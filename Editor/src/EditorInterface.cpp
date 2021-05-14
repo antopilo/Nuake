@@ -1,5 +1,5 @@
 #include "EditorInterface.h"
-#include <src/Vendors/imgui/imgui.h>
+#include "src/Vendors/imgui/imgui.h"
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include <src/Rendering/Textures/Texture.h>
 #include <Engine.h>
@@ -974,10 +974,10 @@ void EditorInterface::BuildFonts()
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
     ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-    normalFont = io.Fonts->AddFontFromFileTTF("Res/Fonts/fa-solid-900.ttf", 11.0f, &icons_config, icons_ranges);
+    normalFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 11.0f, &icons_config, icons_ranges);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
     ImGui::GetIO().Fonts->AddFontDefault();
     icons_config.MergeMode = true;
-    bigIconFont = io.Fonts->AddFontFromFileTTF("Res/Fonts/fa-solid-900.ttf", 42.0f, &icons_config, icons_ranges);
+    bigIconFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 42.0f, &icons_config, icons_ranges);
 }

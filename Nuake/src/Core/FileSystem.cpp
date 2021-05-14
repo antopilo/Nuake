@@ -53,7 +53,7 @@ std::string FileDialog::SaveFile(const char* filter)
 }
 
 
-std::string FileSystem::Root = "Res\\";
+std::string FileSystem::Root = "resources\\";
 Ref<Directory> FileSystem::RootDirectory;
 
 void FileSystem::ScanDirectory(Ref<Directory> directory)

@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{994AC40D-055F-ECBE-CEE0-8F1E3AB4E8EF}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Nuake</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\bin\Debug-windows-x86_64\Nuake\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\Nuake\</IntDir>
+    <TargetName>Nuake</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\bin\Release-windows-x86_64\Nuake\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\Nuake\</IntDir>
+    <TargetName>Nuake</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_DOUBLE_PRECISION;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\x64\include;Dependencies\bullet\src;Dependencies\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_DOUBLE_PRECISION;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\x64\include;Dependencies\bullet\src;Dependencies\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="src\Core\Core.h" />
+    <ClInclude Include="src\Core\FileSystem.h" />
+    <ClInclude Include="src\Core\Input.h" />
+    <ClInclude Include="src\Core\MaterialManager.h" />
+    <ClInclude Include="src\Core\Physics\BulletDebugDrawer.h" />
+    <ClInclude Include="src\Core\Physics\CharacterController.h" />
+    <ClInclude Include="src\Core\Physics\DynamicWorld.h" />
+    <ClInclude Include="src\Core\Physics\KinematicBody.h" />
+    <ClInclude Include="src\Core\Physics\PhysicsManager.h" />
+    <ClInclude Include="src\Core\Physics\PhysicsShapes.h" />
+    <ClInclude Include="src\Core\Physics\RaycastResult.h" />
+    <ClInclude Include="src\Core\Physics\Rigibody.h" />
+    <ClInclude Include="src\Core\TextureManager.h" />
+    <ClInclude Include="src\Core\Timestep.h" />
+    <ClInclude Include="src\Rendering\Camera.h" />
+    <ClInclude Include="src\Rendering\Framebuffer.h" />
+    <ClInclude Include="src\Rendering\GBuffer.h" />
+    <ClInclude Include="src\Rendering\ImGuiAPI.h" />
+    <ClInclude Include="src\Rendering\Mesh\Mesh.h" />
+    <ClInclude Include="src\Rendering\ProceduralSky.h" />
+    <ClInclude Include="src\Rendering\Renderer.h" />
+    <ClInclude Include="src\Rendering\Shaders\Shader.h" />
+    <ClInclude Include="src\Rendering\Skybox.h" />
+    <ClInclude Include="src\Rendering\SkyboxHDR.h" />
+    <ClInclude Include="src\Rendering\Textures\Cubemap.h" />
+    <ClInclude Include="src\Rendering\Textures\HDR.h" />
+    <ClInclude Include="src\Rendering\Textures\Material.h" />
+    <ClInclude Include="src\Rendering\Textures\Texture.h" />
+    <ClInclude Include="src\Rendering\Vertex.h" />
+    <ClInclude Include="src\Resource\FontAwesome5.h" />
+    <ClInclude Include="src\Resource\Resource.h" />
+    <ClInclude Include="src\Resource\TrenchbroomMap.h" />
+    <ClInclude Include="src\Scene\EditorCamera.h" />
+    <ClInclude Include="src\Scene\Entities\Components.h" />
+    <ClInclude Include="src\Scene\Entities\Components\BaseComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\BoxCollider.h" />
+    <ClInclude Include="src\Scene\Entities\Components\CameraComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\CharacterControllerComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\LightComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\MeshCollider.h" />
+    <ClInclude Include="src\Scene\Entities\Components\MeshComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\ModelComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\NameComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\NativeScriptComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\ParentComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\QuakeMap.h" />
+    <ClInclude Include="src\Scene\Entities\Components\RigidbodyComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\SphereCollider.h" />
+    <ClInclude Include="src\Scene\Entities\Components\TransformComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Entity.h" />
+    <ClInclude Include="src\Scene\Entities\ImGuiHelper.h" />
+    <ClInclude Include="src\Scene\Entities\ScriptableEntity.h" />
+    <ClInclude Include="src\Scene\Lighting\Environment.h" />
+    <ClInclude Include="src\Scene\Scene.h" />
+    <ClInclude Include="src\Vendors\glm\simd\common.h" />
+    <ClInclude Include="src\Vendors\glm\simd\exponential.h" />
+    <ClInclude Include="src\Vendors\glm\simd\geometric.h" />
+    <ClInclude Include="src\Vendors\glm\simd\integer.h" />
+    <ClInclude Include="src\Vendors\glm\simd\matrix.h" />
+    <ClInclude Include="src\Vendors\glm\simd\neon.h" />
+    <ClInclude Include="src\Vendors\glm\simd\packing.h" />
+    <ClInclude Include="src\Vendors\glm\simd\platform.h" />
+    <ClInclude Include="src\Vendors\glm\simd\trigonometric.h" />
+    <ClInclude Include="src\Vendors\glm\simd\vector_relational.h" />
+    <ClInclude Include="src\Vendors\imgui\ImCurveEdit.h" />
+    <ClInclude Include="src\Vendors\imgui\ImGradient.h" />
+    <ClInclude Include="src\Vendors\imgui\ImGuizmo.h" />
+    <ClInclude Include="src\Vendors\imgui\ImSequencer.h" />
+    <ClInclude Include="src\Vendors\imgui\ImZoomSlider.h" />
+    <ClInclude Include="src\Vendors\imgui\imconfig.h" />
+    <ClInclude Include="src\Vendors\imgui\imgui.h" />
+    <ClInclude Include="src\Vendors\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\Vendors\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\Vendors\imgui\imgui_internal.h" />
+    <ClInclude Include="src\Vendors\imgui\imgui_stdlib.h" />
+    <ClInclude Include="src\Vendors\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\Vendors\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\Vendors\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\Vendors\libmap\h\brush.h" />
+    <ClInclude Include="src\Vendors\libmap\h\entity.h" />
+    <ClInclude Include="src\Vendors\libmap\h\entity_geometry.h" />
+    <ClInclude Include="src\Vendors\libmap\h\face.h" />
+    <ClInclude Include="src\Vendors\libmap\h\geo_generator.h" />
+    <ClInclude Include="src\Vendors\libmap\h\libmap.h" />
+    <ClInclude Include="src\Vendors\libmap\h\libmap_math.h" />
+    <ClInclude Include="src\Vendors\libmap\h\map_data.h" />
+    <ClInclude Include="src\Vendors\libmap\h\map_parser.h" />
+    <ClInclude Include="src\Vendors\libmap\h\matrix.h" />
+    <ClInclude Include="src\Vendors\libmap\h\platform.h" />
+    <ClInclude Include="src\Vendors\libmap\h\surface_gatherer.h" />
+    <ClInclude Include="src\Vendors\libmap\h\vector.h" />
+    <ClInclude Include="src\Vendors\stb_image\stb_image.h" />
+    <ClInclude Include="src\Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="src\Core\FileSystem.cpp" />
+    <ClCompile Include="src\Core\Input.cpp" />
+    <ClCompile Include="src\Core\MaterialManager.cpp" />
+    <ClCompile Include="src\Core\Physics\BulletDebugDrawer.cpp" />
+    <ClCompile Include="src\Core\Physics\CharacterController.cpp" />
+    <ClCompile Include="src\Core\Physics\DynamicWorld.cpp" />
+    <ClCompile Include="src\Core\Physics\PhysicsManager.cpp" />
+    <ClCompile Include="src\Core\Physics\PhysicsShapes.cpp" />
+    <ClCompile Include="src\Core\Physics\Rigidbody.cpp" />
+    <ClCompile Include="src\Core\TextureManager.cpp" />
+    <ClCompile Include="src\Rendering\Camera.cpp" />
+    <ClCompile Include="src\Rendering\Framebuffer.cpp" />
+    <ClCompile Include="src\Rendering\GBuffer.cpp" />
+    <ClCompile Include="src\Rendering\Mesh\Mesh.cpp" />
+    <ClCompile Include="src\Rendering\ProceduralSky.cpp" />
+    <ClCompile Include="src\Rendering\Renderer.cpp" />
+    <ClCompile Include="src\Rendering\Shaders\Shader.cpp" />
+    <ClCompile Include="src\Rendering\Skybox.cpp" />
+    <ClCompile Include="src\Rendering\SkyboxHDR.cpp" />
+    <ClCompile Include="src\Rendering\Textures\Cubemap.cpp" />
+    <ClCompile Include="src\Rendering\Textures\HDR.cpp" />
+    <ClCompile Include="src\Rendering\Textures\Material.cpp" />
+    <ClCompile Include="src\Rendering\Textures\Texture.cpp" />
+    <ClCompile Include="src\Scene\EditorCamera.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\BoxCollider.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\CameraComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\LightComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\MeshComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\ModelComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\QuakeMap.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\RigidbodyComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Components\TransformComponent.cpp" />
+    <ClCompile Include="src\Scene\Entities\Entity.cpp" />
+    <ClCompile Include="src\Scene\Entities\ScriptableEntity.cpp" />
+    <ClCompile Include="src\Scene\Lighting\Environment.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
+    <ClCompile Include="src\Vendors\glm\detail\glm.cpp" />
+    <ClCompile Include="src\Vendors\imgui\ImCurveEdit.cpp" />
+    <ClCompile Include="src\Vendors\imgui\ImGradient.cpp" />
+    <ClCompile Include="src\Vendors\imgui\ImGuizmo.cpp" />
+    <ClCompile Include="src\Vendors\imgui\ImSequencer.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\Vendors\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Vendors\libmap\c\geo_generator.c" />
+    <ClCompile Include="src\Vendors\libmap\c\map_data.c" />
+    <ClCompile Include="src\Vendors\libmap\c\map_parser.c" />
+    <ClCompile Include="src\Vendors\libmap\c\matrix.c" />
+    <ClCompile Include="src\Vendors\libmap\c\surface_gatherer.c" />
+    <ClCompile Include="src\Vendors\libmap\c\vector.c" />
+    <ClCompile Include="src\Vendors\stb_image\stb_image.cpp" />
+    <ClCompile Include="src\Window.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

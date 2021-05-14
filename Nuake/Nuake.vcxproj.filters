@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core">
+      <UniqueIdentifier>{A5D31CCF-91A0-77DA-BAB9-6582A6E5AC68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Core\Physics">
+      <UniqueIdentifier>{17AC243A-03A5-438C-2CD7-2811182F2398}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Rendering">
+      <UniqueIdentifier>{BA10DABB-26D1-55F2-EF0B-9F6F5B8B9ACE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Rendering\Mesh">
+      <UniqueIdentifier>{B60A023C-A2EE-C291-0B4F-BDE4F751AD13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Rendering\Shaders">
+      <UniqueIdentifier>{934F38AE-FFBB-F3A8-C8AF-8B0634DB1511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Rendering\Textures">
+      <UniqueIdentifier>{CD5366B1-B94D-8F03-A2BA-25148E53F56F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Resource">
+      <UniqueIdentifier>{E46F59CC-D0D2-E870-7958-2127659AB4F3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene">
+      <UniqueIdentifier>{0A06D2B3-7670-862A-BFAE-37D02B58647F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene\Entities">
+      <UniqueIdentifier>{FE8943C2-EA6D-0418-53CE-FE6A3FD1EE99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene\Entities\Components">
+      <UniqueIdentifier>{5374FF1D-BF8C-E647-8839-76E1F4107BE1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene\Lighting">
+      <UniqueIdentifier>{CF04C898-BBE8-88EE-2449-8341104C7370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors">
+      <UniqueIdentifier>{7D52A2DC-E907-1BD2-72FC-14A9DEB011D6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\glm">
+      <UniqueIdentifier>{4CD36C32-B85E-DAF6-C16F-5DEB2D7A36F7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\glm\detail">
+      <UniqueIdentifier>{8E9D8639-7A97-AF8B-6304-469C4F9D15F8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\glm\simd">
+      <UniqueIdentifier>{281F447B-14AE-CD44-BDCC-E13FA93ADEEA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\imgui">
+      <UniqueIdentifier>{A7891381-13A0-1117-5C17-9D38C86CE29E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\libmap">
+      <UniqueIdentifier>{E1F538AA-CDD9-F9FF-363A-F452223DE481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\libmap\c">
+      <UniqueIdentifier>{93F84D1C-7F87-D7E5-28A6-EBE01414E88B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\libmap\h">
+      <UniqueIdentifier>{98F84D1C-8487-D7E5-2DA6-EBE01914E88B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\stb_image">
+      <UniqueIdentifier>{570330DC-C36F-EBD6-8C63-8334F88E0D3F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="src\Core\Core.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\FileSystem.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Input.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\MaterialManager.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\BulletDebugDrawer.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\CharacterController.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\DynamicWorld.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\KinematicBody.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\PhysicsManager.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\PhysicsShapes.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\RaycastResult.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Physics\Rigibody.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\TextureManager.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Timestep.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Camera.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Framebuffer.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\GBuffer.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\ImGuiAPI.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Mesh\Mesh.h">
+      <Filter>src\Rendering\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\ProceduralSky.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Renderer.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Shaders\Shader.h">
+      <Filter>src\Rendering\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Skybox.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\SkyboxHDR.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\Cubemap.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\HDR.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\Material.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\Texture.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Vertex.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource\FontAwesome5.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource\Resource.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource\TrenchbroomMap.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\EditorCamera.h">
+      <Filter>src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components.h">
+      <Filter>src\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\BaseComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\BoxCollider.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\CameraComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\CharacterControllerComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\LightComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\MeshCollider.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\MeshComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\ModelComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\NameComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\NativeScriptComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\ParentComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\QuakeMap.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\RigidbodyComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\SphereCollider.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\TransformComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Entity.h">
+      <Filter>src\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\ImGuiHelper.h">
+      <Filter>src\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\ScriptableEntity.h">
+      <Filter>src\Scene\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Lighting\Environment.h">
+      <Filter>src\Scene\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Scene.h">
+      <Filter>src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\common.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\exponential.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\geometric.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\integer.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\matrix.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\neon.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\packing.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\platform.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\trigonometric.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\glm\simd\vector_relational.h">
+      <Filter>src\Vendors\glm\simd</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\ImCurveEdit.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\ImGradient.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\ImGuizmo.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\ImSequencer.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\ImZoomSlider.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imconfig.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imgui.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imgui_impl_glfw.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imgui_impl_opengl3.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imgui_internal.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imgui_stdlib.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imstb_rectpack.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imstb_textedit.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\imgui\imstb_truetype.h">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\brush.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\entity.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\entity_geometry.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\face.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\geo_generator.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\libmap.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\libmap_math.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\map_data.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\map_parser.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\matrix.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\platform.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\surface_gatherer.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\libmap\h\vector.h">
+      <Filter>src\Vendors\libmap\h</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\stb_image\stb_image.h">
+      <Filter>src\Vendors\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Window.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="src\Core\FileSystem.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Input.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\MaterialManager.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\BulletDebugDrawer.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\CharacterController.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\DynamicWorld.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\PhysicsManager.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\PhysicsShapes.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Physics\Rigidbody.cpp">
+      <Filter>src\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\TextureManager.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Camera.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Framebuffer.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\GBuffer.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Mesh\Mesh.cpp">
+      <Filter>src\Rendering\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\ProceduralSky.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Renderer.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Shaders\Shader.cpp">
+      <Filter>src\Rendering\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Skybox.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\SkyboxHDR.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Textures\Cubemap.cpp">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Textures\HDR.cpp">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Textures\Material.cpp">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Textures\Texture.cpp">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\EditorCamera.cpp">
+      <Filter>src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components.cpp">
+      <Filter>src\Scene\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\BoxCollider.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\CameraComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\LightComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\MeshComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\ModelComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\QuakeMap.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\RigidbodyComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Components\TransformComponent.cpp">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\Entity.cpp">
+      <Filter>src\Scene\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Entities\ScriptableEntity.cpp">
+      <Filter>src\Scene\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Lighting\Environment.cpp">
+      <Filter>src\Scene\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Scene.cpp">
+      <Filter>src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\glm\detail\glm.cpp">
+      <Filter>src\Vendors\glm\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\ImCurveEdit.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\ImGradient.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\ImGuizmo.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\ImSequencer.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_demo.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_draw.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_impl_glfw.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_impl_opengl3.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_stdlib.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_tables.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\imgui\imgui_widgets.cpp">
+      <Filter>src\Vendors\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\geo_generator.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\map_data.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\map_parser.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\matrix.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\surface_gatherer.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\libmap\c\vector.c">
+      <Filter>src\Vendors\libmap\c</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\stb_image\stb_image.cpp">
+      <Filter>src\Vendors\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -133,6 +133,8 @@ ipch/
 # Visual Studio Trace Files
 *.e2e
 
+*.recipe
+
 # TFS 2012 Local Workspace
 $tf/
 
@@ -431,3 +433,6 @@ FodyWeavers.xsd
 *.exe
 *.out
 *.app
+
+
+!premake5.exe

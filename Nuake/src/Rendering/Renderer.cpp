@@ -41,14 +41,14 @@ unsigned int SphereVBO;
 glm::vec3 SphereVertices[360 * 6 + 6];
 void Renderer::Init()
 {
-    m_ShadowmapShader = new Shader("Res/Shaders/shadowMap.shader");
-    m_SkyboxShader    = new Shader("Res/Shaders/skybox.shader");
-    m_BRDShader = new Shader("Res/Shaders/BRD.shader");
-    m_GBufferShader = new Shader("Res/Shaders/gbuffer.shader");
-    m_DeferredShader = new Shader("Res/Shaders/deferred.shader");
-    m_ProceduralSkyShader = new Shader("Res/Shaders/atmospheric_sky.shader");
-    m_DebugShader = new Shader("Res/Shaders/debug.shader");
-    m_Shader = new Shader("Res/Shaders/basic.shader");
+    m_ShadowmapShader = new Shader("resources/Shaders/shadowMap.shader");
+    m_SkyboxShader    = new Shader("resources/Shaders/skybox.shader");
+    m_BRDShader = new Shader("resources/Shaders/BRD.shader");
+    m_GBufferShader = new Shader("resources/Shaders/gbuffer.shader");
+    m_DeferredShader = new Shader("resources/Shaders/deferred.shader");
+    m_ProceduralSkyShader = new Shader("resources/Shaders/atmospheric_sky.shader");
+    m_DebugShader = new Shader("resources/Shaders/debug.shader");
+    m_Shader = new Shader("resources/Shaders/basic.shader");
     m_Shader->Bind();
 
 

@@ -34,7 +34,7 @@ void QuakeMap::Build()
 
     geo_generator_run();
 
-    Ref<Material> DefaultMaterial = MaterialManager::Get()->GetMaterial("Res/Textures/default/Default.png");
+    Ref<Material> DefaultMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
     for (int e = 0; e < entity_count; ++e)
     {
         entity* entity_inst = &entities[e];
@@ -63,7 +63,7 @@ void QuakeMap::Build()
                 }
                 else
                 {
-                    std::string path = "Res/Textures/" + std::string(texture->name) + ".png";
+                    std::string path = "resources/Textures/" + std::string(texture->name) + ".png";
                     auto tex = TextureManager::Get()->GetTexture(path);
                     texture->height = tex->GetHeight();
                     texture->width = tex->GetWidth();
@@ -97,7 +97,7 @@ void QuakeMap::Build()
                 }
                 if (lastTextureID != face->texture_idx)
                 {
-                    lastTexturePath = "Res/Textures/" + std::string(texture->name) + ".png";
+                    lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
                     if (std::string(texture->name) == "__TB_empty")
                         m_Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
                     else
