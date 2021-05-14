@@ -1,0 +1,67 @@
+February 1996
+================================================================
+Title                   : Lost Entrance of the Dismal Oubliette
+Filename                : e2m10.bsp
+Author                  : John Romero
+Email Address           : john@rome.ro
+Description             : Winding, dripping cave entrance
+
+         More Quake History and tidbits might be found on:
+                           http://rome.ro
+================================================================
+
+* Play Information *
+
+Single Player           : Yes
+Cooperative             : Yes
+Deathmatch              : Yes (heh, 1 spot)
+Difficulty Settings     : Yes
+New Sounds              : No
+New Graphics            : No
+New Music               : No
+CD Track                : 5
+Demos Replaced          : None
+
+* Construction *
+
+Base                    : New level from scratch
+Editor(s) used          : QuakeEd on NEXTSTEP
+Known Bugs              : It's not finished... and never will be.
+Build Time              : ???
+
+Texture Wad used        : Medieval
+
+Compile machine         : HP Gecko
+QBSP Time               : ???
+Light -extra time       : ???
+VIS (-level 4) Time     : ???
+
+Brushes                 : 477
+Entities                : 221
+Models                  : ???
+
+* Other Info *
+
+This was the original starting point of the Dismal Oubliette, e2m6.
+It was cut for size reasons since it made the .BSP file go way over
+our self-imposed 1.4mb limit.  
+
+There's even a secret in this little guy.
+
+I created this part of e2m6 in a marathon map-making session.  I was
+in a hurry to get Quake content-complete and needed something really
+fun for the start of Dismal Oubliette.  Little did I know that months
+later I would have to shed a tear and say goodbye to this little one,
+returning the Dismal Oubliette back to its original state which is
+what everyone is familiar with today.
+
+
+* Copyright / Permissions *
+
+Authors MAY use this level as a base to build additional
+levels. I have included the .map file, but no additional files are
+included. If you have Thred, you can load this map up and modify
+it. If you do make any changes to this map, please contact me and
+let me know so I can see it!
+
+This BSP may be distributed in any form you see fit.  Have fun!
