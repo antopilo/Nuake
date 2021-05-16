@@ -9,29 +9,40 @@
 #include <GL/glew.h>
 #include "Entities/Components/BoxCollider.h"
 #include "../../Engine.h"
+#include "../Core/FileSystem.h"
 
+#include <fstream>
+#include <streambuf>
+
+Ref<Scene> Scene::New()
+{
+	return CreateRef<Scene>();
+}
 
 Scene::Scene()
 {
-	m_Environement = CreateRef<Environment>();
-
 	auto camEntity = CreateEntity("Camera");
 	camEntity.AddComponent<CameraComponent>().transformComponent = &camEntity.GetComponent<TransformComponent>();
 
 	m_EditorCamera = CreateRef<EditorCamera>();
-}
-
-
-Scene::~Scene() {
-}
-
-
-void Scene::Init() {
-	//m_Skybox = new SkyboxHDR("Res/Textures/Skyboxes/HDR/lilienstein_4k.hdr");
-	
 	m_Environement = CreateRef<Environment>();
 }
 
+Scene::~Scene() {}
+
+std::string Scene::GetName()
+{
+	return this->Name;
+}
+
+bool Scene::SetName(std::string& newName)
+{
+	if (newName == "")
+		return false;
+
+	this->Name = newName;
+	return true;
+}
 
 void Scene::OnInit()
 {
@@ -145,7 +156,6 @@ void Scene::Update(Timestep ts)
 void Scene::EditorUpdate(Timestep ts)
 {
 	m_EditorCamera->Update(ts);
-
 }
 
 
@@ -206,72 +216,6 @@ void Scene::DrawShadows()
 	}
 }
 
-void Scene::DrawGBuffer()
-{
-	Renderer::m_GBufferShader->Bind();
-	Ref<Camera> cam = nullptr;
-	{
-		auto view = m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto e : view) {
-			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-			cam = camera.CameraInstance;
-			cam->Translation = transform.Translation;
-			break;
-		}
-	}
-	if (cam)
-	{
-		auto view = m_Registry.view<TransformComponent, ModelComponent>();
-		for (auto e : view) {
-			auto [transform, model] = view.get<TransformComponent, ModelComponent>(e);
-			Renderer::m_GBufferShader->SetUniformMat4f("u_View", cam->GetTransform());
-			Renderer::m_GBufferShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-			Renderer::m_GBufferShader->SetUniformMat4f("u_Model", transform.GetTransform());
-			model.Draw();
-		}
-
-		auto view2 = m_Registry.view<TransformComponent, QuakeMap>();
-		for (auto e : view2) {
-			auto [transform, model] = view2.get<TransformComponent, QuakeMap>(e);
-			Renderer::m_GBufferShader->SetUniformMat4f("u_View", cam->GetTransform());
-			Renderer::m_GBufferShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-			Renderer::m_GBufferShader->SetUniformMat4f("u_Model", transform.GetTransform());
-			model.Draw();
-		}
-		
-	}
-}
-
-void Scene::DrawDeferred()
-{
-	// Find the camera of the scene.
-	Ref<Camera> cam = nullptr;
-	{
-		auto view = m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto e : view) {
-			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-			cam = camera.CameraInstance;
-			break;
-		}
-	}
-    
-	{
-		auto view = m_Registry.view<TransformComponent, LightComponent>();
-		for (auto l : view) {
-			auto [transform, light] = view.get<TransformComponent, LightComponent>(l);
-			//light.DrawDeferred(transform, cam);
-		}
-	}
-    
-	//m_Skybox->Draw(cam->GetPerspective(), cam->GetTransform());
-	if (m_Skybox != nullptr)
-		m_Skybox->Push();
-	glm::vec3 camPos = cam->GetTranslation();
-	Renderer::m_DeferredShader->SetUniform1f("u_Exposure", cam->Exposure);
-	Renderer::m_DeferredShader->SetUniform3f("u_EyePosition", camPos.x, camPos.y, camPos.z);
-	Renderer::m_DeferredShader->SetUniformMat4f("u_View", cam->GetTransform());
-	Renderer::m_DeferredShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-}
 
 void Scene::Draw()
 {
@@ -433,7 +377,6 @@ void Scene::EditorDraw()
 				{
 					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
 					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-
 				}
 
 				copyT.Translation = globalOffset;
@@ -589,7 +532,7 @@ glm::vec3 Scene::GetGlobalPosition(Entity ent)
 }
 
 
-Entity Scene::GetEntity(const std::string name)
+Entity Scene::GetEntity(const std::string& name)
 {
 	std::vector<Entity> allEntities;
 	auto view = m_Registry.view<TransformComponent, NameComponent>();
@@ -600,7 +543,7 @@ Entity Scene::GetEntity(const std::string name)
 	}
 }
 
-Entity Scene::CreateEntity(const std::string name) {
+Entity Scene::CreateEntity(const std::string& name) {
 	Entity entity = { m_Registry.create(), this };
     
 	// Must have transform
@@ -635,7 +578,6 @@ Ref<Camera> Scene::GetCurrentCamera()
 			}
 		}
 		return cam;
-
 	}
 
 	return m_EditorCamera;
@@ -643,4 +585,40 @@ Ref<Camera> Scene::GetCurrentCamera()
 
 Ref<Environment> Scene::GetEnvironment() {
 	return m_Environement;
+}
+
+bool Scene::Save()
+{
+	if (Path == "")
+		Path = FileDialog::SaveFile("*.scene") + ".scene";
+
+	return SaveAs(Path);
+}
+
+bool Scene::SaveAs(const std::string& path)
+{
+	std::ofstream sceneFile;
+	sceneFile.open(path);
+	sceneFile << Serialize().dump(4);
+	sceneFile.close();
+	return true;
+}
+
+json Scene::Serialize()
+{
+	BEGIN_SERIALIZE();
+		SERIALIZE_VAL(Name);
+		SERIALIZE_OBJECT(m_Environement)
+		std::vector<json> entities = std::vector<json>();
+		for (Entity e : GetAllEntities())
+			entities.push_back(e.Serialize());
+		SERIALIZE_VAL_LBL("Entities", entities);
+	END_SERIALIZE();
+}
+
+
+
+bool Scene::Deserialize(const std::string& str)
+{
+	return false;
 }

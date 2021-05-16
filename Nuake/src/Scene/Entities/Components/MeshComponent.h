@@ -3,7 +3,7 @@
 #include <glm\ext\matrix_float4x4.hpp>
 #include "BaseComponent.h";
 
-class __declspec(dllexport) MeshComponent  {
+class MeshComponent  {
 
 private:
 	unsigned int VAO;

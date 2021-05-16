@@ -181,7 +181,7 @@ int main()
     EditorInterface editor;
     editor.BuildFonts();
 
-    CreateScene();
+    //CreateScene();
 
     while (!Engine::GetCurrentWindow()->ShouldClose())
     {

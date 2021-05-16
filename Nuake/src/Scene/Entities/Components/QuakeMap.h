@@ -3,7 +3,9 @@
 #include <vector>
 #include "../Rendering/Mesh/Mesh.h"
 #include "../Resource/TrenchbroomMap.h"
-class __declspec(dllexport) QuakeMap  {
+#include "../Resource/Serializable.h"
+
+class QuakeMap  {
 private:
 	
 
@@ -18,4 +20,11 @@ public:
 	void Draw();
 	void DrawEditor();
 	
+	json Serialize()
+	{
+		BEGIN_SERIALIZE();
+		SERIALIZE_VAL(HasCollisions);
+		SERIALIZE_VAL(Path);
+		END_SERIALIZE();
+	}
 };

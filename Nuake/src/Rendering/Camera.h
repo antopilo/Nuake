@@ -2,19 +2,20 @@
 #include "../Core/Timestep.h"
 #include <glm\vec3.hpp>
 #include <glm\ext\matrix_float4x4.hpp>
+#include "../Resource/Serializable.h"
+
 enum CAMERA_TYPE {
 	ORTHO,
 	PERSPECTIVE
 };
 class EditorCamera;
-class __declspec(dllexport) Camera
+class Camera : public ISerializable
 {
 private:
 	CAMERA_TYPE m_Type;
 
 	float AspectRatio = 16.0f / 9.0f;
 
-	
 	glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
@@ -55,6 +56,9 @@ public:
 	glm::mat4 GetPerspective();
 	glm::mat4 GetTransform();
 	glm::mat4 GetTransformRotation();
+
+	json Serialize() override;
+	bool Deserialize(const std::string& str) override;
 
 	friend EditorCamera;
 };

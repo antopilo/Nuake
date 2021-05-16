@@ -37,7 +37,12 @@ public:
 	static Ref<Directory> RootDirectory;
 
 	static void Scan();
+	static Ref<Directory> GetFileTree();
 	static void ScanDirectory(Ref<Directory> directory);
 	static void GetDirectories();
-	static Ref<Directory> GetFileTree();
+
+	static bool DirectoryExists(const std::string path);
+	static bool FileExists(const std::string path);
+
+
 };

@@ -4,7 +4,8 @@
 #include "../Core/Core.h"
 #include "../Rendering/ProceduralSky.h"
 
-class __declspec(dllexport) Environment
+#include "../Resource/Serializable.h"
+class Environment : public ISerializable
 {
 public:
 	Environment();
@@ -15,10 +16,11 @@ public:
 	Ref<ProceduralSky> ProceduralSkybox;
 
 	glm::vec4 m_AmbientColor;
-
 	glm::vec4 GetAmbientColor();
-
 	void SetAmbientColor(glm::vec4 color);
 
 	void Push();
+
+	json Serialize() override;
+	bool Deserialize(const std::string& str) override;
 };

@@ -32,7 +32,6 @@ float RigidBodyComponent::GetMass() {
 	return 0.0f;
 }
 
-
 void RigidBodyComponent::SetMass(float m)
 {
 	if (!m_Rigidbody)

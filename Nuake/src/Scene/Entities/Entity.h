@@ -3,7 +3,9 @@
 #include <glm\ext\matrix_float4x4.hpp>
 #include "../Scene.h"
 #include "Components/BaseComponent.h"
-class __declspec(dllexport) Entity
+#include "../Resource/Serializable.h"
+
+class __declspec(dllexport) Entity : public ISerializable
 {
 public:
 	Entity(entt::entity handle, Scene* scene);
@@ -49,6 +51,10 @@ public:
 	{
 		return !(*this == other);
 	}
+
+	json Serialize() override;
+	bool Deserialize(const std::string& str);
+
 private:
 	entt::entity m_EntityHandle;
 	Scene* m_Scene;

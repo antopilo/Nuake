@@ -5,13 +5,13 @@
 #include "../Rendering/Camera.h"
 #include "../../../Rendering/Framebuffer.h"
 #include "BaseComponent.h";
-
+#include "../Resource/Serializable.h"
 
 enum LightType {
 	Directional, Point, Spot
 };
 
-class __declspec(dllexport) LightComponent  {
+class LightComponent  {
 	
 public:
 	glm::vec2 yes = glm::vec2(2, 2);
@@ -201,4 +201,17 @@ public:
 
 	void SetType(LightType type);
 
+
+	json Serialize()
+	{
+		BEGIN_SERIALIZE();
+		SERIALIZE_VAL(Type);
+		SERIALIZE_VEC3(Direction);
+		SERIALIZE_VEC3(Color);
+		SERIALIZE_VAL(IsVolumetric);
+		SERIALIZE_VAL(Strength);
+		SERIALIZE_VAL(SyncDirectionWithSky);
+		SERIALIZE_VAL(CastShadows);
+		END_SERIALIZE();
+	}
 };

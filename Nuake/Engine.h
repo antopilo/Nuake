@@ -2,13 +2,13 @@
 #include "src/Core/Core.h"
 #include "src/Window.h"
 #include "src/Scene/Scene.h"
+#include "src/Resource/Project.h"
 
-
-class __declspec(dllexport) Engine {
+class Engine {
 private:
 	static float m_LastFrameTime;
 	static Ref<Window> CurrentWindow;
-
+	static Ref<Project> CurrentProject;
 
 public:
 	static bool IsPlayMode;
@@ -26,4 +26,8 @@ public:
 	static int HelloWorld();
 	static Ref<Window> GetCurrentWindow();
 	static Ref<Scene> GetCurrentScene();
+	static bool LoadScene(Ref<Scene> scene);
+
+	static Ref<Project> GetProject();
+	static bool LoadProject(Ref<Project> project);
 };

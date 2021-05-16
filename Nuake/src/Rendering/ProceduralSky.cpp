@@ -85,3 +85,20 @@ void ProceduralSky::Draw(Ref<Camera> cam) {
 glm::vec3 ProceduralSky::GetSunDirection() {
 	return SunDirection;
 }
+
+json ProceduralSky::Serialize()
+{
+	BEGIN_SERIALIZE()
+		SERIALIZE_VAL(SurfaceRadius);
+		SERIALIZE_VAL(AtmosphereRadius);
+		SERIALIZE_VEC3(RayleighScattering);
+		SERIALIZE_VEC3(MieScattering);
+		SERIALIZE_VAL(SunIntensity);
+		SERIALIZE_VEC3(SunDirection);
+	END_SERIALIZE();
+}
+
+bool ProceduralSky::Deserialize(const std::string& str)
+{
+	return false;
+}

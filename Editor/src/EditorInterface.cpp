@@ -16,6 +16,7 @@
 #include <src/Scene/Entities/Components/BoxCollider.h>
 #include <algorithm>
 #include <Dependencies/GLEW/include/GL/glew.h>
+#include "src/Resource/Project.h"
 
 ImFont* normalFont;
 ImFont* bigIconFont;
@@ -180,6 +181,8 @@ void EditorInterface::DrawSceneTree()
 {
     Ref<Scene> scene = Engine::GetCurrentScene();
 
+    if (!scene)
+        return;
     if (ImGui::Begin("Environnement"))
     {
         auto env = Engine::GetCurrentScene()->GetEnvironment();
@@ -842,13 +845,36 @@ void EditorInterface::Draw()
     {
         if (ImGui::BeginMenu("File"))
         {
-            if (ImGui::MenuItem("New project", "CTRL+N")) {}
-            if (ImGui::MenuItem("Open...", "CTRL+O")) {
-                FileDialog::OpenFile(".project");
+            if (ImGui::MenuItem("New project", "CTRL+N")) 
+            {
+                if(Engine::GetProject())
+                    Engine::GetProject()->Save();
+
+                // Parse the project and load it.
+                std::string selectedProject = FileDialog::SaveFile(".project") + ".project";
+
+                Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
+                Engine::LoadProject(project);
+
+                Ref<Scene> scene = Scene::New();
+                Engine::LoadScene(scene);
             }
-            if (ImGui::MenuItem("Save", "CTRL+S")) {}
-            if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S")) {
-                FileDialog::SaveFile(".project");
+            if (ImGui::MenuItem("Open...", "CTRL+O")) 
+            {
+                // Parse the project and load it.
+                std::string selectedProject = FileDialog::OpenFile(".project");
+                Ref<Project> project = Project::Load(selectedProject);
+                Engine::LoadProject(project);
+            }
+            if (ImGui::MenuItem("Save", "CTRL+S")) 
+            {
+                Engine::GetProject()->Save();
+                Engine::GetCurrentScene()->Save();
+            }
+            if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S")) 
+            {
+                std::string savePath = FileDialog::SaveFile("*.project");
+                Engine::GetProject()->SaveAs(savePath);
             }
             ImGui::EndMenu();
         }

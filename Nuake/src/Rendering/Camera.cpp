@@ -64,5 +64,21 @@ glm::mat4 Camera::GetTransformRotation()
 	return lookAt(glm::vec3(), cameraFront, cameraUp);
 }
 
+json Camera::Serialize()
+{
+	BEGIN_SERIALIZE();
+	SERIALIZE_VAL(m_Type);
+	SERIALIZE_VAL(AspectRatio);
+	SERIALIZE_VAL(Fov);
+	SERIALIZE_VAL(Exposure);
+	SERIALIZE_VAL(Speed);
+	END_SERIALIZE();
+}
+
+bool Camera::Deserialize(const std::string& str)
+{
+	return false;
+}
+
 
 

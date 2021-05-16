@@ -30,7 +30,6 @@ std::string FileDialog::OpenFile(const char* filter)
 	return std::string();
 	
 }
-
 std::string FileDialog::SaveFile(const char* filter)
 {
 
@@ -51,11 +50,9 @@ std::string FileDialog::SaveFile(const char* filter)
 	return std::string();
 
 }
-
-
 std::string FileSystem::Root = "resources\\";
-Ref<Directory> FileSystem::RootDirectory;
 
+Ref<Directory> FileSystem::RootDirectory;
 void FileSystem::ScanDirectory(Ref<Directory> directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory->fullPath))
@@ -82,7 +79,10 @@ void FileSystem::ScanDirectory(Ref<Directory> directory)
 		}
 	}
 }
-
+bool FileSystem::DirectoryExists(const std::string path)
+{
+	return false;
+}
 void FileSystem::Scan()
 {
 	RootDirectory = CreateRef<Directory>();

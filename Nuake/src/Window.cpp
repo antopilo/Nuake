@@ -39,7 +39,7 @@ Window::Window()
     Init();
     Renderer::Init();
     
-    m_Scene->Init();
+    //m_Scene->Init();
 }
 
 Window::~Window()
@@ -60,6 +60,12 @@ bool Window::ShouldClose()
 GLFWwindow* Window::GetHandle() 
 { 
     return m_Window; 
+}
+
+bool Window::SetScene(Ref<Scene> scene)
+{
+    m_Scene = scene;
+    return true;
 }
 
 Ref<Scene> Window::GetScene()
@@ -205,7 +211,7 @@ int Window::Init()
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
     
-    m_Scene = CreateRef<Scene>();
+    //m_Scene = CreateRef<Scene>();
     
     return 0;
 }
@@ -224,163 +230,14 @@ bool init = false;
 
 void Window::Draw()
 {
-    Ref<Camera> cam = m_Scene->GetCurrentCamera();
-    
+    if (!m_Scene)
+        return;
 
+    Ref<Camera> cam = m_Scene->GetCurrentCamera();
     if (!cam)
         return;
 
-    
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    
-	ImGui::NewFrame();
-    /*
-
-    static int selected = 0;
-    {
-        //QuadEntity* selectedEntity = m_Scene->GetEntity(selected);
-        ImGui::Begin("Scene");
-        {
-            ImGui::BeginChild("Buttons", ImVec2(300, 20), false);
-            if (ImGui::Button("Add")) {
-                m_Scene->CreateEntity("Entity");
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Remove"))
-            {
-                m_Scene->DestroyEntity(selectedEntity);
-                selectedEntity = m_Scene->GetAllEntities().at(0);
-            };
-            
-            ImGui::EndChild();
-            
-            int idx = 0;
-            for (Entity e : m_Scene->GetAllEntities()) {
-                std::string name = e.GetComponent<NameComponent>().Name;
-                if (ImGui::Selectable(name.c_str(), selected == idx)) {
-                    selected = idx;
-                    selectedEntity = e;
-                }
-                if (ImGui::BeginPopupContextItem())
-                {
-                    // your popup code
-                    ImGui::EndPopup();
-                }
-                idx++;
-            }
-        }
-        
-        ImGui::End();
-    }
-    
-    bool show = true;
-    int id = 0;
-    
-	//
-    //m_Scene->DrawShadows();
-    //
-    // Drawing to texture.
-    
-    
-    
-    ImGui::Begin("ShadowMap");
-    {
-        
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        if (selectedEntity.HasComponent<LightComponent>())
-            ImGui::Image((void*)selectedEntity.GetComponent<LightComponent>().m_Framebuffer->GetTexture()->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-        
-    }
-    
-    
-    
-    //m_GBuffer->Bind();
-    //m_Scene->DrawGBuffer();
-    //m_GBuffer->Unbind();
-    ////
-    //DrawQuad();
-    
-    ImGui::Begin("Deferred output");
-    {
-        
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        
-        ImGui::Image((void*)m_DeferredFrambuffer->GetTexture()->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-        
-    }
-    
-    // Draw rect
-    //Renderer::m_DeferredShader->Bind();
-    
-    ImGui::Begin("depth");
-    {
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        
-        ImGui::Image((void*)m_GBuffer->gDepth, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-    }
-    
-    ImGui::Begin("Albedo");
-    {
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        // If viewport is resized
-        if (m_GBuffer->GetSize() != viewportPanelSize)
-        {
-            // Update FBO size and camera aspect ratio.
-            //m_Framebuffer->UpdateSize(viewportPanelSize);
-            //cam->OnWindowResize(viewportPanelSize.x, viewportPanelSize.y);
-        }
-        
-        ImGui::Image((void*)m_GBuffer->gAlbedo, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-    }
-    
-    ImGui::Begin("Material");
-    {
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        // If viewport is resized
-        if (m_GBuffer->GetSize() != viewportPanelSize)
-        {
-            // Update FBO size and camera aspect ratio.
-            //m_Framebuffer->UpdateSize(viewportPanelSize);
-            //cam->OnWindowResize(viewportPanelSize.x, viewportPanelSize.y);
-        }
-        
-        ImGui::Image((void*)m_GBuffer->gMaterial, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-    }
-    
-    ImGui::Begin("Normal");
-    {
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-        
-        // If viewport is resized
-        if (m_GBuffer->GetSize() != viewportPanelSize)
-        {
-            // Update FBO size and camera aspect ratio.
-            //m_Framebuffer->UpdateSize(viewportPanelSize);
-            //cam->OnWindowResize(viewportPanelSize.x, viewportPanelSize.y);
-        }
-        
-        ImGui::Image((void*)m_GBuffer->gNormal, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        ImGui::End();
-    }
-    */
+ 
     Renderer::BeginDraw(cam);
 
     glCullFace(GL_FRONT);
@@ -411,33 +268,33 @@ void Window::EndDraw()
 
 void Window::DrawQuad()
 {
-    Renderer::m_DeferredShader->Bind();
+    //Renderer::m_DeferredShader->Bind();
     
-    m_DeferredFrambuffer->Bind();
+    //m_DeferredFrambuffer->Bind();
     
-    m_Scene->DrawDeferred();
+    //m_Scene->DrawDeferred();
     
-    glActiveTexture(GL_TEXTURE0 + 5);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer->gAlbedo);
-    
-    glActiveTexture(GL_TEXTURE0 + 6);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer->gNormal);
-    
-    glActiveTexture(GL_TEXTURE0 + 7);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer->gMaterial);
-    
-    glActiveTexture(GL_TEXTURE0 + 8);
-    glBindTexture(GL_TEXTURE_2D, m_GBuffer->gDepth);
-    
-    Renderer::m_DeferredShader->SetUniform1i("m_Albedo", 5);
-    Renderer::m_DeferredShader->SetUniform1i("m_Depth", 8);
-    Renderer::m_DeferredShader->SetUniform1i("m_Normal", 6);
-    Renderer::m_DeferredShader->SetUniform1i("m_Material", 7);
-    
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    
-    m_DeferredFrambuffer->Unbind();
+    //glActiveTexture(GL_TEXTURE0 + 5);
+    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gAlbedo);
+    //
+    //glActiveTexture(GL_TEXTURE0 + 6);
+    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gNormal);
+    //
+    //glActiveTexture(GL_TEXTURE0 + 7);
+    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gMaterial);
+    //
+    //glActiveTexture(GL_TEXTURE0 + 8);
+    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gDepth);
+    //
+    //Renderer::m_DeferredShader->SetUniform1i("m_Albedo", 5);
+    //Renderer::m_DeferredShader->SetUniform1i("m_Depth", 8);
+    //Renderer::m_DeferredShader->SetUniform1i("m_Normal", 6);
+    //Renderer::m_DeferredShader->SetUniform1i("m_Material", 7);
+    //
+    //glBindVertexArray(vao);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    //
+    //m_DeferredFrambuffer->Unbind();
 }
 
 

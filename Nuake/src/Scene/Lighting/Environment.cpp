@@ -25,3 +25,18 @@ void Environment::Push() {
 	Renderer::m_Shader->SetUniform1f("u_FogAmount", VolumetricFog);
 	Renderer::m_Shader->SetUniform1f("u_FogStepCount", VolumetricStepCount);
 }
+
+json Environment::Serialize()
+{
+	BEGIN_SERIALIZE();
+		SERIALIZE_VAL(VolumetricFog);
+		SERIALIZE_VAL(VolumetricStepCount);
+		SERIALIZE_VEC4(AmbientColor);
+		SERIALIZE_OBJECT(ProceduralSkybox);
+	END_SERIALIZE();
+}
+
+bool Environment::Deserialize(const std::string& str)
+{
+	return false;
+}

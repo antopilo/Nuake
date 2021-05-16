@@ -22,6 +22,8 @@ public:
 	static Window* Get();
 	GLFWwindow* GetHandle();
 
+	
+
 	int Init();
 	void Update(Timestep ts);
 	void Draw();
@@ -33,5 +35,7 @@ public:
 
 	void DrawQuad();
 	Ref<Scene> GetScene();
+	bool SetScene(Ref<Scene> scene);
+
 	Ref<FrameBuffer> GetFrameBuffer() const;
 };

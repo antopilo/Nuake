@@ -7,7 +7,7 @@ namespace Physics {
 	enum RigidbodyShapes {
 		BOX, SPHERE, CAPSULE, MESH
 	};
-	class __declspec(dllexport) PhysicShape {
+	class PhysicShape {
 	protected: 
 		btCollisionShape* bShape;
 		RigidbodyShapes m_Type;
