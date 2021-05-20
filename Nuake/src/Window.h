@@ -4,7 +4,7 @@
 #include "Scene/Scene.h"
 #include "Core/Core.h"
 struct GLFWwindow;
-class __declspec(dllexport) Window
+class Window
 {
 private:
 	static Window* s_Instance;
@@ -21,8 +21,6 @@ public:
 
 	static Window* Get();
 	GLFWwindow* GetHandle();
-
-	
 
 	int Init();
 	void Update(Timestep ts);

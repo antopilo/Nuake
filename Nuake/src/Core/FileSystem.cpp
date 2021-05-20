@@ -1,5 +1,5 @@
 #include "FileSystem.h"
-
+#include <filesystem>
 
 #include "../../Engine.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -9,6 +9,8 @@
 #include <commdlg.h>
 #include <fstream>
 #include <iostream>
+
+namespace fs = std::filesystem;
 
 std::string FileDialog::OpenFile(const char* filter)
 {
@@ -50,9 +52,10 @@ std::string FileDialog::SaveFile(const char* filter)
 	return std::string();
 
 }
-std::string FileSystem::Root = "resources\\";
+std::string FileSystem::Root = "";
 
 Ref<Directory> FileSystem::RootDirectory;
+
 void FileSystem::ScanDirectory(Ref<Directory> directory)
 {
 	for (const auto& entry : std::filesystem::directory_iterator(directory->fullPath))
@@ -79,10 +82,18 @@ void FileSystem::ScanDirectory(Ref<Directory> directory)
 		}
 	}
 }
+
 bool FileSystem::DirectoryExists(const std::string path)
 {
 	return false;
 }
+
+void FileSystem::SetRootDirectory(const std::string path)
+{
+	Root = path;
+	Scan();
+}
+
 void FileSystem::Scan()
 {
 	RootDirectory = CreateRef<Directory>();
@@ -92,6 +103,35 @@ void FileSystem::Scan()
 	RootDirectory->fullPath = Root;
 	ScanDirectory(RootDirectory);
 }
+
+std::string FileSystem::AbsoluteToRelative(const std::string& path)
+{
+	const fs::path rootPath(Root);
+	const fs::path absolutePath(path);
+	return fs::relative(absolutePath, rootPath).generic_string();
+}
+
+std::string FileSystem::ReadFile(const std::string& path, bool absolute)
+{
+	std::string finalPath = path;
+	if (!absolute)
+		finalPath = Root + path;
+
+	std::ifstream MyReadFile(finalPath);
+	std::string fileContent = "";
+	std::string allFile = "";
+
+	// Use a while loop together with the getline() function to read the file line by line
+	while (getline(MyReadFile, fileContent))
+	{
+		allFile.append(fileContent);
+	}
+
+	// Close the file
+	MyReadFile.close();
+	return allFile;
+}
+
 
 Ref<Directory> FileSystem::GetFileTree()
 {

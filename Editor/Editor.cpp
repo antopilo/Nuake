@@ -12,6 +12,7 @@
 #include "../Core/Input.h"
 #include <GLFW/glfw3.h>
 #include <src/Vendors/glm/trigonometric.hpp>
+#include <src/Scripting/ScriptingEngine.h>
 
 
 class FPSCamScript : public ScriptableEntity
@@ -56,12 +57,12 @@ public:
         if (Pitch < -89.0f)
             Pitch = -89.0f;
 
-        Ref<Camera> cam = GetComponent<CameraComponent>().CameraInstance;
-        cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        cam->cameraDirection.y = sin(glm::radians(Pitch));
-        cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        cam->cameraFront = glm::normalize(cam->cameraDirection);
-        cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
+        //Ref<Camera> cam = GetComponent<CameraComponent>().CameraInstance;
+        //cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        //cam->cameraDirection.y = sin(glm::radians(Pitch));
+        //cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        //cam->cameraFront = glm::normalize(cam->cameraDirection);
+        //cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
     }
 };
 
@@ -105,14 +106,7 @@ public:
        right.y = .0f;
        glm::vec3 result = velocity.z * glm::normalize(front) + velocity.x * normalize(right);
 
-       CharacterControllerComponent& ccc = GetComponent<CharacterControllerComponent>();
-
-       if (ccc.CharacterController->IsOnGround && Input::IsKeyPress(GLFW_KEY_SPACE))
-       {
-           velocity.y = 100.0f;
-       }
-           
-       ccc.CharacterController->MoveAndSlide(result);
+      
     }
 };
 
@@ -133,7 +127,7 @@ public:
     {
         if (nextFlip < deltaTime)
         {
-            GetComponent<LightComponent>().Strength = isOn * strength;
+            //GetComponent<LightComponent>().Strength = isOn * strength;
             isOn = !isOn;
             nextFlip = deltaTime + 1.0f;
         }
@@ -148,9 +142,9 @@ void CreateScene()
 
     // Main map entity
     auto mapEntity = scene->CreateEntity("Map");
-    mapEntity.AddComponent<QuakeMap>();
-    mapEntity.GetComponent<QuakeMap>().Load("Res/Maps/texture_test.map", true);
-    mapEntity.GetComponent<QuakeMap>().HasCollisions = true;
+    mapEntity.AddComponent<QuakeMapComponent>();
+    mapEntity.GetComponent<QuakeMapComponent>().Load("Res/Maps/texture_test.map", true);
+    mapEntity.GetComponent<QuakeMapComponent>().HasCollisions = true;
 
     // Light entity
     auto lightEntity = scene->CreateEntity("Light");
@@ -163,6 +157,7 @@ void CreateScene()
     auto player = scene->CreateEntity("Player");
     player.GetComponent<TransformComponent>().Translation.y = 10.f;
     player.AddComponent<CharacterControllerComponent>();
+
     player.AddComponent<NativeScriptComponent>().Bind<MoveScript>();
 
     // Add cam child
@@ -177,6 +172,8 @@ void CreateScene()
 int main()
 {
     Engine::Init();
+
+   // ScriptingEngine::UpdateScript("test.lua");
 
     EditorInterface editor;
     editor.BuildFonts();
@@ -193,6 +190,7 @@ int main()
         editor.Draw();
 
         Engine::EndDraw();
+
         Engine::Tick();
     }
 

@@ -4,7 +4,7 @@
 #include "TransformComponent.h"
 #include "../Rendering/Camera.h"
 #include "../../../Rendering/Framebuffer.h"
-#include "BaseComponent.h";
+#include "BaseComponent.h"
 #include "../Resource/Serializable.h"
 
 enum LightType {
@@ -213,5 +213,10 @@ public:
 		SERIALIZE_VAL(SyncDirectionWithSky);
 		SERIALIZE_VAL(CastShadows);
 		END_SERIALIZE();
+	}
+
+	bool Deserialize(std::string str)
+	{
+		return true;
 	}
 };

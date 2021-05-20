@@ -10,7 +10,7 @@
 #include "Entities/Components/BoxCollider.h"
 #include "../../Engine.h"
 #include "../Core/FileSystem.h"
-
+#include "../Scene/Entities/Components/LuaScriptComponent.h"
 #include <fstream>
 #include <streambuf>
 
@@ -21,9 +21,6 @@ Ref<Scene> Scene::New()
 
 Scene::Scene()
 {
-	auto camEntity = CreateEntity("Camera");
-	camEntity.AddComponent<CameraComponent>().transformComponent = &camEntity.GetComponent<TransformComponent>();
-
 	m_EditorCamera = CreateRef<EditorCamera>();
 	m_Environement = CreateRef<Environment>();
 }
@@ -82,10 +79,10 @@ void Scene::OnInit()
 		PhysicsManager::Get()->RegisterCharacterController(cc.CharacterController);
 	}
 
-	auto quakeMapview = m_Registry.view<TransformComponent, QuakeMap>();
+	auto quakeMapview = m_Registry.view<TransformComponent, QuakeMapComponent>();
 	for (auto e : quakeMapview)
 	{
-		auto [transform, quake] = quakeMapview.get<TransformComponent, QuakeMap>(e);
+		auto [transform, quake] = quakeMapview.get<TransformComponent, QuakeMapComponent>(e);
 
 		if (quake.HasCollisions)
 		{
@@ -100,14 +97,9 @@ void Scene::OnInit()
 
 	// Instanciate scripts.
 	{
-		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+		m_Registry.view<LuaScriptComponent>().each([=](auto entity, auto& nsc)
 		{
-			if (!nsc.Instance)
-			{
-				nsc.Instance = nsc.InstantiateScript();
-				nsc.Instance->m_Entity = Entity{ entity, this };
-			}
-			nsc.Instance->OnCreate();
+			
 		});
 	}
 }
@@ -163,7 +155,7 @@ void Scene::DrawShadows()
 {
 
 	auto modelView = m_Registry.view<TransformComponent, ModelComponent>();
-	auto quakeView = m_Registry.view<TransformComponent, QuakeMap>();
+	auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent>();
 	auto view = m_Registry.view<TransformComponent, LightComponent>();
 
 	Ref<Camera> cam = nullptr;
@@ -202,7 +194,7 @@ void Scene::DrawShadows()
 		}
 
 		for (auto e : quakeView) {
-			auto [transform, model] = quakeView.get<TransformComponent, QuakeMap>(e);
+			auto [transform, model] = quakeView.get<TransformComponent, QuakeMapComponent>(e);
 
 			glm::vec3 pos = lightTransform.Translation;
 			glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -317,9 +309,9 @@ void Scene::Draw()
 			model.Draw();
 		}
 
-		auto quakeView = m_Registry.view<TransformComponent, QuakeMap, ParentComponent>();
+		auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent, ParentComponent>();
 		for (auto e : quakeView) {
-			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMap, ParentComponent>(e);
+			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMapComponent, ParentComponent>(e);
 
 			TransformComponent copyT = transform;
 			if (parent.HasParent)
@@ -395,9 +387,6 @@ void Scene::EditorDraw()
 	{
 		Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
 
-
-		
-
 		auto view = m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
 		for (auto e : view) {
 			auto [transform, model, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);
@@ -423,9 +412,9 @@ void Scene::EditorDraw()
 			model.Draw();
 		}
 
-		auto quakeView = m_Registry.view<TransformComponent, QuakeMap, ParentComponent>();
+		auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent, ParentComponent>();
 		for (auto e : quakeView) {
-			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMap, ParentComponent>(e);
+			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMapComponent, ParentComponent>(e);
 
 
 			TransformComponent copyT = transform;
@@ -511,7 +500,7 @@ void Scene::EditorDraw()
 
 std::vector<Entity> Scene::GetAllEntities() {
 	std::vector<Entity> allEntities;
-	auto view = m_Registry.view<TransformComponent, NameComponent>();
+	auto view = m_Registry.view<NameComponent>();
 	for (auto e : view) {
 		allEntities.push_back(Entity(e, this));
 	}
@@ -543,6 +532,11 @@ Entity Scene::GetEntity(const std::string& name)
 	}
 }
 
+Entity Scene::CreateEmptyEntity(const std::string& name) {
+	Entity entity = { m_Registry.create(), this };
+	return entity;
+}
+
 Entity Scene::CreateEntity(const std::string& name) {
 	Entity entity = { m_Registry.create(), this };
     
@@ -554,8 +548,7 @@ Entity Scene::CreateEntity(const std::string& name) {
 
 	ParentComponent& parentComponent = entity.AddComponent<ParentComponent>();
 
-	std::string str = "Created entity: " + nameComponent.Name + "\n";
-	printf(str.c_str());
+	Logger::Log("Created entity: " + nameComponent.Name + "\n");
 	return entity;
 }
 
@@ -590,7 +583,7 @@ Ref<Environment> Scene::GetEnvironment() {
 bool Scene::Save()
 {
 	if (Path == "")
-		Path = FileDialog::SaveFile("*.scene") + ".scene";
+		Path = FileSystem::AbsoluteToRelative(FileDialog::SaveFile("*.scene") + ".scene");
 
 	return SaveAs(Path);
 }
@@ -598,9 +591,11 @@ bool Scene::Save()
 bool Scene::SaveAs(const std::string& path)
 {
 	std::ofstream sceneFile;
-	sceneFile.open(path);
+	sceneFile.open(FileSystem::Root + path);
 	sceneFile << Serialize().dump(4);
 	sceneFile.close();
+
+	Logger::Log("Scene saved successfully");
 	return true;
 }
 
@@ -620,5 +615,34 @@ json Scene::Serialize()
 
 bool Scene::Deserialize(const std::string& str)
 {
-	return false;
+	if (str == "")
+		return false;
+
+	BEGIN_DESERIALIZE();
+	if (!j.contains("Name"))
+		return false;
+
+	Name = j["Name"];
+
+	m_Environement = CreateRef<Environment>();
+	if (j.contains("m_Environement"))
+	{
+		m_Environement = CreateRef<Environment>();
+		std::string env = j["m_Environement"].dump();
+		m_Environement->Deserialize(env);
+	}
+
+	// Parse entities
+	{
+		if (j.contains("Entities"))
+		{
+			for (json e : j["Entities"])
+			{
+				std::string name = e["NameComponent"]["Name"];
+				Entity ent = CreateEmptyEntity(name);
+				ent.Deserialize(e.dump());
+			}
+		}
+	}
+	return true;
 }

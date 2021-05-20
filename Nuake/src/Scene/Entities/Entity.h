@@ -5,7 +5,7 @@
 #include "Components/BaseComponent.h"
 #include "../Resource/Serializable.h"
 
-class __declspec(dllexport) Entity : public ISerializable
+class Entity : public ISerializable
 {
 public:
 	Entity(entt::entity handle, Scene* scene);

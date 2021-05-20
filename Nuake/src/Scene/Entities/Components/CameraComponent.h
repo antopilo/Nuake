@@ -17,4 +17,11 @@ public:
 		SERIALIZE_OBJECT(CameraInstance);
 		END_SERIALIZE();
 	}
+
+	bool Deserialize(std::string str)
+	{
+		CameraInstance = CreateRef<Camera>();
+
+		return CameraInstance->Deserialize(str);
+	}
 };

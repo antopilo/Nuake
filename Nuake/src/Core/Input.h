@@ -2,7 +2,7 @@
 #include <utility>
 
 
-class __declspec(dllexport) Input
+class Input
 {
 public:
 	static bool IsKeyPressed(int keycode);

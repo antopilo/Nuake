@@ -4,7 +4,7 @@
 #include "../Core/Core.h"
 class Texture;
 
-class __declspec(dllexport) TextureManager
+class TextureManager
 {
 private:
 	static TextureManager* s_Instance;

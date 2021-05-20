@@ -1,14 +1,14 @@
 #pragma once
 
 #include "TransformComponent.h"
-#include "BaseComponent.h";
+#include "BaseComponent.h"
 #include "../Core/Core.h"
 namespace Physics{
 	class RigidBody;
 };
 
 
-class __declspec(dllexport) RigidBodyComponent
+class RigidBodyComponent
 {
 public:
 	float mass = 0.0f;

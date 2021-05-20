@@ -1,7 +1,7 @@
 #pragma once
 #include "../../../Rendering/Textures/Material.h"
 #include <glm\ext\matrix_float4x4.hpp>
-#include "BaseComponent.h";
+#include "BaseComponent.h"
 
 class MeshComponent  {
 

@@ -14,6 +14,7 @@ Camera::Camera(CAMERA_TYPE type, glm::vec3 position) {
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
 	cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 	cameraUp = glm::cross(cameraDirection, cameraRight);
+	cameraFront = cameraDirection;
 }
 
 Camera::Camera() {
@@ -77,6 +78,13 @@ json Camera::Serialize()
 
 bool Camera::Deserialize(const std::string& str)
 {
+	BEGIN_DESERIALIZE();
+	j = j["CameraInstance"];
+	this->m_Type = (CAMERA_TYPE)j["m_Type"];
+	this->AspectRatio = j["AspectRatio"];
+	this->Fov = j["Fov"];
+	this->Exposure = j["Exposure"];
+	this->Speed = j["Speed"];
 	return false;
 }
 

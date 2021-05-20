@@ -3,6 +3,8 @@
 #include "src/Window.h"
 #include "src/Scene/Scene.h"
 #include "src/Resource/Project.h"
+#include "src/Scripting/ScriptLoader.h"
+#include "src/Core/Logger.h"
 
 class Engine {
 private:

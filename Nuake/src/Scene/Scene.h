@@ -20,9 +20,10 @@ private:
 	entt::registry m_Registry;
 	Ref<EditorCamera> m_EditorCamera;
 	std::string Name;
-	std::string Path = "";
+	
 	bool has_changed = true;
 public:
+	std::string Path = "";
 	static Ref<Scene> New();
 	Scene();
 	~Scene();
@@ -45,6 +46,7 @@ public:
 	std::vector<Entity> GetAllEntities();
 	glm::vec3 GetGlobalPosition(Entity ent);
 	Entity GetEntity(const std::string& name);
+	Entity CreateEmptyEntity(const std::string& name);
 	Entity CreateEntity(const std::string& name);
 	void DestroyEntity(Entity entity);
 

@@ -11,7 +11,7 @@ struct MeshVertex
 };
 
 
-class __declspec(dllexport) Mesh
+class Mesh
 {
 public:
 	std::vector<Texture> m_Textures;

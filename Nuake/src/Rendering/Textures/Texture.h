@@ -4,7 +4,7 @@
 #include "glm/vec2.hpp"
 
 typedef unsigned int GLenum;
-class __declspec(dllexport) Texture
+class Texture
 {
 private:
 	unsigned int m_RendererId;

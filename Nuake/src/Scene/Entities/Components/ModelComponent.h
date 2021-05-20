@@ -6,7 +6,7 @@
 #include "assimp/Importer.hpp"
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-class __declspec(dllexport) ModelComponent
+class ModelComponent
 {
 public:
     ModelComponent()

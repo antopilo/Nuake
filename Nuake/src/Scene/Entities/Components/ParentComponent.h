@@ -16,4 +16,10 @@ struct ParentComponent
 			SERIALIZE_VAL_LBL("Parent", Parent.GetHandle());
 		END_SERIALIZE();
 	}
+
+	bool Deserialize(std::string str)
+	{
+		return true;
+
+	}
 };

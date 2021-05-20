@@ -5,7 +5,7 @@
 #include "../Resource/TrenchbroomMap.h"
 #include "../Resource/Serializable.h"
 
-class QuakeMap  {
+class QuakeMapComponent  {
 private:
 	
 
@@ -26,5 +26,13 @@ public:
 		SERIALIZE_VAL(HasCollisions);
 		SERIALIZE_VAL(Path);
 		END_SERIALIZE();
+	}
+
+	bool Deserialize(std::string str)
+	{
+		BEGIN_DESERIALIZE();
+		this->Path = j["Path"];
+
+		return true;
 	}
 };

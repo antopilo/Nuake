@@ -2,6 +2,12 @@
 #include "src/Core/Physics/PhysicsManager.h"
 #include <GLFW/glfw3.h>
 #include "src/Core/FileSystem.h"
+#include "src/Scripting/ScriptingEngine.h"
+
+#include "../Rendering/Renderer.h"
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 
 float Engine::m_LastFrameTime = 0.0f;
 Ref<Window> Engine::CurrentWindow;
@@ -9,15 +15,21 @@ bool Engine::IsPlayMode = false;
 
 Ref<Project> Engine::CurrentProject;
 
-#include "../Rendering/Renderer.h"
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
 void Engine::Init()
 {
+	Logger::Log("Engine initialization...");
+
 	PhysicsManager::Get()->Init();
-	FileSystem::Scan();
+	Logger::Log("Physics initialized");
+
+
+	ScriptingEngine::Init();
+	Logger::Log("Scripting engine initialized");
 
 	CurrentWindow = std::make_shared<Window>();
+	Logger::Log("Window initialized");
+
+	Logger::Log("Engine initialized succesfully...");
 }
 
 void Engine::Tick()
@@ -73,6 +85,7 @@ void Engine::Run()
 
 void Engine::Close()
 {
+	ScriptingEngine::Close();
 	glfwTerminate();
 }
 
@@ -95,10 +108,8 @@ Ref<Project> Engine::GetProject()
 bool Engine::LoadProject(Ref<Project> project)
 {
 	CurrentProject = project;
-	
-	Ref<Scene> newScene = CreateRef<Scene>();
-	Engine::LoadScene(newScene);
-
+	Engine::LoadScene(CurrentProject->DefaultScene);
+	FileSystem::SetRootDirectory(project->FullPath + "/../");
 	return true;
 }
 

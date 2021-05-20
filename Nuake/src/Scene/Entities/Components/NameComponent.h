@@ -11,4 +11,11 @@ public:
             SERIALIZE_VAL(Name);
         END_SERIALIZE();
     }
+
+    bool Deserialize(const std::string& str)
+    {
+        BEGIN_DESERIALIZE();
+        Name = j["Name"];
+        return true;
+    }
 };

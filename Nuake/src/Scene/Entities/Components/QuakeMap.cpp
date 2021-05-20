@@ -8,7 +8,7 @@ extern "C" {
 #include <libmap/h/surface_gatherer.h>
 }
 
-void QuakeMap::Draw()
+void QuakeMapComponent::Draw()
 {
     for (auto m : m_Meshes) {
         m->Draw();
@@ -17,7 +17,7 @@ void QuakeMap::Draw()
 
 
 
-void QuakeMap::Load(std::string path, bool collisions)
+void QuakeMapComponent::Load(std::string path, bool collisions)
 {
 	if (Path == path)
 		return;
@@ -27,7 +27,7 @@ void QuakeMap::Load(std::string path, bool collisions)
     Build();
 }
 
-void QuakeMap::Build()
+void QuakeMapComponent::Build()
 {
     m_Meshes.clear();
     map_parser_load(Path.c_str());
@@ -125,7 +125,7 @@ void QuakeMap::Build()
         }
     }
 }
-void QuakeMap::DrawEditor()
+void QuakeMapComponent::DrawEditor()
 {
 
 }

@@ -17,7 +17,7 @@ namespace Physics {
 		
 	};
 
-	class __declspec(dllexport) Box : public PhysicShape {
+	class Box : public PhysicShape {
 	private:
 		glm::vec3 Size;
 		btCollisionShape* bShape;
@@ -30,7 +30,7 @@ namespace Physics {
 		btCollisionShape* GetBulletShape() override;
 	};
 
-	class __declspec(dllexport) Sphere : public PhysicShape {
+	class Sphere : public PhysicShape {
 	private:
 		float Radius;
 		btCollisionShape* bShape;
@@ -43,7 +43,7 @@ namespace Physics {
 		btCollisionShape* GetBulletShape() override;
 	};
 
-	class __declspec(dllexport) MeshShape : public PhysicShape {
+	class MeshShape : public PhysicShape {
 	private:
 		Ref<Mesh> m_Mesh;
 		btCollisionShape* bShape;

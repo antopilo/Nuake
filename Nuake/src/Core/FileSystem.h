@@ -3,7 +3,7 @@
 #include <filesystem>
 #include "Core.h"
 
-class __declspec(dllexport) FileDialog
+class FileDialog
 {
 public:
 	static std::string OpenFile(const char* filter);
@@ -36,13 +36,19 @@ public:
 
 	static Ref<Directory> RootDirectory;
 
+	static void SetRootDirectory(const std::string path);
+
 	static void Scan();
+	static std::string AbsoluteToRelative(const std::string& path);
 	static Ref<Directory> GetFileTree();
 	static void ScanDirectory(Ref<Directory> directory);
 	static void GetDirectories();
 
 	static bool DirectoryExists(const std::string path);
 	static bool FileExists(const std::string path);
+
+	static std::string ReadFile(const std::string& path, bool absolute = false);
+
 
 
 };

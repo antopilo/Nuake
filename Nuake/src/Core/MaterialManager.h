@@ -5,7 +5,7 @@
 
 class Material;
 
-class __declspec(dllexport) MaterialManager {
+class MaterialManager {
 private:
 	static Ref<MaterialManager> s_Instance;
 

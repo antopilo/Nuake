@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <Dependencies/GLEW/include/GL/glew.h>
 #include "src/Resource/Project.h"
+#include <src/Scene/Entities/Components/LuaScriptComponent.h>
+#include <src/Core/Logger.h>
 
 ImFont* normalFont;
 ImFont* bigIconFont;
@@ -35,8 +37,8 @@ void EditorInterface::Init()
 
 void EditorInterface::DrawViewport()
 {
-    ImGui::Begin("ShadowMap");
-    {
+   if(ImGui::Begin("ShadowMap"))
+   {
         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
         if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
@@ -47,9 +49,10 @@ void EditorInterface::DrawViewport()
         else {
             ImGui::Text("Please select a light entity");
         }
-        ImGui::End();
+        
     }
-    ImGui::Begin("Viewport");
+   ImGui::End();
+    if(ImGui::Begin("Viewport"))
     {
         Overlay();
         ImGuizmo::BeginFrame();
@@ -64,14 +67,14 @@ void EditorInterface::DrawViewport()
         ImGuizmo::SetDrawlist();
         ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
-        if (m_DrawGrid)
+        if (m_DrawGrid && !Engine::IsPlayMode)
         {
             ImGuizmo::DrawGrid(glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
                 glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetPerspective()),
                 glm::value_ptr(glm::identity<glm::mat4>()), 100.f);
         }
 
-        if (m_IsEntitySelected)
+        if (m_IsEntitySelected && !Engine::IsPlayMode)
         {
             TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
             glm::mat4 oldTransform = tc.GetTransform();
@@ -97,12 +100,12 @@ void EditorInterface::DrawViewport()
                 tc.Rotation = glm::vec3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));
                 tc.Scale = scale;
             }
-            
         }
         
 
-        ImGui::End();
+        
     }
+    ImGui::End();
 }
 
 static int selected = 0;
@@ -203,9 +206,10 @@ void EditorInterface::DrawSceneTree()
             ImGui::DragFloat("Volumetric scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
             ImGui::DragFloat("Volumetric step count", &env->VolumetricStepCount, 1.f, 0.0f);
         }
+       
     }
-    
-    ImGui::Begin("Scene");
+    ImGui::End();
+    if(ImGui::Begin("Scene"))
     {
         // Buttons to add and remove entity.
         ImGui::BeginChild("Buttons", ImVec2(300, 20), false);
@@ -260,7 +264,7 @@ void EditorInterface::DrawSceneTree()
             //    ImGui::EndPopup();
         }
 
-        ImGui::End();
+        
     }
     ImGui::End();
 }
@@ -269,7 +273,7 @@ void EditorInterface::DrawSceneTree()
 
 void EditorInterface::DrawEntityPropreties()
 {
-    ImGui::Begin("Propreties");
+    if(ImGui::Begin("Propreties"))
     {
         if (!m_IsEntitySelected) 
         {
@@ -297,14 +301,16 @@ void EditorInterface::DrawEntityPropreties()
             }
             if (ImGui::BeginPopup("add_component_popup"))
             {
+                if (ImGui::MenuItem("Lua script") && !m_SelectedEntity.HasComponent<LuaScriptComponent>())
+                    m_SelectedEntity.AddComponent<LuaScriptComponent>();
                 if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
                     m_SelectedEntity.AddComponent<LightComponent>();
                 if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
                     m_SelectedEntity.AddComponent<MeshComponent>();
                 if (ImGui::MenuItem("Camera Component") && !m_SelectedEntity.HasComponent<CameraComponent>())
                     m_SelectedEntity.AddComponent<CameraComponent>();
-                if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMap>())
-                    m_SelectedEntity.AddComponent<QuakeMap>();
+                if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMapComponent>())
+                    m_SelectedEntity.AddComponent<QuakeMapComponent>();
                 if (ImGui::MenuItem("Rigidbody Component") && !m_SelectedEntity.HasComponent<RigidBodyComponent>())
                 {
                     m_SelectedEntity.AddComponent<RigidBodyComponent>();
@@ -343,6 +349,34 @@ void EditorInterface::DrawEntityPropreties()
             if (ImGui::CollapsingHeader((icon + " " + "Light").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
                 m_SelectedEntity.GetComponent<LightComponent>().DrawEditor();
+                ImGui::Separator();
+            }
+
+        }
+
+        if (m_SelectedEntity.HasComponent<LuaScriptComponent>()) {
+            std::string icon = ICON_FA_FILE;
+            if (ImGui::CollapsingHeader((icon + " " + "Lua script").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto& component = m_SelectedEntity.GetComponent<LuaScriptComponent>();
+                std::string path = component.Script;
+
+
+                char pathBuffer[256];
+                memset(pathBuffer, 0, sizeof(pathBuffer));
+                std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
+                if (ImGui::InputText("##ScriptPath", pathBuffer, sizeof(pathBuffer)))
+                {
+                    path = std::string(pathBuffer);
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Browse"))
+                {
+                    path = FileDialog::OpenFile(".map");
+                }
+
+                component.Script = path;
+
                 ImGui::Separator();
             }
 
@@ -414,12 +448,12 @@ void EditorInterface::DrawEntityPropreties()
                 ImGui::Separator();
             }
         }
-        if (m_SelectedEntity.HasComponent<QuakeMap>())
+        if (m_SelectedEntity.HasComponent<QuakeMapComponent>())
         {
             std::string icon = ICON_FA_BROOM ;
             if (ImGui::CollapsingHeader((icon + " " + "Quake map").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
-                auto& component = m_SelectedEntity.GetComponent<QuakeMap>();
+                auto& component = m_SelectedEntity.GetComponent<QuakeMapComponent>();
                 std::string path = component.Path;
 
 
@@ -446,8 +480,9 @@ void EditorInterface::DrawEntityPropreties()
         }
 
         ImGui::PopFont();
-        ImGui::End();
+       
     }
+    ImGui::End();
 }
 void EditorInterface::DrawGizmos()
 {
@@ -492,7 +527,9 @@ void EditorInterface::EditorInterfaceDrawFiletree(Ref<Directory> dir)
 void EditorInterface::DrawFileSystem()
 {
     Ref<Directory> rootDirectory = FileSystem::GetFileTree();
-    ImGui::Begin("Tree browser");
+    if (!rootDirectory)
+        return;
+    if(ImGui::Begin("Tree browser"))
     {
         if (ImGui::BeginPopupContextItem("item context menu"))
         {
@@ -518,8 +555,9 @@ void EditorInterface::DrawFileSystem()
             ImGui::TreePop();
         }
 
-        ImGui::End();
+        
     }
+    ImGui::End();
 
 
 }
@@ -590,9 +628,8 @@ void EditorInterface::DrawFile(Ref<File> file)
 
 void EditorInterface::DrawDirectoryExplorer()
 {
-    ImGui::Begin("File browser");
+    if(ImGui::Begin("File browser"))
     {
-
         // Wrapping.
         int width = ImGui::GetWindowWidth();
         ImVec2 buttonSize = ImVec2(100, 100);
@@ -610,6 +647,7 @@ void EditorInterface::DrawDirectoryExplorer()
                 // Increment item per row tracker.
                 i++;
             }
+
             // Exit if no current directory.
             if (!m_CurrentDirectory) {
                 ImGui::EndTable();
@@ -628,8 +666,6 @@ void EditorInterface::DrawDirectoryExplorer()
                         ImGui::TableNextRow();
                     i++;
                 }
-                
-            
             }
             if (m_CurrentDirectory && m_CurrentDirectory->Files.size() > 0)
             {
@@ -644,23 +680,25 @@ void EditorInterface::DrawDirectoryExplorer()
                 }
             }
 
-
             ImGui::EndTable();
         }
 
-       
         
-
-       
-
-        // Display directories first.
-       
-
-        // Then files.
-       
-
-        ImGui::End();
     }
+    ImGui::End();
+}
+
+void EditorInterface::DrawLogger()
+{
+    if (ImGui::Begin("Logger"))
+    {
+        for (auto l : Logger::GetLogs())
+        {
+            ImGui::Text(l.c_str());
+        }
+       
+    }
+    ImGui::End();
 }
 
 
@@ -699,6 +737,8 @@ void EditorInterface::Overlay()
             if (m_ShowOverlay && ImGui::MenuItem("Close")) m_ShowOverlay = false;
             ImGui::EndPopup();
         }
+
+       
     }
     ImGui::End();
 }
@@ -708,7 +748,7 @@ void EditorInterface::DrawRessourceWindow()
 {
     std::map<std::string, Ref<Material>> materials = MaterialManager::Get()->GetAllMaterials();
 
-    ImGui::Begin("Materials");
+    if(ImGui::Begin("Materials"))
     {
         int width = ImGui::GetWindowWidth();
         ImVec2 buttonSize = ImVec2(100, 100);
@@ -743,10 +783,10 @@ void EditorInterface::DrawRessourceWindow()
             }
         }
         
-        ImGui::End();
+        
     }
-
-    ImGui::Begin("Material property");
+    ImGui::End();
+    if(ImGui::Begin("Material property"))
     {
         if (m_IsMaterialSelected)
         {
@@ -832,50 +872,132 @@ void EditorInterface::DrawRessourceWindow()
             ImGui::Text("No material selected.");
         }
 
-        ImGui::End();
+       
     }
+    ImGui::End();
+}
+
+void NewProject()
+{
+    if (Engine::GetProject())
+        Engine::GetProject()->Save();
+
+    // Parse the project and load it.
+    std::string selectedProject = FileDialog::SaveFile(".project") + ".project";
+
+
+    Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
+    project->FullPath = selectedProject;
+    Engine::LoadProject(project);
+
+    Ref<Scene> scene = Scene::New();
+    Engine::LoadScene(scene);
+
+    
+}
+
+
+void OpenProject()
+{
+    // Parse the project and load it.
+    std::string projectPath = FileDialog::OpenFile(".project");
+
+    FileSystem::SetRootDirectory(projectPath + "/../");
+    Ref<Project> project = Project::New();
+    if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
+    {
+        Logger::Log("Error loading project: " + projectPath);
+        return;
+    }
+    project->FullPath = projectPath;
+    Engine::LoadProject(project);
+}
+
+void OpenScene()
+{
 
 }
 
+void EditorInterface::DrawInit()
+{
+
+}
 
 void EditorInterface::Draw()
 {
     Init();
+    auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
+
+    if (ImGui::BeginPopupModal("Welcome", NULL, flags))
+    {
+        ImGui::Text("Welcome to");
+        ImGui::Text("Nuake engine");
+
+        ImGui::Text("Would you like to");
+        if (ImGui::Button("Start a new project"))
+            NewProject();
+
+        ImGui::SameLine();
+        if (ImGui::Button("Open a project"))
+            OpenProject();
+
+        ImGui::EndPopup();
+    }
+    if (!Engine::GetProject())
+    {
+        ImGui::OpenPopup("Welcome");
+    }
+       
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("File"))
         {
             if (ImGui::MenuItem("New project", "CTRL+N")) 
             {
-                if(Engine::GetProject())
-                    Engine::GetProject()->Save();
+                NewProject();
 
-                // Parse the project and load it.
-                std::string selectedProject = FileDialog::SaveFile(".project") + ".project";
-
-                Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
-                Engine::LoadProject(project);
-
-                Ref<Scene> scene = Scene::New();
-                Engine::LoadScene(scene);
+                m_IsEntitySelected = false;
             }
             if (ImGui::MenuItem("Open...", "CTRL+O")) 
             {
-                // Parse the project and load it.
-                std::string selectedProject = FileDialog::OpenFile(".project");
-                Ref<Project> project = Project::Load(selectedProject);
-                Engine::LoadProject(project);
+                OpenProject();
+
+                m_IsEntitySelected = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) 
             {
                 Engine::GetProject()->Save();
                 Engine::GetCurrentScene()->Save();
+
+                m_IsEntitySelected = false;
             }
             if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S")) 
             {
                 std::string savePath = FileDialog::SaveFile("*.project");
                 Engine::GetProject()->SaveAs(savePath);
+
+                m_IsEntitySelected = false;
             }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Open scene...", "CTRL+O"))
+            {
+                OpenScene();
+                m_IsEntitySelected = false;
+            }
+            if (ImGui::MenuItem("Save scene", "CTRL+S"))
+            {
+                Engine::GetCurrentScene()->Save();
+
+                m_IsEntitySelected = false;
+            }
+            if (ImGui::MenuItem("Save scene as...", "CTRL+SHIFT+S"))
+            {
+                std::string savePath = FileDialog::SaveFile("*.scene");
+                Engine::GetCurrentScene()->SaveAs(savePath);
+
+                m_IsEntitySelected = false;
+            }
+
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Edit"))
@@ -927,7 +1049,7 @@ void EditorInterface::Draw()
                 if (ImGui::MenuItem("Trenchbroom map"))
                 {
                     auto ent = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
-                    ent.AddComponent<QuakeMap>();
+                    ent.AddComponent<QuakeMapComponent>();
                 }
                 if (ImGui::MenuItem("Mesh")) {
                     auto ent = Engine::GetCurrentScene()->CreateEntity("Mesh");
@@ -956,17 +1078,17 @@ void EditorInterface::Draw()
 
     DrawGizmos();
     
-    DrawRessourceWindow();
-    DrawViewport();
-    DrawSceneTree();
-    DrawFileSystem();
-    DrawDirectoryExplorer();
-    DrawEntityPropreties();
-
+   DrawRessourceWindow();
+   DrawViewport();
+   DrawSceneTree();
+   DrawFileSystem();
+   DrawDirectoryExplorer();
+   DrawEntityPropreties();
+   DrawLogger();
     if(m_ShowImGuiDemo)
         ImGui::ShowDemoWindow();
 
-    ImGui::Begin("Physics");
+    if(ImGui::Begin("Toolbar"))
     {
         if (ImGui::Button(ICON_FA_HAND_POINTER))
             CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
@@ -990,8 +1112,9 @@ void EditorInterface::Draw()
             Engine::ExitPlayMode();
         }
         
-        ImGui::End();
+        
     }
+    ImGui::End();
 }
 
 

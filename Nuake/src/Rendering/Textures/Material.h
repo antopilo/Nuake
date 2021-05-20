@@ -3,7 +3,7 @@
 #include "Texture.h"
 #include <glm\ext\vector_float3.hpp>
 #include "../Core/Core.h"
-class __declspec(dllexport) Material
+class Material
 {
 private:
 	std::string m_Name;

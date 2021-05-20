@@ -9,6 +9,33 @@ workspace "Nuake"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+project "DemoModule"
+    location "DemoModule"
+    kind "SharedLib"
+    language "C++"
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    
+    filter "system:windows"
+        cppdialect "C++17"
+
+    includedirs
+    {
+        "%{prj.name}/../Nuake",
+        "%{prj.name}/../Nuake/src/Vendors",
+        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
+        "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
+        "%{prj.name}/../Nuake/Dependencies/bullet/src",
+        "%{prj.name}/../Nuake/Dependencies/assimp/include"
+    }
+    
+
+    files
+    {
+        "%{prj.name}/**.h",
+        "%{prj.name}/**.cpp"
+    }
+
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
@@ -37,11 +64,12 @@ project "Nuake"
 
     includedirs
     {
-        "%{prj.name}/src/Vendors",
-        "%{prj.name}/Dependencies/GLEW/include",
-        "%{prj.name}/Dependencies/GLFW/x64/include",
-        "%{prj.name}/Dependencies/bullet/src",
-        "%{prj.name}/Dependencies/assimp/include"
+        "%{prj.name}/../Nuake",
+        "%{prj.name}/../Nuake/src/Vendors",
+        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
+        "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
+        "%{prj.name}/../Nuake/Dependencies/bullet/src",
+        "%{prj.name}/../Nuake/Dependencies/assimp/include"
     }
 
     filter "system:windows"

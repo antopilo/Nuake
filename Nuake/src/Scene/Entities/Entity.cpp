@@ -7,6 +7,7 @@
 #include "Components/CameraComponent.h"
 #include "Components/QuakeMap.h"
 #include "Components/LightComponent.h"
+#include "Components/QuakeMap.h"
 void Entity::AddChild(Entity ent)
 {
 	if ((int)m_EntityHandle != ent.GetHandle())
@@ -26,8 +27,8 @@ json Entity::Serialize()
 	SERIALIZE_OBJECT_REF_LBL("TransformComponent", GetComponent<TransformComponent>());
 	if(HasComponent<CameraComponent>())
 		SERIALIZE_OBJECT_REF_LBL("CameraComponent", GetComponent<CameraComponent>());
-	if(HasComponent<QuakeMap>())
-		SERIALIZE_OBJECT_REF_LBL("QuakemapComponent", GetComponent<QuakeMap>());
+	if(HasComponent<QuakeMapComponent>())
+		SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>());
 	if (HasComponent<LightComponent>())
 		SERIALIZE_OBJECT_REF_LBL("LightComponent", GetComponent<LightComponent>());
 	END_SERIALIZE();
@@ -35,7 +36,14 @@ json Entity::Serialize()
 
 bool Entity::Deserialize(const std::string& str)
 {
-	return false;
+	BEGIN_DESERIALIZE();
+		DESERIALIZE_COMPONENT(TransformComponent);
+		DESERIALIZE_COMPONENT(NameComponent);
+		DESERIALIZE_COMPONENT(ParentComponent);
+		DESERIALIZE_COMPONENT(CameraComponent);
+		DESERIALIZE_COMPONENT(QuakeMapComponent);
+		DESERIALIZE_COMPONENT(LightComponent);
+	return true;
 }
 
 Entity::Entity(entt::entity handle, Scene* scene)
