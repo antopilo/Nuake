@@ -12,7 +12,6 @@ public:
 	Entity(const Entity& ent);
 	Entity();
 
-
 	void AddChild(Entity ent);
 
 	int GetHandle() { return (int)m_EntityHandle; }

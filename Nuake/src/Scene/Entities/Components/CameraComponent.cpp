@@ -1,6 +1,7 @@
 #pragma once
 #include "CameraComponent.h"
 #include "../ImGuiHelper.h"
+#include <src/Rendering/Camera.h>
 
 CameraComponent::CameraComponent()
 {

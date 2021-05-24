@@ -21,10 +21,12 @@ void EditorCamera::Update(Timestep ts)
 	else
 		Input::HideMouse();
 
+	// Should probably not have speed binding in here.
 	if (Input::IsKeyPress(GLFW_KEY_UP))
 		Speed += 0.1f;
 	else if (Input::IsKeyPress(GLFW_KEY_DOWN))
 		Speed -= 0.1f;
+
 	if (Speed < 0)
 		Speed = 0;
 
@@ -38,7 +40,6 @@ void EditorCamera::Update(Timestep ts)
 			Translation.x += Speed * ts;
 		if (Input::IsKeyPressed(GLFW_KEY_LEFT))
 			Translation.x -= Speed * ts;
-
 		if (Input::IsKeyPressed(GLFW_KEY_UP))
 			Translation.y += Speed * ts;
 		if (Input::IsKeyPressed(GLFW_KEY_DOWN))
@@ -61,14 +62,8 @@ void EditorCamera::Update(Timestep ts)
 		if (Input::IsKeyPressed(GLFW_KEY_SPACE))
 			movement += up * (Speed * ts);
 
-
-		Translation += glm::vec3(movement.x, 0, 0);
-
-		Translation += glm::vec3(0, movement.y, 0);
-
-		Translation += glm::vec3(0, 0, movement.z);
+		Translation += Vector3(movement);
 	}
-
 
 	if (firstMouse)
 	{

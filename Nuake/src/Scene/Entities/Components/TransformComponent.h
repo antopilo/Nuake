@@ -1,18 +1,16 @@
 #pragma once
-#include <glm\ext\matrix_float4x4.hpp>
-#include "BaseComponent.h"
+#include "../Core/Maths.h"
 #include "../Resource/Serializable.h"
 
 class TransformComponent {
 public:
-	glm::vec3 Translation;
-	glm::vec3 Rotation;
-	glm::vec3 Scale;
+	Vector3 Translation;
+	Vector3 Rotation; // TODO: Should use quaternions.
+	Vector3 Scale;
 
 	TransformComponent();
-	glm::mat4 GetTransform();
 
-	void DrawEditor();
+	Matrix4 GetTransform();
 
 	json Serialize()
 	{
@@ -27,10 +25,9 @@ public:
 	bool Deserialize(std::string str)
 	{
 		BEGIN_DESERIALIZE();
-		this->Translation = glm::vec3(j["Translation"]["x"], j["Translation"]["y"], j["Translation"]["z"]);
-		this->Rotation = glm::vec3(j["Rotation"]["x"], j["Rotation"]["y"], j["Rotation"]["z"]);
-		this->Scale = glm::vec3(j["Scale"]["x"], j["Scale"]["y"], j["Scale"]["z"]);
+		this->Translation = Vector3(j["Translation"]["x"], j["Translation"]["y"], j["Translation"]["z"]);
+		this->Rotation = Vector3(j["Rotation"]["x"], j["Rotation"]["y"], j["Rotation"]["z"]);
+		this->Scale = Vector3(j["Scale"]["x"], j["Scale"]["y"], j["Scale"]["z"]);
 		return true;
-
 	}
 };

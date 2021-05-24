@@ -3,10 +3,13 @@
 #include "src/Vendors/imgui/imgui.h"
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
+
 class Material;
+
 class EditorInterface
 {
 private:
+
 	Entity m_SelectedEntity;
 	bool m_IsEntitySelected = false;
 	bool m_DrawGrid = false;

@@ -19,36 +19,39 @@
 #include "Resource/FontAwesome5.h"
 
 #include "../Engine.h"
+
+// TODO: Use abstraction for vertex buffers
 unsigned int vbo;
 unsigned int vao;
 
+// TODO: Move to primitive storage.
 float vertices[] = {
     1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
     1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
     -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+     -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+    1.0f, -1.0f, 0.0f,  1.0f, 0.0f
+   
     
-    1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f
 };
+
+
+Ref<Window> Window::s_Instance;
 
 Window::Window() 
 {
-    s_Instance = this;
-    
     Init();
     Renderer::Init();
-    
-    //m_Scene->Init();
 }
 
-Window::~Window()
-{
-   
-}
+Window::~Window() { }
 
-Window* Window::Get() 
+Ref<Window> Window::Get() 
 {
+    if (s_Instance == nullptr)
+        s_Instance = CreateRef<Window>();
+
     return s_Instance;
 }
 
@@ -64,6 +67,9 @@ GLFWwindow* Window::GetHandle()
 
 bool Window::SetScene(Ref<Scene> scene)
 {
+    if (scene == nullptr)
+        return false;
+
     m_Scene = scene;
     return true;
 }
@@ -78,41 +84,44 @@ Ref<FrameBuffer> Window::GetFrameBuffer() const
     return m_Framebuffer;
 }
 
-unsigned int captureFBO, captureRBO;
-Window* Window::s_Instance;
-unsigned int texture;
+
 int Window::Init() 
 {
-    if (!glfwInit()) {
-        std::cout << "glfw initialization failed." << std::endl;
-        return -1;
+    if (!glfwInit()) 
+    {
+       Logger::Log("glfw initialization failed.");
+       return -1;
     }
-    
-    int width, height;
     
     // Create window
-    m_Window = glfwCreateWindow(1280, 720, "Editor - Dev build", NULL, NULL);
+    m_Window = glfwCreateWindow(m_Width, m_Height, "Editor - Dev build", NULL, NULL);
     
-    if (!m_Window) {
-        std::cout << "Window creation failed." << std::endl;
+    if (!m_Window) 
+    {
+        Logger::Log("Window creation failed.");
         return -1;
     }
+
     glfwMakeContextCurrent(m_Window);
-    std::cout << glGetString(GL_VERSION) << std::endl;
+
+    Logger::Log((char*)glGetString(GL_VERSION));
     
-    if (glewInit() != GLEW_OK) {
-        std::cout << "GLEW initialization failed!";
+    if (glewInit() != GLEW_OK) 
+    {
+        Logger::Log("GLEW initialization failed!");
+        return -1;
     }
     
-    
+    // TODO: Move this to renderer init. The window shouldnt have to do gl calls.
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    
+    // TODO: have clear color in environnement.
     glClearColor(0.019f, 0.501f, 1.0f, 1.0f);
+
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
@@ -120,15 +129,10 @@ int Window::Init()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //glEnable(GL_CULL_FACE);
-    // create viewports
-    
-    m_DeferredFrambuffer = new FrameBuffer(false, glm::vec2(1920, 1080), GL_COLOR_ATTACHMENT0);
-    m_DeferredFrambuffer->SetTexture(CreateRef<Texture>(glm::vec2(1920, 1080), GL_RGB));
-    
-    m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080), GL_COLOR_ATTACHMENT0);
+
+    // Create viewports
+    m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080));
     m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(1920, 1080), GL_RGB));
-    
-    m_GBuffer = new GBuffer(glm::vec2(1920, 1080));
     
     // Temporary quad vbo for deferred.
     glGenVertexArrays(1, &vao);
@@ -146,14 +150,13 @@ int Window::Init()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
     
-    
+    // TODO: Style should move to editor
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.Fonts->AddFontDefault();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ImGui::StyleColorsDark();
 
-    //io.Fonts->AddFontFromFileTTF("../data/Fonts/Ruda-Bold.ttf", 15.0f, &config);
     ImGui::GetStyle().FrameRounding = 4.0f;
     ImGui::GetStyle().GrabRounding = 4.0f;
 
@@ -207,53 +210,43 @@ int Window::Init()
     colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-
     ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
-    
-    //m_Scene = CreateRef<Scene>();
-    
     return 0;
 }
 
 
 void Window::Update(Timestep ts) 
 {
-     
+     // TODO: have event here?
 }
-
-glm::vec4 m_Color;
-float x = 0.0f;
-float y = 0.0f;
-float z = 0.0f;
-bool init = false;
 
 void Window::Draw()
 {
+    // Dont render if no scene is loaded.
     if (!m_Scene)
         return;
 
+    // Dont render if no cam is found.
     Ref<Camera> cam = m_Scene->GetCurrentCamera();
-    if (!cam)
-        return;
+    if (!cam) return;
 
- 
     Renderer::BeginDraw(cam);
+    {
 
-    glCullFace(GL_FRONT);
-    m_Scene->DrawShadows();
-    glCullFace(GL_BACK);
+        //glCullFace(GL_FRONT);
+        //glCullFace(GL_BACK);
+        m_Scene->DrawShadows();
 
-    m_Framebuffer->Bind();
-
-    if(Engine::IsPlayMode)
-        m_Scene->Draw();
-    else
-        m_Scene->EditorDraw();
-
-    m_Framebuffer->Unbind();
-
-    
+        m_Framebuffer->Bind();
+        {
+            if (Engine::IsPlayMode)
+                m_Scene->Draw();
+            else
+                m_Scene->EditorDraw();
+        }
+        m_Framebuffer->Unbind();
+    }
 
     Renderer::EndDraw();
 }
@@ -264,41 +257,4 @@ void Window::EndDraw()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(m_Window);
     glfwPollEvents();
-}
-
-void Window::DrawQuad()
-{
-    //Renderer::m_DeferredShader->Bind();
-    
-    //m_DeferredFrambuffer->Bind();
-    
-    //m_Scene->DrawDeferred();
-    
-    //glActiveTexture(GL_TEXTURE0 + 5);
-    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gAlbedo);
-    //
-    //glActiveTexture(GL_TEXTURE0 + 6);
-    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gNormal);
-    //
-    //glActiveTexture(GL_TEXTURE0 + 7);
-    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gMaterial);
-    //
-    //glActiveTexture(GL_TEXTURE0 + 8);
-    //glBindTexture(GL_TEXTURE_2D, m_GBuffer->gDepth);
-    //
-    //Renderer::m_DeferredShader->SetUniform1i("m_Albedo", 5);
-    //Renderer::m_DeferredShader->SetUniform1i("m_Depth", 8);
-    //Renderer::m_DeferredShader->SetUniform1i("m_Normal", 6);
-    //Renderer::m_DeferredShader->SetUniform1i("m_Material", 7);
-    //
-    //glBindVertexArray(vao);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    //
-    //m_DeferredFrambuffer->Unbind();
-}
-
-
-Ref<Texture> Window::GetSceneRenderTexture()
-{
-    return m_Framebuffer->GetTexture();
 }

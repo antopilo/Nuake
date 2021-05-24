@@ -1,6 +1,6 @@
 #include "Framebuffer.h"
 #include <GL\glew.h>
-FrameBuffer::FrameBuffer(bool hasRenderBuffer, glm::vec2 size, GLenum textureAttachment)
+FrameBuffer::FrameBuffer(bool hasRenderBuffer, Vector2 size)
 {
 	m_Textures = std::map<int, Ref<Texture>>();
 	m_Size = size;
@@ -65,7 +65,7 @@ void FrameBuffer::Unbind()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::UpdateSize(glm::vec2 size)
+void FrameBuffer::UpdateSize(Vector2 size)
 {
 	m_Size = size;
 

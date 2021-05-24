@@ -532,7 +532,7 @@ Entity Scene::GetEntity(const std::string& name)
 	}
 }
 
-Entity Scene::CreateEmptyEntity(const std::string& name) {
+Entity Scene::CreateEmptyEntity() {
 	Entity entity = { m_Registry.create(), this };
 	return entity;
 }
@@ -639,7 +639,7 @@ bool Scene::Deserialize(const std::string& str)
 			for (json e : j["Entities"])
 			{
 				std::string name = e["NameComponent"]["Name"];
-				Entity ent = CreateEmptyEntity(name);
+				Entity ent = CreateEmptyEntity();
 				ent.Deserialize(e.dump());
 			}
 		}

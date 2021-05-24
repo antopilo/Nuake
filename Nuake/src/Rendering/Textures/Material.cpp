@@ -33,15 +33,15 @@ Material::Material(const std::string albedo)
 
 	m_Name = albedo;
 	if (m_DefaultAO == nullptr)
-		m_DefaultAO = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultNormal == nullptr)
-		m_DefaultNormal = TextureManager::Get()->GetTexture("Res/Textures/default/defaultNormal.png");
+		m_DefaultNormal = TextureManager::Get()->GetTexture("resources/Textures/default/defaultNormal.png");
 	if (m_DefaultDisplacement == nullptr)
-		m_DefaultDisplacement = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultDisplacement = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultRoughness == nullptr)
-		m_DefaultRoughness = TextureManager::Get()->GetTexture("Res/Textures/default/DefaultMetal.png");
+		m_DefaultRoughness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultMetalness == nullptr)
-		m_DefaultMetalness = TextureManager::Get()->GetTexture("Res/Textures/default/defaultNormal.png");
+		m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 
 	
 }
@@ -55,18 +55,18 @@ Material::Material(const glm::vec3 albedoColor)
 	m_AlbedoColor = albedoColor;
 	m_Name = "New material";
 	if (m_DefaultAlbedo == nullptr)
-		m_DefaultAlbedo = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultAlbedo = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	m_Albedo = m_DefaultAlbedo;
 	if (m_DefaultAO == nullptr)
-		m_DefaultAO = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultNormal == nullptr)
-		m_DefaultNormal = TextureManager::Get()->GetTexture("Res/Textures/default/defaultNormal.png");
+		m_DefaultNormal = TextureManager::Get()->GetTexture("resources/Textures/default/defaultNormal.png");
 	if (m_DefaultDisplacement == nullptr)
-		m_DefaultDisplacement = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultDisplacement = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultRoughness == nullptr)
-		m_DefaultRoughness = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultRoughness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultMetalness == nullptr)
-		m_DefaultMetalness = TextureManager::Get()->GetTexture("Res/Textures/default/Default.png");
+		m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 }
 
 Material::~Material() 
@@ -120,13 +120,12 @@ void Material::Bind()
 	else
 		m_DefaultNormal->Bind(8);
 	Renderer::m_Shader->SetUniform1i("m_Normal", 8);
-	Renderer::m_GBufferShader->SetUniform1i("m_Normal", 8);
 	// Displacement
 	if (m_Displacement != nullptr)
 		m_Displacement->Bind(9);
 	else
 		m_DefaultDisplacement->Bind(9);
-	Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
+	//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
 	//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
 }
 

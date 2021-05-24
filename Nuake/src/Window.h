@@ -3,37 +3,39 @@
 #include "Rendering/Framebuffer.h"
 #include "Scene/Scene.h"
 #include "Core/Core.h"
+
 struct GLFWwindow;
 class Window
 {
 private:
-	static Window* s_Instance;
+	static Ref<Window> s_Instance;
+
+	int m_Width = 1280;
+	int m_Height = 720;
+
 	GLFWwindow* m_Window;
+
 	Ref<FrameBuffer> m_Framebuffer;
-	GBuffer* m_GBuffer;
 	Ref<Scene> m_Scene;
-	FrameBuffer* m_DeferredFrambuffer;
-	int Width, Height;
-    
 public:
 	Window();
 	~Window();
 
-	static Window* Get();
+	static Ref<Window> Get(); // Get the window instance
 	GLFWwindow* GetHandle();
-
-	int Init();
-	void Update(Timestep ts);
-	void Draw();
-	void EndDraw();
 
 	bool ShouldClose();
 
-	Ref<Texture> GetSceneRenderTexture();
+	int Init();
+	void Update(Timestep ts);
 
-	void DrawQuad();
-	Ref<Scene> GetScene();
-	bool SetScene(Ref<Scene> scene);
+	void Draw();
+	void EndDraw();
 
 	Ref<FrameBuffer> GetFrameBuffer() const;
+	Ref<Texture> GetSceneRenderTexture();
+	void DrawQuad();
+
+	Ref<Scene> GetScene();
+	bool SetScene(Ref<Scene> scene);
 };

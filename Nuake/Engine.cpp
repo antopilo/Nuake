@@ -8,12 +8,10 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-
-float Engine::m_LastFrameTime = 0.0f;
-Ref<Window> Engine::CurrentWindow;
-bool Engine::IsPlayMode = false;
-
 Ref<Project> Engine::CurrentProject;
+Ref<Window> Engine::CurrentWindow;
+float Engine::m_LastFrameTime = 0.0f;
+bool Engine::IsPlayMode = false;
 
 void Engine::Init()
 {
@@ -22,11 +20,10 @@ void Engine::Init()
 	PhysicsManager::Get()->Init();
 	Logger::Log("Physics initialized");
 
-
 	ScriptingEngine::Init();
 	Logger::Log("Scripting engine initialized");
 
-	CurrentWindow = std::make_shared<Window>();
+	CurrentWindow = Window::Get();
 	Logger::Log("Window initialized");
 
 	Logger::Log("Engine initialized succesfully...");
@@ -34,13 +31,16 @@ void Engine::Init()
 
 void Engine::Tick()
 {
+	// Dont update if no scene is loaded.
 	if (!CurrentWindow->GetScene())
 		return;
 
+	// Calculate delta time
 	float time = (float)glfwGetTime();
 	Timestep timestep = time - m_LastFrameTime;
 	m_LastFrameTime = time;
 
+	// Play mode update vs editor update.
 	if (Engine::IsPlayMode)
 		GetCurrentScene()->Update(timestep);
 	else
@@ -49,38 +49,37 @@ void Engine::Tick()
 
 void Engine::EnterPlayMode()
 {
+	// Dont trigger init if already in player mode.
 	if (!IsPlayMode)
-	{
 		GetCurrentScene()->OnInit();
-	}
+
 	IsPlayMode = true;
 }
 
 void Engine::ExitPlayMode()
 {
+	// Dont trigger exit if already not in play mode.
 	if (IsPlayMode)
 		GetCurrentScene()->OnExit();
+
 	IsPlayMode = false;
 }
 
 void Engine::Draw() 
 {
+	// Start imgui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
-
 	ImGui::NewFrame();
 
+	// Draw scene
 	Window::Get()->Draw();
 }
 
 void Engine::EndDraw()
 {
+	// Swap buffer and draw imgui
 	Window::Get()->EndDraw();
-}
-
-void Engine::Run()
-{
-
 }
 
 void Engine::Close()
@@ -96,8 +95,7 @@ Ref<Scene> Engine::GetCurrentScene()
 
 bool Engine::LoadScene(Ref<Scene> scene)
 {
-	CurrentWindow->SetScene(scene);
-	return true;
+	return CurrentWindow->SetScene(scene);
 }
 
 Ref<Project> Engine::GetProject()
@@ -108,14 +106,12 @@ Ref<Project> Engine::GetProject()
 bool Engine::LoadProject(Ref<Project> project)
 {
 	CurrentProject = project;
-	Engine::LoadScene(CurrentProject->DefaultScene);
+
+	if (!Engine::LoadScene(CurrentProject->DefaultScene))
+		return false;
+
 	FileSystem::SetRootDirectory(project->FullPath + "/../");
 	return true;
-}
-
-int Engine::HelloWorld()
-{
-	return 1;
 }
 
 Ref<Window> Engine::GetCurrentWindow()

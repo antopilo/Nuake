@@ -2,6 +2,8 @@
 #include "TransformComponent.h"
 #include "../Core/Core.h"
 #include "../Resource/Serializable.h"
+#include "../Rendering/Camera.h"
+
 class CameraComponent {
 public:
 	Ref<Camera> CameraInstance;

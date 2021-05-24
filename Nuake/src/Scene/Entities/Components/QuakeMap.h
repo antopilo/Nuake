@@ -32,7 +32,7 @@ public:
 	{
 		BEGIN_DESERIALIZE();
 		this->Path = j["Path"];
-
+		Build(); // Maybe have some kind of loading bar or something.
 		return true;
 	}
 };

@@ -25,6 +25,7 @@ private:
 public:
 	std::string Path = "";
 	static Ref<Scene> New();
+
 	Scene();
 	~Scene();
 
@@ -37,19 +38,23 @@ public:
 	void Update(Timestep ts);
 	void EditorUpdate(Timestep ts);
 
+	// TODO: Maybe move this to Renderer::DrawScene() ?
 	void DrawShadows();
-	void DrawGBuffer();
-	void DrawDeferred();
 	void Draw();
 	void EditorDraw();
 
 	std::vector<Entity> GetAllEntities();
-	glm::vec3 GetGlobalPosition(Entity ent);
 	Entity GetEntity(const std::string& name);
-	Entity CreateEmptyEntity(const std::string& name);
-	Entity CreateEntity(const std::string& name);
-	void DestroyEntity(Entity entity);
 
+	// TODO: This shouldnt be allowed
+	Entity CreateEmptyEntity();
+	Entity CreateEntity(const std::string& name);
+
+	// TODO: Could be moved to transform component directly.
+	glm::vec3 GetGlobalPosition(Entity ent);
+	void DestroyEntity(Entity entity); // TODO: Could return bool
+
+	// TODO: Add multiple camera support.
 	Ref<Camera> GetCurrentCamera();
 	Ref<Environment> GetEnvironment();
 

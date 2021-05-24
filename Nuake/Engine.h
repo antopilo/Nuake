@@ -11,25 +11,29 @@ private:
 	static float m_LastFrameTime;
 	static Ref<Window> CurrentWindow;
 	static Ref<Project> CurrentProject;
+	static Ref<Scene> CurrentScene;
 
 public:
-	static bool IsPlayMode;
-	static void Init();
-	static void Run();
-	static void Tick();
+	static bool IsPlayMode; // True if is playing a scene
 
-	static void EnterPlayMode();
-	static void ExitPlayMode();
+	static void Init();  // Initialize the systems
+	static void Tick();  // Update every system, called once per frame.
+	static void Close(); // Close the systems
+	 
+	static void EnterPlayMode(); // Start the game
+	static void ExitPlayMode(); // Stops the game
 
-	static void Draw();
-	static void EndDraw();
-	static void Close();
+	// Custom drawing should happen in between these two
+	static void Draw();    // Start new frame
+	static void EndDraw(); // Swap buffer
 
-	static int HelloWorld();
 	static Ref<Window> GetCurrentWindow();
-	static Ref<Scene> GetCurrentScene();
-	static bool LoadScene(Ref<Scene> scene);
 
-	static Ref<Project> GetProject();
+	// Load a specific scene
+	static bool LoadScene(Ref<Scene> scene);
+	static Ref<Scene> GetCurrentScene();
+
+	// Loads a project and the default scene.
 	static bool LoadProject(Ref<Project> project);
+	static Ref<Project> GetProject();
 };

@@ -61,7 +61,7 @@ void EditorInterface::DrawViewport()
         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
-        Ref<Texture> texture = Engine::GetCurrentWindow()->GetSceneRenderTexture();
+        Ref<Texture> texture = Engine::GetCurrentWindow()->GetFrameBuffer()->GetTexture();
         ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
         ImGuizmo::SetDrawlist();
@@ -341,7 +341,10 @@ void EditorInterface::DrawEntityPropreties()
         {
             //ImGui::InputText("Name:", selectedEntity->m_Name.data(), 12);
             TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
-            component.DrawEditor();
+            ImGuiHelper::DrawVec3("Translation", &component.Translation);
+            ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
+            ImGuiHelper::DrawVec3("Scale", &component.Scale);
+            ImGui::Separator();
         }
 
         if (m_SelectedEntity.HasComponent<LightComponent>()) {

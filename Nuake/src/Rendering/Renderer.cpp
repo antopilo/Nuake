@@ -41,6 +41,7 @@ unsigned int SphereVBO;
 glm::vec3 SphereVertices[360 * 6 + 6];
 void Renderer::Init()
 {
+    // TODO: Make shader storage somewhere.
     m_ShadowmapShader = new Shader("resources/Shaders/shadowMap.shader");
     m_SkyboxShader    = new Shader("resources/Shaders/skybox.shader");
     m_BRDShader = new Shader("resources/Shaders/BRD.shader");
@@ -51,7 +52,7 @@ void Renderer::Init()
     m_Shader = new Shader("resources/Shaders/basic.shader");
     m_Shader->Bind();
 
-
+    // TODO: Use buffer abstraction.
     // Setup buffers
     glGenVertexArrays(1, &CubeVAO);
     glBindVertexArray(CubeVAO);
@@ -64,8 +65,8 @@ void Renderer::Init()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
     glEnableVertexAttribArray(0);
-
-
+    
+    // WTF is this.
     float r = 1.0f;
     int index = 0;
     for (int i = 0; i <= 360; i++) {
@@ -96,6 +97,7 @@ void Renderer::Init()
     glEnableVertexAttribArray(0);
 }
 
+// TODO: Move to shader storage
 Shader* Renderer::m_ShadowmapShader;
 
 void Renderer::BeginDraw(Ref<Camera> camera)
@@ -105,7 +107,6 @@ void Renderer::BeginDraw(Ref<Camera> camera)
     m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
     m_Shader->SetUniformMat4f("u_View", camera->GetTransform());
     m_Shader->SetUniform3f("u_EyePosition", camera->GetTranslation().x, camera->GetTranslation().y, camera->GetTranslation().z);
-
     m_Shader->Bind();
 }
 
@@ -113,7 +114,6 @@ void Renderer::EndDraw()
 {
     m_Lights.clear(); // Clean up lights.
 }
-
 
 
 // List of all lights queued to be used for rendering this frame.
@@ -130,16 +130,10 @@ void Renderer::RegisterLight(TransformComponent transform, LightComponent light,
 	glm::vec3 pos = transform.Translation;
 	glm::mat4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
-    light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(11);
-    light.m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(12);
-    light.m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(13);
-    light.m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(20);
+    light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
     m_Shader->SetUniform1i   ("LightCount", idx);
     m_Shader->SetUniform1i   ("Lights[" + std::to_string(idx - 1) + "].Type"          , light.Type);
-    m_Shader->SetUniform1i   ("Lights[" + std::to_string(idx - 1) + "].ShadowMap"     , 11);
-    //m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].RSMFlux", 12);
-    //m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].RSMNormal", 13);
-    //m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].RSMPos", 20);
+    m_Shader->SetUniform1i   ("Lights[" + std::to_string(idx - 1) + "].ShadowMap"     , 17);
     m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
     m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Position"      , transform.Translation.x, transform.Translation.y, transform.Translation.z);
     m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Direction"     , direction.x, direction.y, direction.z);
@@ -172,12 +166,9 @@ void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponen
 void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) {
     //m_DebugShader->Bind();
     //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
-
-
-
 }
 
-
+// TODO: Maybe have a debug primitive draw list
 void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
 {
     //glDisable(GL_DEPTH_TEST);
@@ -204,7 +195,7 @@ void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
 
 }
 
-
+// TODO: See above
 void Renderer::DrawSphere(TransformComponent transform, glm::vec4 color)
 {
     //glDisable(GL_DEPTH_TEST);
@@ -228,5 +219,4 @@ void Renderer::DrawSphere(TransformComponent transform, glm::vec4 color)
     glPolygonMode(GL_FRONT, GL_FILL);
     glPolygonMode(GL_BACK, GL_FILL);
     //glEnable(GL_DEPTH_TEST);
-
 }

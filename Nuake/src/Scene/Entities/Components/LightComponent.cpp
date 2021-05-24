@@ -12,19 +12,8 @@ LightComponent::LightComponent()
     Direction = glm::vec3(0, -1, 0);
 
     // Framebuffer used for shadow mapping.
-    m_Framebuffer = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096), GL_COLOR_ATTACHMENT0);
+    m_Framebuffer = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
     m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
-
-    // This is the Reflective shadow maps extension.
-    // No need for position here because we retreive position from depth in shading pass.
-    // Normal
-    m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_RGB), GL_COLOR_ATTACHMENT0);
-
-    // Flux
-    m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_RGB), GL_COLOR_ATTACHMENT1);
-
-    // positon
-    m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_RGB), GL_COLOR_ATTACHMENT2);
 }
 
 glm::mat4 LightComponent::GetProjection()
@@ -76,8 +65,6 @@ void LightComponent::DrawShadow()
 void LightComponent::Draw(TransformComponent transformComponent, Ref<Camera> cam)
 {
     Renderer::RegisterLight(transformComponent, *this, cam);
-
-
 }
 
 void LightComponent::DrawDeferred(TransformComponent transformComponent, Camera* cam)
@@ -111,6 +98,7 @@ void LightComponent::DrawEditor() {
     if (Type == Directional) {
         ImGui::Checkbox("Sync with sky", &SyncDirectionWithSky);
         ImGui::Checkbox("Volumetric?", &IsVolumetric);
+        ImGuiHelper::DrawVec3("Direction", &Direction);
     }
     
     //if (Type == 1) {
@@ -118,6 +106,6 @@ void LightComponent::DrawEditor() {
     //    ImGui::SliderFloat("Linear attenuation", &LinearAttenuation, 0.0f, 1.0f);
     //    ImGui::SliderFloat("Quadratic attenuation", &QuadraticAttenuation, 0.0f, 1.0f);
     //}
-    ImGuiHelper::DrawVec3("Direction", &Direction);
+    
     //Direction = glm::normalize(Direction);
 }

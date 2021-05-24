@@ -3,16 +3,18 @@
 #include "Shaders/Shader.h"
 #include "Camera.h"
 #include <GL/glew.h>
-
+// TODO: move this to primitive
 ProceduralSky::ProceduralSky() {
 	float quadVertices[] = {
 		// positions        // texture Coords
-		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		
+		
 		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		 -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
 	};
 	// setup plane VAO
 	glGenVertexArrays(1, &VAO);
@@ -27,6 +29,7 @@ ProceduralSky::ProceduralSky() {
 }
 
 void ProceduralSky::Draw(Ref<Camera> cam) {
+	
 	glm::vec3 CameraDirection = cam->GetDirection();
 
 	Renderer::m_ProceduralSkyShader->Bind();

@@ -4,6 +4,7 @@
 #include "../Core/Core.h"
 class Texture;
 
+// Todo: SHOULD probably be static too.
 class TextureManager
 {
 private:

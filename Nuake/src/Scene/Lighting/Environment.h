@@ -3,8 +3,8 @@
 #include <glm\ext\vector_float3.hpp>
 #include "../Core/Core.h"
 #include "../Rendering/ProceduralSky.h"
-
 #include "../Resource/Serializable.h"
+
 class Environment : public ISerializable
 {
 public:
