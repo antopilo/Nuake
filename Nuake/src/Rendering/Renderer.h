@@ -26,6 +26,7 @@ public:
 	static void BeginDraw(Ref<Camera> camera);
 	static void EndDraw();
 
+
 	// Lights
 	static std::vector<Light> m_Lights;
 	static void RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam);

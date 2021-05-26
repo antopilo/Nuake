@@ -21,7 +21,7 @@
 #include <src/Core/Logger.h>
 
 ImFont* normalFont;
-ImFont* bigIconFont;
+ImFont* EditorInterface::bigIconFont;
 void EditorInterface::Init()
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -33,6 +33,8 @@ void EditorInterface::Init()
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
+
+    this->filesystem = FileSystemUI();
 }
 
 void EditorInterface::DrawViewport()
@@ -532,35 +534,7 @@ void EditorInterface::DrawFileSystem()
     Ref<Directory> rootDirectory = FileSystem::GetFileTree();
     if (!rootDirectory)
         return;
-    if(ImGui::Begin("Tree browser"))
-    {
-        if (ImGui::BeginPopupContextItem("item context menu"))
-        {
-            if (ImGui::Selectable("Set to zero"));
-            if (ImGui::Selectable("Set to PI"));
-            ImGui::SetNextItemWidth(-1);
-            ImGui::EndPopup();
-        }
-        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-        bool is_selected = m_CurrentDirectory == FileSystem::RootDirectory;
-        if (is_selected)
-            base_flags |= ImGuiTreeNodeFlags_Selected;
-        std::string icon = ICON_FA_FOLDER;
 
-        bool open = ImGui::TreeNodeEx((icon + " " + rootDirectory->name).c_str(), base_flags);
-        if (ImGui::IsItemClicked())
-        {
-            m_CurrentDirectory = FileSystem::RootDirectory;
-        }
-        if (open)
-        {
-            EditorInterfaceDrawFiletree(rootDirectory);
-            ImGui::TreePop();
-        }
-
-        
-    }
-    ImGui::End();
 
 
 }
@@ -697,7 +671,7 @@ void EditorInterface::DrawLogger()
     {
         for (auto l : Logger::GetLogs())
         {
-            ImGui::Text(l.c_str());
+            ImGui::TextWrapped(l.c_str());
         }
        
     }
@@ -914,6 +888,18 @@ void OpenProject()
     }
     project->FullPath = projectPath;
     Engine::LoadProject(project);
+
+    Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
+
+    Ref<UI::Rect> rectangle = UI::Rect::New(0, 0, userInterface->Width, userInterface->Height);
+    userInterface->AddRect(rectangle);
+
+    Ref<UI::Rect> rect2 = rectangle->CutLeft(1280.f);
+    rect2->Props.BackgroundColor = Color(0, 1, 0, 1);
+    userInterface->AddRect(rect2);
+
+    Engine::GetCurrentScene()->AddInterface(userInterface);
+
 }
 
 void OpenScene()
@@ -964,7 +950,7 @@ void EditorInterface::Draw()
             if (ImGui::MenuItem("Open...", "CTRL+O")) 
             {
                 OpenProject();
-
+               
                 m_IsEntitySelected = false;
             }
             if (ImGui::MenuItem("Save", "CTRL+S")) 
@@ -1080,7 +1066,7 @@ void EditorInterface::Draw()
     }
 
     DrawGizmos();
-    
+   
    DrawRessourceWindow();
    DrawViewport();
    DrawSceneTree();
@@ -1088,6 +1074,10 @@ void EditorInterface::Draw()
    DrawDirectoryExplorer();
    DrawEntityPropreties();
    DrawLogger();
+
+   // new stuff
+   filesystem.Draw();
+
     if(m_ShowImGuiDemo)
         ImGui::ShowDemoWindow();
 

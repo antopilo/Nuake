@@ -23,6 +23,7 @@ Scene::Scene()
 {
 	m_EditorCamera = CreateRef<EditorCamera>();
 	m_Environement = CreateRef<Environment>();
+	m_Interfaces = std::vector<Ref<UI::UserInterface>>();
 }
 
 Scene::~Scene() {}
@@ -337,6 +338,11 @@ void Scene::Draw()
 		Renderer::m_DebugShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 		PhysicsManager::Get()->DrawDebug();
 	}
+
+	for (auto i : m_Interfaces)
+	{
+		i->Draw();
+	}
 }
 
 void Scene::EditorDraw()
@@ -344,10 +350,17 @@ void Scene::EditorDraw()
 	glDisable(GL_DEPTH_TEST);
 	Ref<Environment> env = GetEnvironment();
 
-	if (env->ProceduralSkybox)
+	//if (env->ProceduralSkybox)
+	//{
+	//	env->ProceduralSkybox->Draw(m_EditorCamera);
+	//}
+
+	for (auto i : m_Interfaces)
 	{
-		env->ProceduralSkybox->Draw(m_EditorCamera);
+		i->Draw();
 	}
+
+
 
 	Renderer::m_Shader->Bind();
 	env->Push();
@@ -383,7 +396,7 @@ void Scene::EditorDraw()
 
 	Renderer::m_Shader->Bind();
 	Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
-	if (m_EditorCamera)
+	/*if (m_EditorCamera)
 	{
 		Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
 
@@ -495,6 +508,11 @@ void Scene::EditorDraw()
 			t.Scale = (box.Radius * 2.f) * transform.Scale;
 			Renderer::DrawSphere(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
 		}
+	}*/
+
+	for (auto i : m_Interfaces)
+	{
+		i->Draw();
 	}
 }
 
@@ -570,6 +588,8 @@ Ref<Camera> Scene::GetCurrentCamera()
 				break;
 			}
 		}
+		if (!cam)
+			cam = m_EditorCamera;
 		return cam;
 	}
 
@@ -598,6 +618,12 @@ bool Scene::SaveAs(const std::string& path)
 	Logger::Log("Scene saved successfully");
 	return true;
 }
+
+void Scene::AddInterface(Ref<UI::UserInterface> interface)
+{
+	this->m_Interfaces.push_back(interface);
+}
+
 
 json Scene::Serialize()
 {

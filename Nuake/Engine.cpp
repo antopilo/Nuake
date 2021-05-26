@@ -5,6 +5,8 @@
 #include "src/Scripting/ScriptingEngine.h"
 
 #include "../Rendering/Renderer.h"
+#include "../Rendering/Renderer2D.h"
+
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
@@ -26,7 +28,10 @@ void Engine::Init()
 	CurrentWindow = Window::Get();
 	Logger::Log("Window initialized");
 
-	Logger::Log("Engine initialized succesfully...");
+	Renderer2D::Init();
+	Logger::Log("2D renderer initialized");
+
+	Logger::Log("Engine initialized succesfully!");
 }
 
 void Engine::Tick()

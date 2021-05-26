@@ -3,13 +3,13 @@
 #include "src/Vendors/imgui/imgui.h"
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
-
+#include "FileSystemUI.h"
 class Material;
 
 class EditorInterface
 {
 private:
-
+	FileSystemUI filesystem;
 	Entity m_SelectedEntity;
 	bool m_IsEntitySelected = false;
 	bool m_DrawGrid = false;
@@ -23,9 +23,8 @@ private:
 
 	bool m_IsMaterialSelected = false;
 
-
-
 public:
+	static ImFont* bigIconFont;
 	void BuildFonts();
 	void Init();
 	void Draw();

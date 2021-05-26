@@ -136,37 +136,13 @@ public:
     }
 };
 
-void CreateScene()
+void CreateInterface()
 {
-    Ref<Scene> scene = Engine::GetCurrentScene();
+    Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
 
-    // Main map entity
-    auto mapEntity = scene->CreateEntity("Map");
-    mapEntity.AddComponent<QuakeMapComponent>();
-    mapEntity.GetComponent<QuakeMapComponent>().Load("Res/Maps/texture_test.map", true);
-    mapEntity.GetComponent<QuakeMapComponent>().HasCollisions = true;
+    Ref<UI::Rect> rectangle = UI::Rect::New(16, 16, userInterface->Width - 16, userInterface->Height - 16);
+    userInterface->AddRect(rectangle);
 
-    // Light entity
-    auto lightEntity = scene->CreateEntity("Light");
-    lightEntity.AddComponent<LightComponent>();
-    lightEntity.GetComponent<LightComponent>().SyncDirectionWithSky = true;
-    lightEntity.GetComponent<LightComponent>().Type = Directional;
-    // lightEntity.AddComponent<NativeScriptComponent>().Bind<FlashingLightScript>();
-
-    // Create player
-    auto player = scene->CreateEntity("Player");
-    player.GetComponent<TransformComponent>().Translation.y = 10.f;
-    player.AddComponent<CharacterControllerComponent>();
-
-    player.AddComponent<NativeScriptComponent>().Bind<MoveScript>();
-
-    // Add cam child
-    auto childEntity = scene->CreateEntity("camEntity");
-    childEntity.AddComponent<CameraComponent>();
-    childEntity.AddComponent<NativeScriptComponent>().Bind<FPSCamScript>();
-
-    // cam as child of player.
-    player.AddChild(childEntity);
 }
 
 int main()
@@ -174,7 +150,8 @@ int main()
     Engine::Init();
 
    // ScriptingEngine::UpdateScript("test.lua");
-
+    
+    CreateInterface();
     EditorInterface editor;
     editor.BuildFonts();
 

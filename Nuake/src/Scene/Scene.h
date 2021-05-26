@@ -9,6 +9,7 @@
 #include "../Core/Core.h"
 #include "EditorCamera.h"
 #include "../Resource/Serializable.h"
+#include "src/UI/UserInterface.h"
 
 class Entity;
 class Scene : public ISerializable
@@ -16,12 +17,14 @@ class Scene : public ISerializable
 	friend Entity;
 
 private:
-	Ref<Environment> m_Environement;
-	entt::registry m_Registry;
-	Ref<EditorCamera> m_EditorCamera;
 	std::string Name;
-	
 	bool has_changed = true;
+
+	std::vector<Ref<UI::UserInterface>> m_Interfaces;
+	entt::registry m_Registry;
+	Ref<Environment> m_Environement;
+	Ref<EditorCamera> m_EditorCamera;
+
 public:
 	std::string Path = "";
 	static Ref<Scene> New();
@@ -61,6 +64,7 @@ public:
 	bool Save();
 	bool SaveAs(const std::string& path);
 
+	void AddInterface(Ref<UI::UserInterface> interface);
 
 	json Serialize() override;
 	bool Deserialize(const std::string& str) override;
