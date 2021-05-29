@@ -869,8 +869,6 @@ void NewProject()
 
     Ref<Scene> scene = Scene::New();
     Engine::LoadScene(scene);
-
-    
 }
 
 
@@ -886,18 +884,23 @@ void OpenProject()
         Logger::Log("Error loading project: " + projectPath);
         return;
     }
+
     project->FullPath = projectPath;
     Engine::LoadProject(project);
 
+    // Create new interface named test.
     Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
 
+    // Creates a rectangle covering the screen.
     Ref<UI::Rect> rectangle = UI::Rect::New(0, 0, userInterface->Width, userInterface->Height);
     userInterface->AddRect(rectangle);
 
+    // Cut another rectangle at 1280 vertically
     Ref<UI::Rect> rect2 = rectangle->CutLeft(1280.f);
-    rect2->Props.BackgroundColor = Color(0, 1, 0, 1);
+    rect2->Props.BackgroundColor = Color(0, 1, 0, 1); // Set background color to green.
     userInterface->AddRect(rect2);
 
+    // Set current interface running.
     Engine::GetCurrentScene()->AddInterface(userInterface);
 
 }

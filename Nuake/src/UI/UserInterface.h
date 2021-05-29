@@ -20,6 +20,7 @@ namespace UI
 
 
 		static Ref<UserInterface> New(const std::string& name);
+		void Calculate();
 		void Draw();
 		void Update(Timestep ts);
 
