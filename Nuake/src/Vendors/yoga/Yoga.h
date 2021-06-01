@@ -360,7 +360,6 @@ WIN_EXPORT float YGRoundValueToPixelGrid(
 YG_EXTERN_C_END
 
 #ifdef __cplusplus
-
 #include <functional>
 #include <vector>
 

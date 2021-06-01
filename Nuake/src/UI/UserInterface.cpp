@@ -1,55 +1,45 @@
 #include "UserInterface.h"
-#include "yoga/Yoga.h"
+
 #include <src/Vendors/pugixml/pugixml.hpp>
 #include "Stylesheet.h"
+#include "yoga/YGConfig.h"
+#include "InterfaceParser.h"
 namespace UI
 {
-	struct simple_walker : pugi::xml_tree_walker
-	{
-		virtual bool for_each(pugi::xml_node& node)
-		{
-			for (int i = 0; i < depth(); ++i) std::cout << "  "; // indentation
-
-			std::cout << node.type() << ": name='" << node.name() << "', value='" << node.value() << "'\n";
-
-			return true; // continue traversal
-		}
-	};
-
 	UserInterface::UserInterface(const std::string& name)
 	{
 		m_Name = name;
-		pugi::xml_document doc;
 
-		// Parse xml document
-		pugi::xml_parse_result result = doc.load_file("resources/Interface/Testing.interface");
-		std::cout << "Load result: " << result.description() << ", mesh name: " << doc.child("Canvas").attribute("size").value() << std::endl;
-		
-		auto childrends = doc.child("Canvas").children();
-		simple_walker walker;
-		doc.traverse(walker);
-		Logger::Log("Hello");
+		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
 
-		// Create engine structure from document
+		if (!Root)
+		{
+			Logger::Log("Failed to generate interface structure");
+		}
 
+		yoga_config = YGConfigNew();
+		yoga_config->useWebDefaults = true;
+		CreateYogaLayout();
+	}
 
-		// Convert engine structure to yoga
+	UserInterface::~UserInterface()
+	{
+		YGConfigFree(yoga_config);
+		if (yoga_root)
+			YGNodeFreeRecursive(yoga_root);
+	}
 
+	void UserInterface::Reload()
+	{
+		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
+		if (!Root)
+		{
+			Logger::Log("Failed to generate interface structure");
+		}
 
-		// Calculate layout
-
-
-		// Load css styling
-
-		//Ref<StyleSheet> stylesheet = StyleSheet::New("resources/Interface/Testing.css");
-		// Iterate through css file
-
-		// Create style sheet data structure
-
-		// When rendering load styles to shader
-
-		// Render
-
+		yoga_config = YGConfigNew();
+		yoga_config->useWebDefaults = true;
+		CreateYogaLayout();
 	}
 
 	Ref<UserInterface> UserInterface::New(const std::string& name)
@@ -57,17 +47,68 @@ namespace UI
 		return CreateRef<UserInterface>(name);
 	}
 
-	void UserInterface::Calculate()
+	void UserInterface::Calculate(int available_width, int available_height)
 	{
-
+		YGNodeRef root = Root->YogaNode;
+		YGNodeCalculateLayout(root, available_width, available_height, YGDirectionLTR);
 	}
 
-	void UserInterface::Draw()
+	void UserInterface::CreateYogaLayout()
 	{
-		Renderer2D::BeginDraw();
-		for (auto r : m_Rects)
+		yoga_root = YGNodeNewWithConfig(yoga_config);
+		Root->YogaNode = yoga_root;
+		Root->SetYogaLayout();
+		CreateYogaLayoutRecursive(Root, yoga_root);
+	}
+
+
+	void UserInterface::CreateYogaLayoutRecursive(Ref<Node> node, YGNodeRef yoga_node)
+	{
+		if(node->Childrens.size() > 0)
+			YGNodeCalculateLayout(yoga_node, YGNodeLayoutGetWidth(yoga_node), YGNodeLayoutGetHeight(yoga_node), YGDirectionLTR);
+		int index = 0;
+		for (auto& n : node->Childrens)
 		{
-			r->Draw();
+			YGNodeRef newYogaNode = YGNodeNew();
+			n->YogaNode = newYogaNode;
+			n->SetYogaLayout();
+			YGNodeInsertChild(yoga_node, newYogaNode, index);
+			CreateYogaLayoutRecursive(n, newYogaNode);
+			index++;
+		}
+
+		Logger::Log(std::to_string(YGNodeGetChildCount(yoga_node)));
+	}
+
+	void UserInterface::Draw(Vector2 size)
+	{
+		Calculate(size.x, size.y);
+		Renderer2D::BeginDraw(size);
+
+		float leftOffset = YGNodeLayoutGetLeft(Root->YogaNode);
+		float topOffset = YGNodeLayoutGetTop(Root->YogaNode);
+						  
+		DrawRecursive(Root, 0, Vector2(leftOffset, topOffset));
+	}
+
+	void UserInterface::DrawRecursive(Ref<Node> node, float z, Vector2 offset)
+	{
+		if (!node)
+			return;
+
+		node->Draw(z, offset);
+		
+		if (node->Childrens.size() <= 0)
+			return;
+
+		offset.x += YGNodeLayoutGetLeft(Root->YogaNode);
+
+		if(!YGNodeLayoutGetHadOverflow(Root->YogaNode))
+			offset.y += YGNodeLayoutGetTop(Root->YogaNode);
+
+		for (auto& c : node->Childrens)
+		{
+			DrawRecursive(c, z + 1, offset);
 		}
 	}
 

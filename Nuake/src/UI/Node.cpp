@@ -12,9 +12,9 @@ Node::Node()
 	FlexDirection = Layout::FlexDirection::ROW;
 	FlexWrap = Layout::FlexWrap::WRAP;
 	FlexGrow = 0.f;
-	FlexShrink = 0.f;
-	FlexBasis = 0.f;
-	AspectRatio = 0.f;
+	FlexShrink = 1.f;
+	FlexBasis = 10.f;
+	AspectRatio = 1.f;
 	AlignItems = Layout::AlignItems::FLEX_START;
 	SelfAlign = Layout::AlignItems::FLEX_START;
 }

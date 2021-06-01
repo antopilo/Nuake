@@ -37,12 +37,15 @@ void EditorInterface::Init()
     this->filesystem = FileSystemUI();
 }
 
+
+ImVec2 LastSize = ImVec2();
 void EditorInterface::DrawViewport()
 {
    if(ImGui::Begin("ShadowMap"))
    {
         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+
         if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
             auto& light = m_SelectedEntity.GetComponent<LightComponent>();
             Ref<Texture> texture = light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT);
@@ -62,6 +65,9 @@ void EditorInterface::DrawViewport()
         ImGuizmo::SetOrthographic(false);
         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+
+        if(Engine::GetCurrentWindow()->GetFrameBuffer()->GetSize() != viewportPanelSize)
+            Engine::GetCurrentWindow()->GetFrameBuffer()->UpdateSize(viewportPanelSize);
 
         Ref<Texture> texture = Engine::GetCurrentWindow()->GetFrameBuffer()->GetTexture();
         ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
@@ -891,15 +897,7 @@ void OpenProject()
     // Create new interface named test.
     Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
 
-    // Creates a rectangle covering the screen.
-    Ref<UI::Rect> rectangle = UI::Rect::New(0, 0, userInterface->Width, userInterface->Height);
-    userInterface->AddRect(rectangle);
-
-    // Cut another rectangle at 1280 vertically
-    Ref<UI::Rect> rect2 = rectangle->CutLeft(1280.f);
-    rect2->Props.BackgroundColor = Color(0, 1, 0, 1); // Set background color to green.
-    userInterface->AddRect(rect2);
-
+   
     // Set current interface running.
     Engine::GetCurrentScene()->AddInterface(userInterface);
 
@@ -1004,6 +1002,10 @@ void EditorInterface::Draw()
         }
         if (ImGui::BeginMenu("View"))
         {
+            if (ImGui::MenuItem("Reload Interfaces", NULL))
+            {
+                Engine::GetCurrentScene()->ReloadInterfaces();
+            }
             if (ImGui::MenuItem("Lighting", NULL, true)) {}
             if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
                 m_DrawGrid = !m_DrawGrid;

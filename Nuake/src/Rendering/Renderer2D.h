@@ -12,7 +12,7 @@ public:
 	static Matrix4 Projection;
 
 	static void Init();
-	static void BeginDraw();
+	static void BeginDraw(Vector2 size);
 	static void DrawRect();
 	static void EndDraw();
 };

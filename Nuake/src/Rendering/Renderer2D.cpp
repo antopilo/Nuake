@@ -1,6 +1,6 @@
 #include "Renderer2D.h"
 #include "GL/glew.h"
-
+#include "../Core/Maths.h"
 Ref<Shader> Renderer2D::UIShader;
 unsigned int Renderer2D::VAO;
 unsigned int Renderer2D::VBO;
@@ -10,7 +10,7 @@ Matrix4 Renderer2D::Projection;
 void Renderer2D::Init()
 {
 	UIShader = CreateRef<Shader>("resources/Shaders/ui.shader");
-	Projection = glm::ortho(0.f, 1920.f, 0.0f, 1080.f, -0.5f, 100.0f);
+	Projection = glm::ortho(0.f, 1920.f, 1080.f, 0.f, -0.5f, 100.0f);
 
 	float quad_Vertices[] = {
 		// positions        // texture Coords
@@ -35,8 +35,10 @@ void Renderer2D::Init()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 }
 
-void Renderer2D::BeginDraw()
+void Renderer2D::BeginDraw(Vector2 size)
 {
+	glDisable(GL_DEPTH_TEST);
+	Projection = glm::ortho(0.f, size.x, size.y, 0.f, -0.5f, 1000.0f);
 	UIShader->Bind();
 	UIShader->SetUniformMat4f("projection", Projection);
 }

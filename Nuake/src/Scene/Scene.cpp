@@ -143,12 +143,20 @@ void Scene::Update(Timestep ts)
 		auto [transform, rb] = ccGroup.get<TransformComponent, CharacterControllerComponent>(e);
 		rb.SyncWithTransform(m_Registry.get<TransformComponent>(e));
 	}
+
+
+
 }
 
 
 void Scene::EditorUpdate(Timestep ts)
 {
 	m_EditorCamera->Update(ts);
+
+	for (auto i : m_Interfaces)
+	{
+		//i->Calculate(1280,720);
+	}
 }
 
 
@@ -206,6 +214,14 @@ void Scene::DrawShadows()
 			model.Draw();
 		}
 		light.EndDrawShadow();
+	}
+}
+
+void Scene::DrawInterface(Vector2 screensize)
+{
+	for (auto i : m_Interfaces)
+	{
+		i->Draw(screensize);
 	}
 }
 
@@ -339,10 +355,7 @@ void Scene::Draw()
 		PhysicsManager::Get()->DrawDebug();
 	}
 
-	for (auto i : m_Interfaces)
-	{
-		i->Draw();
-	}
+	
 }
 
 void Scene::EditorDraw()
@@ -355,10 +368,7 @@ void Scene::EditorDraw()
 	//	env->ProceduralSkybox->Draw(m_EditorCamera);
 	//}
 
-	for (auto i : m_Interfaces)
-	{
-		i->Draw();
-	}
+
 
 
 
@@ -510,10 +520,7 @@ void Scene::EditorDraw()
 		}
 	}*/
 
-	for (auto i : m_Interfaces)
-	{
-		i->Draw();
-	}
+
 }
 
 std::vector<Entity> Scene::GetAllEntities() {
@@ -617,6 +624,12 @@ bool Scene::SaveAs(const std::string& path)
 
 	Logger::Log("Scene saved successfully");
 	return true;
+}
+
+void Scene::ReloadInterfaces()
+{
+	for (auto& i : m_Interfaces)
+		i->Reload();
 }
 
 void Scene::AddInterface(Ref<UI::UserInterface> interface)

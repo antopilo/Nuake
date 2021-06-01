@@ -5,7 +5,6 @@
 enum LOG_TYPE
 {
 	VERBOSE,
-	DEBUG,
 	WARNING,
 	CRITICAL
 };

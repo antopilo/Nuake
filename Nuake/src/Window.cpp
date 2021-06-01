@@ -244,6 +244,8 @@ void Window::Draw()
                 m_Scene->Draw();
             else
                 m_Scene->EditorDraw();
+
+            m_Scene->DrawInterface(m_Framebuffer->GetSize());
         }
         m_Framebuffer->Unbind();
     }

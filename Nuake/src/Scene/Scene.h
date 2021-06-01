@@ -10,7 +10,7 @@
 #include "EditorCamera.h"
 #include "../Resource/Serializable.h"
 #include "src/UI/UserInterface.h"
-
+#include "../Core/Maths.h"
 class Entity;
 class Scene : public ISerializable
 {
@@ -43,6 +43,7 @@ public:
 
 	// TODO: Maybe move this to Renderer::DrawScene() ?
 	void DrawShadows();
+	void DrawInterface(Vector2 screensize);
 	void Draw();
 	void EditorDraw();
 
@@ -64,6 +65,7 @@ public:
 	bool Save();
 	bool SaveAs(const std::string& path);
 
+	void ReloadInterfaces();
 	void AddInterface(Ref<UI::UserInterface> interface);
 
 	json Serialize() override;

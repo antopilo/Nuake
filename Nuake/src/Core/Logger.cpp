@@ -12,6 +12,7 @@ void Logger::Log(std::string log)
 	time_t now = time(0);
 	strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000", localtime(&now));
 	std::string msg = "["+ std::string(buff) + "]" + std::string(" - ") + log;
+	printf((msg + "\n").c_str());
 	logs.push_back(msg);
 }
 
