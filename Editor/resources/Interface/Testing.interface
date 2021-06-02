@@ -1,0 +1,31 @@
+<Canvas
+  script="Interface/Testing.lua"
+  height="100%"
+  width="100%"
+  padding="10px 10px 10px 10px"
+  color="0 0 128 255"
+  groups="button"
+>
+  <!-- PINK -->
+  <Rect
+    height="80%"
+    width="80%"
+    padding="10px 10px 10px 10px"
+    color="255 0 255 255"
+    
+  >
+    <!-- BROWN -->
+    <Rect
+      groups="left"
+      margin="0px 1%"
+      color="111 77 22 255"
+    >
+    </Rect>
+    <!-- BLUE -->
+    <Rect
+      width="49%"
+      height="50%"
+      color="15 66 128 255"
+    ></Rect>
+  </Rect>
+</Canvas>

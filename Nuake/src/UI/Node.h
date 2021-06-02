@@ -4,6 +4,8 @@
 #include "yoga/Yoga.h"
 #include "../Rendering/Renderer2D.h"
 #include "../Core/Logger.h"
+#include "Style.h"
+
 namespace Layout
 {
 	enum class LayoutDirection
@@ -70,6 +72,10 @@ public:
 	YGNodeRef YogaNode;
 	std::vector<Ref<Node>> Childrens = std::vector<Ref<Node>>();
 
+	void ApplyStyle(Ref<StyleGroup> stylegroup);
+	Ref<Style> style;
+	std::vector<std::string> Groups;
+
 	Layout::PositionType PositionType;
 	Layout::LayoutVec4 Position;
 
@@ -96,6 +102,20 @@ public:
 	Layout::AlignItems SelfAlign;
 
 	Node();
+
+	void AddGroup(const std::string& group)
+	{
+		Groups.push_back(group);
+	}
+
+	bool IsInGroup(const std::string& group)
+	{
+		for (auto& g : Groups)
+			if (g == group) return true;
+		return false;
+	}
+
+	std::vector<std::string> GetGroups() const { return Groups; }
 
 	void SetMargin()
 	{

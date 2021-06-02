@@ -1,7 +1,11 @@
-
-
 .button {
-    width: 10px;
-    height: 100px;
-    color: rgba(1, 1, 2, 1);
+    width: 25%;
+    height: 100%;
 }
+
+.left {
+    width: 100px;
+    height: 150px;
+    margin: 50px 100px;
+}
+

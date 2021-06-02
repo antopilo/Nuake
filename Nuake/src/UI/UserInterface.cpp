@@ -10,8 +10,10 @@ namespace UI
 	{
 		m_Name = name;
 
-		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
+		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
 
+		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
+ 		
 		if (!Root)
 		{
 			Logger::Log("Failed to generate interface structure");
@@ -31,6 +33,7 @@ namespace UI
 
 	void UserInterface::Reload()
 	{
+		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
 		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
 		if (!Root)
 		{
@@ -57,6 +60,10 @@ namespace UI
 	{
 		yoga_root = YGNodeNewWithConfig(yoga_config);
 		Root->YogaNode = yoga_root;
+	
+		for (auto& g : Root->GetGroups())
+			if (m_Stylesheet->HasStyleGroup(g))
+				Root->ApplyStyle(m_Stylesheet->GetStyleGroup(g));
 		Root->SetYogaLayout();
 		CreateYogaLayoutRecursive(Root, yoga_root);
 	}
@@ -71,6 +78,11 @@ namespace UI
 		{
 			YGNodeRef newYogaNode = YGNodeNew();
 			n->YogaNode = newYogaNode;
+
+			for (auto& g : n->GetGroups())
+				if (m_Stylesheet->HasStyleGroup(g))
+					n->ApplyStyle(m_Stylesheet->GetStyleGroup(g));
+
 			n->SetYogaLayout();
 			YGNodeInsertChild(yoga_node, newYogaNode, index);
 			CreateYogaLayoutRecursive(n, newYogaNode);

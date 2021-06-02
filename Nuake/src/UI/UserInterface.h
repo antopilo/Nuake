@@ -6,6 +6,7 @@
 #include "Node.h"
 #include <src/UI/Canvas.h>
 #include "../Core/Maths.h"
+#include "Stylesheet.h"
 namespace UI
 {
 	class UserInterface
@@ -14,6 +15,7 @@ namespace UI
 		Ref<FrameBuffer> m_Framebuffer; // Texture of the interface.
 		std::string m_Name;
 		Ref<Canvas> Root;
+		Ref<StyleSheet> m_Stylesheet;
 		YGConfigRef yoga_config;
 		YGNodeRef yoga_root;
 	public:

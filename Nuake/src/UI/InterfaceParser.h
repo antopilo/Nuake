@@ -32,6 +32,8 @@ public:
 		return Root;
 	}
 
+
+
 	static void Iterate(const pugi::xml_node& xml_node, Ref<Node> node)
 	{
 		for (auto& e : xml_node.children())
@@ -58,6 +60,13 @@ public:
 		for (auto& a : xml_node.attributes())
 		{
 			std::string name = a.name();
+			if (name == "groups")
+			{
+				for (auto& g : split(a.value(), ' '))
+				{
+					node->AddGroup(g);
+				}
+			}
 			if (name == "height")
 				node->Height = GetUnit(a.value());
 			if (name == "width")
@@ -72,7 +81,6 @@ public:
 				node->Position = GetVec4Unit(a.value());
 			if (name == "color")
 				node->BackgroundColor = GetColor(a.value());
-
 		}
 
 		return node;
@@ -200,6 +208,13 @@ public:
 		for (auto& a : xml_node.attributes())
 		{
 			std::string name = a.name();
+			if (name == "groups")
+			{
+				for (auto& g : split(a.value(), ' '))
+				{
+					node->AddGroup(g);
+				}
+			}
 			if (name == "height")
 				node->Height = GetUnit(a.value());
 			if (name == "width")
