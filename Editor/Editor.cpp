@@ -138,10 +138,10 @@ public:
 
 void CreateInterface()
 {
-    Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
-
-    Ref<UI::Rect> rectangle = UI::Rect::New(16, 16, userInterface->Width - 16, userInterface->Height - 16);
-    userInterface->AddRect(rectangle);
+    //Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
+    //
+    //Ref<UI::Rect> rectangle = UI::Rect::New(16, 16, userInterface->Width - 16, userInterface->Height - 16);
+    //userInterface->AddRect(rectangle);
 
 }
 
