@@ -80,8 +80,11 @@ namespace UI
 					PropType type;
 
 					if (name == "height") type = PropType::HEIGHT;
-					if (name == "width")type = PropType::WIDTH;
-
+					if (name == "width") type = PropType::WIDTH;
+					if (name == "left") type = PropType::LEFT;
+					if (name == "right") type = PropType::RIGHT;
+					if (name == "top") type = PropType::TOP;
+					if (name == "bottom") type = PropType::BOTTOM;
 					if (name == "margin")
 					{
 						std::regex regex("[0-9]+[^ ]+");
@@ -114,7 +117,112 @@ namespace UI
 							}
 							idx++;
 						}
-						return true;
+						continue;
+					}
+					if (name == "flex-direction")
+					{
+						type = PropType::FLEX_DIRECTION;
+						Value propValue{};
+						
+						if (value == "row")
+							propValue.Enum = (int)Layout::FlexDirection::ROW;
+						if (value == "row-reversed")
+							propValue.Enum = (int)Layout::FlexDirection::ROW_REVERSED;
+						if (value == "column")
+							propValue.Enum = (int)Layout::FlexDirection::COLUMN;
+						if (value == "column-reversed")
+							propValue.Enum = (int)Layout::FlexDirection::COLUMN_REVERSED;
+
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
+					}
+					if (name == "justify-content")
+					{
+						type = PropType::JUSTIFY_CONTENT;
+						Value propValue{};
+						if (value == "flex-start")
+							propValue.Enum = (int)Layout::JustifyContent::FLEX_START;
+						if (value == "flex-end")
+							propValue.Enum = (int)Layout::JustifyContent::FLEX_END;
+						if (value == "center")
+							propValue.Enum = (int)Layout::JustifyContent::CENTER;
+						if (value == "space-between")
+							propValue.Enum = (int)Layout::JustifyContent::SPACE_BETWEEN;
+						if (value == "space-around")
+							propValue.Enum = (int)Layout::JustifyContent::SPACE_AROUND;
+						if (value == "space-evenly")
+							propValue.Enum = (int)Layout::JustifyContent::SPACE_EVENLY;
+
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
+					}
+					if (name == "flex-wrap")
+					{
+						type = PropType::FLEX_WRAP;
+						Value propValue{};
+						if (value == "no-wrap")
+							propValue.Enum = (int)Layout::FlexWrap::NO_WRAP;
+						if (value == "wrap")
+							propValue.Enum = (int)Layout::FlexWrap::WRAP;
+						if (value == "wrap-reversed")
+							propValue.Enum = (int)Layout::FlexWrap::WRAP_REVERSED;
+
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
+					}
+					if (name == "align-self" || name == "align-items")
+					{
+						if (name == "align-self")
+							type = PropType::SELF_ALIGN;
+						else
+							type = PropType::ALIGN_ITEMS;
+
+						Value propValue{};
+						if (value == "stretch")
+							propValue.Enum = (int)Layout::AlignItems::STRETCH;
+						if (value == "flex-start")
+							propValue.Enum = (int)Layout::AlignItems::FLEX_START;
+						if (value == "flex-end")
+							propValue.Enum = (int)Layout::AlignItems::FLEX_END;
+						if (value == "center")
+							propValue.Enum = (int)Layout::AlignItems::CENTER;
+						if (value == "baseline")
+							propValue.Enum = (int)Layout::AlignItems::BASELINE;
+
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
+					}
+					if (name == "align-content")
+					{
+						type = PropType::ALIGN_CONTENT;
+
+						Value propValue{};
+						if (value == "stretch")
+							propValue.Enum = (int)Layout::AlignContent::STRETCH;
+						if (value == "flex-start")
+							propValue.Enum = (int)Layout::AlignContent::FLEX_START;
+						if (value == "flex-end")
+							propValue.Enum = (int)Layout::AlignContent::FLEX_END;
+						if (value == "center")
+							propValue.Enum = (int)Layout::AlignContent::CENTER;
+						if (value == "space-between")
+							propValue.Enum = (int)Layout::AlignContent::SPACE_BETWEEN;
+						if (value == "space-around")
+							propValue.Enum = (int)Layout::AlignContent::SPACE_AROUND;
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
+					}
+					if (name == "position")
+					{
+						type = PropType::POSITION;
+						Value propValue{};
+						if (value == "relative")
+							propValue.Enum = (int)Layout::PositionType::RELATIVE;
+						if (value == "absolute")
+							propValue.Enum = (int)Layout::PositionType::ABSOLUTE;
+						
+						styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
+						continue;
 					}
 					styleGroup->SetProp(type, StyleSheetParser::ParsePropType(value, type));
 					Logger::Log(declaration->property);

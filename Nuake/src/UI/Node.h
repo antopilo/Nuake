@@ -30,7 +30,7 @@ namespace Layout
 
 	enum class AlignItems
 	{
-		STRETCH, FLEX_START, FLEX_END, CENTER, BASELINE
+		STRETCH, FLEX_START, FLEX_END, CENTER, BASELINE, AUTO,
 	};
 
 	enum class AlignContent
@@ -97,9 +97,11 @@ public:
 	float FlexShrink;
 	float FlexBasis;
 	float AspectRatio;
+	Layout::JustifyContent JustifyContent;
 
 	Layout::AlignItems AlignItems;
-	Layout::AlignItems SelfAlign;
+	Layout::AlignItems AlignSelf;
+	Layout::AlignContent AlignContent;
 
 	Node();
 
@@ -261,7 +263,6 @@ public:
 			YGNodeStyleSetWidthAuto(YogaNode);
 			break;
 		}
-
 		switch (Height.Unit)
 		{
 		case Layout::Unit::PIXEL:
@@ -279,9 +280,78 @@ public:
 		SetPadding();
 		SetBorder();
 
-		YGNodeStyleSetFlexWrap(YogaNode, YGWrapWrap);
-		YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionRow);
-		YGNodeStyleSetJustifyContent(YogaNode, YGJustifyFlexStart);
+		if(FlexWrap == Layout::FlexWrap::WRAP)
+			YGNodeStyleSetFlexWrap(YogaNode, YGWrapWrap);
+		else if (FlexWrap == Layout::FlexWrap::NO_WRAP)
+			YGNodeStyleSetFlexWrap(YogaNode, YGWrapNoWrap);
+		else if (FlexWrap == Layout::FlexWrap::WRAP_REVERSED)
+			YGNodeStyleSetFlexWrap(YogaNode, YGWrapWrapReverse);
+
+		if(FlexDirection == Layout::FlexDirection::ROW)
+			YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionRow);
+		else if (FlexDirection == Layout::FlexDirection::ROW_REVERSED)
+			YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionRowReverse);
+		else if (FlexDirection == Layout::FlexDirection::COLUMN)
+			YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionColumn);
+		else if (FlexDirection == Layout::FlexDirection::COLUMN_REVERSED)
+			YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionColumnReverse);
+
+		if(JustifyContent == Layout::JustifyContent::FLEX_START)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifyFlexStart);
+		else if (JustifyContent == Layout::JustifyContent::FLEX_END)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifyFlexEnd);
+		else if (JustifyContent == Layout::JustifyContent::CENTER)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifyCenter);
+		else if (JustifyContent == Layout::JustifyContent::SPACE_BETWEEN)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceBetween);
+		else if (JustifyContent == Layout::JustifyContent::SPACE_AROUND)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceAround);
+		else if (JustifyContent == Layout::JustifyContent::SPACE_EVENLY)
+			YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceEvenly);
+
+		if (AlignItems == Layout::AlignItems::FLEX_START)
+			YGNodeStyleSetAlignItems(YogaNode, YGAlignFlexStart);
+		else if (AlignItems == Layout::AlignItems::FLEX_END)
+			YGNodeStyleSetAlignItems(YogaNode, YGAlignFlexEnd);
+		else if (AlignItems == Layout::AlignItems::CENTER)
+			YGNodeStyleSetAlignItems(YogaNode, YGAlignCenter);
+		else if (AlignItems == Layout::AlignItems::BASELINE)
+			YGNodeStyleSetAlignItems(YogaNode, YGAlignBaseline);
+		else if (AlignItems == Layout::AlignItems::STRETCH)
+			YGNodeStyleSetAlignItems(YogaNode, YGAlignStretch);
+		//else if (AlignItems == Layout::AlignItems::AUTO)
+		//	YGNodeStyleSetAlignItems(YogaNode, YGAlignAuto);
+
+		if (AlignSelf == Layout::AlignItems::FLEX_START)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignFlexStart);
+		else if (AlignSelf == Layout::AlignItems::FLEX_END)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignFlexEnd);
+		else if (AlignSelf == Layout::AlignItems::CENTER)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignCenter);
+		else if (AlignSelf == Layout::AlignItems::BASELINE)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignBaseline);
+		else if (AlignSelf == Layout::AlignItems::STRETCH)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignStretch);
+		else if (AlignSelf == Layout::AlignItems::AUTO)
+			YGNodeStyleSetAlignSelf(YogaNode, YGAlignAuto);
+
+		if (AlignContent == Layout::AlignContent::FLEX_START)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignFlexStart);
+		else if (AlignContent == Layout::AlignContent::FLEX_END)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignFlexEnd);
+		else if (AlignContent == Layout::AlignContent::CENTER)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignCenter);
+		else if (AlignContent == Layout::AlignContent::STRETCH)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignStretch);
+		else if (AlignContent == Layout::AlignContent::SPACE_BETWEEN)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignSpaceBetween);
+		else if (AlignContent == Layout::AlignContent::SPACE_AROUND)
+			YGNodeStyleSetAlignContent(YogaNode, YGAlignSpaceAround);
+
+		if (PositionType == Layout::PositionType::RELATIVE)
+			YGNodeStyleSetPositionType(YogaNode, YGPositionTypeRelative);
+		else if (PositionType == Layout::PositionType::ABSOLUTE)
+			YGNodeStyleSetPositionType(YogaNode, YGPositionTypeAbsolute);
 	}
 
 	void Draw(float z, Vector2 offset)
@@ -329,7 +399,8 @@ public:
 
 		//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
 		Renderer2D::UIShader->SetUniformMat4f("model", transform);
-
+		Renderer2D::UIShader->SetUniform1f("u_border_radius", 8.f);
+		Renderer2D::UIShader->SetUniform2f("u_size", width, height);
 		Renderer2D::DrawRect();
 	}
 };

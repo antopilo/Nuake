@@ -330,6 +330,7 @@ void main()
     finalNormal = finalNormal * 2.0 - 1.0;
     finalNormal = v_TBN * normalize(finalNormal);
 
+
     vec3 N = normalize(finalNormal);
     vec3 V = normalize(u_EyePosition - v_FragPos);
     vec3 R = reflect(-V, N);
@@ -343,6 +344,7 @@ void main()
     vec3 Fog = vec3(0.0);
     float shadow = 0.0f;
     vec3 Lo = vec3(0.0);
+
     for (int i = 0; i < LightCount; i++)
     {
         vec3 L = normalize(Lights[i].Position - v_FragPos);
@@ -403,6 +405,7 @@ void main()
     color += Fog;
     // HDR tonemapping
     color = color / (color + vec3(1.0));
+
 
     const float gamma = 2.2;
 

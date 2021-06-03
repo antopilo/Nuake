@@ -1,31 +1,22 @@
 <Canvas
   script="Interface/Testing.lua"
-  height="100%"
-  width="100%"
-  padding="10px 10px 10px 10px"
-  color="0 0 128 255"
-  groups="button"
+  groups="screen"
+  color="25 25 25 255"
 >
-  <!-- PINK -->
   <Rect
-    height="80%"
-    width="80%"
-    padding="10px 10px 10px 10px"
-    color="255 0 255 255"
-    
+    color="50 50 50 255"
+    groups="container"
+    padding="8px 8px 8px 8px"
   >
-    <!-- BROWN -->
-    <Rect
-      groups="left"
-      margin="0px 1%"
-      color="111 77 22 255"
-    >
-    </Rect>
-    <!-- BLUE -->
-    <Rect
-      width="49%"
-      height="50%"
-      color="15 66 128 255"
-    ></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
+    <Rect groups="items" color="200 0 200 255"></Rect>
   </Rect>
 </Canvas>
