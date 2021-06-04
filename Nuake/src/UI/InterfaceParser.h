@@ -7,6 +7,7 @@
 #include<iostream>
 #include <src/Core/Logger.h>
 #include "Nodes/TextNode.h"
+#include "Font/FontManager.h"
 class InterfaceParser
 {
 	static Ref<Canvas> Root;
@@ -34,29 +35,21 @@ public:
 
 
 
-	static void Iterate(const pugi::xml_node& xml_node, Ref<Node> node)
-	{
-		for (auto& e : xml_node.children())
-		{
-			std::string type = e.name();
-			if (type == "Canvas")
-			{
-				Ref<Canvas> canvas = CreateCanvas(e);
-				node->Childrens.push_back(canvas);
-				Iterate(e, canvas);
-			}
-			else if (type == "Rect")
-			{
-				Ref<Node> newNode = CreateNode(e);
-				node->Childrens.push_back(newNode);
-				Iterate(e, newNode);
-			}
-			else if (type == "p")
-			{
-				//Ref<TextNode> textnode = CreateTextNode(e);
+	static void Iterate(const pugi::xml_node& xml_node, Ref<Node> node);
 
-			}
-		}
+	static Ref<TextNode> CreateTextNode(const pugi::xml_node& xml_node)
+	{
+		Ref<TextNode> node = CreateRef<TextNode>();
+		node->content = xml_node.text().as_string();
+
+		TextStyle style{
+			FontManager::GetFont("resources/Font/OpenSans-Regular.ttf"),
+			2.0,
+			Color(255, 255, 255, 255)
+		};
+
+		node->SetTextStyle(style);
+		return node;
 	}
 
 	static Ref<Node> CreateNode(const pugi::xml_node& xml_node)

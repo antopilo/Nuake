@@ -57,19 +57,16 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>..\Nuake;..\Nuake\src\Vendors;..\Nuake\Dependencies\GLEW\include;..\Nuake\Dependencies\GLFW\x64\include;..\Nuake\Dependencies\bullet\src;..\Nuake\Dependencies\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Nuake;..\Nuake\src\Vendors;..\Nuake\Dependencies\GLEW\include;..\Nuake\Dependencies\GLFW\x64\include;..\Nuake\Dependencies\bullet\src;..\Nuake\Dependencies\assimp\include;..\Nuake\src\Vendors\msdfgen;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>Nuake.lib;glfw3dll.lib;glew32s.lib;opengl32.lib;BulletCollision_vs2010_x64_release.lib;BulletDynamics_vs2010_x64_release.lib;LinearMath_vs2010_x64_release.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\Nuake\dependencies\GLFW\lib-vc2019;..\Nuake\dependencies\GLEW\lib\Release\x64;..\Nuake\dependencies\bullet\lib\release\x64;..\Nuake\dependencies\assimp\lib;..\bin\Debug-windows-x86_64\Nuake;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Nuake.lib;glfw3dll.lib;glew32s.lib;opengl32.lib;BulletCollision_vs2010_x64_release.lib;BulletDynamics_vs2010_x64_release.lib;LinearMath_vs2010_x64_release.lib;assimp-vc142-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Nuake\dependencies\GLFW\lib-vc2019;..\Nuake\dependencies\GLEW\lib\Release\x64;..\Nuake\dependencies\bullet\lib\release\x64;..\Nuake\dependencies\assimp\lib;..\bin\Debug-windows-x86_64\Nuake;%(AdditionalLibraryDirectories);C:\Dev\Nuake\Nuake\dependencies\freetype-windows-binaries\release static\win64</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll\ (xcopy /Q /E /Y /I ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll bin\Debug-windows-x86_64\$(ProjectName)\glfw3.dll &gt; nul) ELSE (xcopy /Q /Y /I ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll bin\Debug-windows-x86_64\$(ProjectName)\glfw3.dll &gt; nul)</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -82,19 +79,27 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>Nuake.lib;glfw3dll.lib;glew32s.lib;opengl32.lib;BulletCollision_vs2010_x64_release.lib;BulletDynamics_vs2010_x64_release.lib;LinearMath_vs2010_x64_release.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\Nuake\dependencies\GLFW\lib-vc2019;..\Nuake\dependencies\GLEW\lib\Release\x64;..\Nuake\dependencies\bullet\lib\release\x64;..\Nuake\dependencies\assimp\lib;..\bin\Release-windows-x86_64\Nuake;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Nuake.lib;glfw3dll.lib;glew32s.lib;opengl32.lib;BulletCollision_vs2010_x64_release.lib;BulletDynamics_vs2010_x64_release.lib;LinearMath_vs2010_x64_release.lib;assimp-vc142-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Nuake\dependencies\GLFW\lib-vc2019;..\Nuake\dependencies\GLEW\lib\Release\x64;..\Nuake\dependencies\bullet\lib\release\x64;..\Nuake\dependencies\assimp\lib;..\bin\Release-windows-x86_64\Nuake;%(AdditionalLibraryDirectories);C:\Dev\Nuake\Nuake\dependencies\freetype-windows-binaries\release static\win64</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll\ (xcopy /Q /E /Y /I ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll bin\Release-windows-x86_64\$(ProjectName)\glfw3.dll &gt; nul) ELSE (xcopy /Q /Y /I ..\Nuake\dependencies\GLFW\lib-vc2019\glfw3.dll bin\Release-windows-x86_64\$(ProjectName)\glfw3.dll &gt; nul)</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\EditorInterface.h" />
+    <ClInclude Include="src\FileSystemUI.h" />
+    <ClInclude Include="src\PropretiesWindow.h" />
+    <ClInclude Include="src\SceneTree.h" />
+    <ClInclude Include="src\Toolbar.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="src\EditorInterface.cpp" />
+    <ClCompile Include="src\FileSystemUI.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\Interface\Testing.css" />
+    <None Include="resources\Interface\Testing.interface" />
+    <None Include="resources\Shaders\sdf_text.shader" />
+    <None Include="resources\Shaders\ui.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

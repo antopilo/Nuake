@@ -110,8 +110,6 @@ namespace UI
 		
 
 		DrawRecursive(Root, 0);
-
-		Renderer2D::DrawString("J'appelle ca grainer", font, charPos, 4.0f);
 		//Renderer2D::DrawChar(charr, font, charPos, size);
 	}
 

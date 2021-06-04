@@ -1,6 +1,9 @@
 #include "Renderer2D.h"
 #include "GL/glew.h"
 #include "../Core/Maths.h"
+#include <Engine.h>
+
+#include "../UI/Nodes/TextNode.h"
 Ref<Shader> Renderer2D::UIShader;
 Ref<Shader> Renderer2D::TextShader;
 
@@ -64,22 +67,23 @@ Vector2 Renderer2D::CalculateStringSize(const std::string& str, Ref<Font> font, 
 	return Vector2(advance, Y);
 }
 
-void Renderer2D::DrawString(const std::string& str, Ref<Font> font, Vector2 position, float fontSize)
+void Renderer2D::DrawString(const std::string& str, TextStyle style, Matrix4 model)
 {
 
 	TextShader->Bind();
 	TextShader->SetUniformMat4f("projection", Projection);
 	float advance = 0.0f;
-	font->FontAtlas->Bind(5);
+	style.font->FontAtlas->Bind(5);
 	TextShader->SetUniform1i("msdf", 5);
+
 	for (char const& c : str) {
-		Char& letter = font->GetChar((int)c);
+		Char& letter = style.font->GetChar((int)c);
 
 		Matrix4 mat = Matrix4(1.0f);
-		mat = glm::translate(mat, Vector3(position.x + advance, position.y - (letter.PlaneBounds.top * fontSize), 0.f));
+		mat = glm::translate(model, Vector3(advance, (letter.PlaneBounds.top * style.fontSize), 0.f));
 		float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
 		float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
-		mat = glm::scale(mat, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
+		mat = glm::scale(mat, Vector3(scaleX * style.fontSize, scaleY * style.fontSize, 0.f));
 
 		TextShader->SetUniform2f("texPos", letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y);
 		TextShader->SetUniform2f("texScale", letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y);
@@ -90,7 +94,7 @@ void Renderer2D::DrawString(const std::string& str, Ref<Font> font, Vector2 posi
 		//TextShader->SetUniform1f("pxRange", 32);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		advance += letter.Advance * fontSize;
+		advance += letter.Advance * style.fontSize;
 	}
 }
 

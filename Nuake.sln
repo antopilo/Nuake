@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DemoModule", "DemoModule\DemoModule.vcxproj", "{30ABCBF1-1C63-0D3F-856A-E69A7141A82F}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcxproj", "{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Nuake", "Nuake\Nuake.vcxproj", "{994AC40D-055F-ECBE-CEE0-8F1E3AB4E8EF}"
@@ -11,6 +13,10 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30ABCBF1-1C63-0D3F-856A-E69A7141A82F}.Debug|x64.ActiveCfg = Debug|x64
+		{30ABCBF1-1C63-0D3F-856A-E69A7141A82F}.Debug|x64.Build.0 = Debug|x64
+		{30ABCBF1-1C63-0D3F-856A-E69A7141A82F}.Release|x64.ActiveCfg = Release|x64
+		{30ABCBF1-1C63-0D3F-856A-E69A7141A82F}.Release|x64.Build.0 = Release|x64
 		{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}.Debug|x64.ActiveCfg = Debug|x64
 		{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}.Debug|x64.Build.0 = Debug|x64
 		{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}.Release|x64.ActiveCfg = Release|x64
