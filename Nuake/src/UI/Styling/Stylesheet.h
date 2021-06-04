@@ -8,10 +8,9 @@
 #include "katana-parser/katana.h"
 #include <string>
 #include <map>
-#include <src/UI/StyleSheetParser.h>
+#include <src/UI/Styling/StyleSheetParser.h>
 #include <regex>
 #include <regex>
-#include <src/UI/InterfaceParser.h>
 #include <src/UI/InterfaceParser.h>
 
 namespace UI

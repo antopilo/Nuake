@@ -8,6 +8,7 @@
     groups="container"
     padding="8px 8px 8px 8px"
   >
+    <p>Hello world!</p>
     <Rect groups="items" color="200 0 200 255"></Rect>
     <Rect groups="items" color="200 0 200 255"></Rect>
     <Rect groups="items" color="200 0 200 255"></Rect>

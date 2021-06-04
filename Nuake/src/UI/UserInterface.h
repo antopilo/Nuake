@@ -1,12 +1,12 @@
 #pragma once
 #include <src/Core/Timestep.h>
 #include <src/Rendering/Framebuffer.h>
-#include <src/UI/Rect.h>
+#include <src/UI/Nodes/Rect.h>
 #include "yoga/Yoga.h"
-#include "Node.h"
-#include <src/UI/Canvas.h>
+#include "Nodes/Node.h"
+#include "Nodes/Canvas.h"
 #include "../Core/Maths.h"
-#include "Stylesheet.h"
+#include "Styling/Stylesheet.h"
 #include "Font/Font.h"
 namespace UI
 {

@@ -6,7 +6,7 @@ uniform mat4 model;
 uniform mat4 projection;
 
 
-out vec2 a_UV;
+out sample vec2 a_UV;
 
 void main()
 {

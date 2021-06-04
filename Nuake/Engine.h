@@ -1,4 +1,5 @@
 #pragma once
+
 #include "src/Core/Core.h"
 #include "src/Window.h"
 #include "src/Scene/Scene.h"

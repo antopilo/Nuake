@@ -1,7 +1,7 @@
 #include "UserInterface.h"
 
 #include <src/Vendors/pugixml/pugixml.hpp>
-#include "Stylesheet.h"
+#include "Styling/Stylesheet.h"
 #include "yoga/YGConfig.h"
 #include "InterfaceParser.h"
 #include <src/UI/Font/FontLoader.h>
@@ -11,7 +11,7 @@ namespace UI
 	{
 		m_Name = name;
 
-		font = FontLoader::LoadFont("resources/Fonts/OpenSans-Regular.ttf");
+		font = FontLoader::LoadFont("resources/Fonts/RobotoMono-Regular.ttf");
 
 		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
 
@@ -111,7 +111,7 @@ namespace UI
 
 		DrawRecursive(Root, 0);
 
-		Renderer2D::DrawString("Hello SDF World!", font, charPos, 2.0f);
+		Renderer2D::DrawString("J'appelle ca grainer", font, charPos, 4.0f);
 		//Renderer2D::DrawChar(charr, font, charPos, size);
 	}
 

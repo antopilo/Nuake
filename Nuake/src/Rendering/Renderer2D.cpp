@@ -66,6 +66,7 @@ Vector2 Renderer2D::CalculateStringSize(const std::string& str, Ref<Font> font, 
 
 void Renderer2D::DrawString(const std::string& str, Ref<Font> font, Vector2 position, float fontSize)
 {
+
 	TextShader->Bind();
 	TextShader->SetUniformMat4f("projection", Projection);
 	float advance = 0.0f;

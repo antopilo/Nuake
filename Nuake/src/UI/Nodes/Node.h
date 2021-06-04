@@ -4,7 +4,8 @@
 #include "yoga/Yoga.h"
 #include "../Rendering/Renderer2D.h"
 #include "../Core/Logger.h"
-#include "Style.h"
+#include <src/UI/Styling/Style.h>
+
 
 namespace Layout
 {

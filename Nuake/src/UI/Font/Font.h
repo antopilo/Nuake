@@ -1,7 +1,9 @@
 #pragma once
+#include "../Core/Core.h"
 #include <src/Vendors/msdfgen/ext/import-font.h>
 #include <map>
 #include <src/Rendering/Textures/Texture.h>
+#include "src/Core/Maths.h"
 struct CharPos
 {
     double left;

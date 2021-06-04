@@ -6,7 +6,7 @@ layout(location = 1) in vec2 UV;
 uniform mat4 model;
 uniform mat4 projection;
 
-out vec2 a_UV;
+out sample vec2 a_UV;
 
 void main()
 {
@@ -42,7 +42,7 @@ void main() {
     vec2 textSize = textureSize(msdf, 0);
 
     vec2 uv = vec2(mix(texPos.x / textSize.x,texScale.x / textSize.x, a_UV.x),
-        mix(texScale.y / textSize.y, texPos.y / textSize.y,  a_UV.y));
+        mix(texScale.y / textSize.y, texPos.y / textSize.y, a_UV.y));
 
     vec3 msd = texture(msdf, uv).rgb;
     float sd = median(msd.r, msd.g, msd.b);

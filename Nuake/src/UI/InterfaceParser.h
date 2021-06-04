@@ -1,12 +1,12 @@
 #pragma once
 #include <src/Vendors/pugixml/pugixml.hpp>
 #include <iostream>
-#include <src/UI/Canvas.h>
-#include <src/UI/Rect.h>
+#include <src/UI/Nodes/Canvas.h>
+#include <src/UI/Nodes/Rect.h>
 #include <regex>
 #include<iostream>
 #include <src/Core/Logger.h>
-
+#include "Nodes/TextNode.h"
 class InterfaceParser
 {
 	static Ref<Canvas> Root;
@@ -50,6 +50,11 @@ public:
 				Ref<Node> newNode = CreateNode(e);
 				node->Childrens.push_back(newNode);
 				Iterate(e, newNode);
+			}
+			else if (type == "p")
+			{
+				//Ref<TextNode> textnode = CreateTextNode(e);
+
 			}
 		}
 	}
