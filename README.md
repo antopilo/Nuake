@@ -29,12 +29,13 @@ No documentation is currently available, I will try my best to work on this asap
 - Game in editor
 - Procedural & HDR skies
 - IBL
+- Serialization
+- UI system
 
 # Planned
 - Advanced bullet physics features
   - Soft bodies, Joints, etc.
 - Demo level
-- Serialization
 - C# scripting
 - Cross platform
 - Different rendering API(not a priority)
@@ -43,5 +44,4 @@ No documentation is currently available, I will try my best to work on this asap
 - Water simulation
 - Terrain editing
 - Exporting
-- UI system
 - Custom shaders
