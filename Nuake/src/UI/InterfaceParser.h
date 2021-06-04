@@ -43,7 +43,7 @@ public:
 		node->content = xml_node.text().as_string();
 
 		TextStyle style{
-			FontManager::GetFont("resources/Font/OpenSans-Regular.ttf"),
+			FontManager::GetFont("resources/Fonts/OpenSans-Regular.ttf"),
 			2.0,
 			Color(255, 255, 255, 255)
 		};
