@@ -41,6 +41,7 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 
 const char* LODEPNG_VERSION_STRING = "20190210";
 
+
 /*
 This source file is built up in the following large parts. The code sections
 with the "LODEPNG_COMPILE_" #defines divide this up further in an intermixed way.
@@ -58,6 +59,7 @@ platform if needed. Everything else in the code calls these. Pass
 define them in your own project's source files without needing to change
 lodepng source code. Don't forget to remove "static" if you copypaste them
 from here.*/
+
 
 #ifdef LODEPNG_COMPILE_ALLOCATORS
 static void* lodepng_malloc(size_t size) {
@@ -5928,6 +5930,7 @@ unsigned decode(std::vector<unsigned char>& out, unsigned& w, unsigned& h, const
 }
 #endif /* LODEPNG_COMPILE_DECODER */
 #endif /* LODEPNG_COMPILE_DISK */
+
 
 #ifdef LODEPNG_COMPILE_ENCODER
 unsigned encode(std::vector<unsigned char>& out, const unsigned char* in, unsigned w, unsigned h,

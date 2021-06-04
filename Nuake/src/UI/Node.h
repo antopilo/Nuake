@@ -354,8 +354,9 @@ public:
 			YGNodeStyleSetPositionType(YogaNode, YGPositionTypeAbsolute);
 	}
 
-	void Draw(float z, Vector2 offset)
+	void Draw(float z)
 	{
+		Renderer2D::UIShader->Bind();
 		Color color = this->BackgroundColor;
 		Renderer2D::UIShader->SetUniform4f("background_color",
 			color.r / 255.f,
@@ -401,6 +402,7 @@ public:
 		Renderer2D::UIShader->SetUniformMat4f("model", transform);
 		Renderer2D::UIShader->SetUniform1f("u_border_radius", 8.f);
 		Renderer2D::UIShader->SetUniform2f("u_size", width, height);
+
 		Renderer2D::DrawRect();
 	}
 };

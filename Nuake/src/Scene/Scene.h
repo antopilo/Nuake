@@ -20,12 +20,13 @@ private:
 	std::string Name;
 	bool has_changed = true;
 
-	std::vector<Ref<UI::UserInterface>> m_Interfaces;
+	
 	entt::registry m_Registry;
 	Ref<Environment> m_Environement;
 	Ref<EditorCamera> m_EditorCamera;
 
 public:
+	std::vector<Ref<UI::UserInterface>> m_Interfaces;
 	std::string Path = "";
 	static Ref<Scene> New();
 

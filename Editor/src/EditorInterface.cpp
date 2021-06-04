@@ -19,7 +19,7 @@
 #include "src/Resource/Project.h"
 #include <src/Scene/Entities/Components/LuaScriptComponent.h>
 #include <src/Core/Logger.h>
-
+Ref<UI::UserInterface> userInterface;
 ImFont* normalFont;
 ImFont* EditorInterface::bigIconFont;
 void EditorInterface::Init()
@@ -56,6 +56,19 @@ void EditorInterface::DrawViewport()
         }
         
     }
+
+   ImGui::End();
+   if (ImGui::Begin("SDF FONT"))
+   {
+       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+       if (userInterface)
+       {
+           auto id = userInterface->font->FontAtlas->GetID();
+           ImGui::Image((void*)id, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+       }
+
+   }
    ImGui::End();
     if(ImGui::Begin("Viewport"))
     {
@@ -222,7 +235,6 @@ void EditorInterface::DrawSceneTree()
         // Buttons to add and remove entity.
         ImGui::BeginChild("Buttons", ImVec2(300, 20), false);
         {
-
             // Add entity.
             if (ImGui::Button("Add"))
                 Engine::GetCurrentScene()->CreateEntity("Entity");
@@ -895,7 +907,7 @@ void OpenProject()
     Engine::LoadProject(project);
 
     // Create new interface named test.
-    Ref<UI::UserInterface> userInterface = UI::UserInterface::New("test");
+    userInterface = UI::UserInterface::New("test");
 
    
     // Set current interface running.

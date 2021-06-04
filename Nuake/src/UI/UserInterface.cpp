@@ -4,11 +4,14 @@
 #include "Stylesheet.h"
 #include "yoga/YGConfig.h"
 #include "InterfaceParser.h"
+#include <src/UI/Font/FontLoader.h>
 namespace UI
 {
 	UserInterface::UserInterface(const std::string& name)
 	{
 		m_Name = name;
+
+		font = FontLoader::LoadFont("resources/Fonts/OpenSans-Regular.ttf");
 
 		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
 
@@ -99,28 +102,32 @@ namespace UI
 
 		float leftOffset = YGNodeLayoutGetLeft(Root->YogaNode);
 		float topOffset = YGNodeLayoutGetTop(Root->YogaNode);
-						  
-		DrawRecursive(Root, 0, Vector2(leftOffset, topOffset));
+		
+
+		Vector2 charPos = Vector2(100.f, 100.f);
+		Char charr = font->GetChar(89);
+
+		
+
+		DrawRecursive(Root, 0);
+
+		Renderer2D::DrawString("Hello SDF World!", font, charPos, 2.0f);
+		//Renderer2D::DrawChar(charr, font, charPos, size);
 	}
 
-	void UserInterface::DrawRecursive(Ref<Node> node, float z, Vector2 offset)
+	void UserInterface::DrawRecursive(Ref<Node> node, float z)
 	{
 		if (!node)
 			return;
 
-		node->Draw(z, offset);
+		node->Draw(z);
 		
 		if (node->Childrens.size() <= 0)
 			return;
 
-		offset.x += YGNodeLayoutGetLeft(Root->YogaNode);
-
-		if(!YGNodeLayoutGetHadOverflow(Root->YogaNode))
-			offset.y += YGNodeLayoutGetTop(Root->YogaNode);
-
 		for (auto& c : node->Childrens)
 		{
-			DrawRecursive(c, z + 1, offset);
+			DrawRecursive(c, z + 1);
 		}
 	}
 

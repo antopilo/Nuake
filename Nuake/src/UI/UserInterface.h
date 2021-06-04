@@ -7,6 +7,7 @@
 #include <src/UI/Canvas.h>
 #include "../Core/Maths.h"
 #include "Stylesheet.h"
+#include "Font/Font.h"
 namespace UI
 {
 	class UserInterface
@@ -19,6 +20,7 @@ namespace UI
 		YGConfigRef yoga_config;
 		YGNodeRef yoga_root;
 	public:
+		Ref<Font> font;
 		const int Width = 1920;
 		const int Height = 1080;
 
@@ -33,7 +35,7 @@ namespace UI
 		void CreateYogaLayout();
 		void CreateYogaLayoutRecursive(Ref<Node> node, YGNodeRef yoga_node);
 		void Draw(Vector2 size);
-		void DrawRecursive(Ref<Node> node, float z, Vector2 offset);
+		void DrawRecursive(Ref<Node> node, float z);
 		void Update(Timestep ts);
 	};
 }

@@ -45,6 +45,24 @@ Texture::Texture(glm::vec2 size, GLenum format)
 	glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+}
+
+
+Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)
+{
+	m_Width = size.x;
+	m_Height = size.y;
+
+	glGenTextures(1, &m_RendererId);
+	glBindTexture(GL_TEXTURE_2D, m_RendererId);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	auto pixel = bitmap(0, bitmap.height - 0 - 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)bitmap.pixels);
 }
 
 void Texture::Resize(glm::vec2 size)

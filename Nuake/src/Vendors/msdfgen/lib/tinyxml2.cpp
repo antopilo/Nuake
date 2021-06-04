@@ -21,7 +21,7 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#include "tinyxml2/tinyxml2.h"
+#include "tinyxml2.h"
 #include <new>		// yes, this one new style header, is in the Android SDK.
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <stddef.h>
@@ -2030,7 +2030,7 @@ XMLDocument::~XMLDocument()
 }
 
 
-void XMLDocument::MarkInUse(const XMLNode* node)
+void XMLDocument::MarkInUse(XMLNode* node)
 {
 	TIXMLASSERT(node);
 	TIXMLASSERT(node->_parent == 0);
