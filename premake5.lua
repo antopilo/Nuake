@@ -9,33 +9,6 @@ workspace "Nuake"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
-project "DemoModule"
-    location "DemoModule"
-    kind "SharedLib"
-    language "C++"
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-    
-    filter "system:windows"
-        cppdialect "C++17"
-
-    includedirs
-    {
-        "%{prj.name}/../Nuake",
-        "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
-        "%{prj.name}/../Nuake/Dependencies/bullet/src",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include"
-    }
-    
-
-    files
-    {
-        "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp"
-    }
-
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
@@ -96,7 +69,8 @@ project "Editor"
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
         "%{prj.name}/../Nuake/Dependencies/bullet/src",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include"
+        "%{prj.name}/../Nuake/Dependencies/assimp/include",
+        "%{prj.name}/../Nuake/src/Vendors/msdfgen"
     }
 
     
@@ -106,6 +80,7 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
         "%{prj.name}/../Nuake/dependencies/bullet/lib/release/x64",
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
+        "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/"
     }
 
@@ -118,7 +93,8 @@ project "Editor"
         "BulletCollision_vs2010_x64_release.lib",
         "BulletDynamics_vs2010_x64_release.lib",
         "LinearMath_vs2010_x64_release.lib",
-        "assimp-vc142-mt.lib"
+        "assimp-vc142-mt.lib",
+        "freetype.lib"
     }
 
     filter "system:windows"
