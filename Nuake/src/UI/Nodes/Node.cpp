@@ -1,5 +1,24 @@
 #include "Node.h"
 
+Node::Node()
+{
+	Childrens = std::vector<Ref<Node>>();
+	Groups = std::vector<std::string>();
+	PositionType = Layout::PositionType::RELATIVE;
+	Position = Layout::LayoutVec4();
+	Height = MaxHeight = MinHeight = Layout::LayoutUnit();
+	Margin = Padding = Border = Layout::LayoutVec4();
+	Direction = Layout::LayoutDirection::LTR;
+	FlexDirection = Layout::FlexDirection::ROW;
+	FlexWrap = Layout::FlexWrap::WRAP;
+	FlexGrow = 0.f;
+	FlexShrink = 1.f;
+	FlexBasis = 10.f;
+	AspectRatio = 1.f;
+	AlignItems = Layout::AlignItems::AUTO;
+	AlignSelf = Layout::AlignItems::AUTO;
+}
+
 void Node::ApplyStyle(Ref<StyleGroup> stylegroup)
 {
 	for (auto& s : stylegroup->GetProps())
@@ -90,21 +109,33 @@ void Node::ApplyStyle(Ref<StyleGroup> stylegroup)
 	}
 }
 
-Node::Node()
+bool Node::IsPositionInside(Vector2 position)
 {
-	Childrens = std::vector<Ref<Node>>();
-	Groups = std::vector<std::string>();
-	PositionType = Layout::PositionType::RELATIVE;
-	Position = Layout::LayoutVec4();
-	Height = MaxHeight = MinHeight = Layout::LayoutUnit();
-	Margin = Padding = Border = Layout::LayoutVec4();
-	Direction = Layout::LayoutDirection::LTR;
-	FlexDirection = Layout::FlexDirection::ROW;
-	FlexWrap = Layout::FlexWrap::WRAP;
-	FlexGrow = 0.f;
-	FlexShrink = 1.f;
-	FlexBasis = 10.f;
-	AspectRatio = 1.f;
-	AlignItems = Layout::AlignItems::AUTO;
-	AlignSelf = Layout::AlignItems::AUTO;
+	float width = YGNodeLayoutGetWidth(YogaNode);
+	float height = YGNodeLayoutGetHeight(YogaNode);
+	float padding = YGNodeLayoutGetPadding(YogaNode, YGEdgeLeft);
+	float left = YGNodeLayoutGetLeft(YogaNode); //+ offset.x;
+	float top = YGNodeLayoutGetTop(YogaNode);// +offset.y;
+
+	float parentLeft = 0.0f;
+	float parentTop = 0.0f;
+	auto parent = YGNodeGetParent(YogaNode);
+	if (parent)
+	{
+		parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(YogaNode));
+		parentTop = YGNodeLayoutGetTop(YGNodeGetParent(YogaNode));
+		float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
+		float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
+		// Overflow hidden.
+		float parentwidth = YGNodeLayoutGetWidth(parent);
+		if (parentwidth - YGNodeLayoutGetMargin(YogaNode, YGEdgeLeft) < width)
+			width = parentwidth - parentPaddingLeft;
+		float parentHeight = YGNodeLayoutGetHeight(parent);
+		if (parentHeight < height)
+			height = parentHeight - parentPaddingTop;
+	}
+
+	left += parentLeft;
+	top += parentTop;
+	return position.x > left && position.x < left + width && position.y > top && position.y < top + height;
 }

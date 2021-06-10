@@ -219,6 +219,7 @@ int Window::Init()
 void Window::Update(Timestep ts) 
 {
      // TODO: have event here?
+    m_Scene->Update(ts);
 }
 
 void Window::Draw()
@@ -239,14 +240,14 @@ void Window::Draw()
         m_Scene->DrawShadows();
 
         m_Framebuffer->Bind();
-        {
-            if (Engine::IsPlayMode)
-                m_Scene->Draw();
-            else
-                m_Scene->EditorDraw();
+        
+        if (Engine::IsPlayMode)
+            m_Scene->Draw();
+        else
+            m_Scene->EditorDraw();
 
-            m_Scene->DrawInterface(m_Framebuffer->GetSize());
-        }
+        m_Scene->DrawInterface(m_Framebuffer->GetSize());
+        
         m_Framebuffer->Unbind();
     }
 

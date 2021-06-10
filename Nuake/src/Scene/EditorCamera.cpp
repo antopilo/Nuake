@@ -22,9 +22,9 @@ void EditorCamera::Update(Timestep ts)
 		Input::HideMouse();
 
 	// Should probably not have speed binding in here.
-	if (Input::IsKeyPress(GLFW_KEY_UP))
+	if (Input::IsKeyDown(GLFW_KEY_UP))
 		Speed += 0.1f;
-	else if (Input::IsKeyPress(GLFW_KEY_DOWN))
+	else if (Input::IsKeyDown(GLFW_KEY_DOWN))
 		Speed -= 0.1f;
 
 	if (Speed < 0)

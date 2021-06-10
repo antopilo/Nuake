@@ -5,6 +5,8 @@
 #include "yoga/YGConfig.h"
 #include "InterfaceParser.h"
 #include <src/UI/Font/FontLoader.h>
+#include "../Core/Input.h"
+
 namespace UI
 {
 	UserInterface::UserInterface(const std::string& name)
@@ -118,7 +120,10 @@ namespace UI
 		if (!node)
 			return;
 
-		node->Draw(z);
+		if (node->Type == NodeType::Text)
+			std::static_pointer_cast<TextNode>(node)->Draw(z);
+		else
+			node->Draw(z);
 		
 		if (node->Childrens.size() <= 0)
 			return;
@@ -131,6 +136,28 @@ namespace UI
 
 	void UserInterface::Update(Timestep ts)
 	{
+		// Check Input
+		if (Input::IsMouseButtonPressed(0))
+		{
+			ConsumeMouseClick(Input::GetMousePosition());
+		}
+	}
 
+
+	void UserInterface::RecursiveMouseClick(Ref<Node> node, Vector2 pos)
+	{
+		for (auto& c : node->Childrens)
+		{
+			RecursiveMouseClick(c, pos);
+			if (c->IsPositionInside(pos) && c->OnClickSignature != "")
+				this->Root->Script->CallMethod(c->OnClickSignature);
+
+		}
+	}
+
+	void UserInterface::ConsumeMouseClick(Vector2 pos)
+	{
+
+		RecursiveMouseClick(Root, pos);
 	}
 }

@@ -86,15 +86,15 @@ public:
     
     void OnUpdate(Timestep ts)
     {
-        if (Input::IsKeyPress(GLFW_KEY_W))
+        if (Input::IsKeyDown(GLFW_KEY_W))
             velocity.z = 5.0f;
-        else if (Input::IsKeyPress(GLFW_KEY_S))
+        else if (Input::IsKeyDown(GLFW_KEY_S))
             velocity.z = -5.0f;
         else
             velocity.z = 0.0f;
-        if (Input::IsKeyPress(GLFW_KEY_A))
+        if (Input::IsKeyDown(GLFW_KEY_A))
             velocity.x = 5.0f;
-        else if (Input::IsKeyPress(GLFW_KEY_D))
+        else if (Input::IsKeyDown(GLFW_KEY_D))
             velocity.x = -5.0f;
         else
             velocity.x = 0.0f;
@@ -159,16 +159,18 @@ int main()
 
     while (!Engine::GetCurrentWindow()->ShouldClose())
     {
+        Engine::Tick();
+
         Engine::Draw();
 
-        if (Input::IsKeyPress(GLFW_KEY_F8))
+        if (Input::IsKeyPressed(GLFW_KEY_F8))
             Engine::ExitPlayMode();
 
         editor.Draw();
 
         Engine::EndDraw();
 
-        Engine::Tick();
+        
     }
 
     Engine::Close();

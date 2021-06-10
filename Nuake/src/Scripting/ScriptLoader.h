@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ScriptModule.h"
 #include <map>
 #include <string>
 #include "../Scene/Entities/ScriptableEntity.h"

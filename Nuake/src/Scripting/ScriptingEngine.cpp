@@ -1,77 +1,112 @@
 #include "ScriptingEngine.h"
-#include <src/Vendors/sol/sol.hpp>
-#include <iostream>
-#include <fstream>
+#include "WrenScript.h"
+#include "../Core/FileSystem.h"
+#include <src/Scripting/Modules/ScriptModule.h>
+#include <src/Scripting/Modules/EngineModule.h>
+WrenVM* ScriptingEngine::m_WrenVM;
 
-inline void my_panic(sol::optional<std::string> maybe_msg) {
-	std::cerr << "Lua script error detected!" << std::endl;
-	if (maybe_msg) {
-		const std::string& msg = maybe_msg.value();
-		std::cerr << "\terror message: " << msg << std::endl;
-	}
+
+std::map<std::string, Ref<WrenScript>> ScriptingEngine::m_Scripts;
+
+std::map<std::string, Ref<ScriptModule>> ScriptingEngine::Modules;
+
+void errorFn(WrenVM* vm, WrenErrorType errorType,
+    const char* module, const int line,
+    const char* msg)
+{
+    switch (errorType)
+    {
+    case WREN_ERROR_COMPILE:
+    {
+        printf("[%s line %d] [Error] %s\n", module, line, msg);
+    } break;
+    case WREN_ERROR_STACK_TRACE:
+    {
+        printf("[%s line %d] in %s\n", module, line, msg);
+    } break;
+    case WREN_ERROR_RUNTIME:
+    {
+        printf("[Runtime Error] %s\n", msg);
+    } break;
+    }
 }
 
-sol::state ScriptingEngine::lua = sol::state(sol::c_call<decltype(&my_panic), &my_panic>);
+
+void writeFn(WrenVM* vm, const char* text) {
+	printf("%s", text);
+}
+
+
+WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) {
+    WrenLoadModuleResult result = { 0 };
+    std::string str = FileSystem::ReadFile("resources/" + std::string(name) + ".wren", true);
+    char* c = strcpy(new char[str.length() + 1], str.c_str());
+    result.source = c;
+    return result;
+}
+
+Ref<WrenScript> ScriptingEngine::RegisterScript(const std::string& path, const std::string& mod)
+{
+    std::string query = "import \"" + path + "\" for " + mod;
+    wrenInterpret(m_WrenVM, "main", query.c_str());
+    return CreateRef<WrenScript>(path, mod);
+}
+
+void ScriptingEngine::RegisterModule(Ref<ScriptModule> scriptModule)
+{
+    Modules[scriptModule->GetModuleName()] = scriptModule;
+    scriptModule->RegisterModule(m_WrenVM);
+}
+
+
+void ScriptingEngine::InitScript(Ref<WrenScript> script)
+{
+    script->CallInit();
+}
+
+void ScriptingEngine::UpdateScript(Ref<WrenScript> script, Timestep timestep)
+{
+    script->CallUpdate(timestep);
+}
+
+void ScriptingEngine::ExitScript(Ref<WrenScript> script)
+{
+    script->CallExit();
+}
 
 void ScriptingEngine::Init()
 {
-	lua.open_libraries(sol::lib::base, sol::lib::package);
+    m_Scripts = std::map<std::string, Ref<WrenScript>>();
+	WrenConfiguration config;
+	wrenInitConfiguration(&config);
 
+    config.loadModuleFn = &myLoadModule;
+    config.errorFn = &errorFn;
+	config.writeFn = &writeFn;
+    config.bindForeignMethodFn = &bindForeignMethod;
+	m_WrenVM = wrenNewVM(&config);
+
+    Ref<ScriptAPI::EngineModule> engineModule = CreateRef<ScriptAPI::EngineModule>();
+    RegisterModule(engineModule);
 }
 
-void ScriptingEngine::RunFile(const std::string& path)
-{
-
-}
-
-void ScriptingEngine::RunCode(const std::string& code)
-{
-	lua.script(code);
-	bool isfullscreen = lua["config"]["fullscreen"];
-	sol::table config = lua["config"];
-	float x = lua["config"]["resolution"]["x"];
-	return;
-
-}
-
-void ScriptingEngine::UpdateScript(const std::string& path)
-{
-	std::string fileContent;
-	std::string allFile = "";
-	// Read from the text file
-	std::ifstream MyReadFile("resources/Scripts/test.lua");
-
-	// Use a while loop together with the getline() function to read the file line by line
-	while (getline(MyReadFile, fileContent)) {
-		allFile.append(fileContent);
-	}
-
-	// Close the file
-	MyReadFile.close();
-
-	try {
-		auto bad_code_result = lua.script(allFile);
-		// it did not work
-		if (!bad_code_result.valid())
-		{
-			printf(std::to_string((int)(bad_code_result.status())).c_str());
-			return;
-		}
-
-		int result = lua["update"]();
-	}
-	catch (int e)
-	{
-
-	}
-
-	
-
-
-	return;
-}
 
 void ScriptingEngine::Close()
 {
+	wrenFreeVM(m_WrenVM);
+}
 
+WrenForeignMethodFn ScriptingEngine::bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature)
+{
+    if (Modules.find(className) != Modules.end())
+    {
+        Ref<ScriptModule> mod = Modules[className];
+        void* ptr = mod->GetMethodPointer(signature);
+        return (WrenForeignMethodFn)ptr;
+    }
+}
+
+WrenVM* ScriptingEngine::GetWrenVM()
+{
+    return m_WrenVM;
 }

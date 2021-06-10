@@ -1,0 +1,41 @@
+# Build outputs
+/bin
+/lib
+# Intermediate files
+*.obj
+Debug/
+Release/
+/build
+/.sass-cache
+*.pyc
+
+# I leave a temporary Wren script at the top
+# level so that I can quickly test stuff.
+/scratch.wren
+
+# The baseline file is machine-specific
+/test/benchmark/baseline.txt
+
+# VSCode project files.
+.vscode
+
+# XCode user-specific stuff
+xcuserdata/
+
+# Visual Studio cache files
+.vs/
+ipch/
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.cachefile
+
+# Visual Studio User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# macOS
+.DS_Store

@@ -65,46 +65,55 @@ namespace Layout
 }
 
 
+enum class NodeType
+{
+	Normal,
+	Text
+};
+
 // Base UI node.
 class Node
 {
 public:
-	Ref<Node*> Parent;
-	YGNodeRef YogaNode;
+	int Depth;
+	Ref<Node> Root;
+	Ref<Node> Parent;
+	std::vector<std::string> Groups;
 	std::vector<Ref<Node>> Childrens = std::vector<Ref<Node>>();
 
-	void ApplyStyle(Ref<StyleGroup> stylegroup);
+	std::string OnClickSignature = "";
+
+	NodeType Type = NodeType::Normal;
+
+	YGNodeRef YogaNode;
+
 	Ref<Style> style;
-	std::vector<std::string> Groups;
 
 	Layout::PositionType PositionType;
 	Layout::LayoutVec4 Position;
-
 	Layout::LayoutUnit Width, MaxWidth, MinWidth;
 	Layout::LayoutUnit Height, MaxHeight, MinHeight;
-
 	Layout::LayoutVec4 Margin;
 	Layout::LayoutVec4 Padding;
 	Layout::LayoutVec4 Border;
-
 	Color BackgroundColor;
-
 	Layout::LayoutDirection Direction;
-
 	Layout::FlexDirection FlexDirection = Layout::FlexDirection::ROW;
-
 	Layout::FlexWrap FlexWrap;
 	float FlexGrow;
 	float FlexShrink;
 	float FlexBasis;
 	float AspectRatio;
 	Layout::JustifyContent JustifyContent;
-
 	Layout::AlignItems AlignItems;
 	Layout::AlignItems AlignSelf;
 	Layout::AlignContent AlignContent;
 
 	Node();
+
+	void ApplyStyle(Ref<StyleGroup> stylegroup);
+
+	bool IsPositionInside(Vector2 position);
 
 	void AddGroup(const std::string& group)
 	{

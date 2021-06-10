@@ -1,6 +1,8 @@
-.button {
-    width: 100%;
-    height: 100%;
+
+
+.hello{
+    width: 400px;
+    height: 200px;
 }
 
 .screen{
@@ -8,20 +10,11 @@
     width: 100%;
     justify-content: center;
     flex-direction: row;
-    align-content:flex-end;
+    align-content:flex-start;
 }
 
-.container {
-    height: 50px;
-    width: 50%;
-    flex-direction: row;
-    justify-content: space-between;
-    align-content: center;
-    align-self:center;
-    padding: 8px;
-}
+.rect{
+    height: 200px;
+    width: 200px;
 
-.items{
-    height: 30px;
-    width: 30px;
 }

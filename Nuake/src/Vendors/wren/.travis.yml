@@ -1,0 +1,42 @@
+language: c
+
+# https://docs.travis-ci.com/user/languages/c/#gcc-on-macos
+# On mac, gcc is aliased to clang, so we only have one row 
+# in build the matrix, not two like on linux
+compiler:
+  - clang
+  - gcc
+
+# Automatically build and deploy docs.
+jobs:
+  include:
+    - os: linux
+    - os: osx
+      env: WREN_TARGET_MAC=1
+
+    - stage: deploy
+      script: ./util/deploy_docs_from_travis.sh
+      # Only deploy commits that land on main.
+      if: branch = main and type = push
+
+# Travis VMs are 64-bit but we compile both for 32 and 64 bit. To enable the
+# 32-bit builds to work, we need gcc-multilib.
+addons:
+  apt:
+    packages:
+    - gcc-multilib
+    - g++-multilib
+    # These are needed for building and deploying the docs.
+    - python3-markdown
+    - python3-pygments
+    - python3-setuptools
+    - ruby-sass
+
+# Can't do container-based builds for now because installing the custom
+# Pygments lexer to generate the docs requires sudo. :( If that changes,
+# uncomment the next line and delete the "sudo" and "dist" lines.
+# sudo: false # Enable container-based builds.
+sudo: required
+dist: trusty
+
+script: ./.travis.sh

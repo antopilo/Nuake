@@ -1,6 +1,8 @@
 #include "Engine.h"
 #include "src/Core/Physics/PhysicsManager.h"
 #include <GLFW/glfw3.h>
+
+#include "../Core/Input.h"
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
 
@@ -47,9 +49,11 @@ void Engine::Tick()
 
 	// Play mode update vs editor update.
 	if (Engine::IsPlayMode)
-		GetCurrentScene()->Update(timestep);
+		CurrentWindow->Update(timestep);
 	else
 		GetCurrentScene()->EditorUpdate(timestep);
+
+	Input::Update();
 }
 
 void Engine::EnterPlayMode()

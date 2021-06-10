@@ -1,0 +1,108 @@
+{
+    "Entities": [
+        {
+            "NameComponent": {
+                "Name": "Trenchbroom map"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "QuakeMapComponent": {
+                "HasCollisions": false,
+                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": 9.199999809265137,
+                    "y": 5.599999904632568,
+                    "z": 0.0
+                },
+                "Type": "TransformComponent"
+            }
+        },
+        {
+            "LightComponent": {
+                "CastShadows": true,
+                "Color": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Direction": {
+                    "x": 0.20000000298023224,
+                    "y": 0.9591699838638306,
+                    "z": 0.20000000298023224
+                },
+                "IsVolumetric": false,
+                "Strength": 10.0,
+                "SyncDirectionWithSky": true,
+                "Type": 0
+            },
+            "NameComponent": {
+                "Name": "Light"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": -0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": 7.035792350769043,
+                    "y": 5.795107364654541,
+                    "z": -0.9431453943252563
+                },
+                "Type": "TransformComponent"
+            }
+        }
+    ],
+    "Name": "",
+    "m_Environement": {
+        "AmbientColor": {
+            "w": 0.0,
+            "x": null,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "ProceduralSkybox": {
+            "AtmosphereRadius": 6380000.0,
+            "MieScattering": {
+                "x": 1.9999999494757503e-05,
+                "y": 1.9999999494757503e-05,
+                "z": 1.9999999494757503e-05
+            },
+            "RayleighScattering": {
+                "x": 5.80000005356851e-06,
+                "y": 1.3500000022759195e-05,
+                "z": 3.310000101919286e-05
+            },
+            "SunDirection": {
+                "x": 0.20000000298023224,
+                "y": 0.9591699838638306,
+                "z": 0.20000000298023224
+            },
+            "SunIntensity": 100.0,
+            "SurfaceRadius": 6360000.0
+        },
+        "VolumetricFog": 0.949999988079071,
+        "VolumetricStepCount": 100.0
+    }
+}

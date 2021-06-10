@@ -17,12 +17,15 @@ private:
 
 	Ref<FrameBuffer> m_Framebuffer;
 	Ref<Scene> m_Scene;
+	Vector2 m_FramebufferOffset;
+
 public:
 	Window();
 	~Window();
 
 	static Ref<Window> Get(); // Get the window instance
 	GLFWwindow* GetHandle();
+
 
 	bool ShouldClose();
 

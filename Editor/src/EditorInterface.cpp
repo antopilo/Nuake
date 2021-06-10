@@ -675,10 +675,10 @@ void EditorInterface::DrawDirectoryExplorer()
                 }
             }
 
-            ImGui::EndTable();
+            
         }
 
-        
+        ImGui::EndTable();
     }
     ImGui::End();
 }

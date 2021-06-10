@@ -76,25 +76,33 @@ void Renderer2D::DrawString(const std::string& str, TextStyle style, Matrix4 mod
 	style.font->FontAtlas->Bind(5);
 	TextShader->SetUniform1i("msdf", 5);
 
+
+	float lineHeight = 0.0f;
 	for (char const& c : str) {
 		Char& letter = style.font->GetChar((int)c);
 
-		Matrix4 mat = Matrix4(1.0f);
-		mat = glm::translate(model, Vector3(advance, (letter.PlaneBounds.top * style.fontSize), 0.f));
+		if (letter.PlaneBounds.top - letter.PlaneBounds.bottom > lineHeight)
+			lineHeight = letter.PlaneBounds.top - letter.PlaneBounds.bottom ;
+	}
+
+	lineHeight *= style.fontSize;
+
+	for (char const& c : str) {
+		Char& letter = style.font->GetChar((int)c);
+		Matrix4 mat = glm::translate(model, Vector3(advance, -(letter.PlaneBounds.top) + (lineHeight), 0.f));
 		float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
 		float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
-		mat = glm::scale(mat, Vector3(scaleX * style.fontSize, scaleY * style.fontSize, 0.f));
-
+		mat = glm::scale(mat, Vector3(scaleX, scaleY, 0.f));
 		TextShader->SetUniform2f("texPos", letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y);
 		TextShader->SetUniform2f("texScale", letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y);
 		TextShader->SetUniformMat4f("model", mat);
 		//TextShader->SetUniform4f("bgColor", 0, 0, 1, 1);
-		TextShader->SetUniform4f("bgColor", 0.f, 0.f, 0.f, 0.f);
+		TextShader->SetUniform4f("bgColor", 1.f, 0.f, 0.f, 0.f);
 		TextShader->SetUniform4f("fgColor", 1.f, 1.f, 1.f, 1.f);
 		//TextShader->SetUniform1f("pxRange", 32);
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		advance += letter.Advance * style.fontSize;
+		advance += letter.Advance;
 	}
 }
 

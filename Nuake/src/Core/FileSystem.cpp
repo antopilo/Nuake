@@ -124,7 +124,7 @@ std::string FileSystem::ReadFile(const std::string& path, bool absolute)
 	// Use a while loop together with the getline() function to read the file line by line
 	while (getline(MyReadFile, fileContent))
 	{
-		allFile.append(fileContent);
+		allFile.append(fileContent + "\n");
 	}
 
 	// Close the file

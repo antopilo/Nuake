@@ -37,5 +37,9 @@ namespace UI
 		void Draw(Vector2 size);
 		void DrawRecursive(Ref<Node> node, float z);
 		void Update(Timestep ts);
+
+		void RecursiveMouseClick(Ref<Node> node, Vector2 pos);
+
+		void ConsumeMouseClick(Vector2 pos);
 	};
 }

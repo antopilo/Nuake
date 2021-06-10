@@ -145,7 +145,6 @@ void Scene::Update(Timestep ts)
 	}
 
 
-
 }
 
 
@@ -155,14 +154,13 @@ void Scene::EditorUpdate(Timestep ts)
 
 	for (auto i : m_Interfaces)
 	{
-		//i->Calculate(1280,720);
+		i->Update(ts);
 	}
 }
 
 
 void Scene::DrawShadows()
 {
-
 	auto modelView = m_Registry.view<TransformComponent, ModelComponent>();
 	auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent>();
 	auto view = m_Registry.view<TransformComponent, LightComponent>();
@@ -363,14 +361,10 @@ void Scene::EditorDraw()
 	glDisable(GL_DEPTH_TEST);
 	Ref<Environment> env = GetEnvironment();
 
-	//if (env->ProceduralSkybox)
-	//{
-	//	env->ProceduralSkybox->Draw(m_EditorCamera);
-	//}
-
-
-
-
+	if (env->ProceduralSkybox)
+	{
+		env->ProceduralSkybox->Draw(m_EditorCamera);
+	}
 
 	Renderer::m_Shader->Bind();
 	env->Push();
@@ -406,7 +400,7 @@ void Scene::EditorDraw()
 
 	Renderer::m_Shader->Bind();
 	Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
-	/*if (m_EditorCamera)
+	if (m_EditorCamera)
 	{
 		Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
 
@@ -518,9 +512,7 @@ void Scene::EditorDraw()
 			t.Scale = (box.Radius * 2.f) * transform.Scale;
 			Renderer::DrawSphere(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
 		}
-	}*/
-
-
+	}
 }
 
 std::vector<Entity> Scene::GetAllEntities() {

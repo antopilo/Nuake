@@ -21,7 +21,12 @@ public:
 		this->style = textStyle;
 	}
 
-	void Draw()
+	void CalculateSize()
+	{
+		
+	}
+
+	void Draw(float z)
 	{
 		Renderer2D::TextShader->Bind();
 
@@ -36,29 +41,25 @@ public:
 		auto parent = YGNodeGetParent(this->YogaNode);
 		if (parent)
 		{
-			parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(this->YogaNode));
-			parentTop = YGNodeLayoutGetTop(YGNodeGetParent(this->YogaNode));
-			float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-			float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-			// Overflow hidden.
-			float parentwidth = YGNodeLayoutGetWidth(parent);
-			if (parentwidth - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeLeft) < width)
-				width = parentwidth - parentPaddingLeft;
-			float parentHeight = YGNodeLayoutGetHeight(parent);
-			if (parentHeight < height)
-				height = parentHeight - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeTop) - parentPaddingTop;
+			//parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(this->YogaNode));
+			//parentTop = YGNodeLayoutGetTop(YGNodeGetParent(this->YogaNode));
+			//float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
+			//float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
+			//// Overflow hidden.
+			//float parentwidth = YGNodeLayoutGetWidth(parent);
+			//if (parentwidth - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeLeft) < width)
+			//	width = parentwidth - parentPaddingLeft;
+			//float parentHeight = YGNodeLayoutGetHeight(parent);
+			//if (parentHeight < height)
+			//	height = parentHeight - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeTop) - parentPaddingTop;
 		}
 
-		
+
 
 		transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, 0.f));
 
 
-		Vector3 scale = Vector3(width, height, 0);
-		transform = glm::scale(transform, scale);
-
 		//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
-		Renderer2D::UIShader->SetUniformMat4f("model", transform);
 
 		Renderer2D::DrawString(content, style, transform);
 		//Renderer2D::DrawString(content, style.font, Vector2(Position.Left, Position.Top), 2.0);
