@@ -3,6 +3,7 @@
 #include "../Core/FileSystem.h"
 #include <src/Scripting/Modules/ScriptModule.h>
 #include <src/Scripting/Modules/EngineModule.h>
+#include <src/Scripting/Modules/SceneModule.h>
 WrenVM* ScriptingEngine::m_WrenVM;
 
 
@@ -88,6 +89,8 @@ void ScriptingEngine::Init()
 
     Ref<ScriptAPI::EngineModule> engineModule = CreateRef<ScriptAPI::EngineModule>();
     RegisterModule(engineModule);
+    Ref<ScriptAPI::SceneModule> sceneModule = CreateRef<ScriptAPI::SceneModule>();
+    RegisterModule(sceneModule);
 }
 
 

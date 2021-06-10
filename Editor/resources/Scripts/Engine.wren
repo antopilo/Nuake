@@ -2,14 +2,25 @@ class Engine {
 	foreign static Log(msg)
 }
 
-class Vector3 {
-	construct new(x, y, z) {
-		_x = x
-		_y = y
-		_z = z
+class Scene {
+	foreign static GetEntityID(name)
+
+	static GetEntity(name) {
+		var entId = Scene.GetEntityID(name)
+		var ent = Entity.new(entId)
+		return ent
 	}
+
+	foreign static EntityHasComponent(id, name)
 }
 
 class Entity {
-	foreign GetComponent(type)
+	construct new(id) {
+		_entityId = id
+	}
+
+	HasComponent(component) {
+		return Scene.EntityHasComponent(_entityId, component)
+	}
 }
+

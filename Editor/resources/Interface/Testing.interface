@@ -3,10 +3,10 @@
   groups="screen"
   color="25 25 25 9"
 >
-  <p groups="hello">Hello, world</p>
+  <p groups="header">Hello, world!</p>
+  
   <Rect onclick="hello()" 
         groups="rect" 
         color="128 128 255 255">
   </Rect>
-  <Slider value="sliderValue"/>
 </Canvas>
