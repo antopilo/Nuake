@@ -38,6 +38,18 @@ void Camera::OnWindowResize(int x, int y)
 	float height = y;
 }
 
+void Camera::SetDirection(Vector3 direction)
+{
+	//cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	//cam->cameraDirection.y = sin(glm::radians(Pitch));
+	//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	//cam->cameraFront = glm::normalize(cam->cameraDirection);
+	//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
+	cameraDirection = glm::normalize(direction);
+	cameraFront = cameraDirection;
+	cameraRight = glm::normalize(glm::cross(up, cameraFront));
+}
+
 glm::vec3 Camera::GetTranslation() {
 	return Translation;
 }

@@ -8,13 +8,13 @@ void EditorCamera::Update(Timestep ts)
 	float x = Input::GetMouseX();
 	float y = Input::GetMouseY();
 
-	if (!controlled && Input::IsMouseButtonPressed(1))
+	if (!controlled && Input::IsMouseButtonDown(1))
 	{
 		mouseLastX = x;
 		mouseLastY = y;
 	}
 
-	controlled = Input::IsMouseButtonPressed(1);
+	controlled = Input::IsMouseButtonDown(1);
 
 	if (!controlled)
 		Input::ShowMouse();
@@ -36,30 +36,30 @@ void EditorCamera::Update(Timestep ts)
 	}
 
 	if (m_Type == CAMERA_TYPE::ORTHO) {
-		if (Input::IsKeyPressed(GLFW_KEY_RIGHT))
+		if (Input::IsKeyDown(GLFW_KEY_RIGHT))
 			Translation.x += Speed * ts;
-		if (Input::IsKeyPressed(GLFW_KEY_LEFT))
+		if (Input::IsKeyDown(GLFW_KEY_LEFT))
 			Translation.x -= Speed * ts;
-		if (Input::IsKeyPressed(GLFW_KEY_UP))
+		if (Input::IsKeyDown(GLFW_KEY_UP))
 			Translation.y += Speed * ts;
-		if (Input::IsKeyPressed(GLFW_KEY_DOWN))
+		if (Input::IsKeyDown(GLFW_KEY_DOWN))
 			Translation.y -= Speed * ts;
 	}
 	else {
 		glm::vec3 movement = glm::vec3(0, 0, 0);
 
-		if (Input::IsKeyPressed(GLFW_KEY_D))
+		if (Input::IsKeyDown(GLFW_KEY_D))
 			movement -= cameraRight * (Speed * ts);
-		if (Input::IsKeyPressed(GLFW_KEY_A))
+		if (Input::IsKeyDown(GLFW_KEY_A))
 			movement += cameraRight * (Speed * ts);
 
-		if (Input::IsKeyPressed(GLFW_KEY_W))
+		if (Input::IsKeyDown(GLFW_KEY_W))
 			movement += cameraDirection * (Speed * ts);
-		if (Input::IsKeyPressed(GLFW_KEY_S))
+		if (Input::IsKeyDown(GLFW_KEY_S))
 			movement -= cameraDirection * (Speed * ts);
-		if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
+		if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
 			movement -= up * (Speed * ts);
-		if (Input::IsKeyPressed(GLFW_KEY_SPACE))
+		if (Input::IsKeyDown(GLFW_KEY_SPACE))
 			movement += up * (Speed * ts);
 
 		Translation += Vector3(movement);

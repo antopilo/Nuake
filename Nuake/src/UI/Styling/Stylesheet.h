@@ -245,7 +245,6 @@ namespace UI
 				KatanaArray errors = Data->errors;
 				return false;
 			}
-			katana_dump_output(Data);
 			return true;
 		}
 	};

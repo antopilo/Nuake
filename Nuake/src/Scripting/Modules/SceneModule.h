@@ -28,6 +28,8 @@ namespace ScriptAPI
 		{
 			RegisterMethod("GetEntityID(_)", (void*)GetEntity);
 			RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
+			RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
+			RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
 		}
 
 		static void GetEntity(WrenVM* vm)
@@ -73,6 +75,31 @@ namespace ScriptAPI
 				bool result = ent.HasComponent<RigidBodyComponent>();
 				wrenSetSlotBool(vm, 0, result);
 			}
+		}
+
+		static void SetLightIntensity(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			float intensity = wrenGetSlotDouble(vm, 2);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			auto& light = ent.GetComponent<LightComponent>();
+			light.Strength = intensity;
+		}
+
+		static void GetLightIntensity(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			float intensity = wrenGetSlotDouble(vm, 2);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			auto& light = ent.GetComponent<LightComponent>();
+			wrenSetSlotDouble(vm, 0, light.Strength);
+		}
+
+		static void SetCameraDirection(WrenVM* vm)
+		{
+
 		}
 	};
 }

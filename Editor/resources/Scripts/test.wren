@@ -1,4 +1,7 @@
-import "Scripts/Engine" for Engine, Scene, Entity
+import "Scripts/Engine" for Engine
+import "Scripts/Input" for Input
+import "Scripts/Scene" for Scene, Entity
+
 class Test {
 	init() {
 		System.print("hello init")
@@ -13,10 +16,12 @@ class Test {
 	}
 
 	static hello() {
-		var entity = Scene.GetEntity("Trenchbroom map")
-		var hasTransform = entity.HasComponent("Transform")
-		var hasLight = entity.HasComponent("Light")
+		var entity = Scene.GetEntity("Light")
+		var light = entity.GetComponent("Light")
+		light.SetIntensity(1.0)
 
-		Engine.Log("trasnform: %(hasTransform) light:%(hasLight)")
+		if(Input.IsMouseButtonPressed(2) == true) {
+			Engine.Log("RIGHT CLICK!!!!!!")
+		}
 	}
 }

@@ -42,6 +42,8 @@ public:
 	void SetType(CAMERA_TYPE type);
 	void OnWindowResize(int x, int y);
 
+	void SetDirection(Vector3 direction);
+
 	Vector3 GetTranslation();
 	Vector3 GetDirection();
 	Matrix4 GetPerspective();
