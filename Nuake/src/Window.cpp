@@ -232,6 +232,8 @@ void Window::Draw()
     Ref<Camera> cam = m_Scene->GetCurrentCamera();
     if (!cam) return;
 
+    Vector2 size = m_Framebuffer->GetSize();
+    cam->AspectRatio = size.x / size.y;
     Renderer::BeginDraw(cam);
     {
 

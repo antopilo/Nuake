@@ -40,11 +40,25 @@ void writeFn(WrenVM* vm, const char* text) {
 	printf("%s", text);
 }
 
+bool hasEnding(std::string const& fullString, std::string const& ending) {
+    if (fullString.length() >= ending.length()) {
+        return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+    }
+    else {
+        return false;
+    }
+}
 
 WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) {
     WrenLoadModuleResult result = { 0 };
-    std::string str = FileSystem::ReadFile("resources/" + std::string(name) + ".wren", true);
+
+    std::string path = "resources/" + std::string(name);
+    if(!hasEnding(path, ".wren"))
+        path += ".wren";
+
+    std::string str = FileSystem::ReadFile(path, true);
     char* c = strcpy(new char[str.length() + 1], str.c_str());
+
     result.source = c;
     return result;
 }

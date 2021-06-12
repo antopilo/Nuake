@@ -12,8 +12,9 @@ public:
 	WrenHandle* m_OnInitHandle;
 	WrenHandle* m_OnUpdateHandle;
 	WrenHandle* m_OnExitHandle;
+	WrenHandle* m_SetEntityIDHandle;
 
-	WrenScript(const std::string& path, const std::string& mod);
+	WrenScript(const std::string& path, const std::string& mod, bool isEntity = false);
 
 	void CallInit();
 	void CallUpdate(float timestep);
@@ -21,4 +22,6 @@ public:
 
 	void RegisterMethod(const std::string& signature);
 	void CallMethod(const std::string& signature);
+
+	void SetScriptableEntityID(int id);
 };

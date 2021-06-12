@@ -27,9 +27,9 @@ namespace ScriptAPI
 
 		static void Sqrt(WrenVM* vm)
 		{
-			float x = wrenGetSlotDouble(vm, 0);
-			float y = wrenGetSlotDouble(vm, 0);
-			float z = wrenGetSlotDouble(vm, 0);
+			float x = wrenGetSlotDouble(vm, 1);
+			float y = wrenGetSlotDouble(vm, 2);
+			float z = wrenGetSlotDouble(vm, 3);
 			float result = glm::sqrt((x * x) + (y * y) + (z * z));
 			wrenSetSlotDouble(vm, 0, result);
 		}

@@ -19,6 +19,7 @@
 #include "src/Resource/Project.h"
 #include <src/Scene/Entities/Components/LuaScriptComponent.h>
 #include <src/Core/Logger.h>
+#include <src/Scene/Entities/Components/WrenScriptComponent.h>
 Ref<UI::UserInterface> userInterface;
 ImFont* normalFont;
 ImFont* EditorInterface::bigIconFont;
@@ -80,7 +81,7 @@ void EditorInterface::DrawViewport()
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
         if(Engine::GetCurrentWindow()->GetFrameBuffer()->GetSize() != viewportPanelSize)
-            Engine::GetCurrentWindow()->GetFrameBuffer()->UpdateSize(viewportPanelSize);
+            Engine::GetCurrentWindow()->GetFrameBuffer()->QueueResize(viewportPanelSize);
 
         Ref<Texture> texture = Engine::GetCurrentWindow()->GetFrameBuffer()->GetTexture();
         ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
@@ -321,16 +322,22 @@ void EditorInterface::DrawEntityPropreties()
             }
             if (ImGui::BeginPopup("add_component_popup"))
             {
-                if (ImGui::MenuItem("Lua script") && !m_SelectedEntity.HasComponent<LuaScriptComponent>())
-                    m_SelectedEntity.AddComponent<LuaScriptComponent>();
-                if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
-                    m_SelectedEntity.AddComponent<LightComponent>();
-                if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
-                    m_SelectedEntity.AddComponent<MeshComponent>();
+                if (ImGui::MenuItem("Wren Script") && !m_SelectedEntity.HasComponent<WrenScriptComponent>())
+                    m_SelectedEntity.AddComponent<WrenScriptComponent>();
+                ImGui::Separator();
                 if (ImGui::MenuItem("Camera Component") && !m_SelectedEntity.HasComponent<CameraComponent>())
                     m_SelectedEntity.AddComponent<CameraComponent>();
+                ImGui::Separator();
+                if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
+                    m_SelectedEntity.AddComponent<LightComponent>();
+                ImGui::Separator();
+                if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
+                    m_SelectedEntity.AddComponent<MeshComponent>();
                 if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMapComponent>())
                     m_SelectedEntity.AddComponent<QuakeMapComponent>();
+                ImGui::Separator();
+                if (ImGui::MenuItem("Character controller") && !m_SelectedEntity.HasComponent<CharacterControllerComponent>())
+                    m_SelectedEntity.AddComponent<CharacterControllerComponent>();
                 if (ImGui::MenuItem("Rigidbody Component") && !m_SelectedEntity.HasComponent<RigidBodyComponent>())
                 {
                     m_SelectedEntity.AddComponent<RigidBodyComponent>();
@@ -377,32 +384,43 @@ void EditorInterface::DrawEntityPropreties()
 
         }
 
-        if (m_SelectedEntity.HasComponent<LuaScriptComponent>()) {
+        if (m_SelectedEntity.HasComponent<WrenScriptComponent>()) {
             std::string icon = ICON_FA_FILE;
-            if (ImGui::CollapsingHeader((icon + " " + "Lua script").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader((icon + " " + "Wren Script").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
-                auto& component = m_SelectedEntity.GetComponent<LuaScriptComponent>();
+                auto& component = m_SelectedEntity.GetComponent<WrenScriptComponent>();
+               
+                // Path
                 std::string path = component.Script;
-
-
                 char pathBuffer[256];
+
                 memset(pathBuffer, 0, sizeof(pathBuffer));
                 std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
+
                 if (ImGui::InputText("##ScriptPath", pathBuffer, sizeof(pathBuffer)))
-                {
-                    path = std::string(pathBuffer);
-                }
+                    path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
+
                 ImGui::SameLine();
+
                 if (ImGui::Button("Browse"))
-                {
-                    path = FileDialog::OpenFile(".map");
-                }
+                    path = FileSystem::AbsoluteToRelative(FileDialog::OpenFile(".wren"));
 
                 component.Script = path;
 
+                // Class
+                std::string module = component.Class;
+
+                char classBuffer[256];
+
+                memset(classBuffer, 0, sizeof(classBuffer));
+                std::strncpy(classBuffer, module.c_str(), sizeof(classBuffer));
+
+                if (ImGui::InputText("##ScriptModule", classBuffer, sizeof(classBuffer)))
+                    module = std::string(classBuffer);
+
+                component.Class = module;
                 ImGui::Separator();
             }
-
         }
 
         if (m_SelectedEntity.HasComponent<CameraComponent>()) {
@@ -414,6 +432,18 @@ void EditorInterface::DrawEntityPropreties()
                 ImGui::Separator();
             }
            
+        }
+
+        if (m_SelectedEntity.HasComponent<CharacterControllerComponent>())
+        {
+            if (ImGui::CollapsingHeader("Character controller", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto& c = m_SelectedEntity.GetComponent<CharacterControllerComponent>();
+                ImGui::InputFloat("Height", &c.Height);
+                ImGui::InputFloat("Radius", &c.Radius);
+                ImGui::InputFloat("Mass", &c.Mass);
+                ImGui::Separator();
+            }
         }
 
         if (m_SelectedEntity.HasComponent<MeshComponent>()) {
@@ -907,17 +937,26 @@ void OpenProject()
     Engine::LoadProject(project);
 
     // Create new interface named test.
-    userInterface = UI::UserInterface::New("test");
+    //userInterface = UI::UserInterface::New("test");
 
    
     // Set current interface running.
-    Engine::GetCurrentScene()->AddInterface(userInterface);
-
+    //Engine::GetCurrentScene()->AddInterface(userInterface);
 }
 
 void OpenScene()
 {
+    // Parse the project and load it.
+    std::string projectPath = FileDialog::OpenFile(".scene");
 
+    Ref<Scene> scene = Scene::New();
+    if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) {
+        Logger::Log("Error failed loading scene: " + projectPath);
+        return;
+    }
+
+    scene->Path = FileSystem::AbsoluteToRelative(projectPath);
+    Engine::LoadScene(scene);
 }
 
 void EditorInterface::DrawInit()
@@ -979,6 +1018,10 @@ void EditorInterface::Draw()
                 Engine::GetProject()->SaveAs(savePath);
 
                 m_IsEntitySelected = false;
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Set current scene as default")) {
+                Engine::GetProject()->DefaultScene = Engine::GetCurrentScene();
             }
             ImGui::Separator();
             if (ImGui::MenuItem("Open scene...", "CTRL+O"))

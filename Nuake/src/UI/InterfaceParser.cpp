@@ -1,5 +1,5 @@
 #include "InterfaceParser.h"
-
+#include "Styling/Stylesheet.h"
 Ref<Canvas> InterfaceParser::Root = CreateRef<Canvas>();
 
 void InterfaceParser::Iterate(const pugi::xml_node& xml_node, Ref<Node> node, int depth)
@@ -270,6 +270,11 @@ Ref<Canvas> InterfaceParser::CreateCanvas(const pugi::xml_node& xml_node)
 			std::string path = s[0];
 			std::string module = s[1];
 			node->Script = ScriptingEngine::RegisterScript(path, module);
+		}
+		if (name == "stylesheet")
+		{
+			std::string path = a.value();
+			node->StyleSheet = UI::StyleSheet::New(path);
 		}
 	}
 

@@ -125,7 +125,7 @@ int Shader::FindUniformLocation(std::string uniform) {
 		if (addr == -1)
 			std::cout << "Warning: uniform '" << uniform << "' doesn't exists!" << std::endl;
 		else {
-			std::cout << "Info: uniform '" << uniform << "' registered." << std::endl;
+			//std::cout << "Info: uniform '" << uniform << "' registered." << std::endl;
 			UniformCache[uniform] = addr;
 		}
 
