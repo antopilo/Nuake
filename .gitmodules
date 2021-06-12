@@ -1,3 +1,6 @@
 [submodule "Nuake/dependencies/glfw"]
 	path = Nuake/dependencies/glfw
 	url = https://github.com/glfw/glfw/tree/master
+[submodule "glfw"]
+	path = glfw
+	url = https://github.com/glfw/glfw.git
