@@ -9,6 +9,8 @@ workspace "Nuake"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+include "Nuake/dependencies/glfw_p5.lua"
+
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
@@ -48,7 +50,7 @@ project "Nuake"
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
+        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/bullet/src",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
 	"%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
@@ -79,7 +81,7 @@ project "Editor"
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/x64/include",
+        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/bullet/src",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen"
@@ -103,7 +105,7 @@ project "Editor"
     links
     { 
         "Nuake.lib", 
-        "glfw3dll.lib", 
+        "GLFW",
         "glew32s.lib", 
         "opengl32.lib", 
         "BulletCollision_vs2010_x64_release.lib",
@@ -119,5 +121,5 @@ project "Editor"
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {
-     "{COPY} "Nuake/dependencies/GLFW/lib-vc2019/glfw3.dll" " .. "./bin/" .. outputdir .. "/%{prj.name}/glfw3.dll"
+     --"{COPY} "Nuake/dependencies/GLFW/lib-vc2019/glfw3.dll" " .. "./bin/" .. outputdir .. "/%{prj.name}/glfw3.dll"
     }
