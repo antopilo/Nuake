@@ -1,3 +1,6 @@
 [submodule "Nuake/dependencies/glfw"]
 	path = Nuake/dependencies/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "Nuake/dependencies/assimp"]
+	path = Nuake/dependencies/assimp
+	url = https://github.com/assimp/assimp.git
