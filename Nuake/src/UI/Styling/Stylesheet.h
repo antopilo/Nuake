@@ -1,18 +1,14 @@
 #pragma once
 
+#include "katana-parser/katana.h"
 #include "../Core/FileSystem.h"
 #include "../Core/Logger.h"
 #include "../Core/Core.h"
-#include "Style.h"
-
-#include "katana-parser/katana.h"
-#include <string>
-#include <map>
+#include "../Nodes/Node.h"
 #include <src/UI/Styling/StyleSheetParser.h>
 #include <regex>
-#include <regex>
-#include <src/UI/InterfaceParser.h>
-
+#include <string>
+#include <map>
 namespace UI
 {
 	class StyleSheet
@@ -24,7 +20,20 @@ namespace UI
 	public:
 		std::string Path;
 		static Ref<StyleSheet> New(const std::string& path);
+		std::vector<std::string> Split(std::string const& str, const char delim)
+		{
+			std::vector<std::string> result;
+			size_t start;
+			size_t end = 0;
 
+			while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
+			{
+				end = str.find(delim, start);
+				result.push_back(str.substr(start, end - start));
+			}
+
+			return result;
+		}
 		void AddStyleGroup(std::string selector, Ref<StyleGroup> group)
 		{
 			Styles[selector] = group;
@@ -90,7 +99,7 @@ namespace UI
 						std::smatch match_value;
 						Layout::LayoutVec4 result;
 
-						std::vector<std::string> splits = InterfaceParser::split(value, ' ');
+						std::vector<std::string> splits = Split(value, ' ');
 						int idx = 0;
 						for (auto& s : splits)
 						{
@@ -245,7 +254,6 @@ namespace UI
 				KatanaArray errors = Data->errors;
 				return false;
 			}
-			katana_dump_output(Data);
 			return true;
 		}
 	};

@@ -55,6 +55,9 @@ void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
 
 void FrameBuffer::Bind()
 {
+	if (ResizeQueued)
+		UpdateSize(m_Size);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, m_Size.x, m_Size.y);
@@ -63,6 +66,12 @@ void FrameBuffer::Bind()
 void FrameBuffer::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FrameBuffer::QueueResize(Vector2 size)
+{
+	ResizeQueued = true;
+	m_Size = size;
 }
 
 void FrameBuffer::UpdateSize(Vector2 size)

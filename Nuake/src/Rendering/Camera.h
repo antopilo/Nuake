@@ -16,12 +16,13 @@ class Camera : public ISerializable
 private:
 	CAMERA_TYPE m_Type;
 
-	float AspectRatio = 16.0f / 9.0f;
+	
 	Vector3 Rotation = { 0.0f, 0.0f, 0.0f };
 	Vector3 Scale = { 1.0f, 1.0f, 1.0f };
 	Matrix4 m_Perspective;
 
 public:
+	float AspectRatio = 16.0f / 9.0f;
 	// TODO: remove duplicate direction and have a proper api.
 	Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
 	Vector3 cameraFront = Vector3(0.0f, 0.0f, 1.0f);
@@ -41,6 +42,8 @@ public:
 
 	void SetType(CAMERA_TYPE type);
 	void OnWindowResize(int x, int y);
+
+	void SetDirection(Vector3 direction);
 
 	Vector3 GetTranslation();
 	Vector3 GetDirection();

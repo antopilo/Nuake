@@ -33,11 +33,8 @@ void Project::Save()
 
 void Project::SaveAs(const std::string FullPath)
 {
-	// Serialize the scene.
-	BEGIN_SERIALIZE();
-	SERIALIZE_VAL(Name);
-	SERIALIZE_VAL(Description);
 
+	json j = Serialize();
 	// Dump.
 	std::string serialized_string = j.dump();
 

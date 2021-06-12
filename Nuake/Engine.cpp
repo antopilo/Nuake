@@ -24,8 +24,6 @@ void Engine::Init()
 	PhysicsManager::Get()->Init();
 	Logger::Log("Physics initialized");
 
-	ScriptingEngine::Init();
-	Logger::Log("Scripting engine initialized");
 
 	CurrentWindow = Window::Get();
 	Logger::Log("Window initialized");

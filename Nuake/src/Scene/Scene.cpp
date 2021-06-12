@@ -13,7 +13,7 @@
 #include "../Scene/Entities/Components/LuaScriptComponent.h"
 #include <fstream>
 #include <streambuf>
-
+#include "../Scene/Entities/Components/WrenScriptComponent.h"
 Ref<Scene> Scene::New()
 {
 	return CreateRef<Scene>();
@@ -44,6 +44,8 @@ bool Scene::SetName(std::string& newName)
 
 void Scene::OnInit()
 {
+	ScriptingEngine::Init();
+
 	// Create physic world.
 	auto view = m_Registry.view<TransformComponent, RigidBodyComponent>();
 	for (auto e : view)
@@ -98,10 +100,19 @@ void Scene::OnInit()
 
 	// Instanciate scripts.
 	{
-		m_Registry.view<LuaScriptComponent>().each([=](auto entity, auto& nsc)
+		auto entities = m_Registry.view<WrenScriptComponent>();
+		for (auto& e : entities)
 		{
+			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
+			if (wren.Script != "" && wren.Class != "")
+				wren.WrenScript = CreateRef<WrenScript>(wren.Script, wren.Class, true);
 			
-		});
+			if (wren.WrenScript != nullptr)
+			{
+				wren.WrenScript->SetScriptableEntityID((int)e);
+				wren.WrenScript->CallInit();
+			}
+		}
 	}
 }
 
@@ -110,12 +121,21 @@ void Scene::OnExit()
 	PhysicsManager::Get()->Reset();
 
 	// destroy scripts.
+	auto entities = m_Registry.view<WrenScriptComponent>();
+	for (auto& e : entities)
 	{
-		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+		WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
+
+		if (wren.WrenScript != nullptr)
 		{
-			nsc.Instance->OnDestroy();
-		});
+				wren.WrenScript->CallExit();
+
+			
+		}
+			
 	}
+
+	ScriptingEngine::Close();
 }
 
 // update entities and some components.
@@ -127,6 +147,16 @@ void Scene::Update(Timestep ts)
 		{
 			nsc.Instance->OnUpdate(ts);
 		});
+	}
+
+	// destroy scripts.
+	auto entities = m_Registry.view<WrenScriptComponent>();
+	for (auto& e : entities)
+	{
+		WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
+
+		if (wren.WrenScript != nullptr)
+			wren.WrenScript->CallUpdate(ts);
 	}
 
 	// Update rigidbodies
@@ -618,11 +648,13 @@ bool Scene::SaveAs(const std::string& path)
 	return true;
 }
 
+
 void Scene::ReloadInterfaces()
 {
 	for (auto& i : m_Interfaces)
 		i->Reload();
 }
+
 
 void Scene::AddInterface(Ref<UI::UserInterface> interface)
 {
@@ -641,7 +673,6 @@ json Scene::Serialize()
 		SERIALIZE_VAL_LBL("Entities", entities);
 	END_SERIALIZE();
 }
-
 
 
 bool Scene::Deserialize(const std::string& str)
@@ -675,5 +706,6 @@ bool Scene::Deserialize(const std::string& str)
 			}
 		}
 	}
+
 	return true;
 }

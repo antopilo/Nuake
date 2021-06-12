@@ -11,7 +11,8 @@ private:
 	unsigned int m_RenderBuffer;
 
 	Vector2 m_Size;
-
+	bool ResizeQueued = false;
+	
 	std::map<int, Ref<Texture>> m_Textures;
 	Ref<Texture> m_Texture;
 
@@ -27,6 +28,7 @@ public:
 
 	void Bind();
 	void Unbind();
+	void QueueResize(Vector2 size);
 	Vector2 GetSize() const { return m_Size; }
 	void UpdateSize(Vector2 size);
 

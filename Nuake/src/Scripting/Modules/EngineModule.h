@@ -11,10 +11,6 @@ namespace ScriptAPI
 	class EngineModule : public ScriptModule
 	{
 		std::string ModuleName = "Engine";
-		std::string WrenAPI = "class Engine { \n"
-			"foreign static Log(msg) \n"
-			"}"
-			"";
 
 		std::string GetModuleName() override
 		{
@@ -24,7 +20,6 @@ namespace ScriptAPI
 		void RegisterModule(WrenVM* vm) override
 		{
 			RegisterMethod("Log(_)", (void*)Log);
-			WrenInterpretResult result = wrenInterpret(vm, "main", WrenAPI.c_str());
 		}
 
 		static void Log(WrenVM* vm)
@@ -33,6 +28,4 @@ namespace ScriptAPI
 			Logger::Log(msg);
 		}
 	};
-
-	
 }

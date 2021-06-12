@@ -4,6 +4,9 @@
 #include <src/Scripting/Modules/ScriptModule.h>
 #include <src/Scripting/Modules/EngineModule.h>
 #include <src/Scripting/Modules/SceneModule.h>
+#include <src/Scripting/Modules/MathModule.h>
+#include <src/Scripting/Modules/InputModule.h>
+
 WrenVM* ScriptingEngine::m_WrenVM;
 
 
@@ -37,11 +40,25 @@ void writeFn(WrenVM* vm, const char* text) {
 	printf("%s", text);
 }
 
+bool hasEnding(std::string const& fullString, std::string const& ending) {
+    if (fullString.length() >= ending.length()) {
+        return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+    }
+    else {
+        return false;
+    }
+}
 
 WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) {
     WrenLoadModuleResult result = { 0 };
-    std::string str = FileSystem::ReadFile("resources/" + std::string(name) + ".wren", true);
+
+    std::string path = "resources/" + std::string(name);
+    if(!hasEnding(path, ".wren"))
+        path += ".wren";
+
+    std::string str = FileSystem::ReadFile(path, true);
     char* c = strcpy(new char[str.length() + 1], str.c_str());
+
     result.source = c;
     return result;
 }
@@ -91,6 +108,10 @@ void ScriptingEngine::Init()
     RegisterModule(engineModule);
     Ref<ScriptAPI::SceneModule> sceneModule = CreateRef<ScriptAPI::SceneModule>();
     RegisterModule(sceneModule);
+    Ref<ScriptAPI::MathModule> mathModule = CreateRef<ScriptAPI::MathModule>();
+    RegisterModule(mathModule);
+    Ref<ScriptAPI::InputModule> inputModule = CreateRef<ScriptAPI::InputModule> ();
+    RegisterModule(inputModule);
 }
 
 

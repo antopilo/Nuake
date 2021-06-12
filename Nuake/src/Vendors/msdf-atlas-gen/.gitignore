@@ -1,0 +1,20 @@
+Debug/
+Release/
+Debug Library/
+Release Library/
+x86/
+x64/
+*.exe
+*.user
+*.sdf
+*.pdb
+*.ipdb
+*.iobj
+*.suo
+*.VC.opendb
+*.VC.db
+bin/msdf-atlas-gen
+bin/*.lib
+output.png
+out/
+build/

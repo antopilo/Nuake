@@ -14,11 +14,8 @@ namespace UI
 		m_Name = name;
 
 		font = FontLoader::LoadFont("resources/Fonts/RobotoMono-Regular.ttf");
-
-		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
-
 		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
- 		
+
 		if (!Root)
 		{
 			Logger::Log("Failed to generate interface structure");
@@ -38,7 +35,6 @@ namespace UI
 
 	void UserInterface::Reload()
 	{
-		m_Stylesheet = StyleSheet::New("/Interface\\Testing.css");
 		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
 		if (!Root)
 		{
@@ -67,8 +63,8 @@ namespace UI
 		Root->YogaNode = yoga_root;
 	
 		for (auto& g : Root->GetGroups())
-			if (m_Stylesheet->HasStyleGroup(g))
-				Root->ApplyStyle(m_Stylesheet->GetStyleGroup(g));
+			if (Root->StyleSheet->HasStyleGroup(g))
+				Root->ApplyStyle(Root->StyleSheet->GetStyleGroup(g));
 		Root->SetYogaLayout();
 		CreateYogaLayoutRecursive(Root, yoga_root);
 	}
@@ -85,8 +81,8 @@ namespace UI
 			n->YogaNode = newYogaNode;
 
 			for (auto& g : n->GetGroups())
-				if (m_Stylesheet->HasStyleGroup(g))
-					n->ApplyStyle(m_Stylesheet->GetStyleGroup(g));
+				if (Root->StyleSheet->HasStyleGroup(g))
+					n->ApplyStyle(Root->StyleSheet->GetStyleGroup(g));
 
 			n->SetYogaLayout();
 			YGNodeInsertChild(yoga_node, newYogaNode, index);
