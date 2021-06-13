@@ -15,7 +15,7 @@ Nuake is a game engine written from scratch by myself. It is not meant to be a e
 Feel free to make pull requests and I will look over them myself.
 
 # Documentation
-No documentation is currently available, I will try my best to work on this asap. 
+You can access the current documentation at [here](https://nuake.readthedocs.io/en/latest/index.html)
 
 # Features
 - Trenchbroom integration with live reload
