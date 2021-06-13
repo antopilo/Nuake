@@ -10,6 +10,7 @@ workspace "Nuake"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Nuake/dependencies/glfw_p5.lua"
+include "Nuake/dependencies/assimp_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -84,6 +85,7 @@ project "Editor"
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/bullet/src",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
+        "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen"
     }
 
@@ -106,12 +108,12 @@ project "Editor"
     { 
         "Nuake.lib", 
         "GLFW",
+        "assimp",
         "glew32s.lib", 
         "opengl32.lib", 
         "BulletCollision_vs2010_x64_release.lib",
         "BulletDynamics_vs2010_x64_release.lib",
         "LinearMath_vs2010_x64_release.lib",
-        "assimp-vc142-mt.lib",
         "freetype.lib"
     }
 
