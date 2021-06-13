@@ -829,3 +829,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 !freetype.lib
+
+./docs/_build/
