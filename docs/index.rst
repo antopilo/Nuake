@@ -7,15 +7,22 @@ Welcome to Nuake's documentation!
 =================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: General
+   :name: sec-general
 
+   General/index
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Scripting
+   :name: sec-scripting
 
-Indices and tables
-==================
+   Scripting/index
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-=======
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorial
+   :name: sec-tutorial
+
+   Tutorial/index

@@ -831,6 +831,7 @@ FodyWeavers.xsd
 !freetype.lib
 
 ./docs/_build/
+docs/_build
 Nuake/dependencies/assimp.vcxproj
 Nuake/dependencies/assimp.vcxproj.filters
 DemoModule/DemoModule.vcxproj
