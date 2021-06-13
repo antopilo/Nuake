@@ -9,10 +9,25 @@
     <ClInclude Include="src\EditorInterface.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\FileSystemUI.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PropretiesWindow.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SceneTree.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Toolbar.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="src\EditorInterface.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FileSystemUI.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

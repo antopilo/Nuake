@@ -37,8 +37,32 @@
     <Filter Include="src\Scene\Lighting">
       <UniqueIdentifier>{CF04C898-BBE8-88EE-2449-8341104C7370}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Scripting">
+      <UniqueIdentifier>{6FBC2D98-DB7C-A9CE-A4B7-F24B1037EEAA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scripting\Modules">
+      <UniqueIdentifier>{3748B9EB-A3B4-74E6-6CA8-0C44D8D3964E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\UI">
+      <UniqueIdentifier>{3A4B661C-26ED-90F2-0FA8-A446FBE81743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\UI\Font">
+      <UniqueIdentifier>{8028D349-ECDD-4B3F-75D2-4516E1864243}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\UI\Nodes">
+      <UniqueIdentifier>{82D0C884-6E33-5829-17B9-90DF03FB23AC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\UI\Styling">
+      <UniqueIdentifier>{33B14B68-1F7F-3F6E-0813-B094F47F1BD3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Vendors">
       <UniqueIdentifier>{7D52A2DC-E907-1BD2-72FC-14A9DEB011D6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\artery-font-format">
+      <UniqueIdentifier>{7D2047F6-6946-115D-528C-96283E513629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\artery-font-format\artery-font">
+      <UniqueIdentifier>{87CE55F0-7336-1CBE-DCA1-30D4C82833AA}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Vendors\glm">
       <UniqueIdentifier>{4CD36C32-B85E-DAF6-C16F-5DEB2D7A36F7}</UniqueIdentifier>
@@ -52,6 +76,9 @@
     <Filter Include="src\Vendors\imgui">
       <UniqueIdentifier>{A7891381-13A0-1117-5C17-9D38C86CE29E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Vendors\katana-parser">
+      <UniqueIdentifier>{36E6ABA1-A2A8-DF2B-EB58-6EB8575AB809}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Vendors\libmap">
       <UniqueIdentifier>{E1F538AA-CDD9-F9FF-363A-F452223DE481}</UniqueIdentifier>
     </Filter>
@@ -61,8 +88,149 @@
     <Filter Include="src\Vendors\libmap\h">
       <UniqueIdentifier>{98F84D1C-8487-D7E5-2DA6-EBE01914E88B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Vendors\lua">
+      <UniqueIdentifier>{AEE96C32-1A75-DAF6-2386-5DEB8F9036F7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\lua\lua-5.4.3">
+      <UniqueIdentifier>{645090A3-D012-C42D-19C3-52BA85C49C0B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\lua\lua-5.4.3\src">
+      <UniqueIdentifier>{7BA0659A-E7B8-4CC4-B065-DC5D1C3DE15D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdf-atlas-gen">
+      <UniqueIdentifier>{BF7A87B9-AB8A-338A-1444-98A800732223}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen">
+      <UniqueIdentifier>{F0F7C555-5C59-A363-E5C6-E9155127DA22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\core">
+      <UniqueIdentifier>{681E7916-5443-C896-7D8E-AD266912C7B4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\ext">
+      <UniqueIdentifier>{50F3FB36-BC2A-44CE-C534-A8F131EB6AC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\freetype">
+      <UniqueIdentifier>{A3E4D45E-8F9F-C40A-3857-3D5524F10E9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\freetype\include">
+      <UniqueIdentifier>{16FF41ED-02E6-03E5-AB36-6A0297FC7C4B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\freetype\include\freetype">
+      <UniqueIdentifier>{89565A05-F5C6-5C7E-BEE5-D6062A15957F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\freetype\include\freetype\config">
+      <UniqueIdentifier>{8E11CFD9-7A50-7955-23D3-55870FF12EC0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\include">
+      <UniqueIdentifier>{630F048B-CF1C-3271-5803-2E5CC40FFE27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\lib">
+      <UniqueIdentifier>{160FFC36-8246-44CE-8B50-A8F1F7066BC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia">
+      <UniqueIdentifier>{47D28116-33F7-D096-5C42-B62648C6CFB4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include">
+      <UniqueIdentifier>{BA504465-A6A1-2FA7-CF05-1E69BBB5C210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\android">
+      <UniqueIdentifier>{0AF6CE81-F672-C2C4-1FF0-C2D80BCC5E58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\atlastext">
+      <UniqueIdentifier>{834F68FB-6FB7-2EC9-D822-43DFC4A945B5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\c">
+      <UniqueIdentifier>{AC6D9BC7-98A9-9E31-01BC-B628ED16474C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\codec">
+      <UniqueIdentifier>{87F8F0DD-734A-C8CD-5C69-05DE485AE1B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\config">
+      <UniqueIdentifier>{9F8A159C-0B1A-D786-1416-B89E80241293}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\core">
+      <UniqueIdentifier>{7285E0A1-DE49-DF91-A7AF-0F5C13337BC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\docs">
+      <UniqueIdentifier>{F20FE1A1-5ED4-DF91-273A-105C93BD7BC7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\effects">
+      <UniqueIdentifier>{89822BA3-75FF-1EE6-9E7C-1FFA8A58BB79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\encode">
+      <UniqueIdentifier>{D7E0A7A0-4370-698B-4C6C-4AA3B87AA497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\gpu">
+      <UniqueIdentifier>{95A82D1C-818F-EF13-2AE0-553116A6687A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\gpu\gl">
+      <UniqueIdentifier>{17327FA5-83C1-4090-8CBD-21A8F8CB7B9C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\gpu\mock">
+      <UniqueIdentifier>{0E781702-7A92-7AA3-C3B4-8A372F0EA2AA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\gpu\mtl">
+      <UniqueIdentifier>{F18F6555-DD0C-5998-068A-59ACF265F52B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\gpu\vk">
+      <UniqueIdentifier>{05347FA5-71C3-4090-7ABF-21A8E6CD7B9C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\pathops">
+      <UniqueIdentifier>{688241E7-54FF-342A-7D7C-353E6958D1BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\ports">
+      <UniqueIdentifier>{A174DCDE-8DC6-B3CE-76E5-F0DE62D6CCB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\private">
+      <UniqueIdentifier>{C499290E-B016-1D51-D993-1D65C56FB9E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\svg">
+      <UniqueIdentifier>{59DC2D1C-45C3-EF13-EE13-5631DAD9687A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\utils">
+      <UniqueIdentifier>{BA8539DF-A6D7-10CF-8FF6-4DDF7BE729B8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\msdfgen\skia\include\utils\mac">
+      <UniqueIdentifier>{1A75B547-06DD-7B15-6F48-902B5BCF9201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\pugixml">
+      <UniqueIdentifier>{72379741-DE98-744F-6706-BB01D366AB0E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Vendors\stb_image">
       <UniqueIdentifier>{570330DC-C36F-EBD6-8C63-8334F88E0D3F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren">
+      <UniqueIdentifier>{C81B1080-B414-2FD2-DD46-1457C99E0EDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\src">
+      <UniqueIdentifier>{DF7DE4FE-CB0C-6EC8-742B-82C360997E6E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\src\include">
+      <UniqueIdentifier>{521405D9-3ECF-F484-E786-6DCFD3203F15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\src\optional">
+      <UniqueIdentifier>{B45E9544-2077-7C6E-E923-0C0855FB1008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\src\vm">
+      <UniqueIdentifier>{117D6A89-7DB4-B220-86BE-1644F274D919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\test">
+      <UniqueIdentifier>{579174DB-C3FD-2FD6-8CF1-C733F81C523E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\test\api">
+      <UniqueIdentifier>{20D696BB-8C98-CA45-D548-59D2414AA323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\wren\test\unit">
+      <UniqueIdentifier>{A6897C2E-9299-28FF-FB52-8D1DE7811798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\yoga">
+      <UniqueIdentifier>{FC271180-E820-30D2-1153-1557FDAA0FDE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\yoga\event">
+      <UniqueIdentifier>{6DC66EE3-59C0-9735-422D-2E462EC6FDA1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Vendors\yoga\internal">
+      <UniqueIdentifier>{C8850D2D-3448-41B7-7DF8-CF43E9F91995}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -76,7 +244,13 @@
     <ClInclude Include="src\Core\Input.h">
       <Filter>src\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Logger.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core\MaterialManager.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Maths.h">
       <Filter>src\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Core\Physics\BulletDebugDrawer.h">
@@ -130,6 +304,9 @@
     <ClInclude Include="src\Rendering\Renderer.h">
       <Filter>src\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Renderer2D.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
     <ClInclude Include="src\Rendering\Shaders\Shader.h">
       <Filter>src\Rendering\Shaders</Filter>
     </ClInclude>
@@ -140,6 +317,9 @@
       <Filter>src\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Textures\Cubemap.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\FontBitmap.h">
       <Filter>src\Rendering\Textures</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Textures\HDR.h">
@@ -154,10 +334,22 @@
     <ClInclude Include="src\Rendering\Vertex.h">
       <Filter>src\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\Resource\File.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
     <ClInclude Include="src\Resource\FontAwesome5.h">
       <Filter>src\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="src\Resource\Project.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
     <ClInclude Include="src\Resource\Resource.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource\Serializable.h">
+      <Filter>src\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Resource\Serializer.h">
       <Filter>src\Resource</Filter>
     </ClInclude>
     <ClInclude Include="src\Resource\TrenchbroomMap.h">
@@ -181,7 +373,13 @@
     <ClInclude Include="src\Scene\Entities\Components\CharacterControllerComponent.h">
       <Filter>src\Scene\Entities\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\InterfaceComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Scene\Entities\Components\LightComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\LuaScriptComponent.h">
       <Filter>src\Scene\Entities\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Entities\Components\MeshCollider.h">
@@ -214,6 +412,9 @@
     <ClInclude Include="src\Scene\Entities\Components\TransformComponent.h">
       <Filter>src\Scene\Entities\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Entities\Components\WrenScriptComponent.h">
+      <Filter>src\Scene\Entities\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Scene\Entities\Entity.h">
       <Filter>src\Scene\Entities</Filter>
     </ClInclude>
@@ -228,6 +429,96 @@
     </ClInclude>
     <ClInclude Include="src\Scene\Scene.h">
       <Filter>src\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\EngineModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\EntityModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\InputModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\MathModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\SceneModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\ScriptModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\ScriptLoader.h">
+      <Filter>src\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\ScriptingEngine.h">
+      <Filter>src\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\WrenScript.h">
+      <Filter>src\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Font\AtlasGenerator.h">
+      <Filter>src\UI\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Font\Font.h">
+      <Filter>src\UI\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Font\FontLoader.h">
+      <Filter>src\UI\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Font\FontManager.h">
+      <Filter>src\UI\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\InterfaceParser.h">
+      <Filter>src\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Nodes\Canvas.h">
+      <Filter>src\UI\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Nodes\Node.h">
+      <Filter>src\UI\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Nodes\Rect.h">
+      <Filter>src\UI\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Nodes\TextNode.h">
+      <Filter>src\UI\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Styling\Style.h">
+      <Filter>src\UI\Styling</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Styling\StyleSheetParser.h">
+      <Filter>src\UI\Styling</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\Styling\Stylesheet.h">
+      <Filter>src\UI\Styling</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UI\UserInterface.h">
+      <Filter>src\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\artery-font.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\crc32.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\enums.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\serialization.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\std-artery-font.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\stdio-serialization.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\structures.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\types.h">
+      <Filter>src\Vendors\artery-font-format\artery-font</Filter>
     </ClInclude>
     <ClInclude Include="src\Vendors\glm\simd\common.h">
       <Filter>src\Vendors\glm\simd</Filter>
@@ -301,6 +592,27 @@
     <ClInclude Include="src\Vendors\imgui\imstb_truetype.h">
       <Filter>src\Vendors\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\foundation.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\katana.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\katana.lex.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\katana.tab.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\parser.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\selector.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\katana-parser\tokenizer.h">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClInclude>
     <ClInclude Include="src\Vendors\libmap\h\brush.h">
       <Filter>src\Vendors\libmap\h</Filter>
     </ClInclude>
@@ -340,8 +652,1409 @@
     <ClInclude Include="src\Vendors\libmap\h\vector.h">
       <Filter>src\Vendors\libmap\h</Filter>
     </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lapi.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lauxlib.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lcode.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lctype.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ldebug.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ldo.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lfunc.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lgc.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ljumptab.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\llex.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\llimits.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lmem.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lobject.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lopcodes.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lopnames.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lparser.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lprefix.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lstate.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lstring.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ltable.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ltm.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lua.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\luaconf.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lualib.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lundump.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lvm.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lzio.h">
+      <Filter>src\Vendors\lua\lua-5.4.3\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\AtlasGenerator.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\AtlasStorage.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\BitmapAtlasStorage.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\Charset.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\DynamicAtlas.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\FontGeometry.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\GlyphBox.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\GlyphGeometry.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\ImmediateAtlasGenerator.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\Rectangle.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\RectanglePacker.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\Remap.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\Workload.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\artery-font-export.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\bitmap-blit.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\csv-export.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\glyph-generators.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-encode.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-save.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\json-export.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\msdf-atlas-gen.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\rectangle-packing.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\resource.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\shadron-preview-generator.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\size-selectors.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\types.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\utf8.h">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Bitmap.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Contour.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\EdgeColor.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\EdgeHolder.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Projection.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Scanline.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Shape.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\ShapeDistanceFinder.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\SignedDistance.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\Vector2.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\contour-combiners.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\edge-coloring.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\edge-segments.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\edge-selectors.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\equation-solver.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\generator-config.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\msdf-error-correction.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\rasterization.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\render-sdf.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\save-bmp.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\save-tiff.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\sdf-error-estimation.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\core\shape-description.h">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\ext\import-font.h">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\ext\import-svg.h">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\ext\resolve-shape-geometry.h">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\ext\save-png.h">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\config\ftconfig.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\config\ftheader.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\config\ftmodule.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\config\ftoption.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\config\ftstdlib.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\freetype.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftadvanc.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftbbox.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftbdf.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftbitmap.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftbzip2.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftcache.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftchapters.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftcid.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftdriver.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\fterrdef.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\fterrors.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftfntfmt.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftgasp.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftglyph.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftgxval.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftgzip.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftimage.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftincrem.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftlcdfil.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftlist.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftlzw.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftmac.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftmm.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftmodapi.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftmoderr.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftotval.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftoutln.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftparams.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftpfr.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftrender.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftsizes.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftsnames.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftstroke.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftsynth.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftsystem.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\fttrigon.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\fttypes.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ftwinfnt.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\t1tables.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\ttnameid.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\tttables.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\freetype\tttags.h">
+      <Filter>src\Vendors\msdfgen\freetype\include\freetype</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\freetype\include\ft2build.h">
+      <Filter>src\Vendors\msdfgen\freetype\include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\include\lodepng.h">
+      <Filter>src\Vendors\msdfgen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\include\tinyxml2.h">
+      <Filter>src\Vendors\msdfgen\include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\msdfgen-ext.h">
+      <Filter>src\Vendors\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\msdfgen.h">
+      <Filter>src\Vendors\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\resource.h">
+      <Filter>src\Vendors\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkAndroidFrameworkUtils.h">
+      <Filter>src\Vendors\msdfgen\skia\include\android</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkAnimatedImage.h">
+      <Filter>src\Vendors\msdfgen\skia\include\android</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkBRDAllocator.h">
+      <Filter>src\Vendors\msdfgen\skia\include\android</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkBitmapRegionDecoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\android</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextContext.h">
+      <Filter>src\Vendors\msdfgen\skia\include\atlastext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextFont.h">
+      <Filter>src\Vendors\msdfgen\skia\include\atlastext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextRenderer.h">
+      <Filter>src\Vendors\msdfgen\skia\include\atlastext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextTarget.h">
+      <Filter>src\Vendors\msdfgen\skia\include\atlastext</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_canvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_colorspace.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_data.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_image.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_imageinfo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_maskfilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_matrix.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_paint.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_path.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_picture.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_shader.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_surface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_types.h">
+      <Filter>src\Vendors\msdfgen\skia\include\c</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkAndroidCodec.h">
+      <Filter>src\Vendors\msdfgen\skia\include\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkCodec.h">
+      <Filter>src\Vendors\msdfgen\skia\include\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkCodecAnimation.h">
+      <Filter>src\Vendors\msdfgen\skia\include\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkEncodedOrigin.h">
+      <Filter>src\Vendors\msdfgen\skia\include\codec</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\config\SkUserConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkAnnotation.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkBBHFactory.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkBitmap.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkBlendMode.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkBlurTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkCanvasVirtualEnforcer.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkClipOp.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkColor.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkColorFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkColorPriv.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkColorSpace.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkColorSpaceXformCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkCoverageMode.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkData.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDataTable.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDeferredDisplayListRecorder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDeque.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDocument.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDrawLooper.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDrawable.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkEncodedImageFormat.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkExecutor.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFilterQuality.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFlattenable.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFont.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontArguments.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontLCDConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontMetrics.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontMgr.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontParameters.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontStyle.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFontTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkGraphics.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkICC.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkImage.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkImageEncoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkImageGenerator.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkImageInfo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkLights.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMallocPixelRef.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMaskFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMath.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMatrix.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMatrix44.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMetaData.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMilestone.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkMultiPictureDraw.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkOverdrawCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPaint.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPath.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPathMeasure.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPicture.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPictureRecorder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPixelRef.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPixmap.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPngChunkReader.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPoint.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPoint3.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPostConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPreConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRRect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRSXform.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRWBuffer.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRasterHandleAllocator.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRefCnt.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRegion.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkScalar.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSerialProcs.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkShader.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSize.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkStream.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkString.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkStrokeRec.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSurface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSurfaceCharacterization.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSurfaceProps.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSwizzle.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTLazy.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTextBlob.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTime.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTraceMemoryDump.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTypeface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkUnPreMultiply.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkVertices.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkYUVAIndex.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkYUVASizeInfo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\docs\SkPDFDocument.h">
+      <Filter>src\Vendors\msdfgen\skia\include\docs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\docs\SkXPSDocument.h">
+      <Filter>src\Vendors\msdfgen\skia\include\docs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\Sk1DPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\Sk2DPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkAlphaThresholdFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkArithmeticImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkBlurDrawLooper.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkBlurImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkBlurMaskFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkColorFilterImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkColorMatrix.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkColorMatrixFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkComposeImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkCornerPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkDashPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkDiscretePathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkDisplacementMapEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkDropShadowImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkGradientShader.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkHighContrastFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkImageSource.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkLayerDrawLooper.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkLightingImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkLumaColorFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkMagnifierImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkMatrixConvolutionImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkMergeImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkMorphologyImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkOffsetImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkOpPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkOverdrawColorFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkPaintImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkPerlinNoiseShader.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkPictureImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkShaderMaskFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkTableColorFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkTableMaskFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkTileImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkToSRGBColorFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkTrimPathEffect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\SkXfermodeImageFilter.h">
+      <Filter>src\Vendors\msdfgen\skia\include\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkEncoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkJpegEncoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkPngEncoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkWebpEncoder.h">
+      <Filter>src\Vendors\msdfgen\skia\include\encode</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendDrawableInfo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendSemaphore.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendSurface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBlend.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrContext.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrContextOptions.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrDriverBugWorkarounds.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrDriverBugWorkaroundsAutogen.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrGpuResource.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrRenderTarget.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrResourceKey.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrSamplerState.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrSurface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrTexture.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLAssembleInterface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig_chrome.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLExtensions.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLFunctions.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLInterface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\mock\GrMockTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\mock</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\mtl\GrMtlTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\mtl</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkBackendContext.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkExtensions.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkMemoryAllocator.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkTypes.h">
+      <Filter>src\Vendors\msdfgen\skia\include\gpu\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\pathops\SkPathOps.h">
+      <Filter>src\Vendors\msdfgen\skia\include\pathops</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontConfigInterface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_FontConfigInterface.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_android.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_directory.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_empty.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_fontconfig.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_indirect.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkImageGeneratorCG.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkImageGeneratorWIC.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkRemotableFontMgr.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkTypeface_mac.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkTypeface_win.h">
+      <Filter>src\Vendors\msdfgen\skia\include\ports</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrAuditTrail.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrCCClipPath.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrCCPerOpListPaths.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrColor.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrOpList.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrProxyRef.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrRenderTargetProxy.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrSharedEnums.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrSingleOwner.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrSkSLFPFactoryCache.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrSurfaceProxy.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrTextureProxy.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrTypesPriv.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\GrVkTypesPriv.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkArenaAlloc.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkAtomics.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkBitmaskEnum.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkChecksum.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkColorData.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkDeferredDisplayList.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkEncodedInfo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkFixed.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkFloatBits.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkFloatingPoint.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkHalf.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkImageInfoPriv.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkLeanWindows.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkMacros.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkMalloc.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkMessageBus.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkMutex.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkNoncopyable.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkNx.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkNx_neon.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkNx_sse.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkOnce.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkPathRef.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkSafe32.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkSafe_math.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkSemaphore.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkShadowFlags.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkSpinlock.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTArray.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTDArray.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTFitsIn.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTHash.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTInternalLList.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTLogic.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTSearch.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTemplates.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkThreadID.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTo.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkWeakRefCnt.h">
+      <Filter>src\Vendors\msdfgen\skia\include\private</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\svg\SkSVGCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\svg</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\Sk3D.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkAnimCodecPlayer.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkBase64.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkCamera.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkCanvasStateUtils.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkEventTracer.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkFrontBufferedStream.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkInterpolator.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkLua.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkLuaCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNWayCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNoDrawCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNullCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkPaintFilterCanvas.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkParse.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkParsePath.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkRandom.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkShadowUtils.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkTextUtils.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkTraceEventPhase.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\mac\SkCGUtils.h">
+      <Filter>src\Vendors\msdfgen\skia\include\utils\mac</Filter>
+    </ClInclude>
     <ClInclude Include="src\Vendors\stb_image\stb_image.h">
       <Filter>src\Vendors\stb_image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\include\wren.h">
+      <Filter>src\Vendors\wren\src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\optional\wren_opt_meta.h">
+      <Filter>src\Vendors\wren\src\optional</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\optional\wren_opt_random.h">
+      <Filter>src\Vendors\wren\src\optional</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_common.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_compiler.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_core.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_debug.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_math.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_opcodes.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_primitive.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_utils.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_value.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_vm.h">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\api_tests.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\benchmark.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\call.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\call_calls_foreign.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\call_wren_call_root.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\error.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\foreign_class.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\get_variable.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\handle.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\lists.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\maps.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\new_vm.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\reset_stack_after_call_abort.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\reset_stack_after_foreign_construct.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\resolution.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\slots.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\api\user_data.h">
+      <Filter>src\Vendors\wren\test\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\test.h">
+      <Filter>src\Vendors\wren\test</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\unit\path_test.h">
+      <Filter>src\Vendors\wren\test\unit</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\wren\test\unit\test.h">
+      <Filter>src\Vendors\wren\test\unit</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\BitUtils.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\CompactValue.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\Utils.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGConfig.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGEnums.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGFloatOptional.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGLayout.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGMacros.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGNode.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGNodePrint.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGStyle.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\YGValue.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\Yoga-internal.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\Yoga.h">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\event\event.h">
+      <Filter>src\Vendors\yoga\event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\internal\experiments-inl.h">
+      <Filter>src\Vendors\yoga\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\internal\experiments.h">
+      <Filter>src\Vendors\yoga\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vendors\yoga\log.h">
+      <Filter>src\Vendors\yoga</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.h">
       <Filter>src</Filter>
@@ -353,6 +2066,9 @@
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Input.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Logger.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\MaterialManager.cpp">
@@ -397,6 +2113,9 @@
     <ClCompile Include="src\Rendering\Renderer.cpp">
       <Filter>src\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\Renderer2D.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
     <ClCompile Include="src\Rendering\Shaders\Shader.cpp">
       <Filter>src\Rendering\Shaders</Filter>
     </ClCompile>
@@ -417,6 +2136,9 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\Textures\Texture.cpp">
       <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Resource\Project.cpp">
+      <Filter>src\Resource</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\EditorCamera.cpp">
       <Filter>src\Scene</Filter>
@@ -460,6 +2182,36 @@
     <ClCompile Include="src\Scene\Scene.cpp">
       <Filter>src\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scripting\ScriptLoader.cpp">
+      <Filter>src\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scripting\ScriptingEngine.cpp">
+      <Filter>src\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scripting\WrenScript.cpp">
+      <Filter>src\Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Font\FontManager.cpp">
+      <Filter>src\UI\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\InterfaceParser.cpp">
+      <Filter>src\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Nodes\Canvas.cpp">
+      <Filter>src\UI\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Nodes\Node.cpp">
+      <Filter>src\UI\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Styling\StyleSheetParser.cpp">
+      <Filter>src\UI\Styling</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Styling\Stylesheet.cpp">
+      <Filter>src\UI\Styling</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\UserInterface.cpp">
+      <Filter>src\UI</Filter>
+    </ClCompile>
     <ClCompile Include="src\Vendors\glm\detail\glm.cpp">
       <Filter>src\Vendors\glm\detail</Filter>
     </ClCompile>
@@ -499,6 +2251,24 @@
     <ClCompile Include="src\Vendors\imgui\imgui_widgets.cpp">
       <Filter>src\Vendors\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\foundation.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\katana.lex.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\katana.tab.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\parser.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\selector.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\katana-parser\tokenizer.c">
+      <Filter>src\Vendors\katana-parser</Filter>
+    </ClCompile>
     <ClCompile Include="src\Vendors\libmap\c\geo_generator.c">
       <Filter>src\Vendors\libmap\c</Filter>
     </ClCompile>
@@ -517,8 +2287,203 @@
     <ClCompile Include="src\Vendors\libmap\c\vector.c">
       <Filter>src\Vendors\libmap\c</Filter>
     </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\Charset.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\FontGeometry.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\GlyphGeometry.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\RectanglePacker.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\Workload.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\artery-font-export.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\bitmap-blit.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\charset-parser.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\csv-export.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\glyph-generators.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\image-encode.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\json-export.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\main.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\shadron-preview-generator.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\size-selectors.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\utf8.cpp">
+      <Filter>src\Vendors\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\Contour.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\EdgeHolder.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\Projection.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\Scanline.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\Shape.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\SignedDistance.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\Vector2.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\contour-combiners.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\edge-coloring.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\edge-segments.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\edge-selectors.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\equation-solver.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\msdf-error-correction.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\msdfgen.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\rasterization.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\render-sdf.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\save-bmp.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\save-tiff.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\sdf-error-estimation.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\core\shape-description.cpp">
+      <Filter>src\Vendors\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\ext\import-font.cpp">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\ext\import-svg.cpp">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\ext\resolve-shape-geometry.cpp">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\ext\save-png.cpp">
+      <Filter>src\Vendors\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\lib\lodepng.cpp">
+      <Filter>src\Vendors\msdfgen\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\lib\tinyxml2.cpp">
+      <Filter>src\Vendors\msdfgen\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\msdfgen\main.cpp">
+      <Filter>src\Vendors\msdfgen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\pugixml\pugixml.cpp">
+      <Filter>src\Vendors\pugixml</Filter>
+    </ClCompile>
     <ClCompile Include="src\Vendors\stb_image\stb_image.cpp">
       <Filter>src\Vendors\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_compiler.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_core.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_debug.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_primitive.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_utils.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_value.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_vm.c">
+      <Filter>src\Vendors\wren\src\vm</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\Utils.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGConfig.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGEnums.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGLayout.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGNode.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGNodePrint.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGStyle.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\YGValue.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\Yoga.cpp">
+      <Filter>src\Vendors\yoga</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\event\event.cpp">
+      <Filter>src\Vendors\yoga\event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\internal\experiments.cpp">
+      <Filter>src\Vendors\yoga\internal</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vendors\yoga\log.cpp">
+      <Filter>src\Vendors\yoga</Filter>
     </ClCompile>
     <ClCompile Include="src\Window.cpp">
       <Filter>src</Filter>

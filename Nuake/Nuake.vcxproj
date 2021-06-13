@@ -15,12 +15,11 @@
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Nuake</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -57,13 +56,15 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_DOUBLE_PRECISION;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\x64\include;Dependencies\bullet\src;Dependencies\assimp\include;src\Vendors\sol2;C:\Dev\Nuake\Nuake\src\Vendors\lua\lua-5.4.3\src;%(AdditionalIncludeDirectories);C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\freetype\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>dependencies\build\assimp;dependencies\assimp\include;.;src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\include;Dependencies\bullet3\src;Dependencies\assimp\include;Dependencies\build;src\Vendors\msdfgen\include;src\Vendors\msdfgen\freetype\include;src\Vendors\msdfgen;src\Vendors\wren\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -71,13 +72,19 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_DOUBLE_PRECISION;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\x64\include;Dependencies\bullet\src;Dependencies\assimp\include;src\Vendors\lua\lua-5.4.3\src;src\Vendors\msdfgen;Vendors\msdf-atlas-gen;src\Vendors\artery-font-format;src\Vendors\msdfgen\include;%(AdditionalIncludeDirectories);C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen\freetype\include;C:\Dev\Nuake\Nuake\src\Vendors\msdfgen</AdditionalIncludeDirectories>
-      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>dependencies\build\assimp;dependencies\assimp\include;.;src\Vendors;Dependencies\GLEW\include;Dependencies\GLFW\include;Dependencies\bullet3\src;Dependencies\assimp\include;Dependencies\build;src\Vendors\msdfgen\include;src\Vendors\msdfgen\freetype\include;src\Vendors\msdfgen;src\Vendors\wren\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -128,6 +135,7 @@
     <ClInclude Include="src\Scene\Entities\Components\BoxCollider.h" />
     <ClInclude Include="src\Scene\Entities\Components\CameraComponent.h" />
     <ClInclude Include="src\Scene\Entities\Components\CharacterControllerComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\InterfaceComponent.h" />
     <ClInclude Include="src\Scene\Entities\Components\LightComponent.h" />
     <ClInclude Include="src\Scene\Entities\Components\LuaScriptComponent.h" />
     <ClInclude Include="src\Scene\Entities\Components\MeshCollider.h" />
@@ -140,28 +148,42 @@
     <ClInclude Include="src\Scene\Entities\Components\RigidbodyComponent.h" />
     <ClInclude Include="src\Scene\Entities\Components\SphereCollider.h" />
     <ClInclude Include="src\Scene\Entities\Components\TransformComponent.h" />
+    <ClInclude Include="src\Scene\Entities\Components\WrenScriptComponent.h" />
     <ClInclude Include="src\Scene\Entities\Entity.h" />
     <ClInclude Include="src\Scene\Entities\ImGuiHelper.h" />
     <ClInclude Include="src\Scene\Entities\ScriptableEntity.h" />
     <ClInclude Include="src\Scene\Lighting\Environment.h" />
     <ClInclude Include="src\Scene\Scene.h" />
-    <ClInclude Include="src\Scripting\ScriptingAPI\HelloWorld.h" />
-    <ClInclude Include="src\Scripting\ScriptingEngine.h" />
+    <ClInclude Include="src\Scripting\Modules\EngineModule.h" />
+    <ClInclude Include="src\Scripting\Modules\EntityModule.h" />
+    <ClInclude Include="src\Scripting\Modules\InputModule.h" />
+    <ClInclude Include="src\Scripting\Modules\MathModule.h" />
+    <ClInclude Include="src\Scripting\Modules\SceneModule.h" />
+    <ClInclude Include="src\Scripting\Modules\ScriptModule.h" />
     <ClInclude Include="src\Scripting\ScriptLoader.h" />
-    <ClInclude Include="src\Scripting\ScriptModule.h" />
-    <ClInclude Include="src\UI\Nodes\Canvas.h" />
+    <ClInclude Include="src\Scripting\ScriptingEngine.h" />
+    <ClInclude Include="src\Scripting\WrenScript.h" />
     <ClInclude Include="src\UI\Font\AtlasGenerator.h" />
     <ClInclude Include="src\UI\Font\Font.h" />
     <ClInclude Include="src\UI\Font\FontLoader.h" />
     <ClInclude Include="src\UI\Font\FontManager.h" />
     <ClInclude Include="src\UI\InterfaceParser.h" />
+    <ClInclude Include="src\UI\Nodes\Canvas.h" />
     <ClInclude Include="src\UI\Nodes\Node.h" />
     <ClInclude Include="src\UI\Nodes\Rect.h" />
-    <ClInclude Include="src\UI\Styling\Style.h" />
-    <ClInclude Include="src\UI\Styling\Stylesheet.h" />
-    <ClInclude Include="src\UI\Styling\StyleSheetParser.h" />
     <ClInclude Include="src\UI\Nodes\TextNode.h" />
+    <ClInclude Include="src\UI\Styling\Style.h" />
+    <ClInclude Include="src\UI\Styling\StyleSheetParser.h" />
+    <ClInclude Include="src\UI\Styling\Stylesheet.h" />
     <ClInclude Include="src\UI\UserInterface.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\artery-font.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\crc32.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\enums.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\serialization.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\std-artery-font.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\stdio-serialization.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\structures.h" />
+    <ClInclude Include="src\Vendors\artery-font-format\artery-font\types.h" />
     <ClInclude Include="src\Vendors\glm\simd\common.h" />
     <ClInclude Include="src\Vendors\glm\simd\exponential.h" />
     <ClInclude Include="src\Vendors\glm\simd\geometric.h" />
@@ -228,85 +250,63 @@
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ltable.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\ltm.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lua.h" />
-    <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lua.hpp" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\luaconf.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lualib.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lundump.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lvm.h" />
     <ClInclude Include="src\Vendors\lua\lua-5.4.3\src\lzio.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\artery-font.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\crc32.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\crc32.hpp" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\enums.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\serialization.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\serialization.hpp" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\std-artery-font.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\stdio-serialization.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\stdio-serialization.hpp" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\structures.h" />
-    <ClInclude Include="src\Vendors\artery-font-format\artery-font\types.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\artery-font-export.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\AtlasGenerator.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\AtlasStorage.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\bitmap-blit.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\BitmapAtlasStorage.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\BitmapAtlasStorage.hpp" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\Charset.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\csv-export.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\DynamicAtlas.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\DynamicAtlas.hpp" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\FontGeometry.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\glyph-generators.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\GlyphBox.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\GlyphGeometry.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-encode.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-save.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-save.hpp" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\ImmediateAtlasGenerator.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\ImmediateAtlasGenerator.hpp" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\json-export.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\msdf-atlas-gen.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\rectangle-packing.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\rectangle-packing.hpp" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\Rectangle.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\RectanglePacker.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\Remap.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\Workload.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\artery-font-export.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\bitmap-blit.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\csv-export.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\glyph-generators.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-encode.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\image-save.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\json-export.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\msdf-atlas-gen.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\rectangle-packing.h" />
+    <ClInclude Include="src\Vendors\msdf-atlas-gen\resource.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\shadron-preview-generator.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\size-selectors.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\types.h" />
     <ClInclude Include="src\Vendors\msdf-atlas-gen\utf8.h" />
-    <ClInclude Include="src\Vendors\msdf-atlas-gen\Workload.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\arithmetics.hpp" />
-    <ClInclude Include="src\Vendors\msdfgen\core\bitmap-interpolation.hpp" />
     <ClInclude Include="src\Vendors\msdfgen\core\Bitmap.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\Bitmap.hpp" />
-    <ClInclude Include="src\Vendors\msdfgen\core\BitmapRef.hpp" />
-    <ClInclude Include="src\Vendors\msdfgen\core\contour-combiners.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\Contour.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\EdgeColor.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\EdgeHolder.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\Projection.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\Scanline.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\Shape.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\ShapeDistanceFinder.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\SignedDistance.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\Vector2.h" />
+    <ClInclude Include="src\Vendors\msdfgen\core\contour-combiners.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\edge-coloring.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\edge-segments.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\edge-selectors.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\EdgeColor.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\EdgeHolder.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\equation-solver.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\generator-config.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\msdf-error-correction.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\pixel-conversion.hpp" />
-    <ClInclude Include="src\Vendors\msdfgen\core\Projection.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\rasterization.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\render-sdf.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\save-bmp.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\save-tiff.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\Scanline.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\sdf-error-estimation.h" />
     <ClInclude Include="src\Vendors\msdfgen\core\shape-description.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\Shape.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\ShapeDistanceFinder.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\ShapeDistanceFinder.hpp" />
-    <ClInclude Include="src\Vendors\msdfgen\core\SignedDistance.h" />
-    <ClInclude Include="src\Vendors\msdfgen\core\Vector2.h" />
     <ClInclude Include="src\Vendors\msdfgen\ext\import-font.h" />
     <ClInclude Include="src\Vendors\msdfgen\ext\import-svg.h" />
     <ClInclude Include="src\Vendors\msdfgen\ext\resolve-shape-geometry.h" />
@@ -367,12 +367,25 @@
     <ClInclude Include="src\Vendors\msdfgen\resource.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkAndroidFrameworkUtils.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkAnimatedImage.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkBitmapRegionDecoder.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkBRDAllocator.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\android\SkBitmapRegionDecoder.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextContext.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextFont.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextRenderer.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\atlastext\SkAtlasTextTarget.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_canvas.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_colorspace.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_data.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_image.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_imageinfo.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_maskfilter.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_matrix.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_paint.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_path.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_picture.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_shader.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_surface.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_types.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkAndroidCodec.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkCodec.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\codec\SkCodecAnimation.h" />
@@ -397,8 +410,8 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDeferredDisplayListRecorder.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDeque.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDocument.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDrawable.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDrawLooper.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkDrawable.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkEncodedImageFormat.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkExecutor.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkFilterQuality.h" />
@@ -441,13 +454,13 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPoint3.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPostConfig.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkPreConfig.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRRect.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRSXform.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRWBuffer.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRasterHandleAllocator.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRect.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRefCnt.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRegion.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRRect.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRSXform.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkRWBuffer.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkScalar.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSerialProcs.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkShader.h" />
@@ -459,9 +472,9 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSurfaceCharacterization.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSurfaceProps.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkSwizzle.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTLazy.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTextBlob.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTime.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTLazy.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTraceMemoryDump.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTypeface.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkTypes.h" />
@@ -469,19 +482,6 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkVertices.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkYUVAIndex.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\core\SkYUVASizeInfo.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_canvas.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_colorspace.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_data.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_image.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_imageinfo.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_maskfilter.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_matrix.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_paint.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_path.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_picture.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_shader.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_surface.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\c\sk_types.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\docs\SkPDFDocument.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\docs\SkXPSDocument.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\effects\Sk1DPathEffect.h" />
@@ -527,13 +527,6 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkJpegEncoder.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkPngEncoder.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\encode\SkWebpEncoder.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLAssembleInterface.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig_chrome.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLExtensions.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLFunctions.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLInterface.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLTypes.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendDrawableInfo.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendSemaphore.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrBackendSurface.h" />
@@ -550,6 +543,13 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrSurface.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrTexture.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\GrTypes.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLAssembleInterface.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLConfig_chrome.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLExtensions.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLFunctions.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLInterface.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\gl\GrGLTypes.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\mock\GrMockTypes.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\mtl\GrMtlTypes.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkBackendContext.h" />
@@ -558,11 +558,11 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\gpu\vk\GrVkTypes.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\pathops\SkPathOps.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontConfigInterface.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_FontConfigInterface.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_android.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_directory.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_empty.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_fontconfig.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_FontConfigInterface.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkFontMgr_indirect.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkImageGeneratorCG.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\ports\SkImageGeneratorWIC.h" />
@@ -613,17 +613,16 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkSpinlock.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTArray.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTDArray.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTemplates.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTFitsIn.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTHash.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkThreadID.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTInternalLList.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTLogic.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTo.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTSearch.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTemplates.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkThreadID.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkTo.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\private\SkWeakRefCnt.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\svg\SkSVGCanvas.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\mac\SkCGUtils.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\Sk3D.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkAnimCodecPlayer.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkBase64.h" />
@@ -634,9 +633,9 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkInterpolator.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkLua.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkLuaCanvas.h" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNWayCanvas.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNoDrawCanvas.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNullCanvas.h" />
-    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkNWayCanvas.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkPaintFilterCanvas.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkParse.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkParsePath.h" />
@@ -644,18 +643,43 @@
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkShadowUtils.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkTextUtils.h" />
     <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\SkTraceEventPhase.h" />
-    <ClInclude Include="src\Vendors\pugixml\pugiconfig.hpp" />
-    <ClInclude Include="src\Vendors\pugixml\pugixml.hpp" />
-    <ClInclude Include="src\Vendors\sol\config.hpp" />
-    <ClInclude Include="src\Vendors\sol\forward.hpp" />
-    <ClInclude Include="src\Vendors\sol\sol.hpp" />
+    <ClInclude Include="src\Vendors\msdfgen\skia\include\utils\mac\SkCGUtils.h" />
     <ClInclude Include="src\Vendors\stb_image\stb_image.h" />
+    <ClInclude Include="src\Vendors\wren\src\include\wren.h" />
+    <ClInclude Include="src\Vendors\wren\src\optional\wren_opt_meta.h" />
+    <ClInclude Include="src\Vendors\wren\src\optional\wren_opt_random.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_common.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_compiler.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_core.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_debug.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_math.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_opcodes.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_primitive.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_utils.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_value.h" />
+    <ClInclude Include="src\Vendors\wren\src\vm\wren_vm.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\api_tests.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\benchmark.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\call.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\call_calls_foreign.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\call_wren_call_root.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\error.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\foreign_class.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\get_variable.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\handle.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\lists.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\maps.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\new_vm.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\reset_stack_after_call_abort.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\reset_stack_after_foreign_construct.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\resolution.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\slots.h" />
+    <ClInclude Include="src\Vendors\wren\test\api\user_data.h" />
+    <ClInclude Include="src\Vendors\wren\test\test.h" />
+    <ClInclude Include="src\Vendors\wren\test\unit\path_test.h" />
+    <ClInclude Include="src\Vendors\wren\test\unit\test.h" />
     <ClInclude Include="src\Vendors\yoga\BitUtils.h" />
     <ClInclude Include="src\Vendors\yoga\CompactValue.h" />
-    <ClInclude Include="src\Vendors\yoga\event\event.h" />
-    <ClInclude Include="src\Vendors\yoga\internal\experiments-inl.h" />
-    <ClInclude Include="src\Vendors\yoga\internal\experiments.h" />
-    <ClInclude Include="src\Vendors\yoga\log.h" />
     <ClInclude Include="src\Vendors\yoga\Utils.h" />
     <ClInclude Include="src\Vendors\yoga\YGConfig.h" />
     <ClInclude Include="src\Vendors\yoga\YGEnums.h" />
@@ -668,6 +692,10 @@
     <ClInclude Include="src\Vendors\yoga\YGValue.h" />
     <ClInclude Include="src\Vendors\yoga\Yoga-internal.h" />
     <ClInclude Include="src\Vendors\yoga\Yoga.h" />
+    <ClInclude Include="src\Vendors\yoga\event\event.h" />
+    <ClInclude Include="src\Vendors\yoga\internal\experiments-inl.h" />
+    <ClInclude Include="src\Vendors\yoga\internal\experiments.h" />
+    <ClInclude Include="src\Vendors\yoga\log.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
@@ -712,15 +740,15 @@
     <ClCompile Include="src\Scene\Entities\ScriptableEntity.cpp" />
     <ClCompile Include="src\Scene\Lighting\Environment.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
-    <ClCompile Include="src\Scripting\ScriptingAPI\HelloWorld.cpp" />
-    <ClCompile Include="src\Scripting\ScriptingEngine.cpp" />
     <ClCompile Include="src\Scripting\ScriptLoader.cpp" />
-    <ClCompile Include="src\UI\Nodes\Canvas.cpp" />
+    <ClCompile Include="src\Scripting\ScriptingEngine.cpp" />
+    <ClCompile Include="src\Scripting\WrenScript.cpp" />
     <ClCompile Include="src\UI\Font\FontManager.cpp" />
     <ClCompile Include="src\UI\InterfaceParser.cpp" />
+    <ClCompile Include="src\UI\Nodes\Canvas.cpp" />
     <ClCompile Include="src\UI\Nodes\Node.cpp" />
-    <ClCompile Include="src\UI\Styling\Stylesheet.cpp" />
     <ClCompile Include="src\UI\Styling\StyleSheetParser.cpp" />
+    <ClCompile Include="src\UI\Styling\Stylesheet.cpp" />
     <ClCompile Include="src\UI\UserInterface.cpp" />
     <ClCompile Include="src\Vendors\glm\detail\glm.cpp" />
     <ClCompile Include="src\Vendors\imgui\ImCurveEdit.cpp" />
@@ -747,90 +775,62 @@
     <ClCompile Include="src\Vendors\libmap\c\matrix.c" />
     <ClCompile Include="src\Vendors\libmap\c\surface_gatherer.c" />
     <ClCompile Include="src\Vendors\libmap\c\vector.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lapi.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lauxlib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lbaselib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lcode.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lcorolib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lctype.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ldblib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ldebug.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ldo.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ldump.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lfunc.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lgc.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\linit.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\liolib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\llex.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lmathlib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lmem.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\loadlib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lobject.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lopcodes.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\loslib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lparser.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lstate.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lstring.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lstrlib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ltable.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ltablib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\ltm.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lua.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\luac.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lundump.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lutf8lib.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lvm.c" />
-    <ClCompile Include="src\Vendors\lua\lua-5.4.3\src\lzio.c" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\Charset.cpp" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\FontGeometry.cpp" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\GlyphGeometry.cpp" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\RectanglePacker.cpp" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.cpp" />
+    <ClCompile Include="src\Vendors\msdf-atlas-gen\Workload.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\artery-font-export.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\bitmap-blit.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\charset-parser.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\Charset.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\csv-export.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\FontGeometry.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\glyph-generators.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\GlyphGeometry.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\image-encode.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\json-export.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\main.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\RectanglePacker.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\shadron-preview-generator.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\size-selectors.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\TightAtlasPacker.cpp" />
     <ClCompile Include="src\Vendors\msdf-atlas-gen\utf8.cpp" />
-    <ClCompile Include="src\Vendors\msdf-atlas-gen\Workload.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\contour-combiners.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\Contour.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\EdgeHolder.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\Projection.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\Scanline.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\Shape.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\SignedDistance.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\Vector2.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\core\contour-combiners.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\edge-coloring.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\edge-segments.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\edge-selectors.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\EdgeHolder.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\equation-solver.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\msdf-error-correction.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\MSDFErrorCorrection.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\msdfgen.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\Projection.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\rasterization.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\render-sdf.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\save-bmp.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\save-tiff.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\Scanline.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\sdf-error-estimation.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\core\shape-description.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\Shape.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\SignedDistance.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\core\Vector2.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\ext\import-font.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\ext\import-svg.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\ext\resolve-shape-geometry.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\ext\save-png.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\lib\lodepng.cpp" />
     <ClCompile Include="src\Vendors\msdfgen\lib\tinyxml2.cpp" />
-    <ClCompile Include="src\Vendors\msdfgen\main.cpp" />
+    <ClCompile Include="src\Vendors\msdfgen\main.cpp">
+      <ObjectFileName>$(IntDir)\main1.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="src\Vendors\pugixml\pugixml.cpp" />
     <ClCompile Include="src\Vendors\stb_image\stb_image.cpp" />
-    <ClCompile Include="src\Vendors\yoga\event\event.cpp" />
-    <ClCompile Include="src\Vendors\yoga\internal\experiments.cpp" />
-    <ClCompile Include="src\Vendors\yoga\log.cpp" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_compiler.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_core.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_debug.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_primitive.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_utils.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_value.c" />
+    <ClCompile Include="src\Vendors\wren\src\vm\wren_vm.c" />
     <ClCompile Include="src\Vendors\yoga\Utils.cpp" />
     <ClCompile Include="src\Vendors\yoga\YGConfig.cpp" />
     <ClCompile Include="src\Vendors\yoga\YGEnums.cpp" />
@@ -840,15 +840,21 @@
     <ClCompile Include="src\Vendors\yoga\YGStyle.cpp" />
     <ClCompile Include="src\Vendors\yoga\YGValue.cpp" />
     <ClCompile Include="src\Vendors\yoga\Yoga.cpp" />
+    <ClCompile Include="src\Vendors\yoga\event\event.cpp" />
+    <ClCompile Include="src\Vendors\yoga\internal\experiments.cpp" />
+    <ClCompile Include="src\Vendors\yoga\log.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\Vendors\lua\lua-5.4.3\doc\contents.html" />
-    <None Include="src\Vendors\lua\lua-5.4.3\doc\manual.html" />
-    <None Include="src\Vendors\lua\lua-5.4.3\doc\readme.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="src\Vendors\msdfgen\Msdfgen.rc" />
+    <ProjectReference Include="dependencies\bullet3\src\BulletCollision\BulletCollision.vcxproj">
+      <Project>{B91153C5-259D-C089-2EAE-437E9AB81C8A}</Project>
+    </ProjectReference>
+    <ProjectReference Include="dependencies\bullet3\src\BulletDynamics\BulletDynamics.vcxproj">
+      <Project>{45122E0F-31E0-2115-1A74-923B06E1FD79}</Project>
+    </ProjectReference>
+    <ProjectReference Include="dependencies\bullet3\src\LinearMath\LinearMath.vcxproj">
+      <Project>{EAF25DFD-D6AA-9F4A-3FB2-78A62B893A3B}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
