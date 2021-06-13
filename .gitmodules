@@ -4,3 +4,6 @@
 [submodule "Nuake/dependencies/assimp"]
 	path = Nuake/dependencies/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "Nuake/dependencies/bullet3"]
+	path = Nuake/dependencies/bullet3
+	url = https://github.com/bulletphysics/bullet3.git
