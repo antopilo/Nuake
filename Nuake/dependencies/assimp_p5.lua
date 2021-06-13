@@ -112,3 +112,11 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_3MF_EXPORTER',
 		'ASSIMP_BUILD_NO_ASSJSON_EXPORTER'
 	}
+
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		runtime "Release"
+		optimize "on"
