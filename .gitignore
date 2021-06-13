@@ -831,3 +831,16 @@ FodyWeavers.xsd
 !freetype.lib
 
 ./docs/_build/
+Nuake/dependencies/assimp.vcxproj
+Nuake/dependencies/assimp.vcxproj.filters
+DemoModule/DemoModule.vcxproj
+bin-int/Debug-windows-x86_64/Nuake/Msdfgen.res
+bin-int/Debug-windows-x86_64/Nuake/Nuake.vcxproj.FileListAbsolute.txt
+bin-int/Release-windows-x86_64/Editor/Editor.vcxproj.FileListAbsolute.txt
+bin-int/Release-windows-x86_64/Nuake/Nuake.vcxproj.FileListAbsolute.txt
+Nuake.sln
+Editor/Editor.vcxproj
+Editor/Editor.vcxproj.filters
+Editor/imgui.ini
+Nuake/Nuake.vcxproj
+Nuake/Nuake.vcxproj.filters
