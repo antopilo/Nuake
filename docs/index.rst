@@ -5,6 +5,11 @@
 
 Welcome to Nuake's documentation!
 =================================
+Welcome to the offical Nuake documentation website! 
+Here you will find the most up-to-date documentation regarding the Nuake game engine.
+I strongly advise everyone to read up the general section to learn more about the project
+before cloning it.
+
 
 .. toctree::
    :maxdepth: 1
