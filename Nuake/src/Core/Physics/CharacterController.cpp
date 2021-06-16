@@ -25,7 +25,7 @@ namespace Physics
 		}
 	};
 
-	CharacterController::CharacterController(float height, float radius, float mass)
+	CharacterController::CharacterController(float height, float radius, float mass, Vector3 position)
 	{
 		m_surfaceHitNormals = std::vector<glm::vec3>();
 
@@ -35,12 +35,12 @@ namespace Physics
 
 		btQuaternion quat = btQuaternion(0, 0, 0);
 		m_Transform = new btTransform();
-		m_Transform->setOrigin(btVector3(0.0f, 10.0f, 0.0f));
+		m_Transform->setOrigin(btVector3(position.x, position.y, position.z));
 		m_Transform->setRotation(quat);
 		m_MotionState = new btDefaultMotionState(*m_Transform);
-
+		
 		btVector3 inertia;
-		m_CollisionShape->calculateLocalInertia(mass, inertia);
+		//m_CollisionShape->calculateLocalInertia(mass, inertia);
 
 		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, m_MotionState, m_CollisionShape, inertia);
 
@@ -52,7 +52,7 @@ namespace Physics
 
 		rigidBodyCI.m_linearDamping = 0.0f;
 		m_Rigidbody = new btRigidBody(rigidBodyCI);
-
+		m_Rigidbody->setGravity(btVector3(0, 0, 0));
 		// Keep upright
 		m_Rigidbody->setAngularFactor(0.0f);
 
@@ -71,6 +71,7 @@ namespace Physics
 
 	void CharacterController::MoveAndSlide(glm::vec3 velocity)
 	{
+		m_Rigidbody->setGravity(btVector3(0, 0, 0));
 		m_manualVelocity = velocity;
 		// Sync ghost with actually object
 		m_GhostObject->setWorldTransform(m_Rigidbody->getWorldTransform());
@@ -162,7 +163,7 @@ namespace Physics
 
 			m_Rigidbody->setLinearVelocity(vel);
 
-			m_onGround = true;
+			IsOnGround = true;
 		}
 
 		float testOffset = 0.07f;
@@ -189,8 +190,8 @@ namespace Physics
 
 	void CharacterController::UpdateVelocity()
 	{
-		m_manualVelocity.y = m_Rigidbody->getLinearVelocity().getY();
-
+		//m_manualVelocity.y = m_Rigidbody->getLinearVelocity().getY();
+		btVector3 grav = m_Rigidbody->getGravity();
 		btVector3 finalVel = btVector3(m_manualVelocity.x, m_manualVelocity.y, m_manualVelocity.z);
 		m_Rigidbody->setLinearVelocity(finalVel);
 

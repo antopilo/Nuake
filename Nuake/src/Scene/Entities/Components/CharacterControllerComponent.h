@@ -15,6 +15,21 @@ public:
 		
 	}
 
+	json Serialize() {
+		BEGIN_SERIALIZE();
+		SERIALIZE_VAL(Height);
+		SERIALIZE_VAL(Radius);
+		SERIALIZE_VAL(Mass);
+		END_SERIALIZE();
+	}
+
+	bool Deserialize(const std::string str) {
+		BEGIN_DESERIALIZE();
+		Height = j["Height"];
+		Radius = j["Radius"];
+		Mass = j["Mass"];
+		return true;
+	}
 	void SyncWithTransform(TransformComponent& tc)
 	{
 		btVector3 pos = CharacterController->m_motionTransform.getOrigin();

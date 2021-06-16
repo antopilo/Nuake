@@ -29,12 +29,14 @@ namespace ScriptAPI
 		{
 			RegisterMethod("GetEntityID(_)", (void*)GetEntity);
 			RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
+			RegisterMethod("GetTranslation_(_)", (void*)GetTranslation);
 			RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
 			RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
 			RegisterMethod("SetCameraDirection_(_,_,_,_)", (void*)SetCameraDirection);
 			RegisterMethod("GetCameraDirection_(_)", (void*)GetCameraDirection);
 			RegisterMethod("GetCameraRight_(_)", (void*)GetCameraRight);
 			RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
+			RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
 		}
 
 		static void GetEntity(WrenVM* vm)
@@ -158,7 +160,14 @@ namespace ScriptAPI
 			wrenInsertInList(vm, 0, 2, 3);
 		}
 
-		
+		static void IsCharacterControllerOnGround(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+			auto& characterController = ent.GetComponent<CharacterControllerComponent>();
+			bool result =  characterController.CharacterController->IsOnGround;
+			wrenSetSlotBool(vm, 0, result);
+		}
 
 		static void MoveAndSlide(WrenVM* vm)
 		{
@@ -170,6 +179,23 @@ namespace ScriptAPI
 			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 			auto& characterController = ent.GetComponent<CharacterControllerComponent>();
 			characterController.CharacterController->MoveAndSlide(Vector3(x, y, z));
+		}
+
+		static void GetTranslation(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+			auto& transform = ent.GetComponent<TransformComponent>();
+			// set the slots
+			wrenSetSlotDouble(vm, 1, transform.Translation.x);
+			wrenSetSlotDouble(vm, 2, transform.Translation.y);
+			wrenSetSlotDouble(vm, 3, transform.Translation.z);
+
+			// Fill the list
+			wrenSetSlotNewList(vm, 0);
+			wrenInsertInList(vm, 0, 0, 1);
+			wrenInsertInList(vm, 0, 1, 2);
+			wrenInsertInList(vm, 0, 2, 3);
 		}
 
 	};

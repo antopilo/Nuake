@@ -32,6 +32,7 @@ public:
 	{
 		BEGIN_DESERIALIZE();
 		this->Path = j["Path"];
+		this->HasCollisions = j["HasCollisions"];
 		Build(); // Maybe have some kind of loading bar or something.
 		return true;
 	}

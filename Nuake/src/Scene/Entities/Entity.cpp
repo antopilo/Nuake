@@ -9,6 +9,7 @@
 #include "Components/LightComponent.h"
 #include "Components/QuakeMap.h"
 #include <src/Scene/Entities/Components/WrenScriptComponent.h>
+#include <src/Scene/Entities/Components/CharacterControllerComponent.h>
 void Entity::AddChild(Entity ent)
 {
 	if ((int)m_EntityHandle != ent.GetHandle())
@@ -34,6 +35,8 @@ json Entity::Serialize()
 		SERIALIZE_OBJECT_REF_LBL("LightComponent", GetComponent<LightComponent>());
 	if (HasComponent<WrenScriptComponent>())
 		SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>());
+	if (HasComponent<CharacterControllerComponent>())
+		SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>());
 	END_SERIALIZE();
 }
 
@@ -47,6 +50,7 @@ bool Entity::Deserialize(const std::string& str)
 		DESERIALIZE_COMPONENT(QuakeMapComponent);
 		DESERIALIZE_COMPONENT(LightComponent);
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
+		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 	return true;
 }
 

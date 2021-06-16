@@ -78,9 +78,9 @@ void QuakeMapComponent::Build()
                     vertex_uv vertex_uv = get_standard_uv(vertex.vertex, face, texture->width, texture->height);
                     vertices.push_back(Vertex{
                         glm::vec3(vertex.vertex.y * (1.0f / 64), vertex.vertex.z * (1.0f / 64), vertex.vertex.x * (1.0f / 64)),
-                        glm::vec2(vertex_uv.u, vertex_uv.v),
-                        glm::vec3(vertex.normal.x, vertex.normal.z, vertex.normal.y),
-                        glm::vec3(vertex.tangent.x, vertex.tangent.z, vertex.tangent.y), glm::vec3(0.0, 1.0, 0.0), 0.0f
+                        glm::vec2(vertex_uv.u, 1.0 -vertex_uv.v),
+                        glm::vec3(vertex.normal.y, vertex.normal.z, vertex.normal.x),
+                        glm::vec3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x), glm::vec3(0.0, 1.0, 0.0), 0.0f
                         });
 
                     //printf("vertex: (%f %f %f), normal: (%f %f %f)\n",

@@ -5,6 +5,7 @@
 
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <vector>
+#include "../Core/Maths.h"
 namespace Physics
 {
 	class CharacterController
@@ -12,14 +13,14 @@ namespace Physics
 	public:
 		bool IsOnGround = false;
 		bool m_hittingWall;
-		float m_stepHeight = 0.05f;
+		float m_stepHeight = .1f;
 
 		btTransform* m_Transform;
 		btCollisionShape* m_CollisionShape;
 		btRigidBody* m_Rigidbody;
 		btPairCachingGhostObject* m_GhostObject;
 		btMotionState* m_MotionState;
-		bool m_onGround;
+
 		//bool m_onJumpableGround; // A bit lower contact than just onGround
 
 		float m_bottomYOffset;
@@ -33,7 +34,7 @@ namespace Physics
 		btVector3 m_previousPosition;
 
 		float m_jumpRechargeTimer;
-		CharacterController(float height, float radius, float mass);
+		CharacterController(float height, float radius, float mass, Vector3 position);
 
 		void MoveAndSlide(glm::vec3 velocity);
 	private:

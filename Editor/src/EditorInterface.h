@@ -9,7 +9,7 @@ class Material;
 class EditorInterface
 {
 private:
-	FileSystemUI filesystem;
+	FileSystemUI filesystem = FileSystemUI();
 	Entity m_SelectedEntity;
 	bool m_IsEntitySelected = false;
 	bool m_DrawGrid = false;

@@ -7,7 +7,7 @@ After attaching the WrenScript component on an entity, you can select the script
 In addition to pointing to the script file, you need to specify which class in the script is considered as the
 entity script.
 
-The class chosen must inherite from ScriptableEntity.
+The class chosen must inherit from ScriptableEntity.
 
 Here is an example of a barebone entity scripts::
 
@@ -16,13 +16,15 @@ Here is an example of a barebone entity scripts::
     class TestScript is ScriptableEntity {
         construct new() {
         }
-
+        
         init() {
 
         }
 
         update(ts) {
            
+
+
         }
 
         exit() {

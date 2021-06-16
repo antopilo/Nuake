@@ -76,7 +76,7 @@ void Scene::OnInit()
 	{
 		auto [transform, cc] = ccview.get<TransformComponent, CharacterControllerComponent>(e);
 
-		cc.CharacterController = CreateRef<Physics::CharacterController>(cc.Height, cc.Radius, cc.Mass);
+		cc.CharacterController = CreateRef<Physics::CharacterController>(cc.Height, cc.Radius, cc.Mass, transform.Translation);
 		Entity ent = Entity({ e, this });
 
 		PhysicsManager::Get()->RegisterCharacterController(cc.CharacterController);
@@ -325,7 +325,7 @@ void Scene::Draw()
 	}
 
 	Renderer::m_Shader->Bind();
-
+	Renderer::m_Shader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
 	Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
 	if (cam)
 	{
@@ -348,6 +348,8 @@ void Scene::Draw()
 
 				copyT.Translation = globalOffset;
 			}
+
+			
 			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 			Renderer::m_Shader->SetUniformMat4f("u_Model", copyT.GetTransform());
@@ -433,7 +435,7 @@ void Scene::EditorDraw()
 	if (m_EditorCamera)
 	{
 		Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
-
+		Renderer::m_Shader->SetUniform3f("u_EyePosition", m_EditorCamera->GetTranslation().x, m_EditorCamera->GetTranslation().y, m_EditorCamera->GetTranslation().z);
 		auto view = m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
 		for (auto e : view) {
 			auto [transform, model, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);

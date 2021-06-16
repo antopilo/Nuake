@@ -21,6 +21,8 @@ namespace Physics
 		dynamicsWorld->setDebugDrawer(new BulletDebugDrawer());
 
 		m_Bodies = std::map<btRigidBody*, Ref<RigidBody>>();
+
+		SetGravity(Vector3(0, -10000, 0));
 	}
 
 
@@ -58,12 +60,18 @@ namespace Physics
 		btCollisionWorld::ClosestRayResultCallback res(btFrom, btTo);
 
 		dynamicsWorld->rayTest(btFrom, btTo, res);
-
+		btVector3 localNormal;
+		if(res.m_collisionObject)
+		{ 
+			// TODO: Fix the godammn fucked up normal
+			localNormal = res.m_collisionObject->getWorldTransform().getBasis().inverse() * res.m_hitNormalWorld;
+		}
+		
 		// Map bullet result to dto.
 		RaycastResult result{
 			glm::vec3(res.m_hitPointWorld.x(), res.m_hitPointWorld.y(), res.m_hitPointWorld.z()),
 			glm::vec3(res.m_hitPointWorld.x(), res.m_hitPointWorld.y(), res.m_hitPointWorld.z()),
-			glm::vec3(res.m_hitNormalWorld.x(), res.m_hitNormalWorld.y(), res.m_hitNormalWorld.z())
+			glm::vec3(localNormal.x(), localNormal.y(), localNormal.z())
 		};
 
 		return result;

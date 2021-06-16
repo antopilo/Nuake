@@ -35,7 +35,7 @@ void EditorInterface::Init()
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
     ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
 
-    this->filesystem = FileSystemUI();
+    //this->filesystem = FileSystemUI();
 }
 
 
@@ -854,7 +854,7 @@ void EditorInterface::DrawRessourceWindow()
                     textureID = m_SelectedMaterial->m_Normal->GetID();
                 if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2,2), ImVec4(0,0,0,1), ImVec4(1, 1, 1, 1)))
                 {
-                    std::string texture = FileDialog::OpenFile("*.png|*.jpg");
+                    std::string texture = FileDialog::OpenFile("*.png");
                     if (texture != "")
                     {
                         m_SelectedMaterial->SetNormal(TextureManager::Get()->GetTexture(texture));
@@ -1130,13 +1130,13 @@ void EditorInterface::Draw()
    DrawRessourceWindow();
    DrawViewport();
    DrawSceneTree();
-   DrawFileSystem();
-   DrawDirectoryExplorer();
+   //DrawDirectoryExplorer();
    DrawEntityPropreties();
    DrawLogger();
 
    // new stuff
    filesystem.Draw();
+   filesystem.DrawDirectoryExplorer();
 
     if(m_ShowImGuiDemo)
         ImGui::ShowDemoWindow();

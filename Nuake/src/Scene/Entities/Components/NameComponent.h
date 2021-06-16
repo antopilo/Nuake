@@ -4,7 +4,7 @@
 class NameComponent {
 public:
     std::string Name = "Entity";
-
+    int Id;
     json Serialize()
     {
         BEGIN_SERIALIZE();

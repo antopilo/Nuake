@@ -19,6 +19,7 @@ struct ParentComponent
 
 	bool Deserialize(std::string str)
 	{
+		
 		return true;
 
 	}
