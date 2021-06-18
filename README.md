@@ -1,4 +1,9 @@
+
+
 # Nuake
+Feel free to join the discord server for updates:   
+
+[![Support Server](https://img.shields.io/discord/852625335236558868.svg?label=Discord&logo=Discord&colorB=7289da&style=for-the-badge)](https://discord.gg/kuF4efPK7Y)
 
 
 # What is it
