@@ -119,7 +119,7 @@ unsigned int Shader::Compile(unsigned int type)
 
 // Retrieve uniform address and registers it if not already registered.
 int Shader::FindUniformLocation(std::string uniform) {
-	if (UniformCache.find(uniform) == UniformCache.end()) {
+	if (UniformCache.count(uniform) == 0) {
 		int addr = glGetUniformLocation(ProgramId, uniform.c_str());
 
 		if (addr == -1)

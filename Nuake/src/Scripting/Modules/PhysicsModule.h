@@ -45,9 +45,9 @@ namespace ScriptAPI
 			wrenSetSlotDouble(vm, 5, result.WorldPoint.y);
 			wrenSetSlotDouble(vm, 6, result.WorldPoint.z);
 
-			wrenSetSlotDouble(vm, 7, result.Normal.x - result.WorldPoint.x);
-			wrenSetSlotDouble(vm, 8, result.Normal.y - result.WorldPoint.y);
-			wrenSetSlotDouble(vm, 9, result.Normal.z - result.WorldPoint.z);
+			wrenSetSlotDouble(vm, 7, result.Normal.x);
+			wrenSetSlotDouble(vm, 8, result.Normal.y);
+			wrenSetSlotDouble(vm, 9, result.Normal.z);
 
 			wrenInsertInList(vm, 0, -1, 1);
 			wrenInsertInList(vm, 0, -1, 2);

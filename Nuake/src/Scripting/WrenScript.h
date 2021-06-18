@@ -11,6 +11,7 @@ public:
 	WrenHandle* m_Instance;
 	WrenHandle* m_OnInitHandle;
 	WrenHandle* m_OnUpdateHandle;
+	WrenHandle* m_OnFixedUpdateHandle;
 	WrenHandle* m_OnExitHandle;
 	WrenHandle* m_SetEntityIDHandle;
 
@@ -18,6 +19,7 @@ public:
 
 	void CallInit();
 	void CallUpdate(float timestep);
+	void CallFixedUpdate(float timestep);
 	void CallExit();
 
 	void RegisterMethod(const std::string& signature);

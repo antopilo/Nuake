@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Rendering/Textures/Material.h"
+#include "../Rendering/Textures/Material.h"
 #include <glm\ext\matrix_float4x4.hpp>
 #include "BaseComponent.h"
 

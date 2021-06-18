@@ -3,9 +3,9 @@
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include <src/Rendering/Textures/Texture.h>
 #include <Engine.h>
-#include <src/Scene/Entities/Components/LightComponent.h>
+#include <src/Scene/Components/LightComponent.h>
 #include <src/Core/Physics/PhysicsManager.h>
-#include <src/Scene/Entities/Components.h>
+#include <src/Scene/Components/Components.h>
 #include <src/Vendors/glm/gtc/type_ptr.hpp>
 #include <src/Vendors/glm/gtx/matrix_decompose.hpp>
 #include "src/Scene/Entities/ImGuiHelper.h"
@@ -13,13 +13,14 @@
 #include <src/Core/MaterialManager.h>
 
 #include "../Resource/FontAwesome5.h"
-#include <src/Scene/Entities/Components/BoxCollider.h>
+#include <src/Scene/Components/BoxCollider.h>
 #include <algorithm>
 #include <Dependencies/GLEW/include/GL/glew.h>
 #include "src/Resource/Project.h"
-#include <src/Scene/Entities/Components/LuaScriptComponent.h>
+#include <src/Scene/Components/LuaScriptComponent.h>
 #include <src/Core/Logger.h>
-#include <src/Scene/Entities/Components/WrenScriptComponent.h>
+#include <src/Scene/Components/WrenScriptComponent.h>
+#include <src/Rendering/MSAAFramebuffer.h>
 Ref<UI::UserInterface> userInterface;
 ImFont* normalFont;
 ImFont* EditorInterface::bigIconFont;
@@ -923,7 +924,7 @@ void NewProject()
 void OpenProject()
 {
     // Parse the project and load it.
-    std::string projectPath = FileDialog::OpenFile(".project");
+    std::string projectPath = "C:/Dev/Nuake/Editor/resources/test.project";//FileDialog::OpenFile(".project");
 
     FileSystem::SetRootDirectory(projectPath + "/../");
     Ref<Project> project = Project::New();

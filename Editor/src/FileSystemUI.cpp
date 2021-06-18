@@ -1,7 +1,7 @@
 #include "FileSystemUI.h"
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Resource/FontAwesome5.h>
-#include <src/Scene/Entities/Components/ParentComponent.h>
+#include "src/Scene/Components/ParentComponent.h"
 #include <src/Rendering/Textures/Texture.h>
 #include <src/Core/TextureManager.h>
 #include "EditorInterface.h"

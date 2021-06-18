@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "../Core/Timestep.h"
-#include "../ScriptableEntity.h"
+#include "../Entities/ScriptableEntity.h"
 struct NativeScriptComponent
 {
 	ScriptableEntity* Instance = nullptr;

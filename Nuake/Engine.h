@@ -29,7 +29,8 @@ private:
 	static Ref<Window> CurrentWindow;
 	static Ref<Project> CurrentProject;
 	static Ref<Scene> CurrentScene;
-
+	static float m_FixedUpdateRate;
+	static float m_FixedUpdateDifference;
 public:
 	static bool IsPlayMode; // True if is playing a scene
 

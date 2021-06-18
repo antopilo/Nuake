@@ -49,6 +49,16 @@ class Vector3 {
 		}
 	}
 
+	/(other) {
+		if(other is Vector3) {
+			return Vector3.new(_x / other.x, 
+								_y / other.y,
+								_z / other.z)
+		} else if(other is Num) {
+			return Vector3.new(_x / other, _y / other, _z / other)
+		}
+	}
+
 	+(other) {
 		if(other is Vector3) {
 			return Vector3.new(_x + other.x, 
@@ -79,6 +89,10 @@ class Vector3 {
 		_z = z
 	}
 
+	Duplicate() {
+		return Vector3.new(_x, _y, _z)
+	}
+
 	Sqrt() {
 		return Math.Sqrt_(_x, _y, _z)
 	}
@@ -93,5 +107,13 @@ class Vector3 {
 		var y = _y / length
 		var z = _z / length
 		return Vector3.new(x, y, z)
+	}
+
+	Angle(vec) {
+		this.Normalize() * vec.Normalize()
+	}
+
+	Length() {
+		this.Sqrt()
 	}
 }

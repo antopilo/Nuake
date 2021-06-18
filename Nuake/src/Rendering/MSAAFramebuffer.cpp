@@ -1,8 +1,8 @@
-#include "Framebuffer.h"
+#include "MSAAFramebuffer.h"
 #include <GL\glew.h>
-FrameBuffer::FrameBuffer(bool hasRenderBuffer, Vector2 size)
+MSAAFrameBuffer::MSAAFrameBuffer(bool hasRenderBuffer, Vector2 size)
 {
-	m_Textures = std::map<int, Ref<Texture>>();
+	m_Textures = std::map<int, Ref<MultiSampledTexture>>();
 	m_Size = size;
 
 	glGenFramebuffers(1, &m_FramebufferID);
@@ -13,7 +13,7 @@ FrameBuffer::FrameBuffer(bool hasRenderBuffer, Vector2 size)
 	{
 		glGenRenderbuffers(1, &m_RenderBuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
 	}
 	else
@@ -25,7 +25,7 @@ FrameBuffer::FrameBuffer(bool hasRenderBuffer, Vector2 size)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
+void MSAAFrameBuffer::SetTexture(Ref<MultiSampledTexture> texture, GLenum attachment)
 {
 	m_Textures[attachment] = texture;
 	// Attach texture to the framebuffer.
@@ -43,41 +43,41 @@ void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
 			keys.push_back(s.first);
 			size += 1;
 		}
-		
 	}
 
-	if(size > 0)
+	if (size > 0)
 		glDrawBuffers(size, &keys[0]);
 
 	Unbind();
 }
 
 
-void FrameBuffer::Bind()
+void MSAAFrameBuffer::Bind()
 {
 	if (ResizeQueued)
 		UpdateSize(m_Size);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_FramebufferID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBlitFramebuffer(0, 0, m_Size.x, m_Size.y, 0, 0, m_Size.x, m_Size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, m_Size.x, m_Size.y);
 }
 
-void FrameBuffer::Unbind()
+void MSAAFrameBuffer::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::QueueResize(Vector2 size)
+void MSAAFrameBuffer::QueueResize(Vector2 size)
 {
 	ResizeQueued = true;
 	m_Size = size;
 }
 
-void FrameBuffer::UpdateSize(Vector2 size)
+void MSAAFrameBuffer::UpdateSize(Vector2 size)
 {
 	m_Size = size;
-	ResizeQueued = false;
 
 	// Delete frame buffer and render buffer.
 	glDeleteFramebuffers(1, &m_FramebufferID);
@@ -105,14 +105,14 @@ void FrameBuffer::UpdateSize(Vector2 size)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::SetDrawBuffer(GLenum draw)
+void MSAAFrameBuffer::SetDrawBuffer(GLenum draw)
 {
 	Bind();
 	//glReadBuffer(draw);
 	Unbind();
 }
 
-void FrameBuffer::SetReadBuffer(GLenum read)
+void MSAAFrameBuffer::SetReadBuffer(GLenum read)
 {
 	Bind();
 	//glReadBuffer(read);

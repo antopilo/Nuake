@@ -26,7 +26,9 @@ class Scene {
 			return Camera.new(id)
 		} else if (component == "Transform") {
 			return TransformComponent.new(id)
-		}
+		} else if (component == "Script") {
+			return this.GetScript_(id)
+		} 
 
 	}
 
@@ -34,8 +36,10 @@ class Scene {
 	// Components
 	//
 	// Transform
+
+	foreign static GetScript_(e)
 	foreign static GetTranslation_(e)
-	//foreign static SetTranslation_(e, x, y, z)
+	foreign static SetTranslation_(e, x, y, z)
 	//foreign static SetRotation_(e, x, y, z)
 	//foreign static SetScale_(e, x, y, z)
 
@@ -111,6 +115,9 @@ class TransformComponent {
 		return Vector3.new(result[0], result[1], result[2])
 	}
 
+	SetTranslation(t) {
+		Scene.SetTranslation_(_entityId, t.x, t.y, t.z)
+	}
 
 }
 

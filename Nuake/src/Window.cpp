@@ -223,6 +223,11 @@ void Window::Update(Timestep ts)
     m_Scene->Update(ts);
 }
 
+void Window::FixedUpdate(Timestep ts)
+{
+    m_Scene->FixedUpdate(ts);
+}
+
 void Window::Draw()
 {
     // Dont render if no scene is loaded.

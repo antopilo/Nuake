@@ -1,5 +1,6 @@
 #pragma once
 #include "../Scripting/WrenScript.h"
+#include <src/Resource/Serializable.h>
 
 class WrenScriptComponent
 {

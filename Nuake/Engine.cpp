@@ -15,6 +15,8 @@
 Ref<Project> Engine::CurrentProject;
 Ref<Window> Engine::CurrentWindow;
 float Engine::m_LastFrameTime = 0.0f;
+float Engine::m_FixedUpdateRate = 1.0 / 60.0f;
+float Engine::m_FixedUpdateDifference = 0.f;
 bool Engine::IsPlayMode = false;
 
 void Engine::Init()
@@ -46,10 +48,22 @@ void Engine::Tick()
 	m_LastFrameTime = time;
 
 	// Play mode update vs editor update.
-	if (Engine::IsPlayMode)
+	if (Engine::IsPlayMode) {
 		CurrentWindow->Update(timestep);
+		m_FixedUpdateDifference += timestep;
+		// Fixed update
+		if (m_FixedUpdateDifference >= m_FixedUpdateRate)
+		{
+			// call update here.
+			CurrentWindow->FixedUpdate(m_FixedUpdateRate);
+			m_FixedUpdateDifference = 0.f;
+		}
+	}
 	else
 		GetCurrentScene()->EditorUpdate(timestep);
+
+	
+
 
 	Input::Update();
 }

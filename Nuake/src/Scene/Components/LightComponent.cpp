@@ -2,9 +2,10 @@
 //#include <imgui\imgui.h>
 #include "LightComponent.h"
 #include "../../../Rendering/Renderer.h"
-#include "../ImGuiHelper.h"
+
 #include <GL\glew.h>
 #include "../Core/Core.h"
+#include <src/Scene/Entities/ImGuiHelper.h>
 LightComponent::LightComponent()
 {
     Color = glm::vec3(1, 1, 1);

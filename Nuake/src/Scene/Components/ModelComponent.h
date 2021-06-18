@@ -1,7 +1,7 @@
 #pragma once
 #include <glm\ext\matrix_float4x4.hpp>
 #include <vector>
-#include "../../../Rendering/Mesh/Mesh.h"
+#include "../Rendering/Mesh/Mesh.h"
 
 #include "assimp/Importer.hpp"
 #include <assimp/scene.h>

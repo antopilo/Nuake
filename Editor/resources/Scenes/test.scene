@@ -1,13 +1,17 @@
 {
     "Entities": [
         {
-            "CharacterControllerComponent": {
-                "Height": 1.2000000476837158,
-                "Mass": 2500.0,
-                "Radius": 0.20000000298023224
+            "CameraComponent": {
+                "CameraInstance": {
+                    "AspectRatio": 1.774647831916809,
+                    "Exposure": 1.0,
+                    "Fov": 88.0,
+                    "Speed": 1.0,
+                    "m_Type": 1
+                }
             },
             "NameComponent": {
-                "Name": "Player"
+                "Name": "Camera"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -24,45 +28,15 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": -15.681736946105957,
-                    "y": 17.139999389648438,
-                    "z": 10.975672721862793
+                    "x": -25.119064331054688,
+                    "y": 19.491336822509766,
+                    "z": 4.5285515785217285
                 },
                 "Type": "TransformComponent"
             },
             "WrenScriptComponent": {
-                "Class": "PlayerScript",
-                "Script": "Scripts/Player.wren"
-            }
-        },
-        {
-            "NameComponent": {
-                "Name": "Trenchbroom map"
-            },
-            "ParentComponent": {
-                "HasParent": false
-            },
-            "QuakeMapComponent": {
-                "HasCollisions": true,
-                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
-            },
-            "TransformComponent": {
-                "Rotation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "Scale": {
-                    "x": 1.0,
-                    "y": 1.0,
-                    "z": 1.0
-                },
-                "Translation": {
-                    "x": 9.199999809265137,
-                    "y": 5.599999904632568,
-                    "z": 0.0
-                },
-                "Type": "TransformComponent"
+                "Class": "CamScript",
+                "Script": "Scripts/Cam.wren"
             }
         },
         {
@@ -78,7 +52,7 @@
                     "y": 0.9591699838638306,
                     "z": 0.20000000298023224
                 },
-                "IsVolumetric": true,
+                "IsVolumetric": false,
                 "Strength": 10.0,
                 "SyncDirectionWithSky": true,
                 "Type": 0
@@ -113,17 +87,43 @@
             }
         },
         {
-            "CameraComponent": {
-                "CameraInstance": {
-                    "AspectRatio": 1.7106741666793823,
-                    "Exposure": 1.0,
-                    "Fov": 88.0,
-                    "Speed": 1.0,
-                    "m_Type": 1
-                }
+            "NameComponent": {
+                "Name": "Trenchbroom map"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "QuakeMapComponent": {
+                "HasCollisions": true,
+                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": 9.199999809265137,
+                    "y": 5.599999904632568,
+                    "z": 0.0
+                },
+                "Type": "TransformComponent"
+            }
+        },
+        {
+            "CharacterControllerComponent": {
+                "Height": 1.2000000476837158,
+                "Mass": 2500.0,
+                "Radius": 0.20000000298023224
             },
             "NameComponent": {
-                "Name": "Camera"
+                "Name": "Player"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -140,15 +140,15 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 0.0,
-                    "y": 0.75,
-                    "z": 0.0
+                    "x": -25.119064331054688,
+                    "y": 18.649978637695313,
+                    "z": 4.5285515785217285
                 },
                 "Type": "TransformComponent"
             },
             "WrenScriptComponent": {
-                "Class": "CamScript",
-                "Script": "Scripts/Cam.wren"
+                "Class": "PlayerScript",
+                "Script": "Scripts/Player.wren"
             }
         }
     ],

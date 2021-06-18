@@ -13,7 +13,8 @@ namespace Physics
 	public:
 		bool IsOnGround = false;
 		bool m_hittingWall;
-		float m_stepHeight = .1f;
+		float m_stepHeight = 0.35f;
+		float m_MaxSlopeAngle = 45.0f;
 
 		btTransform* m_Transform;
 		btCollisionShape* m_CollisionShape;

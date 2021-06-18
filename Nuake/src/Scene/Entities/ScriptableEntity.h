@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Entity.h"
-#include "../Scene/Entities/Components/ParentComponent.h"
-#include "../Scene/Entities/Components/NameComponent.h"
+#include "../Components/ParentComponent.h"
+#include "../Components/NameComponent.h"
 
 class ScriptableEntity
 {

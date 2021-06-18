@@ -1,15 +1,15 @@
 
 
-#include "Components/ParentComponent.h"
+#include "../Components/ParentComponent.h"
 #include "Entity.h"
-#include "Components/NameComponent.h"
-#include "Components/TransformComponent.h"
-#include "Components/CameraComponent.h"
-#include "Components/QuakeMap.h"
-#include "Components/LightComponent.h"
-#include "Components/QuakeMap.h"
-#include <src/Scene/Entities/Components/WrenScriptComponent.h>
-#include <src/Scene/Entities/Components/CharacterControllerComponent.h>
+#include "../Components/NameComponent.h"
+#include "../Components/TransformComponent.h"
+#include "../Components/CameraComponent.h"
+#include "../Components/QuakeMap.h"
+#include "../Components/LightComponent.h"
+#include "../Components/QuakeMap.h"
+#include "../Components/WrenScriptComponent.h"
+#include "../Components/CharacterControllerComponent.h"
 void Entity::AddChild(Entity ent)
 {
 	if ((int)m_EntityHandle != ent.GetHandle())

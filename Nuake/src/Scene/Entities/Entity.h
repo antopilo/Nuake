@@ -2,7 +2,7 @@
 #include <string>
 #include <glm\ext\matrix_float4x4.hpp>
 #include "../Scene.h"
-#include "Components/BaseComponent.h"
+#include "../Components/BaseComponent.h"
 #include "../Resource/Serializable.h"
 
 class Entity : public ISerializable

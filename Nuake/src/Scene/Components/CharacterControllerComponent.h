@@ -35,8 +35,6 @@ public:
 		btVector3 pos = CharacterController->m_motionTransform.getOrigin();
 		glm::vec3 finalPos = glm::vec3(pos.x(), pos.y(), pos.z());
 
-		std::string msg = "moved to: " + std::to_string(finalPos.x) + " " + std::to_string(finalPos.y) + "\n";
-		printf(msg.c_str());
 		tc.Translation = finalPos;
 	}
 };

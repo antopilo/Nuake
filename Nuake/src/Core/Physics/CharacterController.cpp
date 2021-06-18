@@ -1,29 +1,9 @@
 #include "CharacterController.h"
 #include "../Core/Physics/PhysicsManager.h"
+#include "../Core/Physics/RaycastResult.h"
 namespace Physics
 {
-	class IgnoreBodyAndGhostCast :
-		public btCollisionWorld::ClosestRayResultCallback
-	{
-	private:
-		btRigidBody* m_pBody;
-		btPairCachingGhostObject* m_pGhostObject;
-
-	public:
-		IgnoreBodyAndGhostCast(btRigidBody* pBody, btPairCachingGhostObject* pGhostObject)
-			: btCollisionWorld::ClosestRayResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
-			m_pBody(pBody), m_pGhostObject(pGhostObject)
-		{
-		}
-
-		btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
-		{
-			if (rayResult.m_collisionObject == m_pBody || rayResult.m_collisionObject == m_pGhostObject)
-				return 1.0f;
-
-			return ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
-		}
-	};
+	
 
 	CharacterController::CharacterController(float height, float radius, float mass, Vector3 position)
 	{
@@ -141,13 +121,15 @@ namespace Physics
 		}
 	}
 
+
+
 	void CharacterController::UpdatePosition()
 	{
 		// Ray cast, ignore rigid body
 		IgnoreBodyAndGhostCast rayCallBack_bottom(m_Rigidbody, m_GhostObject);
 
 		btVector3 from = m_Rigidbody->getWorldTransform().getOrigin();
-		btVector3 toBt = m_Rigidbody->getWorldTransform().getOrigin() - btVector3(0.0f, m_bottomYOffset + m_stepHeight, 0.0f);
+		btVector3 toBt = m_Rigidbody->getWorldTransform().getOrigin() - btVector3(0.0f, m_bottomYOffset + m_stepHeight  , 0.0f);
 		PhysicsManager::Get()->GetWorld()->GetDynamicWorld()->rayTest(from, toBt, rayCallBack_bottom);
 
 		// Bump up if hit
@@ -155,16 +137,24 @@ namespace Physics
 		{
 			float previousY = m_Rigidbody->getWorldTransform().getOrigin().getY();
 
-			m_Rigidbody->getWorldTransform().getOrigin().setY(previousY + (m_bottomYOffset + m_stepHeight) * (1.0f - rayCallBack_bottom.m_closestHitFraction));
+			float t = rayCallBack_bottom.m_closestHitFraction ;
 
+			float clamped = (1.0 - rayCallBack_bottom.m_closestHitFraction);
 			btVector3 vel(m_Rigidbody->getLinearVelocity());
 
+			
+			if(vel.getY() < 0) // -magic number is to fix bouncing down a slope.
+				m_Rigidbody->getWorldTransform().getOrigin().setY(previousY - 0.14f + (m_bottomYOffset + m_stepHeight) * (clamped));
+			
 			vel.setY(0.0f);
 
 			m_Rigidbody->setLinearVelocity(vel);
 
 			IsOnGround = true;
+
 		}
+		
+
 
 		float testOffset = 0.07f;
 

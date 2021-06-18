@@ -7,16 +7,18 @@ import "Scripts/Physics" for Physics, CollisionResult
 
 class PlayerScript is ScriptableEntity {
 
+
+    Velocity {_Velocity}
     construct new() {
         _InputDir = Vector3.new(0, 0, 0)
         _Velocity = Vector3.new(0, 0, 0)
-        _Accel = 150
+        _Accel = 25
         _Deccel = 0.92
         _AirDeccel = 0.7
-        _Gravity = 20
+        _Gravity = 10
 
         _MaxSpeed = 20
-        _Jump = 800
+        _Jump = 200
         //Input.HideMouse()
     }
 
@@ -24,7 +26,7 @@ class PlayerScript is ScriptableEntity {
         Engine.Log("Player init")
     }
 
-    update(ts) {
+    fixedUpdate(ts) {
         this.CheckInput()
 
         var camEntity = Scene.GetEntity("Camera")
@@ -37,25 +39,26 @@ class PlayerScript is ScriptableEntity {
         var right = cam.GetRight()
         right.y = 0
         right = right.Normalize()
-        var new_Velocity = (dir * _InputDir.z) + (right * _InputDir.x)
+
+        var move = _InputDir
+        var new_Velocity = (dir * move.z) + (right * move.x)
 
         var controller = this.GetComponent("CharacterController")
         var transform = this.GetComponent("Transform")
         
-        
         var from = transform.GetTranslation()
         var to = from - Vector3.new(0, 1, 0)
 
-        var normal = Physics.Raycast(from, to).Normal.Normalize()
-
-        Engine.Log("Normal col: (%(normal.x), %(normal.y), %(normal.z))")
-
+        var normal = Physics.Raycast(from, to).Normal
+ 
         if(!controller.IsOnGround())  {
-            _Velocity.y = _Velocity.y - _Gravity
+            _Velocity.y = _Velocity.y -_Gravity
             //_Velocity.x = _Velocity.x * _AirDeccel
             //_Velocity.z = _Velocity.z * _AirDeccel
         } else {
-            _Velocity.y = -20
+            _Velocity.y = -10
+            
+            Engine.Log("Grav: %(_Velocity.y)")
 
             if(Input.IsKeyPressed(32)) _Velocity.y = _Jump
                 
@@ -65,6 +68,8 @@ class PlayerScript is ScriptableEntity {
             _Velocity.x = _Velocity.x * _Deccel
             _Velocity.z = _Velocity.z * _Deccel
         }
+
+        Engine.Log("Grav: %(_Velocity.y)")
         controller.MoveAndSlide(_Velocity * ts)
     }
 

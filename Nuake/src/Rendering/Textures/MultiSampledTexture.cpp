@@ -1,8 +1,8 @@
-#include "Texture.h"
+#include "MultiSampledTexture.h"
 #include <GL\glew.h>
 #include <iostream>
 
-Texture::Texture(const std::string& path) {
+MultiSampledTexture::MultiSampledTexture(const std::string& path) {
 	m_RendererId = 0;
 	m_FilePath = path;
 	m_LocalBuffer = nullptr;
@@ -15,7 +15,7 @@ Texture::Texture(const std::string& path) {
 	m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, 4);
 
 	glGenTextures(1, &m_RendererId);
-	glBindTexture(GL_TEXTURE_2D, m_RendererId);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_RendererId);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -24,7 +24,7 @@ Texture::Texture(const std::string& path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
+	//glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, format, size.x, size.y, GL_TRUE);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	if (m_LocalBuffer)
 		stbi_image_free(m_LocalBuffer);
@@ -33,7 +33,7 @@ Texture::Texture(const std::string& path) {
 }
 
 // Empty texture not from file.
-Texture::Texture(glm::vec2 size, GLenum format)
+MultiSampledTexture::MultiSampledTexture(glm::vec2 size, GLenum format)
 {
 	m_Format = format;
 
@@ -41,15 +41,16 @@ Texture::Texture(glm::vec2 size, GLenum format)
 	m_Height = size.y;
 
 	glGenTextures(1, &m_RendererId);
-	glBindTexture(GL_TEXTURE_2D, m_RendererId);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_RendererId);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, format, size.x, size.y, GL_TRUE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 
-Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)
+MultiSampledTexture::MultiSampledTexture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)
 {
 	m_Width = size.x;
 	m_Height = size.y;
@@ -65,7 +66,7 @@ Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitm
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)bitmap.pixels);
 }
 
-void Texture::Resize(glm::vec2 size)
+void MultiSampledTexture::Resize(glm::vec2 size)
 {
 	glDeleteTextures(1, &m_RendererId);
 	m_Width = size.x;
@@ -77,22 +78,24 @@ void Texture::Resize(glm::vec2 size)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-Texture::~Texture() {
+MultiSampledTexture::~MultiSampledTexture() {
 	glDeleteTextures(1, &m_RendererId);
 }
 
-void Texture::AttachToFramebuffer(GLenum attachment)
+void MultiSampledTexture::AttachToFramebuffer(GLenum attachment)
 {
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, m_RendererId, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D_MULTISAMPLE, m_RendererId, 0);
+
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, m_RendererId, 0);
 }
 
 
-void Texture::Bind(unsigned int slot) const {
+void MultiSampledTexture::Bind(unsigned int slot) const {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_RendererId);
 }
 
-void Texture::Unbind() const {
+void MultiSampledTexture::Unbind() const {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
