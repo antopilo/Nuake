@@ -1,20 +1,25 @@
 {
     "Entities": [
         {
+            "CameraComponent": {
+                "CameraInstance": {
+                    "AspectRatio": 1.774647831916809,
+                    "Exposure": 1.0,
+                    "Fov": 88.0,
+                    "Speed": 1.0,
+                    "m_Type": 1
+                }
+            },
             "NameComponent": {
-                "Name": "Trenchbroom map"
+                "Name": "Camera"
             },
             "ParentComponent": {
                 "HasParent": false
             },
-            "QuakeMapComponent": {
-                "HasCollisions": false,
-                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
-            },
             "TransformComponent": {
                 "Rotation": {
                     "x": 0.0,
-                    "y": 0.0,
+                    "y": -0.0,
                     "z": 0.0
                 },
                 "Scale": {
@@ -23,11 +28,15 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 9.199999809265137,
-                    "y": 5.599999904632568,
-                    "z": 0.0
+                    "x": -25.119064331054688,
+                    "y": 19.491336822509766,
+                    "z": 4.5285515785217285
                 },
                 "Type": "TransformComponent"
+            },
+            "WrenScriptComponent": {
+                "Class": "CamScript",
+                "Script": "Scripts/Cam.wren"
             }
         },
         {
@@ -66,11 +75,80 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 7.035792350769043,
-                    "y": 5.795107364654541,
-                    "z": -0.9431453943252563
+                    "x": -359.2229919433594,
+                    "y": -1.979316234588623,
+                    "z": -322.51702880859375
                 },
                 "Type": "TransformComponent"
+            },
+            "WrenScriptComponent": {
+                "Class": "TestScript",
+                "Script": "Scripts/entityScript.wren"
+            }
+        },
+        {
+            "NameComponent": {
+                "Name": "Trenchbroom map"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "QuakeMapComponent": {
+                "HasCollisions": true,
+                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": 9.199999809265137,
+                    "y": 5.599999904632568,
+                    "z": 0.0
+                },
+                "Type": "TransformComponent"
+            }
+        },
+        {
+            "CharacterControllerComponent": {
+                "Height": 1.2000000476837158,
+                "Mass": 2500.0,
+                "Radius": 0.20000000298023224
+            },
+            "NameComponent": {
+                "Name": "Player"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": -0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": -25.119064331054688,
+                    "y": 18.649978637695313,
+                    "z": 4.5285515785217285
+                },
+                "Type": "TransformComponent"
+            },
+            "WrenScriptComponent": {
+                "Class": "PlayerScript",
+                "Script": "Scripts/Player.wren"
             }
         }
     ],
@@ -78,7 +156,7 @@
     "m_Environement": {
         "AmbientColor": {
             "w": 0.0,
-            "x": null,
+            "x": 0.0,
             "y": 0.0,
             "z": 0.0
         },

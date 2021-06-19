@@ -99,7 +99,7 @@ void FileSystem::Scan()
 	RootDirectory = CreateRef<Directory>();
 	RootDirectory->Files = std::vector<Ref<File>>();
 	RootDirectory->Directories = std::vector<Ref<Directory>>();
-	RootDirectory->name = Root;
+	RootDirectory->name = FileSystem::AbsoluteToRelative(Root);
 	RootDirectory->fullPath = Root;
 	ScanDirectory(RootDirectory);
 }

@@ -6,6 +6,7 @@
 #include <src/Scripting/Modules/SceneModule.h>
 #include <src/Scripting/Modules/MathModule.h>
 #include <src/Scripting/Modules/InputModule.h>
+#include <src/Scripting/Modules/PhysicsModule.h>
 
 WrenVM* ScriptingEngine::m_WrenVM;
 
@@ -112,6 +113,8 @@ void ScriptingEngine::Init()
     RegisterModule(mathModule);
     Ref<ScriptAPI::InputModule> inputModule = CreateRef<ScriptAPI::InputModule> ();
     RegisterModule(inputModule);
+    Ref<ScriptAPI::PhysicsModule> physicsModule = CreateRef<ScriptAPI::PhysicsModule>();
+    RegisterModule(physicsModule);
 }
 
 

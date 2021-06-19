@@ -153,7 +153,8 @@ int Window::Init()
     // TODO: Style should move to editor
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.Fonts->AddFontDefault();
+    //io.Fonts->AddFontDefault();
+    io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 16.0);
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     ImGui::StyleColorsDark();
 
@@ -220,6 +221,11 @@ void Window::Update(Timestep ts)
 {
      // TODO: have event here?
     m_Scene->Update(ts);
+}
+
+void Window::FixedUpdate(Timestep ts)
+{
+    m_Scene->FixedUpdate(ts);
 }
 
 void Window::Draw()

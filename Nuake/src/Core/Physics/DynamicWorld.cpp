@@ -2,8 +2,12 @@
 #include "Rigibody.h"
 #include "../Core/Core.h"
 #include "BulletDebugDrawer.h"
+#include <src/Vendors/glm/ext/quaternion_common.hpp>
+#include <src/Core/Logger.h>
+
 namespace Physics
 {
+
 	DynamicWorld::DynamicWorld() {
 		///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
 		btDefaultCollisionConfiguration* collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -21,6 +25,8 @@ namespace Physics
 		dynamicsWorld->setDebugDrawer(new BulletDebugDrawer());
 
 		m_Bodies = std::map<btRigidBody*, Ref<RigidBody>>();
+
+		SetGravity(Vector3(0, -10000, 0));
 	}
 
 
@@ -50,20 +56,32 @@ namespace Physics
 		// Specify filters manually, otherwise ghost doesn't collide with statics for some reason
 		dynamicsWorld->addCollisionObject(cc->m_GhostObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter );
 	}
+	
 
 	RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
 	{
 		btVector3 btFrom(from.x, from.y, from.z);
 		btVector3 btTo(to.x, to.y, to.z);
-		btCollisionWorld::ClosestRayResultCallback res(btFrom, btTo);
+		ClosestRayResultCallback res(btFrom, btTo);
 
 		dynamicsWorld->rayTest(btFrom, btTo, res);
+		btVector3 localNormal;
+		if(res.m_collisionObject)
+		{ 
+			// TODO: Fix the godammn fucked up normal
+			localNormal = res.m_hitNormalWorld;
+		}
+		
+		
+		Vector3 localNorm = glm::vec3(localNormal.x(), localNormal.y(), localNormal.z());
 
+		//Logger::Log("normal: x:" + std::to_string(localNorm.x) + " y:" + std::to_string(localNorm.y )+ "z: " + std::to_string(localNorm.z));
+		res.m_closestHitFraction;
 		// Map bullet result to dto.
 		RaycastResult result{
 			glm::vec3(res.m_hitPointWorld.x(), res.m_hitPointWorld.y(), res.m_hitPointWorld.z()),
 			glm::vec3(res.m_hitPointWorld.x(), res.m_hitPointWorld.y(), res.m_hitPointWorld.z()),
-			glm::vec3(res.m_hitNormalWorld.x(), res.m_hitNormalWorld.y(), res.m_hitNormalWorld.z())
+			localNorm
 		};
 
 		return result;

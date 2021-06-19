@@ -27,6 +27,7 @@ WrenScript::WrenScript(const std::string& path, const std::string& mod, bool isE
 	// Create handles to the instance methods.
 	this->m_OnInitHandle = wrenMakeCallHandle(vm, "init()");
 	this->m_OnUpdateHandle = wrenMakeCallHandle(vm, "update(_)");
+	this->m_OnFixedUpdateHandle = wrenMakeCallHandle(vm, "fixedUpdate(_)");
 	this->m_OnExitHandle = wrenMakeCallHandle(vm, "exit()");
 
 	if (isEntity)
@@ -47,6 +48,15 @@ void WrenScript::CallUpdate(float timestep)
 	wrenSetSlotHandle(vm, 0, this->m_Instance);
 	wrenSetSlotDouble(vm, 1, timestep);
 	WrenInterpretResult result = wrenCall(vm, this->m_OnUpdateHandle);
+}
+
+void WrenScript::CallFixedUpdate(float timestep)
+{
+	WrenVM* vm = ScriptingEngine::GetWrenVM();
+	wrenEnsureSlots(vm, 2);
+	wrenSetSlotHandle(vm, 0, this->m_Instance);
+	wrenSetSlotDouble(vm, 1, timestep);
+	WrenInterpretResult result = wrenCall(vm, this->m_OnFixedUpdateHandle);
 }
 
 void WrenScript::CallExit()

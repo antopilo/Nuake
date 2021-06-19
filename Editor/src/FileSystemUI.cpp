@@ -1,7 +1,7 @@
 #include "FileSystemUI.h"
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Resource/FontAwesome5.h>
-#include <src/Scene/Entities/Components/ParentComponent.h>
+#include "src/Scene/Components/ParentComponent.h"
 #include <src/Rendering/Textures/Texture.h>
 #include <src/Core/TextureManager.h>
 #include "EditorInterface.h"
@@ -34,7 +34,7 @@ void FileSystemUI::Draw()
         }
         if (open)
         {
-            //EditorInterfaceDrawFiletree(rootDirectory);
+            EditorInterfaceDrawFiletree(rootDirectory);
             ImGui::TreePop();
         }
     }
@@ -88,6 +88,12 @@ void FileSystemUI::DrawDirectory(Ref<Directory> directory)
     std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
     if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
         m_CurrentDirectory = directory;
+    if (ImGui::BeginPopupContextWindow())
+    {
+        if (ImGui::MenuItem("Htest"));
+
+        ImGui::EndPopup();
+    }
     ImGui::Text(directory->name.c_str());
     ImGui::PopFont();
 }
@@ -199,6 +205,54 @@ void FileSystemUI::DrawDirectoryExplorer()
                     i++;
                 }
             }
+            if (ImGui::BeginPopupContextItem("item context menu"))
+            {
+                float value;
+                if (ImGui::Selectable("Set to zero")) value = 0.0f;
+                if (ImGui::Selectable("Set to PI")) value = 3.1415f;
+                ImGui::SetNextItemWidth(-1);
+                ImGui::DragFloat("##Value", &value, 0.1f, 0.0f, 0.0f);
+                ImGui::EndPopup();
+            }
+            if (ImGui::BeginPopupContextWindow())
+            {
+                if (ImGui::Button("New Wren script"))
+                {
+                    ImGui::OpenPopup("CreateNewFile");
+ 
+                }
+                if (ImGui::MenuItem("New interface script"))
+                {
+                }
+                if (ImGui::MenuItem("New Scene"))
+                {
+                }
+                if (ImGui::MenuItem("New folder"))
+                {
+                }
+                if (ImGui::MenuItem("New interface"))
+                {
+                }
+                if (ImGui::MenuItem("New stylesheet"))
+                {
+                }
+                if (ImGui::BeginPopup("CreateNewFile"))
+                {
+                    static char name[32] = "Label1";
+                    char buf[64];
+                    sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
+
+                    ImGui::Text("Edit name:");
+                    ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
+                    if (ImGui::Button("Close"))
+                        ImGui::CloseCurrentPopup();
+                    if(ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
+                        ImGui::CloseCurrentPopup();
+                    ImGui::EndPopup();
+                }
+                ImGui::EndPopup();
+            }
+            
 
             ImGui::EndTable();
         }

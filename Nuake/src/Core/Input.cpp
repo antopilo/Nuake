@@ -27,7 +27,7 @@ bool Input::IsKeyPressed(int keycode)
 	bool result = state == GLFW_PRESS;
 
 	// First time pressed?
-	if (m_Keys.find(keycode) == m_Keys.end() || m_Keys[keycode] == false)
+	if (m_Keys.find(keycode) == m_Keys.end() || m_Keys[keycode] == true)
 	{
 		if (result)
 			m_Keys[keycode] = true;

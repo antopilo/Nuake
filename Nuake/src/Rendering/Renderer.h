@@ -1,6 +1,6 @@
 #pragma once
 #include "Shaders/Shader.h"
-#include "../Scene/Entities/Components.h"
+#include "../Scene/Components/Components.h"
 #include "../Core/Core.h"
 // DTO for light data.
 struct Light {

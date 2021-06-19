@@ -24,7 +24,11 @@ class Scene {
 			return CharacterController.new(id)
 		} else if (component == "Camera") {
 			return Camera.new(id)
-		}
+		} else if (component == "Transform") {
+			return TransformComponent.new(id)
+		} else if (component == "Script") {
+			return this.GetScript_(id)
+		} 
 
 	}
 
@@ -32,7 +36,10 @@ class Scene {
 	// Components
 	//
 	// Transform
-	//foreign static SetTranslation_(e, x, y, z)
+
+	foreign static GetScript_(e)
+	foreign static GetTranslation_(e)
+	foreign static SetTranslation_(e, x, y, z)
 	//foreign static SetRotation_(e, x, y, z)
 	//foreign static SetScale_(e, x, y, z)
 
@@ -53,6 +60,7 @@ class Scene {
 
 	// Character controller
 	foreign static MoveAndSlide_(e, x, y, z)
+	foreign static IsCharacterControllerOnGround_(e)
 	//foreign static IsOnGround_(e)
 	
 
@@ -97,6 +105,22 @@ class Entity {
 	*/
 }
 
+class TransformComponent {
+	construct new(id) {
+		_entityId = id
+	}
+
+	GetTranslation() {
+		var result = Scene.GetTranslation_(_entityId)
+		return Vector3.new(result[0], result[1], result[2])
+	}
+
+	SetTranslation(t) {
+		Scene.SetTranslation_(_entityId, t.x, t.y, t.z)
+	}
+
+}
+
 class Light {
 	construct new(id) {
 		_entityId = id
@@ -130,6 +154,10 @@ class CharacterController {
 
 	MoveAndSlide(vel) {
 		Scene.MoveAndSlide_(_entityId, vel.x, vel.y, vel.z)
+	}
+
+	IsOnGround() {
+		return Scene.IsCharacterControllerOnGround_(_entityId)
 	}
 }
 

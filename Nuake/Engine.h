@@ -7,13 +7,30 @@
 #include "src/Scripting/ScriptLoader.h"
 #include "src/Core/Logger.h"
 
+/* TODOS:
+* 
+* Engine:
+*	Trigger zones from trenchbroom
+*	Scripting API vectors operation
+*	Scripting API for all component
+*	Scripting API for editing UI maybe
+*	Launch game standalone
+*	Fix physics system
+*	trenchbroom physics element
+*	
+* Editor:
+*   File browser refact
+*   
+*/
+
 class Engine {
 private:
 	static float m_LastFrameTime;
 	static Ref<Window> CurrentWindow;
 	static Ref<Project> CurrentProject;
 	static Ref<Scene> CurrentScene;
-
+	static float m_FixedUpdateRate;
+	static float m_FixedUpdateDifference;
 public:
 	static bool IsPlayMode; // True if is playing a scene
 

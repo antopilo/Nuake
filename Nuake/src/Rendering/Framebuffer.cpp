@@ -77,6 +77,7 @@ void FrameBuffer::QueueResize(Vector2 size)
 void FrameBuffer::UpdateSize(Vector2 size)
 {
 	m_Size = size;
+	ResizeQueued = false;
 
 	// Delete frame buffer and render buffer.
 	glDeleteFramebuffers(1, &m_FramebufferID);

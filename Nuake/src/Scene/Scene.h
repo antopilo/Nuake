@@ -11,7 +11,9 @@
 #include "../Resource/Serializable.h"
 #include "src/UI/UserInterface.h"
 #include "../Core/Maths.h"
+#include <src/Scene/Systems/System.h>
 class Entity;
+
 class Scene : public ISerializable
 {
 	friend Entity;
@@ -20,12 +22,13 @@ private:
 	std::string Name;
 	bool has_changed = true;
 
+	std::vector<Ref<System>> m_Systems;
 	
-	entt::registry m_Registry;
 	Ref<Environment> m_Environement;
 	Ref<EditorCamera> m_EditorCamera;
 
 public:
+	entt::registry m_Registry;
 	std::vector<Ref<UI::UserInterface>> m_Interfaces;
 	std::string Path = "";
 	static Ref<Scene> New();
@@ -40,6 +43,7 @@ public:
 	void OnInit();
 	void OnExit();
 	void Update(Timestep ts);
+	void FixedUpdate(Timestep ts);
 	void EditorUpdate(Timestep ts);
 
 	// TODO: Maybe move this to Renderer::DrawScene() ?

@@ -2,12 +2,12 @@
 #include <src/Scene/Entities/Entity.h>
 
 #include <src/Scene/Scene.h>
-#include <src/Scene/Entities/Components/QuakeMap.h>
+#include <src/Scene/Components/QuakeMap.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Vendors/imgui/ImGuizmo.h>
-#include <src/Scene/Entities/Components.h>
+#include <src/Scene/Components/Components.h>
 #include <src/Core/Physics/PhysicsManager.h>
-#include "../Scene/Entities/Components/BoxCollider.h"
+#include "../Scene/Components/BoxCollider.h"
 #include "src/EditorInterface.h"
 #include "../Core/Input.h"
 #include <GLFW/glfw3.h>

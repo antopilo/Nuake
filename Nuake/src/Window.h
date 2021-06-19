@@ -3,7 +3,6 @@
 #include "Rendering/Framebuffer.h"
 #include "Scene/Scene.h"
 #include "Core/Core.h"
-
 struct GLFWwindow;
 class Window
 {
@@ -31,7 +30,7 @@ public:
 
 	int Init();
 	void Update(Timestep ts);
-
+	void FixedUpdate(Timestep ts);
 	void Draw();
 	void EndDraw();
 

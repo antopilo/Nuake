@@ -7,12 +7,13 @@
 #include <wren.h>
 #include "Engine.h"
 #include "../Scene/Entities/Entity.h"
-#include <src/Scene/Entities/Components/TransformComponent.h>
-#include <src/Scene/Entities/Components/LightComponent.h>
-#include <src/Scene/Entities/Components/QuakeMap.h>
-#include <src/Scene/Entities/Components/CameraComponent.h>
-#include <src/Scene/Entities/Components/RigidbodyComponent.h>
-#include <src/Scene/Entities/Components/CharacterControllerComponent.h>
+#include <src/Scene/Components/TransformComponent.h>
+#include <src/Scene/Components/LightComponent.h>
+#include <src/Scene/Components/QuakeMap.h>
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Scene/Components/RigidbodyComponent.h>
+#include <src/Scene/Components/CharacterControllerComponent.h>
+#include <src/Scene/Components/WrenScriptComponent.h>
 
 namespace ScriptAPI
 {
@@ -29,12 +30,16 @@ namespace ScriptAPI
 		{
 			RegisterMethod("GetEntityID(_)", (void*)GetEntity);
 			RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
+			RegisterMethod("GetTranslation_(_)", (void*)GetTranslation);
+			RegisterMethod("SetTranslation_(_,_,_,_)", (void*)SetTranslation);
 			RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
 			RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
+			RegisterMethod("GetScript_(_)", (void*)GetScript);
 			RegisterMethod("SetCameraDirection_(_,_,_,_)", (void*)SetCameraDirection);
 			RegisterMethod("GetCameraDirection_(_)", (void*)GetCameraDirection);
 			RegisterMethod("GetCameraRight_(_)", (void*)GetCameraRight);
 			RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
+			RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
 		}
 
 		static void GetEntity(WrenVM* vm)
@@ -79,6 +84,20 @@ namespace ScriptAPI
 			{
 				bool result = ent.HasComponent<RigidBodyComponent>();
 				wrenSetSlotBool(vm, 0, result);
+			}
+			if (name == "Script") {
+				bool result = ent.HasComponent<WrenScriptComponent>();
+				wrenSetSlotBool(vm, 0, result);
+			}
+		}
+
+		static void GetScript(WrenVM* vm) {
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			if (ent.HasComponent<WrenScriptComponent>())
+			{
+				wrenSetSlotHandle(vm, 0, ent.GetComponent<WrenScriptComponent>().WrenScript->m_Instance);
 			}
 		}
 
@@ -158,7 +177,14 @@ namespace ScriptAPI
 			wrenInsertInList(vm, 0, 2, 3);
 		}
 
-		
+		static void IsCharacterControllerOnGround(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+			auto& characterController = ent.GetComponent<CharacterControllerComponent>();
+			bool result =  characterController.CharacterController->IsOnGround;
+			wrenSetSlotBool(vm, 0, result);
+		}
 
 		static void MoveAndSlide(WrenVM* vm)
 		{
@@ -170,6 +196,35 @@ namespace ScriptAPI
 			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 			auto& characterController = ent.GetComponent<CharacterControllerComponent>();
 			characterController.CharacterController->MoveAndSlide(Vector3(x, y, z));
+		}
+
+		static void GetTranslation(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+			auto& transform = ent.GetComponent<TransformComponent>();
+			// set the slots
+			wrenSetSlotDouble(vm, 1, transform.Translation.x);
+			wrenSetSlotDouble(vm, 2, transform.Translation.y);
+			wrenSetSlotDouble(vm, 3, transform.Translation.z);
+
+			// Fill the list
+			wrenSetSlotNewList(vm, 0);
+			wrenInsertInList(vm, 0, 0, 1);
+			wrenInsertInList(vm, 0, 1, 2);
+			wrenInsertInList(vm, 0, 2, 3);
+		}
+
+		static void SetTranslation(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+			auto& transform = ent.GetComponent<TransformComponent>();
+			// set the slots
+			float x = wrenGetSlotDouble(vm, 2);
+			float y = wrenGetSlotDouble(vm, 3);
+			float z = wrenGetSlotDouble(vm, 4);
+			transform.Translation = Vector3(x, y, z);
 		}
 
 	};
