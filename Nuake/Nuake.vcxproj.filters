@@ -28,14 +28,17 @@
     <Filter Include="src\Scene">
       <UniqueIdentifier>{0A06D2B3-7670-862A-BFAE-37D02B58647F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Scene\Components">
+      <UniqueIdentifier>{DFD07067-CB5F-FA30-747E-0E2C60EC0AD7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Scene\Entities">
       <UniqueIdentifier>{FE8943C2-EA6D-0418-53CE-FE6A3FD1EE99}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Scene\Entities\Components">
-      <UniqueIdentifier>{5374FF1D-BF8C-E647-8839-76E1F4107BE1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Scene\Lighting">
       <UniqueIdentifier>{CF04C898-BBE8-88EE-2449-8341104C7370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene\Systems">
+      <UniqueIdentifier>{11C62E55-7DDC-2CEB-C653-B80C32A9FD72}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Scripting">
       <UniqueIdentifier>{6FBC2D98-DB7C-A9CE-A4B7-F24B1037EEAA}</UniqueIdentifier>
@@ -274,6 +277,9 @@
     <ClInclude Include="src\Core\Physics\RaycastResult.h">
       <Filter>src\Core\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Physics\RaycastResults.h">
+      <Filter>src\Core\Physics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core\Physics\Rigibody.h">
       <Filter>src\Core\Physics</Filter>
     </ClInclude>
@@ -293,6 +299,9 @@
       <Filter>src\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\ImGuiAPI.h">
+      <Filter>src\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\MSAAFramebuffer.h">
       <Filter>src\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Rendering\Mesh\Mesh.h">
@@ -328,6 +337,9 @@
     <ClInclude Include="src\Rendering\Textures\Material.h">
       <Filter>src\Rendering\Textures</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Textures\MultiSampledTexture.h">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClInclude>
     <ClInclude Include="src\Rendering\Textures\Texture.h">
       <Filter>src\Rendering\Textures</Filter>
     </ClInclude>
@@ -355,65 +367,65 @@
     <ClInclude Include="src\Resource\TrenchbroomMap.h">
       <Filter>src\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Components\BaseComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\BoxCollider.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\CameraComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\CharacterControllerComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\Components.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\InterfaceComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\LightComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\LuaScriptComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\MeshCollider.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\MeshComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\ModelComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\NameComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\NativeScriptComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\ParentComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\QuakeMap.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\RigidbodyComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\SphereCollider.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\TransformComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Components\WrenScriptComponent.h">
+      <Filter>src\Scene\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Scene\EditorCamera.h">
       <Filter>src\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components.h">
-      <Filter>src\Scene\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\BaseComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\BoxCollider.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\CameraComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\CharacterControllerComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\InterfaceComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\LightComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\LuaScriptComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\MeshCollider.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\MeshComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\ModelComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\NameComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\NativeScriptComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\ParentComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\QuakeMap.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\RigidbodyComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\SphereCollider.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\TransformComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Entities\Components\WrenScriptComponent.h">
-      <Filter>src\Scene\Entities\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Entities\Entity.h">
       <Filter>src\Scene\Entities</Filter>
@@ -430,6 +442,15 @@
     <ClInclude Include="src\Scene\Scene.h">
       <Filter>src\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Systems\PhysicsSystem.h">
+      <Filter>src\Scene\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Systems\ScriptingSystem.h">
+      <Filter>src\Scene\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Systems\System.h">
+      <Filter>src\Scene\Systems</Filter>
+    </ClInclude>
     <ClInclude Include="src\Scripting\Modules\EngineModule.h">
       <Filter>src\Scripting\Modules</Filter>
     </ClInclude>
@@ -440,6 +461,9 @@
       <Filter>src\Scripting\Modules</Filter>
     </ClInclude>
     <ClInclude Include="src\Scripting\Modules\MathModule.h">
+      <Filter>src\Scripting\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scripting\Modules\PhysicsModule.h">
       <Filter>src\Scripting\Modules</Filter>
     </ClInclude>
     <ClInclude Include="src\Scripting\Modules\SceneModule.h">
@@ -2104,6 +2128,9 @@
     <ClCompile Include="src\Rendering\GBuffer.cpp">
       <Filter>src\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\MSAAFramebuffer.cpp">
+      <Filter>src\Rendering</Filter>
+    </ClCompile>
     <ClCompile Include="src\Rendering\Mesh\Mesh.cpp">
       <Filter>src\Rendering\Mesh</Filter>
     </ClCompile>
@@ -2134,41 +2161,44 @@
     <ClCompile Include="src\Rendering\Textures\Material.cpp">
       <Filter>src\Rendering\Textures</Filter>
     </ClCompile>
+    <ClCompile Include="src\Rendering\Textures\MultiSampledTexture.cpp">
+      <Filter>src\Rendering\Textures</Filter>
+    </ClCompile>
     <ClCompile Include="src\Rendering\Textures\Texture.cpp">
       <Filter>src\Rendering\Textures</Filter>
     </ClCompile>
     <ClCompile Include="src\Resource\Project.cpp">
       <Filter>src\Resource</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\Components\BoxCollider.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\CameraComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\Components.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\LightComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\MeshComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\ModelComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\QuakeMap.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\RigidbodyComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Components\TransformComponent.cpp">
+      <Filter>src\Scene\Components</Filter>
+    </ClCompile>
     <ClCompile Include="src\Scene\EditorCamera.cpp">
       <Filter>src\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components.cpp">
-      <Filter>src\Scene\Entities</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\BoxCollider.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\CameraComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\LightComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\MeshComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\ModelComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\QuakeMap.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\RigidbodyComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\Entities\Components\TransformComponent.cpp">
-      <Filter>src\Scene\Entities\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\Entities\Entity.cpp">
       <Filter>src\Scene\Entities</Filter>
@@ -2181,6 +2211,15 @@
     </ClCompile>
     <ClCompile Include="src\Scene\Scene.cpp">
       <Filter>src\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Systems\PhysicsSystem.cpp">
+      <Filter>src\Scene\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Systems\ScriptingSystem.cpp">
+      <Filter>src\Scene\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Scene\Systems\System.cpp">
+      <Filter>src\Scene\Systems</Filter>
     </ClCompile>
     <ClCompile Include="src\Scripting\ScriptLoader.cpp">
       <Filter>src\Scripting</Filter>
