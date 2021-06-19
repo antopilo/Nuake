@@ -7,6 +7,7 @@
 #include "BaseComponent.h"
 #include "../Resource/Serializable.h"
 
+#include <glm\ext\matrix_clip_space.hpp>
 enum LightType {
 	Directional, Point, Spot
 };
@@ -29,6 +30,9 @@ public:
 	float LinearAttenuation = 0.0f;
 	float QuadraticAttenuation = 0.0f;
 
+    std::vector<glm::mat4> mViewProjections;
+    std::vector<float> mCascadeSplitDepth;
+
 	LightComponent();
 
 	glm::mat4 GetProjection();
@@ -49,6 +53,8 @@ public:
 	void SetType(LightType type);
 
     std::vector<int> mCascadeSplits;
+
+
     void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection, const glm::vec3& normalizedDirection)
     {
         glm::mat4 viewProjection = projection * view;
@@ -58,6 +64,9 @@ public:
         const float nearClip = 0.1f;
         const float farClip = 1000.0f;
         const float clipRange = farClip - nearClip;
+
+        const float mCascadeNearPlaneOffset = 0.0;
+        const float mCascadeFarPlaneOffset = 0.0;
 
         // Calculate the optimal cascade distances
         const float minZ = nearClip;
@@ -69,13 +78,13 @@ public:
             const float p = (i + 1) / static_cast<float>(4);
             const float log = minZ * glm::pow(ratio, p);
             const float uniform = minZ + range * p;
-            //const float d = 0.91f * (log - uniform) + uniform;
-            //mCascadeSplits[i] = (d - nearClip) / clipRange;
+            const float d = 0.91f * (log - uniform) + uniform;
+            mCascadeSplits[i] = (d - nearClip) / clipRange;
         }
 
-        //mCascadeSplits[0] = 0.2f;
-        //mCascadeSplits[1] = 0.45f;
-        //mCascadeSplits[2] = 1.0f;
+        mCascadeSplits[0] = 0.2f;
+        mCascadeSplits[1] = 0.45f;
+        mCascadeSplits[2] = 1.0f;
 
         float lastSplitDist = 0.0f;
         // Calculate Orthographic Projection matrix for each cascade
@@ -130,22 +139,22 @@ public:
             // Calculate the view and projection matrix
             glm::vec3 lightDir = -normalizedDirection;
             glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
-            //glm::mat4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
+            glm::mat4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
 
             // Offset to texel space to avoid shimmering ->(https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering)
-            //glm::mat4 shadowMatrix = lightProjectionMatrix * lightViewMatrix;
+            glm::mat4 shadowMatrix = lightProjectionMatrix * lightViewMatrix;
             const float ShadowMapResolution = 4096;
-            //glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
-            //glm::vec4 roundedOrigin = glm::round(shadowOrigin);
-            //glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
-            //roundOffset = roundOffset * 2.0f / ShadowMapResolution;
-            //roundOffset.z = 0.0f;
-            //roundOffset.w = 0.0f;
-            //lightProjectionMatrix[3] += roundOffset;
+            glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
+            glm::vec4 roundedOrigin = glm::round(shadowOrigin);
+            glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
+            roundOffset = roundOffset * 2.0f / ShadowMapResolution;
+            roundOffset.z = 0.0f;
+            roundOffset.w = 0.0f;
+            lightProjectionMatrix[3] += roundOffset;
 
             // Store SplitDistance and ViewProjection-Matrix
-            //mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;
-            //mViewProjections[cascade] = lightProjectionMatrix * lightViewMatrix;
+            mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;
+            mViewProjections[cascade] = lightProjectionMatrix * lightViewMatrix;
             lastSplitDist = mCascadeSplits[cascade];
 
             // -----------------------Debug only-----------------------
