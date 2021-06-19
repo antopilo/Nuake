@@ -12,6 +12,7 @@
 
 namespace fs = std::filesystem;
 
+
 std::string FileDialog::OpenFile(const char* filter)
 {
 
@@ -132,6 +133,24 @@ std::string FileSystem::ReadFile(const std::string& path, bool absolute)
 	return allFile;
 }
 
+std::ofstream FileSystem::fileWriter;
+bool FileSystem::BeginWriteFile(const std::string path)
+{
+	fileWriter = std::ofstream();
+	fileWriter.open("example.txt");
+
+	return false;
+}
+
+bool FileSystem::WriteLine(const std::string line)
+{
+	fileWriter << line.c_str();
+}
+
+void FileSystem::EndWriteFile()
+{
+	fileWriter.close();
+}
 
 Ref<Directory> FileSystem::GetFileTree()
 {

@@ -2,7 +2,8 @@
 #include <string>
 #include <filesystem>
 #include "Core.h"
-
+#include <iostream>
+#include <fstream>
 class FileDialog
 {
 public:
@@ -49,6 +50,8 @@ public:
 
 	static std::string ReadFile(const std::string& path, bool absolute = false);
 
-
-
+	static std::ofstream fileWriter;
+	static bool BeginWriteFile(const std::string path);
+	static bool WriteLine(const std::string line);
+	static void EndWriteFile();
 };
