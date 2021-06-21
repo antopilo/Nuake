@@ -30,8 +30,9 @@ public:
 	float LinearAttenuation = 0.0f;
 	float QuadraticAttenuation = 0.0f;
 
-    std::vector<glm::mat4> mViewProjections;
-    std::vector<float> mCascadeSplitDepth;
+    Ref<FrameBuffer> m_Framebuffers[4];
+    glm::mat4 mViewProjections[4];
+    float mCascadeSplitDepth[4];
 
 	LightComponent();
 
@@ -52,16 +53,16 @@ public:
 
 	void SetType(LightType type);
 
-    std::vector<int> mCascadeSplits;
+    float mCascadeSplits[4];
 
 
-    void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection, const glm::vec3& normalizedDirection)
+    void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
     {
         glm::mat4 viewProjection = projection * view;
         glm::mat4 inverseViewProjection = glm::inverse(viewProjection);
 
         // TODO: Automate this
-        const float nearClip = 0.1f;
+        const float nearClip = 0.01f;
         const float farClip = 1000.0f;
         const float clipRange = farClip - nearClip;
 
@@ -82,9 +83,9 @@ public:
             mCascadeSplits[i] = (d - nearClip) / clipRange;
         }
 
-        mCascadeSplits[0] = 0.2f;
-        mCascadeSplits[1] = 0.45f;
-        mCascadeSplits[2] = 1.0f;
+        //mCascadeSplits[0] = 0.2f;
+        //mCascadeSplits[1] = 0.45f;
+        //mCascadeSplits[2] = 1.0f;
 
         float lastSplitDist = 0.0f;
         // Calculate Orthographic Projection matrix for each cascade
@@ -137,7 +138,7 @@ public:
             glm::vec3 minExtents = -maxExtents;
 
             // Calculate the view and projection matrix
-            glm::vec3 lightDir = -normalizedDirection;
+            glm::vec3 lightDir = -this->Direction;
             glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
             glm::mat4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
 

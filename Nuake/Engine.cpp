@@ -15,7 +15,7 @@
 Ref<Project> Engine::CurrentProject;
 Ref<Window> Engine::CurrentWindow;
 float Engine::m_LastFrameTime = 0.0f;
-float Engine::m_FixedUpdateRate = 1.0 / 60.0f;
+float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
 float Engine::m_FixedUpdateDifference = 0.f;
 bool Engine::IsPlayMode = false;
 

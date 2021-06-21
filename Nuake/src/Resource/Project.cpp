@@ -16,6 +16,8 @@ Project::Project(const std::string Name, const std::string Description, const st
 		scene->Deserialize(defaultScenePath);
 	}
 
+	this->EntityDefinitionsFile = CreateRef<FGDFile>();
+
 	SaveAs(FullPath);
 }
 
@@ -24,6 +26,8 @@ Project::Project()
 	this->Name = "";
 	this->Description = "";
 	this->FullPath = "";
+
+	this->EntityDefinitionsFile = CreateRef<FGDFile>();
 }
 
 void Project::Save()

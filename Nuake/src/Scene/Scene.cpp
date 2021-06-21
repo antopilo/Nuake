@@ -71,6 +71,9 @@ void Scene::Update(Timestep ts)
 {
 	for (auto& system : m_Systems)
 		system->Update(ts);
+
+
+
 }
 
 void Scene::FixedUpdate(Timestep ts)
@@ -116,30 +119,42 @@ void Scene::DrawShadows()
 		if (light.Type != LightType::Directional)
 			continue;
         
+		light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
+
+
 		light.BeginDrawShadow();
-		for (auto e : modelView)
+		for (int i = 0; i < 4; i++)
 		{
-			auto [transform, model] = modelView.get<TransformComponent, ModelComponent>(e);
-            
-			glm::vec3 pos = lightTransform.Translation;
-			glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
-			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.GetProjection() * lightView);
-			Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
-            
-			model.Draw();
+			light.m_Framebuffers[i]->Bind();
+
+			for (auto e : modelView)
+			{
+				auto [transform, model] = modelView.get<TransformComponent, ModelComponent>(e);
+
+				glm::vec3 pos = lightTransform.Translation;
+				glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
+				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
+				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
+
+				model.Draw();
+			}
+
+			for (auto e : quakeView) {
+				auto [transform, model] = quakeView.get<TransformComponent, QuakeMapComponent>(e);
+
+				glm::vec3 pos = lightTransform.Translation;
+				glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
+				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
+
+				model.Draw();
+			}
+
+			light.m_Framebuffers[i]->Unbind();
 		}
-        
-		for (auto e : quakeView) {
-			auto [transform, model] = quakeView.get<TransformComponent, QuakeMapComponent>(e);
-            
-			glm::vec3 pos = lightTransform.Translation;
-			glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
-            
-			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.GetProjection() * lightView);
-			Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
-            
-			model.Draw();
-		}
+
+		
 		light.EndDrawShadow();
 	}
 }
@@ -182,6 +197,7 @@ void Scene::Draw()
 			break;
 		}
 	}
+	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	Ref<Environment> env = GetEnvironment();
     
@@ -222,7 +238,8 @@ void Scene::Draw()
 			light.Draw(copyT, m_EditorCamera);
 		}
 	}
-    
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	Renderer::m_Shader->Bind();
 	Renderer::m_Shader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
 	Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);

@@ -137,7 +137,7 @@ std::ofstream FileSystem::fileWriter;
 bool FileSystem::BeginWriteFile(const std::string path)
 {
 	fileWriter = std::ofstream();
-	fileWriter.open("example.txt");
+	fileWriter.open(path);
 
 	return false;
 }
@@ -145,6 +145,8 @@ bool FileSystem::BeginWriteFile(const std::string path)
 bool FileSystem::WriteLine(const std::string line)
 {
 	fileWriter << line.c_str();
+
+	return true;
 }
 
 void FileSystem::EndWriteFile()

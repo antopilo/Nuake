@@ -21,6 +21,7 @@
 #include <src/Core/Logger.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Rendering/MSAAFramebuffer.h>
+#include "ProjectInterface.h"
 Ref<UI::UserInterface> userInterface;
 ImFont* normalFont;
 ImFont* EditorInterface::bigIconFont;
@@ -37,20 +38,25 @@ void EditorInterface::Init()
     ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
 
     //this->filesystem = FileSystemUI();
+
+
+
+
 }
 
 
 ImVec2 LastSize = ImVec2();
 void EditorInterface::DrawViewport()
 {
-   if(ImGui::Begin("ShadowMap"))
+    /*
+   if(ImGui::Begin("ShadowMap1"))
    {
         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
         glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
         if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
             auto& light = m_SelectedEntity.GetComponent<LightComponent>();
-            Ref<Texture> texture = light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT);
+            Ref<Texture> texture = light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
         }
         else {
@@ -58,8 +64,59 @@ void EditorInterface::DrawViewport()
         }
         
     }
+   ImGui::End();
+   if (ImGui::Begin("ShadowMap2"))
+   {
+       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+
+       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
+           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
+           Ref<Texture> texture = light.m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
+           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+       }
+       else {
+           ImGui::Text("Please select a light entity");
+       }
+
+   }
 
    ImGui::End();
+   if (ImGui::Begin("ShadowMap3"))
+   {
+       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+
+       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
+           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
+           Ref<Texture> texture = light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT);
+           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+       }
+       else {
+           ImGui::Text("Please select a light entity");
+       }
+
+   }
+
+   ImGui::End();
+   if (ImGui::Begin("ShadowMap4"))
+   {
+       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+
+       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
+           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
+           Ref<Texture> texture = light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT);
+           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+       }
+       else {
+           ImGui::Text("Please select a light entity");
+       }
+
+   }
+
+   ImGui::End();
+
    if (ImGui::Begin("SDF FONT"))
    {
        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
@@ -72,8 +129,12 @@ void EditorInterface::DrawViewport()
 
    }
    ImGui::End();
+   */
+   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     if(ImGui::Begin("Viewport"))
     {
+
+        ImGui::PopStyleVar();
         Overlay();
         ImGuizmo::BeginFrame();
 
@@ -129,6 +190,7 @@ void EditorInterface::DrawViewport()
         
     }
     ImGui::End();
+
 }
 
 static int selected = 0;
@@ -733,7 +795,7 @@ void EditorInterface::Overlay()
 {
     // FIXME-VIEWPORT: Select a default viewport
     const float DISTANCE = 10.0f;
-    static int corner = 0;
+    static int corner = 3;
     ImGuiIO& io = ImGui::GetIO();
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
     if (corner != -1)
@@ -988,6 +1050,8 @@ void EditorInterface::Draw()
     if (!Engine::GetProject())
     {
         ImGui::OpenPopup("Welcome");
+
+        return;
     }
        
     if (ImGui::BeginMainMenuBar())
@@ -1138,6 +1202,9 @@ void EditorInterface::Draw()
    // new stuff
    filesystem.Draw();
    filesystem.DrawDirectoryExplorer();
+
+   ProjectInterface pInterface;
+   pInterface.DrawEntitySettings();
 
     if(m_ShowImGuiDemo)
         ImGui::ShowDemoWindow();

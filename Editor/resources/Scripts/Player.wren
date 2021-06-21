@@ -12,13 +12,13 @@ class PlayerScript is ScriptableEntity {
     construct new() {
         _InputDir = Vector3.new(0, 0, 0)
         _Velocity = Vector3.new(0, 0, 0)
-        _Accel = 25
-        _Deccel = 0.92
+        _Accel = 150
+        _Deccel = 0.85
         _AirDeccel = 0.7
-        _Gravity = 10
+        _Gravity = 20
 
         _MaxSpeed = 20
-        _Jump = 200
+        _Jump = 400
         //Input.HideMouse()
     }
 
@@ -58,7 +58,6 @@ class PlayerScript is ScriptableEntity {
         } else {
             _Velocity.y = -10
             
-            Engine.Log("Grav: %(_Velocity.y)")
 
             if(Input.IsKeyPressed(32)) _Velocity.y = _Jump
                 
@@ -69,7 +68,6 @@ class PlayerScript is ScriptableEntity {
             _Velocity.z = _Velocity.z * _Deccel
         }
 
-        Engine.Log("Grav: %(_Velocity.y)")
         controller.MoveAndSlide(_Velocity * ts)
     }
 

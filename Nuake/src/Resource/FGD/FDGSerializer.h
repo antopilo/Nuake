@@ -1,11 +1,12 @@
 #pragma once
+#include "FGDClass.h"
 #include <string>
 class FGDSerializer
 {
 public:
 	static bool BeginFGDFile(const std::string path);
 
-	static bool RegisterEntity();
+	static bool SerializeClass(FGDClass fgdClass);
 
 	static bool EndFGDFile();
 };

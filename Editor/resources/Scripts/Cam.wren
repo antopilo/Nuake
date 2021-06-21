@@ -11,11 +11,13 @@ class CamScript is ScriptableEntity {
 
        _mouseLastX = 0
        _mouseLastY = 0
-       _BobHeight = 0.1
+
+        _BobHeight = 0.1
         _BobSpeed = 5.0
         _CamHeight = 0.5
 
         _deltaTime = 0
+
        Input.HideMouse()
     }
 

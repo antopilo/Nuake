@@ -5,7 +5,8 @@
 #include <vector>
 
 
-class BrushClass : public BaseClass {
+class BrushClass {
+public:
 	std::string name;
 	std::vector<ClassProperty> Props;
 	std::string Description;

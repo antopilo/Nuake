@@ -59,6 +59,9 @@ struct Light {
     float LinearAttenuation;
     float QuadraticAttenuation;
     mat4 LightTransform;
+    sampler2D ShadowMaps[4];
+    float CascadeDepth[4];
+    mat4 LightTransforms[4];
     sampler2D ShadowMap;
     sampler2D RSMFlux;
     sampler2D RSMNormal;
@@ -221,6 +224,59 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 
+float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
+{
+    // Get Depth
+    vec3 startPosition = u_EyePosition;             
+    vec3 rayVector = FragPos - startPosition;  
+    float depth = length(rayVector);
+
+    int shadowmap = -1;
+
+    // Get CSM depth
+    for (int i = 0; i < 4; i++)
+    {
+        float CSMDepth = light.CascadeDepth[i] ;
+
+        if (depth < CSMDepth + 0.0001)
+        {
+            shadowmap = i;
+            break;
+        }
+    }
+
+    if (shadowmap == -1)
+        return 1.0;
+
+    vec4 fragPosLightSpace = light.LightTransforms[shadowmap] * vec4(FragPos, 1.0f);
+
+    //sampler2D shadowmapFB = light.ShadowMaps[shadowmap];
+
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(light.ShadowMaps[shadowmap], projCoords.xy).r;
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
+
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(light.ShadowMaps[shadowmap], 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(light.ShadowMaps[shadowmap], projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    return shadow /= 9;
+}
+
+/*
 float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal, vec3 lightDir)
 {
     // perform perspective divide
@@ -246,7 +302,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal
     }
     return shadow /= 9;
 }
-
+*/
 
 uniform float u_FogAmount;
 // Mie scaterring approximated with Henyey-Greenstein phase function.
@@ -357,7 +413,8 @@ void main()
             attenuation = 1.0f;
             if (Lights[i].Volumetric == 1)
                 Fog += ComputeVolumetric(v_FragPos, Lights[i].LightTransform, Lights[i].Color, Lights[i].ShadowMap, Lights[i].Direction);
-            shadow += ShadowCalculation(Lights[i].LightTransform * vec4(v_FragPos, 1.0f), Lights[i].ShadowMap, N, Lights[i].Direction);
+            shadow += ShadowCalculation(Lights[i], v_FragPos, N);
+            //shadow += ShadowCalculation(Lights[i].LightTransform * vec4(v_FragPos, 1.0f), Lights[i].ShadowMap, N, Lights[i].Direction);
         }
 
        

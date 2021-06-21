@@ -12,9 +12,18 @@ LightComponent::LightComponent()
     Strength = 10.0f;
     Direction = glm::vec3(0, -1, 0);
 
+
+    //m_Framebuffers = std::vector<Ref<FrameBuffer>>();
+    //mViewProjections = std::vector<glm::mat4>();
+    //mCascadeSplitDepth = std::vector<float>();
+    //mCascadeSplits = std::vector<float>();
     // Framebuffer used for shadow mapping.
-    m_Framebuffer = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
-    m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+    for (int i = 0; i < 4; i++)
+    {
+        m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
+        m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+    }
+    
 }
 
 glm::mat4 LightComponent::GetProjection()
@@ -44,7 +53,7 @@ glm::vec3 LightComponent::GetDirection()
 void LightComponent::BeginDrawShadow()
 {
     Renderer::m_ShadowmapShader->Bind();
-    m_Framebuffer->Bind();
+    //m_Framebuffer->Bind();
     
     // Render scene...
 
@@ -52,7 +61,7 @@ void LightComponent::BeginDrawShadow()
 
 void LightComponent::EndDrawShadow()
 {
-    m_Framebuffer->Unbind();
+    //m_Framebuffer->Unbind();
 }
 
 void LightComponent::DrawShadow()

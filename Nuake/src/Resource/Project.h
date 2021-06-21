@@ -3,6 +3,9 @@
 #include "../Core/Core.h"
 #include "../Scene/Scene.h"
 #include "Serializable.h"
+
+#include "FGD/FGDFile.h"
+
 class Project : public ISerializable
 {
 public:
@@ -11,6 +14,7 @@ public:
 	std::string FullPath;
 
 	Ref<Scene> DefaultScene;
+	Ref<FGDFile> EntityDefinitionsFile;
 
 	Project(const std::string Name, const std::string Description, const std::string& FullPath, const std::string& defaultScenePath = "");
 	Project();
