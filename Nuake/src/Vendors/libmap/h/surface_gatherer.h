@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SURFACE_GATHERER_H
 #define SURFACE_GATHERER_H
 

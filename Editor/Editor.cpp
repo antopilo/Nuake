@@ -18,31 +18,27 @@
 
 int main()
 {
-    std::string TrenchbroomPath = "F:/TrenchBroom/";
-
-    FGDFile file(TrenchbroomPath + "Games/Nuake/Nuake.fgd");
-
-    FGDClass newClass(FGDClassType::Point, "light", "a nuake light");
-    
-    ClassProperty prop{
-        "Intensity",
-        ClassPropertyType::Integer,
-        "Changes the light intensity"
-    };
-    
-    newClass.AddProperty(prop);
-    file.AddClass(newClass);
-
-    file.Save();
+    //std::string TrenchbroomPath = "F:/TrenchBroom/";
+    //
+    //FGDFile file(TrenchbroomPath + "Games/Nuake/Nuake.fgd");
+    //
+    //FGDClass newClass(FGDClassType::Point, "light", "a nuake light");
+    //
+    //ClassProperty prop{
+    //    "Intensity",
+    //    ClassPropertyType::Integer,
+    //    "Changes the light intensity"
+    //};
+    //
+    //newClass.AddProperty(prop);
+    //file.AddClass(newClass);
+    //
+    //file.Save();
 
     Engine::Init();
 
-   // ScriptingEngine::UpdateScript("test.lua");
-    
     EditorInterface editor;
     editor.BuildFonts();
-
-    //CreateScene();
 
     while (!Engine::GetCurrentWindow()->ShouldClose())
     {
@@ -56,8 +52,6 @@ int main()
         editor.Draw();
 
         Engine::EndDraw();
-
-        
     }
 
     Engine::Close();

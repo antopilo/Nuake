@@ -1,3 +1,4 @@
+#pragma once
 #ifndef GEO_GENERATOR_H
 #define GEO_GENERATOR_H
 

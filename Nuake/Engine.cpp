@@ -26,7 +26,6 @@ void Engine::Init()
 	PhysicsManager::Get()->Init();
 	Logger::Log("Physics initialized");
 
-
 	CurrentWindow = Window::Get();
 	Logger::Log("Window initialized");
 
@@ -48,22 +47,22 @@ void Engine::Tick()
 	m_LastFrameTime = time;
 
 	// Play mode update vs editor update.
-	if (Engine::IsPlayMode) {
+	if (Engine::IsPlayMode) 
+	{
 		CurrentWindow->Update(timestep);
 		m_FixedUpdateDifference += timestep;
+
 		// Fixed update
 		if (m_FixedUpdateDifference >= m_FixedUpdateRate)
 		{
-			// call update here.
 			CurrentWindow->FixedUpdate(m_FixedUpdateRate);
 			m_FixedUpdateDifference = 0.f;
 		}
 	}
 	else
+	{
 		GetCurrentScene()->EditorUpdate(timestep);
-
-	
-
+	}
 
 	Input::Update();
 }
@@ -105,7 +104,6 @@ void Engine::EndDraw()
 
 void Engine::Close()
 {
-	ScriptingEngine::Close();
 	glfwTerminate();
 }
 

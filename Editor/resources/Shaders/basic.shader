@@ -1,10 +1,5 @@
 #shader vertex
 #version 460 core
-// Have you ever seen Godot shader. The whole engine has ONE monolithic shader.
-// Also, how do you want me to split this in multiple shaders lmao.
-// Click upper right Round thing
-// DO CODE REVIEW yep
-// im following u daddy
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
 layout(location = 2) in vec3 Normal;
@@ -12,14 +7,13 @@ layout(location = 3) in vec3 Tangent;
 layout(location = 4) in vec3 Bitangent;
 
 out flat vec2 v_UVPosition;
-out flat float v_TextureId;
 out vec3 v_Normal;
 out vec3 v_FragPos;
 out vec3 v_ViewPos;
 out mat3 v_TBN;
-out mat3 v_WTBN;
 out vec3 v_Tangent;
 out vec3 v_Bitangent;
+
 uniform mat4 u_Projection;
 uniform mat4 u_View;
 uniform mat4 u_Model;
@@ -43,11 +37,22 @@ void main()
     gl_Position = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
     v_FragPos = vec3(u_Model * vec4(VertexPosition, 1.0f));
     v_ViewPos = VertexPosition;
-
 }
 
 #shader fragment
 #version 460 core
+
+out vec4 FragColor;
+
+in vec3 v_FragPos;
+in vec3 v_ViewPos;
+in vec2 v_UVPosition;
+in flat vec3 v_Normal;
+in mat3 v_TBN;
+in vec3 v_Tangent;
+in vec3 v_Bitangent;
+
+const float PI = 3.141592653589793f;
 
 struct Light {
     int Type; // 0 = directional, 1 = point
@@ -69,34 +74,23 @@ struct Light {
     int Volumetric;
 };
 
-out vec4 FragColor;
-
-// Textures
-uniform sampler2D u_Textures[2];
+// Debug
+uniform int u_ShowNormal;
 
 const int MaxLight = 20;
 uniform int LightCount = 0;
 uniform Light Lights[MaxLight];
-
-// Debug
-uniform int u_ShowNormal;
 
 // Lighting
 uniform vec3 u_AmbientColor;
 uniform vec4 u_LightColor;
 uniform vec3 u_LightDirection;
 uniform float u_Exposure;
-
-// Material
-uniform vec3  albedo;
-uniform float metallic;
-uniform float roughness;
-uniform float ao;
+uniform float u_FogAmount;
 
 // Specular
 uniform samplerCube u_Skybox;
 uniform samplerCube u_IrradianceMap;
-uniform float u_Shininess;
 uniform float u_Strength;
 uniform vec3 u_EyePosition;
 
@@ -106,36 +100,28 @@ uniform samplerCube prefilterMap;
 uniform sampler2D   brdfLUT;
 
 // Material
-uniform int u_HasAlbedo; // I would advise against doing this stuff. just need default normal which is 0.5f 0.5f 1.0f.
-uniform sampler2D m_Albedo; // yeah just think about it // normal maps are in tangent space which means the default should be a vector pointing straight towards the camera right? ie 0.0, 0.0, 1.0
-uniform vec3 m_AlbedoColor;
-uniform int u_HasMetalness; // But normal maps can also contain colors where the vectors face away such as vec3(0.2, 0.4, -1.0f) right? yeah
-uniform sampler2D m_Metalness; // Well normal maps are stored as colors so you can't have negative values. So they are mapped from the range of -1 to 1, to 0 to 1
-uniform float u_MetalnessValue;
-uniform int u_HasRoughness; // That is why you do the [normal * 2.0f - 1.0f]; to put it into to range of -1 to 1. yeah 0 - 1 -> -1 - 1
-uniform sampler2D m_Roughness; // So vec3(0.0, 0.0, 1.0) put into the range of 0 to 1 is (0.5, 0.5, 1.0). easy.
-uniform float u_RoughnessValue;
-uniform int u_HasAO;
+uniform sampler2D m_Albedo; 
+uniform sampler2D m_Metalness; 
+uniform sampler2D m_Roughness; 
 uniform sampler2D m_AO;
-uniform float u_AOValue;
-uniform int u_HasNormal;
 uniform sampler2D m_Normal;
-uniform int u_HasDisplacement;
 uniform sampler2D m_Displacement;
 
-in vec3 v_FragPos;
-in vec3 v_ViewPos;
-in vec2 v_UVPosition;
-in flat vec3 v_Normal;
-in mat3 v_TBN;
-in flat float v_TextureId;
+layout(std140, binding = 32) uniform u_MaterialUniform
+{
+    bool u_HasAlbedo; 
+    vec3 m_AlbedoColor;
+    bool u_HasMetalness;
+    float u_MetalnessValue;
+    bool u_HasRoughness;
+    float u_RoughnessValue;
+    bool u_HasAO;
+    float u_AOValue;
+    bool u_HasNormal;
+    bool u_HasDisplacement;
+};
 
-in vec3 v_Tangent;
-in vec3 v_Bitangent;
-
-const float PI = 3.141592653589793f; // mark this as static const wait idk if you can do that in glsl
 float height_scale = 0.00f;
-
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir) // nice never done this // its easy Af its basicalyy returns a uv coords . that u use everywhere
 {
@@ -276,35 +262,6 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     return shadow /= 9;
 }
 
-/*
-float ShadowCalculation(vec4 fragPosLightSpace, sampler2D shadowMap, vec3 normal, vec3 lightDir)
-{
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(shadowMap, projCoords.xy).r;
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    // check whether current frag pos is in shadow
-    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
-
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for (int x = -1; x <= 1; ++x)
-    {
-        for (int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
-    }
-    return shadow /= 9;
-}
-*/
-
-uniform float u_FogAmount;
 // Mie scaterring approximated with Henyey-Greenstein phase function.
 float ComputeScattering(float lightDotView)
 {
@@ -364,23 +321,21 @@ void main()
     vec2 texCoords = v_UVPosition;//ParallaxMapping(v_UVPosition, viewDir);
     vec2 finalTexCoords = texCoords;
 
-
     vec3 finalAlbedo = m_AlbedoColor;
-    if(u_HasAlbedo == 1)
+    if(u_HasAlbedo)
         finalAlbedo = texture(m_Albedo, finalTexCoords).rgb;
 
     float finalRoughness = u_RoughnessValue;
-    if (u_HasRoughness == 1)
+    if (u_HasRoughness )
         finalRoughness = texture(m_Roughness, finalTexCoords).r;
 
     float finalMetalness = u_MetalnessValue;
-    if (u_HasMetalness == 1)
+    if (u_HasMetalness)
         finalMetalness = texture(m_Metalness, finalTexCoords).r;
 
     float finalAO = u_AOValue;
-    if (u_HasAO == 1)
+    if (u_HasAO)
         finalAO = texture(m_AO, finalTexCoords).r;
-
 
     vec3 finalNormal = texture(m_Normal, finalTexCoords).rgb;
     finalNormal = finalNormal * 2.0 - 1.0;
@@ -393,8 +348,6 @@ void main()
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, finalAlbedo, finalMetalness);
 
-    // reflectance equation
-    
     vec3 eyeDirection = normalize(u_EyePosition - v_FragPos);
 
     vec3 Fog = vec3(0.0);

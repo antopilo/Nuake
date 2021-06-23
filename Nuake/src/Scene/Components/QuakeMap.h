@@ -8,7 +8,6 @@
 class QuakeMapComponent  {
 private:
 	
-
 public:
 	std::vector<Ref<Mesh>> m_Meshes;
 	Ref<TrenchbroomMap> Map;

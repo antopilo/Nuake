@@ -4,6 +4,7 @@
 
 class TransformComponent {
 public:
+	Vector3 GlobalTranslation;
 	Vector3 Translation;
 	Vector3 Rotation; // TODO: Should use quaternions.
 	Vector3 Scale;

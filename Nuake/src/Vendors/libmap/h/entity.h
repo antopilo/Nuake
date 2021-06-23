@@ -20,7 +20,7 @@ enum entity_spawn_type
 
 typedef struct entity {
     int property_count;
-    property *properties;
+    property* properties;
     
     int brush_count;
     brush *brushes;

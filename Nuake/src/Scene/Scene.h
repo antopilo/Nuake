@@ -46,6 +46,8 @@ public:
 	void FixedUpdate(Timestep ts);
 	void EditorUpdate(Timestep ts);
 
+	void UpdatePositions();
+
 	// TODO: Maybe move this to Renderer::DrawScene() ?
 	void DrawShadows();
 	void DrawInterface(Vector2 screensize);

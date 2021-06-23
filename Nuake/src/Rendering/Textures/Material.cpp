@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <dependencies/GLEW/include/GL/glew.h>
 Ref<Texture> Material::m_DefaultAlbedo;
 Ref<Texture> Material::m_DefaultAO;
 Ref<Texture> Material::m_DefaultNormal;
@@ -18,10 +19,14 @@ Ref<Texture> Material::m_DefaultDisplacement;
 
 Material::Material(const std::string albedo) 
 {
+	glGenBuffers(1, &UBO);
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW); 
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	m_Albedo = TextureManager::Get()->GetTexture(albedo);
 
-	UseAlbedo = true;
+	data.u_HasAlbedo = 1;
 
 	std::stringstream ss(albedo);
 	std::string item;
@@ -42,8 +47,6 @@ Material::Material(const std::string albedo)
 		m_DefaultRoughness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultMetalness == nullptr)
 		m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
-
-	
 }
 
 //Material::Material()
@@ -52,11 +55,20 @@ Material::Material(const std::string albedo)
 
 Material::Material(const glm::vec3 albedoColor)
 {
-	m_AlbedoColor = albedoColor;
+	glGenBuffers(1, &UBO);
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	data.m_AlbedoColor = myVec3{ albedoColor.r, albedoColor.g, albedoColor.b};
+
 	m_Name = "New material";
+
 	if (m_DefaultAlbedo == nullptr)
 		m_DefaultAlbedo = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+
 	m_Albedo = m_DefaultAlbedo;
+
 	if (m_DefaultAO == nullptr)
 		m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	if (m_DefaultNormal == nullptr)
@@ -69,23 +81,22 @@ Material::Material(const glm::vec3 albedoColor)
 		m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 }
 
-Material::~Material() 
-{
-
-}
+Material::~Material() {}
 
 void Material::Bind() 
 {
-	
+	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
+
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);
+
 	// Albedo
 	if (m_Albedo != nullptr)
 		m_Albedo->Bind(4);
 	else
 		m_DefaultAlbedo->Bind(4);
 	Renderer::m_Shader->SetUniform1i("m_Albedo", 4);
-	Renderer::m_Shader->SetUniform1i("u_HasAlbedo", UseAlbedo);
-	Renderer::m_Shader->SetUniform3f("m_AlbedoColor", m_AlbedoColor.r, m_AlbedoColor.g, m_AlbedoColor.b);
-	Renderer::m_GBufferShader->SetUniform1i("m_Albedo", 4);
 
 	// AO
 	if (m_AO != nullptr)
@@ -93,33 +104,28 @@ void Material::Bind()
 	else
 		m_DefaultAO->Bind(5);
 	Renderer::m_Shader->SetUniform1i("m_AO", 5);
-	Renderer::m_Shader->SetUniform1i("u_HasAO", UseAO);
-	Renderer::m_Shader->SetUniform1f("u_AOValue", m_AOValue);
-	Renderer::m_GBufferShader->SetUniform1i("m_AO", 5);
+
 	// Metallic
 	if (m_Metalness != nullptr) 
 		m_Metalness->Bind(6);
 	else 
 		m_DefaultMetalness->Bind(6);
 	Renderer::m_Shader->SetUniform1i("m_Metalness", 6);
-	Renderer::m_Shader->SetUniform1i("u_HasMetalness", UseMetalness);
-	Renderer::m_Shader->SetUniform1f("u_MetalnessValue", m_MetalnessValue);
-	Renderer::m_GBufferShader->SetUniform1i("m_Metalness", 6);
+
 	// Roughness
 	if (m_Roughness != nullptr)
 		m_Roughness->Bind(7);
 	else
 		m_DefaultRoughness->Bind(7);
 	Renderer::m_Shader->SetUniform1i("m_Roughness", 7);
-	Renderer::m_Shader->SetUniform1i("u_HasRoughness", UseRoughness);
-	Renderer::m_Shader->SetUniform1f("u_RoughnessValue", m_RoughnessValue);
-	Renderer::m_GBufferShader->SetUniform1i("m_Roughness", 7);
+
 	// Normal
 	if (m_Normal != nullptr)
 		m_Normal->Bind(8);
 	else
 		m_DefaultNormal->Bind(8);
 	Renderer::m_Shader->SetUniform1i("m_Normal", 8);
+
 	// Displacement
 	if (m_Displacement != nullptr)
 		m_Displacement->Bind(9);
@@ -127,6 +133,10 @@ void Material::Bind()
 		m_DefaultDisplacement->Bind(9);
 	//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
 	//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
+}
+
+void Material::SetupUniformBuffer()
+{
 }
 
 void Material::SetName(const std::string name) 

@@ -127,7 +127,7 @@ void Renderer::RegisterLight(TransformComponent transform, LightComponent light,
     int idx = m_Lights.size();
 
     glm::vec3 direction = light.GetDirection();
-	glm::vec3 pos = transform.Translation;
+	glm::vec3 pos = transform.GlobalTranslation;
 	glm::mat4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
     //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
@@ -152,7 +152,7 @@ void Renderer::RegisterLight(TransformComponent transform, LightComponent light,
     m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[2]", light.mCascadeSplitDepth[2]);
     m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[3]", light.mCascadeSplitDepth[3]);
     m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
-    m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Position"      , transform.Translation.x, transform.Translation.y, transform.Translation.z);
+    m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Position"      , transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z);
     m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Direction"     , direction.x, direction.y, direction.z);
     m_Shader->SetUniform3f   ("Lights[" + std::to_string(idx - 1) + "].Color"         , light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
     m_Shader->SetUniform1i   ("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);

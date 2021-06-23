@@ -240,6 +240,7 @@ void Window::Draw()
 
     Vector2 size = m_Framebuffer->GetSize();
     cam->AspectRatio = size.x / size.y;
+
     Renderer::BeginDraw(cam);
     {
 
@@ -258,7 +259,6 @@ void Window::Draw()
         
         m_Framebuffer->Unbind();
     }
-
     Renderer::EndDraw();
 }
 

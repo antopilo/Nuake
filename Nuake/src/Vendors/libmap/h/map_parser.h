@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MAP_PARSER_H
 #define MAP_PARSER_H
 

@@ -54,7 +54,7 @@ namespace ScriptAPI
 			int handle = wrenGetSlotDouble(vm, 1);
 			std::string name = wrenGetSlotString(vm, 2);
 			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
-
+			
 			if (name == "Transform")
 			{
 				bool result = ent.HasComponent<TransformComponent>();

@@ -8,12 +8,12 @@
 #include "../Resource/Serializable.h"
 
 #include <glm\ext\matrix_clip_space.hpp>
+
 enum LightType {
 	Directional, Point, Spot
 };
 
 class LightComponent  {
-	
 public:
 	glm::vec2 yes = glm::vec2(2, 2);
 	

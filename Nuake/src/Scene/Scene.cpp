@@ -1,6 +1,11 @@
 #pragma once
 #include <src/Scene/Systems/ScriptingSystem.h>
 #include <src/Scene/Systems/PhysicsSystem.h>
+
+
+#include <src/Scene/Systems/QuakeMapBuilder.h>
+#include <src/Scene/Components/BSPBrushComponent.h>
+
 #include "Scene.h"
 #include "Entities/Entity.h"
 
@@ -69,11 +74,10 @@ void Scene::OnExit()
 
 void Scene::Update(Timestep ts)
 {
+	UpdatePositions();
+
 	for (auto& system : m_Systems)
 		system->Update(ts);
-
-
-
 }
 
 void Scene::FixedUpdate(Timestep ts)
@@ -84,12 +88,36 @@ void Scene::FixedUpdate(Timestep ts)
 
 void Scene::EditorUpdate(Timestep ts)
 {
+	UpdatePositions();
+
 	m_EditorCamera->Update(ts);
     
 	for (auto i : m_Interfaces)
 		i->Update(ts);
 }
 
+void Scene::UpdatePositions()
+{
+	auto transformView = m_Registry.view<ParentComponent, TransformComponent>();
+	for (auto e : transformView) {
+		auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
+		Entity currentParent = Entity{ e, this };
+		Vector3 globalPos = Vector3();
+		if (parent.HasParent)
+		{
+			while (currentParent.GetComponent<ParentComponent>().HasParent) {
+				currentParent = currentParent.GetComponent<ParentComponent>().Parent;
+				globalPos += currentParent.GetComponent<TransformComponent>().Translation;
+			}
+
+			transform.GlobalTranslation = globalPos + transform.Translation;
+		}
+		else
+		{
+			transform.GlobalTranslation = transform.Translation;
+		}
+	}
+}
 
 void Scene::DrawShadows()
 {
@@ -97,19 +125,14 @@ void Scene::DrawShadows()
 	auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent>();
 	auto view = m_Registry.view<TransformComponent, LightComponent>();
     
-	Ref<Camera> cam = nullptr;
-	if (Engine::IsPlayMode)
-	{
+	Ref<Camera> cam = m_EditorCamera;
+	if (Engine::IsPlayMode) {
 		auto view = m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto e : view) {
 			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
 			cam = camera.CameraInstance;
 			break;
 		}
-	}
-	else
-	{
-		cam = m_EditorCamera;
 	}
     
 	glm::mat4 perspective = cam->GetPerspective();
@@ -120,7 +143,6 @@ void Scene::DrawShadows()
 			continue;
         
 		light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
-
 
 		light.BeginDrawShadow();
 		for (int i = 0; i < 4; i++)
@@ -139,22 +161,20 @@ void Scene::DrawShadows()
 				model.Draw();
 			}
 
+			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 			for (auto e : quakeView) {
-				auto [transform, model] = quakeView.get<TransformComponent, QuakeMapComponent>(e);
-
-				glm::vec3 pos = lightTransform.Translation;
-				glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
-
+				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
 
-				model.Draw();
+				for (auto& e : model.Meshes) {
+					e->Draw();
+				}
 			}
 
 			light.m_Framebuffers[i]->Unbind();
 		}
 
-		
 		light.EndDrawShadow();
 	}
 }
@@ -167,7 +187,6 @@ void Scene::DrawInterface(Vector2 screensize)
 	}
 }
 
-
 void Scene::Draw()
 {
 	// Find the camera of the scene.
@@ -176,24 +195,8 @@ void Scene::Draw()
 		auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
 		for (auto e : view) {
 			auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
-            
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
 			cam = camera.CameraInstance;
-			cam->Translation = copyT.Translation;
+			cam->Translation = transform.GlobalTranslation;
 			break;
 		}
 	}
@@ -216,26 +219,10 @@ void Scene::Draw()
 		for (auto l : view) {
 			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
             
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ l, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-                    
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
 			if (light.SyncDirectionWithSky)
 				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
             
-			light.Draw(copyT, m_EditorCamera);
+			light.Draw(transform, m_EditorCamera);
 		}
 	}
 	glEnable(GL_CULL_FACE);
@@ -249,59 +236,31 @@ void Scene::Draw()
         
 		auto view = m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
 		for (auto e : view) {
-			auto [transform, model, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
-			
+			auto [transform, model, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);            
 			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-			Renderer::m_Shader->SetUniformMat4f("u_Model", copyT.GetTransform());
+			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
 			model.Draw();
 		}
         
-		auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent, ParentComponent>();
+		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView) {
-			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMapComponent, ParentComponent>(e);
-            
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
+			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-			Renderer::m_Shader->SetUniformMat4f("u_Model", copyT.GetTransform());
-			model.Draw();
+			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
+
+			for (auto& e : model.Meshes)
+			{
+				e->Draw();
+			}
 		}
         
 		Renderer::m_DebugShader->SetUniformMat4f("u_View", cam->GetTransform());
 		Renderer::m_DebugShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 		PhysicsManager::Get()->DrawDebug();
 	}
-    
-	
 }
 
 void Scene::EditorDraw()
@@ -309,6 +268,7 @@ void Scene::EditorDraw()
 	glDisable(GL_DEPTH_TEST);
 	Ref<Environment> env = GetEnvironment();
     
+	glDisable(GL_CULL_FACE);
 	if (env->ProceduralSkybox)
 	{
 		env->ProceduralSkybox->Draw(m_EditorCamera);
@@ -323,29 +283,15 @@ void Scene::EditorDraw()
 		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
 		for (auto l : view) {
 			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-			
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ l, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
+
 			if (light.SyncDirectionWithSky)
 				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
             
-			light.Draw(copyT, m_EditorCamera);
+			light.Draw(transform, m_EditorCamera);
 		}
 	}
-    
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
 	Renderer::m_Shader->Bind();
 	Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
 	if (m_EditorCamera)
@@ -355,77 +301,33 @@ void Scene::EditorDraw()
 		auto view = m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
 		for (auto e : view) {
 			auto [transform, model, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);
-            
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-			Renderer::m_Shader->SetUniformMat4f("u_Model", copyT.GetTransform());
+			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
 			model.Draw();
 		}
         
-		auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent, ParentComponent>();
+		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView) {
-			auto [transform, model, parent] = quakeView.get<TransformComponent, QuakeMapComponent, ParentComponent>(e);
-            
-            
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-                
-				copyT.Translation = globalOffset;
-			}
+			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-            
-			Renderer::m_Shader->SetUniformMat4f("u_Model", copyT.GetTransform());
-			model.Draw();
+			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
+
+			for (auto& e : model.Meshes) {
+				e->Draw();
+			}
 		}
         
 		auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
 		for (auto e : boxCollider) {
 			auto [transform, box, parent] = boxCollider.get<TransformComponent, BoxColliderComponent, ParentComponent>(e);
             
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-                    
-				}
-                
-				copyT.Translation = globalOffset;
-			}
-            
 			Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-			Renderer::m_DebugShader->SetUniformMat4f("u_Model", copyT.GetTransform());
+			Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
 			
 			TransformComponent t = transform;
 			t.Scale = (box.Size * 2.f) * transform.Scale;
@@ -435,22 +337,6 @@ void Scene::EditorDraw()
 		auto sphereCollider = m_Registry.view<TransformComponent, SphereColliderComponent, ParentComponent>();
 		for (auto e : sphereCollider) {
 			auto [transform, box, parent] = sphereCollider.get<TransformComponent, SphereColliderComponent, ParentComponent>(e);
-            
-			TransformComponent copyT = transform;
-			if (parent.HasParent)
-			{
-				Entity currentParent = Entity{ e, this };
-				glm::vec3 globalOffset = copyT.Translation;
-                
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalOffset += currentParent.GetComponent<TransformComponent>().Translation;
-                    
-				}
-                
-				copyT.Translation = globalOffset;
-			}
             
 			Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
@@ -517,7 +403,16 @@ Entity Scene::CreateEntity(const std::string& name) {
 	return entity;
 }
 
-void Scene::DestroyEntity(Entity entity) {
+void Scene::DestroyEntity(Entity entity) 
+{
+	ParentComponent& parentComponent = entity.GetComponent<ParentComponent>();
+	if (parentComponent.HasParent) {  // Remove self from parents children lists.
+		int idx = 0;
+		ParentComponent& parentParentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
+	}
+	for (auto& c : parentComponent.Children) {
+		DestroyEntity(c);
+	}
 	entity.Destroy();
 }
 

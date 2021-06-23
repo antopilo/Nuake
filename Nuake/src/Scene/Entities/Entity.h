@@ -38,7 +38,8 @@ public:
 	}
 
 	void Destroy() {
-		m_Scene->m_Registry.destroy(m_EntityHandle);
+		if(m_Scene->m_Registry.valid(m_EntityHandle))
+			m_Scene->m_Registry.destroy(m_EntityHandle);
 	}
 
 	bool operator==(const Entity& other) const
@@ -54,6 +55,9 @@ public:
 	json Serialize() override;
 	bool Deserialize(const std::string& str);
 
+	Scene* GetScene() {
+		return m_Scene;
+	}
 private:
 	entt::entity m_EntityHandle;
 	Scene* m_Scene;

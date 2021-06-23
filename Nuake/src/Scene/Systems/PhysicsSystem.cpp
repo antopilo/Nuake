@@ -7,6 +7,7 @@
 #include <src/Core/Physics/PhysicsManager.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/QuakeMap.h>
+#include <src/Scene/Components/BSPBrushComponent.h>
 PhysicsSystem::PhysicsSystem(Scene* scene) 
 {
     m_Scene = scene;
@@ -19,7 +20,6 @@ void PhysicsSystem::Init()
 	for (auto e : view)
 	{
 		auto [transform, rigidbody] = view.get<TransformComponent, RigidBodyComponent>(e);
-        
 		Entity ent = Entity({ e, m_Scene });
 		
 		if (ent.HasComponent<BoxColliderComponent>())
@@ -50,22 +50,21 @@ void PhysicsSystem::Init()
 		PhysicsManager::Get()->RegisterCharacterController(cc.CharacterController);
 	}
 
-	auto quakeMapview = m_Scene->m_Registry.view<TransformComponent, QuakeMapComponent>();
-	for (auto e : quakeMapview)
+	auto bspView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
+	for (auto e : bspView)
 	{
-		auto [transform, quake] = quakeMapview.get<TransformComponent, QuakeMapComponent>(e);
+		auto [transform, brush] = bspView.get<TransformComponent, BSPBrushComponent>(e);
 
-		if (quake.HasCollisions)
+		if (brush.IsSolid)
 		{
-			for (auto m : quake.m_Meshes)
+			for (auto m : brush.Meshes)
 			{
 				Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.Translation, meshShape);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
 		}
 	}
-    
 }
 
 void PhysicsSystem::Update(Timestep ts)

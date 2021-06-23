@@ -22,6 +22,7 @@
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Rendering/MSAAFramebuffer.h>
 #include "ProjectInterface.h"
+#include <src/Scene/Systems/QuakeMapBuilder.h>
 Ref<UI::UserInterface> userInterface;
 ImFont* normalFont;
 ImFont* EditorInterface::bigIconFont;
@@ -161,6 +162,7 @@ void EditorInterface::DrawViewport()
         if (m_IsEntitySelected && !Engine::IsPlayMode)
         {
             TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
+            ParentComponent& parent = m_SelectedEntity.GetComponent<ParentComponent>();
             glm::mat4 oldTransform = tc.GetTransform();
             ImGuizmo::Manipulate(
                 glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
@@ -180,6 +182,20 @@ void EditorInterface::DrawViewport()
                     scale = glm::vec3(0, 0, 0);
                 rotation = glm::conjugate(rotation);
                 glm::vec3 euler = glm::eulerAngles(rotation);
+
+                Vector3 globalPos = Vector3();
+                Entity currentParent = m_SelectedEntity;
+                if (parent.HasParent)
+                {
+                    while (currentParent.GetComponent<ParentComponent>().HasParent) {
+                        currentParent = currentParent.GetComponent<ParentComponent>().Parent;
+                        globalPos -= currentParent.GetComponent<TransformComponent>().Translation;
+                    }
+
+                    translation = globalPos - translation;
+                }
+
+
                 tc.Translation = translation;
                 tc.Rotation = glm::vec3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));
                 tc.Scale = scale;
@@ -188,6 +204,10 @@ void EditorInterface::DrawViewport()
         
 
         
+    }
+    else
+    {
+        ImGui::PopStyleVar();
     }
     ImGui::End();
 
@@ -590,7 +610,11 @@ void EditorInterface::DrawEntityPropreties()
 
                 ImGui::Checkbox("Build collisions?", &component.HasCollisions);
                 if (ImGui::Button("Build"))
-                    component.Build();
+                {
+                    QuakeMapBuilder mapBuilder;
+
+                    mapBuilder.BuildQuakeMap(m_SelectedEntity);
+                }
                 ImGui::Separator();
             }
         }
@@ -888,9 +912,9 @@ void EditorInterface::DrawRessourceWindow()
                     std::string texture = FileDialog::OpenFile("*.png | *.jpg");
                 }
                 ImGui::SameLine();
-                ImGui::Checkbox("Use##1", &m_SelectedMaterial->UseAlbedo);
+                //ImGui::Checkbox("Use##1", &(bool)(m_SelectedMaterial->data.u_HasAlbedo));
                 ImGui::SameLine();
-                ImGui::ColorPicker4("Color", &m_SelectedMaterial->m_AlbedoColor.r);
+                ImGui::ColorPicker3("Color", &m_SelectedMaterial->data.m_AlbedoColor.r);
             }
             if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -906,9 +930,9 @@ void EditorInterface::DrawRessourceWindow()
                     }
                 }
                 ImGui::SameLine();
-                ImGui::Checkbox("Use##2", &m_SelectedMaterial->UseAO);
+                //ImGui::Checkbox("Use##2", &m_SelectedMaterial->data.u_HasAO);
                 ImGui::SameLine();
-                ImGui::DragFloat("Value##2", &m_SelectedMaterial->m_AOValue, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Value##2", &m_SelectedMaterial->data.u_AOValue, 0.01f, 0.0f, 1.0f);
             }
             if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -923,8 +947,8 @@ void EditorInterface::DrawRessourceWindow()
                         m_SelectedMaterial->SetNormal(TextureManager::Get()->GetTexture(texture));
                     }
                 }
-                ImGui::SameLine();
-                ImGui::Checkbox("Use##3", &m_SelectedMaterial->UseNormal);
+                //ImGui::SameLine();
+                //ImGui::Checkbox("Use##3", &m_SelectedMaterial->data.u_HasNormal);
             }
             if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -936,9 +960,9 @@ void EditorInterface::DrawRessourceWindow()
                     std::string texture = FileDialog::OpenFile("*.png | *.jpg");
                 }
                 ImGui::SameLine();
-                ImGui::Checkbox("Use##4", &m_SelectedMaterial->UseMetalness);
+                //ImGui::Checkbox("Use##4", &m_SelectedMaterial->data.u_HasMetalness);
                 ImGui::SameLine();
-                ImGui::DragFloat("Value##4", &m_SelectedMaterial->m_MetalnessValue, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Value##4", &m_SelectedMaterial->data.u_MetalnessValue, 0.01f, 0.0f, 1.0f);
             }
             if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
             {
@@ -950,9 +974,9 @@ void EditorInterface::DrawRessourceWindow()
                     std::string texture = FileDialog::OpenFile("*.png | *.jpg");
                 }
                 ImGui::SameLine();
-                ImGui::Checkbox("Use##5", &m_SelectedMaterial->UseRoughness);
+                //ImGui::Checkbox("Use##5", &m_SelectedMaterial->data.u_HasRoughness);
                 ImGui::SameLine();
-                ImGui::DragFloat("Value##5", &m_SelectedMaterial->m_RoughnessValue, 0.01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Value##5", &m_SelectedMaterial->data.u_RoughnessValue, 0.01f, 0.0f, 1.0f);
             }
         }
         else
