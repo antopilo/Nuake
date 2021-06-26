@@ -56,10 +56,10 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }
 
-void Mesh::Draw()
+void Mesh::Draw(bool drawMaterial)
 {
-    
-    m_Material->Bind();
+    if(drawMaterial)
+        m_Material->Bind();
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);

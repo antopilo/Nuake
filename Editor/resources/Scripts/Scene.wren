@@ -28,7 +28,9 @@ class Scene {
 			return TransformComponent.new(id)
 		} else if (component == "Script") {
 			return this.GetScript_(id)
-		} 
+		} else if (component == "Trigger") {
+			return Trigger.new(id)
+		}
 
 	}
 
@@ -63,7 +65,8 @@ class Scene {
 	foreign static IsCharacterControllerOnGround_(e)
 	//foreign static IsOnGround_(e)
 	
-
+	foreign static TriggerGetOverlappingBodyCount_(e)
+	foreign static TriggerGetOverlappingBodies_(e)
 }
 
 class Entity {
@@ -78,31 +81,6 @@ class Entity {
 	GetComponent(component) {
 		return Scene.EntityGetComponent(_entityId, component)
 	}
-
-	// Foreign engine functions
-/* 
-	// Transform
-	foreign static SetTranslation_(e, x, y, z)
-	foreign static SetRotation_(e, x, y, z)
-	foreign static SetScale_(e, x, y, z)
-
-	// Character controller
-	foreign static SetVelocity(e, x, y, z)
-	foreign static SetStepHeight(e, x, y, z)
-	foreign static IsOnGround(e)
-	*/
-	// Light
-	//
-	/* 
-	foreign static SetLightIsVolumetric_(e, bool)
-	foreign static SetLightSyncDirectionWithSky_(e, bool)
-	foreign static SetLightColor_(e, r, g, b)
-
-	// Camera
-	foreign static SetCameraFov_(e, fov)
-	foreign static SetCameraType(e, type)
-	foreign static SetCameraDirection_(e, x, y, z)
-	*/
 }
 
 class TransformComponent {
@@ -180,4 +158,24 @@ class Camera {
 		return Vector3.new(dir[0], dir[1], dir[2])
 	}
 
+}
+
+class Trigger {
+	construct new(id) {
+		_entityId = id
+	}
+
+	GetOverlappingBodyCount() {
+		return Scene.TriggerGetOverlappingBodyCount_(_entityId)
+	}
+
+	GetOverlappingBodies() {
+		bodies = Scene.TriggerGetOverlappingBodies_(_entityId)
+
+		entities = []
+		for(b in bodies) {
+			entities.add(Entity.new(b))
+		}
+		return entities
+	}
 }

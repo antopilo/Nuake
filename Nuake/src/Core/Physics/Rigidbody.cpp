@@ -3,6 +3,7 @@
 #include <btBulletDynamicsCommon.h>
 #include "../Core.h"
 #include <glm/trigonometric.hpp>
+#include <src/Scene/Entities/Entity.h>
 namespace Physics
 {
 	RigidBody::RigidBody()
@@ -10,10 +11,9 @@ namespace Physics
 		m_Transform = new btTransform();
 		m_Transform->setIdentity();
 		//m_Transform->setOrigin(btVector3(position.x, position.y, position.z));
-
-		
 	}
-	RigidBody::RigidBody(glm::vec3 position)
+
+	RigidBody::RigidBody(glm::vec3 position, Entity handle)
 	{
 		Ref<Box> shape = CreateRef<Box>();
 		m_CollisionShape = shape;
@@ -38,6 +38,7 @@ namespace Physics
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, myMotionState, m_CollisionShape->GetBulletShape(), localInertia);
 
 		m_Rigidbody = new btRigidBody(rbInfo);
+		m_Rigidbody->setUserIndex(handle.GetHandle());
 	}
 
 	RigidBody::RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel)
@@ -63,7 +64,6 @@ namespace Physics
 		btRigidBody::btRigidBodyConstructionInfo rbInfo(m_Mass, myMotionState, m_CollisionShape->GetBulletShape(), localInertia);
 
 		m_Rigidbody = new btRigidBody(rbInfo);
-		
 	}
 
 	void RigidBody::SetShape(Ref<PhysicShape> shape)
@@ -84,6 +84,11 @@ namespace Physics
 		btScalar x = 0, y = 0, z = 0;
 		q.getEulerZYX(z, y, x);
 		return glm::vec3(glm::degrees(x), glm::degrees(y), glm::degrees(z));
+	}
+
+	void RigidBody::SetEntityID(Entity ent)
+	{
+		m_Rigidbody->setUserIndex(ent.GetHandle());
 	}
 
 	void RigidBody::SetKinematic(bool value)

@@ -60,6 +60,11 @@ bool Scene::SetName(std::string& newName)
 	return true;
 }
 
+Entity Scene::GetEntity(int handle)
+{
+	return Entity((entt::entity)handle, this);
+}
+
 void Scene::OnInit()
 {
 	for (auto& system : m_Systems)
@@ -136,46 +141,38 @@ void Scene::DrawShadows()
 	}
     
 	glm::mat4 perspective = cam->GetPerspective();
-    
+	Renderer::m_ShadowmapShader->Bind();
 	for (auto l : view) {
 		auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);
-		if (light.Type != LightType::Directional)
+		if (light.Type != LightType::Directional || !light.CastShadows)
 			continue;
         
 		light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
 
-		light.BeginDrawShadow();
 		for (int i = 0; i < 4; i++)
 		{
 			light.m_Framebuffers[i]->Bind();
-
+			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 			for (auto e : modelView)
 			{
 				auto [transform, model] = modelView.get<TransformComponent, ModelComponent>(e);
 
-				glm::vec3 pos = lightTransform.Translation;
-				glm::mat4 lightView = glm::lookAt(pos, pos - light.GetDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
-				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
-
 				model.Draw();
 			}
 
-			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
+			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
 			for (auto e : quakeView) {
-				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
+				auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
 
 				for (auto& e : model.Meshes) {
-					e->Draw();
+					e->Draw(false);
 				}
 			}
-
-			light.m_Framebuffers[i]->Unbind();
 		}
 
-		light.EndDrawShadow();
 	}
 }
 
@@ -321,12 +318,13 @@ void Scene::EditorDraw()
 			}
 		}
         
+		Renderer::m_DebugShader->Bind();
 		auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
 		for (auto e : boxCollider) {
 			auto [transform, box, parent] = boxCollider.get<TransformComponent, BoxColliderComponent, ParentComponent>(e);
-            
 			Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+
 			Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
 			
 			TransformComponent t = transform;

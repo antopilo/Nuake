@@ -6,6 +6,8 @@
 #include "../Core/Core.h"
 #include <map>
 #include "RaycastResult.h"
+
+#include <src/Core/Physics/GhostObject.h>
 #include "CharacterController.h"
 namespace Physics {
 	class DynamicWorld {
@@ -19,6 +21,8 @@ namespace Physics {
 
 		void SetGravity(glm::vec3 g);
 		void AddRigidbody(Ref<RigidBody> rb);
+
+		void AddGhostbody(Ref<GhostObject> gb);
 
 		void AddCharacterController(Ref < CharacterController> cc);
 

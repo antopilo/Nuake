@@ -45,9 +45,8 @@ Texture::Texture(glm::vec2 size, GLenum format)
 	glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 }
-
 
 Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)
 {
@@ -86,7 +85,6 @@ void Texture::AttachToFramebuffer(GLenum attachment)
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, m_RendererId, 0);
 }
 
-
 void Texture::Bind(unsigned int slot) const {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_RendererId);
@@ -95,4 +93,3 @@ void Texture::Bind(unsigned int slot) const {
 void Texture::Unbind() const {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-

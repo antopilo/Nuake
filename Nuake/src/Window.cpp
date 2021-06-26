@@ -242,23 +242,23 @@ void Window::Draw()
     cam->AspectRatio = size.x / size.y;
 
     Renderer::BeginDraw(cam);
-    {
+    
 
-        //glCullFace(GL_FRONT);
-        //glCullFace(GL_BACK);
-        m_Scene->DrawShadows();
+    //glCullFace(GL_FRONT);
+    //glCullFace(GL_BACK);
+    m_Scene->DrawShadows();
 
-        m_Framebuffer->Bind();
+    m_Framebuffer->Bind();
         
-        if (Engine::IsPlayMode)
-            m_Scene->Draw();
-        else
-            m_Scene->EditorDraw();
+    if (Engine::IsPlayMode)
+        m_Scene->Draw();
+    else
+        m_Scene->EditorDraw();
 
-        m_Scene->DrawInterface(m_Framebuffer->GetSize());
+    m_Scene->DrawInterface(m_Framebuffer->GetSize());
         
-        m_Framebuffer->Unbind();
-    }
+    m_Framebuffer->Unbind();
+    
     Renderer::EndDraw();
 }
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+
 extern "C" {
     #include "libmap/h/map_parser.h"
     #include <libmap/h/geo_generator.h>
@@ -16,6 +17,8 @@ extern "C" {
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/TransformComponent.h>
 #include <src/Scene/Components/LightComponent.h>
+#include <src/Scene/Components/NameComponent.h>
+#include <src/Scene/Components/TriggerZone.h>
 
 
 std::vector<std::string> split(const std::string& s, char delim) {
@@ -56,6 +59,11 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
         entity_geometry* entity_geo_inst = &entity_geo[e];
 
         Entity newEntity = m_Scene->CreateEntity("Brush " + std::to_string(e) );
+
+        if (entity_inst->spawn_type == entity_spawn_type::EST_GROUP)
+            newEntity.GetComponent<NameComponent>().Name = "Group " + std::to_string(e);
+
+        bool isTrigger = false;
         ent.AddChild(newEntity);
         for (int i = 0; i < entity_inst->property_count; i++) {
             property* prop = &(entity_inst->properties)[i];
@@ -74,24 +82,42 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
                 newEntity.GetComponent<TransformComponent>().Translation = position;
             }
 
-            if (key == "classname") {
-                if (value == "light") {
+            if (key == "classname") 
+            {
+                if (value == "light") 
+                {
                     newEntity.AddComponent<LightComponent>();
+                    newEntity.GetComponent<NameComponent>().Name = "Light " + std::to_string(i);
+                }
+                else if (value == "trigger") 
+                {
+                    //newEntity.AddComponent<LightComponent>();
+                    isTrigger = true;
+                    
+                    newEntity.GetComponent<NameComponent>().Name = "Trigger " + std::to_string(i);
                 }
             }
             
         }
         for (int b = 0; b < entity_inst->brush_count; ++b)
         {
-            Entity brushEntiuty = m_Scene->CreateEntity("Brush " + std::to_string(e));
-            newEntity.AddChild(brushEntiuty);
-            brushEntiuty.AddComponent<BSPBrushComponent>();
             std::vector<Vertex> vertices;
             std::vector<unsigned int> indices;
             brush* brush_inst = &entity_inst->brushes[b];
             brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
-            BSPBrushComponent& bsp = brushEntiuty.GetComponent<BSPBrushComponent>();
-            TransformComponent& transformComponent = brushEntiuty.GetComponent<TransformComponent>();
+
+            Entity brushEntity = m_Scene->CreateEntity("Brush " + std::to_string(e));
+            TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
+            BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
+
+            newEntity.AddChild(brushEntity);
+
+            if (isTrigger) {
+                bsp.IsTrigger = true;
+                bsp.IsSolid = false;
+                brushEntity.AddComponent<TriggerZone>();
+            }
+
             transformComponent.Translation = Vector3(brush_inst->center.y * (1.0f / 64),
                 brush_inst->center.z * (1.0f / 64),
                 brush_inst->center.x * (1.0f / 64));

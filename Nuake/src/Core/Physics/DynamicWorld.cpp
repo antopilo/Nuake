@@ -49,6 +49,11 @@ namespace Physics
 		dynamicsWorld->addRigidBody(rb->GetBulletRigidbody());
 	}
 
+	void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
+	{
+		dynamicsWorld->addCollisionObject(gb->GetBulletObject(), btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
+	}
+
 	void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 	{
 		dynamicsWorld->addRigidBody(cc->m_Rigidbody);

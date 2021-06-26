@@ -8,6 +8,12 @@ void PhysicsManager::RegisterBody(Ref<Physics::RigidBody> rb) {
 	m_World->AddRigidbody(rb);
 }
 
+void PhysicsManager::RegisterGhostBody(Ref<GhostObject> rb)
+{
+	m_World->AddGhostbody(rb);
+	
+}
+
 void PhysicsManager::RegisterCharacterController(Ref<Physics::CharacterController> cc) {
 	m_World->AddCharacterController(cc);
 }
@@ -42,5 +48,8 @@ void PhysicsManager::Init() {
 
 	m_World = new Physics::DynamicWorld();
 	m_World->SetGravity(glm::vec3(0, -3, 0));
+
+	m_World->GetDynamicWorld()->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+
 	m_IsRunning = false;
 }

@@ -85,6 +85,10 @@ Material::~Material() {}
 
 void Material::Bind() 
 {
+	if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
+		return;
+
+	MaterialManager::Get()->CurrentlyBoundedMaterial = m_Name;
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
 

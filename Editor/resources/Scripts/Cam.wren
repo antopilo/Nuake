@@ -18,7 +18,7 @@ class CamScript is ScriptableEntity {
 
         _deltaTime = 0
 
-       Input.HideMouse()
+       //Input.HideMouse()
     }
 
     init() {}
@@ -63,7 +63,7 @@ class CamScript is ScriptableEntity {
         velocity = velocity.Sqrt()
 
         var amount = (Math.Sin(_deltaTime * (velocity * 0.01)) / 2 + 1)  * _BobHeight
-        Engine.Log("BobAmount: %(amount)")
+        //Engine.Log("BobAmount: %(amount)")
 
         var pTransform = player.GetComponent("Transform")
         var pPos = pTransform.GetTranslation()

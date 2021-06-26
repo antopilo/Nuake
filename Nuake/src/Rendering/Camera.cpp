@@ -70,7 +70,6 @@ glm::mat4 Camera::GetTransform()
 {
 	glm::mat4 tr = lookAt(Translation, Translation + cameraFront, cameraUp);
 	return tr;
-
 }
 
 glm::mat4 Camera::GetTransformRotation()

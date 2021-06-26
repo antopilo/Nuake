@@ -121,6 +121,8 @@ std::vector<Light> Renderer::m_Lights;
 
 void Renderer::RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam)
 {
+    if (m_Lights.size() == 20)
+        return;
     m_Lights.push_back({ transform , light });
 
     // What light idx is this?
@@ -132,10 +134,14 @@ void Renderer::RegisterLight(TransformComponent transform, LightComponent light,
 
     //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
-    light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
-    light.m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(18);
-    light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(19);
-    light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(20);
+    if (light.CastShadows)
+    {
+        light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
+        light.m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(18);
+        light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(19);
+        light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(20);
+    }
+
 
     m_Shader->SetUniform1i   ("LightCount", idx);
     m_Shader->SetUniform1i   ("Lights[" + std::to_string(idx - 1) + "].Type"          , light.Type);
@@ -192,7 +198,7 @@ void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
     Ref<Window> window = Engine::GetCurrentWindow();
     Ref<FrameBuffer> fb = window->GetFrameBuffer();
 
-    m_DebugShader->Bind(); 
+    
     m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
     m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
     glBindVertexArray(CubeVAO);
@@ -202,7 +208,7 @@ void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
 
     glPolygonMode(GL_FRONT, GL_LINE);
     glPolygonMode(GL_BACK, GL_LINE);
-    glLineWidth(8);
+    glLineWidth(4);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // Turn off wireframe mode

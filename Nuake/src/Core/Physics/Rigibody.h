@@ -5,6 +5,7 @@
 struct btTransform;
 struct btRigidBody;
 struct btVector3;
+class Entity;
 namespace Physics {
 	class RigidBody {
 	private:
@@ -12,21 +13,25 @@ namespace Physics {
 		bool m_IsKinematic = false;
 		glm::vec3 m_InitialVel;
 
-		btTransform* m_Transform;
+		
 		btRigidBody* m_Rigidbody;
 
 		Ref<PhysicShape> m_CollisionShape;
 	public:
+		btTransform* m_Transform;
 		float m_Mass;
+
 		RigidBody();
-		RigidBody(glm::vec3 position);
+		RigidBody(glm::vec3 position, Entity handle);
 		RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel = glm::vec3(0, 0, 0));
 
 		btRigidBody* GetBulletRigidbody() const { return m_Rigidbody; }
-
+		
 		void UpdateTransform(btTransform t);
 		glm::vec3 GetPosition() const;
 		glm::vec3 GetRotation() const;
+
+		void SetEntityID(Entity ent);
 
 		void SetKinematic(bool value);
 		bool IsKinematic() const { return m_IsKinematic; }

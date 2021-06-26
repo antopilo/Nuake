@@ -77,7 +77,7 @@ struct Light {
 // Debug
 uniform int u_ShowNormal;
 
-const int MaxLight = 20;
+const int MaxLight = 24;
 uniform int LightCount = 0;
 uniform Light Lights[MaxLight];
 

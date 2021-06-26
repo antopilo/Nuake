@@ -8,6 +8,9 @@
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
+#include <src/Scene/Components/TriggerZone.h>
+
+
 PhysicsSystem::PhysicsSystem(Scene* scene) 
 {
     m_Scene = scene;
@@ -38,6 +41,8 @@ void PhysicsSystem::Init()
 		}
 	}
 
+
+
 	// character controllers
 	auto ccview = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 	for (auto e : ccview)
@@ -61,8 +66,25 @@ void PhysicsSystem::Init()
 			{
 				Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
 				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
+				btRigidbody->SetEntityID(Entity{ e, m_Scene });
+				brush.Rigidbody.push_back(btRigidbody);
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
+		}
+		
+	}
+
+	auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
+	for (auto e : bspTriggerView) {
+		auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
+		
+		for (auto m : brush.Meshes)
+		{
+			Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
+			Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GlobalTranslation, meshShape);
+			trigger.GhostObject = ghostBody;
+			ghostBody->SetEntityID(Entity{ e, m_Scene });
+			PhysicsManager::Get()->RegisterGhostBody(ghostBody);
 		}
 	}
 }
@@ -71,6 +93,22 @@ void PhysicsSystem::Update(Timestep ts)
 {
 	// Update rigidbodies
 	PhysicsManager::Get()->Step(ts);
+
+	auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
+	for (auto e : brushes) {
+		auto [transform, brush] = brushes.get<TransformComponent, BSPBrushComponent>(e);
+		
+		for (auto& r : brush.Rigidbody) {
+			r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
+			r->UpdateTransform(*r->m_Transform);
+		}
+	}
+
+	auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
+	for (auto e : bspTriggerView) {
+		auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
+		Logger::Log(std::to_string(trigger.GetOverLappingCount()));
+	}
 
 	auto physicGroup = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
 	for (auto e : physicGroup) {

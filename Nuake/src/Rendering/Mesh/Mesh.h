@@ -20,7 +20,7 @@ public:
 
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Ref<Material> material);
 
-	void Draw();
+	void Draw(bool bindMaterial = true);
 	void DebugDraw();
 private:
 	unsigned int VAO, VBO, EBO;

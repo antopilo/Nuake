@@ -103,7 +103,7 @@ unsigned int Shader::Compile(unsigned int type)
 		// m alloc. casted as a pointer.
 		char* message = (char*)malloc(length * sizeof(char));
 
-		glGetShaderInfoLog(id, length, &length, message);
+		//glGetShaderInfoLog(id, length, &length, message);
 
 		std::cout << "Failed to compile " <<
 			(type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << " shader!" << std::endl;

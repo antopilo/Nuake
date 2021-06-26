@@ -15,8 +15,6 @@ enum LightType {
 
 class LightComponent  {
 public:
-	glm::vec2 yes = glm::vec2(2, 2);
-	
 	LightType Type = Point;
 	glm::vec3 Direction = glm::vec3(0, -1, 0);
 	glm::vec3 Color;
@@ -25,7 +23,7 @@ public:
 	bool SyncDirectionWithSky = false;
 	Ref<FrameBuffer> m_Framebuffer;
 
-	bool CastShadows = true;
+	bool CastShadows = false;
 	float Attenuation = 0.0f;
 	float LinearAttenuation = 0.0f;
 	float QuadraticAttenuation = 0.0f;
@@ -35,6 +33,8 @@ public:
     float mCascadeSplitDepth[4];
 
 	LightComponent();
+
+    void SetCastShadows(bool toggle);
 
 	glm::mat4 GetProjection();
 
@@ -191,8 +191,8 @@ public:
 			Strength = j["Strength"];
 		if (j.contains("SyncDirectionWithSky"))
 			SyncDirectionWithSky = j["SyncDirectionWithSky"];
-		if (j.contains("CastShadows"))
-			SyncDirectionWithSky = j["CastShadows"];
+        if (j.contains("CastShadows"))
+            SetCastShadows(j["CastShadows"]);
 		if (j.contains("Direction"))
 		{
 			float x = j["Direction"]["x"];

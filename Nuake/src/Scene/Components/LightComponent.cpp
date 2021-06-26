@@ -18,12 +18,32 @@ LightComponent::LightComponent()
     //mCascadeSplitDepth = std::vector<float>();
     //mCascadeSplits = std::vector<float>();
     // Framebuffer used for shadow mapping.
-    for (int i = 0; i < 4; i++)
-    {
-        m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
-        m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
-    }
+
+    //for (int i = 0; i < 4; i++)
+    //{
+    //    m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
+    //    m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+    //}
     
+}
+
+void LightComponent::SetCastShadows(bool toggle)
+{
+    CastShadows = toggle;
+    if (CastShadows)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
+            m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+        }
+    }
+    else {
+        for (int i = 0; i < 4; i++)
+        {
+            m_Framebuffers[i] = nullptr;
+        }
+    }
 }
 
 glm::mat4 LightComponent::GetProjection()
@@ -86,7 +106,12 @@ void LightComponent::DrawEditor() {
     ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Light properties");
     ImGui::ColorEdit4("Light Color", &Color.r);
     ImGui::SliderFloat("Strength", &Strength, 0.0f, 50.0f);
-    
+    bool before = CastShadows;
+    ImGui::Checkbox("Cast shadows", &CastShadows);
+
+    if (CastShadows && before == false)
+        SetCastShadows(true);
+
     const char* types[] = { "Directional", "Point", "Spot" };
     static const char* current_item = types[Type];
     

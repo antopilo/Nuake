@@ -26,6 +26,10 @@ class PlayerScript is ScriptableEntity {
         Engine.Log("Player init")
     }
 
+    update(ts) {
+        
+    }
+
     fixedUpdate(ts) {
         this.CheckInput()
 

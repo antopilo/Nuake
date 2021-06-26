@@ -38,7 +38,7 @@ public:
 
 	std::string GetName();
 	bool SetName(std::string& newName);
-
+	Entity GetEntity(int handle);
 	void Init();
 	void OnInit();
 	void OnExit();

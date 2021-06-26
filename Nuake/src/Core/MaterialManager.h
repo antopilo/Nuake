@@ -16,7 +16,10 @@ private:
 	Material* ParseMaterialFile(const std::string path);
 	void SaveMaterialFile(const std::string path, Material* material);
 	bool IsMaterialLoaded(const std::string path);
+
+	
 public:
+	std::string CurrentlyBoundedMaterial = "";
 	MaterialManager();
 
 	void LoadMaterials();

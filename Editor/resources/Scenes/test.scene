@@ -1,17 +1,13 @@
 {
     "Entities": [
         {
-            "CameraComponent": {
-                "CameraInstance": {
-                    "AspectRatio": 1.774647831916809,
-                    "Exposure": 1.0,
-                    "Fov": 88.0,
-                    "Speed": 1.0,
-                    "m_Type": 1
-                }
+            "CharacterControllerComponent": {
+                "Height": 1.2000000476837158,
+                "Mass": 2500.0,
+                "Radius": 0.20000000298023224
             },
             "NameComponent": {
-                "Name": "Camera"
+                "Name": "Player"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -28,15 +24,15 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": -25.119064331054688,
-                    "y": 19.491336822509766,
-                    "z": 4.5285515785217285
+                    "x": 2.5405828952789307,
+                    "y": 0.0,
+                    "z": 0.0
                 },
                 "Type": "TransformComponent"
             },
             "WrenScriptComponent": {
-                "Class": "CamScript",
-                "Script": "Scripts/Cam.wren"
+                "Class": "PlayerScript",
+                "Script": "Scripts/Player.wren"
             }
         },
         {
@@ -95,7 +91,7 @@
             },
             "QuakeMapComponent": {
                 "HasCollisions": true,
-                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\texture_test.map"
+                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\debug.map"
             },
             "TransformComponent": {
                 "Rotation": {
@@ -109,21 +105,25 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 9.199999809265137,
-                    "y": -11.569494247436523,
+                    "x": 0.0,
+                    "y": 0.0,
                     "z": 0.0
                 },
                 "Type": "TransformComponent"
             }
         },
         {
-            "CharacterControllerComponent": {
-                "Height": 1.2000000476837158,
-                "Mass": 2500.0,
-                "Radius": 0.20000000298023224
+            "CameraComponent": {
+                "CameraInstance": {
+                    "AspectRatio": 1.774647831916809,
+                    "Exposure": 1.0,
+                    "Fov": 88.0,
+                    "Speed": 1.0,
+                    "m_Type": 1
+                }
             },
             "NameComponent": {
-                "Name": "Player"
+                "Name": "Camera"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -141,14 +141,14 @@
                 },
                 "Translation": {
                     "x": -25.119064331054688,
-                    "y": 18.649978637695313,
+                    "y": 19.491336822509766,
                     "z": 4.5285515785217285
                 },
                 "Type": "TransformComponent"
             },
             "WrenScriptComponent": {
-                "Class": "PlayerScript",
-                "Script": "Scripts/Player.wren"
+                "Class": "CamScript",
+                "Script": "Scripts/Cam.wren"
             }
         }
     ],

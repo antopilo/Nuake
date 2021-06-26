@@ -47,5 +47,6 @@ public:
 	RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
 
 	void RegisterBody(Ref<Physics::RigidBody> rb);
+	void RegisterGhostBody(Ref<GhostObject> rb);
 	void RegisterCharacterController(Ref<Physics::CharacterController> c);
 };

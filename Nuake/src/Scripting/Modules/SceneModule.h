@@ -14,11 +14,10 @@
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
+#include <src/Scene/Components/TriggerZone.h>
 
 namespace ScriptAPI
 {
-
-
 	class SceneModule : public ScriptModule
 	{
 		std::string GetModuleName() override
@@ -30,16 +29,23 @@ namespace ScriptAPI
 		{
 			RegisterMethod("GetEntityID(_)", (void*)GetEntity);
 			RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
+
 			RegisterMethod("GetTranslation_(_)", (void*)GetTranslation);
 			RegisterMethod("SetTranslation_(_,_,_,_)", (void*)SetTranslation);
 			RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
 			RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
+
 			RegisterMethod("GetScript_(_)", (void*)GetScript);
+
 			RegisterMethod("SetCameraDirection_(_,_,_,_)", (void*)SetCameraDirection);
 			RegisterMethod("GetCameraDirection_(_)", (void*)GetCameraDirection);
 			RegisterMethod("GetCameraRight_(_)", (void*)GetCameraRight);
+
 			RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
 			RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
+
+			RegisterMethod("TriggerGetOverlappingBodyCount_(_)", (void*)TriggerGetOverlappingBodyCount);
+			RegisterMethod("TriggerGetOverlappingBodies_(_)", (void*)TriggerGetOverlappingBodies);
 		}
 
 		static void GetEntity(WrenVM* vm)
@@ -227,5 +233,37 @@ namespace ScriptAPI
 			transform.Translation = Vector3(x, y, z);
 		}
 
+		static void TriggerGetOverlappingBodyCount(WrenVM* vm) 
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			TriggerZone trigger = ent.GetComponent<TriggerZone>();
+
+			int count = trigger.GetOverLappingCount();
+
+			wrenSetSlotDouble(vm, 0, count);
+		}
+
+		static void TriggerGetOverlappingBodies(WrenVM* vm)
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			TriggerZone trigger = ent.GetComponent<TriggerZone>();
+
+			std::vector<Entity> entities = trigger.GetOverlappingBodies();
+
+			wrenEnsureSlots(vm, entities.size());
+
+			int idx = 1;
+			for (auto& e : entities)
+			{
+				wrenSetSlotDouble(vm, idx, e.GetHandle());
+				wrenInsertInList(vm, 0, -1, idx);
+				idx++;
+			}
+			wrenSetSlotNewList(vm, 0);
+		}
 	};
 }
