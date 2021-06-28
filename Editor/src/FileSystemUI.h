@@ -6,9 +6,13 @@
 class FileSystemUI
 {
 private:
-	Ref<Directory> m_CurrentDirectory;
+	
 
 public:
+	Ref<Directory> m_CurrentDirectory;
+	FileSystemUI() {
+		m_CurrentDirectory = FileSystem::RootDirectory;
+	}
 	void Draw();
 	void DrawDirectoryContent();
 	void DrawFiletree();

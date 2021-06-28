@@ -109,7 +109,7 @@ bool Project::Deserialize(const std::string& str)
 			std::string sceneContent = FileSystem::ReadFile(scenePath, false);
 			if (!this->DefaultScene->Deserialize(sceneContent))
 			{
-				Logger::Log("Error loading scene: " + scenePath);
+				Logger::Log("Error loading scene: " + scenePath, CRITICAL);
 			}
 			else
 			{

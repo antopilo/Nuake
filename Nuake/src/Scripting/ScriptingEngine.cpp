@@ -23,16 +23,19 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
     {
     case WREN_ERROR_COMPILE:
     {
+        std::string t = "Script error in: " + std::string(module)+ " line:" + std::to_string(line) + " \n error: "+ msg;
+        Logger::Log(t, CRITICAL);
         Engine::ExitPlayMode();
-        printf("[%s line %d] [Error] %s\n", module, line, msg);
     } break;
     case WREN_ERROR_STACK_TRACE:
     {
-        printf("[%s line %d] in %s\n", module, line, msg);
+        std::string t = "Script Stack trace: " + std::string(module) + " line:" + std::to_string(line) + " \n stack: " + msg;
+        Logger::Log(t, CRITICAL);
     } break;
     case WREN_ERROR_RUNTIME:
     {
-        printf("[Runtime Error] %s\n", msg);
+        std::string t = "Script Runtime Error: " + std::string(msg);
+        Logger::Log(t, WARNING);
     } break;
     }
 

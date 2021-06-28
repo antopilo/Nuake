@@ -6,7 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-
+#include "src/Core/FileSystem.h"
 extern "C" {
     #include "libmap/h/map_parser.h"
     #include <libmap/h/geo_generator.h>
@@ -282,7 +282,7 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
     currentParent.Children.clear();
 
-    map_parser_load(quakeMapC.Path.c_str());
+    map_parser_load(std::string(FileSystem::Root + quakeMapC.Path).c_str());
     geo_generator_run();
 
     DefaultMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");

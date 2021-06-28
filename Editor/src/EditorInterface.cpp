@@ -132,7 +132,9 @@ void EditorInterface::DrawViewport()
    ImGui::End();
    */
    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    if(ImGui::Begin("Viewport"))
+
+   std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
+    if(ImGui::Begin(name.c_str()))
     {
 
         ImGui::PopStyleVar();
@@ -291,7 +293,8 @@ void EditorInterface::DrawSceneTree()
 
     if (!scene)
         return;
-    if (ImGui::Begin("Environnement"))
+
+    if (ImGui::Begin(" Environnement"))
     {
         auto env = Engine::GetCurrentScene()->GetEnvironment();
         if (ImGui::CollapsingHeader("Procedural Sky"))
@@ -314,7 +317,9 @@ void EditorInterface::DrawSceneTree()
        
     }
     ImGui::End();
-    if(ImGui::Begin("Scene"))
+
+    std::string title = ICON_FA_TREE + std::string(" Hierarchy");
+    if(ImGui::Begin(title.c_str()))
     {
         // Buttons to add and remove entity.
         ImGui::BeginChild("Buttons", ImVec2(300, 20), false);
@@ -333,10 +338,10 @@ void EditorInterface::DrawSceneTree()
                 // Unselect delted entity.
                 m_SelectedEntity = scene->GetAllEntities().at(0);
             }
-
             ImGui::EndChild();
         }
 
+        ImGui::Separator();
         // Draw a tree of entities.
         for (Entity e : scene->GetAllEntities()) 
         {
@@ -482,6 +487,16 @@ void EditorInterface::DrawEntityPropreties()
 
                 if (ImGui::InputText("##ScriptPath", pathBuffer, sizeof(pathBuffer)))
                     path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
+                    {
+                        char* file = (char*)payload->Data;
+                        std::string fullPath = std::string(file, 256);
+                        path = FileSystem::AbsoluteToRelative(fullPath);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
 
                 ImGui::SameLine();
 
@@ -600,11 +615,25 @@ void EditorInterface::DrawEntityPropreties()
                 {
                     path = std::string(pathBuffer);
                 }
+
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Map"))
+                    {
+                        char* file = (char*)payload->Data;
+                        std::string fullPath = std::string(file, 256);
+                        path = FileSystem::AbsoluteToRelative(fullPath);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
                 ImGui::SameLine();
                 if (ImGui::Button("Browse"))
                 {
                     path = FileDialog::OpenFile(".map");
                 }
+
+
 
                 component.Path = path;
 
@@ -800,14 +829,57 @@ void EditorInterface::DrawDirectoryExplorer()
     ImGui::End();
 }
 
+bool LogErrors = true;
+bool LogWarnings = true;
+bool LogDebug = true;
 void EditorInterface::DrawLogger()
 {
     if (ImGui::Begin("Logger"))
     {
-        for (auto l : Logger::GetLogs())
-        {
-            ImGui::TextWrapped(l.c_str());
-        }
+        ImGui::Checkbox("Errors", &LogErrors);
+        ImGui::SameLine();
+        ImGui::Checkbox("Warning", &LogWarnings);
+        ImGui::SameLine();
+        ImGui::Checkbox("Debug", &LogDebug);
+
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        //if (ImGui::BeginChild("Log window", ImGui::GetContentRegionAvail(), false))
+        //{
+            //ImGui::PopStyleVar();
+            ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+
+            if (ImGui::BeginTable("LogTable", 3, flags))
+            {
+                ImGui::TableSetupScrollFreeze(0, 1);
+                ImGui::TableSetupColumn("Severity");
+                ImGui::TableSetupColumn("Time");
+                ImGui::TableSetupColumn("Message");
+                ImGui::TableHeadersRow();
+                ImGui::TableNextColumn();
+                for (auto& l : Logger::GetLogs())
+                {
+                    if (l.type == LOG_TYPE::VERBOSE && !LogDebug)
+                        continue;
+                    if (l.type == LOG_TYPE::WARNING && !LogWarnings)
+                        continue;
+                    if (l.type == LOG_TYPE::CRITICAL && !LogErrors)
+                        continue;
+                    ImGui::Text("-");
+                    ImGui::TableNextColumn();
+                    ImGui::Text(l.time.c_str());
+                    ImGui::TableNextColumn();
+                    ImGui::TextWrapped(l.message.c_str());
+
+                    ImGui::TableNextColumn();
+                }
+
+                ImGui::EndTable();
+            }
+           
+
+            //ImGui::EndChild();
+        //}
+        
        
     }
     ImGui::End();
@@ -1010,18 +1082,19 @@ void NewProject()
 void OpenProject()
 {
     // Parse the project and load it.
-    std::string projectPath = "C:/Dev/Nuake/Editor/resources/test.project";//FileDialog::OpenFile(".project");
+    std::string projectPath = FileDialog::OpenFile(".project");
 
     FileSystem::SetRootDirectory(projectPath + "/../");
     Ref<Project> project = Project::New();
     if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
     {
-        Logger::Log("Error loading project: " + projectPath);
+        Logger::Log("Error loading project: " + projectPath, CRITICAL);
         return;
     }
 
     project->FullPath = projectPath;
     Engine::LoadProject(project);
+
 
     // Create new interface named test.
     //userInterface = UI::UserInterface::New("test");
@@ -1038,7 +1111,7 @@ void OpenScene()
 
     Ref<Scene> scene = Scene::New();
     if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) {
-        Logger::Log("Error failed loading scene: " + projectPath);
+        Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
         return;
     }
 
@@ -1066,8 +1139,11 @@ void EditorInterface::Draw()
             NewProject();
 
         ImGui::SameLine();
-        if (ImGui::Button("Open a project"))
+        if (ImGui::Button("Open a project")) {
             OpenProject();
+            filesystem.m_CurrentDirectory = FileSystem::RootDirectory;
+        }
+            
 
         ImGui::EndPopup();
     }

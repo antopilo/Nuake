@@ -91,7 +91,7 @@
             },
             "QuakeMapComponent": {
                 "HasCollisions": true,
-                "Path": "C:\\Dev\\Nuake\\Editor\\resources\\Maps\\debug.map"
+                "Path": "Maps/debug.map"
             },
             "TransformComponent": {
                 "Rotation": {

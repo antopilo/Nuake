@@ -9,7 +9,7 @@ enum LOG_TYPE
 	CRITICAL
 };
 
-struct Log
+struct LogEntry
 {
 	LOG_TYPE type;
 	std::string time;
@@ -18,10 +18,9 @@ struct Log
 
 class Logger
 {
-	const int MAX_LOG = 64;
-	static std::vector<std::string> logs;
-	static std::vector<Log> m_Logs; // TODO: Use log struct.
+	static const int MAX_LOG = 64;
+	static std::vector<LogEntry> m_Logs; // TODO: Use log struct.
 public:
-	static void Log(std::string log);
-	static std::vector<std::string> GetLogs();
+	static void Log(std::string log, LOG_TYPE type = VERBOSE);
+	static std::vector<LogEntry> GetLogs();
 };

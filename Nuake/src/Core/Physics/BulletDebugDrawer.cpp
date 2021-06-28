@@ -27,8 +27,5 @@ void BulletDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVect
 	glColor3f(color.x(), color.y(), color.z());
 	glVertex3f(PointOnB.x(), PointOnB.y(), PointOnB.z());
 	glEnd();
-
-
-
 }
 

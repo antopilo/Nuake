@@ -14,8 +14,7 @@ public:
 	std::string Path;
 	bool HasCollisions = false;
 	void Load(std::string path, bool collisions);
-	void Build();
-	void Rebuild();
+
 	void Draw();
 	void DrawEditor();
 	
@@ -32,7 +31,6 @@ public:
 		BEGIN_DESERIALIZE();
 		this->Path = j["Path"];
 		this->HasCollisions = j["HasCollisions"];
-		Build(); // Maybe have some kind of loading bar or something.
 		return true;
 	}
 };

@@ -6,6 +6,7 @@
 //   #define IMGUI_DEFINE_MATH_OPERATORS
 // To implement maths operators for ImVec2 (disabled by default to not collide with using IM_VEC2_CLASS_EXTRA along with your own math types+operators)
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 /*
 
 Index of this file:

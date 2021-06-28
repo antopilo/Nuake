@@ -31,7 +31,7 @@ Ref<Canvas> InterfaceParser::Parse(const std::string path)
 	std::string name = doc.first_child().name();
 	if (name != "Canvas")
 	{
-		Logger::Log("InterfaceParser error: First child should be a canvas - " + path);
+		Logger::Log("InterfaceParser error: First child should be a canvas - " + path, CRITICAL);
 		return nullptr;
 	}
 

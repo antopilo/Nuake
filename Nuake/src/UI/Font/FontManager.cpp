@@ -15,6 +15,6 @@ Ref<Font> FontManager::GetFont(const std::string& font)
 	if (newFont)
 		return newFont;
 
-	Logger::Log("Error: failed to load font " + font);
+	Logger::Log("Error: failed to load font " + font, CRITICAL);
 	return nullptr;
 }

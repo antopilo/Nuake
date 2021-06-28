@@ -88,7 +88,7 @@ public:
 
 		// Load file
 		if (!font->load(path.c_str()))
-			Logger::Log("Failed to laod font");
+			Logger::Log("Failed to load font", CRITICAL);
 			
 		// Load charset ASCII
 		std::vector<msdf_atlas::GlyphGeometry> glyphs;
@@ -105,7 +105,7 @@ public:
 		fonts.push_back(fontGeometry);
 
 		if (glyphs.empty())
-			Logger::Log("No glyphs loaded.");
+			Logger::Log("No glyphs loaded.", CRITICAL);
 
 		// Create atlas params
 		msdf_atlas::TightAtlasPacker::DimensionsConstraint atlasSizeConstraint = msdf_atlas::TightAtlasPacker::DimensionsConstraint::MULTIPLE_OF_FOUR_SQUARE;
@@ -120,7 +120,7 @@ public:
 		// Pack atlas
 		if (int remaining = atlasPacker.pack(glyphs.data(), glyphs.size())) {
 			if (remaining < 0) {
-				Logger::Log("Failed to pack atlas.");
+				Logger::Log("Failed to pack atlas.", CRITICAL);
 			}
 			else {
 				printf("Error: Could not fit %d out of %d glyphs into the atlas.\n", remaining, (int)glyphs.size());

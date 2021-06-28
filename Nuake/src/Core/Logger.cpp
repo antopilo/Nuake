@@ -4,19 +4,30 @@
 #include <string>
 #include <time.h>
 
-std::vector <std::string> Logger::logs = std::vector<std::string>();
+std::vector<LogEntry>  Logger::m_Logs = std::vector<LogEntry>();
 
-void Logger::Log(std::string log)
+void Logger::Log(std::string log, LOG_TYPE type)
 {
 	char buff[100];
 	time_t now = time(0);
 	strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000", localtime(&now));
-	std::string msg = "["+ std::string(buff) + "]" + std::string(" - ") + log;
+
+	LogEntry newLog = {
+		type,
+		buff,
+		log
+	};
+
+	std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
 	printf((msg + "\n").c_str());
-	logs.push_back(msg);
+
+	if (m_Logs.size() >= MAX_LOG)
+		m_Logs.erase(m_Logs.begin());
+
+	m_Logs.push_back(newLog);
 }
 
-std::vector<std::string> Logger::GetLogs()
+std::vector<LogEntry> Logger::GetLogs()
 {
-	return logs;
+	return m_Logs;
 }

@@ -89,16 +89,16 @@ int Window::Init()
 {
     if (!glfwInit()) 
     {
-       Logger::Log("glfw initialization failed.");
+       Logger::Log("glfw initialization failed.", CRITICAL);
        return -1;
     }
     
     // Create window
-    m_Window = glfwCreateWindow(m_Width, m_Height, "Editor - Dev build", NULL, NULL);
+    m_Window = glfwCreateWindow(m_Width, m_Height, "Nuake - Dev build", NULL, NULL);
     
     if (!m_Window) 
     {
-        Logger::Log("Window creation failed.");
+        Logger::Log("Window creation failed.", CRITICAL);
         return -1;
     }
 
@@ -108,7 +108,7 @@ int Window::Init()
     
     if (glewInit() != GLEW_OK) 
     {
-        Logger::Log("GLEW initialization failed!");
+        Logger::Log("GLEW initialization failed!", CRITICAL);
         return -1;
     }
     

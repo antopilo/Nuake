@@ -18,7 +18,7 @@ namespace UI
 
 		if (!Root)
 		{
-			Logger::Log("Failed to generate interface structure");
+			Logger::Log("Failed to generate interface structure", CRITICAL);
 		}
 
 		yoga_config = YGConfigNew();
@@ -38,7 +38,7 @@ namespace UI
 		Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
 		if (!Root)
 		{
-			Logger::Log("Failed to generate interface structure");
+			Logger::Log("Failed to generate interface structure", CRITICAL);
 		}
 
 		yoga_config = YGConfigNew();
@@ -89,8 +89,6 @@ namespace UI
 			CreateYogaLayoutRecursive(n, newYogaNode);
 			index++;
 		}
-
-		Logger::Log(std::to_string(YGNodeGetChildCount(yoga_node)));
 	}
 
 	void UserInterface::Draw(Vector2 size)
