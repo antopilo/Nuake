@@ -30,8 +30,9 @@ class Scene {
 			return this.GetScript_(id)
 		} else if (component == "Trigger") {
 			return Trigger.new(id)
+		} else if (component == "Brush") {
+			return Brush.new(id)
 		}
-
 	}
 
     //
@@ -67,6 +68,9 @@ class Scene {
 	
 	foreign static TriggerGetOverlappingBodyCount_(e)
 	foreign static TriggerGetOverlappingBodies_(e)
+
+	foreign static BrushGetTargets_(e)
+	foreign static BrushGetTargetsCount_(e)
 }
 
 class Entity {
@@ -170,12 +174,40 @@ class Trigger {
 	}
 
 	GetOverlappingBodies() {
-		bodies = Scene.TriggerGetOverlappingBodies_(_entityId)
+		if(this.GetOverlappingBodyCount() <= 0) {
+			return []
+		}
 
-		entities = []
+		var bodies = Scene.TriggerGetOverlappingBodies_(_entityId)
+
+		var entities = []
 		for(b in bodies) {
 			entities.add(Entity.new(b))
 		}
+		return entities
+	}
+}
+
+class Brush {
+	construct new(id) {
+		_entityId = id
+	}
+
+	GetTargetsCount() {
+		return Scene.BrushGetTargetsCount_(_entityId)
+	}
+
+	GetTargets() {
+		if(this.GetTargetsCount() <= 0) {
+			return []
+		}
+
+		var entities = []
+		var targets = Scene.BrushGetTargets_(_entityId)
+		for(t in targets) {
+			entities.add(Entity.new(t))
+		}
+
 		return entities
 	}
 }

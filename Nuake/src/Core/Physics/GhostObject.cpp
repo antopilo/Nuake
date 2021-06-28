@@ -1,5 +1,8 @@
 #include "GhostObject.h"
 #include <dependencies/bullet3/src/BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <dependencies/bullet3/src/BulletCollision/BroadphaseCollision/btCollisionAlgorithm.h>
+#include <dependencies/bullet3/src/BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <src/Core/Physics/PhysicsManager.h>
 
 
 GhostObject::GhostObject(Vector3 position, Ref<Physics::PhysicShape> shape) 
@@ -7,7 +10,8 @@ GhostObject::GhostObject(Vector3 position, Ref<Physics::PhysicShape> shape)
 	m_OverlappingEntities = std::vector<Entity>();
 	m_BulletObject = new btGhostObject();
 
-	btTransform transform;
+	btTransform transform = btTransform();
+	transform.setIdentity();
 	transform.setOrigin(btVector3(position.x, position.y, position.z));
 
 	m_BulletObject->setWorldTransform(transform);
@@ -32,9 +36,14 @@ void GhostObject::SetEntityID(Entity ent)
 void GhostObject::ScanOverlap()
 {
 	ClearOverlappingList();
+
 	for (int i = 0; i < OverlappingCount(); i++)
 	{
-		Entity handle = Engine::GetCurrentScene()->GetEntity(m_BulletObject->getOverlappingObject(i)->getUserIndex());
+		int index = m_BulletObject->getOverlappingObject(i)->getUserIndex();
+		if (index == -1)
+			continue;
+
+		Entity handle = Engine::GetCurrentScene()->GetEntity(index);
 		m_OverlappingEntities.push_back(handle);
 	}
 }

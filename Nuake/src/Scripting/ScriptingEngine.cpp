@@ -23,6 +23,7 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
     {
     case WREN_ERROR_COMPILE:
     {
+        Engine::ExitPlayMode();
         printf("[%s line %d] [Error] %s\n", module, line, msg);
     } break;
     case WREN_ERROR_STACK_TRACE:
@@ -34,6 +35,8 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
         printf("[Runtime Error] %s\n", msg);
     } break;
     }
+
+   
 }
 
 

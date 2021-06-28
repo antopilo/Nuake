@@ -51,7 +51,7 @@ namespace Physics
 
 	void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
 	{
-		dynamicsWorld->addCollisionObject(gb->GetBulletObject(), btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter);
+		dynamicsWorld->addCollisionObject(gb->GetBulletObject(), btBroadphaseProxy::SensorTrigger, btBroadphaseProxy::KinematicFilter);
 	}
 
 	void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
@@ -59,7 +59,7 @@ namespace Physics
 		dynamicsWorld->addRigidBody(cc->m_Rigidbody);
 
 		// Specify filters manually, otherwise ghost doesn't collide with statics for some reason
-		dynamicsWorld->addCollisionObject(cc->m_GhostObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter );
+		dynamicsWorld->addCollisionObject(cc->m_GhostObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::SensorTrigger | btBroadphaseProxy::StaticFilter );
 	}
 	
 

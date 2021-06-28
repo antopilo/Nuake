@@ -7,20 +7,43 @@ import "Scripts/Physics" for Physics, CollisionResult
 
 class TriggerScript is ScriptableEntity {
     construct new() {
-
+        _Activated = false
     }
 
     init() {
-        Engine.Log("Hello, I'm a trigger")
     }
 
     update(ts) {
-        
     }
+    
     fixedUpdate(ts) {
         var trigger = this.GetComponent("Trigger") 
-        
-        Engine.Log("Current overlap: %(trigger.GetOverlappingBodyCount())")
+        if(trigger.GetOverlappingBodyCount() > 0) {
+            var bodies = trigger.GetOverlappingBodies()
+            var brush = this.GetComponent("Brush")
+            var isPlayer = bodies[0].HasComponent("CharacterController")
+            if(isPlayer) {
+                _Activated = true
+            }
+            
+        }
+        if(_Activated) {
+            var brush = this.GetComponent("Brush")
+            for(t in brush.GetTargets()) {
+                var transform = t.GetComponent("Transform")
+                var pos = transform.GetTranslation()
+
+                var target = t.GetComponent("Brush")
+                var pos2 = target.GetTargets()[0].GetComponent("Transform")
+                var targetPos = pos2.GetTranslation()
+
+                if(pos.y < targetPos.y) {
+                    pos.y = pos.y + 3.0 * ts
+                }
+                
+                transform.SetTranslation(pos)
+            } 
+        }
     }
 
     exit() {

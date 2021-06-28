@@ -33,6 +33,7 @@ void PhysicsSystem::Init()
 			Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
             
 			Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(mass, transform.Translation, boxShape);
+
 			rigidbody.m_Rigidbody = btRigidbody;
             
 			btRigidbody->SetKinematic(rigidbody.IsKinematic);
@@ -40,8 +41,6 @@ void PhysicsSystem::Init()
 			PhysicsManager::Get()->RegisterBody(btRigidbody);
 		}
 	}
-
-
 
 	// character controllers
 	auto ccview = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
@@ -51,6 +50,7 @@ void PhysicsSystem::Init()
 
 		cc.CharacterController = CreateRef<Physics::CharacterController>(cc.Height, cc.Radius, cc.Mass, transform.Translation);
 		Entity ent = Entity({ e, m_Scene });
+		cc.CharacterController->SetEntity(ent);
 
 		PhysicsManager::Get()->RegisterCharacterController(cc.CharacterController);
 	}
@@ -78,14 +78,11 @@ void PhysicsSystem::Init()
 	for (auto e : bspTriggerView) {
 		auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
 		
-		for (auto m : brush.Meshes)
-		{
-			Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-			Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GlobalTranslation, meshShape);
-			trigger.GhostObject = ghostBody;
-			ghostBody->SetEntityID(Entity{ e, m_Scene });
-			PhysicsManager::Get()->RegisterGhostBody(ghostBody);
-		}
+		Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(brush.Meshes[0]);
+		Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GlobalTranslation, meshShape);
+		trigger.GhostObject = ghostBody;
+
+		PhysicsManager::Get()->RegisterGhostBody(ghostBody);
 	}
 }
 
@@ -102,12 +99,36 @@ void PhysicsSystem::Update(Timestep ts)
 			r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
 			r->UpdateTransform(*r->m_Transform);
 		}
+
+		if (!brush.IsFunc)
+			continue;
+
+		brush.Targets.clear();
+		auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
+		for (auto e2 : targetnameView) {
+			auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
+
+			if (name.Name == brush.target) {
+				brush.Targets.push_back(Entity{ e2, m_Scene });
+			}
+		}
 	}
+
 
 	auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
 	for (auto e : bspTriggerView) {
 		auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
-		Logger::Log(std::to_string(trigger.GetOverLappingCount()));
+		trigger.GhostObject->ScanOverlap();
+
+		brush.Targets.clear();
+		auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
+		for (auto e2 : targetnameView) {
+			auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
+
+			if (name.Name == brush.target) {
+				brush.Targets.push_back(Entity{ e2, m_Scene });
+			}
+		}
 	}
 
 	auto physicGroup = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();

@@ -49,6 +49,12 @@ namespace Physics
 		//m_pPhysicsWorld->m_pDynamicsWorld->addCollisionObject(m_pGhostObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	}
 
+	void CharacterController::SetEntity(Entity& ent)
+	{
+		m_Rigidbody->setUserIndex(ent.GetHandle());
+		m_GhostObject->setUserIndex(ent.GetHandle());
+	}
+
 	void CharacterController::MoveAndSlide(glm::vec3 velocity)
 	{
 		m_Rigidbody->setGravity(btVector3(0, 0, 0));
@@ -77,7 +83,7 @@ namespace Physics
 			manifoldArray.clear();
 
 			const btBroadphasePair& pair = pairArray[i];
-
+			
 			btDiscreteDynamicsWorld* world = PhysicsManager::Get()->GetWorld()->GetDynamicWorld();
 			btBroadphasePair* collisionPair = world->getPairCache()->findPair(pair.m_pProxy0, pair.m_pProxy1);
 

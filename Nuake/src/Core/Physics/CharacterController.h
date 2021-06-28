@@ -6,6 +6,9 @@
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <vector>
 #include "../Core/Maths.h"
+
+
+class Entity;
 namespace Physics
 {
 	class CharacterController
@@ -37,6 +40,7 @@ namespace Physics
 		float m_jumpRechargeTimer;
 		CharacterController(float height, float radius, float mass, Vector3 position);
 
+		void SetEntity(Entity& ent);
 		void MoveAndSlide(glm::vec3 velocity);
 	private:
 		void ParseGhostContacts();

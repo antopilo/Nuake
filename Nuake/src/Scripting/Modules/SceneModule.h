@@ -15,6 +15,7 @@
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Scene/Components/TriggerZone.h>
+#include <src/Scene/Components/BSPBrushComponent.h>
 
 namespace ScriptAPI
 {
@@ -46,6 +47,9 @@ namespace ScriptAPI
 
 			RegisterMethod("TriggerGetOverlappingBodyCount_(_)", (void*)TriggerGetOverlappingBodyCount);
 			RegisterMethod("TriggerGetOverlappingBodies_(_)", (void*)TriggerGetOverlappingBodies);
+			
+			RegisterMethod("BrushGetTargets_(_)", (void*)BrushGetTargets);
+			RegisterMethod("BrushGetTargetsCount_(_)", (void*)BrushGetTargetsCount);
 		}
 
 		static void GetEntity(WrenVM* vm)
@@ -76,6 +80,11 @@ namespace ScriptAPI
 				bool result = ent.HasComponent<QuakeMapComponent>();
 				wrenSetSlotBool(vm, 0, result);
 			}
+			if (name == "CharacterController")
+			{
+				bool result = ent.HasComponent<CharacterControllerComponent>();
+				wrenSetSlotBool(vm, 0, result);
+			}
 			if (name == "Camera")
 			{
 				bool result = ent.HasComponent<CameraComponent>();
@@ -95,9 +104,14 @@ namespace ScriptAPI
 				bool result = ent.HasComponent<WrenScriptComponent>();
 				wrenSetSlotBool(vm, 0, result);
 			}
+			if (name == "Brush") {
+				bool result = ent.HasComponent<BSPBrushComponent>();
+				wrenSetSlotBool(vm, 0, result);
+			}
 		}
 
-		static void GetScript(WrenVM* vm) {
+		static void GetScript(WrenVM* vm) 
+		{
 			int handle = wrenGetSlotDouble(vm, 1);
 			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
@@ -254,8 +268,9 @@ namespace ScriptAPI
 
 			std::vector<Entity> entities = trigger.GetOverlappingBodies();
 
-			wrenEnsureSlots(vm, entities.size());
+			wrenEnsureSlots(vm, entities.size() );
 
+			wrenSetSlotNewList(vm, 0);
 			int idx = 1;
 			for (auto& e : entities)
 			{
@@ -263,7 +278,32 @@ namespace ScriptAPI
 				wrenInsertInList(vm, 0, -1, idx);
 				idx++;
 			}
+		}
+
+		static void BrushGetTargets(WrenVM* vm) 
+		{
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			BSPBrushComponent& brush = ent.GetComponent<BSPBrushComponent>();
+			wrenEnsureSlots(vm, brush.Targets.size());
 			wrenSetSlotNewList(vm, 0);
+
+			int idx = 1;
+			for (auto& e : brush.Targets)
+			{
+				wrenSetSlotDouble(vm, idx, e.GetHandle());
+				wrenInsertInList(vm, 0, -1, idx);
+				idx++;
+			}
+		}
+
+		static void BrushGetTargetsCount(WrenVM* vm) {
+			int handle = wrenGetSlotDouble(vm, 1);
+			Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+			BSPBrushComponent& brush = ent.GetComponent<BSPBrushComponent>();
+			wrenSetSlotDouble(vm, 0, brush.Targets.size());
 		}
 	};
 }
