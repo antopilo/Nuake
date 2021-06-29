@@ -136,7 +136,7 @@ void EditorInterface::DrawViewport()
    std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
     if(ImGui::Begin(name.c_str()))
     {
-
+        
         ImGui::PopStyleVar();
         Overlay();
         ImGuizmo::BeginFrame();
@@ -189,14 +189,9 @@ void EditorInterface::DrawViewport()
                 Entity currentParent = m_SelectedEntity;
                 if (parent.HasParent)
                 {
-                    while (currentParent.GetComponent<ParentComponent>().HasParent) {
-                        currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-                        globalPos -= currentParent.GetComponent<TransformComponent>().Translation;
-                    }
-
-                    translation = globalPos - translation;
+                    globalPos -= parent.Parent.GetComponent<TransformComponent>().GlobalTranslation;
+                    translation -= globalPos;
                 }
-
 
                 tc.Translation = translation;
                 tc.Rotation = glm::vec3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));
@@ -398,6 +393,8 @@ void EditorInterface::DrawEntityPropreties()
             char buffer[256];
             memset(buffer, 0, sizeof(buffer));
             std::strncpy(buffer, name.c_str(), sizeof(buffer));
+            ImGui::Text("Name: ");
+            ImGui::SameLine();
             if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
             {
                 name = std::string(buffer);
@@ -454,6 +451,7 @@ void EditorInterface::DrawEntityPropreties()
         std::string iconTransform = ICON_FA_MAP_MARKER;
         if(ImGui::CollapsingHeader((iconTransform + " Transform").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
         {
+            ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Transform properties");
             //ImGui::InputText("Name:", selectedEntity->m_Name.data(), 12);
             TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
             ImGuiHelper::DrawVec3("Translation", &component.Translation);
@@ -476,6 +474,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_FILE;
             if (ImGui::CollapsingHeader((icon + " " + "Wren Script").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Script properties");
                 auto& component = m_SelectedEntity.GetComponent<WrenScriptComponent>();
                
                 // Path
@@ -485,6 +484,8 @@ void EditorInterface::DrawEntityPropreties()
                 memset(pathBuffer, 0, sizeof(pathBuffer));
                 std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
 
+                ImGui::Text("Script: ");
+                ImGui::SameLine();
                 if (ImGui::InputText("##ScriptPath", pathBuffer, sizeof(pathBuffer)))
                     path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
                 if (ImGui::BeginDragDropTarget())
@@ -498,10 +499,6 @@ void EditorInterface::DrawEntityPropreties()
                     ImGui::EndDragDropTarget();
                 }
 
-                ImGui::SameLine();
-
-                if (ImGui::Button("Browse"))
-                    path = FileSystem::AbsoluteToRelative(FileDialog::OpenFile(".wren"));
 
                 component.Script = path;
 
@@ -513,6 +510,8 @@ void EditorInterface::DrawEntityPropreties()
                 memset(classBuffer, 0, sizeof(classBuffer));
                 std::strncpy(classBuffer, module.c_str(), sizeof(classBuffer));
 
+                ImGui::Text("Class: ");
+                ImGui::SameLine();
                 if (ImGui::InputText("##ScriptModule", classBuffer, sizeof(classBuffer)))
                     module = std::string(classBuffer);
 
@@ -526,6 +525,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_LIGHTBULB;
             if (ImGui::CollapsingHeader((icon + " " + "Camera").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Camera properties");
                 m_SelectedEntity.GetComponent<CameraComponent>().DrawEditor();
                 ImGui::Separator();
             }
@@ -536,6 +536,7 @@ void EditorInterface::DrawEntityPropreties()
         {
             if (ImGui::CollapsingHeader("Character controller", ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Character controller properties");
                 auto& c = m_SelectedEntity.GetComponent<CharacterControllerComponent>();
                 ImGui::InputFloat("Height", &c.Height);
                 ImGui::InputFloat("Radius", &c.Radius);
@@ -549,6 +550,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_TREE;
             if (ImGui::CollapsingHeader((icon + " " + "Mesh").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Mesh properties");
                 ImGui::Button("Drag Material");
                 if (ImGui::BeginDragDropTarget())
                 {
@@ -569,6 +571,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_BOWLING_BALL ;
             if (ImGui::CollapsingHeader((icon + " Rigidbody").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Rigidbody properties");
                 RigidBodyComponent& rbComponent = m_SelectedEntity.GetComponent<RigidBodyComponent>();
                 ImGui::DragFloat("Mass", &rbComponent.mass, 0.1, 0.0);
                 ImGui::Separator();
@@ -580,6 +583,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_BOX;
             if (ImGui::CollapsingHeader((icon + " Box collider").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Box collider properties");
                 BoxColliderComponent& component = m_SelectedEntity.GetComponent<BoxColliderComponent>();
                 ImGuiHelper::DrawVec3("Size", &component.Size);
                 ImGui::Checkbox("Is trigger", &component.IsTrigger);
@@ -592,6 +596,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_CIRCLE;
             if (ImGui::CollapsingHeader((icon + " Sphere collider").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Sphere properties");
                 SphereColliderComponent& component = m_SelectedEntity.GetComponent<SphereColliderComponent>();
                 ImGui::DragFloat("Radius", &component.Radius, 0.1f, 0.0f, 100.0f);
                 ImGui::Checkbox("Is trigger", &component.IsTrigger);
@@ -604,6 +609,7 @@ void EditorInterface::DrawEntityPropreties()
             std::string icon = ICON_FA_BROOM ;
             if (ImGui::CollapsingHeader((icon + " " + "Quake map").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Quake map properties");
                 auto& component = m_SelectedEntity.GetComponent<QuakeMapComponent>();
                 std::string path = component.Path;
 
@@ -611,6 +617,8 @@ void EditorInterface::DrawEntityPropreties()
                 char pathBuffer[256];
                 memset(pathBuffer, 0, sizeof(pathBuffer));
                 std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
+                ImGui::Text("Map file: ");
+                ImGui::SameLine();
                 if (ImGui::InputText("##MapPath", pathBuffer, sizeof(pathBuffer)))
                 {
                     path = std::string(pathBuffer);
@@ -627,18 +635,10 @@ void EditorInterface::DrawEntityPropreties()
                     ImGui::EndDragDropTarget();
                 }
 
-                ImGui::SameLine();
-                if (ImGui::Button("Browse"))
-                {
-                    path = FileDialog::OpenFile(".map");
-                }
-
-
-
                 component.Path = path;
 
-                ImGui::Checkbox("Build collisions?", &component.HasCollisions);
-                if (ImGui::Button("Build"))
+                ImGui::Checkbox("Build collisions", &component.HasCollisions);
+                if (ImGui::Button("Build Geometry"))
                 {
                     QuakeMapBuilder mapBuilder;
 
@@ -649,7 +649,6 @@ void EditorInterface::DrawEntityPropreties()
         }
 
         ImGui::PopFont();
-       
     }
     ImGui::End();
 }
@@ -657,10 +656,8 @@ void EditorInterface::DrawGizmos()
 {
     Ref<Scene> scene = Engine::GetCurrentScene();
     
-    
     if (!m_IsEntitySelected)
         return;
-
 }
 
 void EditorInterface::EditorInterfaceDrawFiletree(Ref<Directory> dir)

@@ -18,7 +18,7 @@ class CamScript is ScriptableEntity {
 
         _deltaTime = 0
 
-       //Input.HideMouse()
+        Input.HideMouse()
     }
 
     init() {}

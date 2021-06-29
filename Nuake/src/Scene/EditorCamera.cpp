@@ -16,10 +16,10 @@ void EditorCamera::Update(Timestep ts)
 
 	controlled = Input::IsMouseButtonDown(1);
 
-	if (!controlled)
-		Input::ShowMouse();
-	else
-		Input::HideMouse();
+	//if (!controlled)
+	//	Input::ShowMouse();
+	//else
+	//	Input::HideMouse();
 
 	// Should probably not have speed binding in here.
 	if (Input::IsKeyDown(GLFW_KEY_UP))
