@@ -104,7 +104,7 @@ void LightComponent::DrawDeferred(TransformComponent transformComponent, Camera*
 
 void LightComponent::DrawEditor() {
     ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Light properties");
-    ImGui::ColorEdit4("Light Color", &Color.r);
+    ImGui::ColorEdit3("Light Color", &Color.r);
     ImGui::SliderFloat("Strength", &Strength, 0.0f, 50.0f);
     bool before = CastShadows;
     ImGui::Checkbox("Cast shadows", &CastShadows);

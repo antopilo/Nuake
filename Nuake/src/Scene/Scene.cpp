@@ -25,7 +25,8 @@
 
 #include <fstream>
 #include <streambuf>
-
+#include <chrono>
+#include <src/Core/OS.h>
 
 Ref<Scene> Scene::New()
 {
@@ -63,6 +64,16 @@ bool Scene::SetName(std::string& newName)
 Entity Scene::GetEntity(int handle)
 {
 	return Entity((entt::entity)handle, this);
+}
+
+Entity Scene::GetEntityByID(int id)
+{
+	auto idView = m_Registry.view<NameComponent>();
+	for (auto e : idView) {
+		NameComponent& nameC = idView.get<NameComponent>(e);
+		if (nameC.ID == id)
+			return Entity{ e, this };
+	}
 }
 
 void Scene::OnInit()
@@ -112,6 +123,7 @@ void Scene::UpdatePositions()
 		{
 			while (currentParent.GetComponent<ParentComponent>().HasParent) {
 				currentParent = currentParent.GetComponent<ParentComponent>().Parent;
+
 				globalPos += currentParent.GetComponent<TransformComponent>().Translation;
 			}
 
@@ -351,7 +363,11 @@ std::vector<Entity> Scene::GetAllEntities() {
 	std::vector<Entity> allEntities;
 	auto view = m_Registry.view<NameComponent>();
 	for (auto e : view) {
-		allEntities.push_back(Entity(e, this));
+		Entity newEntity(e, this);
+
+		// Check if valid for deleted entities.
+		if(newEntity.IsValid())
+			allEntities.push_back(newEntity);
 	}
 	return allEntities;
 }
@@ -394,6 +410,7 @@ Entity Scene::CreateEntity(const std::string& name) {
     
 	NameComponent& nameComponent = entity.AddComponent<NameComponent>();
 	nameComponent.Name = name;
+	nameComponent.ID = (int)OS::GetTime();
     
 	ParentComponent& parentComponent = entity.AddComponent<ParentComponent>();
     
@@ -403,15 +420,20 @@ Entity Scene::CreateEntity(const std::string& name) {
 
 void Scene::DestroyEntity(Entity entity) 
 {
-	ParentComponent& parentComponent = entity.GetComponent<ParentComponent>();
-	if (parentComponent.HasParent) {  // Remove self from parents children lists.
-		int idx = 0;
-		ParentComponent& parentParentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
+	ParentComponent& parentC = entity.GetComponent<ParentComponent>();
+	std::vector<Entity> copyChildrens = parentC.Children;
+	if (parentC.HasParent) {  // Remove self from parents children lists.
+		ParentComponent& parent = parentC.Parent.GetComponent<ParentComponent>();
+		parent.RemoveChildren(entity);
 	}
-	for (auto& c : parentComponent.Children) {
+	for (auto& c : copyChildrens) {
+		Logger::Log("Deleting... entity" + std::to_string(c.GetHandle()));
 		DestroyEntity(c);
 	}
+
+	Logger::Log("Deleted entity" + std::to_string(entity.GetHandle()) + " - " + entity.GetComponent<NameComponent>().Name);
 	entity.Destroy();
+	m_Registry.shrink_to_fit();
 }
 
 // Getter
@@ -515,8 +537,29 @@ bool Scene::Deserialize(const std::string& str)
 				Entity ent = CreateEmptyEntity();
 				ent.Deserialize(e.dump());
 			}
+
+			auto view = m_Registry.view<ParentComponent>();
+			for (auto e : view) {
+				auto parentC = view.get<ParentComponent>(e);
+				if (!parentC.HasParent)
+					continue;
+				auto& p = Entity{ e, this };
+		
+				auto parent = GetEntityByID(parentC.ParentID);
+				parent.AddChild(p);
+			}
 		}
 	}
     
 	return true;
+}
+
+void Scene::Snapshot()
+{
+	const auto view = m_Registry.view<TransformComponent>();
+
+}
+
+void Scene::LoadSnapshot()
+{
 }

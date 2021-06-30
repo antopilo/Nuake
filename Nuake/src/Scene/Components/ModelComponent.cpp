@@ -10,18 +10,18 @@ void ModelComponent::Draw()
     }
 }
 
-void ModelComponent::LoadModel(std::string path)
+void ModelComponent::LoadModel()
 {
+    this->meshes.clear();
     Assimp::Importer import;
     import.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
-    const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+    const aiScene* scene = import.ReadFile(FileSystem::Root + ModelPath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        printf("ERROR::ASSIMP::{0}", import.GetErrorString());
+        Logger::Log("ASSIMP! Failed to load model" + std::string(import.GetErrorString()), CRITICAL);
         return;
     }
-    directory = path.substr(0, path.find_last_of('/')) + "/";
 
     ProcessNode(scene->mRootNode, scene);
 }
@@ -97,24 +97,24 @@ Mesh ModelComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
         aiString str;
-
+        std::string directory = FileSystem::Root + this->ModelPath + "/../";
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
         Ref<Material> newMaterial = CreateRef<Material>(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 
-        material->GetTexture(aiTextureType_NORMALS, 0, &str);
-        newMaterial->SetNormal(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+        //material->GetTexture(aiTextureType_NORMALS, 0, &str);
+        //newMaterial->SetNormal(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+        //
+        //material->GetTexture(aiTextureType_METALNESS, 0, &str);
+        //newMaterial->SetMetalness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+        //
+        //material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
+        //newMaterial->SetRoughness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 
-        material->GetTexture(aiTextureType_METALNESS, 0, &str);
-        newMaterial->SetMetalness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+		//material->GetTexture(aiTextureType_DISPLACEMENT, 0, &str);
+		//newMaterial->SetDisplacement(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 
-        material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
-        newMaterial->SetRoughness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
-
-		material->GetTexture(aiTextureType_DISPLACEMENT, 0, &str);
-		newMaterial->SetDisplacement(TextureManager::Get()->GetTexture(directory + str.C_Str()));
-
-        material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &str);
-        newMaterial->SetAO(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+        //material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &str);
+        //newMaterial->SetAO(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 
         return Mesh(vertices, indices, newMaterial);
     }

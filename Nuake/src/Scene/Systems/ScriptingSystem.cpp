@@ -7,13 +7,12 @@ ScriptingSystem::ScriptingSystem(Scene* scene)
 	m_Scene = scene;
 }
 
-
 void ScriptingSystem::Init()
 {
 	ScriptingEngine::Init();
 
 	auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-	for (auto& e : entities)
+	for (auto e : entities)
 	{
 		WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 		if (wren.Script != "" && wren.Class != "")

@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include <GL\glew.h>
 #include <iostream>
+#include <src/Core/FileSystem.h>
 
 Texture::Texture(const std::string& path) {
 	m_RendererId = 0;
@@ -12,7 +13,7 @@ Texture::Texture(const std::string& path) {
 
 	stbi_set_flip_vertically_on_load(1);
 
-	m_LocalBuffer = stbi_load(path.c_str(), &m_Width, &m_Height, &m_BPP, 4);
+	m_LocalBuffer = stbi_load((path).c_str(), &m_Width, &m_Height, &m_BPP, 4);
 
 	glGenTextures(1, &m_RendererId);
 	glBindTexture(GL_TEXTURE_2D, m_RendererId);

@@ -38,7 +38,10 @@ project 'assimp'
 		'assimp/code/AssetLib/FBX/**',
 		'../src/Vendors/pugixml/**',
 		-- 'assimp/code/glTF2/**',
-		-- 'assimp/code/glTF/**',
+		'assimp/code/AssetLib/glTF/**',
+		'assimp/code/AssetLib/MDL/**',
+		'assimp/code/AssetLib/MD2/**',
+		'assimp/code/AssetLib/MD3/**',
 		'assimp/code/Assbin/**' -- For caching
 	}
 	-- Importers
@@ -68,11 +71,11 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_LWO_IMPORTER',
 		'ASSIMP_BUILD_NO_LWS_IMPORTER',
 		'ASSIMP_BUILD_NO_M3D_IMPORTER',
-		'ASSIMP_BUILD_NO_MD2_IMPORTER',
-		'ASSIMP_BUILD_NO_MD3_IMPORTER',
+		--'ASSIMP_BUILD_NO_MD2_IMPORTER',
+		--'ASSIMP_BUILD_NO_MD3_IMPORTER',
 		'ASSIMP_BUILD_NO_MD5_IMPORTER',
 		'ASSIMP_BUILD_NO_MDC_IMPORTER',
-		'ASSIMP_BUILD_NO_MDL_IMPORTER',
+		--'ASSIMP_BUILD_NO_MDL_IMPORTER',
 		'ASSIMP_BUILD_NO_MMD_IMPORTER',
 		'ASSIMP_BUILD_NO_MS3D_IMPORTER',
 		'ASSIMP_BUILD_NO_NDO_IMPORTER',

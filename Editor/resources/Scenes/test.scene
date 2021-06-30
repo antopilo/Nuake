@@ -1,12 +1,40 @@
 {
     "Entities": [
         {
+            "NameComponent": {
+                "ID": -1598095916,
+                "Name": "Model"
+            },
+            "ParentComponent": {
+                "HasParent": false
+            },
+            "TransformComponent": {
+                "Rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "Translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "Type": "TransformComponent"
+            }
+        },
+        {
             "CharacterControllerComponent": {
                 "Height": 1.2000000476837158,
                 "Mass": 2500.0,
                 "Radius": 0.20000000298023224
             },
             "NameComponent": {
+                "ID": 237171289,
                 "Name": "Player"
             },
             "ParentComponent": {
@@ -54,6 +82,7 @@
                 "Type": 0
             },
             "NameComponent": {
+                "ID": 3,
                 "Name": "Light"
             },
             "ParentComponent": {
@@ -84,6 +113,7 @@
         },
         {
             "NameComponent": {
+                "ID": 237443808,
                 "Name": "Trenchbroom map"
             },
             "ParentComponent": {
@@ -123,6 +153,7 @@
                 }
             },
             "NameComponent": {
+                "ID": 237481018,
                 "Name": "Camera"
             },
             "ParentComponent": {
@@ -155,10 +186,10 @@
     "Name": "",
     "m_Environement": {
         "AmbientColor": {
-            "w": 0.0,
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
+            "w": -431602080.0,
+            "x": -431602080.0,
+            "y": -431602080.0,
+            "z": -431602080.0
         },
         "ProceduralSkybox": {
             "AtmosphereRadius": 6380000.0,

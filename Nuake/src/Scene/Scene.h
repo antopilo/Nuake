@@ -39,6 +39,7 @@ public:
 	std::string GetName();
 	bool SetName(std::string& newName);
 	Entity GetEntity(int handle);
+	Entity GetEntityByID(int id);
 	void Init();
 	void OnInit();
 	void OnExit();
@@ -77,4 +78,7 @@ public:
 
 	json Serialize() override;
 	bool Deserialize(const std::string& str) override;
+
+	void Snapshot();
+	void LoadSnapshot();
 };

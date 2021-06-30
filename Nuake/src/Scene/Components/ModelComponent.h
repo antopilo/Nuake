@@ -6,14 +6,17 @@
 #include "assimp/Importer.hpp"
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <string>
 class ModelComponent
 {
 public:
+    std::string ModelPath;
+
     ModelComponent()
     {
         //loadModel(path);
     }
-    void LoadModel(std::string path);
+    void LoadModel();
     void Draw();
 private:
     // model data

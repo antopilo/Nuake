@@ -110,6 +110,8 @@ void FileSystemUI::DrawFile(Ref<File> file)
             icon = ICON_FA_FILE_AUDIO;
         if (file->Type == ".wren")
             icon = ICON_FA_FILE_CODE;
+        if (file->Type == ".md3" || file->Type == ".obj")
+            icon = ICON_FA_FILE_IMAGE;
 
         std::string fullName = icon + std::string("##") + file->fullPath;
         if (ImGui::Button(fullName.c_str(), ImVec2(100, 100)))
@@ -126,6 +128,9 @@ void FileSystemUI::DrawFile(Ref<File> file)
                 dragType = "_Script";
             else if (file->Type == ".map")
                 dragType = "_Map";
+            else if (file->Type == ".obj" || file->Type == ".mdl" || file->Type == ".gltf" || file->Type == ".md3" || file->Type == "fbx")
+                dragType = "_Model";
+
             ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
             ImGui::Text(file->name.c_str());
             ImGui::EndDragDropSource();
@@ -210,6 +215,11 @@ void FileSystemUI::DrawDirectoryExplorer()
             avail.y = 30;
             if (ImGui::BeginChild("ariane", avail))
             {
+                if (ImGui::Button("Refresh"))
+                    FileSystem::Scan();
+
+                ImGui::SameLine();
+
                 for (int i = paths.size() - 1; i > 0; i--) {
                     if (i != paths.size())
                         ImGui::SameLine();

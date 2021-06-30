@@ -4,7 +4,7 @@
 #include "../Scene.h"
 #include "../Components/BaseComponent.h"
 #include "../Resource/Serializable.h"
-
+#include "../Components/NameComponent.h"
 class Entity : public ISerializable
 {
 public:
@@ -15,9 +15,15 @@ public:
 	void AddChild(Entity ent);
 
 	int GetHandle() { return (int)m_EntityHandle; }
+	int GetID() { return GetComponent<NameComponent>().ID; }
+
 	template<typename T>
 	bool HasComponent() {
-		return m_Scene->m_Registry.has<T>(m_EntityHandle);
+		return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
+	}
+
+	bool IsValid() {
+		return m_Scene->m_Registry.valid((entt::entity)GetHandle());
 	}
 
 	template<typename T>
@@ -37,9 +43,9 @@ public:
 		return component;
 	}
 
-	void Destroy() {
-		if(m_Scene->m_Registry.valid(m_EntityHandle))
-			m_Scene->m_Registry.destroy(m_EntityHandle);
+	void Destroy() { 
+		Logger::Log("Deleted eneity :" + std::to_string((int)m_EntityHandle));
+		m_Scene->m_Registry.destroy(m_EntityHandle);
 	}
 
 	bool operator==(const Entity& other) const

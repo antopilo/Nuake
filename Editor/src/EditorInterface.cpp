@@ -230,6 +230,7 @@ void EditorInterface::DrawEntityTree(Entity e)
 
     bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
 
+
     if (ImGui::BeginDragDropSource())
     {
         ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
@@ -267,7 +268,27 @@ void EditorInterface::DrawEntityTree(Entity e)
         m_SelectedEntity = e;
         m_IsEntitySelected = true;
     }
+    if (ImGui::BeginPopupContextItem())
+    {
+        if (ImGui::Selectable("Remove")) {
 
+            Engine::GetCurrentScene()->DestroyEntity(m_SelectedEntity);
+            m_SelectedEntity = Engine::GetCurrentScene()->GetAllEntities()[0];
+            open = false;
+        }
+        if (ImGui::Selectable("Move to root"))
+        {
+            auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
+            if (p.HasParent) {
+                auto& pp = p.Parent.GetComponent<ParentComponent>();
+                pp.RemoveChildren(m_SelectedEntity);
+                p.HasParent = false;
+            }
+        }
+        //m_SelectedEntity.Add
+        ImGui::Selectable("Save as prefab");
+        ImGui::EndPopup();
+    }
     if (open)
     {
         for (auto child : parent.Children)
@@ -338,11 +359,11 @@ void EditorInterface::DrawSceneTree()
 
         ImGui::Separator();
         // Draw a tree of entities.
-        for (Entity e : scene->GetAllEntities()) 
+        std::vector<Entity> entities = scene->GetAllEntities();
+        for (Entity e : entities)
         {
             ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
             std::string name = e.GetComponent<NameComponent>().Name;
-
             // If selected add selected flag.
             if (m_SelectedEntity == e)
                 base_flags |= ImGuiTreeNodeFlags_Selected;
@@ -416,8 +437,8 @@ void EditorInterface::DrawEntityPropreties()
                 if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
                     m_SelectedEntity.AddComponent<LightComponent>();
                 ImGui::Separator();
-                if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
-                    m_SelectedEntity.AddComponent<MeshComponent>();
+                if (ImGui::MenuItem("Model Component") && !m_SelectedEntity.HasComponent<ModelComponent>())
+                    m_SelectedEntity.AddComponent<ModelComponent>();
                 if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMapComponent>())
                     m_SelectedEntity.AddComponent<QuakeMapComponent>();
                 ImGui::Separator();
@@ -458,6 +479,53 @@ void EditorInterface::DrawEntityPropreties()
             ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
             ImGuiHelper::DrawVec3("Scale", &component.Scale);
             ImGui::Separator();
+        }
+
+        if (m_SelectedEntity.HasComponent<ModelComponent>()) {
+            std::string icon = ICON_FA_MALE;
+            if (ImGui::CollapsingHeader((icon + " " + "Model").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Model properties");
+                auto& component = m_SelectedEntity.GetComponent<ModelComponent>();
+                // Path
+                std::string path = component.ModelPath;
+                char pathBuffer[256];
+
+                memset(pathBuffer, 0, sizeof(pathBuffer));
+                std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
+
+                std::string oldPath = component.ModelPath;
+                ImGui::Text("Model: ");
+                ImGui::SameLine();
+                if (ImGui::InputText("##ModelPath", pathBuffer, sizeof(pathBuffer)))
+                    path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
+                if (ImGui::BeginDragDropTarget())
+                {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
+                    {
+                        char* file = (char*)payload->Data;
+                        std::string fullPath = std::string(file, 256);
+                        path = FileSystem::AbsoluteToRelative(fullPath);
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                if (component.ModelPath != path)
+                {
+                    component.ModelPath = path;
+                    component.LoadModel();
+                }
+
+
+                if (ImGui::Button("Reimport"))
+                {
+                    component.LoadModel();
+                }
+   
+
+                ImGui::Separator();
+            }
+
         }
 
         if (m_SelectedEntity.HasComponent<LightComponent>()) {

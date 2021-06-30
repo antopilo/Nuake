@@ -274,13 +274,14 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
     QuakeMapComponent& quakeMapC = ent.GetComponent<QuakeMapComponent>();
     Scene* m_Scene = ent.GetScene();
 
-    // Clear old map entities.
+    // TODO: Tag entities *owned* by the map.
     ParentComponent& currentParent = ent.GetComponent<ParentComponent>();
-    for (auto& e : currentParent.Children) {
+
+    // Copy queue, cant delete while iterating.
+    auto deletionQueue = currentParent.Children;
+    for (auto& e : deletionQueue) {
         m_Scene->DestroyEntity(e);
     }
-
-    currentParent.Children.clear();
 
     map_parser_load(std::string(FileSystem::Root + quakeMapC.Path).c_str());
     geo_generator_run();
