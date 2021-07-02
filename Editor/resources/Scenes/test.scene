@@ -2,12 +2,12 @@
     "Entities": [
         {
             "NameComponent": {
-                "ID": 130924321,
+                "ID": -1986865524,
                 "Name": "testing"
             },
             "ParentComponent": {
                 "HasParent": true,
-                "ParentID": 130921466
+                "ParentID": -1986867378
             },
             "TransformComponent": {
                 "Rotation": {
@@ -30,7 +30,7 @@
         },
         {
             "NameComponent": {
-                "ID": 130921466,
+                "ID": -1986867378,
                 "Name": "Brush 2"
             },
             "ParentComponent": {
@@ -58,12 +58,12 @@
         },
         {
             "NameComponent": {
-                "ID": 130912441,
+                "ID": -1986874285,
                 "Name": "TestTrigger"
             },
             "ParentComponent": {
                 "HasParent": true,
-                "ParentID": 130909903
+                "ParentID": -1986876522
             },
             "TransformComponent": {
                 "Rotation": {
@@ -90,7 +90,7 @@
         },
         {
             "NameComponent": {
-                "ID": 130909903,
+                "ID": -1986876522,
                 "Name": "Brush 1"
             },
             "ParentComponent": {
@@ -118,12 +118,12 @@
         },
         {
             "NameComponent": {
-                "ID": 126715946,
+                "ID": -1990960415,
                 "Name": ""
             },
             "ParentComponent": {
                 "HasParent": true,
-                "ParentID": 126713557
+                "ParentID": -1990962787
             },
             "TransformComponent": {
                 "Rotation": {
@@ -146,7 +146,7 @@
         },
         {
             "NameComponent": {
-                "ID": 126713557,
+                "ID": -1990962787,
                 "Name": "Brush 0"
             },
             "ParentComponent": {
@@ -173,18 +173,9 @@
             }
         },
         {
-            "CameraComponent": {
-                "CameraInstance": {
-                    "AspectRatio": 1.9246861934661865,
-                    "Exposure": 1.0,
-                    "Fov": 88.0,
-                    "Speed": 1.0,
-                    "m_Type": 1
-                }
-            },
             "NameComponent": {
-                "ID": 237481018,
-                "Name": "Camera"
+                "ID": -1598095916,
+                "Name": "Model"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -192,7 +183,7 @@
             "TransformComponent": {
                 "Rotation": {
                     "x": 0.0,
-                    "y": -0.0,
+                    "y": 0.0,
                     "z": 0.0
                 },
                 "Scale": {
@@ -201,15 +192,11 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 6.100314617156982,
-                    "y": -49.37096405029297,
-                    "z": -5.69704008102417
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
                 },
                 "Type": "TransformComponent"
-            },
-            "WrenScriptComponent": {
-                "Class": "CamScript",
-                "Script": "Scripts/Cam.wren"
             }
         },
         {
@@ -328,9 +315,18 @@
             }
         },
         {
+            "CameraComponent": {
+                "CameraInstance": {
+                    "AspectRatio": 1.9246861934661865,
+                    "Exposure": 1.0,
+                    "Fov": 88.0,
+                    "Speed": 1.0,
+                    "m_Type": 1
+                }
+            },
             "NameComponent": {
-                "ID": -1598095916,
-                "Name": "Model"
+                "ID": 237481018,
+                "Name": "Camera"
             },
             "ParentComponent": {
                 "HasParent": false
@@ -338,7 +334,7 @@
             "TransformComponent": {
                 "Rotation": {
                     "x": 0.0,
-                    "y": 0.0,
+                    "y": -0.0,
                     "z": 0.0
                 },
                 "Scale": {
@@ -347,11 +343,15 @@
                     "z": 1.0
                 },
                 "Translation": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
+                    "x": 6.100314617156982,
+                    "y": -49.37096405029297,
+                    "z": -5.69704008102417
                 },
                 "Type": "TransformComponent"
+            },
+            "WrenScriptComponent": {
+                "Class": "CamScript",
+                "Script": "Scripts/Cam.wren"
             }
         }
     ],

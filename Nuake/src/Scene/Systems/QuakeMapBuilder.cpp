@@ -285,23 +285,36 @@ void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
             indices.push_back(index_offset + (unsigned int)index);
         }
 
-        if (lastTextureID != face->texture_idx)
+        if(!bsp.IsTrigger)
         {
-            lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
-            if (std::string(texture->name) == "__TB_empty")
-                bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
-            else
-                bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
+            if (lastTextureID != face->texture_idx)
+            {
+                lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
+                if (std::string(texture->name) == "__TB_empty")
+                    bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
+                else
+                    bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
 
-            index_offset = 0;
-            vertices.clear();
-            indices.clear();
-            lastTextureID = face->texture_idx;
+                index_offset = 0;
+                vertices.clear();
+                indices.clear();
+                lastTextureID = face->texture_idx;
+            }
+            else
+            {
+                index_offset += (face_geo_inst->vertex_count);
+            }
         }
         else
         {
             index_offset += (face_geo_inst->vertex_count);
         }
+    }
+
+    if (bsp.IsTrigger)
+    {
+        bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
+        vertices.clear();
     }
 
     if (vertices.size() > 0)

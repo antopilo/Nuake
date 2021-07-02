@@ -204,6 +204,7 @@ class Brush {
 
 		var entities = []
 		var targets = Scene.BrushGetTargets_(_entityId)
+		
 		for(t in targets) {
 			entities.add(Entity.new(t))
 		}

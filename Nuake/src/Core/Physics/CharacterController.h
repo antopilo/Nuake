@@ -42,6 +42,12 @@ namespace Physics
 
 		void SetEntity(Entity& ent);
 		void MoveAndSlide(glm::vec3 velocity);
+
+		bool IsOnFloor()
+		{
+			return IsOnGround;
+		}
+
 	private:
 		void ParseGhostContacts();
 		void UpdatePosition();

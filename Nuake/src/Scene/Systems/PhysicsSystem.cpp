@@ -71,7 +71,6 @@ void PhysicsSystem::Init()
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
 		}
-		
 	}
 
 	auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();

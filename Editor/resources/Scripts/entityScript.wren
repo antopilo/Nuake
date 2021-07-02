@@ -17,6 +17,10 @@ class TestScript is ScriptableEntity {
 
     }
 
+    fixedUpdate(ts) {
+        
+    }
+
     exit() {
         Engine.Log("Hello exit")
     }

@@ -244,6 +244,7 @@ namespace ScriptAPI
 			float x = wrenGetSlotDouble(vm, 2);
 			float y = wrenGetSlotDouble(vm, 3);
 			float z = wrenGetSlotDouble(vm, 4);
+
 			transform.Translation = Vector3(x, y, z);
 		}
 

@@ -3,8 +3,6 @@
 #include "../Core/Physics/RaycastResult.h"
 namespace Physics
 {
-	
-
 	CharacterController::CharacterController(float height, float radius, float mass, Vector3 position)
 	{
 		m_surfaceHitNormals = std::vector<glm::vec3>();
@@ -55,6 +53,8 @@ namespace Physics
 		m_GhostObject->setUserIndex(ent.GetHandle());
 	}
 
+
+
 	void CharacterController::MoveAndSlide(glm::vec3 velocity)
 	{
 		m_Rigidbody->setGravity(btVector3(0, 0, 0));
@@ -63,7 +63,6 @@ namespace Physics
 		m_GhostObject->setWorldTransform(m_Rigidbody->getWorldTransform());
 		
 		IsOnGround = false;
-
 		ParseGhostContacts();
 		UpdatePosition();
 		UpdateVelocity();
@@ -100,8 +99,7 @@ namespace Physics
 				// Skip the rigid body the ghost monitors
 				if (pManifold->getBody0() == m_Rigidbody)
 					continue;
-				btVector3 boost = pManifold->getBody0()->getInterpolationLinearVelocity();
-				m_manualVelocity += Vector3(boost.x(), boost.y(), boost.z());
+
 				for (int p = 0; p < pManifold->getNumContacts(); p++)
 				{
 					const btManifoldPoint& point = pManifold->getContactPoint(p);
@@ -144,12 +142,12 @@ namespace Physics
 		{
 			float previousY = m_Rigidbody->getWorldTransform().getOrigin().getY();
 
+
 			float t = rayCallBack_bottom.m_closestHitFraction ;
 
 			float clamped = (1.0 - rayCallBack_bottom.m_closestHitFraction);
 			btVector3 vel(m_Rigidbody->getLinearVelocity());
 
-			
 			if(vel.getY() < 0) // -magic number is to fix bouncing down a slope.
 				m_Rigidbody->getWorldTransform().getOrigin().setY(previousY - 0.14f + (m_bottomYOffset + m_stepHeight) * (clamped));
 			
@@ -160,7 +158,7 @@ namespace Physics
 			IsOnGround = true;
 
 		}
-		
+
 
 
 		float testOffset = 0.07f;

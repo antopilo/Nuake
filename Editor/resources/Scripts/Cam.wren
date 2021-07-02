@@ -76,5 +76,9 @@ class CamScript is ScriptableEntity {
         cam.SetDirection(newDir)
     }
 
+    fixedUpdate(ts) {
+        
+    }
+
     exit() {}
 }
