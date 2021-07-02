@@ -217,9 +217,7 @@ void FileSystemUI::DrawDirectoryExplorer()
             {
                 if (ImGui::Button("Refresh"))
                     FileSystem::Scan();
-
                 ImGui::SameLine();
-
                 for (int i = paths.size() - 1; i > 0; i--) {
                     if (i != paths.size())
                         ImGui::SameLine();

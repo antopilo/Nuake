@@ -9,6 +9,7 @@ Project::Project(const std::string Name, const std::string Description, const st
 	this->Name = Name;
 	this->Description = Description;
 	this->FullPath = FullPath;
+	this->TrenchbroomPath = "";
 
 	if (defaultScenePath != "")
 	{
@@ -26,6 +27,7 @@ Project::Project()
 	this->Name = "";
 	this->Description = "";
 	this->FullPath = "";
+	this->TrenchbroomPath = "";
 
 	this->EntityDefinitionsFile = CreateRef<FGDFile>();
 }
@@ -37,15 +39,14 @@ void Project::Save()
 
 void Project::SaveAs(const std::string FullPath)
 {
-
 	json j = Serialize();
-	// Dump.
 	std::string serialized_string = j.dump();
 
-	// write to file.
+	// TODO: Use file interface here...
+	// Write to file.
 	std::ofstream projectFile;
-	projectFile.open(FullPath);
-	projectFile << serialized_string;
+		projectFile.open(FullPath);
+		projectFile << serialized_string;
 	projectFile.close();
 }
 
@@ -85,40 +86,50 @@ Ref<Project> Project::Load(std::string path)
 json Project::Serialize()
 {
 	BEGIN_SERIALIZE();
-	SERIALIZE_VAL(Name);
-	SERIALIZE_VAL(Description);
-	SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
+		SERIALIZE_VAL(Name);
+		SERIALIZE_VAL(Description);
+		SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
+		SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
 	END_SERIALIZE();
 }
 
 bool Project::Deserialize(const std::string& str)
 {
-	json j = json::parse(str);
-	if (!j.contains("Name"))
-		return false;
-	if (!j.contains("Description"))
+	BEGIN_DESERIALIZE();
+
+	if (!j.contains("Name") || !j.contains("Description"))
 		return false;
 
-	this->DefaultScene = Scene::New();
+	Name = j["Name"];
+	Description = j["Description"];
 
-	if (j.contains("DefaultScene"))
+	DefaultScene = Scene::New();
+
+	// Load default scene, a project can have no default scene set.
+	if (!j.contains("DefaultScene"))
+		return true;
+
+	std::string scenePath = j["DefaultScene"];
+	if (scenePath == "") // Not set correctly.
+		return true;
+
+	std::string sceneContent = FileSystem::ReadFile(scenePath, false);
+	if (!DefaultScene->Deserialize(sceneContent))
 	{
-		std::string scenePath = j["DefaultScene"];
-		if (scenePath != "")
-		{
-			std::string sceneContent = FileSystem::ReadFile(scenePath, false);
-			if (!this->DefaultScene->Deserialize(sceneContent))
-			{
-				Logger::Log("Error loading scene: " + scenePath, CRITICAL);
-			}
-			else
-			{
-				this->DefaultScene->Path = scenePath;
-				Logger::Log("Successfully loaded scene: " + scenePath);
-			}
-		}
-		
+		Logger::Log("Error loading scene: " + scenePath, CRITICAL);
+		return false;
 	}
 
+	if (j.contains("EntityDefinition"))
+	{
+		std::string path = j["EntityDefinition"];
+		EntityDefinitionsFile = CreateRef<FGDFile>(path);
+		std::string content = FileSystem::ReadFile(path, false);
+		EntityDefinitionsFile->Deserialize(content);
+	}
+
+	DefaultScene->Path = scenePath;
+	Logger::Log("Successfully loaded scene: " + scenePath);	
+	
 	return true; // Success
 }

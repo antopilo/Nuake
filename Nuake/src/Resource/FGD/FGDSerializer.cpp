@@ -8,6 +8,8 @@ bool FGDSerializer::BeginFGDFile(const std::string path)
 	return true;
 }
 
+
+
 bool FGDSerializer::SerializeClass(FGDClass fgdClass)
 {
 	std::string line = "@";
@@ -49,6 +51,42 @@ bool FGDSerializer::SerializeClass(FGDClass fgdClass)
 
 	FileSystem::WriteLine(line);
 	return true;
+}
+
+bool FGDSerializer::SerializeBrush(FGDBrushEntity fgdClass)
+{
+	std::string line = "@";
+	line += "SolidClass = ";
+	line += fgdClass.Name + " : \"" + fgdClass.Description + "\"";
+
+	// Exit early
+	if (fgdClass.Properties.size() == 0)
+	{
+		line += " [] \n";
+		FileSystem::WriteLine(line);
+		return true;
+	}
+
+	// Properties here.
+	line += "\n [ \n";
+	for (auto& p : fgdClass.Properties)
+	{
+		// E.g: myProp(integer) : "description"
+		line += "    "; // Tabulation
+		line += p.name;
+		line += "(";
+		if (p.type == ClassPropertyType::Integer)
+			line += "integer";
+		line += ") : ";
+		line += "\"" + p.description + "\"";
+		line += "\n";
+
+	}
+
+	line += "]";
+
+	FileSystem::WriteLine(line);
+	return false;
 }
 
 bool FGDSerializer::EndFGDFile()

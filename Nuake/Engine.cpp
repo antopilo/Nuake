@@ -14,6 +14,7 @@
 
 Ref<Project> Engine::CurrentProject;
 Ref<Window> Engine::CurrentWindow;
+
 float Engine::m_LastFrameTime = 0.0f;
 float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
 float Engine::m_FixedUpdateDifference = 0.f;
@@ -26,6 +27,7 @@ void Engine::Init()
 	PhysicsManager::Get()->Init();
 	Logger::Log("Physics initialized");
 
+	// Creates the window
 	CurrentWindow = Window::Get();
 	Logger::Log("Window initialized");
 
@@ -46,7 +48,7 @@ void Engine::Tick()
 	Timestep timestep = time - m_LastFrameTime;
 	m_LastFrameTime = time;
 
-	// Play mode update vs editor update.
+	// Play mode update all the entities, Editor does not.
 	if (Engine::IsPlayMode) 
 	{
 		CurrentWindow->Update(timestep);
@@ -79,8 +81,11 @@ void Engine::EnterPlayMode()
 void Engine::ExitPlayMode()
 {
 	// Dont trigger exit if already not in play mode.
-	if (IsPlayMode)
+	if (IsPlayMode) {
 		GetCurrentScene()->OnExit();
+		Input::ShowMouse();
+	}
+		
 
 	IsPlayMode = false;
 }

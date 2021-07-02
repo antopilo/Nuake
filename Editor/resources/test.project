@@ -1,1 +1,6 @@
-{"DefaultScene":"Scenes/test.scene","Description":"","Name":""}
+{
+	"DefaultScene":"Scenes/test.scene",
+	"Description":"",
+	"Name":"DemoProject",
+	"EntityDefinition": "lalala.json"
+}

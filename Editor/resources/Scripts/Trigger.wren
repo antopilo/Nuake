@@ -25,7 +25,6 @@ class TriggerScript is ScriptableEntity {
             if(isPlayer) {
                 _Activated = true
             }
-            
         }
         if(_Activated) {
             var brush = this.GetComponent("Brush")

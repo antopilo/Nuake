@@ -59,7 +59,19 @@ bool hasEnding(std::string const& fullString, std::string const& ending) {
 WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) {
     WrenLoadModuleResult result = { 0 };
 
+    std::string sname = name;
+    std::string s = "tititoto";
     std::string path = "resources/" + std::string(name);
+
+    if (s.rfind("Nuake/", 0) == 0) 
+    {
+        path = "resources/" + std::string(name);
+    }
+    else
+    {
+        path = FileSystem::Root + name;
+    }
+
     if(!hasEnding(path, ".wren"))
         path += ".wren";
 

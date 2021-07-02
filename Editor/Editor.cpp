@@ -40,6 +40,11 @@ int main()
     EditorInterface editor;
     editor.BuildFonts();
 
+    Ref<FrameBuffer> myFramebuffer = CreateRef<FrameBuffer>(true, Vector2(200, 200));
+    myFramebuffer->SetTexture(CreateRef<Texture>(Vector2(200, 200), GL_RGB));
+
+    Ref<Scene> myScene = CreateRef<Scene>();
+
     while (!Engine::GetCurrentWindow()->ShouldClose())
     {
         Engine::Tick();
@@ -49,8 +54,25 @@ int main()
         if (Input::IsKeyPressed(GLFW_KEY_F8))
             Engine::ExitPlayMode();
 
-        editor.Draw();
+        myFramebuffer->Bind();
+        myScene->EditorDraw();
+        
+        myFramebuffer->Unbind();
+        if (ImGui::Begin("hahahah"))
+        {
+            ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
+            if (myFramebuffer->GetSize() != viewportPanelSize)
+                myFramebuffer->QueueResize(viewportPanelSize);
+
+            Ref<Texture> texture = myFramebuffer->GetTexture();
+            ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            
+        }
+        ImGui::End();
+        editor.Draw();
+        
         Engine::EndDraw();
     }
 

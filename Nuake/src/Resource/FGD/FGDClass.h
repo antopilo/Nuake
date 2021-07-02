@@ -1,7 +1,9 @@
 #pragma once
 #include "ClassProperty.h"
+#include "src/Resource/Serializable.h"
 #include <string>
 #include <vector>
+
 
 class FGDBaseEntity
 {
@@ -10,21 +12,61 @@ public:
 	std::vector<ClassProperty> Properties;
 };
 
-class FGDBrushEntity
+
+class FGDBrushEntity : ISerializable
 {
 public:
 	std::string Name;
 	std::string Description;
-	bool Transparent = false;
-	bool Collision = false;
+
+	bool Visible = false;
+	bool Solid = false;
 	bool IsTrigger = false;
 	std::string Script = "";
+
 	std::vector<ClassProperty> Properties;
+
+	FGDBrushEntity()
+	{
+		Name = "";
+		Description = "";
+	}
+
+	FGDBrushEntity(const std::string& name) 
+	{
+		Name = name;
+		Description = "";
+	}
+
+	json Serialize() override
+	{
+		BEGIN_SERIALIZE();
+			SERIALIZE_VAL(Name);
+			SERIALIZE_VAL(Description);
+			SERIALIZE_VAL(Visible); 
+			SERIALIZE_VAL(Solid);
+			SERIALIZE_VAL(IsTrigger);
+			SERIALIZE_VAL(Script);
+		END_SERIALIZE();
+	}
+
+	bool Deserialize(const std::string& str) override 
+	{
+		BEGIN_DESERIALIZE();
+			Name = j["Name"];
+			Description = j["Description"];
+			Visible = j["Visible"];
+			Solid = j["Solid"];
+			IsTrigger = j["IsTrigger"];
+			Script = j["Script"];
+		return true;
+	}
 
 	FGDBaseEntity BaseClass;
 };
 
-class FGDPointEntity
+
+class FGDPointEntity : ISerializable
 {
 public:
 	std::string Name;
@@ -32,6 +74,20 @@ public:
 	std::string Prefab;
 	std::vector<ClassProperty> Properties;
 	FGDBaseEntity BaseClass;
+
+	json Serialize() override
+	{
+		BEGIN_SERIALIZE();
+			SERIALIZE_VAL(Name);
+			SERIALIZE_VAL(Description);
+			SERIALIZE_VAL(Prefab);
+		END_SERIALIZE();
+	}
+
+	bool Deserialize(const std::string& str) override
+	{
+		return true;
+	}
 };
 
 class FGDClass {
@@ -42,6 +98,7 @@ public:
 	std::vector<ClassProperty> Properties;
 
 	FGDClass(FGDClassType type, const std::string& name, const std::string& desc);
+
 	void AddProperty(ClassProperty prop);
 	void RemoveProperty(const std::string name);
 };

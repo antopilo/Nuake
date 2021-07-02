@@ -304,12 +304,14 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
         std::string target = "";
         std::string targetname = "";
-        for (int i = 0; i < entity_inst->property_count; i++) {
+        for (int i = 0; i < entity_inst->property_count; i++) 
+        {
             property* prop = &(entity_inst->properties)[i];
             std::string key = prop->key;
             std::string value = prop->value;
 
-            if (key == "origin") {
+            if (key == "origin") 
+            {
                 // Position
                 std::vector<std::string> splits = split(value, ' ');
 
@@ -334,11 +336,13 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
                     isTrigger = true;
                     newEntity.GetComponent<NameComponent>().Name = "Trigger " + std::to_string(i);
                 }
-                else if (value == "func_any") {
+                else if (value == "func_any") 
+                {
                     isFunc = true;
                     newEntity.GetComponent<NameComponent>().Name = "func_any " + std::to_string(i);
                 }
-                else if (value == "position") {
+                else if (value == "position") 
+                {
                     isPos = true;
                 }
             }

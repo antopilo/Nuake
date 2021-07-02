@@ -39,98 +39,12 @@ void EditorInterface::Init()
     ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
 
     //this->filesystem = FileSystemUI();
-
-
-
-
 }
 
 
 ImVec2 LastSize = ImVec2();
 void EditorInterface::DrawViewport()
 {
-    /*
-   if(ImGui::Begin("ShadowMap1"))
-   {
-        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-
-        if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
-            auto& light = m_SelectedEntity.GetComponent<LightComponent>();
-            Ref<Texture> texture = light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
-            ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-        }
-        else {
-            ImGui::Text("Please select a light entity");
-        }
-        
-    }
-   ImGui::End();
-   if (ImGui::Begin("ShadowMap2"))
-   {
-       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-
-       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
-           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
-           Ref<Texture> texture = light.m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
-           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-       }
-       else {
-           ImGui::Text("Please select a light entity");
-       }
-
-   }
-
-   ImGui::End();
-   if (ImGui::Begin("ShadowMap3"))
-   {
-       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-
-       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
-           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
-           Ref<Texture> texture = light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT);
-           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-       }
-       else {
-           ImGui::Text("Please select a light entity");
-       }
-
-   }
-
-   ImGui::End();
-   if (ImGui::Begin("ShadowMap4"))
-   {
-       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-       glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-
-       if (m_IsEntitySelected && m_SelectedEntity.HasComponent<LightComponent>()) {
-           auto& light = m_SelectedEntity.GetComponent<LightComponent>();
-           Ref<Texture> texture = light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT);
-           ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-       }
-       else {
-           ImGui::Text("Please select a light entity");
-       }
-
-   }
-
-   ImGui::End();
-
-   if (ImGui::Begin("SDF FONT"))
-   {
-       ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-       if (userInterface)
-       {
-           auto id = userInterface->font->FontAtlas->GetID();
-           ImGui::Image((void*)id, regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
-       }
-
-   }
-   ImGui::End();
-   */
    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
    std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
@@ -198,9 +112,6 @@ void EditorInterface::DrawViewport()
                 tc.Scale = scale;
             }
         }
-        
-
-        
     }
     else
     {
@@ -211,6 +122,7 @@ void EditorInterface::DrawViewport()
 }
 
 static int selected = 0;
+Entity QueueDeletion;
 void EditorInterface::DrawEntityTree(Entity e)
 {
     ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -268,14 +180,15 @@ void EditorInterface::DrawEntityTree(Entity e)
         m_SelectedEntity = e;
         m_IsEntitySelected = true;
     }
+
     if (ImGui::BeginPopupContextItem())
     {
         if (ImGui::Selectable("Remove")) {
 
-            Engine::GetCurrentScene()->DestroyEntity(m_SelectedEntity);
-            m_SelectedEntity = Engine::GetCurrentScene()->GetAllEntities()[0];
+            QueueDeletion = e;
             open = false;
         }
+
         if (ImGui::Selectable("Move to root"))
         {
             auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
@@ -285,18 +198,19 @@ void EditorInterface::DrawEntityTree(Entity e)
                 p.HasParent = false;
             }
         }
-        //m_SelectedEntity.Add
         ImGui::Selectable("Save as prefab");
         ImGui::EndPopup();
     }
     if (open)
     {
-        for (auto child : parent.Children)
-            DrawEntityTree(child);
-        
-        ImGui::TreePop();
-    }
+        // Caching list to prevent deletion while iterating.
+        std::vector<Entity> childrens = parent.Children;
+        for (auto c : childrens)
+            DrawEntityTree(c);
 
+        ImGui::TreePop();
+
+    }
     ImGui::PopFont();
 }
 
@@ -354,10 +268,12 @@ void EditorInterface::DrawSceneTree()
                 // Unselect delted entity.
                 m_SelectedEntity = scene->GetAllEntities().at(0);
             }
-            ImGui::EndChild();
+            
         }
+        ImGui::EndChild();
 
         ImGui::Separator();
+
         // Draw a tree of entities.
         std::vector<Entity> entities = scene->GetAllEntities();
         for (Entity e : entities)
@@ -379,6 +295,7 @@ void EditorInterface::DrawSceneTree()
             {
                 // Recursively draw childrens.
                 DrawEntityTree(e);
+              
             }
 
             // Pop font.
@@ -389,9 +306,19 @@ void EditorInterface::DrawSceneTree()
             //    ImGui::EndPopup();
         }
 
-        
+        // Delete entity
+        if (QueueDeletion.GetHandle() != 0) 
+        {
+            Engine::GetCurrentScene()->DestroyEntity(QueueDeletion);
+
+            if(m_SelectedEntity == QueueDeletion)
+                m_SelectedEntity = scene->GetAllEntities().at(0);
+
+            QueueDeletion = Entity{ (entt::entity)0, scene.get() };
+            ImGui::TreePop();
+        }
+        ImGui::End();
     }
-    ImGui::End();
 }
 
 
@@ -1144,6 +1071,7 @@ void NewProject()
 }
 
 
+ProjectInterface pInterface;
 void OpenProject()
 {
     // Parse the project and load it.
@@ -1160,7 +1088,7 @@ void OpenProject()
     project->FullPath = projectPath;
     Engine::LoadProject(project);
 
-
+    pInterface.m_CurrentProject = project;
     // Create new interface named test.
     //userInterface = UI::UserInterface::New("test");
 
@@ -1368,7 +1296,6 @@ void EditorInterface::Draw()
    filesystem.Draw();
    filesystem.DrawDirectoryExplorer();
 
-   ProjectInterface pInterface;
    pInterface.DrawEntitySettings();
 
     if(m_ShowImGuiDemo)

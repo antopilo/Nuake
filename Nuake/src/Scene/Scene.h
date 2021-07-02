@@ -12,16 +12,19 @@
 #include "src/UI/UserInterface.h"
 #include "../Core/Maths.h"
 #include <src/Scene/Systems/System.h>
+
 class Entity;
 
 class Scene : public ISerializable
 {
 	friend Entity;
-
 private:
-	std::string Name;
+	std::string Name; // Name of the scene
 	bool has_changed = true;
 
+	// The systems are what updates the components.
+	// You can create a new system(see 'Systems/'.) and register it
+	// In the scene constructor.
 	std::vector<Ref<System>> m_Systems;
 	
 	Ref<Environment> m_Environement;

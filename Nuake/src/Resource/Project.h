@@ -13,6 +13,9 @@ public:
 	std::string Description;
 	std::string FullPath;
 
+	// Path of the trenchbroom .exe folder
+	std::string TrenchbroomPath = ""; 
+
 	Ref<Scene> DefaultScene;
 	Ref<FGDFile> EntityDefinitionsFile;
 
@@ -28,5 +31,4 @@ public:
 
 	json Serialize() override;
 	bool Deserialize(const std::string& str) override;
-
 };
