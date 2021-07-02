@@ -90,6 +90,7 @@ json Project::Serialize()
 		SERIALIZE_VAL(Description);
 		SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
 		SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
+		SERIALIZE_VAL(TrenchbroomPath);
 	END_SERIALIZE();
 }
 
@@ -126,6 +127,11 @@ bool Project::Deserialize(const std::string& str)
 		EntityDefinitionsFile = CreateRef<FGDFile>(path);
 		std::string content = FileSystem::ReadFile(path, false);
 		EntityDefinitionsFile->Deserialize(content);
+	}
+
+	if (j.contains("TrenchbroomPath"))
+	{
+		this->TrenchbroomPath = j["TrenchbroomPath"];
 	}
 
 	DefaultScene->Path = scenePath;

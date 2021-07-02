@@ -21,7 +21,6 @@ void ProjectInterface::DrawProjectSettings()
 
 void ProjectInterface::DrawCreatePointEntity()
 {
-
     char buffer[256];
     memset(buffer, 0, sizeof(buffer));
     std::strncpy(buffer, Engine::GetProject()->Name.c_str(), sizeof(buffer));
@@ -45,9 +44,8 @@ void ProjectInterface::DrawEntitySettings()
         
         ImGui::Text("Trenchbroom path:");
         ImGui::SameLine();
-        
-            
         ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
+        ImGui::SameLine();
         if (ImGui::Button("Browse"))
         {
             std::string path = FileDialog::OpenFile("*.exe");
@@ -162,6 +160,7 @@ void ProjectInterface::DrawEntitySettings()
                 ImGui::EndChild();
                 ImGui::EndTabItem();
             }
+
             if (ImGui::BeginTabItem("Brush entities"))
             {
                 ImVec2 avail = ImGui::GetContentRegionAvail();
@@ -187,9 +186,9 @@ void ProjectInterface::DrawEntitySettings()
 
                         ImGui::Checkbox(std::string("Visible##" + std::to_string(i)).c_str(), &pE.Visible);
                         ImGui::SameLine();
-                        ImGui::Checkbox(std::string("Solid" + std::to_string(i)).c_str(), &pE.Solid);
+                        ImGui::Checkbox(std::string("Solid##" + std::to_string(i)).c_str(), &pE.Solid);
                         ImGui::SameLine();
-                        ImGui::Checkbox(std::string("Trigger" + std::to_string(i)).c_str(), &pE.IsTrigger);
+                        ImGui::Checkbox(std::string("Trigger##" + std::to_string(i)).c_str(), &pE.IsTrigger);
                         
                         ImGui::TableNextColumn();
 
@@ -205,6 +204,7 @@ void ProjectInterface::DrawEntitySettings()
 
                             ImGui::EndDragDropTarget();
                         }
+                        ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
                         ImGui::TableNextColumn();
 
                         i++;

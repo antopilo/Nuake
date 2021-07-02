@@ -178,7 +178,8 @@ void Scene::DrawShadows()
 			for (auto e : quakeView) {
 				auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
-
+				if (model.IsTransparent)
+					continue;
 				for (auto& e : model.Meshes) {
 					e->Draw(false);
 				}
@@ -255,7 +256,8 @@ void Scene::Draw()
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView) {
 			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-
+			if (model.IsTransparent)
+				continue;
 			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
@@ -268,6 +270,7 @@ void Scene::Draw()
         
 		Renderer::m_DebugShader->SetUniformMat4f("u_View", cam->GetTransform());
 		Renderer::m_DebugShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
+
 		PhysicsManager::Get()->DrawDebug();
 	}
 }

@@ -1,6 +1,1 @@
-{
-	"DefaultScene":"Scenes/test.scene",
-	"Description":"",
-	"Name":"DemoProject",
-	"EntityDefinition": "lalala.json"
-}
+{"DefaultScene":"Scenes/test.scene","Description":"","EntityDefinition":"lalala.json","Name":"DemoProject","TrenchbroomPath":"F:\\TrenchBroom\\TrenchBroom.exe/../"}

@@ -31,25 +31,9 @@ FGDFile::FGDFile()
 
 bool FGDFile::Save()
 {
-	BEGIN_SERIALIZE();
-
-	int i = 0;
-	for (auto& c : this->BrushEntities)
-	{
-		j["BrushEntities"][i] = c.Serialize();
-		i++;
-	}
-
-	i = 0;
-	for (auto& c : this->PointEntities)
-	{
-		j["PointEntities"][i] = c.Serialize();
-		i++;
-	}
-	
 	// Write to file.
-	FileSystem::BeginWriteFile(Path);
-		FileSystem::WriteLine(j.dump(4));
+	FileSystem::BeginWriteFile(FileSystem::Root + Path);
+		FileSystem::WriteLine(Serialize().dump(4));
 	FileSystem::EndWriteFile();
 
 	return true;

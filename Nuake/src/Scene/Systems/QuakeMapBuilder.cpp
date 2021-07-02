@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include "src/Core/FileSystem.h"
+
 extern "C" {
     #include "libmap/h/map_parser.h"
     #include <libmap/h/geo_generator.h>
@@ -19,14 +20,17 @@ extern "C" {
 #include <src/Scene/Components/LightComponent.h>
 #include <src/Scene/Components/NameComponent.h>
 #include <src/Scene/Components/TriggerZone.h>
-
+#include <src/Resource/FGD/FGDClass.h>
+#include <src/Scene/Components/WrenScriptComponent.h>
 Ref<Material> DefaultMaterial;
-std::vector<std::string> split(const std::string& s, char delim) {
+std::vector<std::string> split(const std::string& s, char delim) 
+{
     std::vector<std::string> result;
     std::stringstream ss(s);
     std::string item;
 
-    while (getline(ss, item, delim)) {
+    while (getline(ss, item, delim)) 
+    {
         result.push_back(item);
     }
 
@@ -102,7 +106,8 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
 
     parent.AddChild(brushEntity);
 
-    transformComponent.Translation = Vector3(brush->center.y * (1.0f / 64),
+    transformComponent.Translation = Vector3(
+        brush->center.y * (1.0f / 64),
         brush->center.z * (1.0f / 64),
         brush->center.x * (1.0f / 64));
 
@@ -113,13 +118,16 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
     {
         face* face = &brush->faces[f];
         texture_data* texture = &textures[face->texture_idx];
-        if (std::string(texture->name) == "__TB_empty") {
+        if (std::string(texture->name) == "__TB_empty") 
+        {
             texture->height = 1;
             texture->width = 1;
         }
-        else {
+        else 
+        {
             std::string path = "resources/Textures/" + std::string(texture->name) + ".png";
             auto tex = TextureManager::Get()->GetTexture(path);
+
             texture->height = tex->GetHeight();
             texture->width = tex->GetWidth();
         }
@@ -136,6 +144,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
                 (vertex.vertex.z - brush->center.z) * (1.0f / 64),
                 (vertex.vertex.x - brush->center.x) * (1.0f / 64)
             );
+
             Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
             Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
             Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
@@ -158,6 +167,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
         if (lastTextureID != face->texture_idx)
         {
             lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
+
             if (std::string(texture->name) == "__TB_empty")
                 bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
             else
@@ -178,34 +188,62 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
         bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
 }
 
-void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname)
+void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname, FGDBrushEntity fgdBrush)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    Entity brushEntity = scene->CreateEntity(targetname);
+
+    std::string name = fgdBrush.Name;
+    if (targetname != "")
+        name = targetname;
+
+    Entity brushEntity = scene->CreateEntity(name);
+
     TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
     BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
+
+    bsp.IsSolid = fgdBrush.Solid;
+    bsp.IsTransparent = !fgdBrush.Visible;
     bsp.IsFunc = true;
+    bsp.IsTrigger = fgdBrush.IsTrigger;
+    if (fgdBrush.Script != "" && fgdBrush.Class != "")
+    {
+        auto& wrenScript = brushEntity.AddComponent<WrenScriptComponent>();
+        wrenScript.Script = fgdBrush.Script;
+        wrenScript.Class = fgdBrush.Class;
+    }
+
+    if (bsp.IsTrigger)
+    {
+        TriggerZone& trigger = brushEntity.AddComponent<TriggerZone>();
+        trigger.target = target;
+    }
+
     bsp.target = target;
 
     parent.AddChild(brushEntity);
 
-    transformComponent.Translation = Vector3(brush->center.y * (1.0f / 64),
+    transformComponent.Translation = Vector3(
+        brush->center.y * (1.0f / 64),
         brush->center.z * (1.0f / 64),
         brush->center.x * (1.0f / 64));
 
     int index_offset = 0;
     int lastTextureID = -1;
     std::string lastTexturePath = "";
+
+
     for (int f = 0; f < brush->face_count; ++f)
     {
         face* face = &brush->faces[f];
         texture_data* texture = &textures[face->texture_idx];
-        if (std::string(texture->name) == "__TB_empty") {
+        if (std::string(texture->name) == "__TB_empty") 
+        {
             texture->height = 1;
             texture->width = 1;
         }
-        else {
+        else 
+        {
             std::string path = "resources/Textures/" + std::string(texture->name) + ".png";
             auto tex = TextureManager::Get()->GetTexture(path);
             texture->height = tex->GetHeight();
@@ -224,17 +262,21 @@ void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
                 (vertex.vertex.z - brush->center.z) * (1.0f / 64),
                 (vertex.vertex.x - brush->center.x) * (1.0f / 64)
             );
+
             Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
             Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
             Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
 
-            vertices.push_back(Vertex{
-                vertexPos,
-                vertexUV,
-                vertexNormal,
-                vertexTangent,
-                glm::vec3(0.0, 1.0, 0.0), 0.0f
-                });
+            vertices.push_back(Vertex 
+                {
+                    vertexPos,
+                    vertexUV,
+                    vertexNormal,
+                    vertexTangent,
+                    glm::vec3(0.0, 1.0, 0.0), 
+                    0.0f
+                }
+            );
         }
 
         for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
@@ -279,7 +321,8 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
     // Copy queue, cant delete while iterating.
     auto deletionQueue = currentParent.Children;
-    for (auto& e : deletionQueue) {
+    for (auto& e : deletionQueue) 
+    {
         m_Scene->DestroyEntity(e);
     }
 
@@ -304,6 +347,8 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
         std::string target = "";
         std::string targetname = "";
+        FGDBrushEntity fgdBrush;
+        bool isEntity = false;
         for (int i = 0; i < entity_inst->property_count; i++) 
         {
             property* prop = &(entity_inst->properties)[i];
@@ -312,7 +357,7 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
             if (key == "origin") 
             {
-                // Position
+                // Positon split with space.
                 std::vector<std::string> splits = split(value, ' ');
 
                 float x = std::stof(splits[1]) * (1.f / 64.f);
@@ -325,36 +370,23 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
 
             if (key == "classname") 
             {
-                if (value == "light") 
+                Ref<FGDFile> file = Engine::GetProject()->EntityDefinitionsFile;
+                EntityType type = file->GetTypeOfEntity(value);
+                if (type != EntityType::None)
                 {
-                    newEntity.AddComponent<LightComponent>();
-                    newEntity.GetComponent<NameComponent>().Name = "Light " + std::to_string(i);
-                }
-                else if (value == "trigger") 
-                {
-                    //newEntity.AddComponent<LightComponent>();
-                    isTrigger = true;
-                    newEntity.GetComponent<NameComponent>().Name = "Trigger " + std::to_string(i);
-                }
-                else if (value == "func_any") 
-                {
-                    isFunc = true;
-                    newEntity.GetComponent<NameComponent>().Name = "func_any " + std::to_string(i);
-                }
-                else if (value == "position") 
-                {
-                    isPos = true;
+                    if (type == EntityType::Brush)
+                    {
+                        fgdBrush = file->GetBrushEntity(value);
+                        isEntity = true;
+                    }
                 }
             }
-            if (key == "targetname") {
-                if (isPos) {
-
-                    newEntity.GetComponent<NameComponent>().Name = value;
-                    isPos = false;
-                }
+            if (key == "targetname") 
+            {
                 targetname = value;
             }
-            if (key == "target") {
+            if (key == "target") 
+            {
                 target = value;
             }
         }
@@ -362,16 +394,16 @@ void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
         {
             brush* brush_inst = &entity_inst->brushes[b];
             brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
-
-            if (isTrigger) {
-                CreateTrigger(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
+            if (isEntity)
+            {
+                CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
             }
-            else if (isFunc) {
-                CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
-            }
-            else {
+            else
+            {
                 CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
             }
         }
+
+        isEntity = false;
     }
 }

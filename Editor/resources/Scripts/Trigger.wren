@@ -18,6 +18,7 @@ class TriggerScript is ScriptableEntity {
     
     fixedUpdate(ts) {
         var trigger = this.GetComponent("Trigger") 
+        Engine.Log("Hello")
         if(trigger.GetOverlappingBodyCount() > 0) {
             var bodies = trigger.GetOverlappingBodies()
             var brush = this.GetComponent("Brush")
@@ -31,14 +32,8 @@ class TriggerScript is ScriptableEntity {
             for(t in brush.GetTargets()) {
                 var transform = t.GetComponent("Transform")
                 var pos = transform.GetTranslation()
-
-                var target = t.GetComponent("Brush")
-                var pos2 = target.GetTargets()[0].GetComponent("Transform")
-                var targetPos = pos2.GetTranslation()
-
-                if(pos.y < targetPos.y) {
-                    pos.y = pos.y + 3.0 * ts
-                }
+                Engine.Log("Hello")
+                pos.x = pos.x + 1.0 * ts
                 
                 transform.SetTranslation(pos)
             } 

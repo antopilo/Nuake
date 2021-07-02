@@ -100,7 +100,8 @@ namespace Physics
 				// Skip the rigid body the ghost monitors
 				if (pManifold->getBody0() == m_Rigidbody)
 					continue;
-
+				btVector3 boost = pManifold->getBody0()->getInterpolationLinearVelocity();
+				m_manualVelocity += Vector3(boost.x(), boost.y(), boost.z());
 				for (int p = 0; p < pManifold->getNumContacts(); p++)
 				{
 					const btManifoldPoint& point = pManifold->getContactPoint(p);

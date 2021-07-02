@@ -23,7 +23,7 @@ public:
 	bool Solid = false;
 	bool IsTrigger = false;
 	std::string Script = "";
-
+	std::string Class = "";
 	std::vector<ClassProperty> Properties;
 
 	FGDBrushEntity()
@@ -47,6 +47,7 @@ public:
 			SERIALIZE_VAL(Solid);
 			SERIALIZE_VAL(IsTrigger);
 			SERIALIZE_VAL(Script);
+			SERIALIZE_VAL(Class);
 		END_SERIALIZE();
 	}
 
@@ -59,6 +60,7 @@ public:
 			Solid = j["Solid"];
 			IsTrigger = j["IsTrigger"];
 			Script = j["Script"];
+			Class = j["Class"];
 		return true;
 	}
 

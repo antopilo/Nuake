@@ -4,6 +4,11 @@
 #include <string>
 #include <vector>
 
+enum class EntityType
+{
+	Brush, Point, Base, None
+};
+
 class FGDFile : ISerializable{
 public:
 	std::string Path;
@@ -19,13 +24,25 @@ public:
 	bool Save();
 	bool SaveAs();
 
-	void AddClass(FGDClass fgdClass);
+	void AddClass(FGDClass fgdClass);	
 	void RemoveClass(const std::string& name);
 
 	json Serialize() override
 	{
 		BEGIN_SERIALIZE();
+		int i = 0;
+		for (auto& c : this->BrushEntities)
+		{
+			j["BrushEntities"][i] = c.Serialize();
+			i++;
+		}
 
+		i = 0;
+		for (auto& c : this->PointEntities)
+		{
+			j["PointEntities"][i] = c.Serialize();
+			i++;
+		}
 		END_SERIALIZE();
 	}
 
@@ -41,7 +58,6 @@ public:
 				brushEntity.Deserialize(brush.dump());
 				BrushEntities.push_back(brushEntity);
 			}
-			
 		}
 
 		if (j.contains("PointEntities"))
@@ -50,5 +66,31 @@ public:
 		}
 
 		return true;
+	}
+
+	FGDBrushEntity& GetBrushEntity(const std::string& name)
+	{
+		for (auto& b : BrushEntities)
+		{
+			if (b.Name == name)
+				return b;
+		}
+	}
+
+	EntityType GetTypeOfEntity(const std::string& className)
+	{
+		for (auto& b : BrushEntities)
+		{
+			if (b.Name == className)
+				return EntityType::Brush;
+		}
+
+		for (auto& p : PointEntities)
+		{
+			if (p.Name == className)
+				return EntityType::Point;
+		}
+
+		return EntityType::None;
 	}
 };

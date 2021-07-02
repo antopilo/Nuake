@@ -317,8 +317,9 @@ void EditorInterface::DrawSceneTree()
             QueueDeletion = Entity{ (entt::entity)0, scene.get() };
             ImGui::TreePop();
         }
-        ImGui::End();
+        
     }
+    ImGui::End();
 }
 
 
@@ -636,7 +637,6 @@ void EditorInterface::DrawEntityPropreties()
                 if (ImGui::Button("Build Geometry"))
                 {
                     QuakeMapBuilder mapBuilder;
-
                     mapBuilder.BuildQuakeMap(m_SelectedEntity);
                 }
                 ImGui::Separator();
