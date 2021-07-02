@@ -10,20 +10,22 @@ struct myVec3 {
 	float r;
 	float g;
 	float b;
-	float a;
 };
 
 struct UBOStructure {
 	int u_HasAlbedo;
-	myVec3 m_AlbedoColor;
-	uint32_t u_HasMetalness;
+	float padding;
+	float padding2;
+	float padding3;
+	glm::vec3 m_AlbedoColor;
+	int u_HasMetalness;
 	float u_MetalnessValue;
-	uint32_t u_HasRoughness;
+	int u_HasRoughness;
 	float u_RoughnessValue;
-	uint32_t u_HasAO;
+	int u_HasAO;
 	float u_AOValue;
-	uint32_t u_HasNormal;
-	uint32_t u_HasDisplacement;
+	int u_HasNormal;
+	int u_HasDisplacement;
 };
 
 class Material
@@ -39,10 +41,12 @@ public:
 	Ref<Texture> m_Normal;
 	Ref<Texture> m_Displacement;
 
-
 	UBOStructure data{
 		0, // has labedo
-		myVec3{0.f, 0.f, 0.f, 1.0f},	// m_AlbedoColor
+		0, // padding
+		0, // padding
+		0, // padding
+		glm::vec3{0.f, 0.f, 0.f},	// m_AlbedoColor
 		0,						// u_HasMetalness
 		0.5f,					// u_MetalnessValue
 		0,						// u_HasRoughness

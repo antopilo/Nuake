@@ -57,10 +57,10 @@ Material::Material(const glm::vec3 albedoColor)
 {
 	glGenBuffers(1, &UBO);
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	data.m_AlbedoColor = myVec3{ albedoColor.r, albedoColor.g, albedoColor.b};
+	data.m_AlbedoColor = Vector3{ albedoColor.r, albedoColor.g, albedoColor.b};
 
 	m_Name = "New material";
 
@@ -90,7 +90,21 @@ void Material::Bind()
 
 	MaterialManager::Get()->CurrentlyBoundedMaterial = m_Name;
 	glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 0, 4, &data.u_HasAlbedo);
+	//
+	//glBufferSubData(GL_UNIFORM_BUFFER, 16, 12, &data.m_AlbedoColor);
+	//
+	//glBufferSubData(GL_UNIFORM_BUFFER, 28, 4, &data.u_HasMetalness);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 32, 4, &data.u_MetalnessValue);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 36, 4, &data.u_HasRoughness);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 40, 4, &data.u_RoughnessValue);
+	//
+	//glBufferSubData(GL_UNIFORM_BUFFER, 44, 4, &data.u_HasAO);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 48, 4, &data.u_AOValue);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 52, 4, &data.u_HasNormal);
+	//glBufferSubData(GL_UNIFORM_BUFFER, 56, 4, &data.u_HasDisplacement);
 
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);

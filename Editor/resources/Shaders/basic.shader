@@ -109,16 +109,16 @@ uniform sampler2D m_Displacement;
 
 layout(std140, binding = 32) uniform u_MaterialUniform
 {
-    bool u_HasAlbedo; 
-    vec3 m_AlbedoColor;
-    bool u_HasMetalness;
-    float u_MetalnessValue;
-    bool u_HasRoughness;
-    float u_RoughnessValue;
-    bool u_HasAO;
-    float u_AOValue;
-    bool u_HasNormal;
-    bool u_HasDisplacement;
+    int u_HasAlbedo; 
+    vec3 m_AlbedoColor; //  16 byte
+    int u_HasMetalness; //  32 byte
+    float u_MetalnessValue; //  36 byte
+    int u_HasRoughness; //  40 byte
+    float u_RoughnessValue; //  44 byte
+    int u_HasAO; //  48 byte
+    float u_AOValue; //  52 byte
+    int u_HasNormal; //  56 byte
+    int u_HasDisplacement; //  60 byte
 };
 
 float height_scale = 0.00f;
@@ -322,22 +322,27 @@ void main()
     vec2 finalTexCoords = texCoords;
 
     vec3 finalAlbedo = m_AlbedoColor;
-    if(u_HasAlbedo)
+    if(u_HasAlbedo == 1)
         finalAlbedo = texture(m_Albedo, finalTexCoords).rgb;
 
     float finalRoughness = u_RoughnessValue;
-    if (u_HasRoughness )
+    if (u_HasRoughness == 1)
         finalRoughness = texture(m_Roughness, finalTexCoords).r;
 
     float finalMetalness = u_MetalnessValue;
-    if (u_HasMetalness)
+    if (u_HasMetalness == 1)
         finalMetalness = texture(m_Metalness, finalTexCoords).r;
 
     float finalAO = u_AOValue;
-    if (u_HasAO)
+    if (u_HasAO == 1)
         finalAO = texture(m_AO, finalTexCoords).r;
 
-    vec3 finalNormal = texture(m_Normal, finalTexCoords).rgb;
+    vec3 finalNormal = vec3(0.5, 0.5, 1.0);
+    if (u_HasNormal == 1)
+    {
+        finalNormal = texture(m_Normal, finalTexCoords).rgb;
+    }
+
     finalNormal = finalNormal * 2.0 - 1.0;
     finalNormal = v_TBN * normalize(finalNormal);
 
