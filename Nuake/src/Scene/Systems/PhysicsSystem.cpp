@@ -16,7 +16,7 @@ PhysicsSystem::PhysicsSystem(Scene* scene)
     m_Scene = scene;
 }
 
-void PhysicsSystem::Init()
+bool PhysicsSystem::Init()
 {
     // Create physic world.
 	auto view = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
@@ -83,6 +83,7 @@ void PhysicsSystem::Init()
 
 		PhysicsManager::Get()->RegisterGhostBody(ghostBody);
 	}
+	return true;
 }
 
 void PhysicsSystem::Update(Timestep ts)

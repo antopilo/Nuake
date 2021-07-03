@@ -4,7 +4,7 @@
 class TrenchbroomSystem : public System {
 public:
 	TrenchbroomSystem(Scene* scene);
-	void Init() override;
+	bool Init() override;
 	void Update(Timestep ts) override;
 	void Draw() override {}
 	void FixedUpdate(Timestep ts) override;

@@ -6,9 +6,9 @@ TrenchbroomSystem::TrenchbroomSystem(Scene* scene)
 	m_Scene = scene;
 }
 
-void TrenchbroomSystem::Init()
+bool TrenchbroomSystem::Init()
 {
-	
+	return true;
 }
 
 void TrenchbroomSystem::Update(Timestep ts)

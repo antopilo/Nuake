@@ -120,6 +120,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
     {
         face* face = &brush->faces[f];
         texture_data* texture = &textures[face->texture_idx];
+
         if (std::string(texture->name) == "__TB_empty") 
         {
             texture->height = 1;
@@ -127,7 +128,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
         }
         else 
         {
-            std::string path = "resources/Textures/" + std::string(texture->name) + ".png";
+            std::string path = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
             auto tex = TextureManager::Get()->GetTexture(path);
 
             texture->height = tex->GetHeight();
@@ -157,7 +158,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
                 vertexNormal,
                 vertexTangent,
                 glm::vec3(0.0, 1.0, 0.0), 0.0f
-                });
+            });
         }
 
         for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
@@ -168,7 +169,7 @@ void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scen
 
         if (lastTextureID != face->texture_idx)
         {
-            lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
+            lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
 
             if (std::string(texture->name) == "__TB_empty")
                 bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
@@ -246,7 +247,7 @@ void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
         }
         else 
         {
-            std::string path = "resources/Textures/" + std::string(texture->name) + ".png";
+            std::string path = FileSystem::Root + std::string(texture->name) + ".png";
             auto tex = TextureManager::Get()->GetTexture(path);
             texture->height = tex->GetHeight();
             texture->width = tex->GetWidth();
@@ -291,7 +292,7 @@ void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
         {
             if (lastTextureID != face->texture_idx)
             {
-                lastTexturePath = "resources/Textures/" + std::string(texture->name) + ".png";
+                lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
                 if (std::string(texture->name) == "__TB_empty")
                     bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
                 else

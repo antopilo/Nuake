@@ -7,7 +7,7 @@ class System {
 public:
 	Scene* m_Scene;
 
-	virtual void Init() = 0;
+	virtual bool Init() = 0;
 
 	virtual void Draw() = 0;
 

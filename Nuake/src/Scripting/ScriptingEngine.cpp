@@ -23,13 +23,13 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
     {
     case WREN_ERROR_COMPILE:
     {
-        std::string t = "Script error in: " + std::string(module)+ " line:" + std::to_string(line) + " \n error: "+ msg;
+        std::string t = std::string(module)+ " line " + std::to_string(line) + ": "+ msg;
         Logger::Log(t, CRITICAL);
         Engine::ExitPlayMode();
     } break;
     case WREN_ERROR_STACK_TRACE:
     {
-        std::string t = "Script Stack trace: " + std::string(module) + " line:" + std::to_string(line) + " \n stack: " + msg;
+        std::string t = "Stack trace: " + std::string(module) + " line " + std::to_string(line) + ": " + msg;
         Logger::Log(t, CRITICAL);
     } break;
     case WREN_ERROR_RUNTIME:

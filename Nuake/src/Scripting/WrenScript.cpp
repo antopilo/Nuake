@@ -9,8 +9,15 @@ WrenScript::WrenScript(const std::string& path, const std::string& mod, bool isE
 	// Import statement
 	std::string source = "import \"" + path + "\" for " + mod;
 
+	CompiledSuccesfully = true;
+
 	// Import file as module
-	wrenInterpret(vm, "main", source.c_str());
+	WrenInterpretResult result = wrenInterpret(vm, "main", source.c_str());
+	if (result != WREN_RESULT_SUCCESS)
+		CompiledSuccesfully = false;
+
+	if (!CompiledSuccesfully)
+		return;
 
 	// Get handle to class
 	wrenEnsureSlots(vm, 1);
@@ -61,6 +68,9 @@ void WrenScript::CallFixedUpdate(float timestep)
 
 void WrenScript::CallExit()
 {
+	if (!CompiledSuccesfully)
+		return;
+
 	WrenVM* vm = ScriptingEngine::GetWrenVM();
 	wrenEnsureSlots(vm, 1);
 	wrenSetSlotHandle(vm, 0, this->m_Instance);

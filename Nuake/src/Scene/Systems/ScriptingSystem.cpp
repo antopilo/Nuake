@@ -7,7 +7,7 @@ ScriptingSystem::ScriptingSystem(Scene* scene)
 	m_Scene = scene;
 }
 
-void ScriptingSystem::Init()
+bool ScriptingSystem::Init()
 {
 	ScriptingEngine::Init();
 
@@ -16,7 +16,11 @@ void ScriptingSystem::Init()
 	{
 		WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 		if (wren.Script != "" && wren.Class != "")
+		{
 			wren.WrenScript = CreateRef<WrenScript>(wren.Script, wren.Class, true);
+			if (!wren.WrenScript->CompiledSuccesfully)
+				return false;
+		}
 
 		if (wren.WrenScript != nullptr)
 		{
@@ -24,6 +28,8 @@ void ScriptingSystem::Init()
 			wren.WrenScript->CallInit();
 		}
 	}
+
+	return true;
 }
 
 

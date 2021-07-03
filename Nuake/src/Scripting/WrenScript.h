@@ -15,6 +15,8 @@ public:
 	WrenHandle* m_OnExitHandle;
 	WrenHandle* m_SetEntityIDHandle;
 
+	bool CompiledSuccesfully;
+
 	WrenScript(const std::string& path, const std::string& mod, bool isEntity = false);
 
 	void CallInit();

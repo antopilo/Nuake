@@ -73,9 +73,10 @@ void Engine::EnterPlayMode()
 {
 	// Dont trigger init if already in player mode.
 	if (!IsPlayMode)
-		GetCurrentScene()->OnInit();
-
-	IsPlayMode = true;
+		if(GetCurrentScene()->OnInit())
+			IsPlayMode = true;
+		else
+			GetCurrentScene()->OnExit();
 }
 
 void Engine::ExitPlayMode()
@@ -86,6 +87,7 @@ void Engine::ExitPlayMode()
 		Input::ShowMouse();
 	}
 		
+	Input::ShowMouse();
 
 	IsPlayMode = false;
 }

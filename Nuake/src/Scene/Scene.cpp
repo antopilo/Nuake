@@ -76,16 +76,22 @@ Entity Scene::GetEntityByID(int id)
 	}
 }
 
-void Scene::OnInit()
+bool Scene::OnInit()
 {
 	for (auto& system : m_Systems)
-		system->Init();
+		if(!system->Init())
+		{
+			return false;
+		}
+
+	return true;
 }
 
 void Scene::OnExit()
 {
 	for (auto& system : m_Systems)
 		system->Exit();
+
 }
 
 void Scene::Update(Timestep ts)

@@ -44,7 +44,7 @@ public:
 	Entity GetEntity(int handle);
 	Entity GetEntityByID(int id);
 	void Init();
-	void OnInit();
+	bool OnInit();
 	void OnExit();
 	void Update(Timestep ts);
 	void FixedUpdate(Timestep ts);
