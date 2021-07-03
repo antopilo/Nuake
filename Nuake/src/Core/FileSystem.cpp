@@ -35,7 +35,6 @@ std::string FileDialog::OpenFile(const char* filter)
 }
 std::string FileDialog::SaveFile(const char* filter)
 {
-
 	OPENFILENAMEA ofn;
 	CHAR szFile[260] = { 0 };
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));

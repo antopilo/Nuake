@@ -15,6 +15,8 @@ private:
 	GLFWwindow* m_Window;
 
 	Ref<FrameBuffer> m_Framebuffer;
+	Ref<GBuffer> m_GBuffer;
+
 	Ref<Scene> m_Scene;
 	Vector2 m_FramebufferOffset;
 

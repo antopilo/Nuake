@@ -84,6 +84,7 @@ public:
         }
         return false;
     }
+
     operator msdfgen::FontHandle* () const {
         return font;
     }

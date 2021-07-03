@@ -9,7 +9,7 @@
 #include "src/Core/FileSystem.h"
 
 extern "C" {
-    #include "libmap/h/map_parser.h"
+    #include <libmap/h/map_parser.h>
     #include <libmap/h/geo_generator.h>
     #include <libmap/h/surface_gatherer.h>
 }
@@ -22,6 +22,8 @@ extern "C" {
 #include <src/Scene/Components/TriggerZone.h>
 #include <src/Resource/FGD/FGDClass.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
+
+
 Ref<Material> DefaultMaterial;
 std::vector<std::string> split(const std::string& s, char delim) 
 {

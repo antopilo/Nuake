@@ -1,4 +1,4 @@
-import "Scripts/Math" for Vector3
+import "Nuake:Math" for Vector3
 
 class CollisionResult {
 

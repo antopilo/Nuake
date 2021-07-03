@@ -1237,8 +1237,6 @@ void EditorInterface::Draw()
             {
                 if (ImGui::MenuItem("Empty")) {
                     auto ent = Engine::GetCurrentScene()->CreateEntity("Empty entity");
-                    
-
                 }
                 if (ImGui::MenuItem("Light")) {
                     auto ent = Engine::GetCurrentScene()->CreateEntity("Light");

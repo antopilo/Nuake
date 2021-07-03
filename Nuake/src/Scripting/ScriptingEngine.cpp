@@ -56,23 +56,29 @@ bool hasEnding(std::string const& fullString, std::string const& ending) {
     }
 }
 
-WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) {
+
+const std::string NuakeModulePrefix = "Nuake:";
+WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) 
+{
     WrenLoadModuleResult result = { 0 };
 
-    std::string sname = name;
-    std::string s = "tititoto";
+    std::string sname = std::string(name);
     std::string path = "resources/" + std::string(name);
 
-    if (s.rfind("Nuake/", 0) == 0) 
+    bool isAbsolute = false;
+    if (sname.rfind(NuakeModulePrefix, 0) == 0)
     {
-        path = "resources/" + std::string(name);
+        size_t prefixPosition = sname.find(NuakeModulePrefix);
+        sname.erase(prefixPosition, NuakeModulePrefix.length());
+        path = "resources/Scripts/" + std::string(sname);
     }
     else
     {
         path = FileSystem::Root + name;
+        isAbsolute = true;
     }
 
-    if(!hasEnding(path, ".wren"))
+    if (!hasEnding(path, ".wren"))
         path += ".wren";
 
     std::string str = FileSystem::ReadFile(path, true);

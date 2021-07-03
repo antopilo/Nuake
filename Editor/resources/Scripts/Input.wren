@@ -1,5 +1,5 @@
-import "Scripts/Math" for Vector3
-import "Scripts/Engine" for Engine
+import "Nuake:Math" for Vector3
+import "Nuake:Engine" for Engine
 class Input {
     foreign static GetMouseX()
     foreign static GetMouseY()

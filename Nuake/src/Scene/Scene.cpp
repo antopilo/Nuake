@@ -258,6 +258,7 @@ void Scene::Draw()
 			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
 			if (model.IsTransparent)
 				continue;
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
@@ -289,7 +290,7 @@ void Scene::EditorDraw()
 	Renderer::m_Shader->Bind();
 	env->Push();
 	glEnable(GL_DEPTH_TEST);
-    
+
 	// Push lights
 	{
 		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();

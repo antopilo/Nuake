@@ -125,7 +125,6 @@ namespace Physics
 		{
 			btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];
 			dynamicsWorld->removeCollisionObject(obj);
-			printf("Object cleared %d\n", j);
 		}
 
 		m_Bodies.clear();

@@ -1,4 +1,4 @@
-import "Scripts/Scene" for Scene 
+import "Nuake:Scene" for Scene 
 
 class ScriptableEntity {
     SetEntityId(id) {

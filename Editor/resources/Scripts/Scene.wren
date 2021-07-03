@@ -1,5 +1,5 @@
-import "Scripts/Engine" for Engine
-import "Scripts/Math" for Vector3
+import "Nuake:Engine" for Engine
+import "Nuake:Math" for Vector3
 
 class Scene {
 	foreign static GetEntityID(name)

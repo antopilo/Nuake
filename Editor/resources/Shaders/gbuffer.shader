@@ -56,6 +56,4 @@ void main()
     gMaterial.r = texture(m_Metalness, UV).r;
     gMaterial.g = texture(m_AO, UV).r;
     gMaterial.b = texture(m_Roughness, UV).r;
-
-
 }
