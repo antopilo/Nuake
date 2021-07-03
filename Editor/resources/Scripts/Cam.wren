@@ -26,12 +26,12 @@ class CamScript is ScriptableEntity {
     update(ts) {
         _deltaTime = _deltaTime + ts
         var x = Input.GetMouseX()
-        var y = Input.GetMouseY()
+        var my = Input.GetMouseY()
 
         var diffx = x - _mouseLastX
-        var diffy =  _mouseLastY - y
+        var diffy =  _mouseLastY - my
         _mouseLastX = x
-        _mouseLastY = y
+        _mouseLastY = my
 
         var sens = 0.1
 
@@ -56,6 +56,10 @@ class CamScript is ScriptableEntity {
 
 
         var player = Scene.GetEntity("Player")
+        
+        var camTransform = this.GetComponent("Transform")
+        var camPoss = camTransform.GetTranslation()
+        var camYz = camPoss.y
 
         var playerScript = player.GetComponent("Script")
         var velocity = playerScript.Velocity.Duplicate()
@@ -68,16 +72,18 @@ class CamScript is ScriptableEntity {
         var pTransform = player.GetComponent("Transform")
         var pPos = pTransform.GetTranslation()
         if(amount < 1 && amount > -1) amount = 0
-            
+        
+        var newY = camYz + 0.08 * ((pPos.y + _CamHeight) - camYz)
+
         var transform = this.GetComponent("Transform")
-        var newPos = Vector3.new(pPos.x, pPos.y + _CamHeight + amount , pPos.z)
+        var newPos = Vector3.new(pPos.x, newY, pPos.z)
         transform.SetTranslation(newPos)
 
         cam.SetDirection(newDir)
     }
 
     fixedUpdate(ts) {
-        
+
     }
 
     exit() {}
