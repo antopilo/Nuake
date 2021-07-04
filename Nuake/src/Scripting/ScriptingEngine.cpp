@@ -10,9 +10,7 @@
 
 WrenVM* ScriptingEngine::m_WrenVM;
 
-
 std::map<std::string, Ref<WrenScript>> ScriptingEngine::m_Scripts;
-
 std::map<std::string, Ref<ScriptModule>> ScriptingEngine::Modules;
 
 void errorFn(WrenVM* vm, WrenErrorType errorType,
@@ -38,24 +36,24 @@ void errorFn(WrenVM* vm, WrenErrorType errorType,
         Logger::Log(t, WARNING);
     } break;
     }
-
-   
 }
 
-
-void writeFn(WrenVM* vm, const char* text) {
+void writeFn(WrenVM* vm, const char* text) 
+{
 	printf("%s", text);
 }
 
-bool hasEnding(std::string const& fullString, std::string const& ending) {
-    if (fullString.length() >= ending.length()) {
+bool hasEnding(std::string const& fullString, std::string const& ending) 
+{
+    if (fullString.length() >= ending.length()) 
+    {
         return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
     }
-    else {
+    else 
+    {
         return false;
     }
 }
-
 
 const std::string NuakeModulePrefix = "Nuake:";
 WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name) 

@@ -104,6 +104,19 @@ bool Project::Deserialize(const std::string& str)
 	Name = j["Name"];
 	Description = j["Description"];
 
+	if (j.contains("EntityDefinition"))
+	{
+		std::string path = j["EntityDefinition"];
+		EntityDefinitionsFile = CreateRef<FGDFile>(path);
+		std::string content = FileSystem::ReadFile(path, false);
+		EntityDefinitionsFile->Deserialize(content);
+	}
+
+	if (j.contains("TrenchbroomPath"))
+	{
+		this->TrenchbroomPath = j["TrenchbroomPath"];
+	}
+
 	DefaultScene = Scene::New();
 
 	// Load default scene, a project can have no default scene set.
@@ -119,19 +132,6 @@ bool Project::Deserialize(const std::string& str)
 	{
 		Logger::Log("Error loading scene: " + scenePath, CRITICAL);
 		return false;
-	}
-
-	if (j.contains("EntityDefinition"))
-	{
-		std::string path = j["EntityDefinition"];
-		EntityDefinitionsFile = CreateRef<FGDFile>(path);
-		std::string content = FileSystem::ReadFile(path, false);
-		EntityDefinitionsFile->Deserialize(content);
-	}
-
-	if (j.contains("TrenchbroomPath"))
-	{
-		this->TrenchbroomPath = j["TrenchbroomPath"];
 	}
 
 	DefaultScene->Path = scenePath;

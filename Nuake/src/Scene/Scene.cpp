@@ -1,7 +1,7 @@
 #pragma once
 #include <src/Scene/Systems/ScriptingSystem.h>
 #include <src/Scene/Systems/PhysicsSystem.h>
-
+#include <src/Scene/Systems/TransformSystem.h>
 
 #include <src/Scene/Systems/QuakeMapBuilder.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
@@ -41,8 +41,10 @@ Scene::Scene()
 	m_Interfaces = std::vector<Ref<UI::UserInterface>>();
     
 	// Adding systems
+	m_Systems.push_back(CreateRef<TransformSystem>(this));
 	m_Systems.push_back(CreateRef<ScriptingSystem>(this));
     m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+	
 }
 
 Scene::~Scene() {}
@@ -96,8 +98,6 @@ void Scene::OnExit()
 
 void Scene::Update(Timestep ts)
 {
-	UpdatePositions();
-
 	for (auto& system : m_Systems)
 		system->Update(ts);
 }
@@ -549,12 +549,13 @@ bool Scene::Deserialize(const std::string& str)
 			}
 
 			auto view = m_Registry.view<ParentComponent>();
-			for (auto e : view) {
+			for (auto e : view) 
+			{
 				auto parentC = view.get<ParentComponent>(e);
 				if (!parentC.HasParent)
 					continue;
+
 				auto& p = Entity{ e, this };
-		
 				auto parent = GetEntityByID(parentC.ParentID);
 				parent.AddChild(p);
 			}
@@ -566,7 +567,6 @@ bool Scene::Deserialize(const std::string& str)
 
 void Scene::Snapshot()
 {
-	const auto view = m_Registry.view<TransformComponent>();
 
 }
 

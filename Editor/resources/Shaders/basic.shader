@@ -271,7 +271,7 @@ float ComputeScattering(float lightDotView)
 }
 
 uniform float u_FogStepCount;
-vec3 ComputeVolumetric(vec3 FragPos, mat4 LightTransform, vec3 LightColor, sampler2D shadowMap, vec3 LightDirection)
+vec3 ComputeVolumetric(vec3 FragPos, Light light)
 {
     // world space frag position.
     vec3 startPosition = u_EyePosition;             // Camera Position
@@ -289,7 +289,7 @@ vec3 ComputeVolumetric(vec3 FragPos, mat4 LightTransform, vec3 LightColor, sampl
     // Raymarching
     for (int i = 0; i < u_FogStepCount; i++)
     {
-        vec4 fragPosLightSpace = LightTransform * vec4(currentPosition, 1.0f);
+        vec4 fragPosLightSpace = light.LightTransforms[0] * vec4(currentPosition, 1.0f);
         // perform perspective divide
         vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
         // transform to [0,1] range
@@ -298,12 +298,12 @@ vec3 ComputeVolumetric(vec3 FragPos, mat4 LightTransform, vec3 LightColor, sampl
         float currentDepth = projCoords.z;
 
         // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-        vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+        vec2 texelSize = 1.0 / textureSize(light.ShadowMaps[0], 0);
 
-        float closestDepth = texture(shadowMap, projCoords.xy).r;
+        float closestDepth = texture(light.ShadowMaps[0], projCoords.xy).r;
 
         if (closestDepth > currentDepth)
-            accumFog += (ComputeScattering(dot(rayDirection, LightDirection)).xxx * LightColor);
+            accumFog += (ComputeScattering(dot(rayDirection, light.Direction)).xxx * light.Color);
 
         currentPosition += step;
     }
@@ -370,9 +370,9 @@ void main()
             L = normalize(Lights[i].Direction);
             attenuation = 1.0f;
             if (Lights[i].Volumetric == 1)
-                Fog += ComputeVolumetric(v_FragPos, Lights[i].LightTransform, Lights[i].Color, Lights[i].ShadowMap, Lights[i].Direction);
+                Fog += ComputeVolumetric(v_FragPos, Lights[i]);
+
             shadow += ShadowCalculation(Lights[i], v_FragPos, N);
-            //shadow += ShadowCalculation(Lights[i].LightTransform * vec4(v_FragPos, 1.0f), Lights[i].ShadowMap, N, Lights[i].Direction);
         }
 
        

@@ -4,6 +4,7 @@
 #include "../Rendering/Mesh/Mesh.h"
 #include "../Resource/TrenchbroomMap.h"
 #include "../Resource/Serializable.h"
+#include <src/Scene/Systems/QuakeMapBuilder.h>
 
 class QuakeMapComponent  {
 private:
@@ -31,6 +32,7 @@ public:
 		BEGIN_DESERIALIZE();
 		this->Path = j["Path"];
 		this->HasCollisions = j["HasCollisions"];
+
 		return true;
 	}
 };

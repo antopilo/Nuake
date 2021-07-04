@@ -7,3 +7,6 @@
 [submodule "Nuake/dependencies/bullet3"]
 	path = Nuake/dependencies/bullet3
 	url = https://github.com/bulletphysics/bullet3.git
+[submodule "Nuake/dependencies/glew"]
+	path = Nuake/dependencies/glew
+	url = https://github.com/nigels-com/glew.git
