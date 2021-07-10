@@ -12,6 +12,7 @@ WrenVM* ScriptingEngine::m_WrenVM;
 
 std::map<std::string, Ref<WrenScript>> ScriptingEngine::m_Scripts;
 std::map<std::string, Ref<ScriptModule>> ScriptingEngine::Modules;
+std::vector<std::string> ScriptingEngine::m_LoadedScripts;
 
 void errorFn(WrenVM* vm, WrenErrorType errorType,
     const char* module, const int line,
@@ -88,17 +89,43 @@ WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name)
 
 Ref<WrenScript> ScriptingEngine::RegisterScript(const std::string& path, const std::string& mod)
 {
-    std::string query = "import \"" + path + "\" for " + mod;
-    wrenInterpret(m_WrenVM, "main", query.c_str());
+    // Check if scripts has already been loaded.
+    // You can't import the same module twice, otherwise, compile error.
+    if (m_Scripts.find(path) == m_Scripts.end())
+    {
+        std::string query = "import \"" + path + "\" for " + mod;
+        wrenInterpret(m_WrenVM, "main", query.c_str());
+    }
+
     return CreateRef<WrenScript>(path, mod);
 }
+
+// Useful to check if a script has been imported, importing a script
+// twice gives a compile error.
+bool ScriptingEngine::IsScriptImported(const std::string& path)
+{
+    for (auto& script : m_LoadedScripts)
+    {
+        if (script == path)
+            return true;
+    }
+    return false;
+}
+
+void ScriptingEngine::ImportScript(const std::string& path)
+{
+    if (IsScriptImported(path))
+        return;
+    m_LoadedScripts.push_back(path);
+}
+
+
 
 void ScriptingEngine::RegisterModule(Ref<ScriptModule> scriptModule)
 {
     Modules[scriptModule->GetModuleName()] = scriptModule;
     scriptModule->RegisterModule(m_WrenVM);
 }
-
 
 void ScriptingEngine::InitScript(Ref<WrenScript> script)
 {

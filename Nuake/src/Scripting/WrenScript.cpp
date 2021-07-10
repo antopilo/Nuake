@@ -6,18 +6,22 @@ WrenScript::WrenScript(const std::string& path, const std::string& mod, bool isE
 {
 	WrenVM* vm = ScriptingEngine::GetWrenVM();
 
-	// Import statement
-	std::string source = "import \"" + path + "\" for " + mod;
-
 	CompiledSuccesfully = true;
 
-	// Import file as module
-	WrenInterpretResult result = wrenInterpret(vm, "main", source.c_str());
-	if (result != WREN_RESULT_SUCCESS)
-		CompiledSuccesfully = false;
+	// Can't import twice the same script, otherwise gives a compile error.
+	if (!ScriptingEngine::IsScriptImported(path))
+	{
+		std::string source = "import \"" + path + "\" for " + mod;
+		WrenInterpretResult result = wrenInterpret(vm, "main", source.c_str());
 
-	if (!CompiledSuccesfully)
-		return;
+		if (result != WREN_RESULT_SUCCESS)
+			CompiledSuccesfully = false;
+
+		if (!CompiledSuccesfully)
+			return;
+
+		ScriptingEngine::ImportScript(path);
+	}
 
 	// Get handle to class
 	wrenEnsureSlots(vm, 1);
