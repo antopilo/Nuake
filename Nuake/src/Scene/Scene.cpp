@@ -170,6 +170,7 @@ void Scene::DrawShadows()
 		for (int i = 0; i < 4; i++)
 		{
 			light.m_Framebuffers[i]->Bind();
+			light.m_Framebuffers[i]->Clear();
 			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 			for (auto e : modelView)
 			{

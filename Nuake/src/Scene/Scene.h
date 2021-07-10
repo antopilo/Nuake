@@ -28,9 +28,8 @@ private:
 	std::vector<Ref<System>> m_Systems;
 	
 	Ref<Environment> m_Environement;
-	Ref<EditorCamera> m_EditorCamera;
-
 public:
+	Ref<EditorCamera> m_EditorCamera;
 	entt::registry m_Registry;
 	std::vector<Ref<UI::UserInterface>> m_Interfaces;
 	std::string Path = "";

@@ -14,65 +14,73 @@
 #include <src/Vendors/glm/trigonometric.hpp>
 #include <src/Scripting/ScriptingEngine.h>
 #include <src/Resource/FGD/FGDFile.h>
-
+#include <src/Rendering/Shaders/ShaderManager.h>
+#include <src/Rendering/Renderer.h>
 
 int main()
 {
-    //std::string TrenchbroomPath = "F:/TrenchBroom/";
-    //
-    //FGDFile file(TrenchbroomPath + "Games/Nuake/Nuake.fgd");
-    //
-    //FGDClass newClass(FGDClassType::Point, "light", "a nuake light");
-    //
-    //ClassProperty prop{
-    //    "Intensity",
-    //    ClassPropertyType::Integer,
-    //    "Changes the light intensity"
-    //};
-    //
-    //newClass.AddProperty(prop);
-    //file.AddClass(newClass);
-    //
-    //file.Save();
-
     Engine::Init();
 
     EditorInterface editor;
     editor.BuildFonts();
 
-    Ref<FrameBuffer> myFramebuffer = CreateRef<FrameBuffer>(true, Vector2(200, 200));
-    myFramebuffer->SetTexture(CreateRef<Texture>(Vector2(200, 200), GL_RGB));
-
-    Ref<Scene> myScene = CreateRef<Scene>();
+    // Register Gizmo textures
+    Ref<Texture> lightTexture = TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
+    Ref<Texture> camTexture = TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
+    Ref<Shader> GuizmoShader = ShaderManager::GetShader("resources/Shaders/gizmo.shader");
 
     while (!Engine::GetCurrentWindow()->ShouldClose())
     {
         Engine::Tick();
-
         Engine::Draw();
 
         if (Input::IsKeyPressed(GLFW_KEY_F8))
             Engine::ExitPlayMode();
 
-        myFramebuffer->Bind();
-        myScene->EditorDraw();
+        Ref<FrameBuffer> sceneFramebuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
+        sceneFramebuffer->Bind();
         
-        myFramebuffer->Unbind();
-        if (ImGui::Begin("hahahah"))
+        Ref<Scene> currentScene = Engine::GetCurrentScene();
+        if (currentScene && !Engine::IsPlayMode)
         {
-            ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-
-            if (myFramebuffer->GetSize() != viewportPanelSize)
-                myFramebuffer->QueueResize(viewportPanelSize);
-
-            Ref<Texture> texture = myFramebuffer->GetTexture();
-            ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            
-        }
-        ImGui::End();
-        editor.Draw();
+            GuizmoShader->Bind();
         
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
+            auto camView = currentScene->m_Registry.view<TransformComponent, CameraComponent>();
+            for (auto e : camView) {
+                auto [transformComponent, cam] = camView.get<TransformComponent, CameraComponent>(e);
+
+                GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
+                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
+                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
+
+                camTexture->Bind(2);
+                GuizmoShader->SetUniform1i("gizmo_texture", 2);
+
+                Renderer::DrawQuad(transformComponent.GetTransform());
+            }
+
+            auto view = currentScene->m_Registry.view<TransformComponent, LightComponent>();
+            for (auto e : view) {
+                auto [transformComponent, light] = view.get<TransformComponent, LightComponent>(e);
+
+                GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
+                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
+                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
+
+                lightTexture->Bind(2);
+                GuizmoShader->SetUniform1i("gizmo_texture", 2);
+            
+                Renderer::DrawQuad(transformComponent.GetTransform());
+            }
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+            GuizmoShader->Unbind();
+        }
+        
+        sceneFramebuffer->Unbind();
+        editor.Draw();
         Engine::EndDraw();
     }
 

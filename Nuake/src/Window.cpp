@@ -230,6 +230,7 @@ void Window::FixedUpdate(Timestep ts)
 
 void Window::Draw()
 {
+    
     // Dont render if no scene is loaded.
     if (!m_Scene)
         return;
@@ -242,21 +243,19 @@ void Window::Draw()
     cam->AspectRatio = size.x / size.y;
 
     Renderer::BeginDraw(cam);
-    
 
-    //glCullFace(GL_FRONT);
-    //glCullFace(GL_BACK);
     m_Scene->DrawShadows();
 
     m_Framebuffer->Bind();
-        
-    if (Engine::IsPlayMode)
-        m_Scene->Draw();
-    else
-        m_Scene->EditorDraw();
+    m_Framebuffer->Clear();
+    {
+        if (Engine::IsPlayMode)
+            m_Scene->Draw();
+        else
+            m_Scene->EditorDraw();
 
-    m_Scene->DrawInterface(m_Framebuffer->GetSize());
-        
+        m_Scene->DrawInterface(m_Framebuffer->GetSize());
+    }
     m_Framebuffer->Unbind();
     
     Renderer::EndDraw();

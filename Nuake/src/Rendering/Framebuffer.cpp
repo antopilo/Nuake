@@ -43,7 +43,6 @@ void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
 			keys.push_back(s.first);
 			size += 1;
 		}
-		
 	}
 
 	if(size > 0)
@@ -53,13 +52,18 @@ void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
 }
 
 
+void FrameBuffer::Clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void FrameBuffer::Bind()
 {
 	if (ResizeQueued)
 		UpdateSize(m_Size);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 	glViewport(0, 0, m_Size.x, m_Size.y);
 }
 

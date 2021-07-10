@@ -145,6 +145,8 @@ void ScriptingEngine::ExitScript(Ref<WrenScript> script)
 void ScriptingEngine::Init()
 {
     m_Scripts = std::map<std::string, Ref<WrenScript>>();
+    m_LoadedScripts.clear();
+
 	WrenConfiguration config;
 	wrenInitConfiguration(&config);
 
@@ -152,6 +154,7 @@ void ScriptingEngine::Init()
     config.errorFn = &errorFn;
 	config.writeFn = &writeFn;
     config.bindForeignMethodFn = &bindForeignMethod;
+
 	m_WrenVM = wrenNewVM(&config);
 
     Ref<ScriptAPI::EngineModule> engineModule = CreateRef<ScriptAPI::EngineModule>();
@@ -165,7 +168,6 @@ void ScriptingEngine::Init()
     Ref<ScriptAPI::PhysicsModule> physicsModule = CreateRef<ScriptAPI::PhysicsModule>();
     RegisterModule(physicsModule);
 }
-
 
 void ScriptingEngine::Close()
 {

@@ -25,7 +25,7 @@ public:
 	Ref<Texture> GetTexture(GLenum attachment = 0x8CE0) { return m_Textures[(int)attachment]; }
 	void SetTexture(Ref<Texture> texture, GLenum attachment = 0x8CE0);
 
-
+	void Clear();
 	void Bind();
 	void Unbind();
 	void QueueResize(Vector2 size);

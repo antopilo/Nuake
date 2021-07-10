@@ -19,26 +19,35 @@ Shader* Renderer::m_DebugShader;
 
 unsigned int CubeVAO;
 unsigned int CubeVBO;
-// Cube
+unsigned int QuadVAO;
+unsigned int QuadVBO;
+
+
 glm::vec3 CubeVertices[36]{
        glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,   0.5f, -0.5f),
        glm::vec3(0.5f,   0.5f, -0.5f), glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
-       glm::vec3(-0.5f, -0.5f,  0.5f),glm::vec3(0.5f,  -0.5f,  0.5f),glm::vec3(0.5f,   0.5f,  0.5f),
-       glm::vec3(0.5f,   0.5f,  0.5f),glm::vec3(-0.5f,  0.5f,  0.5f),glm::vec3(-0.5f, -0.5f,  0.5f),
-       glm::vec3(-0.5f,  0.5f,  0.5f),glm::vec3(-0.5f,  0.5f, -0.5f),glm::vec3(-0.5f, -0.5f, -0.5f),
-       glm::vec3(-0.5f, -0.5f, -0.5f),glm::vec3(-0.5f, -0.5f,  0.5f),glm::vec3(-0.5f,  0.5f,  0.5f),
-       glm::vec3(0.5f,  0.5f,  0.5f),glm::vec3(0.5f,  0.5f, -0.5f),glm::vec3(0.5f, -0.5f, -0.5f),
-       glm::vec3(0.5f, -0.5f, -0.5f),glm::vec3(0.5f, -0.5f,  0.5f),glm::vec3(0.5f,  0.5f,  0.5f),
-       glm::vec3(-0.5f, -0.5f, -0.5f),glm::vec3(0.5f,  -0.5f, -0.5f),glm::vec3(0.5f,  -0.5f,  0.5f),
-       glm::vec3(0.5f,  -0.5f,  0.5f),glm::vec3(-0.5f, -0.5f,  0.5f),glm::vec3(-0.5f, -0.5f, -0.5f),
-       glm::vec3(-0.5f, 0.5f, -0.5f) ,glm::vec3(0.5f,  0.5f, -0.5f) ,glm::vec3(0.5f,  0.5f,  0.5f) ,
-       glm::vec3(0.5f,  0.5f,  0.5f) ,glm::vec3(-0.5f, 0.5f,  0.5f) ,glm::vec3(-0.5f, 0.5f, -0.5f)
+       glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(0.5f,  -0.5f,  0.5f), glm::vec3(0.5f,   0.5f,  0.5f),
+       glm::vec3(0.5f,   0.5f,  0.5f), glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(-0.5f, -0.5f,  0.5f),
+       glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
+       glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-0.5f,  0.5f,  0.5f),
+       glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(0.5f, -0.5f, -0.5f),
+       glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(0.5f, -0.5f,  0.5f),  glm::vec3(0.5f,  0.5f,  0.5f),
+       glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f,  0.5f),
+       glm::vec3(0.5f,  -0.5f,  0.5f), glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
+       glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(0.5f,  0.5f,  0.5f),
+       glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(-0.5f, 0.5f,  0.5f),  glm::vec3(-0.5f, 0.5f, -0.5f)
+};
+
+float QuadVertices[] = {
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
+    0.5f,   0.5f, 0.0f,   1.0f, 1.0f,
+    -0.5f,  0.5f, 0.0f,   0.0f, 1.0f,
+    0.5f,  -0.5f, 0.0f,   1.0f, 0.0f,
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
+    0.5f,   0.5f, 0.0f,   1.0f, 1.0f
 };
 
 
-unsigned int SphereVAO;
-unsigned int SphereVBO;
-glm::vec3 SphereVertices[360 * 6 + 6];
 void Renderer::Init()
 {
     // TODO: Make shader storage somewhere.
@@ -65,36 +74,22 @@ void Renderer::Init()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
     glEnableVertexAttribArray(0);
-    
-    // WTF is this.
-    float r = 1.0f;
-    int index = 0;
-    for (int i = 0; i <= 360; i++) {
-        float ra = glm::radians((float)i );
-        float rb = glm::radians((float)i + 1);
-        glm::vec2 a = glm::vec2(sin(ra), cos(ra)) * r;
-        glm::vec2 b = glm::vec2(sin(rb), cos(rb)) * r;
 
-        SphereVertices[index]     = glm::vec3(a.x, 0, a.y);  
-        SphereVertices[index + 1] = glm::vec3(b.x, 0, b.y);
-        SphereVertices[index + 2] = glm::vec3(0, a.x, a.y);
-        SphereVertices[index + 3] = glm::vec3(0, b.x, b.y);
-        SphereVertices[index + 4] = glm::vec3(a.x, a.y, 0);
-        SphereVertices[index + 5] = glm::vec3(b.x, b.y, 0);
-        index += 6;
-    }
+    // Quad
+    glGenVertexArrays(1, &QuadVAO);
+    glBindVertexArray(QuadVAO);
 
-    glGenVertexArrays(1, &SphereVAO);
-    glBindVertexArray(SphereVAO);
+    glGenBuffers(1, &QuadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
 
-    glGenBuffers(1, &SphereVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, SphereVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, SphereVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(SphereVertices), SphereVertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
 }
 
 // TODO: Move to shader storage
@@ -221,25 +216,11 @@ void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
 // TODO: See above
 void Renderer::DrawSphere(TransformComponent transform, glm::vec4 color)
 {
-    //glDisable(GL_DEPTH_TEST);
-    Ref<Window> window = Engine::GetCurrentWindow();
-    Ref<FrameBuffer> fb = window->GetFrameBuffer();
+   
+}
 
-    m_DebugShader->Bind();
-    m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
-    m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
-    glBindVertexArray(SphereVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, 1.0f);
-
-    glPolygonMode(GL_FRONT, GL_LINE);
-    glPolygonMode(GL_BACK, GL_LINE);
-    glLineWidth(8);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    // Turn off wireframe mode
-    glPolygonMode(GL_FRONT, GL_FILL);
-    glPolygonMode(GL_BACK, GL_FILL);
-    //glEnable(GL_DEPTH_TEST);
+void Renderer::DrawQuad(Matrix4 transform)
+{
+    glBindVertexArray(QuadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
