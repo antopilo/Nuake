@@ -332,6 +332,9 @@ void Scene::EditorDraw()
 		for (auto e : quakeView) {
 			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
 
+			if (model.IsTransparent)
+				continue;
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
 			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
@@ -366,6 +369,25 @@ void Scene::EditorDraw()
 			TransformComponent t = transform;
 			t.Scale = (box.Radius * 2.f) * transform.Scale;
 			Renderer::DrawSphere(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
+		}
+
+		Renderer::m_DebugShader->Bind();
+
+		auto quakeViewTransparent = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+		for (auto e : quakeViewTransparent) 
+		{
+			auto [transform, model, parent] = quakeViewTransparent.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+
+			if (!model.IsTransparent)
+				continue;
+
+			Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
+			Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+			Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
+			Renderer::m_DebugShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
+			for (auto& e : model.Meshes) {
+				e->Draw();
+			}
 		}
 	}
 }

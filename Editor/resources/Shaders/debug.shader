@@ -1,10 +1,5 @@
 #shader vertex
 #version 460 core
-// Have you ever seen Godot shader. The whole engine has ONE monolithic shader.
-// Also, how do you want me to split this in multiple shaders lmao.
-// Click upper right Round thing
-// DO CODE REVIEW yep
-// im following u daddy
 
 
 layout(location = 0) in vec3 VertexPosition;
