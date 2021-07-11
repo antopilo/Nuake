@@ -142,6 +142,18 @@ void Scene::UpdatePositions()
 	}
 }
 
+struct BSPDrawObject
+{
+	float distance;
+	BSPBrushComponent brush;
+	Matrix4 transform;
+};
+
+bool DepthSort(BSPDrawObject& one, BSPDrawObject& two)
+{
+	return one.distance < two.distance;
+}
+
 void Scene::DrawShadows()
 {
 	auto modelView = m_Registry.view<TransformComponent, ModelComponent>();
@@ -179,15 +191,35 @@ void Scene::DrawShadows()
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
 				model.Draw();
 			}
+			std::vector<BSPDrawObject> sortedBrushes = std::vector<BSPDrawObject>();
 
 			Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
 			for (auto e : quakeView) {
 				auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
 				Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
+
 				if (model.IsTransparent)
 					continue;
-				for (auto& e : model.Meshes) {
+
+				float dist = glm::length(transform.GlobalTranslation - cam->GetTranslation());
+				sortedBrushes.push_back({
+					dist,
+					model,
+					transform.GetTransform()
+				});
+
+				//for (auto& e : model.Meshes) {
+				//	e->Draw(false);
+				//}
+			}
+
+			std::sort(sortedBrushes.begin(), sortedBrushes.end(), DepthSort);
+
+			for (auto& b : sortedBrushes)
+			{
+				Renderer::m_ShadowmapShader->SetUniformMat4f("model", b.transform);
+				for (auto& e : b.brush.Meshes) {
 					e->Draw(false);
 				}
 			}
@@ -203,6 +235,8 @@ void Scene::DrawInterface(Vector2 screensize)
 		i->Draw(screensize);
 	}
 }
+
+
 
 void Scene::Draw()
 {
@@ -224,8 +258,8 @@ void Scene::Draw()
 	if (env->ProceduralSkybox)
 	{
 		env->ProceduralSkybox->Draw(cam);
-        
 	}
+
 	Renderer::m_Shader->Bind();
 	env->Push();
 	glEnable(GL_DEPTH_TEST);
@@ -260,22 +294,35 @@ void Scene::Draw()
 			model.Draw();
 		}
         
+
+		std::vector<BSPDrawObject> sortedBrushes = std::vector<BSPDrawObject>();
+
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView) {
 			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
 			if (model.IsTransparent)
 				continue;
 
-			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
-			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
-
-			for (auto& e : model.Meshes)
-			{
-				e->Draw();
-			}
+			float dist = glm::length(transform.GlobalTranslation - cam->GetTranslation());
+			sortedBrushes.push_back({
+				dist,
+				model,
+				transform.GetTransform()
+			});
 		}
         
+		std::sort(sortedBrushes.begin(), sortedBrushes.end(), DepthSort);
+
+		for (auto& b : sortedBrushes)
+		{
+			Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
+			Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
+			Renderer::m_Shader->SetUniformMat4f("u_Model", b.transform);
+
+			for (auto& e : b.brush.Meshes)
+				e->Draw();
+		}
+
 		Renderer::m_DebugShader->SetUniformMat4f("u_View", cam->GetTransform());
 		Renderer::m_DebugShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 
@@ -328,6 +375,9 @@ void Scene::EditorDraw()
 			model.Draw();
 		}
         
+		std::vector<BSPDrawObject> sortedBrushes = std::vector<BSPDrawObject>();
+
+
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView) {
 			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
@@ -335,15 +385,27 @@ void Scene::EditorDraw()
 			if (model.IsTransparent)
 				continue;
 
+			float dist = glm::length(transform.GlobalTranslation - m_EditorCamera->GetTranslation());
+			sortedBrushes.push_back({
+				dist,
+				model,
+				transform.GetTransform()
+			});
+
 			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-			Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
-
-			for (auto& e : model.Meshes) {
-				e->Draw();
-			}
 		}
+
+		std::sort(sortedBrushes.begin(), sortedBrushes.end(), DepthSort);
         
+		for (auto& b : sortedBrushes)
+		{
+			Renderer::m_Shader->SetUniformMat4f("u_Model", b.transform);
+
+			for (auto& d : b.brush.Meshes)
+				d->Draw();
+		}
+
 		Renderer::m_DebugShader->Bind();
 		auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
 		for (auto e : boxCollider) {
