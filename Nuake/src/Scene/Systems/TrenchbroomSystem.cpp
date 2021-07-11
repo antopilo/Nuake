@@ -1,27 +1,29 @@
 #include "TrenchbroomSystem.h"
 
-
-TrenchbroomSystem::TrenchbroomSystem(Scene* scene)
+namespace Nuake
 {
-	m_Scene = scene;
-}
+	TrenchbroomSystem::TrenchbroomSystem(Scene* scene)
+	{
+		m_Scene = scene;
+	}
 
-bool TrenchbroomSystem::Init()
-{
-	return true;
-}
+	bool TrenchbroomSystem::Init()
+	{
+		return true;
+	}
 
-void TrenchbroomSystem::Update(Timestep ts)
-{
-	
-}
+	void TrenchbroomSystem::Update(Timestep ts)
+	{
 
-void TrenchbroomSystem::FixedUpdate(Timestep ts)
-{
+	}
 
-}
+	void TrenchbroomSystem::FixedUpdate(Timestep ts)
+	{
 
-void TrenchbroomSystem::Exit()
-{
+	}
 
+	void TrenchbroomSystem::Exit()
+	{
+
+	}
 }

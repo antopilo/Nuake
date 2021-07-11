@@ -1,42 +1,46 @@
 #pragma once
 #include "Environment.h"
-#include "../Rendering/Renderer.h"
-#include "../Core/Core.h"
-Environment::Environment() 
-{
-	m_AmbientColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	ProceduralSkybox = CreateRef<ProceduralSky>();
-}
+#include "src/Rendering/Renderer.h"
+#include "src/Core/Core.h"
 
-// Ambient Light
-glm::vec4 Environment::GetAmbientColor() 
-{
-	return m_AmbientColor;
-}
+namespace Nuake {
+	Environment::Environment()
+	{
+		m_AmbientColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		ProceduralSkybox = CreateRef<ProceduralSky>();
+	}
 
-void Environment::SetAmbientColor(glm::vec4 color)
-{
-	m_AmbientColor = color;
-}
+	// Ambient Light
+	glm::vec4 Environment::GetAmbientColor()
+	{
+		return m_AmbientColor;
+	}
 
-void Environment::Push() {
-	//Renderer::m_Shader->SetUniform3f("u_AmbientColor", m_AmbientColor.r, m_AmbientColor.g, m_AmbientColor.b);
-	//Renderer::m_Shader->SetUniform4f("u_AmbientColor", 1.0f, 1.0f, 1.0f, 1.0f);
-	Renderer::m_Shader->SetUniform1f("u_FogAmount", VolumetricFog);
-	Renderer::m_Shader->SetUniform1f("u_FogStepCount", VolumetricStepCount);
-}
+	void Environment::SetAmbientColor(glm::vec4 color)
+	{
+		m_AmbientColor = color;
+	}
 
-json Environment::Serialize()
-{
-	BEGIN_SERIALIZE();
+	void Environment::Push() {
+		//Renderer::m_Shader->SetUniform3f("u_AmbientColor", m_AmbientColor.r, m_AmbientColor.g, m_AmbientColor.b);
+		//Renderer::m_Shader->SetUniform4f("u_AmbientColor", 1.0f, 1.0f, 1.0f, 1.0f);
+		Renderer::m_Shader->SetUniform1f("u_FogAmount", VolumetricFog);
+		Renderer::m_Shader->SetUniform1f("u_FogStepCount", VolumetricStepCount);
+	}
+
+	json Environment::Serialize()
+	{
+		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(VolumetricFog);
 		SERIALIZE_VAL(VolumetricStepCount);
 		SERIALIZE_VEC4(AmbientColor);
 		SERIALIZE_OBJECT(ProceduralSkybox);
-	END_SERIALIZE();
+		END_SERIALIZE();
+	}
+
+	bool Environment::Deserialize(const std::string& str)
+	{
+		return false;
+	}
 }
 
-bool Environment::Deserialize(const std::string& str)
-{
-	return false;
-}

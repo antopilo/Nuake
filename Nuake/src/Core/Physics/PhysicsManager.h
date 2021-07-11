@@ -5,48 +5,52 @@
 #include "Rigibody.h"
 
 #include "RaycastResult.h"
-class PhysicsManager
+
+namespace Nuake
 {
-private:
-	Physics::DynamicWorld* m_World;
-	bool m_IsRunning = false;
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-
-	bool m_DrawDebug = false;
-	static PhysicsManager* m_Instance;
-public:
-	static PhysicsManager* Get() 
+	class PhysicsManager
 	{
-		if (!m_Instance)
-			m_Instance = new PhysicsManager();
-		return m_Instance; 
- 	}
+	private:
+		Physics::DynamicWorld* m_World;
+		bool m_IsRunning = false;
+		btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
-	Physics::DynamicWorld* GetWorld() { return m_World; }
+		bool m_DrawDebug = false;
+		static PhysicsManager* m_Instance;
+	public:
+		static PhysicsManager* Get()
+		{
+			if (!m_Instance)
+				m_Instance = new PhysicsManager();
+			return m_Instance;
+		}
 
-	PhysicsManager() { if (!m_Instance) m_Instance = this; }
+		Physics::DynamicWorld* GetWorld() { return m_World; }
 
-	void SetDrawDebug(bool value) {
-		m_DrawDebug = value;
-	}
+		PhysicsManager() { if (!m_Instance) m_Instance = this; }
 
-	bool GetDrawDebug() {
-		return m_DrawDebug;
-	}
+		void SetDrawDebug(bool value) {
+			m_DrawDebug = value;
+		}
 
-	void Init();
+		bool GetDrawDebug() {
+			return m_DrawDebug;
+		}
 
-	void Start() { m_IsRunning = true; }
-	void Stop() { m_IsRunning = false; }
-	void DrawDebug();
-	bool IsRunning() { return m_IsRunning; }
-	void Step(Timestep ts);
+		void Init();
 
-	void Reset();
+		void Start() { m_IsRunning = true; }
+		void Stop() { m_IsRunning = false; }
+		void DrawDebug();
+		bool IsRunning() { return m_IsRunning; }
+		void Step(Timestep ts);
 
-	RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
+		void Reset();
 
-	void RegisterBody(Ref<Physics::RigidBody> rb);
-	void RegisterGhostBody(Ref<GhostObject> rb);
-	void RegisterCharacterController(Ref<Physics::CharacterController> c);
-};
+		RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
+
+		void RegisterBody(Ref<Physics::RigidBody> rb);
+		void RegisterGhostBody(Ref<GhostObject> rb);
+		void RegisterCharacterController(Ref<Physics::CharacterController> c);
+	};
+}

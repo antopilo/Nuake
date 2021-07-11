@@ -240,6 +240,5 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0 / u_Exposure));
 
-	
-    FragColor = vec4(color, 1.0); // so If i wanted to implement other stuff like SSR and bloom. I would need another render texture? using this same shader?
+    FragColor = vec4(color, 1.0);
 }

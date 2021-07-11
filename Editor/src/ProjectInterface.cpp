@@ -3,11 +3,25 @@
 #include "Engine.h"
 #include "ImGuiTextHelper.h"
 
-void ProjectInterface::DrawProjectSettings() 
-{
-	if (ImGui::Begin("Project settings"))
-	{
-        
+namespace Nuake {
+    void ProjectInterface::DrawProjectSettings()
+    {
+        if (ImGui::Begin("Project settings"))
+        {
+
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            std::strncpy(buffer, Engine::GetProject()->Name.c_str(), sizeof(buffer));
+            if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
+            {
+                Engine::GetProject()->Name = std::string(buffer);
+            }
+        }
+        ImGui::End();
+    }
+
+    void ProjectInterface::DrawCreatePointEntity()
+    {
         char buffer[256];
         memset(buffer, 0, sizeof(buffer));
         std::strncpy(buffer, Engine::GetProject()->Name.c_str(), sizeof(buffer));
@@ -15,242 +29,230 @@ void ProjectInterface::DrawProjectSettings()
         {
             Engine::GetProject()->Name = std::string(buffer);
         }
-	}
-    ImGui::End();
-}
-
-void ProjectInterface::DrawCreatePointEntity()
-{
-    char buffer[256];
-    memset(buffer, 0, sizeof(buffer));
-    std::strncpy(buffer, Engine::GetProject()->Name.c_str(), sizeof(buffer));
-    if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
-    {
-        Engine::GetProject()->Name = std::string(buffer);
     }
-}
 
-FGDPointEntity newEntity;
+    FGDPointEntity newEntity;
 
-const char* items[] = { "String", "Integer", "Float", "Boolean"};
-void ProjectInterface::DrawEntitySettings()
-{
-    if (!m_CurrentProject)
-        return;
-
-    if (ImGui::Begin("Entity definitions"))
+    const char* items[] = { "String", "Integer", "Float", "Boolean" };
+    void ProjectInterface::DrawEntitySettings()
     {
-        ImGui::Text("This is the entity definition used by trenchbroom. This files allows you to see your entities inside Trenchbroom");
-        
-        ImGui::Text("Trenchbroom path:");
-        ImGui::SameLine();
-        ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
-        ImGui::SameLine();
-        if (ImGui::Button("Browse"))
+        if (!m_CurrentProject)
+            return;
+
+        if (ImGui::Begin("Entity definitions"))
         {
-            std::string path = FileDialog::OpenFile("*.exe");
-            if (path != "")
-            {
-                path += "/../";
-                m_CurrentProject->TrenchbroomPath = path;
-            }
-        }
+            ImGui::Text("This is the entity definition used by trenchbroom. This files allows you to see your entities inside Trenchbroom");
 
-        Ref<FGDFile> file = Engine::GetProject()->EntityDefinitionsFile;
-
-        auto flags = ImGuiWindowFlags_NoTitleBar;
-        if (ImGui::BeginPopupModal("Create new point entity", NULL, flags))
-        {
-            ImGuiTextSTD("Name", newEntity.Name);
-            ImGuiTextMultiline("Description", newEntity.Description);
-            
-            if (ImGui::BeginTable("DictCreate", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
-            {
-                ImGui::TableSetupColumn("Name");
-                ImGui::TableSetupColumn("Type");
-                ImGui::TableHeadersRow();
-
-                ImGui::TableNextColumn();
-                int idx = 0;
-                for (auto& p : newEntity.Properties)
-                {
-                    ImGuiTextSTD("Name", p.name);
-                    ImGui::TableNextColumn();
-                    std::string current_item = NULL;
-                    if(ImGui::BeginCombo(("TypeSelection" + std::to_string(idx)).c_str(), current_item.c_str()))
-                    {
-                        for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-                        {
-                            bool is_selected = (p.type == (ClassPropertyType)n); // You can store your selection however you want, outside or inside your objects
-                            if (ImGui::Selectable(items[n], is_selected))
-                                if (is_selected)
-                                {
-                                    p.type = (ClassPropertyType)n;
-                                    ImGui::SetItemDefaultFocus();
-                                }
-                                       
-                        }
-                        ImGui::EndCombo();
-                    }
-                    idx++;
-                    ImGui::TableNextColumn();
-                }
-                if (ImGui::Button("Add new property")) 
-                {
-                    newEntity.Properties.push_back(ClassProperty());
-                }
-
-                ImGui::EndTable();
-            }
-
-            ImGui::Button("Create");
+            ImGui::Text("Trenchbroom path:");
             ImGui::SameLine();
-            if (ImGui::Button("Cancel"))
-                ImGui::CloseCurrentPopup();
-
-            ImGui::EndPopup();
-        }
-
-        
-        if (ImGui::Button("Export"))
-        {
-            file->Export();
-        }
-
-        ImGui::SameLine();
-
-        if (ImGui::Button("Save"))
-        {
-            file->Save();
-        }
-
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 100));
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-        {
-            if (ImGui::BeginTabItem("Point entities"))
+            ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
+            ImGui::SameLine();
+            if (ImGui::Button("Browse"))
             {
-                ImVec2 avail = ImGui::GetContentRegionAvail();
-                avail.y *= .8;
+                std::string path = FileDialog::OpenFile("*.exe");
+                if (path != "")
+                {
+                    path += "/../";
+                    m_CurrentProject->TrenchbroomPath = path;
+                }
+            }
 
-                ImGui::BeginChild("table_child", avail, false);
-                if (ImGui::BeginTable("nested1", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
+            Ref<FGDFile> file = Engine::GetProject()->EntityDefinitionsFile;
+
+            auto flags = ImGuiWindowFlags_NoTitleBar;
+            if (ImGui::BeginPopupModal("Create new point entity", NULL, flags))
+            {
+                ImGuiTextSTD("Name", newEntity.Name);
+                ImGuiTextMultiline("Description", newEntity.Description);
+
+                if (ImGui::BeginTable("DictCreate", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
                 {
                     ImGui::TableSetupColumn("Name");
-                    ImGui::TableSetupColumn("Desciption");
-                    ImGui::TableSetupColumn("Settings");
-                    ImGui::TableSetupColumn("Prefab");
+                    ImGui::TableSetupColumn("Type");
                     ImGui::TableHeadersRow();
 
                     ImGui::TableNextColumn();
-                    for (auto& pE : file->PointEntities)
+                    int idx = 0;
+                    for (auto& p : newEntity.Properties)
                     {
-                        ImGui::Text(pE.Name.c_str());
+                        ImGuiTextSTD("Name", p.name);
                         ImGui::TableNextColumn();
-                        ImGui::Text(pE.Description.c_str());
+                        std::string current_item = NULL;
+                        if (ImGui::BeginCombo(("TypeSelection" + std::to_string(idx)).c_str(), current_item.c_str()))
+                        {
+                            for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+                            {
+                                bool is_selected = (p.type == (ClassPropertyType)n); // You can store your selection however you want, outside or inside your objects
+                                if (ImGui::Selectable(items[n], is_selected))
+                                    if (is_selected)
+                                    {
+                                        p.type = (ClassPropertyType)n;
+                                        ImGui::SetItemDefaultFocus();
+                                    }
+
+                            }
+                            ImGui::EndCombo();
+                        }
+                        idx++;
                         ImGui::TableNextColumn();
-                        ImGui::Button("Edit");
-                        ImGui::TableNextColumn();
-                        ImGui::Text(pE.Prefab.c_str());
-                        ImGui::SameLine();
-                        ImGui::Button("Browse");
+                    }
+                    if (ImGui::Button("Add new property"))
+                    {
+                        newEntity.Properties.push_back(ClassProperty());
                     }
 
                     ImGui::EndTable();
                 }
-                ImGui::EndChild();
-                ImGui::EndTabItem();
+
+                ImGui::Button("Create");
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel"))
+                    ImGui::CloseCurrentPopup();
+
+                ImGui::EndPopup();
             }
 
-            if (ImGui::BeginTabItem("Brush entities"))
+
+            if (ImGui::Button("Export"))
             {
-                ImVec2 avail = ImGui::GetContentRegionAvail();
-                avail.y *= .8;
-                ImGui::BeginChild("table_child", avail, false);
-                if (ImGui::BeginTable("nested1", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
+                file->Export();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Save"))
+            {
+                file->Save();
+            }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 100));
+            if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+            {
+                if (ImGui::BeginTabItem("Point entities"))
                 {
-                    ImGui::TableSetupColumn("Name");
-                    ImGui::TableSetupColumn("Desciption");
-                    ImGui::TableSetupColumn("Settings");
-                    ImGui::TableSetupColumn("Script");
-                    ImGui::TableHeadersRow();
-                    ImGui::TableNextColumn();
+                    ImVec2 avail = ImGui::GetContentRegionAvail();
+                    avail.y *= .8;
 
-                    int i = 0;
-                    for (auto& pE : file->BrushEntities)
+                    ImGui::BeginChild("table_child", avail, false);
+                    if (ImGui::BeginTable("nested1", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
                     {
-                        ImGuiTextSTD("##Name" + std::to_string(i), pE.Name);
-                        ImGui::TableNextColumn();
+                        ImGui::TableSetupColumn("Name");
+                        ImGui::TableSetupColumn("Desciption");
+                        ImGui::TableSetupColumn("Settings");
+                        ImGui::TableSetupColumn("Prefab");
+                        ImGui::TableHeadersRow();
 
-                        ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
                         ImGui::TableNextColumn();
-
-                        ImGui::Checkbox(std::string("Visible##" + std::to_string(i)).c_str(), &pE.Visible);
-                        ImGui::SameLine();
-                        ImGui::Checkbox(std::string("Solid##" + std::to_string(i)).c_str(), &pE.Solid);
-                        ImGui::SameLine();
-                        ImGui::Checkbox(std::string("Trigger##" + std::to_string(i)).c_str(), &pE.IsTrigger);
-                        
-                        ImGui::TableNextColumn();
-
-                        ImGuiTextSTD("Script##" + std::to_string(i), pE.Script);
-                        if (ImGui::BeginDragDropTarget())
+                        for (auto& pE : file->PointEntities)
                         {
-                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
+                            ImGui::Text(pE.Name.c_str());
+                            ImGui::TableNextColumn();
+                            ImGui::Text(pE.Description.c_str());
+                            ImGui::TableNextColumn();
+                            ImGui::Button("Edit");
+                            ImGui::TableNextColumn();
+                            ImGui::Text(pE.Prefab.c_str());
+                            ImGui::SameLine();
+                            ImGui::Button("Browse");
+                        }
+
+                        ImGui::EndTable();
+                    }
+                    ImGui::EndChild();
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Brush entities"))
+                {
+                    ImVec2 avail = ImGui::GetContentRegionAvail();
+                    avail.y *= .8;
+                    ImGui::BeginChild("table_child", avail, false);
+                    if (ImGui::BeginTable("nested1", 4, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
+                    {
+                        ImGui::TableSetupColumn("Name");
+                        ImGui::TableSetupColumn("Desciption");
+                        ImGui::TableSetupColumn("Settings");
+                        ImGui::TableSetupColumn("Script");
+                        ImGui::TableHeadersRow();
+                        ImGui::TableNextColumn();
+
+                        int i = 0;
+                        for (auto& pE : file->BrushEntities)
+                        {
+                            ImGuiTextSTD("##Name" + std::to_string(i), pE.Name);
+                            ImGui::TableNextColumn();
+
+                            ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
+                            ImGui::TableNextColumn();
+
+                            ImGui::Checkbox(std::string("Visible##" + std::to_string(i)).c_str(), &pE.Visible);
+                            ImGui::SameLine();
+                            ImGui::Checkbox(std::string("Solid##" + std::to_string(i)).c_str(), &pE.Solid);
+                            ImGui::SameLine();
+                            ImGui::Checkbox(std::string("Trigger##" + std::to_string(i)).c_str(), &pE.IsTrigger);
+
+                            ImGui::TableNextColumn();
+
+                            ImGuiTextSTD("Script##" + std::to_string(i), pE.Script);
+                            if (ImGui::BeginDragDropTarget())
                             {
-                                char* file = (char*)payload->Data;
-                                std::string fullPath = std::string(file, 256);
-                                pE.Script = FileSystem::AbsoluteToRelative(fullPath);
+                                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
+                                {
+                                    char* file = (char*)payload->Data;
+                                    std::string fullPath = std::string(file, 256);
+                                    pE.Script = FileSystem::AbsoluteToRelative(fullPath);
+                                }
+
+                                ImGui::EndDragDropTarget();
+                            }
+                            ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
+                            ImGui::TableNextColumn();
+
+                            i++;
+                        }
+
+                        ImGui::TableNextColumn();
+                        ImGui::EndTable();
+
+                        if (ImGui::BeginPopupModal("CreateBrush", NULL, flags))
+                        {
+                            ImGuiTextSTD("Name", newEntity.Name);
+                            ImGuiTextMultiline("Description", newEntity.Description);
+
+                            bool isSolid = true;
+                            bool isTrigger = false;
+                            bool isVisible = true;
+                            ImGui::Checkbox("Is Solid", &isSolid);
+                            ImGui::Checkbox("Is Trigger", &isTrigger);
+                            ImGui::Checkbox("Is Visible", &isVisible);
+
+                            if (ImGui::Button("Create"))
+                            {
+
                             }
 
-                            ImGui::EndDragDropTarget();
+                            ImGui::SameLine();
+
+                            if (ImGui::Button("Cancel"))
+                                ImGui::CloseCurrentPopup();
+
+                            ImGui::EndPopup();
                         }
-                        ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
-                        ImGui::TableNextColumn();
 
-                        i++;
-                    }
-
-                    ImGui::TableNextColumn();
-                    ImGui::EndTable();
-
-                    if (ImGui::BeginPopupModal("CreateBrush", NULL, flags))
-                    {
-                        ImGuiTextSTD("Name", newEntity.Name);
-                        ImGuiTextMultiline("Description", newEntity.Description);
-
-                        bool isSolid = true;
-                        bool isTrigger = false;
-                        bool isVisible = true;
-                        ImGui::Checkbox("Is Solid", &isSolid);
-                        ImGui::Checkbox("Is Trigger", &isTrigger);
-                        ImGui::Checkbox("Is Visible", &isVisible);
-
-                        if (ImGui::Button("Create")) 
+                        if (ImGui::Button("Add new"))
                         {
-
+                            file->BrushEntities.push_back(FGDBrushEntity("New brush"));
                         }
 
-                        ImGui::SameLine();
-
-                        if (ImGui::Button("Cancel"))
-                            ImGui::CloseCurrentPopup();
-
-                        ImGui::EndPopup();
                     }
-
-                    if (ImGui::Button("Add new")) 
-                    {
-                        file->BrushEntities.push_back(FGDBrushEntity("New brush"));
-                    }
-                        
+                    ImGui::EndChild();
+                    ImGui::EndTabItem();
                 }
-                ImGui::EndChild();
-                ImGui::EndTabItem();
+                ImGui::EndTabBar();
             }
-            ImGui::EndTabBar();
+
+            ImGui::PopStyleVar();
         }
-       
-        ImGui::PopStyleVar();
+        ImGui::End();
     }
-    ImGui::End();
 }

@@ -5,44 +5,48 @@
 struct btTransform;
 struct btRigidBody;
 struct btVector3;
-class Entity;
-namespace Physics {
-	class RigidBody {
-	private:
-		bool m_IsDynamic = false;
-		bool m_IsKinematic = false;
-		glm::vec3 m_InitialVel;
 
-		
-		btRigidBody* m_Rigidbody;
+namespace Nuake
+{
+	class Entity;
+	namespace Physics {
+		class RigidBody {
+		private:
+			bool m_IsDynamic = false;
+			bool m_IsKinematic = false;
+			glm::vec3 m_InitialVel;
 
-		Ref<PhysicShape> m_CollisionShape;
-	public:
-		btTransform* m_Transform;
-		float m_Mass;
+			btRigidBody* m_Rigidbody;
 
-		RigidBody();
-		RigidBody(glm::vec3 position, Entity handle);
-		RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel = glm::vec3(0, 0, 0));
+			Ref<PhysicShape> m_CollisionShape;
+		public:
+			btTransform* m_Transform;
+			float m_Mass;
 
-		btRigidBody* GetBulletRigidbody() const { return m_Rigidbody; }
-		
-		void UpdateTransform(btTransform t);
-		glm::vec3 GetPosition() const;
-		glm::vec3 GetRotation() const;
+			RigidBody();
+			RigidBody(glm::vec3 position, Entity handle);
+			RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel = glm::vec3(0, 0, 0));
 
-		void SetEntityID(Entity ent);
+			btRigidBody* GetBulletRigidbody() const { return m_Rigidbody; }
 
-		void SetKinematic(bool value);
-		bool IsKinematic() const { return m_IsKinematic; }
+			void UpdateTransform(btTransform t);
+			glm::vec3 GetPosition() const;
+			glm::vec3 GetRotation() const;
 
-		bool HasShape() { return m_CollisionShape != nullptr; }
-		void SetShape(Ref<PhysicShape> shape);
-		Ref<PhysicShape> GetShape() const { return m_CollisionShape; }
+			void SetEntityID(Entity ent);
 
-		float GetMass() const { return m_Mass; }
-		void SetMass(float m); 
+			void SetKinematic(bool value);
+			bool IsKinematic() const { return m_IsKinematic; }
 
-		void MoveAndSlide(glm::vec3 velocity);
-	};
+			bool HasShape() { return m_CollisionShape != nullptr; }
+			void SetShape(Ref<PhysicShape> shape);
+			Ref<PhysicShape> GetShape() const { return m_CollisionShape; }
+
+			float GetMass() const { return m_Mass; }
+			void SetMass(float m);
+
+			void MoveAndSlide(glm::vec3 velocity);
+		};
+	}
+
 }

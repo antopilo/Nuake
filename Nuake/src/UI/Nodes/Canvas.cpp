@@ -1,5 +1,9 @@
 #include "Canvas.h"
-Canvas::Canvas()
-{
 
+namespace Nuake {
+	Canvas::Canvas()
+	{
+
+	}
 }
+

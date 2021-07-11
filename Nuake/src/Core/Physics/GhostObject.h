@@ -1,27 +1,33 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 #include "PhysicsShapes.h"
 
 #include <vector>
 #include <Engine.h>
 
+
 class btGhostObject;
-class GhostObject {
-private:
-	btGhostObject* m_BulletObject;
-	std::vector<Entity> m_OverlappingEntities;
 
-public:
-	GhostObject(Vector3 position, Ref<Physics::PhysicShape> shape);
+namespace Nuake
+{
+	class GhostObject {
+	private:
+		btGhostObject* m_BulletObject;
+		std::vector<Entity> m_OverlappingEntities;
 
-	int OverlappingCount();
-	void ClearOverlappingList();
-	void ScanOverlap();
+	public:
+		GhostObject(Vector3 position, Ref<Physics::PhysicShape> shape);
 
-	void SetEntityID(Entity ent);
+		int OverlappingCount();
+		void ClearOverlappingList();
+		void ScanOverlap();
 
-	std::vector<Entity> GetOverlappingEntities();
+		void SetEntityID(Entity ent);
 
-	// Internal use only.
-	btGhostObject* GetBulletObject();
-};
+		std::vector<Entity> GetOverlappingEntities();
+
+		// Internal use only.
+		btGhostObject* GetBulletObject();
+	};
+}

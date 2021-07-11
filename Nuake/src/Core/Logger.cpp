@@ -4,30 +4,33 @@
 #include <string>
 #include <time.h>
 
-std::vector<LogEntry>  Logger::m_Logs = std::vector<LogEntry>();
-
-void Logger::Log(std::string log, LOG_TYPE type)
+namespace Nuake
 {
-	char buff[100];
-	time_t now = time(0);
-	strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000", localtime(&now));
+	std::vector<LogEntry>  Logger::m_Logs = std::vector<LogEntry>();
 
-	LogEntry newLog = {
-		type,
-		buff,
-		log
-	};
+	void Logger::Log(std::string log, LOG_TYPE type)
+	{
+		char buff[100];
+		time_t now = time(0);
+		strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000", localtime(&now));
 
-	std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
-	printf((msg + "\n").c_str());
+		LogEntry newLog = {
+			type,
+			buff,
+			log
+		};
 
-	if (m_Logs.size() >= MAX_LOG)
-		m_Logs.erase(m_Logs.begin());
+		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
+		printf((msg + "\n").c_str());
 
-	m_Logs.push_back(newLog);
-}
+		if (m_Logs.size() >= MAX_LOG)
+			m_Logs.erase(m_Logs.begin());
 
-std::vector<LogEntry> Logger::GetLogs()
-{
-	return m_Logs;
+		m_Logs.push_back(newLog);
+	}
+
+	std::vector<LogEntry> Logger::GetLogs()
+	{
+		return m_Logs;
+	}
 }

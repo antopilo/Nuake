@@ -1,29 +1,33 @@
 #pragma once
 #include "TransformComponent.h"
-#include "../Core/Core.h"
-#include "../Resource/Serializable.h"
-#include "../Rendering/Camera.h"
+#include "src/Core/Core.h"
+#include "src/Resource/Serializable.h"
+#include "src/Rendering/Camera.h"
 
-class CameraComponent {
-public:
-	Ref<Camera> CameraInstance;
-	TransformComponent* transformComponent;
-
-	CameraComponent();
-
-	void DrawEditor();
-
-	json Serialize()
+namespace Nuake
+{
+	class CameraComponent 
 	{
-		BEGIN_SERIALIZE();
-		SERIALIZE_OBJECT(CameraInstance);
-		END_SERIALIZE();
-	}
+	public:
+		Ref<Camera> CameraInstance;
+		TransformComponent* transformComponent;
 
-	bool Deserialize(std::string str)
-	{
-		CameraInstance = CreateRef<Camera>();
+		CameraComponent();
 
-		return CameraInstance->Deserialize(str);
-	}
-};
+		void DrawEditor();
+
+		json Serialize()
+		{
+			BEGIN_SERIALIZE();
+			SERIALIZE_OBJECT(CameraInstance);
+			END_SERIALIZE();
+		}
+
+		bool Deserialize(std::string str)
+		{
+			CameraInstance = CreateRef<Camera>();
+
+			return CameraInstance->Deserialize(str);
+		}
+	};
+}

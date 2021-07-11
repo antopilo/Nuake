@@ -6,33 +6,34 @@
 #include <iostream>
 #include <wren.h>
 
-namespace ScriptAPI
+namespace Nuake
 {
-	class EngineModule : public ScriptModule
+	namespace ScriptAPI
 	{
-		std::string ModuleName = "Engine";
-		std::string WrenAPI = "class Engine { \n"
-			"foreign static Log(msg) \n"
-			"}"
-			"";
-
-		std::string GetModuleName() override
+		class EngineModule : public ScriptModule
 		{
-			return "Engine";
-		}
+			std::string ModuleName = "Engine";
+			std::string WrenAPI = "class Engine { \n"
+				"foreign static Log(msg) \n"
+				"}"
+				"";
 
-		void RegisterModule(WrenVM* vm) override
-		{
-			RegisterMethod("Log(_)", (void*)Log);
-			WrenInterpretResult result = wrenInterpret(vm, "main", WrenAPI.c_str());
-		}
+			std::string GetModuleName() override
+			{
+				return "Engine";
+			}
 
-		static void Log(WrenVM* vm)
-		{
-			std::string msg = wrenGetSlotString(vm, 1);
-			Logger::Log(msg);
-		}
-	};
+			void RegisterModule(WrenVM* vm) override
+			{
+				RegisterMethod("Log(_)", (void*)Log);
+				WrenInterpretResult result = wrenInterpret(vm, "main", WrenAPI.c_str());
+			}
 
-
+			static void Log(WrenVM* vm)
+			{
+				std::string msg = wrenGetSlotString(vm, 1);
+				Logger::Log(msg);
+			}
+		};
+	}
 }

@@ -1,22 +1,24 @@
 #pragma once
-#include <map>
-#include <string>
-#include "../Core/Core.h"
-class Texture;
+#include "src/Core/Core.h"
 
-// Todo: SHOULD probably be static too.
-class TextureManager
+namespace Nuake
 {
-private:
-	static TextureManager* s_Instance;
+	class Texture;
 
-	static std::map<std::string, Ref<Texture>> m_Registry;
-	bool IsTextureLoaded(const std::string path);
+	// Todo: SHOULD probably be static too.
+	class TextureManager
+	{
+	private:
+		static TextureManager* s_Instance;
 
-public:
-	static TextureManager* Get();
+		static std::map<std::string, Ref<Texture>> m_Registry;
+		bool IsTextureLoaded(const std::string path);
 
-	TextureManager(); 
+	public:
+		static TextureManager* Get();
 
-	Ref<Texture> GetTexture(const std::string path);
-};
+		TextureManager();
+
+		Ref<Texture> GetTexture(const std::string path);
+	};
+}

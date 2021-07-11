@@ -2,9 +2,12 @@
 #include <string>
 #include "Style.h"
 
-class StyleSheetParser
+namespace Nuake
 {
+	class StyleSheetParser
+	{
 
-public:
-	static PropValue ParsePropType(const std::string& str, PropType type);
-};
+	public:
+		static PropValue ParsePropType(const std::string& str, PropType type);
+	};
+}

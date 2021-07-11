@@ -1,5 +1,8 @@
 #pragma once
 #include <memory>
+#include <map>
+#include <string>
+#include <vector>
 
 template<typename T>
 using Scope = std::unique_ptr<T>;

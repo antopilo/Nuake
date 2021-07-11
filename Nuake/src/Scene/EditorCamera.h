@@ -2,17 +2,20 @@
 #include "../Core/Timestep.h"
 #include "../Rendering/Camera.h"
 
-class EditorCamera : public Camera
+namespace Nuake
 {
-private:
-	bool controlled = false;
-	bool firstMouse = false;
+	class EditorCamera : public Camera
+	{
+	public:
+		void Update(Timestep ts);
+	private:
+		bool controlled = false;
+		bool firstMouse = false;
 
-	float mouseLastX;
-	float mouseLastY;
+		float mouseLastX;
+		float mouseLastY;
 
-	float Yaw = 0.f;
-	float Pitch = 0.f;
-public:
-	void Update(Timestep ts);
-};
+		float Yaw = 0.f;
+		float Pitch = 0.f;
+	};
+}

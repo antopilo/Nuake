@@ -1,11 +1,13 @@
 #pragma once
-#include "../Core/Physics/PhysicsShapes.h"
-#include "../Core/Core.h"
+#include "src/Core/Physics/PhysicsShapes.h"
+#include "src/Core/Core.h"
 
-class MeshColliderComponent
-{
-public:
-	Ref<Physics::MeshShape> MeshShape;
-	Ref<Mesh> Mesh;
-	bool IsTrigger;
-};
+namespace Nuake {
+	class MeshColliderComponent
+	{
+	public:
+		Ref<Physics::MeshShape> MeshShape;
+		Ref<Mesh> Mesh;
+		bool IsTrigger;
+	};
+}

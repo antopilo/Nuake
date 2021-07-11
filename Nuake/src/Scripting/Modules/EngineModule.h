@@ -5,27 +5,29 @@
 #include "ScriptModule.h"
 #include <iostream>
 #include <wren.h>
-
-namespace ScriptAPI
+namespace Nuake
 {
-	class EngineModule : public ScriptModule
+	namespace ScriptAPI
 	{
-		std::string ModuleName = "Engine";
-
-		std::string GetModuleName() override
+		class EngineModule : public ScriptModule
 		{
-			return "Engine";
-		}
+			std::string ModuleName = "Engine";
 
-		void RegisterModule(WrenVM* vm) override
-		{
-			RegisterMethod("Log(_)", (void*)Log);
-		}
+			std::string GetModuleName() override
+			{
+				return "Engine";
+			}
 
-		static void Log(WrenVM* vm)
-		{
-			std::string msg = wrenGetSlotString(vm, 1);
-			Logger::Log(msg);
-		}
-	};
+			void RegisterModule(WrenVM* vm) override
+			{
+				RegisterMethod("Log(_)", (void*)Log);
+			}
+
+			static void Log(WrenVM* vm)
+			{
+				std::string msg = wrenGetSlotString(vm, 1);
+				Logger::Log(msg);
+			}
+		};
+	}
 }

@@ -12,135 +12,138 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-Ref<Project> Engine::CurrentProject;
-Ref<Window> Engine::CurrentWindow;
-
-float Engine::m_LastFrameTime = 0.0f;
-float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
-float Engine::m_FixedUpdateDifference = 0.f;
-bool Engine::IsPlayMode = false;
-
-void Engine::Init()
+namespace Nuake
 {
-	Logger::Log("Engine initialization...");
+	Ref<Project> Engine::CurrentProject;
+	Ref<Window> Engine::CurrentWindow;
 
-	PhysicsManager::Get()->Init();
-	Logger::Log("Physics initialized");
+	float Engine::m_LastFrameTime = 0.0f;
+	float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
+	float Engine::m_FixedUpdateDifference = 0.f;
+	bool Engine::IsPlayMode = false;
 
-	// Creates the window
-	CurrentWindow = Window::Get();
-	Logger::Log("Window initialized");
-
-	Renderer2D::Init();
-	Logger::Log("2D renderer initialized");
-
-	Logger::Log("Engine initialized succesfully!");
-}
-
-void Engine::Tick()
-{
-	// Dont update if no scene is loaded.
-	if (!CurrentWindow->GetScene())
-		return;
-
-	// Calculate delta time
-	float time = (float)glfwGetTime();
-	Timestep timestep = time - m_LastFrameTime;
-	m_LastFrameTime = time;
-
-	// Play mode update all the entities, Editor does not.
-	if (Engine::IsPlayMode) 
+	void Engine::Init()
 	{
-		CurrentWindow->Update(timestep);
-		m_FixedUpdateDifference += timestep;
+		Logger::Log("Engine initialization...");
 
-		// Fixed update
-		if (m_FixedUpdateDifference >= m_FixedUpdateRate)
+		PhysicsManager::Get()->Init();
+		Logger::Log("Physics initialized");
+
+		// Creates the window
+		CurrentWindow = Window::Get();
+		Logger::Log("Window initialized");
+
+		Renderer2D::Init();
+		Logger::Log("2D renderer initialized");
+
+		Logger::Log("Engine initialized succesfully!");
+	}
+
+	void Engine::Tick()
+	{
+		// Dont update if no scene is loaded.
+		if (!CurrentWindow->GetScene())
+			return;
+
+		// Calculate delta time
+		float time = (float)glfwGetTime();
+		Timestep timestep = time - m_LastFrameTime;
+		m_LastFrameTime = time;
+
+		// Play mode update all the entities, Editor does not.
+		if (Engine::IsPlayMode)
 		{
-			CurrentWindow->FixedUpdate(m_FixedUpdateRate);
-			m_FixedUpdateDifference = 0.f;
+			CurrentWindow->Update(timestep);
+			m_FixedUpdateDifference += timestep;
+
+			// Fixed update
+			if (m_FixedUpdateDifference >= m_FixedUpdateRate)
+			{
+				CurrentWindow->FixedUpdate(m_FixedUpdateRate);
+				m_FixedUpdateDifference = 0.f;
+			}
 		}
-	}
-	else
-	{
-		GetCurrentScene()->EditorUpdate(timestep);
-	}
-
-	Input::Update();
-}
-
-void Engine::EnterPlayMode()
-{
-	// Dont trigger init if already in player mode.
-	if (!IsPlayMode)
-		if(GetCurrentScene()->OnInit())
-			IsPlayMode = true;
 		else
-			GetCurrentScene()->OnExit();
-}
+		{
+			GetCurrentScene()->EditorUpdate(timestep);
+		}
 
-void Engine::ExitPlayMode()
-{
-	// Dont trigger exit if already not in play mode.
-	if (IsPlayMode) {
-		GetCurrentScene()->OnExit();
-		Input::ShowMouse();
+		Input::Update();
 	}
-		
-	Input::ShowMouse();
 
-	IsPlayMode = false;
-}
+	void Engine::EnterPlayMode()
+	{
+		// Dont trigger init if already in player mode.
+		if (!IsPlayMode)
+			if (GetCurrentScene()->OnInit())
+				IsPlayMode = true;
+			else
+				GetCurrentScene()->OnExit();
+	}
 
-void Engine::Draw() 
-{
-	// Start imgui frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+	void Engine::ExitPlayMode()
+	{
+		// Dont trigger exit if already not in play mode.
+		if (IsPlayMode) {
+			GetCurrentScene()->OnExit();
+			Input::ShowMouse();
+		}
 
-	// Draw scene
-	Window::Get()->Draw();
-}
+		Input::ShowMouse();
 
-void Engine::EndDraw()
-{
-	// Swap buffer and draw imgui
-	Window::Get()->EndDraw();
-}
+		IsPlayMode = false;
+	}
 
-void Engine::Close()
-{
-	glfwTerminate();
-}
+	void Engine::Draw()
+	{
+		// Start imgui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-Ref<Scene> Engine::GetCurrentScene()
-{
-	return CurrentWindow->GetScene();
-}
+		// Draw scene
+		Window::Get()->Draw();
+	}
 
-bool Engine::LoadScene(Ref<Scene> scene)
-{
-	return CurrentWindow->SetScene(scene);
-}
+	void Engine::EndDraw()
+	{
+		// Swap buffer and draw imgui
+		Window::Get()->EndDraw();
+	}
 
-Ref<Project> Engine::GetProject()
-{
-	return CurrentProject;
-}
+	void Engine::Close()
+	{
+		glfwTerminate();
+	}
 
-bool Engine::LoadProject(Ref<Project> project)
-{
-	CurrentProject = project;
+	Ref<Scene> Engine::GetCurrentScene()
+	{
+		return CurrentWindow->GetScene();
+	}
 
-	if (!Engine::LoadScene(CurrentProject->DefaultScene))
-		return false;
+	bool Engine::LoadScene(Ref<Scene> scene)
+	{
+		return CurrentWindow->SetScene(scene);
+	}
 
-	FileSystem::SetRootDirectory(project->FullPath + "/../");
-	return true;
-}
+	Ref<Project> Engine::GetProject()
+	{
+		return CurrentProject;
+	}
 
-Ref<Window> Engine::GetCurrentWindow()
-{
-	return CurrentWindow;
+	bool Engine::LoadProject(Ref<Project> project)
+	{
+		CurrentProject = project;
+
+		if (!Engine::LoadScene(CurrentProject->DefaultScene))
+			return false;
+
+		FileSystem::SetRootDirectory(project->FullPath + "/../");
+		return true;
+	}
+
+	Ref<Window> Engine::GetCurrentWindow()
+	{
+		return CurrentWindow;
+	}
 }

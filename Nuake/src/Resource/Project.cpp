@@ -4,138 +4,143 @@
 #include <fstream>
 #include <streambuf>
 #include "../Core/Logger.h"
-Project::Project(const std::string Name, const std::string Description, const std::string& FullPath, const std::string& defaultScenePath )
-{
-	this->Name = Name;
-	this->Description = Description;
-	this->FullPath = FullPath;
-	this->TrenchbroomPath = "";
 
-	if (defaultScenePath != "")
+namespace Nuake
+{
+	Project::Project(const std::string Name, const std::string Description, const std::string& FullPath, const std::string& defaultScenePath)
 	{
-		Ref<Scene> scene = CreateRef<Scene>();
-		scene->Deserialize(defaultScenePath);
+		this->Name = Name;
+		this->Description = Description;
+		this->FullPath = FullPath;
+		this->TrenchbroomPath = "";
+
+		if (defaultScenePath != "")
+		{
+			Ref<Scene> scene = CreateRef<Scene>();
+			scene->Deserialize(defaultScenePath);
+		}
+
+		this->EntityDefinitionsFile = CreateRef<FGDFile>();
+
+		SaveAs(FullPath);
 	}
 
-	this->EntityDefinitionsFile = CreateRef<FGDFile>();
+	Project::Project()
+	{
+		this->Name = "";
+		this->Description = "";
+		this->FullPath = "";
+		this->TrenchbroomPath = "";
 
-	SaveAs(FullPath);
-}
+		this->EntityDefinitionsFile = CreateRef<FGDFile>();
+	}
 
-Project::Project()
-{
-	this->Name = "";
-	this->Description = "";
-	this->FullPath = "";
-	this->TrenchbroomPath = "";
+	void Project::Save()
+	{
+		SaveAs(this->FullPath);
+	}
 
-	this->EntityDefinitionsFile = CreateRef<FGDFile>();
-}
+	void Project::SaveAs(const std::string FullPath)
+	{
+		json j = Serialize();
+		std::string serialized_string = j.dump();
 
-void Project::Save()
-{
-	SaveAs(this->FullPath);
-}
-
-void Project::SaveAs(const std::string FullPath)
-{
-	json j = Serialize();
-	std::string serialized_string = j.dump();
-
-	// TODO: Use file interface here...
-	// Write to file.
-	std::ofstream projectFile;
+		// TODO: Use file interface here...
+		// Write to file.
+		std::ofstream projectFile;
 		projectFile.open(FullPath);
 		projectFile << serialized_string;
-	projectFile.close();
-}
+		projectFile.close();
+	}
 
-Ref<Project> Project::New(const std::string Name, const std::string Description, const std::string FullPath)
-{
-	if (Name == "")
-		return nullptr;
+	Ref<Project> Project::New(const std::string Name, const std::string Description, const std::string FullPath)
+	{
+		if (Name == "")
+			return nullptr;
 
-	return CreateRef<Project>(Name, Description, FullPath);
-}
+		return CreateRef<Project>(Name, Description, FullPath);
+	}
 
-Ref<Project> Project::New()
-{
-	return CreateRef<Project>();
-}
+	Ref<Project> Project::New()
+	{
+		return CreateRef<Project>();
+	}
 
-Ref<Project> Project::Load(std::string path)
-{
-	std::ifstream i(path);
-	json j;
-	i >> j;
+	Ref<Project> Project::Load(std::string path)
+	{
+		std::ifstream i(path);
+		json j;
+		i >> j;
 
-	// validation
-	std::string projectName = "";
-	if(!j.contains("ProjectName"))
-		return nullptr;
+		// validation
+		std::string projectName = "";
+		if (!j.contains("ProjectName"))
+			return nullptr;
 
-	projectName = j["ProjectName"];
+		projectName = j["ProjectName"];
 
-	std::string description = "";
-	if (j.contains("Description"))
-		description = j["Description"];
+		std::string description = "";
+		if (j.contains("Description"))
+			description = j["Description"];
 
-	return CreateRef<Project>(projectName, description, path);
-}
+		return CreateRef<Project>(projectName, description, path);
+	}
 
-json Project::Serialize()
-{
-	BEGIN_SERIALIZE();
+	json Project::Serialize()
+	{
+		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Name);
 		SERIALIZE_VAL(Description);
 		SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
 		SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
 		SERIALIZE_VAL(TrenchbroomPath);
-	END_SERIALIZE();
+		END_SERIALIZE();
+	}
+
+	bool Project::Deserialize(const std::string& str)
+	{
+		BEGIN_DESERIALIZE();
+
+		if (!j.contains("Name") || !j.contains("Description"))
+			return false;
+
+		Name = j["Name"];
+		Description = j["Description"];
+
+		if (j.contains("EntityDefinition"))
+		{
+			std::string path = j["EntityDefinition"];
+			EntityDefinitionsFile = CreateRef<FGDFile>(path);
+			std::string content = FileSystem::ReadFile(path, false);
+			EntityDefinitionsFile->Deserialize(content);
+		}
+
+		if (j.contains("TrenchbroomPath"))
+		{
+			this->TrenchbroomPath = j["TrenchbroomPath"];
+		}
+
+		DefaultScene = Scene::New();
+
+		// Load default scene, a project can have no default scene set.
+		if (!j.contains("DefaultScene"))
+			return true;
+
+		std::string scenePath = j["DefaultScene"];
+		if (scenePath == "") // Not set correctly.
+			return true;
+
+		std::string sceneContent = FileSystem::ReadFile(scenePath, false);
+		if (!DefaultScene->Deserialize(sceneContent))
+		{
+			Logger::Log("Error loading scene: " + scenePath, CRITICAL);
+			return false;
+		}
+
+		DefaultScene->Path = scenePath;
+		Logger::Log("Successfully loaded scene: " + scenePath);
+
+		return true; // Success
+	}
 }
 
-bool Project::Deserialize(const std::string& str)
-{
-	BEGIN_DESERIALIZE();
-
-	if (!j.contains("Name") || !j.contains("Description"))
-		return false;
-
-	Name = j["Name"];
-	Description = j["Description"];
-
-	if (j.contains("EntityDefinition"))
-	{
-		std::string path = j["EntityDefinition"];
-		EntityDefinitionsFile = CreateRef<FGDFile>(path);
-		std::string content = FileSystem::ReadFile(path, false);
-		EntityDefinitionsFile->Deserialize(content);
-	}
-
-	if (j.contains("TrenchbroomPath"))
-	{
-		this->TrenchbroomPath = j["TrenchbroomPath"];
-	}
-
-	DefaultScene = Scene::New();
-
-	// Load default scene, a project can have no default scene set.
-	if (!j.contains("DefaultScene"))
-		return true;
-
-	std::string scenePath = j["DefaultScene"];
-	if (scenePath == "") // Not set correctly.
-		return true;
-
-	std::string sceneContent = FileSystem::ReadFile(scenePath, false);
-	if (!DefaultScene->Deserialize(sceneContent))
-	{
-		Logger::Log("Error loading scene: " + scenePath, CRITICAL);
-		return false;
-	}
-
-	DefaultScene->Path = scenePath;
-	Logger::Log("Successfully loaded scene: " + scenePath);	
-	
-	return true; // Success
-}

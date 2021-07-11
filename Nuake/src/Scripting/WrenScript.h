@@ -4,28 +4,31 @@
 #include <string>
 
 class WrenHandle;
-class WrenScript
-{
-public:
-	std::map <std::string, WrenHandle*> methods;
-	WrenHandle* m_Instance;
-	WrenHandle* m_OnInitHandle;
-	WrenHandle* m_OnUpdateHandle;
-	WrenHandle* m_OnFixedUpdateHandle;
-	WrenHandle* m_OnExitHandle;
-	WrenHandle* m_SetEntityIDHandle;
 
-	bool CompiledSuccesfully;
+namespace Nuake {
+	class WrenScript
+	{
+	public:
+		std::map <std::string, WrenHandle*> methods;
+		WrenHandle* m_Instance;
+		WrenHandle* m_OnInitHandle;
+		WrenHandle* m_OnUpdateHandle;
+		WrenHandle* m_OnFixedUpdateHandle;
+		WrenHandle* m_OnExitHandle;
+		WrenHandle* m_SetEntityIDHandle;
 
-	WrenScript(const std::string& path, const std::string& mod, bool isEntity = false);
+		bool CompiledSuccesfully;
 
-	void CallInit();
-	void CallUpdate(float timestep);
-	void CallFixedUpdate(float timestep);
-	void CallExit();
+		WrenScript(const std::string& path, const std::string& mod, bool isEntity = false);
 
-	void RegisterMethod(const std::string& signature);
-	void CallMethod(const std::string& signature);
+		void CallInit();
+		void CallUpdate(float timestep);
+		void CallFixedUpdate(float timestep);
+		void CallExit();
 
-	void SetScriptableEntityID(int id);
-};
+		void RegisterMethod(const std::string& signature);
+		void CallMethod(const std::string& signature);
+
+		void SetScriptableEntityID(int id);
+	};
+}

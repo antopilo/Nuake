@@ -1,41 +1,41 @@
 #pragma once
 #include "stb_image/stb_image.h"
 #include <string>
-#include "glm/vec2.hpp"
+#include "src/Core/Maths.h"
 #include "msdfgen/core/BitmapRef.hpp"
 
-
-typedef unsigned int GLenum;
-class Texture
+namespace Nuake
 {
-private:
-	unsigned int m_RendererId;
-	std::string m_FilePath;
-	unsigned char* m_LocalBuffer;
-	GLenum m_Format;
+	typedef unsigned int GLenum;
 
-	int m_Width;
-	int m_Height;
-	int m_BPP; // byte per pixel.
+	class Texture
+	{
+	private:
+		unsigned int m_RendererId;
+		std::string m_FilePath;
+		unsigned char* m_LocalBuffer;
+		GLenum m_Format;
 
-public:
-	Texture(const std::string& path);
-	Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t);
-	Texture(glm::vec2 size, GLenum format);
+		int m_Width;
+		int m_Height;
+		int m_BPP; // byte per pixel.
 
-	~Texture();
+	public:
+		Texture(const std::string& path);
+		Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t);
+		Texture(glm::vec2 size, GLenum format);
 
-	void Resize(glm::vec2 size);
-	void AttachToFramebuffer(GLenum attachment);
+		~Texture();
 
-	void Bind(unsigned int slot = 0) const;
-	void Unbind() const;
+		void Resize(glm::vec2 size);
+		void AttachToFramebuffer(GLenum attachment);
 
-	unsigned int GetID() const { return m_RendererId; }
-	
-	inline int GetWidth() const { return m_Width; }
-	inline int GetHeight() const { return m_Height; }
-};
+		void Bind(unsigned int slot = 0) const;
+		void Unbind() const;
 
+		unsigned int GetID() const { return m_RendererId; }
 
-
+		inline int GetWidth() const { return m_Width; }
+		inline int GetHeight() const { return m_Height; }
+	};
+}

@@ -1,11 +1,13 @@
 #pragma once
-#include "../Core/Physics/PhysicsShapes.h"
-#include "../Core/Core.h"
+#include "src/Core/Physics/PhysicsShapes.h"
+#include "src/Core/Core.h"
 
-class SphereColliderComponent
-{
-public:
-	Ref<Physics::PhysicShape> Sphere;
-	float Radius = 0.5f;
-	bool IsTrigger;
-};
+namespace Nuake {
+	class SphereColliderComponent
+	{
+	public:
+		Ref<Physics::PhysicShape> Sphere;
+		float Radius = 0.5f;
+		bool IsTrigger;
+	};
+}

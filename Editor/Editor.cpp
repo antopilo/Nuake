@@ -17,39 +17,40 @@
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
 
+
 int main()
 {
-    Engine::Init();
+    Nuake::Engine::Init();
 
-    EditorInterface editor;
+    Nuake::EditorInterface editor;
     editor.BuildFonts();
 
     // Register Gizmo textures
-    Ref<Texture> lightTexture = TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
-    Ref<Texture> camTexture = TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
-    Ref<Shader> GuizmoShader = ShaderManager::GetShader("resources/Shaders/gizmo.shader");
+    Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
+    Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
+    Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
 
-    while (!Engine::GetCurrentWindow()->ShouldClose())
+    while (!Nuake::Engine::GetCurrentWindow()->ShouldClose())
     {
-        Engine::Tick();
-        Engine::Draw();
+        Nuake::Engine::Tick();
+        Nuake::Engine::Draw();
 
-        if (Input::IsKeyPressed(GLFW_KEY_F8))
-            Engine::ExitPlayMode();
+        if (Nuake::Input::IsKeyPressed(GLFW_KEY_F8))
+            Nuake::Engine::ExitPlayMode();
 
-        Ref<FrameBuffer> sceneFramebuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
+        Ref<Nuake::FrameBuffer> sceneFramebuffer = Nuake::Engine::GetCurrentWindow()->GetFrameBuffer();
         sceneFramebuffer->Bind();
         
-        Ref<Scene> currentScene = Engine::GetCurrentScene();
-        if (currentScene && !Engine::IsPlayMode)
+        Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+        if (currentScene && !Nuake::Engine::IsPlayMode)
         {
             GuizmoShader->Bind();
         
             glDisable(GL_CULL_FACE);
             glDisable(GL_DEPTH_TEST);
-            auto camView = currentScene->m_Registry.view<TransformComponent, CameraComponent>();
+            auto camView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::CameraComponent>();
             for (auto e : camView) {
-                auto [transformComponent, cam] = camView.get<TransformComponent, CameraComponent>(e);
+                auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
 
                 GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
@@ -58,12 +59,12 @@ int main()
                 camTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
 
-                Renderer::DrawQuad(transformComponent.GetTransform());
+                Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
             }
 
-            auto view = currentScene->m_Registry.view<TransformComponent, LightComponent>();
+            auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
             for (auto e : view) {
-                auto [transformComponent, light] = view.get<TransformComponent, LightComponent>(e);
+                auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
 
                 GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
@@ -72,7 +73,7 @@ int main()
                 lightTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
             
-                Renderer::DrawQuad(transformComponent.GetTransform());
+                Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
             }
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
@@ -81,9 +82,9 @@ int main()
         
         sceneFramebuffer->Unbind();
         editor.Draw();
-        Engine::EndDraw();
+        Nuake::Engine::EndDraw();
     }
 
-    Engine::Close();
+    Nuake::Engine::Close();
 }
 
