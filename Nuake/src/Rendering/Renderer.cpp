@@ -29,6 +29,7 @@ namespace Nuake
     Ref<Shader> Renderer::m_ShadowmapShader;
 
     VertexArray* Renderer::QuadVertexArray;
+    VertexBuffer* Renderer::QuadVertexBuffer;
 
     unsigned int CubeVAO;
     unsigned int CubeVBO;
@@ -85,43 +86,29 @@ namespace Nuake
         QuadVertexArray = new VertexArray();
         QuadVertexArray->Bind();
 
-        VertexBuffer quadVertexBuffer(QuadVertices, sizeof(QuadVertices));
+        QuadVertexBuffer = new VertexBuffer(QuadVertices, sizeof(QuadVertices));
 
         VertexBufferLayout vblayout = VertexBufferLayout();
         vblayout.Push<float>(3);
         vblayout.Push<float>(2);
-
-
-        QuadVertexArray->AddBuffer(quadVertexBuffer, vblayout);
-
-        //glGenVertexArrays(1, &QuadVAO);`
-        //glBindVertexArray(QuadVAO);
-        //
-        //glGenBuffers(1, &QuadVBO);
-        //glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
-        //
-        //glEnableVertexAttribArray(0);
-        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        //glEnableVertexAttribArray(1);
-        //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        QuadVertexArray->AddBuffer(*QuadVertexBuffer, vblayout);
     }
 
     void Renderer::LoadShaders()
     {
-        m_ShadowmapShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
-        m_SkyboxShader = ShaderManager::GetShader("resources/Shaders/skybox.shader");
-        m_BRDShader = ShaderManager::GetShader("resources/Shaders/BRD.shader");
-        m_GBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
-        m_DeferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        m_ShadowmapShader   = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
+        m_SkyboxShader      = ShaderManager::GetShader("resources/Shaders/skybox.shader");
+        m_BRDShader         = ShaderManager::GetShader("resources/Shaders/BRD.shader");
+        m_GBufferShader     = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+        m_DeferredShader    = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         m_ProceduralSkyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
-        m_DebugShader = ShaderManager::GetShader("resources/Shaders/debug.shader");
-        m_Shader = ShaderManager::GetShader("resources/Shaders/basic.shader");
+        m_DebugShader       = ShaderManager::GetShader("resources/Shaders/debug.shader");
+        m_Shader            = ShaderManager::GetShader("resources/Shaders/basic.shader");
     }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        RenderCommand::Clear();
 
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
@@ -141,6 +128,7 @@ namespace Nuake
     {
         if (m_Lights.size() == 20)
             return;
+
         m_Lights.push_back({ transform , light });
 
         // What light idx is this?

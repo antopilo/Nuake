@@ -22,6 +22,7 @@ namespace Nuake {
 		void EnableVertexAttribArray(unsigned int& index) override;
 		void VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer) override;
 
+		void DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices) override;
 		void DrawArrays(int from, int count) override;
 	private:
 		GLenum GetType(const RendererEnum& bufferType);

@@ -5,7 +5,9 @@ namespace Nuake {
 	enum class RendererEnum {
 		INT, UINT, BYTE, UBYTE,
 		FLOAT, UFLOAT,
-		ARRAY_BUFFER
+		ARRAY_BUFFER,
+		ELEMENT_ARRAY_BUFFER,
+		TRIANGLES
 	};
 
 	class RendererAPI
@@ -25,6 +27,7 @@ namespace Nuake {
 		virtual void EnableVertexAttribArray(unsigned int& index) = 0;
 		virtual void VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer) = 0;
 
+		virtual void DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices) = 0;
 		virtual void DrawArrays(int from, int count) = 0;
 	};
 }

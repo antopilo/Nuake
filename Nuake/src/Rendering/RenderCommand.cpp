@@ -64,6 +64,11 @@ namespace Nuake {
 		sRendererAPI->VertexAttribPointer(index, size, type, normalized, stride, pointer);
 	}
 
+	void RenderCommand::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
+	{
+		sRendererAPI->DrawElements(mode, count, type, indices);
+	}
+
 	void RenderCommand::DrawArrays(int first, int count)
 	{
 		sRendererAPI->DrawArrays(first, count);

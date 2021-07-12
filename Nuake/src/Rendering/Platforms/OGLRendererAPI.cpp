@@ -54,7 +54,13 @@ namespace Nuake {
 
 	void OGLRendererAPI::VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer)
 	{
-		glVertexAttribPointer(index, size, GetType(type), normalized, stride, pointer);
+		GLenum glType = GetType(type);
+		glVertexAttribPointer(index, size, glType, normalized, stride, pointer);
+	}
+
+	void OGLRendererAPI::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
+	{
+		glDrawElements(GetType(mode), count, GetType(type), indices);
 	}
 
 	void OGLRendererAPI::DrawArrays(int from, int count)
@@ -67,12 +73,14 @@ namespace Nuake {
 		switch (bufferType)
 		{
 			case RendererEnum::ARRAY_BUFFER: return GL_ARRAY_BUFFER;
+			case RendererEnum::ELEMENT_ARRAY_BUFFER: return GL_ELEMENT_ARRAY_BUFFER;
 			case RendererEnum::FLOAT: return GL_FLOAT;
 			case RendererEnum::UFLOAT: return GL_BYTE;
 			case RendererEnum::BYTE: return GL_BYTE;
 			case RendererEnum::UBYTE: return GL_UNSIGNED_BYTE;
 			case RendererEnum::INT: return GL_INT;
 			case RendererEnum::UINT: return GL_UNSIGNED_INT;
+			case RendererEnum::TRIANGLES: return GL_TRIANGLES;
 		}
 
 		return 0;

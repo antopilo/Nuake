@@ -20,7 +20,5 @@ namespace Nuake {
 		void SetMaterial(const std::string materialName);
 		void Draw(glm::mat4 projection, glm::mat4 view, glm::mat4 transform);
 		void DrawEditor();
-
-		void RenderSphere();
 	};
 }

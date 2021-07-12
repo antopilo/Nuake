@@ -1,10 +1,13 @@
 #pragma once
-#include <vector>
-#include "src/Rendering/Textures/Texture.h"
-#include "src/Rendering/Vertex.h"
-#include <glm\ext\matrix_float4x4.hpp>
-#include "src/Rendering/Textures/Material.h"
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
+
+#include "src/Rendering/Textures/Material.h"
+#include "src/Rendering/Vertex.h"
+
+#include "src/Rendering/Buffers/VertexBuffer.h"
+#include "src/Rendering/Buffers/VertexArray.h"
+#include "src/Rendering/Buffers/VertexBufferLayout.h"
 
 namespace Nuake
 {
@@ -21,6 +24,10 @@ namespace Nuake
 		void DebugDraw();
 
 	private:
+		VertexBuffer* m_VertexBuffer;
+		VertexArray* m_VertexArray;
+		VertexBuffer* m_ElementBuffer;
+
 		unsigned int VAO, VBO, EBO;
 		void setupMesh();
 	};

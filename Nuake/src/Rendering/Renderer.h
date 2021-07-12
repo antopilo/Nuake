@@ -16,6 +16,8 @@ namespace Nuake
 	{
 	public:
 		static VertexArray* Renderer::QuadVertexArray;
+		static VertexBuffer* Renderer::QuadVertexBuffer;
+
 		static Ref<Shader> m_Shader;
 		static Ref<Shader> m_ShadowmapShader;
 		static Ref<Shader> m_SkyboxShader;

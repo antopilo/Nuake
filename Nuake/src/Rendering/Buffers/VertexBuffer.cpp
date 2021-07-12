@@ -1,12 +1,12 @@
 #include "VertexBuffer.h"
-#include "src/Rendering/RenderCommand.h"
 
 namespace Nuake {
-	VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+	VertexBuffer::VertexBuffer(const void* data, unsigned int size, RendererEnum bufferType)
 	{
+		m_BufferType = bufferType;
 		RenderCommand::GenBuffer(m_RendererID);
 		Bind();
-		RenderCommand::SetBufferData(RendererEnum::ARRAY_BUFFER, data, size);
+		RenderCommand::SetBufferData(m_BufferType, data, size);
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -16,11 +16,11 @@ namespace Nuake {
 
 	void VertexBuffer::Bind() const
 	{
-		RenderCommand::BindBuffer(RendererEnum::ARRAY_BUFFER, m_RendererID);
+		RenderCommand::BindBuffer(m_BufferType, m_RendererID);
 	}
 
 	void VertexBuffer::Unbind() const
 	{
-		RenderCommand::BindBuffer(RendererEnum::ARRAY_BUFFER, 0);
+		RenderCommand::BindBuffer(m_BufferType, 0);
 	}
 }
