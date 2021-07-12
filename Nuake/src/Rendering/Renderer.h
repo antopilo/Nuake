@@ -1,7 +1,8 @@
 #pragma once
 #include "Shaders/Shader.h"
-#include "../Scene/Components/Components.h"
-#include "../Core/Core.h"
+#include "src/Scene/Components/Components.h"
+#include "src/Core/Core.h"
+#include "Buffers/VertexArray.h"
 
 namespace Nuake
 {
@@ -14,16 +15,21 @@ namespace Nuake
 	class Renderer 
 	{
 	public:
-		static Shader* m_Shader;
-		static Shader* m_ShadowmapShader;
-		static Shader* m_SkyboxShader;
-		static Shader* m_BRDShader;
-		static Shader* m_GBufferShader;
-		static Shader* m_DeferredShader;
-		static Shader* m_ProceduralSkyShader;
-		static Shader* m_DebugShader;
+		static VertexArray* Renderer::QuadVertexArray;
+		static Ref<Shader> m_Shader;
+		static Ref<Shader> m_ShadowmapShader;
+		static Ref<Shader> m_SkyboxShader;
+		static Ref<Shader> m_BRDShader;
+		static Ref<Shader> m_GBufferShader;
+		static Ref<Shader> m_DeferredShader;
+		static Ref<Shader> m_ProceduralSkyShader;
+		static Ref<Shader> m_DebugShader;
 
 		static void Init();
+		static void LoadShaders();
+
+		static void BeginScene();
+		static void Flush();
 
 		// Drawing states
 		static void BeginDraw(Ref<Camera> camera);
@@ -33,7 +39,6 @@ namespace Nuake
 		static std::vector<Light> m_Lights;
 		static void RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam);
 		static void RegisterDeferredLight(TransformComponent transform, LightComponent light, Camera* cam);
-
 
 		static void SubmitMesh(Ref<Mesh> mesh);
 

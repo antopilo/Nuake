@@ -1,29 +1,39 @@
 #include "Renderer.h"
+
 #include <GL\glew.h>
-#include "Camera.h"
-#include "Textures/Texture.h"
-#include "Textures/Cubemap.h"
-#include "../../Engine.h"
+
+#include "RenderCommand.h"
+
+#include "src/Rendering/Camera.h"
+#include "src/Rendering/Textures/Texture.h"
+#include "src/Rendering/Textures/Cubemap.h"
+#include "src/Rendering/Shaders/ShaderManager.h"
+#include "Engine.h"
+#include "src/Core/Core.h"
+
 #include <glm/gtc/type_ptr.hpp>
+#include "Buffers/VertexBufferLayout.h"
 
 namespace Nuake
 {
     unsigned int depthTexture;
     unsigned int depthFBO;
 
-    Shader* Renderer::m_Shader;
-    Shader* Renderer::m_SkyboxShader;
-    Shader* Renderer::m_BRDShader;
-    Shader* Renderer::m_GBufferShader;
-    Shader* Renderer::m_DeferredShader;
-    Shader* Renderer::m_ProceduralSkyShader;
-    Shader* Renderer::m_DebugShader;
+    Ref<Shader> Renderer::m_Shader;
+    Ref<Shader> Renderer::m_SkyboxShader;
+    Ref<Shader> Renderer::m_BRDShader;
+    Ref<Shader> Renderer::m_GBufferShader;
+    Ref<Shader> Renderer::m_DeferredShader;
+    Ref<Shader> Renderer::m_ProceduralSkyShader;
+    Ref<Shader> Renderer::m_DebugShader;
+    Ref<Shader> Renderer::m_ShadowmapShader;
+
+    VertexArray* Renderer::QuadVertexArray;
 
     unsigned int CubeVAO;
     unsigned int CubeVBO;
     unsigned int QuadVAO;
     unsigned int QuadVBO;
-
 
     glm::vec3 CubeVertices[36]{
            glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,   0.5f, -0.5f),
@@ -52,15 +62,10 @@ namespace Nuake
 
     void Renderer::Init()
     {
-        // TODO: Make shader storage somewhere.
-        m_ShadowmapShader = new Shader("resources/Shaders/shadowMap.shader");
-        m_SkyboxShader = new Shader("resources/Shaders/skybox.shader");
-        m_BRDShader = new Shader("resources/Shaders/BRD.shader");
-        m_GBufferShader = new Shader("resources/Shaders/gbuffer.shader");
-        m_DeferredShader = new Shader("resources/Shaders/deferred.shader");
-        m_ProceduralSkyShader = new Shader("resources/Shaders/atmospheric_sky.shader");
-        m_DebugShader = new Shader("resources/Shaders/debug.shader");
-        m_Shader = new Shader("resources/Shaders/basic.shader");
+        RenderCommand::SetRendererAPI(RendererPlatforms::OpenGL);
+
+        LoadShaders();
+
         m_Shader->Bind();
 
         // TODO: Use buffer abstraction.
@@ -71,47 +76,63 @@ namespace Nuake
         glGenBuffers(1, &CubeVBO);
         glBindBuffer(GL_ARRAY_BUFFER, CubeVBO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, CubeVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Quad
-        glGenVertexArrays(1, &QuadVAO);
-        glBindVertexArray(QuadVAO);
+        // Create quad buffer
+        QuadVertexArray = new VertexArray();
+        QuadVertexArray->Bind();
 
-        glGenBuffers(1, &QuadVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
+        VertexBuffer quadVertexBuffer(QuadVertices, sizeof(QuadVertices));
 
-        glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
+        VertexBufferLayout vblayout = VertexBufferLayout();
+        vblayout.Push<float>(3);
+        vblayout.Push<float>(2);
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+        QuadVertexArray->AddBuffer(quadVertexBuffer, vblayout);
+
+        //glGenVertexArrays(1, &QuadVAO);`
+        //glBindVertexArray(QuadVAO);
+        //
+        //glGenBuffers(1, &QuadVBO);
+        //glBindBuffer(GL_ARRAY_BUFFER, QuadVBO);
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVertices), QuadVertices, GL_STATIC_DRAW);
+        //
+        //glEnableVertexAttribArray(0);
+        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        //glEnableVertexAttribArray(1);
+        //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     }
 
-    // TODO: Move to shader storage
-    Shader* Renderer::m_ShadowmapShader;
+    void Renderer::LoadShaders()
+    {
+        m_ShadowmapShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
+        m_SkyboxShader = ShaderManager::GetShader("resources/Shaders/skybox.shader");
+        m_BRDShader = ShaderManager::GetShader("resources/Shaders/BRD.shader");
+        m_GBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+        m_DeferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        m_ProceduralSkyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
+        m_DebugShader = ShaderManager::GetShader("resources/Shaders/debug.shader");
+        m_Shader = ShaderManager::GetShader("resources/Shaders/basic.shader");
+    }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
         m_Shader->SetUniformMat4f("u_View", camera->GetTransform());
         m_Shader->SetUniform3f("u_EyePosition", camera->GetTranslation().x, camera->GetTranslation().y, camera->GetTranslation().z);
-        m_Shader->Bind();
     }
 
     void Renderer::EndDraw()
     {
         m_Lights.clear(); // Clean up lights.
     }
-
 
     // List of all lights queued to be used for rendering this frame.
     std::vector<Light> Renderer::m_Lights;
@@ -138,7 +159,6 @@ namespace Nuake
             light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(19);
             light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(20);
         }
-
 
         m_Shader->SetUniform1i("LightCount", idx);
         m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
@@ -224,7 +244,7 @@ namespace Nuake
 
     void Renderer::DrawQuad(Matrix4 transform)
     {
-        glBindVertexArray(QuadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        QuadVertexArray->Bind();
+        RenderCommand::DrawArrays(0, 6);
     }
 }
