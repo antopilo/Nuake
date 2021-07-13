@@ -1,4 +1,5 @@
 #include <Engine.h>
+#include "src/Core/Maths.h"
 #include <src/Scene/Entities/Entity.h>
 
 #include <src/Scene/Scene.h>
@@ -7,9 +8,9 @@
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include <src/Scene/Components/Components.h>
 #include <src/Core/Physics/PhysicsManager.h>
-#include "../Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/BoxCollider.h"
 #include "src/EditorInterface.h"
-#include "../Core/Input.h"
+#include "src/Core/Input.h"
 #include <GLFW/glfw3.h>
 #include <src/Vendors/glm/trigonometric.hpp>
 #include <src/Scripting/ScriptingEngine.h>

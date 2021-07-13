@@ -2,12 +2,12 @@
 #include "src/Core/Physics/PhysicsManager.h"
 #include <GLFW/glfw3.h>
 
-#include "../Core/Input.h"
+#include "src/Core/Input.h"
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
 
-#include "../Rendering/Renderer.h"
-#include "../Rendering/Renderer2D.h"
+#include "src/Rendering/Renderer.h"
+#include "src/Rendering/Renderer2D.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -45,7 +45,6 @@ namespace Nuake
 		if (!CurrentWindow->GetScene())
 			return;
 
-		// Calculate delta time
 		float time = (float)glfwGetTime();
 		Timestep timestep = time - m_LastFrameTime;
 		m_LastFrameTime = time;
@@ -74,11 +73,13 @@ namespace Nuake
 	void Engine::EnterPlayMode()
 	{
 		// Dont trigger init if already in player mode.
-		if (!IsPlayMode)
-			if (GetCurrentScene()->OnInit())
-				IsPlayMode = true;
-			else
-				GetCurrentScene()->OnExit();
+		if (IsPlayMode)
+			return;
+
+		if (GetCurrentScene()->OnInit())
+			IsPlayMode = true;
+		else
+			GetCurrentScene()->OnExit();
 	}
 
 	void Engine::ExitPlayMode()
@@ -90,7 +91,6 @@ namespace Nuake
 		}
 
 		Input::ShowMouse();
-
 		IsPlayMode = false;
 	}
 
@@ -107,7 +107,6 @@ namespace Nuake
 
 	void Engine::EndDraw()
 	{
-		// Swap buffer and draw imgui
 		Window::Get()->EndDraw();
 	}
 

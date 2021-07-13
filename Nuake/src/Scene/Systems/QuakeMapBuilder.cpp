@@ -1,12 +1,12 @@
 #include "QuakeMapBuilder.h"
-#include <src/Scene/Scene.h>
-#include <src/Scene/Entities/Entity.h>
-#include <src/Scene/Components/QuakeMap.h>
-#include <src/Scene/Components/ParentComponent.h>
-#include <vector>
-#include <iostream>
-#include <sstream>
 #include "src/Core/FileSystem.h"
+#include "src/Core/String.h"
+#include "src/Scene/Scene.h"
+#include "src/Scene/Entities/Entity.h"
+#include "src/Scene/Components/QuakeMap.h"
+#include "src/Scene/Components/ParentComponent.h"
+#include <vector>
+
 
 extern "C" {
     #include <libmap/h/map_parser.h>
@@ -14,32 +14,21 @@ extern "C" {
     #include <libmap/h/surface_gatherer.h>
 }
 
-#include <src/Core/MaterialManager.h>
-#include <src/Scene/Components/BSPBrushComponent.h>
-#include <src/Scene/Components/TransformComponent.h>
-#include <src/Scene/Components/LightComponent.h>
-#include <src/Scene/Components/NameComponent.h>
-#include <src/Scene/Components/TriggerZone.h>
-#include <src/Resource/FGD/FGDClass.h>
-#include <src/Scene/Components/WrenScriptComponent.h>
+#include "src/Rendering/Textures/MaterialManager.h"
+#include "src/Scene/Components/BSPBrushComponent.h"
+#include "src/Scene/Components/TransformComponent.h"
+#include "src/Scene/Components/LightComponent.h"
+#include "src/Scene/Components/NameComponent.h"
+#include "src/Scene/Components/TriggerZone.h"
+#include "src/Resource/FGD/FGDClass.h"
+#include "src/Scene/Components/WrenScriptComponent.h"
 
 namespace Nuake {
     Ref<Material> DefaultMaterial;
-    std::vector<std::string> split(const std::string& s, char delim)
-    {
-        std::vector<std::string> result;
-        std::stringstream ss(s);
-        std::string item;
 
-        while (getline(ss, item, delim))
-        {
-            result.push_back(item);
-        }
-
-        return result;
-    }
-
-    void QuakeMapBuilder::CreateTrigger(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname)
+    void QuakeMapBuilder::CreateTrigger(brush* brush, brush_geometry* brush_inst, 
+                                        Scene* scene, Entity& parent, 
+                                        const std::string& target, const std::string& targetname)
     {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -98,7 +87,9 @@ namespace Nuake {
         bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
     }
 
-    void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname)
+    void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, 
+                                        Scene* scene, Entity& parent, 
+                                        const std::string& target, const std::string& targetname)
     {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -191,7 +182,9 @@ namespace Nuake {
             bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
     }
 
-    void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname, FGDBrushEntity fgdBrush)
+    void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
+                                            Scene* scene, Entity& parent, 
+        const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush)
     {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -373,12 +366,11 @@ namespace Nuake {
 
                 if (key == "origin")
                 {
-                    // Positon split with space.
-                    std::vector<std::string> splits = split(value, ' ');
+                    std::vector<std::string> splits = String::Split(value, ' ');
 
-                    float x = std::stof(splits[1]) * (1.f / 64.f);
-                    float y = std::stof(splits[2]) * (1.f / 64.f);
-                    float z = std::stof(splits[0]) * (1.f / 64.f);
+                    float x = String::ToFloat(splits[1]) * (1.f / 64.f);
+                    float y = String::ToFloat(splits[2]) * (1.f / 64.f);
+                    float z = String::ToFloat(splits[0]) * (1.f / 64.f);
 
                     Vector3 position = Vector3(x, y, z);
                     newEntity.GetComponent<TransformComponent>().Translation = position;

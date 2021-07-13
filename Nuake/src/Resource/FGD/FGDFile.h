@@ -73,7 +73,7 @@ namespace Nuake {
 		{
 			for (auto& b : BrushEntities)
 			{
-				if (b.Name == name)
+				if (name == b.Name)
 					return b;
 			}
 		}

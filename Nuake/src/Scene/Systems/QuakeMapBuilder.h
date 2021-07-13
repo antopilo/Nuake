@@ -12,9 +12,17 @@ namespace Nuake {
 	class QuakeMapBuilder
 	{
 	private:
-		void CreateTrigger(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname);
-		void CreateBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname);
-		void CreateFuncBrush(brush* brush, brush_geometry* brush_inst, Scene* scene, Entity& parent, std::string target, std::string targetname, FGDBrushEntity fgdBrush);
+		void CreateTrigger(brush* brush, brush_geometry* brush_inst,
+			Scene* scene, Entity& parent,
+			const std::string& target, const std::string& targetname);
+
+		void CreateBrush(brush* brush, brush_geometry* brush_inst,
+			Scene* scene, Entity& parent,
+			const std::string& target, const std::string& targetname);
+
+		void CreateFuncBrush(brush* brush, brush_geometry* brush_inst,
+			Scene* scene, Entity& parent,
+			const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush);
 	public:
 		QuakeMapBuilder() {}
 

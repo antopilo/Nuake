@@ -30,11 +30,10 @@ namespace Nuake
 
     VertexArray* Renderer::QuadVertexArray;
     VertexBuffer* Renderer::QuadVertexBuffer;
+    VertexArray*  Renderer::CubeVertexArray;
+    VertexBuffer* Renderer::CubeVertexBuffer;
 
-    unsigned int CubeVAO;
-    unsigned int CubeVBO;
-    unsigned int QuadVAO;
-    unsigned int QuadVBO;
+    RenderList Renderer::m_RenderList = RenderList();
 
     glm::vec3 CubeVertices[36]{
            glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,   0.5f, -0.5f),
@@ -67,28 +66,21 @@ namespace Nuake
 
         LoadShaders();
 
-        m_Shader->Bind();
-
-        // TODO: Use buffer abstraction.
-        // Setup buffers
-        glGenVertexArrays(1, &CubeVAO);
-        glBindVertexArray(CubeVAO);
-
-        glGenBuffers(1, &CubeVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, CubeVBO);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(CubeVertices), CubeVertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Create quad buffer
-        QuadVertexArray = new VertexArray();
-        QuadVertexArray->Bind();
-
-        QuadVertexBuffer = new VertexBuffer(QuadVertices, sizeof(QuadVertices));
+        // Cube buffer
+        CubeVertexArray = new VertexArray();
+        CubeVertexArray->Bind();
+        CubeVertexBuffer = new VertexBuffer(CubeVertices, sizeof(CubeVertices));
 
         VertexBufferLayout vblayout = VertexBufferLayout();
+        vblayout.Push<float>(3);
+        CubeVertexArray->AddBuffer(*CubeVertexBuffer, vblayout);
+
+        // Quad buffer
+        QuadVertexArray = new VertexArray();
+        QuadVertexArray->Bind();
+        QuadVertexBuffer = new VertexBuffer(QuadVertices, sizeof(QuadVertices));
+
+        vblayout = VertexBufferLayout();
         vblayout.Push<float>(3);
         vblayout.Push<float>(2);
         QuadVertexArray->AddBuffer(*QuadVertexBuffer, vblayout);
@@ -106,6 +98,16 @@ namespace Nuake
         m_Shader            = ShaderManager::GetShader("resources/Shaders/basic.shader");
     }
 
+    void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform)
+    {
+        m_RenderList.AddToRenderList(mesh, transform);
+    }
+
+    void Renderer::Flush()
+    {
+        m_RenderList.Flush();
+    }
+
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
         RenderCommand::Clear();
@@ -118,7 +120,7 @@ namespace Nuake
 
     void Renderer::EndDraw()
     {
-        m_Lights.clear(); // Clean up lights.
+        m_Lights.clear();
     }
 
     // List of all lights queued to be used for rendering this frame.
@@ -131,12 +133,11 @@ namespace Nuake
 
         m_Lights.push_back({ transform , light });
 
-        // What light idx is this?
         int idx = m_Lights.size();
 
-        glm::vec3 direction = light.GetDirection();
-        glm::vec3 pos = transform.GlobalTranslation;
-        glm::mat4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 direction = light.GetDirection();
+        Vector3 pos = transform.GlobalTranslation;
+        Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
@@ -173,12 +174,11 @@ namespace Nuake
     {
         m_Lights.push_back({ transform , light });
 
-        // What light idx is this?
         int idx = m_Lights.size();
 
-        glm::vec3 direction = light.GetDirection();
-        glm::vec3 pos = transform.Translation;
-        glm::mat4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 direction = light.GetDirection();
+        Vector3 pos = transform.Translation;
+        Matrix4 lightView = glm::lookAt(pos, pos - direction, Vector3(0.0f, 1.0f, 0.0f));
 
         light.m_Framebuffer->GetTexture()->Bind(11);
 
@@ -201,25 +201,24 @@ namespace Nuake
     void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
     {
         //glDisable(GL_DEPTH_TEST);
-        Ref<Window> window = Engine::GetCurrentWindow();
-        Ref<FrameBuffer> fb = window->GetFrameBuffer();
-
-
         m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
         m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
-        glBindVertexArray(CubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, 1.0f);
+        CubeVertexArray->Bind();
+        RenderCommand::DrawArrays(0, 36);
+        //glBindVertexArray(CubeVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glPolygonMode(GL_FRONT, GL_LINE);
-        glPolygonMode(GL_BACK, GL_LINE);
-        glLineWidth(4);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, 1.0f);
 
-        // Turn off wireframe mode
-        glPolygonMode(GL_FRONT, GL_FILL);
-        glPolygonMode(GL_BACK, GL_FILL);
+        //glPolygonMode(GL_FRONT, GL_LINE);
+        //glPolygonMode(GL_BACK, GL_LINE);
+        //glLineWidth(4);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        //
+        //// Turn off wireframe mode
+        //glPolygonMode(GL_FRONT, GL_FILL);
+        //glPolygonMode(GL_BACK, GL_FILL);
         //glEnable(GL_DEPTH_TEST);
 
     }

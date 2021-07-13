@@ -1,14 +1,14 @@
 #pragma once
-#include "../Core/Core.h"
-#include "../Core/Maths.h"
+#include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 
-#include "../Rendering/Textures/Material.h"
-#include "../Rendering/Mesh/Mesh.h"
-#include <src/Core/Physics/Rigibody.h>
+#include "src/Rendering/Textures/Material.h"
+#include "src/Rendering/Mesh/Mesh.h"
+#include "src/Core/Physics/Rigibody.h"
 
-namespace Nuake
-{
-	class BSPBrushComponent {
+namespace Nuake {
+	class BSPBrushComponent 
+	{
 	public:
 		std::vector<Ref<Mesh>> Meshes;
 		std::vector< Ref<Material>> Materials;

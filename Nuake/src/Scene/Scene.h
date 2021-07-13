@@ -1,15 +1,18 @@
 #pragma once
-#include "../Rendering/Camera.h"
-#include "Lighting/Environment.h"
 #include <vector>
+#include "src/Core/Core.h"
+#include "src/Core/Maths.h"
+
 #include "entt/entt.hpp"
 
-#include "../Core/Core.h"
+#include "src/Rendering/Camera.h"
+#include "Lighting/Environment.h"
+
 #include "EditorCamera.h"
-#include "../Resource/Serializable.h"
+#include "src/Resource/Serializable.h"
 #include "src/UI/UserInterface.h"
-#include "../Core/Maths.h"
-#include <src/Scene/Systems/System.h>
+
+#include "src/Scene/Systems/System.h"
 
 namespace Nuake {
 	class Entity;

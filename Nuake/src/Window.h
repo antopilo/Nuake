@@ -30,7 +30,6 @@ namespace Nuake
 		static Ref<Window> Get(); // Get the window instance
 		GLFWwindow* GetHandle();
 
-
 		bool ShouldClose();
 
 		int Init();
@@ -40,8 +39,6 @@ namespace Nuake
 		void EndDraw();
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
-		Ref<Texture> GetSceneRenderTexture();
-		void DrawQuad();
 
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);

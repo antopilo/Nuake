@@ -1,6 +1,4 @@
 #include "QuakeMap.h"
-#include "src/Core/Core.h"
-#include "src/Core/MaterialManager.h"
 
 namespace Nuake {
 	void QuakeMapComponent::Draw()

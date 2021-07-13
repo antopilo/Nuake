@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../Rendering/Mesh/Mesh.h"
-#include "../Resource/TrenchbroomMap.h"
-#include "../Resource/Serializable.h"
-#include <src/Scene/Systems/QuakeMapBuilder.h>
+
+#include "src/Rendering/Mesh/Mesh.h"
+#include "src/Resource/Serializable.h"
+#include "src/Scene/Systems/QuakeMapBuilder.h"
 
 namespace Nuake {
 	class QuakeMapComponent
@@ -13,7 +13,6 @@ namespace Nuake {
 
 	public:
 		std::vector<Ref<Mesh>> m_Meshes;
-		Ref<TrenchbroomMap> Map;
 		std::string Path;
 		bool HasCollisions = false;
 		void Load(std::string path, bool collisions);

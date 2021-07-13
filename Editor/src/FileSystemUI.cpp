@@ -3,10 +3,10 @@
 #include <src/Vendors/imgui/imgui.h>
 
 #include <src/Vendors/imgui/imgui_internal.h>
-#include <src/Resource/FontAwesome5.h>
+#include "src/Resource/FontAwesome5.h"
 #include "src/Scene/Components/ParentComponent.h"
-#include <src/Rendering/Textures/Texture.h>
-#include <src/Core/TextureManager.h>
+#include "src/Rendering/Textures/Texture.h"
+#include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
 namespace Nuake {

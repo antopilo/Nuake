@@ -1,28 +1,33 @@
-#include "EditorInterface.h"
-#include "src/Vendors/imgui/imgui.h"
-#include <src/Vendors/imgui/ImGuizmo.h>
-#include <src/Rendering/Textures/Texture.h>
-#include <Engine.h>
-#include <src/Scene/Components/LightComponent.h>
-#include <src/Core/Physics/PhysicsManager.h>
-#include <src/Scene/Components/Components.h>
-#include <src/Vendors/glm/gtc/type_ptr.hpp>
-#include <src/Vendors/glm/gtx/matrix_decompose.hpp>
-#include "src/Scene/Entities/ImGuiHelper.h"
 #include <map>
-#include <src/Core/MaterialManager.h>
-
-#include "../Resource/FontAwesome5.h"
-#include <src/Scene/Components/BoxCollider.h>
 #include <algorithm>
-#include <Dependencies/GLEW/include/GL/glew.h>
-#include "src/Resource/Project.h"
-#include <src/Scene/Components/LuaScriptComponent.h>
-#include <src/Core/Logger.h>
-#include <src/Scene/Components/WrenScriptComponent.h>
 
 #include "ProjectInterface.h"
-#include <src/Scene/Systems/QuakeMapBuilder.h>
+#include "EditorInterface.h"
+
+#include "Engine.h"
+#include "src/Core/Logger.h"
+
+#include "src/Vendors/imgui/imgui.h"
+#include "src/Vendors/imgui/ImGuizmo.h"
+#include "src/Scene/Entities/ImGuiHelper.h"
+
+#include "src/Rendering/Textures/Texture.h"
+#include "src/Rendering/Textures/MaterialManager.h"
+
+#include "src/Core/Physics/PhysicsManager.h"
+
+#include "src/Vendors/glm/gtc/type_ptr.hpp"
+#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
+#include "src/Resource/FontAwesome5.h"
+
+#include "Dependencies/GLEW/include/GL/glew.h"
+
+#include "src/Scene/Components/Components.h"
+#include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/LuaScriptComponent.h"
+#include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Systems/QuakeMapBuilder.h"
+#include "src/Scene/Components/LightComponent.h"
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -367,8 +372,8 @@ namespace Nuake {
                     if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
                         m_SelectedEntity.AddComponent<LightComponent>();
                     ImGui::Separator();
-                    if (ImGui::MenuItem("Model Component") && !m_SelectedEntity.HasComponent<ModelComponent>())
-                        m_SelectedEntity.AddComponent<ModelComponent>();
+                    if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
+                        m_SelectedEntity.AddComponent<MeshComponent>();
                     if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMapComponent>())
                         m_SelectedEntity.AddComponent<QuakeMapComponent>();
                     ImGui::Separator();
@@ -411,12 +416,12 @@ namespace Nuake {
                 ImGui::Separator();
             }
 
-            if (m_SelectedEntity.HasComponent<ModelComponent>()) {
+            if (m_SelectedEntity.HasComponent<MeshComponent>()) {
                 std::string icon = ICON_FA_MALE;
-                if (ImGui::CollapsingHeader((icon + " " + "Model").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+                if (ImGui::CollapsingHeader((icon + " " + "Mesh").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Model properties");
-                    auto& component = m_SelectedEntity.GetComponent<ModelComponent>();
+                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Mesh properties");
+                    auto& component = m_SelectedEntity.GetComponent<MeshComponent>();
                     // Path
                     std::string path = component.ModelPath;
                     char pathBuffer[256];

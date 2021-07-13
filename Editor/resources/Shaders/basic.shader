@@ -17,7 +17,6 @@ out vec3 v_Bitangent;
 uniform mat4 u_Projection;
 uniform mat4 u_View;
 uniform mat4 u_Model;
-uniform mat3 u_NormalMatrix;
 
 void main()
 {
@@ -77,25 +76,18 @@ struct Light {
 // Debug
 uniform int u_ShowNormal;
 
+// Lights
 const int MaxLight = 24;
 uniform int LightCount = 0;
 uniform Light Lights[MaxLight];
 
-// Lighting
-uniform vec3 u_AmbientColor;
-uniform vec4 u_LightColor;
-uniform vec3 u_LightDirection;
-uniform float u_Exposure;
-uniform float u_FogAmount;
-
-// Specular
-uniform samplerCube u_Skybox;
-uniform samplerCube u_IrradianceMap;
-uniform float u_Strength;
+// Camera
 uniform vec3 u_EyePosition;
+uniform float u_Exposure;
 
-// IBL
-uniform samplerCube irradianceMap;
+// Environmnent
+uniform float u_FogAmount;
+uniform samplerCube u_IrradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D   brdfLUT;
 

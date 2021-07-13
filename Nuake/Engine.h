@@ -8,16 +8,12 @@
 /* TODOS:
 * 
 * Engine:
-*	Scripting API for all component
 *	Scripting API for editing UI maybe
 *	Launch game standalone
 *	Fix physics system
-*	trenchbroom physics element
-*	
-*   
 */
 
-// Welcome to the Nuake source code. This is the entry point for the engine.
+// Welcome to the Nuake source code.
 namespace Nuake
 {
 	class Engine {
@@ -30,7 +26,7 @@ namespace Nuake
 		static float m_FixedUpdateRate;
 		static float m_FixedUpdateDifference;
 	public:
-		static bool IsPlayMode; // True if currently playing the game.
+		static bool IsPlayMode; // Is currently in runtime..
 
 		static void Init();  // Initialize the engine.
 		static void Tick();  // Updates everything, called everyframe.
@@ -45,11 +41,9 @@ namespace Nuake
 
 		static Ref<Window> GetCurrentWindow();
 
-		// Load a specific scene
 		static bool LoadScene(Ref<Scene> scene);
 		static Ref<Scene> GetCurrentScene();
 
-		// Loads a project and the default scene.
 		static bool LoadProject(Ref<Project> project);
 		static Ref<Project> GetProject();
 	};

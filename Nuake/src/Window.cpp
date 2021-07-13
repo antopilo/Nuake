@@ -147,7 +147,6 @@ namespace Nuake {
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
         glEnableVertexAttribArray(1);
 
-        // TODO: Style should move to editor
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
         //io.Fonts->AddFontDefault();

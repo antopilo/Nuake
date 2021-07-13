@@ -1,4 +1,4 @@
-#include "../Core/MaterialManager.h"
+#include "src/Rendering/Textures/MaterialManager.h"
 #include "Material.h"
 
 #include "src/Core/Maths.h"

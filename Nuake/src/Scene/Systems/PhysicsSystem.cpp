@@ -89,7 +89,6 @@ namespace Nuake
 
 	void PhysicsSystem::Update(Timestep ts)
 	{
-		// Update rigidbodies
 		PhysicsManager::Get()->Step(ts);
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();

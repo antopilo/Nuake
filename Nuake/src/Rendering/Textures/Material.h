@@ -1,5 +1,5 @@
 #pragma once
-#include "src/Core/TextureManager.h"
+#include "src/Rendering/Textures/TextureManager.h"
 #include "Texture.h"
 
 #include "src/Core/Core.h"

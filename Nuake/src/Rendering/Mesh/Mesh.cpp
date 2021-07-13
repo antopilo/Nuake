@@ -1,8 +1,6 @@
 #include "Mesh.h"
-#include <GL\glew.h>
-
 #include "src/Rendering/Renderer.h"
-#include "src/Core/MaterialManager.h"
+#include "src/Rendering/Textures/MaterialManager.h"
 
 namespace Nuake
 {

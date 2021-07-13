@@ -1,7 +1,7 @@
 #pragma once
 #include "ClassProperty.h"
 #include "src/Resource/Serializable.h"
-#include <string>
+#include "src/Core/String.h"
 #include <vector>
 
 namespace Nuake {
@@ -18,12 +18,13 @@ namespace Nuake {
 	public:
 		std::string Name;
 		std::string Description;
+		std::string Script = "";
+		std::string Class = "";
 
 		bool Visible = false;
 		bool Solid = false;
 		bool IsTrigger = false;
-		std::string Script = "";
-		std::string Class = "";
+
 		std::vector<ClassProperty> Properties;
 
 		FGDBrushEntity()
@@ -41,13 +42,15 @@ namespace Nuake {
 		json Serialize() override
 		{
 			BEGIN_SERIALIZE();
-			SERIALIZE_VAL(Name);
-			SERIALIZE_VAL(Description);
-			SERIALIZE_VAL(Visible);
-			SERIALIZE_VAL(Solid);
-			SERIALIZE_VAL(IsTrigger);
-			SERIALIZE_VAL(Script);
-			SERIALIZE_VAL(Class);
+			{
+				SERIALIZE_VAL(Name);
+				SERIALIZE_VAL(Description);
+				SERIALIZE_VAL(Script);
+				SERIALIZE_VAL(Class);
+				SERIALIZE_VAL(Visible);
+				SERIALIZE_VAL(Solid);
+				SERIALIZE_VAL(IsTrigger);
+			}
 			END_SERIALIZE();
 		}
 

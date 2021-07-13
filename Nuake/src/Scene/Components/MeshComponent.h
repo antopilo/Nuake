@@ -1,24 +1,30 @@
 #pragma once
-#include "../Rendering/Textures/Material.h"
 #include <glm\ext\matrix_float4x4.hpp>
-#include "BaseComponent.h"
+#include <vector>
+#include "src/Rendering/Mesh/Mesh.h"
 
-namespace Nuake {
-	class MeshComponent {
+#include "assimp/Importer.hpp"
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <string>
 
-	private:
-		unsigned int VAO;
-		unsigned int VBO;
-		Ref<Material> m_Material;
+namespace Nuake
+{
+    struct MeshComponent
+    {
+        std::string ModelPath;
 
-		void BuildTangents();
-	public:
-		void LoadModel(const std::string path);
-		//void ProcessNode(aiNode* node, const aiScene* scene);
-		MeshComponent();
+        MeshComponent()
+        {
+            //loadModel(path);
+        }
+        void LoadModel();
+        void Draw();
+        std::vector<Ref<Mesh>> meshes;
+        std::string directory;
 
-		void SetMaterial(const std::string materialName);
-		void Draw(glm::mat4 projection, glm::mat4 view, glm::mat4 transform);
-		void DrawEditor();
-	};
+        void ProcessNode(aiNode* node, const aiScene* scene);
+        Ref<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+        std::vector<Texture*> LoadMaterialTextures(aiMaterial* mat, aiTextureType type);
+    };
 }

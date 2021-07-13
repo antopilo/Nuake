@@ -3,6 +3,7 @@
 #include "src/Scene/Components/Components.h"
 #include "src/Core/Core.h"
 #include "Buffers/VertexArray.h"
+#include "RenderList.h"
 
 namespace Nuake
 {
@@ -14,9 +15,13 @@ namespace Nuake
 
 	class Renderer 
 	{
+	private:
+		static RenderList m_RenderList;
 	public:
 		static VertexArray* Renderer::QuadVertexArray;
 		static VertexBuffer* Renderer::QuadVertexBuffer;
+		static VertexArray* Renderer::CubeVertexArray;
+		static VertexBuffer* Renderer::CubeVertexBuffer;
 
 		static Ref<Shader> m_Shader;
 		static Ref<Shader> m_ShadowmapShader;
@@ -31,6 +36,7 @@ namespace Nuake
 		static void LoadShaders();
 
 		static void BeginScene();
+		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform);
 		static void Flush();
 
 		// Drawing states
@@ -42,7 +48,7 @@ namespace Nuake
 		static void RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam);
 		static void RegisterDeferredLight(TransformComponent transform, LightComponent light, Camera* cam);
 
-		static void SubmitMesh(Ref<Mesh> mesh);
+		
 
 		// Debug
 		static void DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
