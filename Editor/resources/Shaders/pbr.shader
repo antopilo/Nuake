@@ -212,7 +212,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     int shadowmap = -1;
 
     // Get CSM depth
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; i++)
     {
         float CSMDepth = light.CascadeDepth[i] ;
 

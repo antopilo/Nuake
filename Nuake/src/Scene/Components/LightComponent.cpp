@@ -34,14 +34,14 @@ namespace Nuake {
         CastShadows = toggle;
         if (CastShadows)
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < CSM_AMOUNT; i++)
             {
                 m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
                 m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
             }
         }
         else {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < CSM_AMOUNT; i++)
             {
                 m_Framebuffers[i] = nullptr;
             }
@@ -96,7 +96,7 @@ namespace Nuake {
 
     void LightComponent::Draw(TransformComponent transformComponent, Ref<Camera> cam)
     {
-        Renderer::RegisterLight(transformComponent, *this, cam);
+        
     }
 
     void LightComponent::DrawDeferred(TransformComponent transformComponent, Camera* cam)

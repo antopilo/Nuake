@@ -12,6 +12,7 @@ namespace Nuake {
 	class QuakeMapBuilder
 	{
 	private:
+		const float SCALE_FACTOR = 1.f / 64.f;
 		void CreateTrigger(brush* brush, brush_geometry* brush_inst,
 			Scene* scene, Entity& parent,
 			const std::string& target, const std::string& targetname);
@@ -23,6 +24,7 @@ namespace Nuake {
 		void CreateFuncBrush(brush* brush, brush_geometry* brush_inst,
 			Scene* scene, Entity& parent,
 			const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush);
+
 	public:
 		QuakeMapBuilder() {}
 

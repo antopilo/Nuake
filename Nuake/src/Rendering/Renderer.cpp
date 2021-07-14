@@ -95,7 +95,7 @@ namespace Nuake
         m_DeferredShader    = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         m_ProceduralSkyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
         m_DebugShader       = ShaderManager::GetShader("resources/Shaders/debug.shader");
-        m_Shader            = ShaderManager::GetShader("resources/Shaders/basic.shader");
+        m_Shader            = ShaderManager::GetShader("resources/Shaders/pbr.shader");
     }
 
     void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform)
@@ -103,15 +103,13 @@ namespace Nuake
         m_RenderList.AddToRenderList(mesh, transform);
     }
 
-    void Renderer::Flush()
+    void Renderer::Flush(Ref<Shader> shader, bool depthOnly)
     {
-        m_RenderList.Flush();
+        m_RenderList.Flush(shader, depthOnly);
     }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
-        RenderCommand::Clear();
-
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
         m_Shader->SetUniformMat4f("u_View", camera->GetTransform());
@@ -126,7 +124,7 @@ namespace Nuake
     // List of all lights queued to be used for rendering this frame.
     std::vector<Light> Renderer::m_Lights;
 
-    void Renderer::RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam)
+    void Renderer::RegisterLight(TransformComponent transform, LightComponent light)
     {
         if (m_Lights.size() == 20)
             return;
@@ -143,26 +141,17 @@ namespace Nuake
 
         if (light.CastShadows)
         {
-            light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
-            light.m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(18);
-            light.m_Framebuffers[2]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(19);
-            light.m_Framebuffers[3]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(20);
+            for (unsigned int i = 0; i < CSM_AMOUNT; i++)
+            {
+                light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
+                m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[" + std::to_string(i) + "]", 17 + i);
+                m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
+                m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+            }
         }
 
         m_Shader->SetUniform1i("LightCount", idx);
         m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[0]", 17);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[1]", 18);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[2]", 19);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[3]", 20);
-        m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[0]", light.mViewProjections[0]);
-        m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[1]", light.mViewProjections[1]);
-        m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[2]", light.mViewProjections[2]);
-        m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[3]", light.mViewProjections[3]);
-        m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[0]", light.mCascadeSplitDepth[0]);
-        m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[1]", light.mCascadeSplitDepth[1]);
-        m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[2]", light.mCascadeSplitDepth[2]);
-        m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[3]", light.mCascadeSplitDepth[3]);
         m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
         m_Shader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z);
         m_Shader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);

@@ -28,6 +28,7 @@
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Components/LightComponent.h"
+#include "UIComponents/Viewport.h"
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -53,7 +54,6 @@ namespace Nuake {
     void EditorInterface::DrawViewport()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-
         std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
         if (ImGui::Begin(name.c_str()))
         {
@@ -125,7 +125,6 @@ namespace Nuake {
             ImGui::PopStyleVar();
         }
         ImGui::End();
-
     }
 
     static int selected = 0;

@@ -226,19 +226,19 @@ namespace Nuake {
 
     void Window::Draw()
     {
-
         // Dont render if no scene is loaded.
         if (!m_Scene)
             return;
 
         // Dont render if no cam is found.
         Ref<Camera> cam = m_Scene->GetCurrentCamera();
-        if (!cam) return;
+        if (!cam) 
+            return;
 
         Vector2 size = m_Framebuffer->GetSize();
         cam->AspectRatio = size.x / size.y;
 
-        Renderer::BeginDraw(cam);
+        //Renderer::BeginDraw(cam);
 
         m_Scene->DrawShadows();
 

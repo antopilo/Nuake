@@ -21,7 +21,8 @@ namespace Nuake {
 		m_AmbientColor = color;
 	}
 
-	void Environment::Push() {
+	void Environment::Push() 
+	{
 		//Renderer::m_Shader->SetUniform3f("u_AmbientColor", m_AmbientColor.r, m_AmbientColor.g, m_AmbientColor.b);
 		//Renderer::m_Shader->SetUniform4f("u_AmbientColor", 1.0f, 1.0f, 1.0f, 1.0f);
 		Renderer::m_Shader->SetUniform1f("u_FogAmount", VolumetricFog);

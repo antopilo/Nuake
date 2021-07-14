@@ -37,7 +37,7 @@ namespace Nuake
 
 		static void BeginScene();
 		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform);
-		static void Flush();
+		static void Flush(Ref<Shader> shader, bool depthOnly = false);
 
 		// Drawing states
 		static void BeginDraw(Ref<Camera> camera);
@@ -45,7 +45,7 @@ namespace Nuake
 
 		// Lights
 		static std::vector<Light> m_Lights;
-		static void RegisterLight(TransformComponent transform, LightComponent light, Ref<Camera> cam);
+		static void RegisterLight(TransformComponent transform, LightComponent light);
 		static void RegisterDeferredLight(TransformComponent transform, LightComponent light, Camera* cam);
 
 		

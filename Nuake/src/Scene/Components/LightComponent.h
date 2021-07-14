@@ -16,6 +16,7 @@ namespace Nuake
         Directional, Point, Spot
     };
 
+    const int CSM_AMOUNT = 4;
     class LightComponent 
     {
     public:
@@ -32,9 +33,9 @@ namespace Nuake
         float LinearAttenuation = 0.0f;
         float QuadraticAttenuation = 0.0f;
 
-        Ref<FrameBuffer> m_Framebuffers[4];
-        glm::mat4 mViewProjections[4];
-        float mCascadeSplitDepth[4];
+        Ref<FrameBuffer> m_Framebuffers[CSM_AMOUNT];
+        glm::mat4 mViewProjections[CSM_AMOUNT];
+        float mCascadeSplitDepth[CSM_AMOUNT];
 
         LightComponent();
 
@@ -57,8 +58,7 @@ namespace Nuake
 
         void SetType(LightType type);
 
-        float mCascadeSplits[4];
-
+        float mCascadeSplits[CSM_AMOUNT];
 
         void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
         {
@@ -78,7 +78,7 @@ namespace Nuake
             const float maxZ = nearClip + clipRange;
             const float range = maxZ - minZ;
             const float ratio = maxZ / minZ;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < CSM_AMOUNT; i++)
             {
                 const float p = (i + 1) / static_cast<float>(4);
                 const float log = minZ * glm::pow(ratio, p);
@@ -93,7 +93,7 @@ namespace Nuake
 
             float lastSplitDist = 0.0f;
             // Calculate Orthographic Projection matrix for each cascade
-            for (int cascade = 0; cascade < 4; cascade++)
+            for (int cascade = 0; cascade < CSM_AMOUNT; cascade++)
             {
                 float splitDist = mCascadeSplits[cascade];
                 glm::vec4 frustumCorners[8] =
@@ -117,7 +117,7 @@ namespace Nuake
                     glm::vec4 invCorner = inverseViewProjection * frustumCorners[i];
                     frustumCorners[i] = invCorner / invCorner.w;
                 }
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < CSM_AMOUNT; i++)
                 {
                     glm::vec4 dist = frustumCorners[i + 4] - frustumCorners[i];
                     frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);

@@ -130,7 +130,7 @@ namespace Nuake
 	// Retrieve uniform address and registers it if not already registered.
 	int Shader::FindUniformLocation(std::string uniform) 
 	{
-		if (UniformCache.count(uniform) != 0) 
+		if (UniformCache.find(uniform) == UniformCache.end())
 		{
 			int addr = glGetUniformLocation(ProgramId, uniform.c_str());
 

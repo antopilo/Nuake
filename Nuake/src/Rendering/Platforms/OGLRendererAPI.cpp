@@ -58,6 +58,11 @@ namespace Nuake {
 		glVertexAttribPointer(index, size, glType, normalized, stride, pointer);
 	}
 
+	void OGLRendererAPI::DrawMultiElements(const RendererEnum mode, const int count, const RendererEnum type, const void* const* indices, unsigned int drawCount)
+	{
+		glMultiDrawElements(GetType(mode), &count, GetType(type), indices, drawCount);
+	}
+
 	void OGLRendererAPI::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
 	{
 		glDrawElements(GetType(mode), count, GetType(type), indices);

@@ -163,68 +163,55 @@ namespace Nuake {
 		auto view = m_Registry.view<TransformComponent, LightComponent>();
 
 		Ref<Camera> cam = m_EditorCamera;
-		if (Engine::IsPlayMode) {
+		if (Engine::IsPlayMode) 
+		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto e : view) {
+			for (auto e : view) 
+			{
 				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
 				cam = camera.CameraInstance;
 				break;
 			}
 		}
 
-		glm::mat4 perspective = cam->GetPerspective();
-		Renderer::m_ShadowmapShader->Bind();
-		for (auto l : view) {
+		Ref<Shader> shadowShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
+		shadowShader->Bind();
+
+		for (auto l : view) 
+		{
 			auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);
 			if (light.Type != LightType::Directional || !light.CastShadows)
 				continue;
 
 			light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
 
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < CSM_AMOUNT; i++)
 			{
 				light.m_Framebuffers[i]->Bind();
 				light.m_Framebuffers[i]->Clear();
-				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
+
+				shadowShader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+
 				for (auto e : meshView)
 				{
 					auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
-
-					Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
-					mesh.Draw();
+					for(auto& m : mesh.meshes)
+						Renderer::SubmitMesh(m, transform.GetTransform());
 				}
-				std::vector<BSPDrawObject> sortedBrushes = std::vector<BSPDrawObject>();
 
-				Renderer::m_ShadowmapShader->SetUniformMat4f("lightSpaceMatrix", light.mViewProjections[i]);
 				auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
-				for (auto e : quakeView) {
+				for (auto e : quakeView) 
+				{
 					auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
-					Renderer::m_ShadowmapShader->SetUniformMat4f("model", transform.GetTransform());
 
 					if (model.IsTransparent)
 						continue;
 
-					float dist = glm::length(transform.GlobalTranslation - cam->GetTranslation());
-					sortedBrushes.push_back({
-						dist,
-						model,
-						transform.GetTransform()
-						});
-
-					//for (auto& e : model.Meshes) {
-					//	e->Draw(false);
-					//}
+					for (auto& m : model.Meshes)
+						Renderer::SubmitMesh(m, transform.GetTransform());
 				}
 
-				std::sort(sortedBrushes.begin(), sortedBrushes.end(), DepthSort);
-
-				for (auto& b : sortedBrushes)
-				{
-					Renderer::m_ShadowmapShader->SetUniformMat4f("model", b.transform);
-					for (auto& e : b.brush.Meshes) {
-						e->Draw(false);
-					}
-				}
+				Renderer::Flush(shadowShader, true);
 			}
 
 		}
@@ -233,12 +220,8 @@ namespace Nuake {
 	void Scene::DrawInterface(Vector2 screensize)
 	{
 		for (auto i : m_Interfaces)
-		{
 			i->Draw(screensize);
-		}
 	}
-
-
 
 	void Scene::Draw()
 	{
@@ -253,98 +236,23 @@ namespace Nuake {
 				break;
 			}
 		}
+
+		Ref<Shader> pbrShader = ShaderManager::GetShader("resources/Shaders/pbr.shader");
+
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		Ref<Environment> env = GetEnvironment();
-
 		if (env->ProceduralSkybox)
-		{
 			env->ProceduralSkybox->Draw(cam);
-		}
 
-		Renderer::m_Shader->Bind();
+		pbrShader->Bind();
 		env->Push();
-		glEnable(GL_DEPTH_TEST);
-
-		// Push lights
-		{
-			auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
-			for (auto l : view) {
-				auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-
-				if (light.SyncDirectionWithSky)
-					light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
-
-				light.Draw(transform, m_EditorCamera);
-			}
-		}
 
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
-		Renderer::m_Shader->Bind();
-		Renderer::m_Shader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
-		Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
-
-		if (cam)
-		{
-			Renderer::m_Shader->SetUniform1f("u_Exposure", cam->Exposure);
-
-			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-			for (auto e : view) {
-				auto [transform, model, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-				Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
-				Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-				Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
-
-				for (auto& m : model.meshes)
-				{
-					Renderer::SubmitMesh(m, transform.GetTransform());
-				}
-
-				model.Draw();
-			}
-
-			std::vector<BSPDrawObject> sortedBrushes = std::vector<BSPDrawObject>();
-
-			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-			for (auto e : quakeView) {
-				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-				if (model.IsTransparent)
-					continue;
-
-				Renderer::m_Shader->SetUniformMat4f("u_View", cam->GetTransform());
-				Renderer::m_Shader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-
-				for (auto& b : model.Meshes)
-				{
-					Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
-
-					Renderer::SubmitMesh(b, transform.GetTransform());
-				}
-			}
-
-			Renderer::m_DebugShader->SetUniformMat4f("u_View", cam->GetTransform());
-			Renderer::m_DebugShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-
-			Renderer::Flush();
-
-			PhysicsManager::Get()->DrawDebug();
-		}
-	}
-
-	void Scene::EditorDraw()
-	{
-		glDisable(GL_DEPTH_TEST);
-		Ref<Environment> env = GetEnvironment();
-
-		glDisable(GL_CULL_FACE);
-		if (env->ProceduralSkybox)
-			env->ProceduralSkybox->Draw(m_EditorCamera);
-
-		Renderer::m_Shader->Bind();
-		env->Push();
 		glEnable(GL_DEPTH_TEST);
 
+		// Register the lights
 		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
 		for (auto l : view) 
 		{
@@ -353,26 +261,87 @@ namespace Nuake {
 			if (light.SyncDirectionWithSky)
 				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
 
-			light.Draw(transform, m_EditorCamera);
+			Renderer::RegisterLight(transform, light);
 		}
 
+		pbrShader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
+		pbrShader->SetUniform1i("u_ShowNormal", 0);
+
+		if (cam)
+		{
+			pbrShader->SetUniform1f("u_Exposure", cam->Exposure);
+			pbrShader->SetUniformMat4f("u_View", cam->GetTransform());
+			pbrShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
+
+			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
+			for (auto e : view) 
+			{
+				auto [transform, model, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
+				for (auto& m : model.meshes)
+					Renderer::SubmitMesh(m, transform.GetTransform());
+			}
+
+			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+			for (auto e : quakeView) 
+			{
+				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+				if (model.IsTransparent)
+					continue;
+
+				for (auto& b : model.Meshes)
+					Renderer::SubmitMesh(b, transform.GetTransform());
+			}
+
+			Renderer::Flush(pbrShader);
+
+			PhysicsManager::Get()->DrawDebug();
+		}
+	}
+
+	void Scene::EditorDraw()
+	{
+		Ref<Environment> env = GetEnvironment();
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+
+		if (env->ProceduralSkybox)
+			env->ProceduralSkybox->Draw(m_EditorCamera);
+
 		glEnable(GL_CULL_FACE);
+
+		Ref<Shader> pbrShader = ShaderManager::GetShader("resources/Shaders/pbr.shader");
+		pbrShader->Bind();
+
+		env->Push();
+
 		glCullFace(GL_FRONT);
-		Renderer::m_Shader->Bind();
-		Renderer::m_Shader->SetUniform1i("u_ShowNormal", 0);
+		glEnable(GL_DEPTH_TEST);
+
+		// Register the lights
+		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
+		for (auto l : view) 
+		{
+			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
+
+			if (light.SyncDirectionWithSky)
+				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
+
+			Renderer::RegisterLight(transform, light);
+		}
+
+		pbrShader->SetUniform1i("u_ShowNormal", 0);
 		if (m_EditorCamera)
 		{
 			Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
 			Renderer::m_Shader->SetUniform3f("u_EyePosition", m_EditorCamera->GetTranslation().x, m_EditorCamera->GetTranslation().y, m_EditorCamera->GetTranslation().z);
+			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
+			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+			
 			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
 			for (auto e : view) 
 			{
 				auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-
-				Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-				Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-				Renderer::m_Shader->SetUniformMat4f("u_Model", transform.GetTransform());
-
 				for(auto& m : mesh.meshes)
 					Renderer::SubmitMesh(m, transform.GetTransform());
 			}
@@ -387,20 +356,19 @@ namespace Nuake {
 
 				for (auto& b : model.Meshes)
 					Renderer::SubmitMesh(b, transform.GetTransform());
-
-				Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-				Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
 			}
 
-			Renderer::m_DebugShader->Bind();
+			Renderer::Flush(pbrShader);
+
+			Ref<Shader> flatShader = ShaderManager::GetShader("resources/Shaders/flat.shader");
+			flatShader->Bind();
+			flatShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
+			flatShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+
 			auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
 			for (auto e : boxCollider) 
 			{
 				auto [transform, box, parent] = boxCollider.get<TransformComponent, BoxColliderComponent, ParentComponent>(e);
-				Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-				Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-
-				Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
 
 				TransformComponent t = transform;
 				t.Scale = (box.Size * 2.f) * transform.Scale;
@@ -412,16 +380,12 @@ namespace Nuake {
 			{
 				auto [transform, box, parent] = sphereCollider.get<TransformComponent, SphereColliderComponent, ParentComponent>(e);
 
-				Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-				Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-				Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
+				flatShader->SetUniformMat4f("u_Model", transform.GetTransform());
 
 				TransformComponent t = transform;
 				t.Scale = (box.Radius * 2.f) * transform.Scale;
 				Renderer::DrawSphere(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
 			}
-
-			Renderer::m_DebugShader->Bind();
 
 			auto quakeViewTransparent = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 			for (auto e : quakeViewTransparent)
@@ -431,16 +395,15 @@ namespace Nuake {
 				if (!model.IsTransparent)
 					continue;
 
-				Renderer::m_DebugShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-				Renderer::m_DebugShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-				Renderer::m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
-				Renderer::m_DebugShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
+
+				flatShader->SetUniformMat4f("u_Model", transform.GetTransform());
+				flatShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
 
 				for (auto& e : model.Meshes)
 					Renderer::SubmitMesh(e, transform.GetTransform());
 			}
 
-			Renderer::Flush();
+			Renderer::Flush(flatShader);
 		}
 	}
 

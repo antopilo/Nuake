@@ -6,7 +6,7 @@
 #include "src/Scene/Components/QuakeMap.h"
 #include "src/Scene/Components/ParentComponent.h"
 #include <vector>
-
+#include <map>
 
 extern "C" {
     #include <libmap/h/map_parser.h>
@@ -24,6 +24,13 @@ extern "C" {
 #include "src/Scene/Components/WrenScriptComponent.h"
 
 namespace Nuake {
+    struct ProcessedMesh
+    {
+        std::vector<Vertex> Vertices;
+        std::vector<unsigned int> Indices;
+    };
+
+
     Ref<Material> DefaultMaterial;
 
     void QuakeMapBuilder::CreateTrigger(brush* brush, brush_geometry* brush_inst, 
@@ -131,7 +138,7 @@ namespace Nuake {
             for (int i = 0; i < face_geo_inst->vertex_count; ++i)
             {
                 face_vertex vertex = face_geo_inst->vertices[i];
-                vertex_uv vertex_uv = get_standard_uv(vertex.vertex, face, texture->width, texture->height);
+                vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
 
                 Vector3 vertexPos = Vector3(
                     (vertex.vertex.y - brush->center.y) * (1.0f / 64),
@@ -139,7 +146,7 @@ namespace Nuake {
                     (vertex.vertex.x - brush->center.x) * (1.0f / 64)
                 );
 
-                Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
+                Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
                 Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
                 Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
 
@@ -149,7 +156,7 @@ namespace Nuake {
                     vertexNormal,
                     vertexTangent,
                     glm::vec3(0.0, 1.0, 0.0), 0.0f
-                    });
+                });
             }
 
             for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
@@ -228,7 +235,6 @@ namespace Nuake {
         int lastTextureID = -1;
         std::string lastTexturePath = "";
 
-
         for (int f = 0; f < brush->face_count; ++f)
         {
             face* face = &brush->faces[f];
@@ -251,7 +257,7 @@ namespace Nuake {
             for (int i = 0; i < face_geo_inst->vertex_count; ++i)
             {
                 face_vertex vertex = face_geo_inst->vertices[i];
-                vertex_uv vertex_uv = get_standard_uv(vertex.vertex, face, texture->width, texture->height);
+                vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
 
                 Vector3 vertexPos = Vector3(
                     (vertex.vertex.y - brush->center.y) * (1.0f / 64),
@@ -259,7 +265,7 @@ namespace Nuake {
                     (vertex.vertex.x - brush->center.x) * (1.0f / 64)
                 );
 
-                Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
+                Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
                 Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
                 Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
 
@@ -358,6 +364,7 @@ namespace Nuake {
             std::string targetname = "";
             FGDBrushEntity fgdBrush;
             bool isEntity = false;
+            bool isWorldSpawn = false;
             for (int i = 0; i < entity_inst->property_count; i++)
             {
                 property* prop = &(entity_inst->properties)[i];
@@ -367,12 +374,11 @@ namespace Nuake {
                 if (key == "origin")
                 {
                     std::vector<std::string> splits = String::Split(value, ' ');
+                    float x = String::ToFloat(splits[1]);
+                    float y = String::ToFloat(splits[2]);
+                    float z = String::ToFloat(splits[0]);
 
-                    float x = String::ToFloat(splits[1]) * (1.f / 64.f);
-                    float y = String::ToFloat(splits[2]) * (1.f / 64.f);
-                    float z = String::ToFloat(splits[0]) * (1.f / 64.f);
-
-                    Vector3 position = Vector3(x, y, z);
+                    Vector3 position = Vector3(x, y, z) * SCALE_FACTOR;
                     newEntity.GetComponent<TransformComponent>().Translation = position;
                 }
 
@@ -385,33 +391,145 @@ namespace Nuake {
                         if (type == EntityType::Brush)
                         {
                             fgdBrush = file->GetBrushEntity(value);
-                            isEntity = true;
+
+                            if(fgdBrush.Name != "")
+                                isEntity = true;
+                            else
+                                isWorldSpawn = true;
                         }
+                    }
+                    else
+                    {
+                        isWorldSpawn = true;
+                        continue;
                     }
                 }
                 if (key == "targetname")
-                {
                     targetname = value;
-                }
                 if (key == "target")
-                {
                     target = value;
-                }
             }
-            for (int b = 0; b < entity_inst->brush_count; ++b)
+            if (!isWorldSpawn)
             {
-                brush* brush_inst = &entity_inst->brushes[b];
-                brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
-                if (isEntity)
+                for (int b = 0; b < entity_inst->brush_count; ++b)
                 {
-                    CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
-                }
-                else
-                {
-                    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
+                    brush* brush_inst = &entity_inst->brushes[b];
+                    brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
+
+                    if (isEntity)
+                        CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
+                    else
+                        CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
                 }
             }
+            else
+            {
+                std::map<std::string, Ref<Material>> m_Materials;
+                std::map<Ref<Material>, std::vector<ProcessedMesh>> m_StaticWorld;
 
+                Entity brushEntity = m_Scene->CreateEntity("WorldSpawn");
+                newEntity.AddChild(brushEntity);
+
+                TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
+                BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
+                bsp.IsSolid = true;
+                bsp.IsTransparent = false;
+                bsp.IsFunc = false;
+                bsp.IsTrigger = false;
+                bsp.target = target;
+
+                for (int b = 0; b < entity_inst->brush_count; ++b)
+                {
+                    brush* brush_inst = &entity_inst->brushes[b];
+                    brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
+
+                    for (int f = 0; f < brush_inst->face_count; ++f)
+                    {
+                        face* face = &brush_inst->faces[f];
+                        texture_data* texture = &textures[face->texture_idx];
+
+                        Ref<Material> currentMaterial;
+                        if (std::string(texture->name) != "__TB_empty")
+                        {
+                            std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
+                            if (m_Materials.find(path) == m_Materials.end())
+                                m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+
+                            currentMaterial = m_Materials[path];
+                            texture->height = currentMaterial->m_Albedo->GetHeight();
+                            texture->width = currentMaterial->m_Albedo->GetWidth();
+                        }
+                        else
+                        {
+                            currentMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
+                            texture->height = texture->width = 1;
+                        }
+                            
+
+                        face_geometry* face_geo_inst = &brush_geo_inst->faces[f];
+
+                        std::vector<Vertex> vertices;
+                        std::vector<unsigned int> indices;
+                        for (int i = 0; i < face_geo_inst->vertex_count; ++i)
+                        {
+                            face_vertex vertex = face_geo_inst->vertices[i];
+                            vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
+
+                            Vector3 vertexPos = Vector3(
+                                vertex.vertex.y,
+                                vertex.vertex.z,
+                                vertex.vertex.x
+                            );
+
+                            Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
+                            Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
+                            Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
+                            Vector3 vertexBitangent = glm::cross(vertexNormal, vertexTangent) * (float)vertex.tangent.w;
+
+                            vertices.push_back(Vertex {
+                                vertexPos * SCALE_FACTOR,
+                                vertexUV,
+                                vertexNormal,
+                                vertexTangent,
+                                vertexBitangent,
+                                0.0f
+                            });
+                        }
+
+                        for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
+                        {
+                            unsigned int index = face_geo_inst->indices[i];
+                            indices.push_back((unsigned int)index);
+                        }
+
+                        m_StaticWorld[currentMaterial].push_back({vertices, indices});
+
+                        vertices.clear();
+                        indices.clear();
+                    }
+                }
+
+                // Batching process
+                for (auto& mat : m_StaticWorld)
+                {
+                    std::vector<Vertex> batchedVertices;
+                    std::vector<unsigned int> batchedIndices;
+                    int indexOffset = 0;
+                    for (auto& pm : mat.second)
+                    {
+                        for(auto& vert : pm.Vertices)
+                            batchedVertices.push_back(vert);
+
+                        for (auto& index : pm.Indices)
+                            batchedIndices.push_back(indexOffset + index);
+
+                        indexOffset += pm.Vertices.size();
+                    }
+
+                    bsp.Meshes.push_back(CreateRef<Mesh>(batchedVertices, batchedIndices, mat.first));
+                }
+            }
+            
             isEntity = false;
         }
     }

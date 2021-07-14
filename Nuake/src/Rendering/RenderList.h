@@ -30,17 +30,17 @@ namespace Nuake
 			m_RenderList[mesh->m_Material].push_back({mesh, transform});
 		}
 
-		void Flush()
+		void Flush(Ref<Shader> shader, bool depthOnly = false)
 		{
-			Ref<Shader> pbrShader = ShaderManager::GetShader("resources/Shaders/basic.shader");
-			pbrShader->Bind();
+			shader->Bind();
 			for (auto& i : m_RenderList)
 			{
-				i.first->Bind();
+				if(!depthOnly)
+					i.first->Bind();
 
 				for (auto& m : i.second)
 				{
-					pbrShader->SetUniformMat4f("u_Model", m.transform);
+					shader->SetUniformMat4f("u_Model", m.transform);
 					m.Mesh->Draw(false);
 				}
 			}
