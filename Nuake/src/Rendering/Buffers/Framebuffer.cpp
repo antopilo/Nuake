@@ -28,6 +28,12 @@ namespace Nuake
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
+	FrameBuffer::~FrameBuffer()
+	{
+		glDeleteFramebuffers(1, &m_FramebufferID);
+		glDeleteRenderbuffers(1, &m_RenderBuffer);
+	}
+
 	void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
 	{
 		m_Textures[attachment] = texture;

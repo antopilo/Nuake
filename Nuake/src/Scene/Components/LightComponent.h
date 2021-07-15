@@ -29,9 +29,6 @@ namespace Nuake
         Ref<FrameBuffer> m_Framebuffer;
 
         bool CastShadows = false;
-        float Attenuation = 0.0f;
-        float LinearAttenuation = 0.0f;
-        float QuadraticAttenuation = 0.0f;
 
         Ref<FrameBuffer> m_Framebuffers[CSM_AMOUNT];
         glm::mat4 mViewProjections[CSM_AMOUNT];

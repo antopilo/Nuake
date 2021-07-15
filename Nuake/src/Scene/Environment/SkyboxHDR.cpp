@@ -289,7 +289,6 @@ namespace Nuake {
         Renderer::m_SkyboxShader->SetUniform1i("equirectangularMap", 6);
         Renderer::m_SkyboxShader->SetUniform1i("skybox", 5);
 
-
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         unsigned int maxMipLevels = 5;
         for (unsigned int mip = 0; mip < maxMipLevels; ++mip)

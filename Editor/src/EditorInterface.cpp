@@ -972,6 +972,10 @@ namespace Nuake {
         {
             if (m_IsMaterialSelected)
             {
+                ImGui::Text("Flags");
+                bool unlit = m_SelectedMaterial->data.u_Unlit == 1;
+                ImGui::Checkbox("Unlit", &unlit);
+                m_SelectedMaterial->data.u_Unlit = (int)unlit;
                 if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     unsigned int textureID = 0;
@@ -982,7 +986,10 @@ namespace Nuake {
                         std::string texture = FileDialog::OpenFile("*.png | *.jpg");
                     }
                     ImGui::SameLine();
-                    //ImGui::Checkbox("Use##1", &(bool)(m_SelectedMaterial->data.u_HasAlbedo));
+                    bool isAlbedo = m_SelectedMaterial->data.u_HasAlbedo == 1;
+                    ImGui::Checkbox("Use##1", &isAlbedo);
+                    m_SelectedMaterial->data.u_HasAlbedo = (int)isAlbedo;
+
                     ImGui::SameLine();
                     ImGui::ColorPicker3("Color", &m_SelectedMaterial->data.m_AlbedoColor.r);
                 }
@@ -1000,7 +1007,10 @@ namespace Nuake {
                         }
                     }
                     ImGui::SameLine();
-                    //ImGui::Checkbox("Use##2", &m_SelectedMaterial->data.u_HasAO);
+                    bool hasAO = m_SelectedMaterial->data.u_HasAO == 1;
+                    ImGui::Checkbox("Use##1", &hasAO);
+                    m_SelectedMaterial->data.u_HasAO = (int)hasAO;
+
                     ImGui::SameLine();
                     ImGui::DragFloat("Value##2", &m_SelectedMaterial->data.u_AOValue, 0.01f, 0.0f, 1.0f);
                 }

@@ -26,7 +26,6 @@ namespace Nuake {
         //    m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
         //    m_Framebuffers[i]->SetTexture(CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
         //}
-
     }
 
     void LightComponent::SetCastShadows(bool toggle)
@@ -92,11 +91,6 @@ namespace Nuake {
             return;
 
         Renderer::m_ShadowmapShader->Bind();
-    }
-
-    void LightComponent::Draw(TransformComponent transformComponent, Ref<Camera> cam)
-    {
-        
     }
 
     void LightComponent::DrawDeferred(TransformComponent transformComponent, Camera* cam)

@@ -22,7 +22,7 @@ namespace Nuake
 
 	public:
 		FrameBuffer(bool hasRenderBuffer, Vector2 size);
-		~FrameBuffer() { }
+		~FrameBuffer();
 
 		// 0x8CE0 = color attachment 0.
 		// TODO: Remove blackbox crap

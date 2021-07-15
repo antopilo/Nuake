@@ -2,6 +2,7 @@
 #include "src/Core/Timestep.h"
 #include "src/Core/Maths.h"
 #include "src/Resource/Serializable.h"
+#include "Frustum.h"
 
 namespace Nuake
 {
@@ -13,18 +14,18 @@ namespace Nuake
 
 	class EditorCamera;
 
-	// TODO: Remove logic from here.
 	class Camera : public ISerializable
 	{
 	private:
 		CAMERA_TYPE m_Type;
-
 
 		Vector3 Rotation = { 0.0f, 0.0f, 0.0f };
 		Vector3 Scale = { 1.0f, 1.0f, 1.0f };
 		Matrix4 m_Perspective;
 
 	public:
+		Frustum m_Frustum;
+
 		float AspectRatio = 16.0f / 9.0f;
 		// TODO: remove duplicate direction and have a proper api.
 		Vector3 up = Vector3(0.0f, 1.0f, 0.0f);

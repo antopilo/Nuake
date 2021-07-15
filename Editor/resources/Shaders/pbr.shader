@@ -111,6 +111,7 @@ layout(std140, binding = 32) uniform u_MaterialUniform
     float u_AOValue; //  52 byte
     int u_HasNormal; //  56 byte
     int u_HasDisplacement; //  60 byte
+    int u_Unlit;
 };
 
 float height_scale = 0.00f;
@@ -338,7 +339,6 @@ void main()
     finalNormal = finalNormal * 2.0 - 1.0;
     finalNormal = v_TBN * normalize(finalNormal);
 
-
     vec3 N = normalize(finalNormal);
     vec3 V = normalize(u_EyePosition - v_FragPos);
     vec3 R = reflect(-V, N);
@@ -350,6 +350,12 @@ void main()
     vec3 Fog = vec3(0.0);
     float shadow = 0.0f;
     vec3 Lo = vec3(0.0);
+
+    if (u_Unlit == 1)
+    {
+        FragColor = vec4(finalAlbedo, 1.0);
+        return;
+    }
 
     for (int i = 0; i < LightCount; i++)
     {

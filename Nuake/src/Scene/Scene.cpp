@@ -364,7 +364,6 @@ namespace Nuake {
 			flatShader->Bind();
 			flatShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			flatShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-
 			auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
 			for (auto e : boxCollider) 
 			{
@@ -486,7 +485,6 @@ namespace Nuake {
 		m_Registry.shrink_to_fit();
 	}
 
-	// Getter
 	Ref<Camera> Scene::GetCurrentCamera()
 	{
 		if (Engine::IsPlayMode)
@@ -494,7 +492,8 @@ namespace Nuake {
 			Ref<Camera> cam = nullptr;
 			{
 				auto view = m_Registry.view<TransformComponent, CameraComponent>();
-				for (auto e : view) {
+				for (auto e : view) 
+				{
 					auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
 					cam = camera.CameraInstance;
 					break;
@@ -508,7 +507,8 @@ namespace Nuake {
 		return m_EditorCamera;
 	}
 
-	Ref<Environment> Scene::GetEnvironment() {
+	Ref<Environment> Scene::GetEnvironment() 
+	{
 		return m_Environement;
 	}
 
@@ -530,7 +530,6 @@ namespace Nuake {
 		Logger::Log("Scene saved successfully");
 		return true;
 	}
-
 
 	void Scene::ReloadInterfaces()
 	{

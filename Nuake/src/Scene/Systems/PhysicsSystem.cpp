@@ -75,7 +75,8 @@ namespace Nuake
 		}
 
 		auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		for (auto e : bspTriggerView) {
+		for (auto e : bspTriggerView) 
+		{
 			auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
 
 			Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(brush.Meshes[0]);
@@ -105,10 +106,12 @@ namespace Nuake
 
 			brush.Targets.clear();
 			auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-			for (auto e2 : targetnameView) {
+			for (auto e2 : targetnameView) 
+			{
 				auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
 
-				if (name.Name == brush.target) {
+				if (name.Name == brush.target) 
+				{
 					brush.Targets.push_back(Entity{ e2, m_Scene });
 				}
 			}
@@ -116,13 +119,15 @@ namespace Nuake
 
 
 		auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		for (auto e : bspTriggerView) {
+		for (auto e : bspTriggerView) 
+		{
 			auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
 			trigger.GhostObject->ScanOverlap();
 
 			brush.Targets.clear();
 			auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-			for (auto e2 : targetnameView) {
+			for (auto e2 : targetnameView) 
+			{
 				auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
 
 				if (name.Name == brush.target) {

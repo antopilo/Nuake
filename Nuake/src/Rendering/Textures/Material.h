@@ -21,6 +21,7 @@ namespace Nuake
 		float u_AOValue;
 		int u_HasNormal;
 		int u_HasDisplacement;
+		int u_Unlit;
 	};
 
 	class Material
@@ -50,7 +51,8 @@ namespace Nuake
 			0,						// u_HasAO
 			0.5f,					// u_AOValue
 			0,						// u_HasNormal
-			0						// u_HasDisplacement
+			0,						// u_HasDisplacement
+			0
 		};
 
 		static Ref<Texture> m_DefaultAlbedo;
@@ -72,6 +74,9 @@ namespace Nuake
 
 		void SetName(const std::string name);
 		std::string GetName();
+
+		inline void SetUnlit(bool value)  {data.u_Unlit = value; }
+		inline bool GetUnlit() { return data.u_Unlit == 1; }
 
 		bool HasAlbedo() { return m_Albedo != nullptr; }
 		void SetAlbedo(const std::string path) { m_Albedo = CreateRef<Texture>(path); }
