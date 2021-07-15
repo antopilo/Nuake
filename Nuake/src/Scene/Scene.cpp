@@ -212,6 +212,7 @@ namespace Nuake {
 				}
 
 				Renderer::Flush(shadowShader, true);
+				light.m_Framebuffers[i]->Unbind();
 			}
 
 		}

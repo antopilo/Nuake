@@ -5,6 +5,23 @@ namespace Nuake
 {
 	Ref<Canvas> InterfaceParser::Root = CreateRef<Canvas>();
 
+	Ref<Canvas> InterfaceParser::Parse(const std::string path)
+	{
+		pugi::xml_document doc;
+		pugi::xml_parse_result result = doc.load_file(path.c_str());
+		std::string name = doc.first_child().name();
+		if (name != "Canvas")
+		{
+			Logger::Log("InterfaceParser error: First child should be a canvas - " + path, CRITICAL);
+			return nullptr;
+		}
+
+		Root = CreateCanvas(doc.first_child());
+		Root->Depth = 0;
+		Iterate(doc.first_child(), Root, 0);
+		return Root;
+	}
+
 	void InterfaceParser::Iterate(const pugi::xml_node& xml_node, Ref<Node> node, int depth)
 	{
 		int currentDepth = depth + 1;
@@ -27,23 +44,6 @@ namespace Nuake
 		}
 	}
 
-	Ref<Canvas> InterfaceParser::Parse(const std::string path)
-	{
-		pugi::xml_document doc;
-		pugi::xml_parse_result result = doc.load_file(path.c_str());
-		std::string name = doc.first_child().name();
-		if (name != "Canvas")
-		{
-			Logger::Log("InterfaceParser error: First child should be a canvas - " + path, CRITICAL);
-			return nullptr;
-		}
-
-		Root = CreateCanvas(doc.first_child());
-		Root->Depth = 0;
-		Iterate(doc.first_child(), Root, 0);
-		return Root;
-	}
-
 	Ref<TextNode> InterfaceParser::CreateTextNode(const pugi::xml_node& xml_node)
 	{
 		Ref<TextNode> node = CreateRef<TextNode>();
@@ -51,11 +51,10 @@ namespace Nuake
 		node->Type = NodeType::Text;
 		TextStyle style{
 			FontManager::GetFont("resources/Fonts/RobotoMono-Regular.ttf"),
-			2.0,
+			0.5,
 			Color(255, 255, 255, 255)
 		};
-
-		node->SetTextStyle(style);
+		
 		for (auto& a : xml_node.attributes())
 		{
 			std::string name = a.name();
@@ -80,7 +79,22 @@ namespace Nuake
 				node->Position = GetVec4Unit(a.value());
 			if (name == "color")
 				node->BackgroundColor = GetColor(a.value());
+			if (name == "font-size")
+				style.fontSize = std::stof(a.value());
 		}
+
+		Vector2 minSize = Renderer2D::CalculateStringSize(node->content, style);
+		node->Width = {
+			minSize.x,
+			Layout::Unit::PIXEL
+		};
+		node->Height = {
+			minSize.y,
+			Layout::Unit::PIXEL
+		};
+
+
+		node->SetTextStyle(style);
 		return node;
 	}
 

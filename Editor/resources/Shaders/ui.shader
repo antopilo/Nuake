@@ -2,9 +2,9 @@
 #version 460 core
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec2 UV;
+
 uniform mat4 model;
 uniform mat4 projection;
-
 
 out sample vec2 a_UV;
 
@@ -17,9 +17,9 @@ void main()
 #shader fragment
 #version 460 core
 
-uniform vec4 background_color;
-uniform float u_border_radius;
-uniform vec2 u_size;
+uniform vec4 u_BackgroundColor;
+uniform float u_BorderRadius;
+uniform vec2 u_Size;
 
 out vec4 FragColor;
 
@@ -53,11 +53,11 @@ bool ShouldDiscard(vec2 coords, vec2 dimensions, float radius)
 
 void main()
 {
-    vec2 coords = a_UV * u_size;
-    vec2 center = u_size / 2.0;
+    vec2 coords = a_UV * u_Size;
+    vec2 center = u_Size / 2.0;
 
     // Border rounding
-    if (ShouldDiscard(coords, u_size, u_border_radius))
+    if (ShouldDiscard(coords, u_Size, u_BorderRadius))
         discard;
-    FragColor = background_color;
+    FragColor = u_BackgroundColor;
 }

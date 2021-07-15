@@ -39,14 +39,21 @@ namespace Nuake
 
 			float parentLeft = 0.0f;
 			float parentTop = 0.0f;
-			auto parent = YGNodeGetParent(this->YogaNode);
+			auto parent = YGNodeGetParent(YogaNode);
+
+			while (parent)
+			{
+				parentLeft += YGNodeLayoutGetLeft(parent);
+				parentTop += YGNodeLayoutGetTop(parent);
+				parent = YGNodeGetParent(parent);
+			}
 			if (parent)
 			{
-				//parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(this->YogaNode));
-				//parentTop = YGNodeLayoutGetTop(YGNodeGetParent(this->YogaNode));
+				//parentLeft = YGNodeLayoutGetLeft(parent);
+				//parentTop = YGNodeLayoutGetTop(parent);
 				//float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
 				//float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-				//// Overflow hidden.
+				// Overflow hidden.
 				//float parentwidth = YGNodeLayoutGetWidth(parent);
 				//if (parentwidth - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeLeft) < width)
 				//	width = parentwidth - parentPaddingLeft;
@@ -58,7 +65,13 @@ namespace Nuake
 
 
 			transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, 0.f));
+			//transform = glm::scale(transform, Vector3(width, height, 1.0));
+			//Renderer2D::UIShader->Bind();
+			//Renderer2D::UIShader->SetUniformMat4f("model", transform);
+			//Renderer2D::UIShader->SetUniform1f("u_BorderRadius", Border.Left.Value);
+			//Renderer2D::UIShader->SetUniform2f("u_Size", width, height);
 
+			//Renderer2D::DrawRect();
 
 			//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
 

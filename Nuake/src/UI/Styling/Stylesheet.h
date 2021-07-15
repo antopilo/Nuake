@@ -88,7 +88,7 @@ namespace Nuake
 						KatanaDeclaration* declaration = (KatanaDeclaration*)(stylerule->declarations->data[k]);
 						std::string value = declaration->raw;
 						std::string name = declaration->property;
-						PropType type;
+						PropType type = PropType::NONE;
 
 						if (name == "height") type = PropType::HEIGHT;
 						if (name == "width") type = PropType::WIDTH;
@@ -235,7 +235,12 @@ namespace Nuake
 							styleGroup->SetProp(type, PropValue{ PropValueType::ENUM, propValue });
 							continue;
 						}
-						styleGroup->SetProp(type, StyleSheetParser::ParsePropType(value, type));
+						if (name == "font-size")
+						{
+							type = PropType::FONT_SIZE;
+						}
+						if(type != PropType::NONE)
+							styleGroup->SetProp(type, StyleSheetParser::ParsePropType(value, type));
 						Logger::Log(declaration->property);
 					}
 					Logger::Log(rule->name);
@@ -244,7 +249,7 @@ namespace Nuake
 			}
 			bool ParseSheet()
 			{
-				std::string content = FileSystem::ReadFile(this->Path);
+				std::string content = FileSystem::ReadFile(this->Path, true);
 				Data = katana_parse(content.c_str(), content.length(), KatanaParserModeStylesheet);
 				for (int i = 0; i < Data->stylesheet->rules.length; i++)
 				{

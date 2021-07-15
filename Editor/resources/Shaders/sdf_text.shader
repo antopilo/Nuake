@@ -18,7 +18,7 @@ void main()
 #version 460 core
 out vec4 FragColor;
 
-in vec2 a_UV;
+in sample vec2 a_UV;
 
 uniform vec2 texPos;
 uniform vec2 texScale;
@@ -41,12 +41,13 @@ float median(float r, float g, float b) {
 void main() {
     vec2 textSize = textureSize(msdf, 0);
 
-    vec2 uv = vec2(mix(texPos.x / textSize.x,texScale.x / textSize.x, a_UV.x),
-        mix(texScale.y / textSize.y, texPos.y / textSize.y, a_UV.y));
+    vec2 uv = vec2(mix(texPos.x / textSize.x, texScale.x / textSize.x, a_UV.x),
+                   mix(texScale.y / textSize.y, texPos.y / textSize.y, a_UV.y));
 
     vec3 msd = texture(msdf, uv).rgb;
     float sd = median(msd.r, msd.g, msd.b);
     float screenPxDistance = screenPxRange(uv) * (sd - 0.5);
-    float alpha = smoothstep(0.5 - 1/16.0, 0.5 + 1 / 16.0, sd);
-    FragColor = mix(bgColor, fgColor, alpha);
+    float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+
+    FragColor = mix(bgColor, fgColor, opacity);
 }

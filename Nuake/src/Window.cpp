@@ -81,6 +81,13 @@ namespace Nuake {
         return m_Framebuffer;
     }
 
+    Vector2 Window::GetSize()
+    {
+        int w, h = 0;
+        glfwGetWindowSize(m_Window, &w, &h);
+        return Vector2(w, h);
+    }
+
 
     int Window::Init()
     {

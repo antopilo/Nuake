@@ -40,6 +40,8 @@ namespace Nuake
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
 
+		Vector2 GetSize();
+
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);
 	};

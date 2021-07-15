@@ -99,11 +99,8 @@ namespace Nuake {
 			float leftOffset = YGNodeLayoutGetLeft(Root->YogaNode);
 			float topOffset = YGNodeLayoutGetTop(Root->YogaNode);
 
-
 			Vector2 charPos = Vector2(100.f, 100.f);
 			Char charr = font->GetChar(89);
-
-
 
 			DrawRecursive(Root, 0);
 			//Renderer2D::DrawChar(charr, font, charPos, size);

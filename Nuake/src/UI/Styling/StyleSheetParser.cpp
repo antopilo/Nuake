@@ -47,6 +47,16 @@ namespace Nuake
 			}
 		}
 		break;
+
+		case PropType::FONT_SIZE:
+		{
+			float fvalue = std::stof(str);
+			return PropValue{
+				PropValueType::PIXEL,
+				fvalue
+			};
+			break;
+		}
 		}
 
 		return PropValue();

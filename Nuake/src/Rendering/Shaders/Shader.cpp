@@ -117,7 +117,7 @@ namespace Nuake
 
 			std::cout << "Failed to compile " <<
 				(type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << " shader!" << std::endl;
-			std::cout << message << std::endl;
+			std::cout << std::string(message) << std::endl;
 
 			// Delete invalid shader
 			glDeleteShader(id);

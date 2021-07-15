@@ -20,7 +20,10 @@ namespace Nuake
 		static void Init();
 		static void BeginDraw(Vector2 size);
 		static void DrawRect();
-		static Vector2 CalculateStringSize(const std::string& str, Ref<Font> font, Vector2 position, float fontSize);
+		static void DrawRect(Matrix4 transform, Vector2 size, Color color, float borderRadius = 0.0f);
+		static void DrawRect(Vector2 position, Vector2 size, Color color, float borderRadius = 0.0f);
+
+		static Vector2 CalculateStringSize(const std::string& str, const TextStyle& style);
 		static void DrawString(const std::string& str, TextStyle style, Matrix4 model);
 		static void DrawChar(Char& letter, Ref<Font> font, Vector2 position, Vector2 size);
 		static void EndDraw();

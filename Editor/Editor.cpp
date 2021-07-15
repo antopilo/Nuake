@@ -17,7 +17,7 @@
 #include <src/Resource/FGD/FGDFile.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
-
+#include "src/UI/UserInterface.h"
 
 int main()
 {
@@ -30,14 +30,28 @@ int main()
     Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
     Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
     Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
-
+    Ref<Nuake::UI::UserInterface> uinterface = Nuake::UI::UserInterface::New("Editor");
+    
     while (!Nuake::Engine::GetCurrentWindow()->ShouldClose())
     {
+        Nuake::RenderCommand::Clear();
         Nuake::Engine::Tick();
-        Nuake::Engine::Draw();
 
+        uinterface->Update(0.0f);
+        Nuake::Engine::Draw();
+        //
+        if (Nuake::Input::IsKeyPressed(GLFW_KEY_F1))
+            uinterface->Reload();
         if (Nuake::Input::IsKeyPressed(GLFW_KEY_F8))
             Nuake::Engine::ExitPlayMode();
+        
+        Nuake::Vector2 WindowSize = Nuake::Engine::GetCurrentWindow()->GetSize();
+        glViewport(0, 0, WindowSize.x, WindowSize.y);
+        Nuake::Renderer2D::BeginDraw(WindowSize);
+        //Nuake::Renderer2D::DrawRect(Nuake::Vector2(100, 100), Nuake::Vector2(100, 100), Nuake::Color(1.0, 0.0, 0.0, 1.0), 2.0f);
+
+        
+        uinterface->Draw(WindowSize);
 
         Ref<Nuake::FrameBuffer> sceneFramebuffer = Nuake::Engine::GetCurrentWindow()->GetFrameBuffer();
         sceneFramebuffer->Bind();
@@ -52,37 +66,41 @@ int main()
             auto camView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::CameraComponent>();
             for (auto e : camView) {
                 auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
-
+        
                 GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
                 GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-
+        
                 camTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
-
+        
                 Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
             }
-
+        
             auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
             for (auto e : view) {
                 auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
-
+        
                 GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
                 GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-
+        
                 lightTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
             
                 Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
             }
+        
             glEnable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             GuizmoShader->Unbind();
         }
-        
         sceneFramebuffer->Unbind();
-        editor.Draw();
+
+        
+        //if (ImGui::Begin("test")) {}
+        //ImGui::End();
+        //editor.Draw();
         Nuake::Engine::EndDraw();
     }
 

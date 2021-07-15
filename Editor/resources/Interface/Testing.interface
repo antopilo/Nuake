@@ -1,11 +1,32 @@
 <Canvas
-  script="Scripts/test Test"
-  stylesheet="Interface/Testing.css"
+  stylesheet="resources/Interface/Testing.css"
   groups="screen"
+  color="33 33 33 255"
+  height="100%"
+  width="100%"
+  padding="8px 8px 8px 8px"
 >
-  <p groups="header">Hello, world!</p>
-  
-  <Rect onclick="hello()" 
-        groups="rect">
+  <Rect groups="logo"
+       color="25 25 25 0">
+    <p font-size="1.5" margin="0 0 0 12px">Nuake Engine</p>
+    <p groups="normal-text">You can load a project, or create a new one.</p>
+    <Rect groups="panel-bottom">
+      <Rect
+        groups="rect"
+        height="50px"
+        width="49%"
+        border="8px 8px 8px 8px"
+        color="18 18 18 255">
+        <p groups="normal-text">New Project</p>
+      </Rect>
+      <Rect
+        groups="rect"
+        height="50px"
+        width="49%"
+        border="8px 8px 8px 8px"
+        color="18 18 18 255">
+        <p groups="normal-text">Load Project</p>
+      </Rect>
+    </Rect>
   </Rect>
 </Canvas>
