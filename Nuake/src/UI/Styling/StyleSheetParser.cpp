@@ -1,6 +1,7 @@
 #include "StyleSheetParser.h"
 #include <regex>
 #include <src/Vendors/pugixml/pugixml.hpp>
+#include "src/Core/String.h"
 
 namespace Nuake
 {
@@ -57,6 +58,23 @@ namespace Nuake
 			};
 			break;
 		}
+		break;
+		case PropType::BACKGROUND_COLOR:
+			std::vector<std::string> splits = String::Split(str, ' ');
+
+			if (splits.size() == 4)
+			{
+				float r = String::ToFloat(splits[0]);
+				float g = String::ToFloat(splits[1]);
+				float b = String::ToFloat(splits[2]);
+				float a = String::ToFloat(splits[3]);
+				PropValue data = PropValue{
+					PropValueType::COLOR,
+					{0},
+				};
+				data.value.Color = Color(r, g, b, a);
+				return data;
+			}
 		}
 
 		return PropValue();

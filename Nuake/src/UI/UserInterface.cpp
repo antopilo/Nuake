@@ -9,12 +9,12 @@
 
 namespace Nuake {
 	namespace UI {
-		UserInterface::UserInterface(const std::string& name)
+		UserInterface::UserInterface(const std::string& name, const std::string& path)
 		{
 			m_Name = name;
 
-			font = FontLoader::LoadFont("resources/Fonts/RobotoMono-Regular.ttf");
-			Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
+			font = FontLoader::LoadFont("resources/Fonts/OpenSans-Regular.ttf");
+			Root = InterfaceParser::Parse(path);
 
 			if (!Root)
 			{
@@ -23,6 +23,7 @@ namespace Nuake {
 
 			yoga_config = YGConfigNew();
 			yoga_config->useWebDefaults = true;
+
 			CreateYogaLayout();
 		}
 
@@ -46,9 +47,9 @@ namespace Nuake {
 			CreateYogaLayout();
 		}
 
-		Ref<UserInterface> UserInterface::New(const std::string& name)
+		Ref<UserInterface> UserInterface::New(const std::string& name, const std::string& path)
 		{
-			return CreateRef<UserInterface>(name);
+			return CreateRef<UserInterface>(name, path);
 		}
 
 		void UserInterface::Calculate(int available_width, int available_height)
@@ -63,17 +64,23 @@ namespace Nuake {
 			Root->YogaNode = yoga_root;
 
 			for (auto& g : Root->GetGroups())
-				if (Root->StyleSheet->HasStyleGroup(g))
-					Root->ApplyStyle(Root->StyleSheet->GetStyleGroup(g));
+			{
+				if (!Root->StyleSheet->HasStyleGroup(g))
+					continue;
+
+				Ref<StyleGroup> stylegroup = Root->StyleSheet->GetStyleGroup(g);
+				if(stylegroup->Selector == StyleGroupSelector::Normal)
+					Root->ApplyStyle(stylegroup);
+			}
 			Root->SetYogaLayout();
 			CreateYogaLayoutRecursive(Root, yoga_root);
 		}
-
 
 		void UserInterface::CreateYogaLayoutRecursive(Ref<Node> node, YGNodeRef yoga_node)
 		{
 			if (node->Childrens.size() > 0)
 				YGNodeCalculateLayout(yoga_node, YGNodeLayoutGetWidth(yoga_node), YGNodeLayoutGetHeight(yoga_node), YGDirectionLTR);
+			
 			int index = 0;
 			for (auto& n : node->Childrens)
 			{
@@ -81,8 +88,16 @@ namespace Nuake {
 				n->YogaNode = newYogaNode;
 
 				for (auto& g : n->GetGroups())
-					if (Root->StyleSheet->HasStyleGroup(g))
-						n->ApplyStyle(Root->StyleSheet->GetStyleGroup(g));
+				{
+					if (!Root->StyleSheet->HasStyleGroup(g))
+						continue;
+
+					Ref<StyleGroup> stylegroup = Root->StyleSheet->GetStyleGroup(g);
+					if (stylegroup->Selector == StyleGroupSelector::Normal)
+						n->ApplyStyle(stylegroup);
+				}
+
+				n->HoverStyle = n->NormalStyle;
 
 				n->SetYogaLayout();
 				YGNodeInsertChild(yoga_node, newYogaNode, index);
@@ -95,15 +110,7 @@ namespace Nuake {
 		{
 			Calculate(size.x, size.y);
 			Renderer2D::BeginDraw(size);
-
-			float leftOffset = YGNodeLayoutGetLeft(Root->YogaNode);
-			float topOffset = YGNodeLayoutGetTop(Root->YogaNode);
-
-			Vector2 charPos = Vector2(100.f, 100.f);
-			Char charr = font->GetChar(89);
-
 			DrawRecursive(Root, 0);
-			//Renderer2D::DrawChar(charr, font, charPos, size);
 		}
 
 		void UserInterface::DrawRecursive(Ref<Node> node, float z)
@@ -132,8 +139,33 @@ namespace Nuake {
 			{
 				ConsumeMouseClick(Input::GetMousePosition());
 			}
+
+			// Hover
+			RecursiveHover(Root, Input::GetMousePosition());
 		}
 
+		void UserInterface::RecursiveHover(Ref<Node> node, Vector2 pos)
+		{
+			for (auto& c : node->Childrens)
+			{
+				RecursiveHover(c, pos);
+
+				bool isHover = c->IsPositionInside(pos);
+				c->IsHover = isHover;
+				if (isHover)
+				{
+					for (auto& g : c->GetGroups())
+					{
+						if (!Root->StyleSheet->HasStyleGroup(g + ":hover"))
+							continue;
+
+						Ref<StyleGroup> stylegroup = Root->StyleSheet->GetStyleGroup(g + ":hover");
+						c->ApplyStyle(stylegroup, StyleGroupSelector::Hover);
+					}
+				}
+				c->SetYogaLayout();
+			}
+		}
 
 		void UserInterface::RecursiveMouseClick(Ref<Node> node, Vector2 pos)
 		{
@@ -142,13 +174,11 @@ namespace Nuake {
 				RecursiveMouseClick(c, pos);
 				if (c->IsPositionInside(pos) && c->OnClickSignature != "")
 					this->Root->Script->CallMethod(c->OnClickSignature);
-
 			}
 		}
 
 		void UserInterface::ConsumeMouseClick(Vector2 pos)
 		{
-
 			RecursiveMouseClick(Root, pos);
 		}
 	}

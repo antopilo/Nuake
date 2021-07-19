@@ -4,6 +4,63 @@
 
 namespace Nuake
 {
+	namespace Layout
+	{
+		enum class LayoutDirection
+		{
+			LTR = 2, RTL = 3
+		};
+
+		enum class FlexWrap
+		{
+			NO_WRAP, WRAP, WRAP_REVERSED
+		};
+
+		enum class FlexDirection
+		{
+			ROW, COLUMN, ROW_REVERSED, COLUMN_REVERSED
+		};
+
+		enum class JustifyContent
+		{
+			FLEX_START, FLEX_END, CENTER, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY
+		};
+
+		enum class AlignItems
+		{
+			STRETCH, FLEX_START, FLEX_END, CENTER, BASELINE, AUTO,
+		};
+
+		enum class AlignContent
+		{
+			FLEX_START, FLEX_END, STRETCH, CENTER, SPACE_BETWEEN, SPACE_AROUND
+		};
+
+		enum class PositionType
+		{
+			STATIC, RELATIVE, ABSOLUTE
+		};
+
+		enum Unit
+		{
+			PIXEL, PERCENT, AUTO
+		};
+
+		struct LayoutUnit
+		{
+			float Value = 0.0f;
+			Unit Unit = Unit::PIXEL;
+		};
+
+		struct LayoutVec4
+		{
+			LayoutUnit Top = LayoutUnit{ 0, PIXEL };
+			LayoutUnit Bottom = LayoutUnit{ 0, PIXEL };
+			LayoutUnit Left = LayoutUnit{ 0, PIXEL };
+			LayoutUnit Right = LayoutUnit{ 0, PIXEL };
+		};
+	}
+
 	enum class PropType
 	{
 		NONE, HEIGHT, MAX_HEIGHT, MIN_HEIGHT, WIDTH, MAX_WIDTH, MIN_WIDTH,
@@ -36,10 +93,18 @@ namespace Nuake
 		Value value;
 	};
 
+	enum class StyleGroupSelector
+	{
+		Normal,
+		Hover,
+		Active
+	};
+
 	class StyleGroup
 	{
 	public:
 		std::map<PropType, PropValue> Props;
+		StyleGroupSelector Selector;
 
 		StyleGroup()
 		{
@@ -81,8 +146,30 @@ namespace Nuake
 	};
 
 
-	class Style
+	struct Style
 	{
-
+		Layout::PositionType PositionType;
+		Layout::LayoutVec4 Position;
+		Layout::LayoutUnit Width;
+		Layout::LayoutUnit MaxWidth;
+		Layout::LayoutUnit MinWidth;
+		Layout::LayoutUnit Height; 
+		Layout::LayoutUnit MaxHeight;
+		Layout::LayoutUnit MinHeight;
+		Layout::LayoutVec4 Margin;
+		Layout::LayoutVec4 Padding;
+		Layout::LayoutVec4 Border;
+		Color BackgroundColor;
+		Layout::LayoutDirection Direction;
+		Layout::FlexDirection FlexDirection;
+		Layout::FlexWrap FlexWrap;
+		float FlexGrow;
+		float FlexShrink;
+		float FlexBasis;
+		float AspectRatio;
+		Layout::JustifyContent JustifyContent;
+		Layout::AlignItems AlignItems;
+		Layout::AlignItems AlignSelf;
+		Layout::AlignContent AlignContent;
 	};
 }

@@ -139,7 +139,7 @@ namespace Nuake
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		return  Vector2(xpos, ypos);
+		return Vector2(xpos, ypos);
 	}
 #pragma endregion
 

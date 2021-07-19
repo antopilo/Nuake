@@ -14,22 +14,28 @@ namespace Nuake {
 		class UserInterface
 		{
 		private:
-			Ref<FrameBuffer> m_Framebuffer; // Texture of the interface.
 			std::string m_Name;
+			std::string m_Path;
+
+			Ref<FrameBuffer> m_Framebuffer; // Texture of the interface.
+
 			Ref<Canvas> Root;
+
 			YGConfigRef yoga_config;
 			YGNodeRef yoga_root;
+
+			void RecursiveHover(Ref<Node> node, Vector2 pos);
 		public:
 			Ref<Font> font;
 			const int Width = 1920;
 			const int Height = 1080;
 
-			UserInterface(const std::string& name);
+			UserInterface(const std::string& name, const std::string& path);
 			~UserInterface();
 
 			void Reload();
 
-			static Ref<UserInterface> New(const std::string& name);
+			static Ref<UserInterface> New(const std::string& name, const std::string& path);
 			void Calculate(int available_width, int available_height);
 
 			void CreateYogaLayout();
@@ -38,6 +44,7 @@ namespace Nuake {
 			void DrawRecursive(Ref<Node> node, float z);
 			void Update(Timestep ts);
 
+			void RecursiveStyle(Ref<Node> node);
 			void RecursiveMouseClick(Ref<Node> node, Vector2 pos);
 
 			void ConsumeMouseClick(Vector2 pos);

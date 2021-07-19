@@ -15,16 +15,14 @@
         groups="rect"
         height="50px"
         width="49%"
-        border="8px 8px 8px 8px"
-        color="18 18 18 255">
+        border="8px 8px 8px 8px">
         <p groups="normal-text">New Project</p>
       </Rect>
       <Rect
         groups="rect"
         height="50px"
         width="49%"
-        border="8px 8px 8px 8px"
-        color="18 18 18 255">
+        border="8px 8px 8px 8px">
         <p groups="normal-text">Load Project</p>
       </Rect>
     </Rect>

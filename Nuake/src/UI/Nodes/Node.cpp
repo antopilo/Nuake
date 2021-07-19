@@ -6,109 +6,126 @@ namespace Nuake
 	{
 		Childrens = std::vector<Ref<Node>>();
 		Groups = std::vector<std::string>();
-		PositionType = Layout::PositionType::RELATIVE;
-		Position = Layout::LayoutVec4();
-		Height = MaxHeight = MinHeight = Layout::LayoutUnit();
-		Margin = Padding = Border = Layout::LayoutVec4();
-		Direction = Layout::LayoutDirection::LTR;
-		FlexDirection = Layout::FlexDirection::ROW;
-		FlexWrap = Layout::FlexWrap::WRAP;
-		FlexGrow = 0.f;
-		FlexShrink = 1.f;
-		FlexBasis = 10.f;
-		AspectRatio = 1.f;
-		AlignItems = Layout::AlignItems::AUTO;
-		AlignSelf = Layout::AlignItems::AUTO;
+
+		NormalStyle = {
+			Layout::PositionType::RELATIVE,
+			Layout::LayoutVec4(),
+			Layout::LayoutUnit(), Layout::LayoutUnit(), Layout::LayoutUnit(),
+			Layout::LayoutUnit(), Layout::LayoutUnit(), Layout::LayoutUnit(),
+			Layout::LayoutVec4(),
+			Layout::LayoutVec4(),
+			Layout::LayoutVec4(),
+			Color(),
+			Layout::LayoutDirection::LTR,
+			Layout::FlexDirection::ROW,
+			Layout::FlexWrap::WRAP,
+			0.f,
+			1.f,
+			10.f,
+			1.f,
+			Layout::JustifyContent(),
+			Layout::AlignItems::AUTO,
+			Layout::AlignItems::AUTO,
+		};
 	}
 
-	void Node::ApplyStyle(Ref<StyleGroup> stylegroup)
+	void Node::ApplyStyle(Ref<StyleGroup> stylegroup, StyleGroupSelector selector)
 	{
+		Style style = NormalStyle;
 		for (auto& s : stylegroup->GetProps())
 		{
 			switch (s.first)
 			{
 			case PropType::HEIGHT:
 			{
-				Height.Unit = (Layout::Unit)(s.second.type);
+				style.Height.Unit = (Layout::Unit)(s.second.type);
 				float value = s.second.value.Number;
-				Height.Value = value;
+				style.Height.Value = value;
 			}
 			break;
 			case PropType::MIN_HEIGHT:
-				MinHeight.Unit = (Layout::Unit)s.second.type;
-				MinHeight.Value = s.second.value.Number;
+				style.MinHeight.Unit = (Layout::Unit)s.second.type;
+				style.MinHeight.Value = s.second.value.Number;
 				break;
 			case PropType::MAX_HEIGHT:
-				MaxHeight.Unit = (Layout::Unit)s.second.type;
-				MaxHeight.Value = s.second.value.Number;
+				style.MaxHeight.Unit = (Layout::Unit)s.second.type;
+				style.MaxHeight.Value = s.second.value.Number;
 				break;
 			case PropType::WIDTH:
-				Width.Unit = (Layout::Unit)s.second.type;
-				Width.Value = s.second.value.Number;
+				style.Width.Unit = (Layout::Unit)s.second.type;
+				style.Width.Value = s.second.value.Number;
 				break;
 			case PropType::MIN_WIDTH:
-				MinWidth.Unit = (Layout::Unit)s.second.type;
-				MinWidth.Value = s.second.value.Number;
+				style.MinWidth.Unit = (Layout::Unit)s.second.type;
+				style.MinWidth.Value = s.second.value.Number;
 				break;
 			case PropType::MAX_WIDTH:
-				MaxWidth.Unit = (Layout::Unit)s.second.type;
-				MaxWidth.Value = s.second.value.Number;
+				style.MaxWidth.Unit = (Layout::Unit)s.second.type;
+				style.MaxWidth.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_RIGHT:
-				Margin.Right.Unit = (Layout::Unit)s.second.type;
-				Margin.Right.Value = s.second.value.Number;
+				style.Margin.Right.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Right.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_LEFT:
-				Margin.Left.Unit = (Layout::Unit)s.second.type;
-				Margin.Left.Value = s.second.value.Number;
+				style.Margin.Left.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Left.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_TOP:
-				Margin.Top.Unit = (Layout::Unit)s.second.type;
-				Margin.Top.Value = s.second.value.Number;
+				style.Margin.Top.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Top.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_BOTTOM:
-				Margin.Bottom.Unit = (Layout::Unit)s.second.type;
-				Margin.Bottom.Value = s.second.value.Number;
+				style.Margin.Bottom.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Bottom.Value = s.second.value.Number;
 				break;
 			case PropType::JUSTIFY_CONTENT:
-				JustifyContent = (Layout::JustifyContent)s.second.value.Enum;
+				style.JustifyContent = (Layout::JustifyContent)s.second.value.Enum;
 				break;
 			case PropType::FLEX_WRAP:
-				FlexWrap = (Layout::FlexWrap)s.second.value.Enum;
+				style.FlexWrap = (Layout::FlexWrap)s.second.value.Enum;
 				break;
 			case PropType::FLEX_DIRECTION:
-				FlexDirection = (Layout::FlexDirection)s.second.value.Enum;
+				style.FlexDirection = (Layout::FlexDirection)s.second.value.Enum;
 				break;
 			case PropType::ALIGN_ITEMS:
-				AlignItems = (Layout::AlignItems)s.second.value.Enum;
+				style.AlignItems = (Layout::AlignItems)s.second.value.Enum;
 				break;
 			case PropType::SELF_ALIGN:
-				AlignSelf = (Layout::AlignItems)s.second.value.Enum;
+				style.AlignSelf = (Layout::AlignItems)s.second.value.Enum;
 				break;
 			case PropType::ALIGN_CONTENT:
-				AlignContent = (Layout::AlignContent)s.second.value.Enum;
+				style.AlignContent = (Layout::AlignContent)s.second.value.Enum;
 				break;
 			case PropType::POSITION:
-				PositionType = (Layout::PositionType)s.second.value.Enum;
+				style.PositionType = (Layout::PositionType)s.second.value.Enum;
 				break;
 			case PropType::LEFT:
-				Position.Left.Unit = (Layout::Unit)s.second.type;
-				Position.Left.Value = s.second.value.Number;
+				style.Position.Left.Unit = (Layout::Unit)s.second.type;
+				style.Position.Left.Value = s.second.value.Number;
 				break;
 			case PropType::RIGHT:
-				Position.Right.Unit = (Layout::Unit)s.second.type;
-				Position.Right.Value = s.second.value.Number;
+				style.Position.Right.Unit = (Layout::Unit)s.second.type;
+				style.Position.Right.Value = s.second.value.Number;
 				break;
 			case PropType::TOP:
-				Position.Top.Unit = (Layout::Unit)s.second.type;
-				Position.Top.Value = s.second.value.Number;
+				style.Position.Top.Unit = (Layout::Unit)s.second.type;
+				style.Position.Top.Value = s.second.value.Number;
 				break;
 			case PropType::BOTTOM:
-				Position.Bottom.Unit = (Layout::Unit)s.second.type;
-				Position.Bottom.Value = s.second.value.Number;
+				style.Position.Bottom.Unit = (Layout::Unit)s.second.type;
+				style.Position.Bottom.Value = s.second.value.Number;
+				break;
+			case PropType::BACKGROUND_COLOR:
+				style.BackgroundColor = s.second.value.Color;
 				break;
 			}
 		}
+
+		if (selector == StyleGroupSelector::Hover)
+			HoverStyle = style;
+		else
+			NormalStyle = style;
 	}
 
 	bool Node::IsPositionInside(Vector2 position)
@@ -122,19 +139,11 @@ namespace Nuake
 		float parentLeft = 0.0f;
 		float parentTop = 0.0f;
 		auto parent = YGNodeGetParent(YogaNode);
-		if (parent)
+		while (parent)
 		{
-			parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(YogaNode));
-			parentTop = YGNodeLayoutGetTop(YGNodeGetParent(YogaNode));
-			float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-			float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-			// Overflow hidden.
-			float parentwidth = YGNodeLayoutGetWidth(parent);
-			if (parentwidth - YGNodeLayoutGetMargin(YogaNode, YGEdgeLeft) < width)
-				width = parentwidth - parentPaddingLeft;
-			float parentHeight = YGNodeLayoutGetHeight(parent);
-			if (parentHeight < height)
-				height = parentHeight - parentPaddingTop;
+			parentLeft += YGNodeLayoutGetLeft(parent);
+			parentTop += YGNodeLayoutGetTop(parent);
+			parent = YGNodeGetParent(parent);
 		}
 
 		left += parentLeft;

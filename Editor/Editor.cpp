@@ -30,7 +30,7 @@ int main()
     Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
     Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
     Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
-    Ref<Nuake::UI::UserInterface> uinterface = Nuake::UI::UserInterface::New("Editor");
+    Ref<Nuake::UI::UserInterface> uinterface = Nuake::UI::UserInterface::New("Editor", "resources/Interface/Testing.interface");
     
     while (!Nuake::Engine::GetCurrentWindow()->ShouldClose())
     {
@@ -39,18 +39,16 @@ int main()
 
         uinterface->Update(0.0f);
         Nuake::Engine::Draw();
-        //
+
         if (Nuake::Input::IsKeyPressed(GLFW_KEY_F1))
             uinterface->Reload();
+
         if (Nuake::Input::IsKeyPressed(GLFW_KEY_F8))
             Nuake::Engine::ExitPlayMode();
         
         Nuake::Vector2 WindowSize = Nuake::Engine::GetCurrentWindow()->GetSize();
         glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
-        //Nuake::Renderer2D::DrawRect(Nuake::Vector2(100, 100), Nuake::Vector2(100, 100), Nuake::Color(1.0, 0.0, 0.0, 1.0), 2.0f);
-
-        
         uinterface->Draw(WindowSize);
 
         Ref<Nuake::FrameBuffer> sceneFramebuffer = Nuake::Engine::GetCurrentWindow()->GetFrameBuffer();
@@ -97,9 +95,6 @@ int main()
         }
         sceneFramebuffer->Unbind();
 
-        
-        //if (ImGui::Begin("test")) {}
-        //ImGui::End();
         //editor.Draw();
         Nuake::Engine::EndDraw();
     }

@@ -14,12 +14,12 @@ namespace Nuake
 	{
 	public:
 		std::string content = "Hello World!";
-		TextStyle style;
+		TextStyle textStyle;
 
 
 		void SetTextStyle(TextStyle textStyle)
 		{
-			this->style = textStyle;
+			this->textStyle = textStyle;
 		}
 
 		void CalculateSize()
@@ -40,6 +40,10 @@ namespace Nuake
 			float parentLeft = 0.0f;
 			float parentTop = 0.0f;
 			auto parent = YGNodeGetParent(YogaNode);
+
+			float maxWidth = 0; 
+			if (parent)
+				maxWidth = YGNodeLayoutGetWidth(parent);
 
 			while (parent)
 			{
@@ -62,8 +66,6 @@ namespace Nuake
 				//	height = parentHeight - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeTop) - parentPaddingTop;
 			}
 
-
-
 			transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, 0.f));
 			//transform = glm::scale(transform, Vector3(width, height, 1.0));
 			//Renderer2D::UIShader->Bind();
@@ -75,7 +77,7 @@ namespace Nuake
 
 			//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
 
-			Renderer2D::DrawString(content, style, transform);
+			Renderer2D::DrawString(content, textStyle, transform);
 			//Renderer2D::DrawString(content, style.font, Vector2(Position.Left, Position.Top), 2.0);
 		}
 	};

@@ -7,7 +7,7 @@
 #include "../Nodes/Node.h"
 #include <src/UI/Styling/StyleSheetParser.h>
 #include <regex>
-#include <string>
+#include "src/Core/String.h"
 #include <map>
 
 namespace Nuake
@@ -23,20 +23,7 @@ namespace Nuake
 		public:
 			std::string Path;
 			static Ref<StyleSheet> New(const std::string& path);
-			std::vector<std::string> Split(std::string const& str, const char delim)
-			{
-				std::vector<std::string> result;
-				size_t start;
-				size_t end = 0;
 
-				while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
-				{
-					end = str.find(delim, start);
-					result.push_back(str.substr(start, end - start));
-				}
-
-				return result;
-			}
 			void AddStyleGroup(std::string selector, Ref<StyleGroup> group)
 			{
 				Styles[selector] = group;
@@ -71,6 +58,7 @@ namespace Nuake
 				if (rule->type == KatanaRuleStyle)
 				{
 					Ref<StyleGroup> styleGroup = CreateRef<StyleGroup>();
+					styleGroup->Selector = StyleGroupSelector::Normal;
 
 					// Selectors
 					KatanaStyleRule* stylerule = (KatanaStyleRule*)rule;
@@ -79,6 +67,17 @@ namespace Nuake
 						KatanaSelector* selector = (KatanaSelector*)stylerule->selectors->data[j];
 						std::string name = selector->data->value;
 
+						KatanaPseudoType pseudo = KatanaPseudoUnknown;
+						if(selector->tagHistory)
+							pseudo = selector->tagHistory->pseudo;
+
+						// Special selectors
+						if (pseudo == KatanaPseudoHover)
+						{
+							name += ":hover";
+							styleGroup->Selector = StyleGroupSelector::Hover;
+						}
+						
 						AddStyleGroup(name, styleGroup);
 					}
 
@@ -102,7 +101,7 @@ namespace Nuake
 							std::smatch match_value;
 							Layout::LayoutVec4 result;
 
-							std::vector<std::string> splits = Split(value, ' ');
+							std::vector<std::string> splits = String::Split(value, ' ');
 							int idx = 0;
 							for (auto& s : splits)
 							{
@@ -239,11 +238,14 @@ namespace Nuake
 						{
 							type = PropType::FONT_SIZE;
 						}
+						if (name == "background-color")
+						{
+							type = PropType::BACKGROUND_COLOR;
+						}
+
 						if(type != PropType::NONE)
 							styleGroup->SetProp(type, StyleSheetParser::ParsePropType(value, type));
-						Logger::Log(declaration->property);
 					}
-					Logger::Log(rule->name);
 				}
 				return true;
 			}

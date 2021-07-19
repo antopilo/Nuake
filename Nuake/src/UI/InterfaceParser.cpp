@@ -49,7 +49,7 @@ namespace Nuake
 		Ref<TextNode> node = CreateRef<TextNode>();
 		node->content = xml_node.text().as_string();
 		node->Type = NodeType::Text;
-		TextStyle style{
+		TextStyle style {
 			FontManager::GetFont("resources/Fonts/RobotoMono-Regular.ttf"),
 			0.5,
 			Color(255, 255, 255, 255)
@@ -66,29 +66,29 @@ namespace Nuake
 				}
 			}
 			if (name == "height")
-				node->Height = GetUnit(a.value());
+				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")
-				node->Width = GetUnit(a.value());
+				node->NormalStyle.Width = GetUnit(a.value());
 			if (name == "margin")
-				node->Margin = GetVec4Unit(a.value());
+				node->NormalStyle.Margin = GetVec4Unit(a.value());
 			if (name == "padding")
-				node->Padding = GetVec4Unit(a.value());
+				node->NormalStyle.Padding = GetVec4Unit(a.value());
 			if (name == "border")
-				node->Border = GetVec4Unit(a.value());
+				node->NormalStyle.Border = GetVec4Unit(a.value());
 			if (name == "position")
-				node->Position = GetVec4Unit(a.value());
+				node->NormalStyle.Position = GetVec4Unit(a.value());
 			if (name == "color")
-				node->BackgroundColor = GetColor(a.value());
+				node->NormalStyle.BackgroundColor = GetColor(a.value());
 			if (name == "font-size")
 				style.fontSize = std::stof(a.value());
 		}
 
 		Vector2 minSize = Renderer2D::CalculateStringSize(node->content, style);
-		node->Width = {
+		node->NormalStyle.Width = {
 			minSize.x,
 			Layout::Unit::PIXEL
 		};
-		node->Height = {
+		node->NormalStyle.Height = {
 			minSize.y,
 			Layout::Unit::PIXEL
 		};
@@ -114,19 +114,19 @@ namespace Nuake
 				}
 			}
 			if (name == "height")
-				node->Height = GetUnit(a.value());
+				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")
-				node->Width = GetUnit(a.value());
+				node->NormalStyle.Width = GetUnit(a.value());
 			if (name == "margin")
-				node->Margin = GetVec4Unit(a.value());
+				node->NormalStyle.Margin = GetVec4Unit(a.value());
 			if (name == "padding")
-				node->Padding = GetVec4Unit(a.value());
+				node->NormalStyle.Padding = GetVec4Unit(a.value());
 			if (name == "border")
-				node->Border = GetVec4Unit(a.value());
+				node->NormalStyle.Border = GetVec4Unit(a.value());
 			if (name == "position")
-				node->Position = GetVec4Unit(a.value());
+				node->NormalStyle.Position = GetVec4Unit(a.value());
 			if (name == "color")
-				node->BackgroundColor = GetColor(a.value());
+				node->NormalStyle.BackgroundColor = GetColor(a.value());
 			if (name == "onclick")
 			{
 				std::string signature = a.value();
@@ -268,19 +268,19 @@ namespace Nuake
 				}
 			}
 			if (name == "height")
-				node->Height = GetUnit(a.value());
+				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")
-				node->Width = GetUnit(a.value());
+				node->NormalStyle.Width = GetUnit(a.value());
 			if (name == "margin")
-				node->Margin = GetVec4Unit(a.value());
+				node->NormalStyle.Margin = GetVec4Unit(a.value());
 			if (name == "padding")
-				node->Padding = GetVec4Unit(a.value());
+				node->NormalStyle.Padding = GetVec4Unit(a.value());
 			if (name == "border")
-				node->Border = GetVec4Unit(a.value());
+				node->NormalStyle.Border = GetVec4Unit(a.value());
 			if (name == "position")
-				node->Position = GetVec4Unit(a.value());
+				node->NormalStyle.Position = GetVec4Unit(a.value());
 			if (name == "color")
-				node->BackgroundColor = GetColor(a.value());
+				node->NormalStyle.BackgroundColor = GetColor(a.value());
 			if (name == "script")
 			{
 				auto s = split(a.value(), ' ');

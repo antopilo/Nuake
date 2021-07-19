@@ -8,71 +8,12 @@
 
 namespace Nuake
 {
-	namespace Layout
-	{
-		enum class LayoutDirection
-		{
-			LTR = 2, RTL = 3
-		};
-
-		enum class FlexWrap
-		{
-			NO_WRAP, WRAP, WRAP_REVERSED
-		};
-
-		enum class FlexDirection
-		{
-			ROW, COLUMN, ROW_REVERSED, COLUMN_REVERSED
-		};
-
-		enum class JustifyContent
-		{
-			FLEX_START, FLEX_END, CENTER, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY
-		};
-
-		enum class AlignItems
-		{
-			STRETCH, FLEX_START, FLEX_END, CENTER, BASELINE, AUTO,
-		};
-
-		enum class AlignContent
-		{
-			FLEX_START, FLEX_END, STRETCH, CENTER, SPACE_BETWEEN, SPACE_AROUND
-		};
-
-		enum class PositionType
-		{
-			STATIC, RELATIVE, ABSOLUTE
-		};
-
-		enum Unit
-		{
-			PIXEL, PERCENT, AUTO
-		};
-
-		struct LayoutUnit
-		{
-			float Value = 0.0f;
-			Unit Unit = Unit::PIXEL;
-		};
-
-		struct LayoutVec4
-		{
-			LayoutUnit Top = LayoutUnit{ 0, PIXEL };
-			LayoutUnit Bottom = LayoutUnit{ 0, PIXEL };
-			LayoutUnit Left = LayoutUnit{ 0, PIXEL };
-			LayoutUnit Right = LayoutUnit{ 0, PIXEL };
-		};
-	}
-
-
 	enum class NodeType
 	{
 		Normal,
 		Text
 	};
 
-	// Base UI node.
 	class Node
 	{
 	public:
@@ -88,31 +29,13 @@ namespace Nuake
 
 		YGNodeRef YogaNode;
 
-		Ref<Style> style;
-
-		Layout::PositionType PositionType;
-		Layout::LayoutVec4 Position;
-		Layout::LayoutUnit Width, MaxWidth, MinWidth;
-		Layout::LayoutUnit Height, MaxHeight, MinHeight;
-		Layout::LayoutVec4 Margin;
-		Layout::LayoutVec4 Padding;
-		Layout::LayoutVec4 Border;
-		Color BackgroundColor;
-		Layout::LayoutDirection Direction;
-		Layout::FlexDirection FlexDirection = Layout::FlexDirection::ROW;
-		Layout::FlexWrap FlexWrap;
-		float FlexGrow;
-		float FlexShrink;
-		float FlexBasis;
-		float AspectRatio;
-		Layout::JustifyContent JustifyContent;
-		Layout::AlignItems AlignItems;
-		Layout::AlignItems AlignSelf;
-		Layout::AlignContent AlignContent;
+		bool IsHover = false;
+		Style NormalStyle;
+		Style HoverStyle;
 
 		Node();
 
-		void ApplyStyle(Ref<StyleGroup> stylegroup);
+		void ApplyStyle(Ref<StyleGroup> stylegroup, StyleGroupSelector selector = StyleGroupSelector::Normal);
 
 		bool IsPositionInside(Vector2 position);
 
@@ -132,243 +55,249 @@ namespace Nuake
 
 		void SetMargin()
 		{
-			switch (Margin.Left.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetMargin(YogaNode, YGEdgeLeft, Margin.Left.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeLeft, Margin.Left.Value);
-				break;
-			case Layout::Unit::AUTO:
-				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeLeft);
-				break;
-			}
-
-			switch (Margin.Right.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetMargin(YogaNode, YGEdgeRight, Margin.Right.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeRight, Margin.Right.Value);
-				break;
-			case Layout::Unit::AUTO:
-				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeRight);
-				break;
-			}
-
-			switch (Margin.Top.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetMargin(YogaNode, YGEdgeTop, Margin.Top.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeTop, Margin.Top.Value);
-				break;
-			case Layout::Unit::AUTO:
-				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeTop);
-				break;
-			}
-
-			switch (Margin.Bottom.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetMargin(YogaNode, YGEdgeBottom, Margin.Bottom.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeBottom, Margin.Bottom.Value);
-				break;
-			case Layout::Unit::AUTO:
-				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeTop);
-				break;
-			}
-
+			
 		}
 
 		void SetPadding()
 		{
-			switch (Padding.Left.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetPadding(YogaNode, YGEdgeLeft, Padding.Left.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeLeft, Padding.Left.Value);
-				break;
-			}
-
-			switch (Padding.Right.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetPadding(YogaNode, YGEdgeRight, Padding.Right.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeRight, Padding.Right.Value);
-				break;
-			}
-
-			switch (Padding.Top.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetPadding(YogaNode, YGEdgeTop, Padding.Top.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeTop, Padding.Top.Value);
-				break;
-			}
-
-			switch (Padding.Bottom.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetPadding(YogaNode, YGEdgeBottom, Padding.Bottom.Value);
-				break;
-			case Layout::Unit::PERCENT:
-				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeBottom, Padding.Bottom.Value);
-				break;
-			}
+			
 		}
 
 		void SetBorder()
 		{
-			switch (Border.Left.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetBorder(YogaNode, YGEdgeLeft, Border.Left.Value);
-				break;
-			}
-
-			switch (Border.Right.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetBorder(YogaNode, YGEdgeRight, Border.Right.Value);
-				break;
-			}
-
-			switch (Border.Top.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetBorder(YogaNode, YGEdgeTop, Border.Top.Value);
-				break;
-			}
-
-			switch (Border.Bottom.Unit)
-			{
-			case Layout::Unit::PIXEL:
-				YGNodeStyleSetBorder(YogaNode, YGEdgeBottom, Border.Bottom.Value);
-				break;
-			}
+			
 		}
 
 		void SetYogaLayout()
 		{
-			switch (Width.Unit)
+			Style style = this->NormalStyle;
+			if (IsHover)
+				style = this->HoverStyle;
+
+			switch (style.Width.Unit)
 			{
 			case Layout::Unit::PIXEL:
-				YGNodeStyleSetWidth(YogaNode, Width.Value);
+				YGNodeStyleSetWidth(YogaNode, style.Width.Value);
 				break;
 			case Layout::Unit::PERCENT:
-				YGNodeStyleSetWidthPercent(YogaNode, Width.Value);
+				YGNodeStyleSetWidthPercent(YogaNode, style.Width.Value);
 				break;
 			case Layout::Unit::AUTO:
 				YGNodeStyleSetWidthAuto(YogaNode);
 				break;
 			}
-			switch (Height.Unit)
+			switch (style.Height.Unit)
 			{
 			case Layout::Unit::PIXEL:
-				YGNodeStyleSetHeight(YogaNode, Height.Value);
+				YGNodeStyleSetHeight(YogaNode, style.Height.Value);
 				break;
 			case Layout::Unit::PERCENT:
-				YGNodeStyleSetHeightPercent(YogaNode, Height.Value);
+				YGNodeStyleSetHeightPercent(YogaNode, style.Height.Value);
 				break;
 			case Layout::Unit::AUTO:
 				YGNodeStyleSetHeightAuto(YogaNode);
 				break;
 			}
 
-			SetMargin();
-			SetPadding();
-			SetBorder();
+			switch (style.Margin.Left.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetMargin(YogaNode, YGEdgeLeft, style.Margin.Left.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeLeft, style.Margin.Left.Value);
+				break;
+			case Layout::Unit::AUTO:
+				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeLeft);
+				break;
+			}
 
-			if (FlexWrap == Layout::FlexWrap::WRAP)
+			switch (style.Margin.Right.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetMargin(YogaNode, YGEdgeRight, style.Margin.Right.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeRight, style.Margin.Right.Value);
+				break;
+			case Layout::Unit::AUTO:
+				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeRight);
+				break;
+			}
+
+			switch (style.Margin.Top.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetMargin(YogaNode, YGEdgeTop, style.Margin.Top.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeTop, style.Margin.Top.Value);
+				break;
+			case Layout::Unit::AUTO:
+				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeTop);
+				break;
+			}
+
+			switch (style.Margin.Bottom.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetMargin(YogaNode, YGEdgeBottom, style.Margin.Bottom.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetMarginPercent(YogaNode, YGEdgeBottom, style.Margin.Bottom.Value);
+				break;
+			case Layout::Unit::AUTO:
+				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeTop);
+				break;
+			}
+			switch (style.Padding.Left.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetPadding(YogaNode, YGEdgeLeft, style.Padding.Left.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeLeft, style.Padding.Left.Value);
+				break;
+			}
+
+			switch (style.Padding.Right.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetPadding(YogaNode, YGEdgeRight, style.Padding.Right.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeRight, style.Padding.Right.Value);
+				break;
+			}
+
+			switch (style.Padding.Top.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetPadding(YogaNode, YGEdgeTop, style.Padding.Top.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeTop, style.Padding.Top.Value);
+				break;
+			}
+
+			switch (style.Padding.Bottom.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetPadding(YogaNode, YGEdgeBottom, style.Padding.Bottom.Value);
+				break;
+			case Layout::Unit::PERCENT:
+				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeBottom, style.Padding.Bottom.Value);
+				break;
+			}
+			switch (style.Border.Left.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetBorder(YogaNode, YGEdgeLeft, style.Border.Left.Value);
+				break;
+			}
+
+			switch (style.Border.Right.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetBorder(YogaNode, YGEdgeRight, style.Border.Right.Value);
+				break;
+			}
+
+			switch (style.Border.Top.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetBorder(YogaNode, YGEdgeTop, style.Border.Top.Value);
+				break;
+			}
+
+			switch (style.Border.Bottom.Unit)
+			{
+			case Layout::Unit::PIXEL:
+				YGNodeStyleSetBorder(YogaNode, YGEdgeBottom, style.Border.Bottom.Value);
+				break;
+			}
+
+			if (style.FlexWrap == Layout::FlexWrap::WRAP)
 				YGNodeStyleSetFlexWrap(YogaNode, YGWrapWrap);
-			else if (FlexWrap == Layout::FlexWrap::NO_WRAP)
+			else if (style.FlexWrap == Layout::FlexWrap::NO_WRAP)
 				YGNodeStyleSetFlexWrap(YogaNode, YGWrapNoWrap);
-			else if (FlexWrap == Layout::FlexWrap::WRAP_REVERSED)
+			else if (style.FlexWrap == Layout::FlexWrap::WRAP_REVERSED)
 				YGNodeStyleSetFlexWrap(YogaNode, YGWrapWrapReverse);
 
-			if (FlexDirection == Layout::FlexDirection::ROW)
+			if (style.FlexDirection == Layout::FlexDirection::ROW)
 				YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionRow);
-			else if (FlexDirection == Layout::FlexDirection::ROW_REVERSED)
+			else if (style.FlexDirection == Layout::FlexDirection::ROW_REVERSED)
 				YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionRowReverse);
-			else if (FlexDirection == Layout::FlexDirection::COLUMN)
+			else if (style.FlexDirection == Layout::FlexDirection::COLUMN)
 				YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionColumn);
-			else if (FlexDirection == Layout::FlexDirection::COLUMN_REVERSED)
+			else if (style.FlexDirection == Layout::FlexDirection::COLUMN_REVERSED)
 				YGNodeStyleSetFlexDirection(YogaNode, YGFlexDirectionColumnReverse);
 
-			if (JustifyContent == Layout::JustifyContent::FLEX_START)
+			if (style.JustifyContent == Layout::JustifyContent::FLEX_START)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifyFlexStart);
-			else if (JustifyContent == Layout::JustifyContent::FLEX_END)
+			else if (style.JustifyContent == Layout::JustifyContent::FLEX_END)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifyFlexEnd);
-			else if (JustifyContent == Layout::JustifyContent::CENTER)
+			else if (style.JustifyContent == Layout::JustifyContent::CENTER)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifyCenter);
-			else if (JustifyContent == Layout::JustifyContent::SPACE_BETWEEN)
+			else if (style.JustifyContent == Layout::JustifyContent::SPACE_BETWEEN)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceBetween);
-			else if (JustifyContent == Layout::JustifyContent::SPACE_AROUND)
+			else if (style.JustifyContent == Layout::JustifyContent::SPACE_AROUND)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceAround);
-			else if (JustifyContent == Layout::JustifyContent::SPACE_EVENLY)
+			else if (style.JustifyContent == Layout::JustifyContent::SPACE_EVENLY)
 				YGNodeStyleSetJustifyContent(YogaNode, YGJustifySpaceEvenly);
 
-			if (AlignItems == Layout::AlignItems::FLEX_START)
+			if (style.AlignItems == Layout::AlignItems::FLEX_START)
 				YGNodeStyleSetAlignItems(YogaNode, YGAlignFlexStart);
-			else if (AlignItems == Layout::AlignItems::FLEX_END)
+			else if (style.AlignItems == Layout::AlignItems::FLEX_END)
 				YGNodeStyleSetAlignItems(YogaNode, YGAlignFlexEnd);
-			else if (AlignItems == Layout::AlignItems::CENTER)
+			else if (style.AlignItems == Layout::AlignItems::CENTER)
 				YGNodeStyleSetAlignItems(YogaNode, YGAlignCenter);
-			else if (AlignItems == Layout::AlignItems::BASELINE)
+			else if (style.AlignItems == Layout::AlignItems::BASELINE)
 				YGNodeStyleSetAlignItems(YogaNode, YGAlignBaseline);
-			else if (AlignItems == Layout::AlignItems::STRETCH)
+			else if (style.AlignItems == Layout::AlignItems::STRETCH)
 				YGNodeStyleSetAlignItems(YogaNode, YGAlignStretch);
 			//else if (AlignItems == Layout::AlignItems::AUTO)
 			//	YGNodeStyleSetAlignItems(YogaNode, YGAlignAuto);
 
-			if (AlignSelf == Layout::AlignItems::FLEX_START)
+			if (style.AlignSelf == Layout::AlignItems::FLEX_START)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignFlexStart);
-			else if (AlignSelf == Layout::AlignItems::FLEX_END)
+			else if (style.AlignSelf == Layout::AlignItems::FLEX_END)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignFlexEnd);
-			else if (AlignSelf == Layout::AlignItems::CENTER)
+			else if (style.AlignSelf == Layout::AlignItems::CENTER)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignCenter);
-			else if (AlignSelf == Layout::AlignItems::BASELINE)
+			else if (style.AlignSelf == Layout::AlignItems::BASELINE)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignBaseline);
-			else if (AlignSelf == Layout::AlignItems::STRETCH)
+			else if (style.AlignSelf == Layout::AlignItems::STRETCH)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignStretch);
-			else if (AlignSelf == Layout::AlignItems::AUTO)
+			else if (style.AlignSelf == Layout::AlignItems::AUTO)
 				YGNodeStyleSetAlignSelf(YogaNode, YGAlignAuto);
 
-			if (AlignContent == Layout::AlignContent::FLEX_START)
+			if (style.AlignContent == Layout::AlignContent::FLEX_START)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignFlexStart);
-			else if (AlignContent == Layout::AlignContent::FLEX_END)
+			else if (style.AlignContent == Layout::AlignContent::FLEX_END)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignFlexEnd);
-			else if (AlignContent == Layout::AlignContent::CENTER)
+			else if (style.AlignContent == Layout::AlignContent::CENTER)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignCenter);
-			else if (AlignContent == Layout::AlignContent::STRETCH)
+			else if (style.AlignContent == Layout::AlignContent::STRETCH)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignStretch);
-			else if (AlignContent == Layout::AlignContent::SPACE_BETWEEN)
+			else if (style.AlignContent == Layout::AlignContent::SPACE_BETWEEN)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignSpaceBetween);
-			else if (AlignContent == Layout::AlignContent::SPACE_AROUND)
+			else if (style.AlignContent == Layout::AlignContent::SPACE_AROUND)
 				YGNodeStyleSetAlignContent(YogaNode, YGAlignSpaceAround);
 
-			if (PositionType == Layout::PositionType::RELATIVE)
+			if (style.PositionType == Layout::PositionType::RELATIVE)
 				YGNodeStyleSetPositionType(YogaNode, YGPositionTypeRelative);
-			else if (PositionType == Layout::PositionType::ABSOLUTE)
+			else if (style.PositionType == Layout::PositionType::ABSOLUTE)
 				YGNodeStyleSetPositionType(YogaNode, YGPositionTypeAbsolute);
 		}
 
 		void Draw(float z)
 		{
 			Renderer2D::UIShader->Bind();
-			Color color = this->BackgroundColor;
+			Color color = this->NormalStyle.BackgroundColor;
+			if(IsHover)
+				color = this->HoverStyle.BackgroundColor;
+
 			Renderer2D::UIShader->SetUniform4f("u_BackgroundColor",
 				color.r / 255.f,
 				color.g / 255.f,
@@ -417,7 +346,7 @@ namespace Nuake
 
 			//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
 			Renderer2D::UIShader->SetUniformMat4f("model", transform);
-			Renderer2D::UIShader->SetUniform1f("u_BorderRadius", Border.Left.Value);
+			Renderer2D::UIShader->SetUniform1f("u_BorderRadius", NormalStyle.Border.Left.Value);
 			Renderer2D::UIShader->SetUniform2f("u_Size", width, height);
 
 			Renderer2D::DrawRect();
