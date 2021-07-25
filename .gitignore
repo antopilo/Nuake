@@ -849,3 +849,6 @@ bin-int/Debug-windows-x86_64/Editor/vc142.idb
 bin-int/Debug-windows-x86_64/Nuake/dynamicworld.obj.enc
 bin-int/Debug-windows-x86_64/Nuake/Nuake.idb
 bin-int/Debug-windows-x86_64/Editor/Editor.vcxproj.FileListAbsolute.txt
+bin-int/Debug-windows-x86_64/Nuake/meshcomponent.obj.enc
+bin-int/Debug-windows-x86_64/Nuake/scene.obj.enc
+bin-int/Debug-windows-x86_64/Nuake/userinterface.obj.enc
