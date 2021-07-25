@@ -74,7 +74,7 @@ namespace Nuake
 			if (IsHover)
 				style = this->HoverStyle;
 
-			switch (style.Width.Unit)
+			switch (style.Width.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetWidth(YogaNode, style.Width.Value);
@@ -86,7 +86,7 @@ namespace Nuake
 				YGNodeStyleSetWidthAuto(YogaNode);
 				break;
 			}
-			switch (style.Height.Unit)
+			switch (style.Height.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetHeight(YogaNode, style.Height.Value);
@@ -99,7 +99,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Margin.Left.Unit)
+			switch (style.Margin.Left.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetMargin(YogaNode, YGEdgeLeft, style.Margin.Left.Value);
@@ -112,7 +112,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Margin.Right.Unit)
+			switch (style.Margin.Right.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetMargin(YogaNode, YGEdgeRight, style.Margin.Right.Value);
@@ -125,7 +125,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Margin.Top.Unit)
+			switch (style.Margin.Top.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetMargin(YogaNode, YGEdgeTop, style.Margin.Top.Value);
@@ -138,7 +138,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Margin.Bottom.Unit)
+			switch (style.Margin.Bottom.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetMargin(YogaNode, YGEdgeBottom, style.Margin.Bottom.Value);
@@ -150,7 +150,7 @@ namespace Nuake
 				YGNodeStyleSetMarginAuto(YogaNode, YGEdgeTop);
 				break;
 			}
-			switch (style.Padding.Left.Unit)
+			switch (style.Padding.Left.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetPadding(YogaNode, YGEdgeLeft, style.Padding.Left.Value);
@@ -160,7 +160,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Padding.Right.Unit)
+			switch (style.Padding.Right.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetPadding(YogaNode, YGEdgeRight, style.Padding.Right.Value);
@@ -170,7 +170,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Padding.Top.Unit)
+			switch (style.Padding.Top.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetPadding(YogaNode, YGEdgeTop, style.Padding.Top.Value);
@@ -180,7 +180,7 @@ namespace Nuake
 				break;
 			}
 
-			switch (style.Padding.Bottom.Unit)
+			switch (style.Padding.Bottom.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetPadding(YogaNode, YGEdgeBottom, style.Padding.Bottom.Value);
@@ -189,28 +189,28 @@ namespace Nuake
 				YGNodeStyleSetPaddingPercent(YogaNode, YGEdgeBottom, style.Padding.Bottom.Value);
 				break;
 			}
-			switch (style.Border.Left.Unit)
+			switch (style.Border.Left.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetBorder(YogaNode, YGEdgeLeft, style.Border.Left.Value);
 				break;
 			}
 
-			switch (style.Border.Right.Unit)
+			switch (style.Border.Right.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetBorder(YogaNode, YGEdgeRight, style.Border.Right.Value);
 				break;
 			}
 
-			switch (style.Border.Top.Unit)
+			switch (style.Border.Top.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetBorder(YogaNode, YGEdgeTop, style.Border.Top.Value);
 				break;
 			}
 
-			switch (style.Border.Bottom.Unit)
+			switch (style.Border.Bottom.mUnit)
 			{
 			case Layout::Unit::PIXEL:
 				YGNodeStyleSetBorder(YogaNode, YGEdgeBottom, style.Border.Bottom.Value);

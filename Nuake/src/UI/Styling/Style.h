@@ -49,7 +49,7 @@ namespace Nuake
 		struct LayoutUnit
 		{
 			float Value = 0.0f;
-			Unit Unit = Unit::PIXEL;
+			Unit mUnit = Unit::PIXEL;
 		};
 
 		struct LayoutVec4
