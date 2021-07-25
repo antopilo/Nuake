@@ -18,15 +18,15 @@ namespace Nuake {
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 			if (wren.Script != "" && wren.Class != "")
 			{
-				wren.WrenScript = CreateRef<WrenScript>(wren.Script, wren.Class, true);
-				if (!wren.WrenScript->CompiledSuccesfully)
+				wren.mWrenScript = CreateRef<WrenScript>(wren.Script, wren.Class, true);
+				if (!wren.mWrenScript->CompiledSuccesfully)
 					return false;
 			}
 
-			if (wren.WrenScript != nullptr)
+			if (wren.mWrenScript != nullptr)
 			{
-				wren.WrenScript->SetScriptableEntityID((int)e);
-				wren.WrenScript->CallInit();
+				wren.mWrenScript->SetScriptableEntityID((int)e);
+				wren.mWrenScript->CallInit();
 			}
 		}
 
@@ -41,8 +41,8 @@ namespace Nuake {
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 
-			if (wren.WrenScript != nullptr)
-				wren.WrenScript->CallUpdate(ts);
+			if (wren.mWrenScript != nullptr)
+				wren.mWrenScript->CallUpdate(ts);
 		}
 	}
 
@@ -54,8 +54,8 @@ namespace Nuake {
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 
-			if (wren.WrenScript != nullptr)
-				wren.WrenScript->CallFixedUpdate(ts);
+			if (wren.mWrenScript != nullptr)
+				wren.mWrenScript->CallFixedUpdate(ts);
 		}
 	}
 
@@ -67,8 +67,8 @@ namespace Nuake {
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 
-			if (wren.WrenScript != nullptr)
-				wren.WrenScript->CallExit();
+			if (wren.mWrenScript != nullptr)
+				wren.mWrenScript->CallExit();
 		}
 
 		ScriptingEngine::Close();
