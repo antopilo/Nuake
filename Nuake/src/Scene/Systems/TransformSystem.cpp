@@ -3,9 +3,9 @@
 #include "src/Core/Maths.h"
 
 #include "src/Scene/Scene.h"
-#include "src/Scene/Components/TransformComponent.h"
-#include "src/Scene/Components/ParentComponent.h"
-#include "src/Scene/Components/CameraComponent.h"
+#include <src/Scene/Components/TransformComponent.h>
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Scene/Components/ParentComponent.h>
 
 namespace Nuake {
 	TransformSystem::TransformSystem(Scene* scene)
@@ -39,8 +39,8 @@ namespace Nuake {
 		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto e : camView)
 		{
-			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>();
-
+			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
+			//
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
 			
 		}

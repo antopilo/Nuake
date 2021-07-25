@@ -72,16 +72,16 @@ namespace Nuake
 			float mouseX = Input::GetMouseX();
 			float ratio = mouseX / totalWidth;
 
-			m_Inspector->NormalStyle.Width.Unit = Layout::PIXEL;
+			m_Inspector->NormalStyle.Width.mUnit = Layout::PIXEL;
 			m_Inspector->NormalStyle.Width.Value = (1.0f - ratio) * totalWidth - 3.0f;
 
-			m_ViewportNode->NormalStyle.Width.Unit = Layout::PIXEL;
+			m_ViewportNode->NormalStyle.Width.mUnit = Layout::PIXEL;
 			m_ViewportNode->NormalStyle.Width.Value = ratio * totalWidth;
 
-			m_Inspector->HoverStyle.Width.Unit = Layout::PIXEL;
+			m_Inspector->HoverStyle.Width.mUnit = Layout::PIXEL;
 			m_Inspector->HoverStyle.Width.Value = (1.0f - ratio) * totalWidth - 3.0f;
 
-			m_ViewportNode->HoverStyle.Width.Unit = Layout::PIXEL;
+			m_ViewportNode->HoverStyle.Width.mUnit = Layout::PIXEL;
 			m_ViewportNode->HoverStyle.Width.Value = ratio * totalWidth;
 
 			Logger::Log("mouseX " + std::to_string(ratio));

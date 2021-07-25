@@ -10,3 +10,6 @@
 [submodule "Nuake/dependencies/glew"]
 	path = Nuake/dependencies/glew
 	url = https://github.com/nigels-com/glew.git
+[submodule "Nuake/dependencies/freetype"]
+	path = Nuake/dependencies/freetype
+	url = https://github.com/freetype/freetype.git

@@ -12,6 +12,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "Nuake/dependencies/glfw_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/bullet_p5.lua"
+include "Nuake/dependencies/freetype_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -67,6 +68,7 @@ project "Nuake"
         "BulletCollision",
         "BulletDynamics",
         "LinearMath",
+		"Freetype"
     }
 
     filter "system:windows"
@@ -113,7 +115,7 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
-        "%{prj.name}/../Nuake/src/Vendors/msdf/freetype/include",
+        "%{prj.name}/../Nuake/dependencies/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/win64",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
@@ -129,7 +131,7 @@ project "Editor"
         "BulletCollision",
         "BulletDynamics",
         "LinearMath",
-        "freetype.lib"
+		"Freetype"
     }
 
     filter "system:windows"
