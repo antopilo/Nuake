@@ -6,10 +6,13 @@
   width="100%"
   padding="8px 8px 8px 8px"
 >
-  <Rect groups="logo"
-       color="25 25 25 0">
+  <Rect groups="logo" color="25 25 25 0">
     <p font-size="1.5" margin="0 0 0 12px">Nuake Engine</p>
     <p groups="normal-text">You can load a project, or create a new one.</p>
+    <Rect groups="viewport"
+      id="viewport">
+
+    </Rect>
     <Rect groups="panel-bottom">
       <Rect
         groups="rect"
@@ -19,6 +22,7 @@
         <p groups="normal-text">New Project</p>
       </Rect>
       <Rect
+        id="open-project-btn"
         groups="rect"
         height="50px"
         width="49%"

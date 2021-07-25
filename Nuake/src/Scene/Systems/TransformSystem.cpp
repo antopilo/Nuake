@@ -1,7 +1,11 @@
 #include "TransformSystem.h"
+
+#include "src/Core/Maths.h"
+
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/ParentComponent.h"
+#include "src/Scene/Components/CameraComponent.h"
 
 namespace Nuake {
 	TransformSystem::TransformSystem(Scene* scene)
@@ -32,24 +36,44 @@ namespace Nuake {
 
 	void TransformSystem::UpdateTransform()
 	{
+		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto e : camView)
+		{
+			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>();
+
+			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+			
+		}
+
 		auto transformView = m_Scene->m_Registry.view<ParentComponent, TransformComponent>();
-		for (auto e : transformView) {
+		for (auto e : transformView) 
+		{
 			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
 			Entity currentParent = Entity((entt::entity)e, m_Scene);
-			Vector3 globalPos = Vector3();
+
+			Vector3 globalPosition = Vector3();
+			Vector3 globalRotation = Vector3();
+			Vector3 globalScale = Vector3();
 			if (parent.HasParent)
 			{
-				while (currentParent.GetComponent<ParentComponent>().HasParent)
+				ParentComponent& parentComponent = currentParent.GetComponent<ParentComponent>();
+				while (parentComponent.HasParent)
 				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalPos += currentParent.GetComponent<TransformComponent>().Translation;
+					TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
+					globalPosition += transformComponent.Translation;
+					globalRotation += transformComponent.Rotation;
+					globalScale *= transformComponent.Scale;
 				}
-
-				transform.GlobalTranslation = globalPos + transform.Translation;
+				
+				transform.GlobalTranslation = globalPosition + transform.Translation;
+				transform.GlobalRotation = globalRotation + transform.Rotation;
+				transform.GlobalScale = globalScale * transform.Scale;
 			}
 			else
 			{
 				transform.GlobalTranslation = transform.Translation;
+				transform.GlobalRotation = transform.Rotation;
+				transform.Scale = transform.Scale;
 			}
 		}
 	}

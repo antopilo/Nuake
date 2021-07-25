@@ -33,11 +33,11 @@ namespace Nuake
 			Speed = 0;
 
 		// Keyboard
-		if (!controlled) {
+		if (!controlled)
 			return;
-		}
 
-		if (m_Type == CAMERA_TYPE::ORTHO) {
+		if (m_Type == CAMERA_TYPE::ORTHO) 
+		{
 			if (Input::IsKeyDown(GLFW_KEY_RIGHT))
 				Translation.x += Speed * ts;
 			if (Input::IsKeyDown(GLFW_KEY_LEFT))
@@ -47,7 +47,8 @@ namespace Nuake
 			if (Input::IsKeyDown(GLFW_KEY_DOWN))
 				Translation.y -= Speed * ts;
 		}
-		else {
+		else 
+		{
 			glm::vec3 movement = glm::vec3(0, 0, 0);
 
 			if (Input::IsKeyDown(GLFW_KEY_D))

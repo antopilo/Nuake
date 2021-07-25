@@ -65,6 +65,8 @@ namespace Nuake
 					node->AddGroup(g);
 				}
 			}
+			if (name == "id")
+				node->ID = a.value();
 			if (name == "height")
 				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")
@@ -113,6 +115,8 @@ namespace Nuake
 					node->AddGroup(g);
 				}
 			}
+			if (name == "id")
+				node->ID = a.value();
 			if (name == "height")
 				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")
@@ -267,6 +271,8 @@ namespace Nuake
 					node->AddGroup(g);
 				}
 			}
+			if (name == "id")
+				node->ID = a.value();
 			if (name == "height")
 				node->NormalStyle.Height = GetUnit(a.value());
 			if (name == "width")

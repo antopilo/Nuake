@@ -18,6 +18,31 @@
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
 #include "src/UI/UserInterface.h"
+#include "src/NewEditor.h"
+
+void OpenProject()
+{
+    // Parse the project and load it.
+    std::string projectPath = Nuake::FileDialog::OpenFile(".project");
+
+    Nuake::FileSystem::SetRootDirectory(projectPath + "/../");
+    Ref<Nuake::Project> project = Nuake::Project::New();
+    if (!project->Deserialize(Nuake::FileSystem::ReadFile(projectPath, true)))
+    {
+        Nuake::Logger::Log("Error loading project: " + projectPath, Nuake::CRITICAL);
+        return;
+    }
+
+    project->FullPath = projectPath;
+    Nuake::Engine::LoadProject(project);
+
+    // Create new interface named test.
+    //userInterface = UI::UserInterface::New("test");
+
+
+    // Set current interface running.
+    //Engine::GetCurrentScene()->AddInterface(userInterface);
+}
 
 int main()
 {
@@ -30,18 +55,17 @@ int main()
     Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
     Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
     Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
-    Ref<Nuake::UI::UserInterface> uinterface = Nuake::UI::UserInterface::New("Editor", "resources/Interface/Testing.interface");
+
+    Nuake::NewEditor newEditor = Nuake::NewEditor();
     
     while (!Nuake::Engine::GetCurrentWindow()->ShouldClose())
     {
         Nuake::RenderCommand::Clear();
         Nuake::Engine::Tick();
 
-        uinterface->Update(0.0f);
         Nuake::Engine::Draw();
 
-        if (Nuake::Input::IsKeyPressed(GLFW_KEY_F1))
-            uinterface->Reload();
+        //newEditor.Update(0.f);
 
         if (Nuake::Input::IsKeyPressed(GLFW_KEY_F8))
             Nuake::Engine::ExitPlayMode();
@@ -49,7 +73,8 @@ int main()
         Nuake::Vector2 WindowSize = Nuake::Engine::GetCurrentWindow()->GetSize();
         glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
-        uinterface->Draw(WindowSize);
+
+        //newEditor.Draw(WindowSize);
 
         Ref<Nuake::FrameBuffer> sceneFramebuffer = Nuake::Engine::GetCurrentWindow()->GetFrameBuffer();
         sceneFramebuffer->Bind();
@@ -95,7 +120,7 @@ int main()
         }
         sceneFramebuffer->Unbind();
 
-        //editor.Draw();
+        editor.Draw();
         Nuake::Engine::EndDraw();
     }
 

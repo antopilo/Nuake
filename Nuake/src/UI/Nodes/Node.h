@@ -17,9 +17,13 @@ namespace Nuake
 	class Node
 	{
 	public:
+		float ScrollAmount = 0.0f;
+
 		int Depth;
 		Ref<Node> Root;
 		Ref<Node> Parent;
+		std::string ID;
+
 		std::vector<std::string> Groups;
 		std::vector<Ref<Node>> Childrens = std::vector<Ref<Node>>();
 
@@ -30,8 +34,12 @@ namespace Nuake
 		YGNodeRef YogaNode;
 
 		bool IsHover = false;
+		bool IsClicked = false;
+
 		Style NormalStyle;
 		Style HoverStyle;
+
+		Ref<Texture> BackgroundTexture;
 
 		Node();
 
@@ -44,10 +52,16 @@ namespace Nuake
 			Groups.push_back(group);
 		}
 
+		float GetWidth()
+		{
+			return YGNodeLayoutGetWidth(YogaNode);
+		}
+
 		bool IsInGroup(const std::string& group)
 		{
 			for (auto& g : Groups)
 				if (g == group) return true;
+
 			return false;
 		}
 
@@ -302,20 +316,32 @@ namespace Nuake
 				color.r / 255.f,
 				color.g / 255.f,
 				color.b / 255.f,
-				color.a / 255.f);
+				color.a / 255.f
+			);
 
-			// Get transform
 			Matrix4 transform = Matrix4(1.0f);
 
 			float width = YGNodeLayoutGetWidth(YogaNode);
 			float height = YGNodeLayoutGetHeight(YogaNode);
+
+			float scrollRange = height;
+
+
 			float padding = YGNodeLayoutGetPadding(YogaNode, YGEdgeLeft);
 			float left = YGNodeLayoutGetLeft(YogaNode); //+ offset.x;
 			float top = YGNodeLayoutGetTop(YogaNode);// +offset.y;
 
 			float parentLeft = 0.0f;
 			float parentTop = 0.0f;
+			float parentHeight = 0.0f;
+			float parentWidth = 0.0f;
+
 			auto parent = YGNodeGetParent(YogaNode);
+			if (parent)
+			{
+				parentHeight = YGNodeLayoutGetHeight(parent);
+				parentWidth = YGNodeLayoutGetWidth(parent);
+			}
 
 			while (parent)
 			{
@@ -323,32 +349,31 @@ namespace Nuake
 				parentTop += YGNodeLayoutGetTop(parent);
 				parent = YGNodeGetParent(parent);
 			}
-			if (parent)
-			{
-				//parentLeft = YGNodeLayoutGetLeft(YGNodeGetParent(YogaNode));
-				//parentTop = YGNodeLayoutGetTop(YGNodeGetParent(YogaNode));
-				//float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-				//float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-				// Overflow hidden.
-				//float parentwidth = YGNodeLayoutGetWidth(parent);
-				//if (parentwidth - YGNodeLayoutGetMargin(YogaNode, YGEdgeLeft) < width)
-				//	width = parentwidth - parentPaddingLeft;
-				//float parentHeight = YGNodeLayoutGetHeight(parent);
-				//if (parentHeight < height)
-				//	height = parentHeight - YGNodeLayoutGetMargin(YogaNode, YGEdgeTop) - parentPaddingTop;
-			}
 
 			transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, 0.f));
 
+			//if (top + height > parentHeight)
+			//{
+			//	float heightDifference = parentHeight - (top + height);
+			//	height = height + heightDifference;
+			//}
 
 			Vector3 scale = Vector3(width, height, 0);
 			transform = glm::scale(transform, scale);
-
-			//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
+			
 			Renderer2D::UIShader->SetUniformMat4f("model", transform);
 			Renderer2D::UIShader->SetUniform1f("u_BorderRadius", NormalStyle.Border.Left.Value);
 			Renderer2D::UIShader->SetUniform2f("u_Size", width, height);
 
+			if (BackgroundTexture != nullptr)
+			{
+				BackgroundTexture->Bind(1);
+				Renderer2D::UIShader->SetUniform1i("u_BackgroundTexture", 1);
+				Renderer2D::UIShader->SetUniform1i("u_HasBackgroundTexture", 1);
+			}
+			else
+				Renderer2D::UIShader->SetUniform1i("u_HasBackgroundTexture", 0);
+				
 			Renderer2D::DrawRect();
 		}
 	};

@@ -12,6 +12,7 @@ namespace Nuake {
 		UserInterface::UserInterface(const std::string& name, const std::string& path)
 		{
 			m_Name = name;
+			m_Path = path;
 
 			font = FontLoader::LoadFont("resources/Fonts/OpenSans-Regular.ttf");
 			Root = InterfaceParser::Parse(path);
@@ -36,7 +37,7 @@ namespace Nuake {
 
 		void UserInterface::Reload()
 		{
-			Root = InterfaceParser::Parse("resources/Interface/Testing.interface");
+			Root = InterfaceParser::Parse(this->m_Path);
 			if (!Root)
 			{
 				Logger::Log("Failed to generate interface structure", CRITICAL);
@@ -111,6 +112,7 @@ namespace Nuake {
 			Calculate(size.x, size.y);
 			Renderer2D::BeginDraw(size);
 			DrawRecursive(Root, 0);
+			Size = size;
 		}
 
 		void UserInterface::DrawRecursive(Ref<Node> node, float z)
@@ -134,14 +136,11 @@ namespace Nuake {
 
 		void UserInterface::Update(Timestep ts)
 		{
-			// Check Input
-			if (Input::IsMouseButtonPressed(0))
-			{
-				ConsumeMouseClick(Input::GetMousePosition());
-			}
-
 			// Hover
 			RecursiveHover(Root, Input::GetMousePosition());
+
+			// Check Input
+			ConsumeMouseClick(Input::GetMousePosition());
 		}
 
 		void UserInterface::RecursiveHover(Ref<Node> node, Vector2 pos)
@@ -152,6 +151,7 @@ namespace Nuake {
 
 				bool isHover = c->IsPositionInside(pos);
 				c->IsHover = isHover;
+				c->IsClicked = false;
 				if (isHover)
 				{
 					for (auto& g : c->GetGroups())
@@ -169,17 +169,46 @@ namespace Nuake {
 
 		void UserInterface::RecursiveMouseClick(Ref<Node> node, Vector2 pos)
 		{
+			if (node->IsHover)
+			{
+				node->IsClicked = true;
+			}
+
 			for (auto& c : node->Childrens)
 			{
 				RecursiveMouseClick(c, pos);
-				if (c->IsPositionInside(pos) && c->OnClickSignature != "")
-					this->Root->Script->CallMethod(c->OnClickSignature);
 			}
 		}
 
 		void UserInterface::ConsumeMouseClick(Vector2 pos)
 		{
-			RecursiveMouseClick(Root, pos);
+			if(Input::IsMouseButtonPressed(0))
+				RecursiveMouseClick(Root, pos);
+		}
+
+
+		Ref<Node> UserInterface::GetNodeByID(const std::string& id)
+		{
+			for (auto& n : Root->Childrens)
+			{
+				Ref<Node> result = GetNodeByIDRecurse(n, id);
+				if (result)
+					return result;
+			}
+		}
+
+		Ref<Node> UserInterface::GetNodeByIDRecurse(Ref<Node> node, const std::string& id)
+		{
+			for (auto& n : node->Childrens)
+			{
+				if (n->ID == id)
+					return n;
+
+				Ref<Node> result = GetNodeByIDRecurse(n, id);
+				if (result != nullptr)
+					return result;
+			}
+			return nullptr;
 		}
 	}
 }

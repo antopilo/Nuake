@@ -8,7 +8,11 @@ namespace Nuake
 	public:
 		Vector3 GlobalTranslation;
 		Vector3 Translation;
+
+		Vector3 GlobalRotation;
 		Vector3 Rotation; // TODO: Should use quaternions.
+
+		Vector3 GlobalScale;
 		Vector3 Scale;
 
 		TransformComponent();

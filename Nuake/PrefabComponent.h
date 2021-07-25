@@ -3,8 +3,12 @@
 #include <string>
 
 #include "src/Scene/Entities/Entity.h"
-class PrefabComponent {
-public:
-	Ref<Prefab> PrefabInstance;
 
-};
+namespace Nuake {
+	class PrefabComponent 
+	{
+	public:
+		Ref<Prefab> PrefabInstance;
+		
+	};
+}

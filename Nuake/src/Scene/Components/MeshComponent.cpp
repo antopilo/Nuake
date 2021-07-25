@@ -2,6 +2,7 @@
 #include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/TextureManager.h"
+#include <src/Rendering/Textures/MaterialManager.h>
 
 namespace Nuake {
     void MeshComponent::Draw()
@@ -15,7 +16,7 @@ namespace Nuake {
         this->meshes.clear();
         Assimp::Importer import;
         import.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
-        const aiScene* scene = import.ReadFile(FileSystem::Root + ModelPath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+        const aiScene* scene = import.ReadFile(FileSystem::Root + ModelPath, aiProcess_Triangulate |aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
@@ -92,21 +93,22 @@ namespace Nuake {
             for (unsigned int j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);
         }
+
         // process material
         if (mesh->mMaterialIndex >= 0)
         {
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
             aiString str;
-            std::string directory = FileSystem::Root + this->ModelPath + "/../";
+            std::string directory = FileSystem::Root + "/textures/d3b_concrt02a.png";
             material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-            Ref<Material> newMaterial = CreateRef<Material>(TextureManager::Get()->GetTexture(directory + str.C_Str()));
+            Ref<Material> newMaterial = MaterialManager::Get()->GetMaterial(directory);
 
             //material->GetTexture(aiTextureType_NORMALS, 0, &str);
             //newMaterial->SetNormal(TextureManager::Get()->GetTexture(directory + str.C_Str()));
-            //
+
             //material->GetTexture(aiTextureType_METALNESS, 0, &str);
             //newMaterial->SetMetalness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
-            //
+
             //material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
             //newMaterial->SetRoughness(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 

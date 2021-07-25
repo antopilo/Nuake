@@ -1,0 +1,74 @@
+<Canvas
+  stylesheet="resources/Interface/Editor.css"
+  groups="screen"
+  color="33 33 33 255">
+  <Rect
+    width="100%"
+    height="25px"
+    groups="action-menu">
+    <Rect groups="action-menu-item" id="action-menu-file" padding="4px 0px 0px 0px">
+      <p>File</p>
+    </Rect>
+    <Rect groups="action-menu-item" padding="4px 0px 0px 0px">
+      <p>Edit</p>
+    </Rect>
+  </Rect>
+  <Rect groups="toolbar" padding="4px 4px 4px 4px">
+    <Rect groups="toolbar-group-left">
+      <Rect groups="toolbar-button">
+        <p>mous</p>
+      </Rect>
+      <Rect groups="toolbar-button">
+        <p>move</p>
+      </Rect>
+      <Rect groups="toolbar-button">
+        <p>turn</p>
+      </Rect>
+      <Rect groups="toolbar-button">
+        <p>scal</p>
+      </Rect>
+    </Rect>
+    <Rect groups="toolbar-group-right">
+      <Rect groups="toolbar-button">
+        <p>Play</p>
+      </Rect>
+      <Rect groups="toolbar-button">
+        <p>Stop</p>
+      </Rect>
+    </Rect>
+  </Rect>
+  <Rect groups="middle">
+    <Rect groups="viewport" id="viewport-texture">
+      <!--<Rect groups="viewport-tool-bar">
+        
+        <Rect groups="viewport-tool-test" padding="0px 4px 4px 4px" border="12px 0px 0px 0px">
+          <p>Viewport</p>
+        </Rect>
+        <Rect width="60px" groups="viewport-tool-test" padding="0px 4px 4px 4px" border="12px 0px 0px 0px">
+          <p>View</p>
+        </Rect>-->
+
+      <Rect id="left" width="200px" height="100%" color="255 0 0 255"></Rect>
+      <Rect id="splitter2" width="3px" height="100%" color="0 0 255 255"></Rect>
+      <Rect id="right" width="200px" height="100%" color="0 255 128 255"></Rect>
+    </Rect>
+    <Rect height="100%" width="2px" color="255 0 0 255" groups="splitter" id="splitter"></Rect>
+    <Rect groups="inspector" id="inspector" padding="8px 8px 8px 8px" height="100%">
+      <Rect groups="component-view" width="100%" height="230px">
+        <Rect width="100%" height="30px" color="255 25 25 255">
+          <p>Transform component</p>
+        </Rect>
+        <Rect width="100%" height="200px" color="128 25 25 255"></Rect>
+      </Rect>
+      <Rect groups="component-view" width="100%" height="230px">
+        <Rect width="100%" height="30px" color="255 25 25 255">
+          <p>Model component</p>
+        </Rect>
+        <Rect width="100%" height="200px" color="128 25 25 255"></Rect>
+      </Rect>
+    </Rect>
+  </Rect>
+  <Rect groups="bottom">
+  
+  </Rect>
+</Canvas>

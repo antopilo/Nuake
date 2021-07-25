@@ -177,6 +177,8 @@ namespace Nuake {
 		Ref<Shader> shadowShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
 		shadowShader->Bind();
 
+		glCullFace(GL_BACK);
+
 		for (auto l : view) 
 		{
 			auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);
@@ -268,6 +270,7 @@ namespace Nuake {
 		pbrShader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
 		pbrShader->SetUniform1i("u_ShowNormal", 0);
 
+		
 		if (cam)
 		{
 			pbrShader->SetUniform1f("u_Exposure", cam->Exposure);
@@ -281,7 +284,9 @@ namespace Nuake {
 				for (auto& m : model.meshes)
 					Renderer::SubmitMesh(m, transform.GetTransform());
 			}
-
+			glCullFace(GL_BACK);
+			Renderer::Flush(pbrShader);
+			glCullFace(GL_FRONT);
 			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 			for (auto e : quakeView) 
 			{
@@ -316,7 +321,6 @@ namespace Nuake {
 
 		env->Push();
 
-		glCullFace(GL_FRONT);
 		glEnable(GL_DEPTH_TEST);
 
 		// Register the lights
@@ -346,6 +350,9 @@ namespace Nuake {
 				for(auto& m : mesh.meshes)
 					Renderer::SubmitMesh(m, transform.GetTransform());
 			}
+			glCullFace(GL_BACK);
+			Renderer::Flush(pbrShader);
+			glCullFace(GL_FRONT);
 
 			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 			for (auto e : quakeView) 
@@ -359,6 +366,7 @@ namespace Nuake {
 					Renderer::SubmitMesh(b, transform.GetTransform());
 			}
 
+			glCullFace(GL_FRONT);
 			Renderer::Flush(pbrShader);
 
 			Ref<Shader> flatShader = ShaderManager::GetShader("resources/Shaders/flat.shader");
@@ -407,7 +415,8 @@ namespace Nuake {
 		}
 	}
 
-	std::vector<Entity> Scene::GetAllEntities() {
+	std::vector<Entity> Scene::GetAllEntities() 
+	{
 		std::vector<Entity> allEntities;
 		auto view = m_Registry.view<NameComponent>();
 		for (auto e : view) {

@@ -64,17 +64,20 @@ namespace Nuake
 #pragma region Mouse
 
 	// Visibility
-	void Input::HideMouse() {
+	void Input::HideMouse() 
+	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
-	bool Input::IsMouseHidden() {
+	bool Input::IsMouseHidden() 
+	{
 		auto window = Window::Get()->GetHandle();
 		return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 	}
 
-	void Input::ShowMouse() {
+	void Input::ShowMouse() 
+	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}

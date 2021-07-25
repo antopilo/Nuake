@@ -23,12 +23,15 @@ namespace Nuake {
 
 			YGConfigRef yoga_config;
 			YGNodeRef yoga_root;
-
+		
+			Ref<Node> GetNodeByIDRecurse(Ref<Node> node, const std::string& id);
 			void RecursiveHover(Ref<Node> node, Vector2 pos);
 		public:
 			Ref<Font> font;
 			const int Width = 1920;
 			const int Height = 1080;
+
+			Vector2 Size = Vector2();
 
 			UserInterface(const std::string& name, const std::string& path);
 			~UserInterface();
@@ -46,6 +49,8 @@ namespace Nuake {
 
 			void RecursiveStyle(Ref<Node> node);
 			void RecursiveMouseClick(Ref<Node> node, Vector2 pos);
+
+			Ref<Node> GetNodeByID(const std::string& id);
 
 			void ConsumeMouseClick(Vector2 pos);
 		};

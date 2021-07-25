@@ -104,7 +104,6 @@ namespace Nuake
 			bool preprocess = false;
 			int loaded = fontGeometry.loadCharset(font->GetFontHandle(), fontScale, charset, config.preprocessGeometry, config.kerning);
 
-
 			fonts.push_back(fontGeometry);
 
 			if (glyphs.empty())

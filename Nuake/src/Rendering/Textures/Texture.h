@@ -34,7 +34,7 @@ namespace Nuake
 		void Unbind() const;
 
 		unsigned int GetID() const { return m_RendererId; }
-
+		inline std::string GetPath() { return m_FilePath; }
 		inline int GetWidth() const { return m_Width; }
 		inline int GetHeight() const { return m_Height; }
 	};

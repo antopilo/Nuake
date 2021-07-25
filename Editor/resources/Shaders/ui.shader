@@ -18,6 +18,10 @@ void main()
 #version 460 core
 
 uniform vec4 u_BackgroundColor;
+
+uniform int u_HasBackgroundTexture;
+uniform sampler2D u_BackgroundTexture;
+
 uniform float u_BorderRadius;
 uniform vec2 u_Size;
 
@@ -29,22 +33,22 @@ bool ShouldDiscard(vec2 coords, vec2 dimensions, float radius)
 {
     vec2 circle_center = vec2(radius, radius);
 
-    if (length(coords - circle_center) > radius
+    if (length(coords - circle_center) >= radius
         && coords.x < circle_center.x && coords.y < circle_center.y) return true; //first circle
 
     circle_center.x += dimensions.x - 2 * radius;
 
-    if (length(coords - circle_center) > radius
+    if (length(coords - circle_center) >= radius
         && coords.x > circle_center.x && coords.y < circle_center.y) return true; //second circle
 
     circle_center.y += dimensions.y - 2 * radius;
 
-    if (length(coords - circle_center) > radius
+    if (length(coords - circle_center) >= radius
         && coords.x > circle_center.x && coords.y > circle_center.y) return true; //third circle
 
     circle_center.x -= dimensions.x - 2 * radius;
 
-    if (length(coords - circle_center) > radius
+    if (length(coords - circle_center) >= radius
         && coords.x < circle_center.x && coords.y > circle_center.y) return true; //fourth circle
 
     return false;
@@ -59,5 +63,13 @@ void main()
     // Border rounding
     if (ShouldDiscard(coords, u_Size, u_BorderRadius))
         discard;
+
     FragColor = u_BackgroundColor;
+
+    if (u_HasBackgroundTexture == 1)
+    {
+        vec2 uv = a_UV;
+        uv.y = 1.0 - a_UV.y;
+        FragColor = texture(u_BackgroundTexture, uv);
+    }
 }

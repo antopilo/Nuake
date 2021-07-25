@@ -130,7 +130,7 @@ namespace Nuake {
                     dragType = "_Script";
                 else if (file->Type == ".map")
                     dragType = "_Map";
-                else if (file->Type == ".obj" || file->Type == ".mdl" || file->Type == ".gltf" || file->Type == ".md3" || file->Type == "fbx")
+                else if (file->Type == ".obj" || file->Type == ".mdl" || file->Type == ".gltf" || file->Type == ".md3" || file->Type == ".fbx")
                     dragType = "_Model";
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));

@@ -546,28 +546,6 @@ namespace Nuake {
                     ImGui::Separator();
                 }
             }
-
-            if (m_SelectedEntity.HasComponent<MeshComponent>()) {
-
-                std::string icon = ICON_FA_TREE;
-                if (ImGui::CollapsingHeader((icon + " " + "Mesh").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Mesh properties");
-                    ImGui::Button("Drag Material");
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_DEMO_CELL"))
-                        {
-                            IM_ASSERT(payload->DataSize == sizeof(int));
-                            int payload_n = *(const int*)payload->Data;
-
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-                }
-
-            }
-
             if (m_SelectedEntity.HasComponent<RigidBodyComponent>())
             {
                 std::string icon = ICON_FA_BOWLING_BALL;
@@ -579,7 +557,6 @@ namespace Nuake {
                     ImGui::Separator();
                 }
             }
-
             if (m_SelectedEntity.HasComponent<BoxColliderComponent>())
             {
                 std::string icon = ICON_FA_BOX;
@@ -981,10 +958,14 @@ namespace Nuake {
                     unsigned int textureID = 0;
                     if (m_SelectedMaterial->HasAlbedo())
                         textureID = m_SelectedMaterial->m_Albedo->GetID();
+
                     if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
                     {
                         std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+                        if (texture != "" && texture != m_SelectedMaterial->m_Albedo->GetPath())
+                            m_SelectedMaterial->m_Albedo = TextureManager::Get()->GetTexture(texture);
                     }
+
                     ImGui::SameLine();
                     bool isAlbedo = m_SelectedMaterial->data.u_HasAlbedo == 1;
                     ImGui::Checkbox("Use##1", &isAlbedo);

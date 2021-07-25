@@ -6,4 +6,4 @@ class LuaScriptComponent
 public:
 
 	std::string Script;
-};
+}; 

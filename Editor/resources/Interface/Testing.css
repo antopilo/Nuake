@@ -7,6 +7,11 @@
     width: 100%;
 }
 
+.viewport {
+    height: 200px;
+    width: 200px;
+}
+
 .logo {
     width: 500px;
     height: 50%;

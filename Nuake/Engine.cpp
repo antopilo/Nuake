@@ -41,30 +41,30 @@ namespace Nuake
 
 	void Engine::Tick()
 	{
-		// Dont update if no scene is loaded.
-		if (!CurrentWindow->GetScene())
-			return;
-
 		float time = (float)glfwGetTime();
 		Timestep timestep = time - m_LastFrameTime;
 		m_LastFrameTime = time;
 
-		// Play mode update all the entities, Editor does not.
-		if (Engine::IsPlayMode)
+		// Dont update if no scene is loaded.
+		if (CurrentWindow->GetScene())
 		{
-			CurrentWindow->Update(timestep);
-			m_FixedUpdateDifference += timestep;
-
-			// Fixed update
-			if (m_FixedUpdateDifference >= m_FixedUpdateRate)
+			// Play mode update all the entities, Editor does not.
+			if (Engine::IsPlayMode)
 			{
-				CurrentWindow->FixedUpdate(m_FixedUpdateRate);
-				m_FixedUpdateDifference = 0.f;
+				CurrentWindow->Update(timestep);
+				m_FixedUpdateDifference += timestep;
+
+				// Fixed update
+				if (m_FixedUpdateDifference >= m_FixedUpdateRate)
+				{
+					CurrentWindow->FixedUpdate(m_FixedUpdateRate);
+					m_FixedUpdateDifference = 0.f;
+				}
 			}
-		}
-		else
-		{
-			GetCurrentScene()->EditorUpdate(timestep);
+			else
+			{
+				GetCurrentScene()->EditorUpdate(timestep);
+			}
 		}
 
 		Input::Update();
