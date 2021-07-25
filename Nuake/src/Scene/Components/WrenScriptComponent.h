@@ -9,7 +9,7 @@ namespace Nuake {
 		std::string Script;
 		std::string Class;
 
-		Ref<WrenScript> WrenScript;
+		Ref<WrenScript> mWrenScript;
 
 		json Serialize()
 		{

@@ -38,45 +38,45 @@ namespace Nuake
 			{
 			case PropType::HEIGHT:
 			{
-				style.Height.Unit = (Layout::Unit)(s.second.type);
+				style.Height.mUnit = (Layout::Unit)(s.second.type);
 				float value = s.second.value.Number;
 				style.Height.Value = value;
 			}
 			break;
 			case PropType::MIN_HEIGHT:
-				style.MinHeight.Unit = (Layout::Unit)s.second.type;
+				style.MinHeight.mUnit = (Layout::Unit)s.second.type;
 				style.MinHeight.Value = s.second.value.Number;
 				break;
 			case PropType::MAX_HEIGHT:
-				style.MaxHeight.Unit = (Layout::Unit)s.second.type;
+				style.MaxHeight.mUnit = (Layout::Unit)s.second.type;
 				style.MaxHeight.Value = s.second.value.Number;
 				break;
 			case PropType::WIDTH:
-				style.Width.Unit = (Layout::Unit)s.second.type;
+				style.Width.mUnit = (Layout::Unit)s.second.type;
 				style.Width.Value = s.second.value.Number;
 				break;
 			case PropType::MIN_WIDTH:
-				style.MinWidth.Unit = (Layout::Unit)s.second.type;
+				style.MinWidth.mUnit = (Layout::Unit)s.second.type;
 				style.MinWidth.Value = s.second.value.Number;
 				break;
 			case PropType::MAX_WIDTH:
-				style.MaxWidth.Unit = (Layout::Unit)s.second.type;
+				style.MaxWidth.mUnit = (Layout::Unit)s.second.type;
 				style.MaxWidth.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_RIGHT:
-				style.Margin.Right.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Right.mUnit = (Layout::Unit)s.second.type;
 				style.Margin.Right.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_LEFT:
-				style.Margin.Left.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Left.mUnit = (Layout::Unit)s.second.type;
 				style.Margin.Left.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_TOP:
-				style.Margin.Top.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Top.mUnit = (Layout::Unit)s.second.type;
 				style.Margin.Top.Value = s.second.value.Number;
 				break;
 			case PropType::MARGIN_BOTTOM:
-				style.Margin.Bottom.Unit = (Layout::Unit)s.second.type;
+				style.Margin.Bottom.mUnit = (Layout::Unit)s.second.type;
 				style.Margin.Bottom.Value = s.second.value.Number;
 				break;
 			case PropType::JUSTIFY_CONTENT:
@@ -101,19 +101,19 @@ namespace Nuake
 				style.PositionType = (Layout::PositionType)s.second.value.Enum;
 				break;
 			case PropType::LEFT:
-				style.Position.Left.Unit = (Layout::Unit)s.second.type;
+				style.Position.Left.mUnit = (Layout::Unit)s.second.type;
 				style.Position.Left.Value = s.second.value.Number;
 				break;
 			case PropType::RIGHT:
-				style.Position.Right.Unit = (Layout::Unit)s.second.type;
+				style.Position.Right.mUnit = (Layout::Unit)s.second.type;
 				style.Position.Right.Value = s.second.value.Number;
 				break;
 			case PropType::TOP:
-				style.Position.Top.Unit = (Layout::Unit)s.second.type;
+				style.Position.Top.mUnit = (Layout::Unit)s.second.type;
 				style.Position.Top.Value = s.second.value.Number;
 				break;
 			case PropType::BOTTOM:
-				style.Position.Bottom.Unit = (Layout::Unit)s.second.type;
+				style.Position.Bottom.mUnit = (Layout::Unit)s.second.type;
 				style.Position.Bottom.Value = s.second.value.Number;
 				break;
 			case PropType::BACKGROUND_COLOR:
