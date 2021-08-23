@@ -40,9 +40,7 @@ namespace Nuake {
 		for (auto e : camView)
 		{
 			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
-			//
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
-			
 		}
 
 		auto transformView = m_Scene->m_Registry.view<ParentComponent, TransformComponent>();
@@ -63,6 +61,8 @@ namespace Nuake {
 					globalPosition += transformComponent.Translation;
 					globalRotation += transformComponent.Rotation;
 					globalScale *= transformComponent.Scale;
+
+					parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 				}
 				
 				transform.GlobalTranslation = globalPosition + transform.Translation;

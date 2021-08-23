@@ -123,6 +123,7 @@ FontHandle * loadFont(FreetypeHandle *library, const char *filename) {
         return NULL;
     FontHandle *handle = new FontHandle;
     FT_Error error = FT_New_Face(library->library, filename, 0, &handle->face);
+    
     if (error) {
         delete handle;
         return NULL;

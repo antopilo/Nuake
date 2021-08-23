@@ -72,5 +72,6 @@ project "Freetype"
 	symbols "on"
 	
 	filter "configurations:Release"
+		files { "freetype/src/base/ftdebug.c" }
 	runtime "Release"
 	optimize "on"

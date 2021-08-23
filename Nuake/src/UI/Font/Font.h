@@ -67,12 +67,13 @@ namespace Nuake
 
         ~Font() 
         {
-            if (ft) 
-            {
-                if (font)
-                    msdfgen::destroyFont(font);
-                msdfgen::deinitializeFreetype(ft);
-            }
+            if (!ft)
+                return;
+
+            if (font)
+                msdfgen::destroyFont(font);
+
+            msdfgen::deinitializeFreetype(ft);
         }
 
         bool load(const char* fontFilename) 
