@@ -57,7 +57,6 @@ namespace Nuake {
         std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
         if (ImGui::Begin(name.c_str()))
         {
-
             ImGui::PopStyleVar();
             Overlay();
             ImGuizmo::BeginFrame();
@@ -125,6 +124,33 @@ namespace Nuake {
             ImGui::PopStyleVar();
         }
         ImGui::End();
+
+        if (m_IsEntitySelected)
+        {
+            if (ImGui::Begin("CSM"))
+            {
+                if (m_SelectedEntity.HasComponent<LightComponent>())
+                {
+                    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                    Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
+                    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+                }
+            }
+            ImGui::End();
+
+            if (ImGui::Begin("CSM 2"))
+            {
+                if (m_SelectedEntity.HasComponent<LightComponent>())
+                {
+                    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                    Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
+                    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+                }
+            }
+            ImGui::End();
+        }
     }
 
     static int selected = 0;

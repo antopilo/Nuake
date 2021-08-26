@@ -17,7 +17,6 @@
 #include <GL/glew.h>
 
 #include "Engine.h"
-#include "Engine.h"
 #include "src/Core/FileSystem.h"
 #include "Components/Components.h"
 #include "Components/BoxCollider.h"
@@ -42,11 +41,10 @@ namespace Nuake {
 		m_Environement = CreateRef<Environment>();
 		m_Interfaces = std::vector<Ref<UI::UserInterface>>();
 
-		// Adding systems
+		// Adding systems - Order is important
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
-
 	}
 
 	Scene::~Scene() {}
@@ -95,7 +93,6 @@ namespace Nuake {
 	{
 		for (auto& system : m_Systems)
 			system->Exit();
-
 	}
 
 	void Scene::Update(Timestep ts)
@@ -123,15 +120,16 @@ namespace Nuake {
 	void Scene::UpdatePositions()
 	{
 		auto transformView = m_Registry.view<ParentComponent, TransformComponent>();
-		for (auto e : transformView) {
+		for (auto e : transformView) 
+		{
 			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
 			Entity currentParent = Entity{ e, this };
 			Vector3 globalPos = Vector3();
 			if (parent.HasParent)
 			{
-				while (currentParent.GetComponent<ParentComponent>().HasParent) {
+				while (currentParent.GetComponent<ParentComponent>().HasParent) 
+				{
 					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-
 					globalPos += currentParent.GetComponent<TransformComponent>().Translation;
 				}
 
@@ -186,14 +184,16 @@ namespace Nuake {
 				continue;
 
 			light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
+			
 
 			for (int i = 0; i < CSM_AMOUNT; i++)
 			{
 				light.m_Framebuffers[i]->Bind();
 				light.m_Framebuffers[i]->Clear();
-
+				
+				Frustum lightFrustum = Frustum(light.mViewProjections[i]);
 				shadowShader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
-
+				
 				for (auto e : meshView)
 				{
 					auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
@@ -209,8 +209,15 @@ namespace Nuake {
 					if (model.IsTransparent)
 						continue;
 
-					for (auto& m : model.Meshes)
-						Renderer::SubmitMesh(m, transform.GetTransform());
+					for (Ref<Mesh>& m : model.Meshes)
+					{
+						AABB modelAABB = m->GetAABB();
+						modelAABB.Transform(transform.GetTransform());
+
+						bool isInFrustum = lightFrustum.IsBoxVisible(modelAABB.Min, modelAABB.Max);
+						if (isInFrustum)
+							Renderer::SubmitMesh(m, transform.GetTransform());
+					}
 				}
 
 				Renderer::Flush(shadowShader, true);
@@ -295,7 +302,12 @@ namespace Nuake {
 					continue;
 
 				for (auto& b : model.Meshes)
-					Renderer::SubmitMesh(b, transform.GetTransform());
+				{
+					AABB aabb = b->GetAABB();
+					aabb.Transform(transform.GetTransform());
+					if(cam->BoxFrustumCheck(aabb))
+						Renderer::SubmitMesh(b, transform.GetTransform());
+				}
 			}
 
 			Renderer::Flush(pbrShader);
@@ -403,12 +415,16 @@ namespace Nuake {
 				if (!model.IsTransparent)
 					continue;
 
-
 				flatShader->SetUniformMat4f("u_Model", transform.GetTransform());
 				flatShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
 
-				for (auto& e : model.Meshes)
-					Renderer::SubmitMesh(e, transform.GetTransform());
+				for (auto& b : model.Meshes)
+				{
+					AABB aabb = b->GetAABB();
+					aabb.Transform(transform.GetTransform());
+					if (m_EditorCamera->BoxFrustumCheck(aabb))
+						Renderer::SubmitMesh(b, transform.GetTransform());
+				}
 			}
 
 			Renderer::Flush(flatShader);
@@ -452,12 +468,6 @@ namespace Nuake {
 			if (namec.Name == name)
 				return Entity{ e, this };
 		}
-	}
-
-	Entity Scene::CreateEmptyEntity() 
-	{
-		Entity entity = { m_Registry.create(), this };
-		return entity;
 	}
 
 	Entity Scene::CreateEntity(const std::string& name) 
@@ -593,7 +603,7 @@ namespace Nuake {
 				for (json e : j["Entities"])
 				{
 					std::string name = e["NameComponent"]["Name"];
-					Entity ent = CreateEmptyEntity();
+					Entity ent = { m_Registry.create(), this };
 					ent.Deserialize(e.dump());
 				}
 

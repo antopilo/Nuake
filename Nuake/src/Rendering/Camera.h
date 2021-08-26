@@ -3,6 +3,7 @@
 #include "src/Core/Maths.h"
 #include "src/Resource/Serializable.h"
 #include "Frustum.h"
+#include <src/Rendering/AABB.h>
 
 namespace Nuake
 {
@@ -18,14 +19,13 @@ namespace Nuake
 	{
 	private:
 		CAMERA_TYPE m_Type;
+		Frustum m_Frustum;
 
 		Vector3 Rotation = { 0.0f, 0.0f, 0.0f };
 		Vector3 Scale = { 1.0f, 1.0f, 1.0f };
 		Matrix4 m_Perspective;
 
 	public:
-		Frustum m_Frustum;
-
 		float AspectRatio = 16.0f / 9.0f;
 		// TODO: remove duplicate direction and have a proper api.
 		Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
@@ -54,6 +54,8 @@ namespace Nuake
 		Matrix4 GetPerspective();
 		Matrix4 GetTransform();
 		Matrix4 GetTransformRotation();
+		
+		bool BoxFrustumCheck(const AABB& aabb);
 
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;

@@ -62,8 +62,6 @@ namespace Nuake {
 		std::vector<Entity> GetAllEntities();
 		Entity GetEntity(const std::string& name);
 
-		// TODO: This shouldnt be allowed
-		Entity CreateEmptyEntity();
 		Entity CreateEntity(const std::string& name);
 
 		// TODO: Could be moved to transform component directly.

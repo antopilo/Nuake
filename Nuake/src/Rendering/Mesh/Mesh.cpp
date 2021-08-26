@@ -12,10 +12,31 @@ namespace Nuake
 
         MaterialManager::Get()->RegisterMaterial(material);
 
-        setupMesh();
+        SetupMesh();
+        CalculateAABB();
     }
+	
+	void Mesh::CalculateAABB()
+	{
+        float minX = 0.0f;
+        float minY = 0.0f;
+        float minZ = 0.0f;
+        float maxX = 0.0f;
+        float maxY = 0.0f;
+        float maxZ = 0.0f;
+		for (Vertex& v : m_Vertices)
+		{
+			minX = v.position.x < minX ? v.position.x : minX;
+			minY = v.position.y < minY ? v.position.y : minY;
+			minZ = v.position.z < minZ ? v.position.z : minZ;
+			maxX = v.position.x > maxX ? v.position.x : maxX;
+			maxY = v.position.y > maxY ? v.position.y : maxY;
+			maxZ = v.position.z > maxZ ? v.position.z : maxZ;
+		}
+        this->m_AABB = { Vector3(minX, minY, minZ), Vector3(maxX, maxY, maxZ) };
+	}
 
-    void Mesh::setupMesh()
+    void Mesh::SetupMesh()
     {
         m_VertexArray = new VertexArray();
         m_VertexArray->Bind();

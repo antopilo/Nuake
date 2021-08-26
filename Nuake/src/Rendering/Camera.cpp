@@ -1,10 +1,12 @@
 #include "Camera.h"
+#include "src/Core/Maths.h"
 #include "../Core/Input.h"
 #include <glm\ext\vector_float3.hpp>
 #include <glm\ext\matrix_clip_space.hpp>
 #include <glm\ext\matrix_float4x4.hpp>
 #include <glm\ext\matrix_transform.hpp>
 #include <GLFW\glfw3.h>
+
 
 namespace Nuake
 {
@@ -17,6 +19,8 @@ namespace Nuake
 		cameraRight = glm::normalize(glm::cross(up, cameraDirection));
 		cameraUp = glm::cross(cameraDirection, cameraRight);
 		cameraFront = cameraDirection;
+
+		m_Frustum = Frustum(GetTransform());
 	}
 
 	Camera::Camera() 
@@ -53,31 +57,36 @@ namespace Nuake
 		cameraRight = glm::normalize(glm::cross(up, cameraFront));
 	}
 
-	glm::vec3 Camera::GetTranslation() {
+	Vector3 Camera::GetTranslation() {
 		return Translation;
 	}
 
-	glm::vec3 Camera::GetDirection() {
+	Vector3 Camera::GetDirection() {
 		return cameraDirection;
 	}
 
-	glm::mat4 Camera::GetPerspective()
+	Matrix4 Camera::GetPerspective()
 	{
 		//TODO: Add perspective options
 		m_Perspective = glm::perspectiveFov(glm::radians(Fov), 9.0f * AspectRatio, 9.0f, 0.1f, 1000.0f);
-		//m_Perspective = glm::ortho(-8.0f, 8.0f, -4.5f, 4.5f, -1.0f, 1.0f);
 		return m_Perspective;
 	}
 
-	glm::mat4 Camera::GetTransform()
+	Matrix4 Camera::GetTransform()
 	{
 		glm::mat4 tr = lookAt(Translation, Translation + cameraFront, cameraUp);
 		return tr;
 	}
 
-	glm::mat4 Camera::GetTransformRotation()
+	Matrix4 Camera::GetTransformRotation()
 	{
 		return lookAt(glm::vec3(), cameraFront, cameraUp);
+	}
+	
+	bool Camera::BoxFrustumCheck(const AABB& aabb)
+	{
+		m_Frustum = Frustum(GetPerspective() * GetTransform());
+		return m_Frustum.IsBoxVisible(aabb.Min, aabb.Max);
 	}
 
 	json Camera::Serialize()
