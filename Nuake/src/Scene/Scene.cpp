@@ -157,7 +157,7 @@ namespace Nuake {
 	void Scene::DrawShadows()
 	{
 		auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
-		auto quakeView = m_Registry.view<TransformComponent, QuakeMapComponent>();
+		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
 		auto view = m_Registry.view<TransformComponent, LightComponent>();
 
 		Ref<Camera> cam = m_EditorCamera;
@@ -177,6 +177,7 @@ namespace Nuake {
 
 		glCullFace(GL_BACK);
 
+		// Build a list of mesh to draw.
 		for (auto l : view) 
 		{
 			auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);

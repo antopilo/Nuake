@@ -6,8 +6,9 @@ namespace Nuake {
     class NameComponent 
     {
     public:
+		int ID;
         std::string Name = "Entity";
-        int ID;
+		bool IsPrefab = false;
 
         json Serialize()
         {

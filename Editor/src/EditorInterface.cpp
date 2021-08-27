@@ -29,6 +29,7 @@
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Components/LightComponent.h"
 #include "UIComponents/Viewport.h"
+#include <src/Resource/Prefab.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -159,7 +160,8 @@ namespace Nuake {
     {
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
-        std::string name = e.GetComponent<NameComponent>().Name;
+		NameComponent& nameComponent = e.GetComponent<NameComponent>();
+		std::string name = nameComponent.Name;
         ParentComponent& parent = e.GetComponent<ParentComponent>();
 
         if (m_SelectedEntity == e)
@@ -172,8 +174,11 @@ namespace Nuake {
         if (parent.Children.size() <= 0)
             base_flags |= ImGuiTreeNodeFlags_Leaf;
 
+		if(nameComponent.IsPrefab)
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
-
+		if(nameComponent.IsPrefab)
+			ImGui::PopStyleColor();
 
         if (ImGui::BeginDragDropSource())
         {
@@ -230,7 +235,12 @@ namespace Nuake {
                     p.HasParent = false;
                 }
             }
-            ImGui::Selectable("Save as prefab");
+			if (ImGui::Selectable("Save as new prefab"))
+			{
+				Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(m_SelectedEntity);
+                std::string savePath = FileDialog::SaveFile("*.prefab");
+                newPrefab->SaveAs(savePath);
+			}
             ImGui::EndPopup();
         }
         if (open)
@@ -256,7 +266,7 @@ namespace Nuake {
         if (!scene)
             return;
 
-        if (ImGui::Begin(" Environnement"))
+        if (ImGui::Begin("Environnement"))
         {
             auto env = Engine::GetCurrentScene()->GetEnvironment();
             if (ImGui::CollapsingHeader("Procedural Sky"))
@@ -1307,6 +1317,8 @@ namespace Nuake {
         DrawGizmos();
 
         DrawRessourceWindow();
+		
+		pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
         //DrawDirectoryExplorer();
@@ -1317,7 +1329,6 @@ namespace Nuake {
         filesystem.Draw();
         filesystem.DrawDirectoryExplorer();
 
-        pInterface.DrawEntitySettings();
 
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
