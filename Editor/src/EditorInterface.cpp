@@ -30,6 +30,7 @@
 #include "src/Scene/Components/LightComponent.h"
 #include "UIComponents/Viewport.h"
 #include <src/Resource/Prefab.h>
+#include <src/Scene/Components/PrefabComponent.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -174,18 +175,18 @@ namespace Nuake {
         if (parent.Children.size() <= 0)
             base_flags |= ImGuiTreeNodeFlags_Leaf;
 
-		if(nameComponent.IsPrefab)
+		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
-		if(nameComponent.IsPrefab)
+		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PopStyleColor();
-
-        if (ImGui::BeginDragDropSource())
-        {
-            ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
-            ImGui::Text(name.c_str());
-            ImGui::EndDragDropSource();
-        }
+		else
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
+				ImGui::Text(name.c_str());
+				ImGui::EndDragDropSource();
+			}
 
         if (ImGui::BeginDragDropTarget())
         {
@@ -240,6 +241,7 @@ namespace Nuake {
 				Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(m_SelectedEntity);
                 std::string savePath = FileDialog::SaveFile("*.prefab");
                 newPrefab->SaveAs(savePath);
+                m_SelectedEntity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
 			}
             ImGui::EndPopup();
         }
