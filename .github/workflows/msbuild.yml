@@ -22,7 +22,7 @@ jobs:
       run: ls
       
     - name: Generating solution
-      run: generate.bat
+      run: premake5.exe
       
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
