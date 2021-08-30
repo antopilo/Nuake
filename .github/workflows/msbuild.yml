@@ -4,7 +4,7 @@ on: [push]
 
 env:
   # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: Nuake.sln
+  SOLUTION_FILE_PATH: Nuake/Nuake.sln
 
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Premake
-      run: generate.bat
+      run: Nuake/generate.bat
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
