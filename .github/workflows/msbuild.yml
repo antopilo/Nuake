@@ -20,11 +20,9 @@ jobs:
       
     - name: list
       run: ls
-      working-directory: Nuake
       
     - name: Generating solution
       run: generate.bat
-      working-directory: Nuake
       
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
