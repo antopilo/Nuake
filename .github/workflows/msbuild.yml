@@ -21,7 +21,7 @@ jobs:
          path: Nuake
       
     - name: list
-      run: dir
+      run: ls
       
     - name: Setup premake
       uses: abel0b/setup-premake@v1
