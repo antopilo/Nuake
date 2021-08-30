@@ -23,6 +23,9 @@ jobs:
     - name: list
       run: dir
       
+    - name: Setup premake
+      uses: abel0b/setup-premake@v1
+      
     - name: Generating solution
       working-directory: Nuake
       run: premake5 vs2019
