@@ -17,6 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Premake
+      run: generate.bat
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
