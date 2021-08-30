@@ -18,9 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Premake
+    - name: Generating solution
+      working-directory: ./Nuake
       run: premake5.exe vs2019
-      working-directory: Nuake
       
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
