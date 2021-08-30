@@ -20,13 +20,11 @@ jobs:
       with:
          path: Nuake
       
-    
     - name: list
       run: dir
       
-      
     - name: Generating solution
-      working-directory: ./Nuake
+      working-directory: Nuake
       run: premake5 vs2019
       
     - name: Add MSBuild to PATH
