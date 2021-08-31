@@ -22,7 +22,7 @@ out vec4 FragColor;
 
 void main()
 {
-    if (mod(gl_FragCoord.x + gl_FragCoord.y, 4.0) < 2.0)
+    if (mod(gl_FragCoord.x + gl_FragCoord.y + (u_Time * 4.0), 4.0) < 2.0)
         discard;
 
     vec4 finalColor = u_Color;
