@@ -42,4 +42,9 @@ jobs:
           title: "Development Build"
           files: bin/Release-windows-x86_64/Editor/Editor.exe
     
+    - name: Install zip
+      uses: montudor/action-zip@v1
+      
+    - name: Zip
+      
    
