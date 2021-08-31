@@ -7,7 +7,7 @@
 
 namespace Nuake
 {
-	Project::Project(const std::string Name, const std::string Description, const std::string& FullPath, const std::string& defaultScenePath)
+	Project::Project(const std::string& Name, const std::string& Description, const std::string& FullPath, const std::string& defaultScenePath)
 	{
 		this->Name = Name;
 		this->Description = Description;
@@ -40,7 +40,7 @@ namespace Nuake
 		SaveAs(this->FullPath);
 	}
 
-	void Project::SaveAs(const std::string FullPath)
+	void Project::SaveAs(const std::string& FullPath)
 	{
 		json j = Serialize();
 		std::string serialized_string = j.dump();
@@ -53,11 +53,8 @@ namespace Nuake
 		projectFile.close();
 	}
 
-	Ref<Project> Project::New(const std::string Name, const std::string Description, const std::string FullPath)
+	Ref<Project> Project::New(const std::string& Name, const std::string& Description, const std::string& FullPath)
 	{
-		if (Name == "")
-			return nullptr;
-
 		return CreateRef<Project>(Name, Description, FullPath);
 	}
 
@@ -66,7 +63,7 @@ namespace Nuake
 		return CreateRef<Project>();
 	}
 
-	Ref<Project> Project::Load(std::string path)
+	Ref<Project> Project::Load(std::string& path)
 	{
 		std::ifstream i(path);
 		json j;
@@ -91,8 +88,12 @@ namespace Nuake
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Name);
 		SERIALIZE_VAL(Description);
-		SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
-		SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
+
+		if(DefaultScene)
+			SERIALIZE_VAL_LBL("DefaultScene", DefaultScene->Path);
+
+		if(EntityDefinitionsFile)
+			SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
 		SERIALIZE_VAL(TrenchbroomPath);
 		END_SERIALIZE();
 	}
@@ -107,7 +108,7 @@ namespace Nuake
 		Name = j["Name"];
 		Description = j["Description"];
 
-		if (j.contains("EntityDefinition"))
+		if (j.contains("EntityDefinition") && j["EntityDefinition"] != "")
 		{
 			std::string path = j["EntityDefinition"];
 			EntityDefinitionsFile = CreateRef<FGDFile>(path);
@@ -123,7 +124,7 @@ namespace Nuake
 		DefaultScene = Scene::New();
 
 		// Load default scene, a project can have no default scene set.
-		if (!j.contains("DefaultScene"))
+		if (!j.contains("DefaultScene") )
 			return true;
 
 		std::string scenePath = j["DefaultScene"];

@@ -67,7 +67,7 @@ namespace Nuake {
 
             ImGuizmo::SetOrthographic(false);
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
             if (Engine::GetCurrentWindow()->GetFrameBuffer()->GetSize() != viewportPanelSize)
                 Engine::GetCurrentWindow()->GetFrameBuffer()->QueueResize(viewportPanelSize);
@@ -89,7 +89,7 @@ namespace Nuake {
             {
                 TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
                 ParentComponent& parent = m_SelectedEntity.GetComponent<ParentComponent>();
-                glm::mat4 oldTransform = tc.GetTransform();
+                Matrix4 oldTransform = tc.GetTransform();
                 ImGuizmo::Manipulate(
                     glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
                     glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetPerspective()),
@@ -97,17 +97,17 @@ namespace Nuake {
                 );
                 if (ImGuizmo::IsUsing())
                 {
-                    glm::vec3 scale;
+                    Vector3 scale;
                     glm::quat rotation;
-                    glm::vec3 translation;
-                    glm::vec3 skew;
-                    glm::vec4 perspective;
+                    Vector3 translation;
+                    Vector3 skew;
+                    Vector4 perspective;
                     glm::decompose(oldTransform, scale, rotation, translation, skew, perspective);
                     //rotation = glm::conjugate(rotation);
                     if (scale.x < 0 && scale.y < 0 && scale.z < 0)
                         scale = glm::vec3(0, 0, 0);
                     rotation = glm::conjugate(rotation);
-                    glm::vec3 euler = glm::eulerAngles(rotation);
+                    Vector3 euler = glm::eulerAngles(rotation);
 
                     Vector3 globalPos = Vector3();
                     Entity currentParent = m_SelectedEntity;
@@ -131,29 +131,29 @@ namespace Nuake {
 
         if (m_IsEntitySelected)
         {
-            if (ImGui::Begin("CSM"))
-            {
-                if (m_SelectedEntity.HasComponent<LightComponent>())
-                {
-                    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                    Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
-                    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-                }
-            }
-            ImGui::End();
-
-            if (ImGui::Begin("CSM 2"))
-            {
-                if (m_SelectedEntity.HasComponent<LightComponent>())
-                {
-                    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                    Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
-                    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-                }
-            }
-            ImGui::End();
+            //if (ImGui::Begin("CSM"))
+            //{
+            //    if (m_SelectedEntity.HasComponent<LightComponent>())
+            //    {
+            //        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //        Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
+            //        ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //    }
+            //}
+            //ImGui::End();
+            //
+            //if (ImGui::Begin("CSM 2"))
+            //{
+            //    if (m_SelectedEntity.HasComponent<LightComponent>())
+            //    {
+            //        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //        Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
+            //        ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //    }
+            //}
+            //ImGui::End();
         }
     }
 
@@ -179,6 +179,7 @@ namespace Nuake {
 
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
+
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PopStyleColor();
@@ -214,7 +215,6 @@ namespace Nuake {
             }
         }
 
-        // Click.
         if (ImGui::IsItemClicked())
         {
             m_SelectedEntity = e;
@@ -223,15 +223,16 @@ namespace Nuake {
 
         if (ImGui::BeginPopupContextItem())
         {
-            if (ImGui::Selectable("Remove")) {
-
+            if (ImGui::Selectable("Remove")) 
+            {
                 QueueDeletion = e;
             }
 
             if (ImGui::Selectable("Move to root"))
             {
                 auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
-                if (p.HasParent) {
+                if (p.HasParent) 
+                {
                     auto& pp = p.Parent.GetComponent<ParentComponent>();
                     pp.RemoveChildren(m_SelectedEntity);
                     p.HasParent = false;
@@ -254,7 +255,6 @@ namespace Nuake {
                 DrawEntityTree(c);
 
             ImGui::TreePop();
-
         }
         ImGui::PopFont();
     }
@@ -271,23 +271,23 @@ namespace Nuake {
 
         if (ImGui::Begin("Environnement"))
         {
-            auto env = Engine::GetCurrentScene()->GetEnvironment();
+            Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
             if (ImGui::CollapsingHeader("Procedural Sky"))
             {
                 ImGui::DragFloat("Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f);
 
-                glm::vec3 currentDirection = env->ProceduralSkybox->SunDirection;
+                Vector3 currentDirection = env->ProceduralSkybox->SunDirection;
                 ImGuiHelper::DrawVec3("Sun Direction", &currentDirection);
                 env->ProceduralSkybox->SunDirection = glm::normalize(currentDirection);
 
-                glm::vec3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
+                Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
                 ImGuiHelper::DrawVec3("Mie Scattering", &mieScattering);
                 env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
             }
             if (ImGui::CollapsingHeader("Fog"))
             {
-                ImGui::DragFloat("Volumetric scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
-                ImGui::DragFloat("Volumetric step count", &env->VolumetricStepCount, 1.f, 0.0f);
+                ImGui::DragFloat("Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
+                ImGui::DragFloat("Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
             }
 
         }
@@ -297,7 +297,7 @@ namespace Nuake {
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
-            ImGui::BeginChild("Buttons", ImVec2(300, 20), false);
+            if(ImGui::BeginChild("Buttons", ImVec2(300, 20), false))
             {
                 // Add entity.
                 if (ImGui::Button("Add"))
@@ -671,6 +671,7 @@ namespace Nuake {
         }
         ImGui::End();
     }
+
     void EditorInterface::DrawGizmos()
     {
         Ref<Scene> scene = Engine::GetCurrentScene();
@@ -714,9 +715,6 @@ namespace Nuake {
         Ref<Directory> rootDirectory = FileSystem::GetFileTree();
         if (!rootDirectory)
             return;
-
-
-
     }
 
     void EditorInterface::DrawDirectory(Ref<Directory> directory)
@@ -806,7 +804,8 @@ namespace Nuake {
                 }
 
                 // Exit if no current directory.
-                if (!m_CurrentDirectory) {
+                if (!m_CurrentDirectory) 
+                {
                     ImGui::EndTable();
                     ImGui::End();
                     return;
@@ -836,8 +835,6 @@ namespace Nuake {
                         i++;
                     }
                 }
-
-
             }
 
             ImGui::EndTable();
@@ -1096,16 +1093,13 @@ namespace Nuake {
         if (Engine::GetProject())
             Engine::GetProject()->Save();
 
-        // Parse the project and load it.
-        std::string selectedProject = FileDialog::SaveFile(".project") + ".project";
+        std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
+        if (selectedProject == "") // Hit cancel
+            return;
 
-
-        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
-        project->FullPath = selectedProject;
+        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject + ".project");
         Engine::LoadProject(project);
-
-        Ref<Scene> scene = Scene::New();
-        Engine::LoadScene(scene);
+        Engine::LoadScene(Scene::New());
     }
 
 
@@ -1114,6 +1108,9 @@ namespace Nuake {
     {
         // Parse the project and load it.
         std::string projectPath = FileDialog::OpenFile("Project file\0*.project");
+
+        if (projectPath == "") // Hit cancel.
+            return;
 
         FileSystem::SetRootDirectory(projectPath + "/../");
         Ref<Project> project = Project::New();
@@ -1160,7 +1157,7 @@ namespace Nuake {
             ImGui::Text("Welcome to Nuake Engine");
             ImGui::Text("Developement build");
 
-            ImGui::Text("This project is still very early in developement and is not stable!");
+            ImGui::Text("This project is still very early in developement!");
             if (ImGui::Button("New Project"))
                 NewProject();
 
@@ -1269,14 +1266,17 @@ namespace Nuake {
             {
                 if (ImGui::BeginMenu("Create new"))
                 {
-                    if (ImGui::MenuItem("Empty")) {
+                    if (ImGui::MenuItem("Empty")) 
+                    {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Empty entity");
                     }
-                    if (ImGui::MenuItem("Light")) {
+                    if (ImGui::MenuItem("Light")) 
+                    {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Light");
                         ent.AddComponent<LightComponent>();
                     }
-                    if (ImGui::MenuItem("Camera")) {
+                    if (ImGui::MenuItem("Camera")) 
+                    {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Camera");
                         ent.AddComponent<CameraComponent>();
                     }
@@ -1290,7 +1290,8 @@ namespace Nuake {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
                         ent.AddComponent<QuakeMapComponent>();
                     }
-                    if (ImGui::MenuItem("Mesh")) {
+                    if (ImGui::MenuItem("Mesh")) 
+                    {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Mesh");
                         ent.AddComponent<MeshComponent>();
                     }
@@ -1303,15 +1304,10 @@ namespace Nuake {
             }
             if (ImGui::BeginMenu("Debug"))
             {
-                if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) {
-                    m_ShowImGuiDemo = !m_ShowImGuiDemo;
-                }
+                if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Quit"))
-            {
-                ImGui::EndMenu();
-            }
+            if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();
             ImGui::EndMainMenuBar();
         }
 
@@ -1330,35 +1326,22 @@ namespace Nuake {
         filesystem.Draw();
         filesystem.DrawDirectoryExplorer();
 
-
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
 
         if (ImGui::Begin("Toolbar"))
         {
-            if (ImGui::Button(ICON_FA_HAND_POINTER))
-                CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            if (ImGui::Button(ICON_FA_HAND_POINTER)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ARROWS_ALT))
-                CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            if (ImGui::Button(ICON_FA_ARROWS_ALT)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT))
-                CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+            if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT))
-                CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            if (ImGui::Button(ICON_FA_EXPAND_ALT)) CurrentOperation = ImGuizmo::OPERATION::SCALE;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_PLAY))
-            {
-                Engine::EnterPlayMode();
-            }
+            if (ImGui::Button(ICON_FA_PLAY)) Engine::EnterPlayMode();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_STOP))
-            {
-                Engine::ExitPlayMode();
-            }
-
-
+            if (ImGui::Button(ICON_FA_STOP)) Engine::ExitPlayMode(); 
         }
         ImGui::End();
     }

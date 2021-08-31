@@ -64,9 +64,6 @@ namespace Nuake {
 
     bool Window::SetScene(Ref<Scene> scene)
     {
-        if (scene == nullptr)
-            return false;
-
         m_Scene = scene;
         return true;
     }
@@ -161,8 +158,8 @@ namespace Nuake {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         ImGui::StyleColorsDark();
 
-        ImGui::GetStyle().FrameRounding = 4.0f;
-        ImGui::GetStyle().GrabRounding = 4.0f;
+        ImGui::GetStyle().FrameRounding = 2.0f;
+        ImGui::GetStyle().GrabRounding = 2.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);

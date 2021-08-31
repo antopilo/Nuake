@@ -21,15 +21,15 @@ namespace Nuake
 		Ref<Scene> DefaultScene;
 		Ref<FGDFile> EntityDefinitionsFile;
 
-		Project(const std::string Name, const std::string Description, const std::string& FullPath, const std::string& defaultScenePath = "");
+		Project(const std::string& Name, const std::string& Description, const std::string& FullPath, const std::string& defaultScenePath = "");
 		Project();
 
 		void Save();
-		void SaveAs(const std::string FullPath);
+		void SaveAs(const std::string& FullPath);
 
-		static Ref<Project> New(const std::string Name, const std::string Description, const std::string FullPath);
+		static Ref<Project> New(const std::string& Name, const std::string& Description, const std::string& FullPath);
 		static Ref<Project> New();
-		static Ref<Project> Load(std::string path);
+		static Ref<Project> Load(std::string& path);
 
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;

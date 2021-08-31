@@ -278,8 +278,9 @@ namespace Nuake {
 		pbrShader->SetUniform1i("u_ShowNormal", 0);
 
 		
-		if (cam)
+		if (!cam)
 		{
+			return;
 			pbrShader->SetUniform1f("u_Exposure", cam->Exposure);
 			pbrShader->SetUniformMat4f("u_View", cam->GetTransform());
 			pbrShader->SetUniformMat4f("u_Projection", cam->GetPerspective());

@@ -27,48 +27,37 @@ namespace Nuake {
 
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
-        for (auto d : dir->Directories)
+        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        //if (is_selected) 
+       
+        std::string icon = ICON_FA_FOLDER;
+        if (m_CurrentDirectory == dir)
+            base_flags |= ImGuiTreeNodeFlags_Selected;
+        if (dir->Directories.size() <= 0)
+            base_flags = ImGuiTreeNodeFlags_Leaf;
+
+        bool open = ImGui::TreeNodeEx(dir->name.c_str(), base_flags);
+
+        if (ImGui::IsItemClicked())
+            m_CurrentDirectory = dir;
+
+        if (open)
         {
-            ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-            bool is_selected = m_CurrentDirectory == d;
-            if (is_selected)
-                base_flags |= ImGuiTreeNodeFlags_Selected;
-
-            if (d->Directories.size() == 0)
-            {
-                base_flags = ImGuiTreeNodeFlags_Leaf;
-            }
-            std::string icon = ICON_FA_FOLDER;
-            if (is_selected)
-                icon = ICON_FA_FOLDER_OPEN;
-            bool open = ImGui::TreeNodeEx((icon + " " + d->name).c_str(), base_flags);
-
-            if (ImGui::IsItemClicked())
-                m_CurrentDirectory = d;
-            if (open)
-            {
-                if (d->Directories.size() > 0)
+            if (dir->Directories.size() > 0)
+                for (auto& d : dir->Directories)
                     EditorInterfaceDrawFiletree(d);
-                ImGui::TreePop();
-            }
-
+            ImGui::TreePop();
         }
     }
-
-
 
     void FileSystemUI::DrawDirectory(Ref<Directory> directory)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
         std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
+
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
             m_CurrentDirectory = directory;
-        if (ImGui::BeginPopupContextWindow())
-        {
-            if (ImGui::MenuItem("Htest"));
 
-            ImGui::EndPopup();
-        }
         ImGui::Text(directory->name.c_str());
         ImGui::PopFont();
     }
@@ -170,28 +159,22 @@ namespace Nuake {
 
             if (ImGui::BeginChild("Tree browser", ImVec2(sz1, avail.y)))
             {
-                if (ImGui::BeginPopupContextItem("item context menu"))
-                {
-                    if (ImGui::Selectable("Set to zero"));
-                    if (ImGui::Selectable("Set to PI"));
-                    ImGui::SetNextItemWidth(-1);
-                    ImGui::EndPopup();
-                }
-                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
 
                 bool is_selected = m_CurrentDirectory == FileSystem::RootDirectory;
                 if (is_selected)
-                    base_flags |= ImGuiTreeNodeFlags_Selected | ImGuiTreeNodeFlags_DefaultOpen;
+                    base_flags |= ImGuiTreeNodeFlags_Selected;
                 std::string icon = ICON_FA_FOLDER;
 
-                bool open = ImGui::TreeNodeEx((icon + " " + rootDirectory->name).c_str(), base_flags);
+                bool open = ImGui::TreeNodeEx((icon + " " + "Project files").c_str(), base_flags);
                 if (ImGui::IsItemClicked())
                 {
                     m_CurrentDirectory = FileSystem::RootDirectory;
                 }
                 if (open)
                 {
-                    EditorInterfaceDrawFiletree(rootDirectory);
+                    for(auto& d : rootDirectory->Directories)
+                        EditorInterfaceDrawFiletree(d);
                     ImGui::TreePop();
                 }
 
@@ -205,7 +188,8 @@ namespace Nuake {
 
             Ref<Directory> currentParent = m_CurrentDirectory;
             paths.push_back(m_CurrentDirectory);
-            while (currentParent != nullptr) {
+            while (currentParent != nullptr) 
+            {
                 paths.push_back(currentParent);
                 currentParent = currentParent->Parent;
             }
@@ -215,7 +199,7 @@ namespace Nuake {
             if (ImGui::BeginChild("Wrapper", avail))
             {
                 avail.y = 30;
-                if (ImGui::BeginChild("ariane", avail))
+                if (ImGui::BeginChild("Path", avail))
                 {
                     if (ImGui::Button("Refresh"))
                         FileSystem::Scan();
@@ -238,29 +222,22 @@ namespace Nuake {
 
                 if (ImGui::BeginChild("Content", avail))
                 {
-                    // Wrapping.
                     int width = ImGui::GetWindowWidth() * 0.8f;
                     ImVec2 buttonSize = ImVec2(80, 80);
-                    int amount = (width / 100); // -2 because button overflow width + ... button.
+                    int amount = (int)(width / 100);
+                    if (amount <= 0) amount = 1;
+
                     int i = 1; // current amount of item per row.
                     if (ImGui::BeginTable("ssss", amount))
                     {
                         // Button to go up a level.
-                        if (m_CurrentDirectory != FileSystem::RootDirectory)
+                        if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
                         {
                             ImGui::TableNextColumn();
                             if (ImGui::Button("..", ImVec2(100, 100)))
                                 m_CurrentDirectory = m_CurrentDirectory->Parent;
                             ImGui::TableNextColumn();
-                            // Increment item per row tracker.
                             i++;
-                        }
-
-                        // Exit if no current directory.
-                        if (!m_CurrentDirectory) {
-                            ImGui::EndTable();
-                            ImGui::End();
-                            return;
                         }
 
                         if (m_CurrentDirectory && m_CurrentDirectory->Directories.size() > 0)
@@ -275,6 +252,7 @@ namespace Nuake {
                                 i++;
                             }
                         }
+
                         if (m_CurrentDirectory && m_CurrentDirectory->Files.size() > 0)
                         {
                             for (auto f : m_CurrentDirectory->Files)
@@ -298,7 +276,7 @@ namespace Nuake {
                         }
                         if (ImGui::BeginPopupContextWindow())
                         {
-                            if (ImGui::Button("New Wren script"))
+                            if (ImGui::MenuItem("New Wren script"))
                             {
                                 ImGui::OpenPopup("CreateNewFile");
 
