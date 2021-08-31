@@ -54,7 +54,7 @@ namespace Nuake {
 			Vector3 globalScale = Vector3();
 			if (parent.HasParent)
 			{
-				ParentComponent& parentComponent = currentParent.GetComponent<ParentComponent>();
+				ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
 				while (parentComponent.HasParent)
 				{
 					TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
@@ -68,6 +68,7 @@ namespace Nuake {
 				transform.GlobalTranslation = globalPosition + transform.Translation;
 				transform.GlobalRotation = globalRotation + transform.Rotation;
 				transform.GlobalScale = globalScale * transform.Scale;
+
 			}
 			else
 			{

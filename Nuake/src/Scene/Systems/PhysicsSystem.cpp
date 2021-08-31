@@ -93,10 +93,12 @@ namespace Nuake
 		PhysicsManager::Get()->Step(ts);
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
-		for (auto e : brushes) {
+		for (auto e : brushes) 
+		{
 			auto [transform, brush] = brushes.get<TransformComponent, BSPBrushComponent>(e);
 
-			for (auto& r : brush.Rigidbody) {
+			for (auto& r : brush.Rigidbody) 
+			{
 				r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
 				r->UpdateTransform(*r->m_Transform);
 			}

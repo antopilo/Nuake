@@ -13,8 +13,8 @@ namespace Nuake {
 	{
 	private:
 		FileSystemUI filesystem = FileSystemUI();
-		Entity m_SelectedEntity;
-		bool m_IsEntitySelected = false;
+		
+		
 		bool m_DrawGrid = false;
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = false;
@@ -27,6 +27,8 @@ namespace Nuake {
 		bool m_IsMaterialSelected = false;
 
 	public:
+		bool m_IsEntitySelected = false;
+		Entity m_SelectedEntity;
 		static ImFont* bigIconFont;
 		void BuildFonts();
 		void Init();

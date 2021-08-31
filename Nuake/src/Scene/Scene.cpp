@@ -260,7 +260,6 @@ namespace Nuake {
 		env->Push();
 
 		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
 		glEnable(GL_DEPTH_TEST);
 
 		// Register the lights
@@ -421,10 +420,7 @@ namespace Nuake {
 
 				for (auto& b : model.Meshes)
 				{
-					AABB aabb = b->GetAABB();
-					aabb.Transform(transform.GetTransform());
-					if (m_EditorCamera->BoxFrustumCheck(aabb))
-						Renderer::SubmitMesh(b, transform.GetTransform());
+					Renderer::SubmitMesh(b, transform.GetTransform());
 				}
 			}
 

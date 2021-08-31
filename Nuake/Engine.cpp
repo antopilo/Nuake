@@ -20,6 +20,8 @@ namespace Nuake
 	float Engine::m_LastFrameTime = 0.0f;
 	float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
 	float Engine::m_FixedUpdateDifference = 0.f;
+	float Engine::m_Time = 0.f;
+
 	bool Engine::IsPlayMode = false;
 
 	void Engine::Init()
@@ -41,9 +43,9 @@ namespace Nuake
 
 	void Engine::Tick()
 	{
-		float time = (float)glfwGetTime();
-		Timestep timestep = time - m_LastFrameTime;
-		m_LastFrameTime = time;
+		m_Time = (float)glfwGetTime();
+		Timestep timestep = m_Time - m_LastFrameTime;
+		m_LastFrameTime = m_Time;
 
 		// Dont update if no scene is loaded.
 		if (CurrentWindow->GetScene())
@@ -85,7 +87,8 @@ namespace Nuake
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (IsPlayMode) {
+		if (IsPlayMode) 
+		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();
 		}

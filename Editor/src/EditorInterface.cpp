@@ -31,6 +31,8 @@
 #include "UIComponents/Viewport.h"
 #include <src/Resource/Prefab.h>
 #include <src/Scene/Components/PrefabComponent.h>
+#include <src/Rendering/Shaders/ShaderManager.h>
+#include "src/Rendering/Renderer.h"
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -224,7 +226,6 @@ namespace Nuake {
             if (ImGui::Selectable("Remove")) {
 
                 QueueDeletion = e;
-                open = false;
             }
 
             if (ImGui::Selectable("Move to root"))
@@ -359,7 +360,7 @@ namespace Nuake {
                     m_SelectedEntity = scene->GetAllEntities().at(0);
 
                 QueueDeletion = Entity{ (entt::entity)0, scene.get() };
-                ImGui::TreePop();
+                //ImGui::TreePop();
             }
 
         }
@@ -453,7 +454,8 @@ namespace Nuake {
                 ImGui::Separator();
             }
 
-            if (m_SelectedEntity.HasComponent<MeshComponent>()) {
+            if (m_SelectedEntity.HasComponent<MeshComponent>()) 
+            {
                 std::string icon = ICON_FA_MALE;
                 if (ImGui::CollapsingHeader((icon + " " + "Mesh").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
@@ -623,6 +625,7 @@ namespace Nuake {
             }
             if (m_SelectedEntity.HasComponent<QuakeMapComponent>())
             {
+                
                 std::string icon = ICON_FA_BROOM;
                 if (ImGui::CollapsingHeader((icon + " " + "Quake map").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
                 {
@@ -1110,7 +1113,7 @@ namespace Nuake {
     void OpenProject()
     {
         // Parse the project and load it.
-        std::string projectPath = FileDialog::OpenFile(".project");
+        std::string projectPath = FileDialog::OpenFile("Project file\0*.project");
 
         FileSystem::SetRootDirectory(projectPath + "/../");
         Ref<Project> project = Project::New();
@@ -1124,12 +1127,6 @@ namespace Nuake {
         Engine::LoadProject(project);
 
         pInterface.m_CurrentProject = project;
-        // Create new interface named test.
-        //userInterface = UI::UserInterface::New("test");
-
-
-        // Set current interface running.
-        //Engine::GetCurrentScene()->AddInterface(userInterface);
     }
 
     void OpenScene()
@@ -1138,7 +1135,8 @@ namespace Nuake {
         std::string projectPath = FileDialog::OpenFile(".scene");
 
         Ref<Scene> scene = Scene::New();
-        if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) {
+        if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) 
+        {
             Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
             return;
         }
@@ -1159,15 +1157,16 @@ namespace Nuake {
 
         if (ImGui::BeginPopupModal("Welcome", NULL, flags))
         {
-            ImGui::Text("Welcome to");
-            ImGui::Text("Nuake engine");
+            ImGui::Text("Welcome to Nuake Engine");
+            ImGui::Text("Developement build");
 
-            ImGui::Text("Would you like to");
-            if (ImGui::Button("Start a new project"))
+            ImGui::Text("This project is still very early in developement and is not stable!");
+            if (ImGui::Button("New Project"))
                 NewProject();
 
             ImGui::SameLine();
-            if (ImGui::Button("Open a project")) {
+            if (ImGui::Button("Open Project")) 
+            {
                 OpenProject();
                 filesystem.m_CurrentDirectory = FileSystem::RootDirectory;
             }
@@ -1175,10 +1174,10 @@ namespace Nuake {
 
             ImGui::EndPopup();
         }
+
         if (!Engine::GetProject())
         {
             ImGui::OpenPopup("Welcome");
-
             return;
         }
 

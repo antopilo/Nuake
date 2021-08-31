@@ -19,11 +19,12 @@
 #include <src/Rendering/Renderer.h>
 #include "src/UI/UserInterface.h"
 #include "src/NewEditor.h"
+#include <src/Scene/Components/BSPBrushComponent.h>
 
 void OpenProject()
 {
     // Parse the project and load it.
-    std::string projectPath = Nuake::FileDialog::OpenFile(".project");
+    std::string projectPath = Nuake::FileDialog::OpenFile("Project file|*.project;");
 
     Nuake::FileSystem::SetRootDirectory(projectPath + "/../");
     Ref<Nuake::Project> project = Nuake::Project::New();
@@ -55,9 +56,11 @@ int main()
     Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
     Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
     Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
+    Ref<Nuake::Shader> ditherShader = Nuake::ShaderManager::GetShader("resources/Shaders/dither.shader");
 
-    Nuake::NewEditor newEditor = Nuake::NewEditor();
+    //Nuake::NewEditor newEditor = Nuake::NewEditor();
     
+    // Register shaders
     while (!Nuake::Engine::GetCurrentWindow()->ShouldClose())
     {
         Nuake::RenderCommand::Clear();
@@ -115,8 +118,23 @@ int main()
             }
         
             glEnable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
+            
             GuizmoShader->Unbind();
+
+            ditherShader->Bind();
+            ditherShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
+            ditherShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
+            ditherShader->SetUniform1f("u_Time", Nuake::Engine::GetTime());
+            ditherShader->SetUniform4f("u_Color", 252.0 / 255.0, 3.0 / 255.0, 65.0 / 255.0, 1.0);
+
+            if (editor.m_IsEntitySelected && editor.m_SelectedEntity.HasComponent<Nuake::BSPBrushComponent>())
+            {
+                for (auto& m : editor.m_SelectedEntity.GetComponent<Nuake::BSPBrushComponent>().Meshes)
+                    Nuake::Renderer::SubmitMesh(m, editor.m_SelectedEntity.GetComponent<Nuake::TransformComponent>().GetTransform());
+
+                Nuake::Renderer::Flush(ditherShader, true);
+            }
+            glEnable(GL_DEPTH_TEST);
         }
         sceneFramebuffer->Unbind();
 

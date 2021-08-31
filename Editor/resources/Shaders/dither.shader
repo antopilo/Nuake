@@ -17,13 +17,16 @@ void main()
 #version 460 core
 
 uniform vec4 u_Color;
-
+uniform float u_Time;
 out vec4 FragColor;
 
 void main()
 {
-    if(mod(gl_FragCoord.x / 4.0 + gl_FragCoord.y / 4.0, 4.0) < 2.0)
+    if (mod(gl_FragCoord.x + gl_FragCoord.y, 4.0) < 2.0)
         discard;
 
-    FragColor = u_Color;
+    vec4 finalColor = u_Color;
+    finalColor.a = (sin(u_Time * 4.0) + 1.0) / 4.0 + 0.1;
+    FragColor = finalColor;
+    
 }
