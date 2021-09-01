@@ -78,6 +78,11 @@ namespace Nuake {
         return m_Framebuffer;
     }
 
+    Ref<FrameBuffer> Window::GetGBuffer() const
+    {
+        return m_GBuffer;
+    }
+
     Vector2 Window::GetSize()
     {
         int w, h = 0;
@@ -134,6 +139,12 @@ namespace Nuake {
         // Create viewports
         m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080));
         m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(1920, 1080), GL_RGB));
+
+        m_GBuffer = CreateRef<FrameBuffer>(false, Vector2(1920, 1080));
+        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
+        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT1);
+        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
 
         // Temporary quad vbo for deferred.
         glGenVertexArrays(1, &vao);
@@ -257,6 +268,15 @@ namespace Nuake {
             m_Scene->DrawInterface(m_Framebuffer->GetSize());
         }
         m_Framebuffer->Unbind();
+
+        m_GBuffer->Bind();
+        m_GBuffer->Clear();
+        {
+            m_Scene->EditorDrawDeferred();
+        }
+        
+        m_GBuffer->Unbind();
+
 
         Renderer::EndDraw();
     }

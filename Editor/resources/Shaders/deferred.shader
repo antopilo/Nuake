@@ -29,6 +29,7 @@ in vec3 FragPos;
 in vec2 UV;
 in mat4 InvProjection;
 in mat4 InvView;
+
 // Camera
 uniform float u_Exposure;
 uniform vec3  u_EyePosition;

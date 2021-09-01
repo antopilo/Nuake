@@ -113,11 +113,11 @@ namespace Nuake
 			// m alloc. casted as a pointer.
 			char* message = (char*)malloc(length * sizeof(char));
 
-			//glGetShaderInfoLog(id, length, &length, message);
+			glGetShaderInfoLog(id, length, &length, message);
 
 			std::cout << "Failed to compile " <<
 				(type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << " shader!" << std::endl;
-			std::cout << std::string(message) << std::endl;
+			std::cout << message << std::endl;
 
 			// Delete invalid shader
 			glDeleteShader(id);

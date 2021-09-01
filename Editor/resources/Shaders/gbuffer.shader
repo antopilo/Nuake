@@ -30,30 +30,70 @@ void main()
 #shader fragment
 #version 460 core
 
-layout(location = 0) out vec3 gAlbedo;
-layout(location = 1) out vec3 gNormal;
-layout(location = 2) out vec3 gMaterial;
+layout(location = 0) out vec4 gAlbedo;
+layout(location = 1) out vec4 gNormal;
+layout(location = 2) out vec4 gMaterial;
 
 in vec3 FragPos;
 in vec2 UV;
 in mat3 TBN;
 
+// Material
 uniform sampler2D m_Albedo;
-uniform sampler2D m_Normal;
-uniform sampler2D m_Roughness;
 uniform sampler2D m_Metalness;
+uniform sampler2D m_Roughness;
 uniform sampler2D m_AO;
+uniform sampler2D m_Normal;
+uniform sampler2D m_Displacement;
+
+layout(std140, binding = 32) uniform u_MaterialUniform
+{
+    int u_HasAlbedo;
+    vec3 m_AlbedoColor;     //  16 byte
+    int u_HasMetalness;     //  32 byte
+    float u_MetalnessValue; //  36 byte
+    int u_HasRoughness;     //  40 byte
+    float u_RoughnessValue; //  44 byte
+    int u_HasAO;            //  48 byte
+    float u_AOValue;        //  52 byte
+    int u_HasNormal;        //  56 byte
+    int u_HasDisplacement;  //  60 byte
+    int u_Unlit;
+};
 
 void main()
 {
-    gAlbedo.rgb = texture(m_Albedo, UV).rgb;
+    // Normal
+    vec3 normal = vec3(0.5, 0.5, 1.0);
+    if (u_HasNormal == 1)
+        normal = texture(m_Normal, UV).rgb;
 
-    vec3 normal = texture(m_Normal, UV).rgb;
     normal = normal * 2.0 - 1.0;
-    normal = normalize((TBN * normalize(normal)).xyz);
+    normal =  TBN * normalize(normal);
+    gNormal = vec4(normal, 1.0);
+
+    // Albedo
+    gAlbedo = vec4(m_AlbedoColor, 1.0);
+    if (u_HasAlbedo == 1)
+        gAlbedo = texture(m_Albedo, UV).rgba;
+
+    gAlbedo.rgba = texture(m_Albedo, UV).rgba;
     
-    gNormal = (normal * 0.5 + 0.5);
-    gMaterial.r = texture(m_Metalness, UV).r;
-    gMaterial.g = texture(m_AO, UV).r;
-    gMaterial.b = texture(m_Roughness, UV).r;
+    // Material
+    float finalMetalness = u_MetalnessValue;
+    if (u_HasMetalness == 1)
+        finalMetalness = texture(m_Metalness, UV).r;
+
+    float finalAO = u_AOValue;
+    if (u_HasAO == 1)
+        finalAO = texture(m_AO, UV).r;
+
+    float finalRoughness = u_RoughnessValue;
+    if (u_HasRoughness == 1)
+        finalRoughness = texture(m_Roughness, UV).r;
+
+    gMaterial = vec4(0, 0, 0, 1);
+    gMaterial.r = finalMetalness;
+    gMaterial.g = finalAO;
+    gMaterial.b = finalRoughness;
 }

@@ -45,13 +45,13 @@ namespace Nuake
 		// Surely, this can be optimized.
 		int size = 0;
 		std::vector<unsigned int> keys = std::vector<unsigned int>();
-		for (auto s : m_Textures)
+		for (auto& s : m_Textures)
 		{
-			if (s.first != GL_DEPTH_ATTACHMENT)
-			{
-				keys.push_back(s.first);
-				size += 1;
-			}
+			if (s.first == GL_DEPTH_ATTACHMENT)
+				continue;
+
+			keys.push_back(s.first);
+			size += 1;
 		}
 
 		if (size > 0)

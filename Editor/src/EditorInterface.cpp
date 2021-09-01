@@ -131,17 +131,42 @@ namespace Nuake {
 
         if (m_IsEntitySelected)
         {
-            //if (ImGui::Begin("CSM"))
-            //{
-            //    if (m_SelectedEntity.HasComponent<LightComponent>())
-            //    {
-            //        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //        Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT);
-            //        ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //    }
-            //}
-            //ImGui::End();
+            if (ImGui::Begin("GBUFFER"))
+            {
+                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_DEPTH_ATTACHMENT);
+                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+            }
+            ImGui::End();
+            if (ImGui::Begin("GBUFFER2"))
+            {
+                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
+                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+            }
+            ImGui::End();
+            if (ImGui::Begin("GBUFFER3"))
+            {
+                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT1);
+                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+            }
+            ImGui::End();
+            if (ImGui::Begin("GBUFFER4"))
+            {
+                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT2);
+                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+            }
+            ImGui::End();
             //
             //if (ImGui::Begin("CSM 2"))
             //{

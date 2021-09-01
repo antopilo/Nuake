@@ -1,9 +1,11 @@
 #pragma once
+#include "src/Core/Core.h"
+#include "src/Core/Maths.h"
+
+#include "src/Rendering/Shaders/Shader.h"
 #include "src/Rendering/Textures/TextureManager.h"
 #include "Texture.h"
 
-#include "src/Core/Core.h"
-#include "src/Core/Maths.h"
 
 namespace Nuake
 {
@@ -68,7 +70,7 @@ namespace Nuake
 
 		~Material();
 
-		void Bind();
+		void Bind(Ref<Shader> shader);
 
 		void SetupUniformBuffer();
 

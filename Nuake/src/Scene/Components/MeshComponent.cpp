@@ -5,12 +5,6 @@
 #include <src/Rendering/Textures/MaterialManager.h>
 
 namespace Nuake {
-    void MeshComponent::Draw()
-    {
-        for (auto m : meshes)
-            m->Draw();
-    }
-
     void MeshComponent::LoadModel()
     {
         this->meshes.clear();

@@ -19,6 +19,7 @@ namespace Nuake
 		GLFWwindow* m_Window;
 
 		Ref<FrameBuffer> m_Framebuffer;
+		Ref<FrameBuffer> m_GBuffer;
 
 		Ref<Scene> m_Scene;
 		Vector2 m_FramebufferOffset;
@@ -39,6 +40,7 @@ namespace Nuake
 		void EndDraw();
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
+		Ref<FrameBuffer> GetGBuffer() const;
 
 		Vector2 GetSize();
 

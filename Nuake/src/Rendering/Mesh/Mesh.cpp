@@ -55,10 +55,10 @@ namespace Nuake
         m_VertexArray->Unbind();
     }
 
-    void Mesh::Draw(bool drawMaterial)
+    void Mesh::Draw(Ref<Shader> shader, bool bindMaterial)
     {
-        if (drawMaterial)
-            m_Material->Bind();
+        if (bindMaterial)
+            m_Material->Bind(shader);
 
         m_VertexArray->Bind();
         RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_Indices.size(), RendererEnum::UINT, 0);
@@ -68,6 +68,7 @@ namespace Nuake
     {
         Renderer::m_DebugShader->Bind();
         Renderer::m_DebugShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
+
         m_VertexArray->Bind();
         RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_Indices.size(), RendererEnum::UINT, 0);
     }

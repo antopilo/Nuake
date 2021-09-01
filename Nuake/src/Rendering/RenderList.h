@@ -36,12 +36,12 @@ namespace Nuake
 			for (auto& i : m_RenderList)
 			{
 				if(!depthOnly)
-					i.first->Bind();
+					i.first->Bind(shader);
 
 				for (auto& m : i.second)
 				{
 					shader->SetUniformMat4f("u_Model", m.transform);
-					m.Mesh->Draw(false);
+					m.Mesh->Draw(shader, false);
 				}
 			}
 

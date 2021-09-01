@@ -278,25 +278,26 @@ namespace Nuake {
 		pbrShader->SetUniform1i("u_ShowNormal", 0);
 
 		
-		if (!cam)
+		if (cam)
 		{
-			return;
 			pbrShader->SetUniform1f("u_Exposure", cam->Exposure);
 			pbrShader->SetUniformMat4f("u_View", cam->GetTransform());
 			pbrShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 
 			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-			for (auto e : view) 
+			for (auto e : view)
 			{
 				auto [transform, model, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
 				for (auto& m : model.meshes)
 					Renderer::SubmitMesh(m, transform.GetTransform());
 			}
+
 			glCullFace(GL_BACK);
 			Renderer::Flush(pbrShader);
 			glCullFace(GL_FRONT);
+
 			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-			for (auto e : quakeView) 
+			for (auto e : quakeView)
 			{
 				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
 				if (model.IsTransparent)
@@ -304,10 +305,7 @@ namespace Nuake {
 
 				for (auto& b : model.Meshes)
 				{
-					AABB aabb = b->GetAABB();
-					aabb.Transform(transform.GetTransform());
-					if(cam->BoxFrustumCheck(aabb))
-						Renderer::SubmitMesh(b, transform.GetTransform());
+					Renderer::SubmitMesh(b, transform.GetTransform());
 				}
 			}
 
@@ -425,8 +423,32 @@ namespace Nuake {
 				}
 			}
 
-			Renderer::Flush(flatShader);
+			Renderer::Flush(flatShader, true);
 		}
+	}
+
+	void Scene::EditorDrawDeferred()
+	{
+		glEnable(GL_DEPTH_TEST);
+
+		Ref<Shader> gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+		gBufferShader->Bind();
+		gBufferShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+		gBufferShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
+		
+		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+		for (auto e : quakeView)
+		{
+			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+
+			if (model.IsTransparent)
+				continue;
+
+			for (auto& b : model.Meshes)
+				Renderer::SubmitMesh(b, transform.GetTransform());
+		}
+
+		Renderer::Flush(gBufferShader, false);
 	}
 
 	std::vector<Entity> Scene::GetAllEntities() 
@@ -461,7 +483,8 @@ namespace Nuake {
 	{
 		std::vector<Entity> allEntities;
 		auto view = m_Registry.view<TransformComponent, NameComponent>();
-		for (auto e : view) {
+		for (auto e : view) 
+		{
 			auto [transform, namec] = view.get<TransformComponent, NameComponent>(e);
 			if (namec.Name == name)
 				return Entity{ e, this };
@@ -489,11 +512,14 @@ namespace Nuake {
 	{
 		ParentComponent& parentC = entity.GetComponent<ParentComponent>();
 		std::vector<Entity> copyChildrens = parentC.Children;
+
 		if (parentC.HasParent) {  // Remove self from parents children lists.
 			ParentComponent& parent = parentC.Parent.GetComponent<ParentComponent>();
 			parent.RemoveChildren(entity);
 		}
-		for (auto& c : copyChildrens) {
+
+		for (auto& c : copyChildrens) 
+		{
 			Logger::Log("Deleting... entity" + std::to_string(c.GetHandle()));
 			DestroyEntity(c);
 		}
@@ -517,6 +543,7 @@ namespace Nuake {
 					break;
 				}
 			}
+
 			if (!cam)
 				cam = m_EditorCamera;
 			return cam;
