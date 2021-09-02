@@ -46,7 +46,7 @@ namespace Nuake
 		// Lights
 		static std::vector<Light> m_Lights;
 		static void RegisterLight(TransformComponent transform, LightComponent light);
-		static void RegisterDeferredLight(TransformComponent transform, LightComponent light, Camera* cam);
+		static void RegisterDeferredLight(TransformComponent transform, LightComponent light);
 
 		
 

@@ -83,6 +83,11 @@ namespace Nuake {
         return m_GBuffer;
     }
 
+    Ref<FrameBuffer> Window::GetDeferredBuffer() const
+    {
+        return m_DeferredBuffer;
+    }
+
     Vector2 Window::GetSize()
     {
         int w, h = 0;
@@ -145,6 +150,9 @@ namespace Nuake {
         m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
         m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT1);
         m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
+
+        m_DeferredBuffer = CreateRef<FrameBuffer>(true, Vector2(1920, 1080));
+        m_DeferredBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB));
 
         // Temporary quad vbo for deferred.
         glGenVertexArrays(1, &vao);
@@ -262,8 +270,8 @@ namespace Nuake {
         {
             if (Engine::IsPlayMode)
                 m_Scene->Draw();
-            else
-                m_Scene->EditorDraw();
+            //else
+            //    m_Scene->EditorDraw();
 
             m_Scene->DrawInterface(m_Framebuffer->GetSize());
         }
@@ -277,6 +285,31 @@ namespace Nuake {
         
         m_GBuffer->Unbind();
 
+        m_DeferredBuffer->Bind();
+        m_DeferredBuffer->Clear();
+        {
+            glDisable(GL_CULL_FACE);
+            if (m_Scene->GetEnvironment()->ProceduralSkybox)
+                m_Scene->GetEnvironment()->ProceduralSkybox->Draw(m_Scene->m_EditorCamera);
+
+            m_Scene->EditorDrawDeferredShading();
+
+            m_GBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
+            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
+            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
+
+            Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+            deferredShader->SetUniform1i("m_Depth", 5);
+            deferredShader->SetUniform1i("m_Albedo", 6);
+            deferredShader->SetUniform1i("m_Normal", 7);
+            deferredShader->SetUniform1i("m_Material", 8);
+
+            Renderer::DrawQuad(Matrix4());
+
+
+        }
+        m_DeferredBuffer->Unbind();
 
         Renderer::EndDraw();
     }

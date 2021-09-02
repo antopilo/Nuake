@@ -51,12 +51,12 @@ namespace Nuake
     };
 
     float QuadVertices[] = {
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
-        0.5f,   0.5f, 0.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f,
-        0.5f,  -0.5f, 0.0f,   1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
-        0.5f,   0.5f, 0.0f,   1.0f, 1.0f
+        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
+        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
+        1.0f,  -1.0f, 0.0f,   1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
+        1.0f,   1.0f, 0.0f,   1.0f, 1.0f
     };
 
 
@@ -159,25 +159,41 @@ namespace Nuake
         m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
     }
 
-    void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light, Camera* cam)
+    void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light)
     {
+        if (m_Lights.size() == 20)
+            return;
+
+        Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        deferredShader->Bind();
         m_Lights.push_back({ transform , light });
 
         int idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.Translation;
-        Matrix4 lightView = glm::lookAt(pos, pos - direction, Vector3(0.0f, 1.0f, 0.0f));
+        Vector3 pos = transform.GlobalTranslation;
+        Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
-        light.m_Framebuffer->GetTexture()->Bind(11);
+        //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
-        m_DeferredShader->SetUniform1i("LightCount", idx);
-        m_DeferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
-        m_DeferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMap", 11);
-        m_DeferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
-        m_DeferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", transform.Translation.x, transform.Translation.y, transform.Translation.z);
-        m_DeferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
-        m_DeferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+        if (light.CastShadows)
+        {
+            for (unsigned int i = 0; i < CSM_AMOUNT; i++)
+            {
+                light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
+                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[" + std::to_string(i) + "]", 17 + i);
+                deferredShader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
+                deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+            }
+        }
+
+       deferredShader->SetUniform1i("LightCount", idx);
+       deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
+       deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
+       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z);
+       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
+       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+       deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
     }
 
     void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) 

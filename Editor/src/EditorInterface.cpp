@@ -131,6 +131,16 @@ namespace Nuake {
 
         if (m_IsEntitySelected)
         {
+            if (ImGui::Begin("DEFERRED"))
+            {
+                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+                Ref<Texture> texture = Engine::GetCurrentWindow()->GetDeferredBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
+                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+
+            }
+            ImGui::End();
+
             if (ImGui::Begin("GBUFFER"))
             {
                 ImVec2 regionAvail = ImGui::GetContentRegionAvail();

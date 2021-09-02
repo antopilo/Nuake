@@ -67,17 +67,18 @@ void main()
     vec3 normal = vec3(0.5, 0.5, 1.0);
     if (u_HasNormal == 1)
         normal = texture(m_Normal, UV).rgb;
-
     normal = normal * 2.0 - 1.0;
-    normal =  TBN * normalize(normal);
-    gNormal = vec4(normal, 1.0);
+
+    normal = TBN * normalize(normal);
+
+    gNormal = vec4(normal, 1.0) / 2.0 + 0.5;
 
     // Albedo
     gAlbedo = vec4(m_AlbedoColor, 1.0);
     if (u_HasAlbedo == 1)
-        gAlbedo = texture(m_Albedo, UV).rgba;
+        gAlbedo.rgb = texture(m_Albedo, UV).rgb;
 
-    gAlbedo.rgba = texture(m_Albedo, UV).rgba;
+    gAlbedo.rgb = texture(m_Albedo, UV).rgb;
     
     // Material
     float finalMetalness = u_MetalnessValue;

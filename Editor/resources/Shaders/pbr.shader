@@ -373,7 +373,6 @@ void main()
             shadow += ShadowCalculation(Lights[i], v_FragPos, N);
         }
 
-       
         vec3 H = normalize(V + L);
         vec3 radiance = Lights[i].Color * attenuation * (1.0f - shadow);
 

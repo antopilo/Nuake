@@ -58,6 +58,7 @@ namespace Nuake {
 		void DrawInterface(Vector2 screensize);
 		void Draw();
 		void EditorDrawDeferred();
+		void EditorDrawDeferredShading();
 		void EditorDraw();
 
 		std::vector<Entity> GetAllEntities();

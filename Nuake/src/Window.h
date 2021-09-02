@@ -20,6 +20,7 @@ namespace Nuake
 
 		Ref<FrameBuffer> m_Framebuffer;
 		Ref<FrameBuffer> m_GBuffer;
+		Ref<FrameBuffer> m_DeferredBuffer;
 
 		Ref<Scene> m_Scene;
 		Vector2 m_FramebufferOffset;
@@ -41,7 +42,7 @@ namespace Nuake
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
 		Ref<FrameBuffer> GetGBuffer() const;
-
+		Ref<FrameBuffer> GetDeferredBuffer() const;
 		Vector2 GetSize();
 
 		Ref<Scene> GetScene();

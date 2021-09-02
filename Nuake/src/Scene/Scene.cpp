@@ -363,7 +363,6 @@ namespace Nuake {
 			}
 			glCullFace(GL_BACK);
 			Renderer::Flush(pbrShader);
-			glCullFace(GL_FRONT);
 
 			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 			for (auto e : quakeView) 
@@ -430,12 +429,20 @@ namespace Nuake {
 	void Scene::EditorDrawDeferred()
 	{
 		glEnable(GL_DEPTH_TEST);
-
+		
 		Ref<Shader> gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
 		gBufferShader->Bind();
 		gBufferShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
 		gBufferShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 		
+		auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
+		for (auto e : view)
+		{
+			auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
+			for (auto& m : mesh.meshes)
+				Renderer::SubmitMesh(m, transform.GetTransform());
+		}
+
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView)
 		{
@@ -447,8 +454,39 @@ namespace Nuake {
 			for (auto& b : model.Meshes)
 				Renderer::SubmitMesh(b, transform.GetTransform());
 		}
-
+		glCullFace(GL_FRONT);
 		Renderer::Flush(gBufferShader, false);
+	}
+
+	void Scene::EditorDrawDeferredShading()
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+		deferredShader->Bind();
+		deferredShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
+		deferredShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
+
+		deferredShader->SetUniform1f("u_Exposure", 1.0);
+
+		Vector3 camPosition = m_EditorCamera->GetTranslation();
+		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
+		
+		Ref<Environment> env = GetEnvironment();
+		deferredShader->SetUniform1f("u_FogAmount", env->VolumetricFog);
+		deferredShader->SetUniform1f("u_FogStepCount", env->VolumetricStepCount);
+
+		// Register the lights
+		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
+		for (auto l : view)
+		{
+			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
+
+			if (light.SyncDirectionWithSky)
+				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
+
+			Renderer::RegisterDeferredLight(transform, light);
+		}
 	}
 
 	std::vector<Entity> Scene::GetAllEntities() 
