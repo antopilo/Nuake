@@ -49,5 +49,5 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: true
           title: "Development Build"
-          files: bin/Release-windows-x86_64/Editor/Nuake.zip
+          files: Nuake-latest.zip
    
