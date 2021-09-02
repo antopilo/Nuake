@@ -37,7 +37,7 @@ jobs:
       run: xcopy Editor\resources bin\Release-windows-x86_64\Editor /I /E 
     
     - name: Zip
-    - uses: papeloto/action-zip@v1
+      uses: papeloto/action-zip@v1
       with:
           files: bin/Release-windows-x86_64/Editor/
           dest: Nuake-latest.zip
