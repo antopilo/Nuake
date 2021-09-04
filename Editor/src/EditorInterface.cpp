@@ -145,42 +145,42 @@ namespace Nuake {
             //}
             //ImGui::End();
             //
-            if (ImGui::Begin("GBUFFER"))
-            {
-                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_DEPTH_ATTACHMENT);
-                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            
-            }
-            ImGui::End();
-            if (ImGui::Begin("GBUFFER2"))
-            {
-                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
-                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            
-            }
-            ImGui::End();
-            if (ImGui::Begin("GBUFFER3"))
-            {
-                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT1);
-                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            
-            }
-            ImGui::End();
-            if (ImGui::Begin("GBUFFER4"))
-            {
-                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT2);
-                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            
-            }
-            ImGui::End();
+            //if (ImGui::Begin("GBUFFER"))
+            //{
+            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_DEPTH_ATTACHMENT);
+            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //
+            //}
+            //ImGui::End();
+            //if (ImGui::Begin("GBUFFER2"))
+            //{
+            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
+            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //
+            //}
+            //ImGui::End();
+            //if (ImGui::Begin("GBUFFER3"))
+            //{
+            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT1);
+            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //
+            //}
+            //ImGui::End();
+            //if (ImGui::Begin("GBUFFER4"))
+            //{
+            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT2);
+            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //
+            //}
+            //ImGui::End();
             //
             //if (ImGui::Begin("CSM 2"))
             //{
@@ -200,7 +200,7 @@ namespace Nuake {
     Entity QueueDeletion;
     void EditorInterface::DrawEntityTree(Entity e)
     {
-        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
 		NameComponent& nameComponent = e.GetComponent<NameComponent>();
 		std::string name = nameComponent.Name;
@@ -219,7 +219,10 @@ namespace Nuake {
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
 
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
+
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
+        ImGui::PopStyleVar();
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PopStyleColor();
 		else
@@ -391,14 +394,16 @@ namespace Nuake {
             }
 
             // Delete entity
-            if (QueueDeletion.GetHandle() != 0)
+            if (QueueDeletion.GetHandle() != -1)
             {
                 Engine::GetCurrentScene()->DestroyEntity(QueueDeletion);
 
                 if (m_SelectedEntity == QueueDeletion)
-                    m_SelectedEntity = scene->GetAllEntities().at(0);
+                {
+                    m_IsEntitySelected = false;
+                }
 
-                QueueDeletion = Entity{ (entt::entity)0, scene.get() };
+                QueueDeletion = Entity{ (entt::entity)-1, scene.get() };
                 //ImGui::TreePop();
             }
 
@@ -1248,19 +1253,24 @@ namespace Nuake {
                     m_IsEntitySelected = false;
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Set current scene as default")) {
+                if (ImGui::MenuItem("Set current scene as default")) 
+                {
                     Engine::GetProject()->DefaultScene = Engine::GetCurrentScene();
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Open scene...", "CTRL+O"))
+                if (ImGui::MenuItem("New scene"))
                 {
                     OpenScene();
                     m_IsEntitySelected = false;
                 }
-                if (ImGui::MenuItem("Save scene", "CTRL+S"))
+                if (ImGui::MenuItem("Open scene...", "CTRL+SHIFT+O"))
+                {
+                    Engine::LoadScene(Scene::New());
+                    m_IsEntitySelected = false;
+                }
+                if (ImGui::MenuItem("Save scene", "CTR+SHIFT+L+S"))
                 {
                     Engine::GetCurrentScene()->Save();
-
                     m_IsEntitySelected = false;
                 }
                 if (ImGui::MenuItem("Save scene as...", "CTRL+SHIFT+S"))

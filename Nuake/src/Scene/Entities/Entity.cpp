@@ -68,5 +68,8 @@ namespace Nuake
 	}
 
 
-	Entity::Entity() {}
+	Entity::Entity() 
+	{
+		this->m_EntityHandle = (entt::entity)-1;
+	}
 }
