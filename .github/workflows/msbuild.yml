@@ -33,14 +33,15 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
     
-    - name: Bunle resources
-      run: xcopy "Editor/resources" "bin/Release-windows-x86_64/Editor" /I /E 
+    - name: Bundle Resources
+      run: xcopy Editor\resources bin\Release-windows-x86_64\Editor\resources /I /E 
     
-    - name: Install zip
-      uses: montudor/action-zip@v1
+    - name: Zip
+      uses: papeloto/action-zip@v1
       with:
-        args: zip -qq -r Nuake.zip bin/Release-windows-x86_64/Editor/
-      
+          files: bin/Release-windows-x86_64/Editor/
+          dest: Nuake-latest.zip
+          
     - name: Pre-release
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
@@ -48,5 +49,5 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: true
           title: "Development Build"
-          files: bin/Release-windows-x86_64/Editor/Nuake.zip
+          files: Nuake-latest.zip
    
