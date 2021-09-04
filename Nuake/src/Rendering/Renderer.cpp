@@ -138,7 +138,6 @@ namespace Nuake
         Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
-
         if (light.CastShadows)
         {
             for (unsigned int i = 0; i < CSM_AMOUNT; i++)
@@ -171,7 +170,7 @@ namespace Nuake
         int idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GlobalTranslation;
+        Vector3 pos = transform.GetTransform()[3];
         Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
@@ -190,7 +189,7 @@ namespace Nuake
        deferredShader->SetUniform1i("LightCount", idx);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
        deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
-       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z);
+       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position",pos.x, pos.y, pos.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);

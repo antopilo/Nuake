@@ -1,6 +1,6 @@
 #pragma once
-#include "../Core/Maths.h"
-#include "../Resource/Serializable.h"
+#include "src/Core/Maths.h"
+#include "src/Resource/Serializable.h"
 
 namespace Nuake
 {
@@ -8,6 +8,7 @@ namespace Nuake
 	public:
 		Vector3 GlobalTranslation;
 		Vector3 Translation;
+		Matrix4 Transform;
 
 		Vector3 GlobalRotation;
 		Vector3 Rotation; // TODO: Should use quaternions.

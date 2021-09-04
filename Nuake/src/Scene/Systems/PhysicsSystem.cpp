@@ -90,6 +90,9 @@ namespace Nuake
 
 	void PhysicsSystem::Update(Timestep ts)
 	{
+		if (!Engine::IsPlayMode)
+			return;
+
 		PhysicsManager::Get()->Step(ts);
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();

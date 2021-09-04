@@ -69,10 +69,14 @@ namespace Nuake {
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
             Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
-            if (Engine::GetCurrentWindow()->GetFrameBuffer()->GetSize() != viewportPanelSize)
-                Engine::GetCurrentWindow()->GetFrameBuffer()->QueueResize(viewportPanelSize);
+            Ref<FrameBuffer> framebuffer = Engine::GetCurrentWindow()->GetDeferredBuffer();
+            if (framebuffer->GetSize() != viewportPanelSize)
+            {
+                Engine::GetCurrentWindow()->GetGBuffer()->QueueResize(viewportPanelSize);
+                framebuffer->QueueResize(viewportPanelSize);
+            }
 
-            Ref<Texture> texture = Engine::GetCurrentWindow()->GetFrameBuffer()->GetTexture();
+            Ref<Texture> texture = framebuffer->GetTexture();
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
             ImGuizmo::SetDrawlist();
@@ -131,23 +135,23 @@ namespace Nuake {
 
         if (m_IsEntitySelected)
         {
-            if (ImGui::Begin("DEFERRED"))
-            {
-                ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-                glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-                Ref<Texture> texture = Engine::GetCurrentWindow()->GetDeferredBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
-                ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
-            }
-            ImGui::End();
-
+            //if (ImGui::Begin("DEFERRED"))
+            //{
+            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
+            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetDeferredBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
+            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            //
+            //}
+            //ImGui::End();
+            //
             if (ImGui::Begin("GBUFFER"))
             {
                 ImVec2 regionAvail = ImGui::GetContentRegionAvail();
                 glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
                 Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_DEPTH_ATTACHMENT);
                 ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
+            
             }
             ImGui::End();
             if (ImGui::Begin("GBUFFER2"))
@@ -156,7 +160,7 @@ namespace Nuake {
                 glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
                 Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
                 ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
+            
             }
             ImGui::End();
             if (ImGui::Begin("GBUFFER3"))
@@ -165,7 +169,7 @@ namespace Nuake {
                 glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
                 Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT1);
                 ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
+            
             }
             ImGui::End();
             if (ImGui::Begin("GBUFFER4"))
@@ -174,7 +178,7 @@ namespace Nuake {
                 glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
                 Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT2);
                 ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-
+            
             }
             ImGui::End();
             //

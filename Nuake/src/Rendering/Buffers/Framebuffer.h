@@ -19,6 +19,7 @@ namespace Nuake
 
 		std::map<int, Ref<Texture>> m_Textures;
 		Ref<Texture> m_Texture;
+		bool m_HasRenderBuffer = false;
 
 	public:
 		FrameBuffer(bool hasRenderBuffer, Vector2 size);

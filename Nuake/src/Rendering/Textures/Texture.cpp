@@ -99,4 +99,11 @@ namespace Nuake
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+
+	void Texture::SetParameter(const GLenum& param, const GLenum& value)
+	{
+		Bind();
+		glTextureParameteri(GL_TEXTURE_2D, param, value);
+		Unbind();
+	}
 }

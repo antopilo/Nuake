@@ -1,6 +1,7 @@
 #include "ScriptingSystem.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Scene.h"
+#include "Engine.h"
 
 namespace Nuake {
 	ScriptingSystem::ScriptingSystem(Scene* scene)
@@ -36,6 +37,9 @@ namespace Nuake {
 
 	void ScriptingSystem::Update(Timestep ts)
 	{
+		if (!Engine::IsPlayMode)
+			return;
+
 		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
 		for (auto& e : entities)
 		{

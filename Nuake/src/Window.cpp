@@ -17,7 +17,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include "Resource/FontAwesome5.h"
-#include "../Engine.h"
+#include "Engine.h"
 
 namespace Nuake {
     // TODO: Use abstraction for vertex buffers
@@ -133,6 +133,7 @@ namespace Nuake {
         // TODO: have clear color in environnement.
         glClearColor(0.019f, 0.501f, 1.0f, 1.0f);
 
+        glfwSwapInterval(1);
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
@@ -277,6 +278,8 @@ namespace Nuake {
         }
         m_Framebuffer->Unbind();
 
+
+        m_Scene->m_EditorCamera->OnWindowResize(m_GBuffer->GetSize().x, m_GBuffer->GetSize().y);
         m_GBuffer->Bind();
         m_GBuffer->Clear();
         {

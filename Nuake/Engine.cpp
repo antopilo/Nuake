@@ -50,10 +50,11 @@ namespace Nuake
 		// Dont update if no scene is loaded.
 		if (CurrentWindow->GetScene())
 		{
+			CurrentWindow->Update(timestep);
 			// Play mode update all the entities, Editor does not.
 			if (Engine::IsPlayMode)
 			{
-				CurrentWindow->Update(timestep);
+				
 				m_FixedUpdateDifference += timestep;
 
 				// Fixed update

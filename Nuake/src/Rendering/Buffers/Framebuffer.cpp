@@ -7,12 +7,13 @@ namespace Nuake
 	{
 		m_Textures = std::map<int, Ref<Texture>>();
 		m_Size = size;
+		m_HasRenderBuffer = hasRenderBuffer;
 
 		glGenFramebuffers(1, &m_FramebufferID);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
 
 		// Create render buffer and attach to frame buffer.
-		if (hasRenderBuffer)
+		if (m_HasRenderBuffer)
 		{
 			glGenRenderbuffers(1, &m_RenderBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
@@ -94,25 +95,29 @@ namespace Nuake
 
 		// Delete frame buffer and render buffer.
 		glDeleteFramebuffers(1, &m_FramebufferID);
-		glDeleteRenderbuffers(1, &m_RenderBuffer);
-
-		// Recreate resized texture.
-		for (auto t : m_Textures)
-			t.second->Resize(size);
-
+		if(m_HasRenderBuffer)
+			glDeleteRenderbuffers(1, &m_RenderBuffer);
+			
 		// New FBO and RBO.
 		glGenFramebuffers(1, &m_FramebufferID);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
 
 		// Recreate resized texture.
-		for (auto t : m_Textures)
-			t.second->AttachToFramebuffer(t.first);
+		for (auto& t : m_Textures)
+		{
+			t.second->Resize(size);
+			SetTexture(t.second, t.first);
+		}
 
 		// Recreate render buffer
-		glGenRenderbuffers(1, &m_RenderBuffer);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
+		// TODO: move out render buffer.
+		if (m_HasRenderBuffer)
+		{
+			glGenRenderbuffers(1, &m_RenderBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
+		}
 
 		// Unbind.
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

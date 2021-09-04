@@ -33,6 +33,8 @@ namespace Nuake
 		void Bind(unsigned int slot = 0) const;
 		void Unbind() const;
 
+		void SetParameter(const GLenum& param, const GLenum& value);
+
 		unsigned int GetID() const { return m_RendererId; }
 		inline std::string GetPath() { return m_FilePath; }
 		inline int GetWidth() const { return m_Width; }

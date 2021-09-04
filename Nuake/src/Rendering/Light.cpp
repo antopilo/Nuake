@@ -12,8 +12,8 @@ namespace Nuake
             Ref<FrameBuffer> shadowmap = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
 
             Ref<Texture> texture = CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT);
+            texture->SetParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
             shadowmap->SetTexture(texture, GL_DEPTH_ATTACHMENT);
-
             m_ShadowMaps[i] = shadowmap;
         }
     }

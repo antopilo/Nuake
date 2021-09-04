@@ -159,7 +159,6 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(light.ShadowMaps[0], projCoords.xy).r;
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
@@ -214,7 +213,14 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         if (closestDepth > currentDepth)
             accumFog += (ComputeScattering(dot(rayDirection, light.Direction)).xxx * light.Color);
 
-        currentPosition += step;
+        //float ditherPattern[4][4] = { 
+        //    { 0.0f, 0.5f, 0.125f, 0.625f},
+        //    { 0.75f, 0.22f, 0.875f, 0.375f},
+        //    { 0.1875f, 0.6875f, 0.0625f, 0.5625},
+        //    { 0.9375f, 0.4375f, 0.8125f, 0.3125} 
+        //};
+
+        currentPosition += step; //* ditherPattern[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
     }
     accumFog /= u_FogStepCount;
 
