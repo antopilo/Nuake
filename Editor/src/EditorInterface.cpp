@@ -1378,7 +1378,7 @@ namespace Nuake {
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
 
-        if (ImGui::Begin("Toolbar"))
+        if (ImGui::Begin("Toolbar", 0, ImGuiWindowFlags_NoScrollbar | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiWindowFlags_NoDecoration))
         {
             if (ImGui::Button(ICON_FA_HAND_POINTER)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             ImGui::SameLine();
