@@ -46,7 +46,7 @@ uniform sampler2D m_Material;
 uniform sampler2D m_Normal;
 
 // Lights
-const int MaxLight = 20;
+const int MaxLight = 29;
 uniform int LightCount = 0;
 
 struct Light {
@@ -55,19 +55,14 @@ struct Light {
     vec3 Color;
     float Strength;
     vec3 Position;
-    float ConstantAttenuation;
-    float LinearAttenuation;
-    float QuadraticAttenuation;
     mat4 LightTransform;
-    sampler2D ShadowMaps[4];
+    int ShadowMapsIDs[4];
     float CascadeDepth[4];
     mat4 LightTransforms[4];
-    sampler2D ShadowMap;
-    sampler2D RSMFlux;
-    sampler2D RSMNormal;
-    sampler2D RSMPos;
     int Volumetric;
 };
+
+uniform sampler2D ShadowMaps[4];
 
 uniform Light Lights[MaxLight];
 
@@ -166,7 +161,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
 
     float shadow = 0.0;
 
-    float pcfDepth = texture(light.ShadowMaps[0], projCoords.xy).r;
+    float pcfDepth = texture(ShadowMaps[0], projCoords.xy).r;
     return currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 }
 
@@ -206,9 +201,9 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         float currentDepth = projCoords.z;
 
         // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-        vec2 texelSize = 1.0 / textureSize(light.ShadowMaps[0], 0);
+        vec2 texelSize = 1.0 / textureSize(ShadowMaps[0], 0);
 
-        float closestDepth = texture(light.ShadowMaps[0], projCoords.xy).r;
+        float closestDepth = texture(ShadowMaps[0], projCoords.xy).r;
 
         if (closestDepth > currentDepth)
             accumFog += (ComputeScattering(dot(rayDirection, light.Direction)).xxx * light.Color);

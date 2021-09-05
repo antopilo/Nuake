@@ -266,24 +266,27 @@ namespace Nuake {
 
         m_Scene->DrawShadows();
 
-        m_Framebuffer->Bind();
-        m_Framebuffer->Clear();
-        {
-            if (Engine::IsPlayMode)
-                m_Scene->Draw();
-            //else
-            //    m_Scene->EditorDraw();
-
-            m_Scene->DrawInterface(m_Framebuffer->GetSize());
-        }
-        m_Framebuffer->Unbind();
+       //m_Framebuffer->Bind();
+       //m_Framebuffer->Clear();
+       //{
+       //    if (Engine::IsPlayMode)
+       //        m_Scene->Draw();
+       //    //else
+       //    //    m_Scene->EditorDraw();
+       //
+       //    m_Scene->DrawInterface(m_Framebuffer->GetSize());
+       //}
+       //m_Framebuffer->Unbind();
 
 
         m_Scene->m_EditorCamera->OnWindowResize(m_GBuffer->GetSize().x, m_GBuffer->GetSize().y);
         m_GBuffer->Bind();
         m_GBuffer->Clear();
         {
-            m_Scene->EditorDrawDeferred();
+            if (Engine::IsPlayMode)
+                m_Scene->DrawDeferred();
+            else
+                m_Scene->EditorDrawDeferred();
         }
         
         m_GBuffer->Unbind();
@@ -292,10 +295,11 @@ namespace Nuake {
         m_DeferredBuffer->Clear();
         {
             glDisable(GL_CULL_FACE);
-            if (m_Scene->GetEnvironment()->ProceduralSkybox)
-                m_Scene->GetEnvironment()->ProceduralSkybox->Draw(m_Scene->m_EditorCamera);
 
-            m_Scene->EditorDrawDeferredShading();
+            if (Engine::IsPlayMode)
+                m_Scene->DrawDeferredShading();
+            else
+                m_Scene->EditorDrawDeferredShading();
 
             m_GBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
             m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
@@ -309,8 +313,6 @@ namespace Nuake {
             deferredShader->SetUniform1i("m_Material", 8);
 
             Renderer::DrawQuad(Matrix4());
-
-
         }
         m_DeferredBuffer->Unbind();
 

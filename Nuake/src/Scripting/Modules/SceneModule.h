@@ -148,7 +148,6 @@ namespace Nuake {
 				float y = wrenGetSlotDouble(vm, 3);
 				float z = wrenGetSlotDouble(vm, 4);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
-
 				auto& cam = ent.GetComponent<CameraComponent>();
 				cam.CameraInstance->SetDirection(Vector3(x, y, z));
 			}

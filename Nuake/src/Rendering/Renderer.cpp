@@ -170,7 +170,7 @@ namespace Nuake
         int idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GetTransform()[3];
+        Vector3 pos = transform.GetGlobalTransform()[3];
         Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
@@ -180,7 +180,8 @@ namespace Nuake
             for (unsigned int i = 0; i < CSM_AMOUNT; i++)
             {
                 light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
-                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[" + std::to_string(i) + "]", 17 + i);
+                deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(i) + "]", 17 + i);
+                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMapsIDs[" + std::to_string(i) + "]", i);
                 deferredShader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
                 deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
             }
@@ -205,7 +206,7 @@ namespace Nuake
     void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
     {
         //glDisable(GL_DEPTH_TEST);
-        m_DebugShader->SetUniformMat4f("u_Model", transform.GetTransform());
+        m_DebugShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
         m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
 
         CubeVertexArray->Bind();

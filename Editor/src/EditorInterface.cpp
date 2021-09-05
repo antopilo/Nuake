@@ -41,7 +41,7 @@ namespace Nuake {
     void EditorInterface::Init()
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->GetWorkPos());
         ImGui::SetNextWindowSize(viewport->GetWorkSize());
@@ -49,7 +49,6 @@ namespace Nuake {
 
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
-
         //this->filesystem = FileSystemUI();
     }
 
@@ -93,37 +92,52 @@ namespace Nuake {
             {
                 TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
                 ParentComponent& parent = m_SelectedEntity.GetComponent<ParentComponent>();
-                Matrix4 oldTransform = tc.GetTransform();
+                Matrix4 oldTransform = tc.GetGlobalTransform();
+                Vector3 oldRotation = tc.Rotation;
                 ImGuizmo::Manipulate(
                     glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
                     glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetPerspective()),
                     CurrentOperation, CurrentMode, glm::value_ptr(oldTransform), 0, 0
                 );
+
                 if (ImGuizmo::IsUsing())
                 {
+                    Vector3 globalPos = Vector3();
+                    Entity currentParent = m_SelectedEntity;
+                    if (parent.HasParent)
+                    {
+                        Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GlobalTransform);
+                        oldTransform *= inverseParent;
+                    }
+
                     Vector3 scale;
                     glm::quat rotation;
                     Vector3 translation;
                     Vector3 skew;
                     Vector4 perspective;
                     glm::decompose(oldTransform, scale, rotation, translation, skew, perspective);
-                    //rotation = glm::conjugate(rotation);
-                    if (scale.x < 0 && scale.y < 0 && scale.z < 0)
-                        scale = glm::vec3(0, 0, 0);
+
                     rotation = glm::conjugate(rotation);
                     Vector3 euler = glm::eulerAngles(rotation);
 
-                    Vector3 globalPos = Vector3();
-                    Entity currentParent = m_SelectedEntity;
-                    if (parent.HasParent)
+                    if(CurrentOperation == ImGuizmo::TRANSLATE)
+                        tc.Translation = translation;
+                    if (CurrentOperation == ImGuizmo::ROTATE)
                     {
-                        globalPos -= parent.Parent.GetComponent<TransformComponent>().GlobalTranslation;
-                        translation -= globalPos;
-                    }
+                        float signX = 1.0f;
+                        if (oldRotation.x < 0.0f) signX = -1.0f;
+                        float signY = 1.0f;
+                        if (oldRotation.y < 0.0f) signY = -1.0f;
+                        float signZ = 1.0f;
+                        if (oldRotation.z < 0.0f) signZ = -1.0f;
 
-                    tc.Translation = translation;
-                    tc.Rotation = glm::vec3(glm::degrees(euler.x), glm::degrees(euler.y), glm::degrees(euler.z));
-                    tc.Scale = scale;
+                        tc.Rotation = glm::vec3(glm::degrees(euler.x),
+                           glm::degrees(euler.y),
+                           glm::degrees(euler.z));
+                    }
+                        
+                    if (CurrentOperation == ImGuizmo::SCALE)
+                        tc.Scale = scale;
                 }
             }
         }
@@ -534,12 +548,53 @@ namespace Nuake {
                         component.LoadModel();
                     }
 
+                    ImGui::SameLine();
 
                     if (ImGui::Button("Reimport"))
                     {
                         component.LoadModel();
                     }
 
+                    ImGui::Indent(16.0f);
+                    if (ImGui::CollapsingHeader("Meshes"))
+                    {
+                        ImGui::Indent(16.0f);
+                        uint16_t index = 0;
+                        for (auto& m : component.meshes)
+                        {
+                            if (ImGui::CollapsingHeader(std::to_string(index).c_str()))
+                            {
+                                std::string materialName = "No material";
+                                if (m->m_Material)
+                                    materialName = m->m_Material->GetName();
+
+                                ImGui::Indent(16.0f);
+                                if (ImGui::CollapsingHeader(materialName.c_str()))
+                                {
+                                    //if (ImGui::BeginChild("Material child", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysAutoResize))
+                                    //{
+                                    ImGui::Indent(16.0f);
+                                    DrawMaterialEditor(m->m_Material);
+                                    //}
+                                    //ImGui::EndChild();
+                                }
+
+                                if (ImGui::BeginDragDropTarget())
+                                {
+                                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Material"))
+                                    {
+                                        char* file = (char*)payload->Data;
+                                        std::string fullPath = std::string(file, 256);
+                                        path = FileSystem::AbsoluteToRelative(fullPath);
+                                    }
+                                    ImGui::EndDragDropTarget();
+                                }
+                            }
+
+                            index++;
+                        }
+                        
+                    }
 
                     ImGui::Separator();
                 }
@@ -700,6 +755,8 @@ namespace Nuake {
                     }
 
                     component.Path = path;
+
+                    ImGui::InputFloat("Scale factor", &component.ScaleFactor, 0.01f, 0.1f);
 
                     ImGui::Checkbox("Build collisions", &component.HasCollisions);
                     if (ImGui::Button("Build Geometry"))
@@ -982,6 +1039,101 @@ namespace Nuake {
 
         }
         ImGui::End();
+    }
+
+    void EditorInterface::DrawMaterialEditor(Ref<Material> material)
+    {
+
+        ImGui::Text("Flags");
+        bool unlit = material->data.u_Unlit == 1;
+        ImGui::Checkbox("Unlit", &unlit);
+        material->data.u_Unlit = (int)unlit;
+        if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            unsigned int textureID = 0;
+            if (material->HasAlbedo())
+                textureID = material->m_Albedo->GetID();
+
+
+            ImGui::ColorEdit3("Color", &material->data.m_AlbedoColor.r);
+            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+            {
+                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+                if (texture != "" && texture != material->m_Albedo->GetPath())
+                    material->m_Albedo = TextureManager::Get()->GetTexture(texture);
+            }
+
+            ImGui::SameLine();
+            bool isAlbedo = material->data.u_HasAlbedo == 1;
+            ImGui::Checkbox("Use##1", &isAlbedo);
+            material->data.u_HasAlbedo = (int)isAlbedo;
+
+        }
+        if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            unsigned int textureID = 0;
+            if (material->HasAO())
+                textureID = material->m_AO->GetID();
+            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
+            {
+                std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
+                if (texture != "")
+                {
+                    m_SelectedMaterial->SetAO(TextureManager::Get()->GetTexture(texture));
+                }
+            }
+            ImGui::SameLine();
+            bool hasAO = material->data.u_HasAO == 1;
+            ImGui::Checkbox("Use##1", &hasAO);
+            material->data.u_HasAO = (int)hasAO;
+
+            ImGui::SameLine();
+            ImGui::DragFloat("Value##2", &material->data.u_AOValue, 0.01f, 0.0f, 1.0f);
+        }
+        if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            unsigned int textureID = 0;
+            if (material->HasNormal())
+                textureID = material->m_Normal->GetID();
+            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
+            {
+                std::string texture = FileDialog::OpenFile("*.png");
+                if (texture != "")
+                {
+                    material->SetNormal(TextureManager::Get()->GetTexture(texture));
+                }
+            }
+            //ImGui::SameLine();
+            //ImGui::Checkbox("Use##3", &m_SelectedMaterial->data.u_HasNormal);
+        }
+        if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            unsigned int textureID = 0;
+            if (material->HasMetalness())
+                textureID = material->m_Metalness->GetID();
+            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
+            {
+                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+            }
+            ImGui::SameLine();
+            //ImGui::Checkbox("Use##4", &m_SelectedMaterial->data.u_HasMetalness);
+            ImGui::SameLine();
+            ImGui::DragFloat("Value##4", &material->data.u_MetalnessValue, 0.01f, 0.0f, 1.0f);
+        }
+        if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            unsigned int textureID = 0;
+            if (material->HasRougness())
+                textureID = material->m_Roughness->GetID();
+            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+            {
+                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+            }
+            ImGui::SameLine();
+            //ImGui::Checkbox("Use##5", &m_SelectedMaterial->data.u_HasRoughness);
+            ImGui::SameLine();
+            ImGui::DragFloat("Value##5", &material->data.u_RoughnessValue, 0.01f, 0.0f, 1.0f);
+        }
     }
 
 
@@ -1387,6 +1539,15 @@ namespace Nuake {
             if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             ImGui::SameLine();
             if (ImGui::Button(ICON_FA_EXPAND_ALT)) CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            ImGui::SameLine();
+
+            float availWidth = ImGui::GetContentRegionAvailWidth();
+            float windowWidth = ImGui::GetWindowWidth();
+
+            float used = windowWidth - availWidth;
+            float half = windowWidth / 2.0;
+            float needed = half - used;
+            ImGui::Dummy(ImVec2(needed, 10));
             ImGui::SameLine();
             if (ImGui::Button(ICON_FA_PLAY)) Engine::EnterPlayMode();
             ImGui::SameLine();

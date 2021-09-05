@@ -48,8 +48,8 @@ namespace Nuake {
         parent.AddChild(brushEntity);
 
         transformComponent.Translation = Vector3(brush->center.y * (1.0f / 64),
-            brush->center.z * (1.0f / 64),
-            brush->center.x * (1.0f / 64));
+            brush->center.z * ScaleFactor * (1.0f / 64),
+            brush->center.x * ScaleFactor * (1.0f / 64));
 
         BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
         bsp.IsSolid = false;
@@ -66,9 +66,9 @@ namespace Nuake {
                 face_vertex vertex = face_geo_inst->vertices[i];
 
                 Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * (1.0f / 64)
+                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
                 );
 
                 Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
@@ -107,9 +107,9 @@ namespace Nuake {
         parent.AddChild(brushEntity);
 
         transformComponent.Translation = Vector3(
-            brush->center.y * (1.0f / 64),
-            brush->center.z * (1.0f / 64),
-            brush->center.x * (1.0f / 64));
+            brush->center.y * ScaleFactor * (1.0f / 64),
+            brush->center.z * ScaleFactor * (1.0f / 64),
+            brush->center.x * ScaleFactor * (1.0f / 64));
 
         int index_offset = 0;
         int lastTextureID = -1;
@@ -141,9 +141,9 @@ namespace Nuake {
                 vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
 
                 Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * (1.0f / 64)
+                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
                 );
 
                 Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
@@ -227,9 +227,9 @@ namespace Nuake {
         parent.AddChild(brushEntity);
 
         transformComponent.Translation = Vector3(
-            brush->center.y * (1.0f / 64),
-            brush->center.z * (1.0f / 64),
-            brush->center.x * (1.0f / 64));
+            brush->center.y * ScaleFactor * (1.0f / 64),
+            brush->center.z * ScaleFactor * (1.0f / 64),
+            brush->center.x * ScaleFactor * (1.0f / 64));
 
         int index_offset = 0;
         int lastTextureID = -1;
@@ -260,9 +260,9 @@ namespace Nuake {
                 vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
 
                 Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * (1.0f / 64)
+                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
+                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
                 );
 
                 Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
@@ -378,7 +378,7 @@ namespace Nuake {
                     float y = String::ToFloat(splits[2]);
                     float z = String::ToFloat(splits[0]);
 
-                    Vector3 position = Vector3(x, y, z) * SCALE_FACTOR;
+                    Vector3 position = Vector3(x, y, z) * (ScaleFactor * (1.0f / 64.0f));
                     newEntity.GetComponent<TransformComponent>().Translation = position;
                 }
 
@@ -476,9 +476,9 @@ namespace Nuake {
                             vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
 
                             Vector3 vertexPos = Vector3(
-                                vertex.vertex.y,
-                                vertex.vertex.z,
-                                vertex.vertex.x
+                                vertex.vertex.y * quakeMapC.ScaleFactor,
+                                vertex.vertex.z * quakeMapC.ScaleFactor,
+                                vertex.vertex.x * quakeMapC.ScaleFactor
                             );
 
                             Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
@@ -487,7 +487,7 @@ namespace Nuake {
                             Vector3 vertexBitangent = glm::cross(vertexNormal, vertexTangent) * (float)vertex.tangent.w;
 
                             vertices.push_back(Vertex {
-                                vertexPos * SCALE_FACTOR,
+                                vertexPos * (1.0f/64.0f),
                                 vertexUV,
                                 vertexNormal,
                                 vertexTangent,

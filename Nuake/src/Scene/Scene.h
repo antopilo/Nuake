@@ -57,6 +57,8 @@ namespace Nuake {
 		void DrawShadows();
 		void DrawInterface(Vector2 screensize);
 		void Draw();
+		void DrawDeferred();
+		void DrawDeferredShading();
 		void EditorDrawDeferred();
 		void EditorDrawDeferredShading();
 		void EditorDraw();

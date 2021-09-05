@@ -14,6 +14,7 @@ namespace Nuake {
 	public:
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::string Path;
+		float ScaleFactor = 1.0f;
 		bool HasCollisions = false;
 		void Load(std::string path, bool collisions);
 

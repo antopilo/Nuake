@@ -6,19 +6,21 @@ namespace Nuake
 {
 	class TransformComponent {
 	public:
-		Vector3 GlobalTranslation;
 		Vector3 Translation;
-		Matrix4 Transform;
-
-		Vector3 GlobalRotation;
 		Vector3 Rotation; // TODO: Should use quaternions.
-
-		Vector3 GlobalScale;
 		Vector3 Scale;
+
+		Vector3 GlobalTranslation;
+		Vector3 GlobalRotation;
+		Vector3 GlobalScale;
+
+		Matrix4 LocalTransform;
+		Matrix4 GlobalTransform;
 
 		TransformComponent();
 
-		Matrix4 GetTransform();
+		Matrix4 GetGlobalTransform() const;
+		Matrix4 GetLocalTransform() const;
 
 		json Serialize()
 		{

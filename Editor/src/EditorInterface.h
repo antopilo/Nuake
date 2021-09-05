@@ -48,5 +48,6 @@ namespace Nuake {
 		void DrawInit();
 		void EditorInterfaceDrawFiletree(Ref<Directory> dir);
 		void Overlay();
+		void DrawMaterialEditor(Ref<Material> material);
 	};
 }

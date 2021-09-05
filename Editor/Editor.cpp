@@ -93,28 +93,28 @@ int main()
             for (auto e : camView) {
                 auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
         
-                GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
+                GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
                 GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
         
                 camTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
         
-                Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
+                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
             }
         
             auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
             for (auto e : view) {
                 auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
         
-                GuizmoShader->SetUniformMat4f("model", transformComponent.GetTransform());
+                GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
                 GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
                 GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
         
                 lightTexture->Bind(2);
                 GuizmoShader->SetUniform1i("gizmo_texture", 2);
             
-                Nuake::Renderer::DrawQuad(transformComponent.GetTransform());
+                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
             }
         
             glEnable(GL_CULL_FACE);
@@ -130,7 +130,7 @@ int main()
             if (editor.m_IsEntitySelected && editor.m_SelectedEntity.HasComponent<Nuake::BSPBrushComponent>())
             {
                 for (auto& m : editor.m_SelectedEntity.GetComponent<Nuake::BSPBrushComponent>().Meshes)
-                    Nuake::Renderer::SubmitMesh(m, editor.m_SelectedEntity.GetComponent<Nuake::TransformComponent>().GetTransform());
+                    Nuake::Renderer::SubmitMesh(m, editor.m_SelectedEntity.GetComponent<Nuake::TransformComponent>().GetGlobalTransform());
 
                 Nuake::Renderer::Flush(ditherShader, true);
             }

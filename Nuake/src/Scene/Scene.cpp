@@ -199,7 +199,7 @@ namespace Nuake {
 				{
 					auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
 					for(auto& m : mesh.meshes)
-						Renderer::SubmitMesh(m, transform.GetTransform());
+						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 				}
 
 				auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
@@ -213,11 +213,11 @@ namespace Nuake {
 					for (Ref<Mesh>& m : model.Meshes)
 					{
 						AABB modelAABB = m->GetAABB();
-						modelAABB.Transform(transform.GetTransform());
+						modelAABB.Transform(transform.GetGlobalTransform());
 
 						bool isInFrustum = lightFrustum.IsBoxVisible(modelAABB.Min, modelAABB.Max);
 						if (isInFrustum)
-							Renderer::SubmitMesh(m, transform.GetTransform());
+							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 					}
 				}
 
@@ -289,7 +289,7 @@ namespace Nuake {
 			{
 				auto [transform, model, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
 				for (auto& m : model.meshes)
-					Renderer::SubmitMesh(m, transform.GetTransform());
+					Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 			}
 
 			glCullFace(GL_BACK);
@@ -305,13 +305,108 @@ namespace Nuake {
 
 				for (auto& b : model.Meshes)
 				{
-					Renderer::SubmitMesh(b, transform.GetTransform());
+					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
 				}
 			}
 
 			Renderer::Flush(pbrShader);
 
 			PhysicsManager::Get()->DrawDebug();
+		}
+	}
+
+	void Scene::DrawDeferred()
+	{
+		glEnable(GL_DEPTH_TEST);
+
+		Ref<Camera> cam = nullptr;
+		{
+			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
+			for (auto e : view) {
+				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
+				cam = camera.CameraInstance;
+				cam->Translation = transform.GlobalTranslation;
+				break;
+			}
+		}
+
+		if (!cam)
+			return;
+
+		Ref<Shader> gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+		gBufferShader->Bind();
+		gBufferShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
+		gBufferShader->SetUniformMat4f("u_View", cam->GetTransform());
+
+		auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
+		for (auto e : view)
+		{
+			auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
+			for (auto& m : mesh.meshes)
+				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+		}
+
+		glCullFace(GL_BACK);
+		Renderer::Flush(gBufferShader, false);
+
+		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+		for (auto e : quakeView)
+		{
+			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+
+			if (model.IsTransparent)
+				continue;
+
+			for (auto& b : model.Meshes)
+				Renderer::SubmitMesh(b, transform.GetGlobalTransform());
+		}
+		glCullFace(GL_FRONT);
+		Renderer::Flush(gBufferShader, false);
+	}
+
+	void Scene::DrawDeferredShading()
+	{
+		glDisable(GL_DEPTH_TEST);
+
+		Ref<Camera> cam = nullptr;
+		{
+			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
+			for (auto e : view) {
+				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
+				cam = camera.CameraInstance;
+				cam->Translation = transform.GlobalTranslation;
+				break;
+			}
+		}
+
+		if (!cam)
+			return;
+
+		if (GetEnvironment()->ProceduralSkybox)
+			GetEnvironment()->ProceduralSkybox->Draw(cam);
+
+		Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+		deferredShader->Bind();
+		deferredShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
+		deferredShader->SetUniformMat4f("u_View", cam->GetTransform());
+		deferredShader->SetUniform1f("u_Exposure", 1.0);
+
+		Vector3 camPosition = cam->GetTranslation();
+		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
+
+		Ref<Environment> env = GetEnvironment();
+		deferredShader->SetUniform1f("u_FogAmount", env->VolumetricFog);
+		deferredShader->SetUniform1f("u_FogStepCount", env->VolumetricStepCount);
+
+		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
+		for (auto l : view)
+		{
+			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
+
+			if (light.SyncDirectionWithSky)
+				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
+
+			Renderer::RegisterDeferredLight(transform, light);
 		}
 	}
 
@@ -359,7 +454,7 @@ namespace Nuake {
 			{
 				auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
 				for(auto& m : mesh.meshes)
-					Renderer::SubmitMesh(m, transform.GetTransform());
+					Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 			}
 			glCullFace(GL_BACK);
 			Renderer::Flush(pbrShader);
@@ -373,7 +468,7 @@ namespace Nuake {
 					continue;
 
 				for (auto& b : model.Meshes)
-					Renderer::SubmitMesh(b, transform.GetTransform());
+					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
 			}
 
 			glCullFace(GL_FRONT);
@@ -398,7 +493,7 @@ namespace Nuake {
 			{
 				auto [transform, box, parent] = sphereCollider.get<TransformComponent, SphereColliderComponent, ParentComponent>(e);
 
-				flatShader->SetUniformMat4f("u_Model", transform.GetTransform());
+				flatShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
 
 				TransformComponent t = transform;
 				t.Scale = (box.Radius * 2.f) * transform.Scale;
@@ -413,12 +508,12 @@ namespace Nuake {
 				if (!model.IsTransparent)
 					continue;
 
-				flatShader->SetUniformMat4f("u_Model", transform.GetTransform());
+				flatShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
 				flatShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
 
 				for (auto& b : model.Meshes)
 				{
-					Renderer::SubmitMesh(b, transform.GetTransform());
+					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
 				}
 			}
 
@@ -440,8 +535,10 @@ namespace Nuake {
 		{
 			auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
 			for (auto& m : mesh.meshes)
-				Renderer::SubmitMesh(m, transform.GetTransform());
+				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 		}
+		glCullFace(GL_BACK);
+		Renderer::Flush(gBufferShader, false);
 
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
 		for (auto e : quakeView)
@@ -452,7 +549,7 @@ namespace Nuake {
 				continue;
 
 			for (auto& b : model.Meshes)
-				Renderer::SubmitMesh(b, transform.GetTransform());
+				Renderer::SubmitMesh(b, transform.GetGlobalTransform());
 		}
 		glCullFace(GL_FRONT);
 		Renderer::Flush(gBufferShader, false);
@@ -461,12 +558,13 @@ namespace Nuake {
 	void Scene::EditorDrawDeferredShading()
 	{
 		glDisable(GL_DEPTH_TEST);
+		if (GetEnvironment()->ProceduralSkybox)
+			GetEnvironment()->ProceduralSkybox->Draw(m_EditorCamera);
 
 		Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
 		deferredShader->Bind();
 		deferredShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
 		deferredShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-
 		deferredShader->SetUniform1f("u_Exposure", 1.0);
 
 		Vector3 camPosition = m_EditorCamera->GetTranslation();
