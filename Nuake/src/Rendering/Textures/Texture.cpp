@@ -38,6 +38,7 @@ namespace Nuake
 
 	Texture::Texture(glm::vec2 size, GLenum format)
 	{
+		m_RendererId = 0;
 		m_Format = format;
 
 		m_Width = size.x;
@@ -51,8 +52,35 @@ namespace Nuake
 		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
+	Texture::Texture(Vector2 size, unsigned char* data, int len)
+	{
+		m_RendererId = 0;
+		m_Width = size.x;
+		m_Height = size.y;
+		int channels = 0;
+		m_LocalBuffer = stbi_load_from_memory(data, len, &m_Width, &m_Height, &channels, 0);
+		glGenTextures(1, &m_RendererId);
+		glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_LocalBuffer);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		if (m_LocalBuffer)
+			stbi_image_free(m_LocalBuffer);
+		else
+			std::cout << "Error: failed to load texture buffer " << std::endl;
+	}
+
 	Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)
 	{
+		m_RendererId = 0;
 		m_Width = size.x;
 		m_Height = size.y;
 
@@ -69,6 +97,7 @@ namespace Nuake
 
 	void Texture::Resize(glm::vec2 size)
 	{
+
 		glDeleteTextures(1, &m_RendererId);
 		m_Width = size.x;
 		m_Height = size.y;

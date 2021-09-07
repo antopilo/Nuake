@@ -265,13 +265,17 @@ void main()
             if (Lights[i].Volumetric == 1)
                 fog += ComputeVolumetric(worldPos, Lights[i]);
 
-            shadow = ShadowCalculation(Lights[i], worldPos, N);
+            shadow += ShadowCalculation(Lights[i], worldPos, N);
         }
 
-        vec3 H = normalize(V + L);
-        vec3 radiance = Lights[i].Color * attenuation * (1.0f - shadow);
+        vec3 radiance = Lights[i].Color * attenuation ;
+
+        if (Lights[i].Type == 0) {
+            radiance *= 1.0f - shadow;
+        }
 
         // Cook-Torrance BRDF
+        vec3 H = normalize(V + L);
         float NDF = DistributionGGX(N, H, roughness);
         float G = GeometrySmith(N, V, L, roughness);
         vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);

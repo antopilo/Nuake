@@ -85,55 +85,55 @@ int main()
         Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
         if (currentScene && !Nuake::Engine::IsPlayMode)
         {
-            GuizmoShader->Bind();
-        
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_DEPTH_TEST);
-            auto camView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::CameraComponent>();
-            for (auto e : camView) {
-                auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
-        
-                GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
-                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
-                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-        
-                camTexture->Bind(2);
-                GuizmoShader->SetUniform1i("gizmo_texture", 2);
-        
-                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
-            }
-        
-            auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
-            for (auto e : view) {
-                auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
-        
-                GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
-                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
-                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-        
-                lightTexture->Bind(2);
-                GuizmoShader->SetUniform1i("gizmo_texture", 2);
-            
-                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
-            }
-        
-            glEnable(GL_CULL_FACE);
-            
-            GuizmoShader->Unbind();
-
-            ditherShader->Bind();
-            ditherShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
-            ditherShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
-            ditherShader->SetUniform1f("u_Time", Nuake::Engine::GetTime());
-            ditherShader->SetUniform4f("u_Color", 252.0 / 255.0, 3.0 / 255.0, 65.0 / 255.0, 1.0);
-
-            if (editor.m_IsEntitySelected && editor.m_SelectedEntity.HasComponent<Nuake::BSPBrushComponent>())
-            {
-                for (auto& m : editor.m_SelectedEntity.GetComponent<Nuake::BSPBrushComponent>().Meshes)
-                    Nuake::Renderer::SubmitMesh(m, editor.m_SelectedEntity.GetComponent<Nuake::TransformComponent>().GetGlobalTransform());
-
-                Nuake::Renderer::Flush(ditherShader, true);
-            }
+            //GuizmoShader->Bind();
+            //
+            //glDisable(GL_CULL_FACE);
+            //glDisable(GL_DEPTH_TEST);
+            //auto camView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::CameraComponent>();
+            //for (auto e : camView) {
+            //    auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
+            //
+            //    GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
+            //    GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
+            //    GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
+            //
+            //    camTexture->Bind(2);
+            //    GuizmoShader->SetUniform1i("gizmo_texture", 2);
+            //
+            //    Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
+            //}
+            //
+            //auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
+            //for (auto e : view) {
+            //    auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
+            //
+            //    GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
+            //    GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
+            //    GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
+            //
+            //    lightTexture->Bind(2);
+            //    GuizmoShader->SetUniform1i("gizmo_texture", 2);
+            //
+            //    Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
+            //}
+            //
+            //glEnable(GL_CULL_FACE);
+            //
+            //GuizmoShader->Unbind();
+            //
+            //ditherShader->Bind();
+            //ditherShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
+            //ditherShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
+            //ditherShader->SetUniform1f("u_Time", Nuake::Engine::GetTime());
+            //ditherShader->SetUniform4f("u_Color", 252.0 / 255.0, 3.0 / 255.0, 65.0 / 255.0, 1.0);
+            //
+            //if (editor.m_IsEntitySelected && editor.m_SelectedEntity.HasComponent<Nuake::BSPBrushComponent>())
+            //{
+            //    for (auto& m : editor.m_SelectedEntity.GetComponent<Nuake::BSPBrushComponent>().Meshes)
+            //        Nuake::Renderer::SubmitMesh(m, editor.m_SelectedEntity.GetComponent<Nuake::TransformComponent>().GetGlobalTransform());
+            //
+            //    Nuake::Renderer::Flush(ditherShader, true);
+            //}
             glEnable(GL_DEPTH_TEST);
         }
         sceneFramebuffer->Unbind();

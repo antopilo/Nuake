@@ -279,10 +279,21 @@ namespace Nuake {
 
         if (ImGui::BeginPopupContextItem())
         {
+            if (m_SelectedEntity.HasComponent<CameraComponent>())
+            {
+                if (ImGui::Selectable("Focus camera"))
+                {
+                    Engine::GetCurrentScene()->m_EditorCamera->Translation = m_SelectedEntity.GetComponent<TransformComponent>().Translation;
+                    Engine::GetCurrentScene()->m_EditorCamera->SetDirection(m_SelectedEntity.GetComponent<CameraComponent>().CameraInstance->GetDirection());
+                }
+                ImGui::Separator();
+            }
+
             if (ImGui::Selectable("Remove")) 
             {
                 QueueDeletion = e;
             }
+
 
             if (ImGui::Selectable("Move to root"))
             {
@@ -1051,8 +1062,7 @@ namespace Nuake {
         if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
         {
             unsigned int textureID = 0;
-            if (material->HasAlbedo())
-                textureID = material->m_Albedo->GetID();
+            textureID = material->m_Albedo->GetID();
 
 
             ImGui::ColorEdit3("Color", &material->data.m_AlbedoColor.r);

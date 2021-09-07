@@ -1,4 +1,5 @@
 #pragma once
+
 #include "stb_image/stb_image.h"
 #include <string>
 #include "src/Core/Maths.h"
@@ -24,7 +25,7 @@ namespace Nuake
 		Texture(const std::string& path);
 		Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t);
 		Texture(glm::vec2 size, GLenum format);
-
+		Texture(Vector2 size, unsigned char* data, int len);
 		~Texture();
 
 		void Resize(glm::vec2 size);

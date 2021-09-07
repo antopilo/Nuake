@@ -33,6 +33,8 @@ namespace Nuake {
 
 				RegisterMethod("GetTranslation_(_)", (void*)GetTranslation);
 				RegisterMethod("SetTranslation_(_,_,_,_)", (void*)SetTranslation);
+				RegisterMethod("GetRotation_(_)", (void*)GetRotation);
+				RegisterMethod("SetRotation_(_,_,_,_)", (void*)SetRotation);
 				RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
 				RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
 
@@ -232,6 +234,36 @@ namespace Nuake {
 				wrenInsertInList(vm, 0, 0, 1);
 				wrenInsertInList(vm, 0, 1, 2);
 				wrenInsertInList(vm, 0, 2, 3);
+			}
+
+			static void GetRotation(WrenVM* vm)
+			{
+				int handle = wrenGetSlotDouble(vm, 1);
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+				auto& transform = ent.GetComponent<TransformComponent>();
+				// set the slots
+				wrenSetSlotDouble(vm, 1, transform.Rotation.x);
+				wrenSetSlotDouble(vm, 2, transform.Rotation.y);
+				wrenSetSlotDouble(vm, 3, transform.Rotation.z);
+
+				// Fill the list
+				wrenSetSlotNewList(vm, 0);
+				wrenInsertInList(vm, 0, 0, 1);
+				wrenInsertInList(vm, 0, 1, 2);
+				wrenInsertInList(vm, 0, 2, 3);
+			}
+
+			static void SetRotation(WrenVM* vm)
+			{
+				int handle = wrenGetSlotDouble(vm, 1);
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+				auto& transform = ent.GetComponent<TransformComponent>();
+				// set the slots
+				float x = wrenGetSlotDouble(vm, 2);
+				float y = wrenGetSlotDouble(vm, 3);
+				float z = wrenGetSlotDouble(vm, 4);
+
+				transform.Rotation = Vector3(x, y, z);
 			}
 
 			static void SetTranslation(WrenVM* vm)

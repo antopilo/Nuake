@@ -10,8 +10,15 @@ namespace Nuake {
         this->meshes.clear();
         Assimp::Importer import;
         import.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
-        const aiScene* scene = import.ReadFile(FileSystem::Root + ModelPath, aiProcess_Triangulate |aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
-
+        const aiScene* scene = import.ReadFile(FileSystem::Root + ModelPath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FixInfacingNormals | aiProcess_CalcTangentSpace);
+        if (scene->HasTextures())
+        {
+            int textureCount = scene->mNumTextures;
+            for (unsigned int i = 0; i < textureCount; i++)
+            {
+                scene->mTextures[i];
+            }
+        }
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             Logger::Log("ASSIMP! Failed to load model" + std::string(import.GetErrorString()), CRITICAL);
@@ -92,10 +99,23 @@ namespace Nuake {
         if (mesh->mMaterialIndex >= 0)
         {
             aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+            Ref<Material> newMaterial = MaterialManager::Get()->GetMaterial(material->GetName().C_Str());
+
             aiString str;
-            std::string directory = FileSystem::Root + "/textures/d3b_concrt02a.png";
+            
+            unsigned int textureCount = material->GetTextureCount(aiTextureType_DIFFUSE);
             material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-            Ref<Material> newMaterial = MaterialManager::Get()->GetMaterial(directory);
+
+            // Embedded texture
+            if (String::BeginsWith(str.C_Str(), "*"))
+            {
+                int textureIndex = std::atoi(String::Split(str.C_Str(), '*')[1].c_str());
+                const aiTexture* texture = scene->GetEmbeddedTexture(str.C_Str());
+
+                Ref<Texture> newTexture = CreateRef<Texture>(Vector2(texture->mWidth, texture->mHeight), (unsigned char*)texture->pcData, texture->mWidth);
+                newMaterial->SetAlbedo(newTexture);
+            }
+            
 
             //material->GetTexture(aiTextureType_NORMALS, 0, &str);
             //newMaterial->SetNormal(TextureManager::Get()->GetTexture(directory + str.C_Str()));

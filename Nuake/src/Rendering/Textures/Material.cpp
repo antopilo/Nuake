@@ -86,8 +86,8 @@ namespace Nuake
 
 	void Material::Bind(Ref<Shader> shader)
 	{
-		if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
-			return;
+		//if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
+		//	return;
 
 		MaterialManager::Get()->CurrentlyBoundedMaterial = m_Name;
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);

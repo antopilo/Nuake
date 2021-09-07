@@ -315,7 +315,7 @@ namespace Nuake {
             Renderer::DrawQuad(Matrix4());
         }
         m_DeferredBuffer->Unbind();
-
+        glEnable(GL_DEPTH_TEST);
         Renderer::EndDraw();
     }
 

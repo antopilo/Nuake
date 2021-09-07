@@ -42,8 +42,8 @@ namespace Nuake {
 		m_Interfaces = std::vector<Ref<UI::UserInterface>>();
 
 		// Adding systems - Order is important
-		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
+		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 	}
 
@@ -156,21 +156,22 @@ namespace Nuake {
 
 	void Scene::DrawShadows()
 	{
+		glEnable(GL_DEPTH_TEST);
 		auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
 		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
 		auto view = m_Registry.view<TransformComponent, LightComponent>();
 
 		Ref<Camera> cam = m_EditorCamera;
-		if (Engine::IsPlayMode) 
-		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent>();
-			for (auto e : view) 
-			{
-				auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-				cam = camera.CameraInstance;
-				break;
-			}
-		}
+		//if (Engine::IsPlayMode) 
+		//{
+		//	auto view = m_Registry.view<TransformComponent, CameraComponent>();
+		//	for (auto e : view) 
+		//	{
+		//		auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
+		//		cam = camera.CameraInstance;
+		//		break;
+		//	}
+		//}
 
 		Ref<Shader> shadowShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
 		shadowShader->Bind();
@@ -186,7 +187,6 @@ namespace Nuake {
 
 			light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
 			
-
 			for (int i = 0; i < CSM_AMOUNT; i++)
 			{
 				light.m_Framebuffers[i]->Bind();
@@ -224,7 +224,6 @@ namespace Nuake {
 				Renderer::Flush(shadowShader, true);
 				light.m_Framebuffers[i]->Unbind();
 			}
-
 		}
 	}
 

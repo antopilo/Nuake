@@ -43,7 +43,8 @@ class Scene {
 	foreign static GetScript_(e)
 	foreign static GetTranslation_(e)
 	foreign static SetTranslation_(e, x, y, z)
-	//foreign static SetRotation_(e, x, y, z)
+	foreign static SetRotation_(e, x, y, z)
+	foreign static GetRotation_(e)
 	//foreign static SetScale_(e, x, y, z)
 
 	// Light
@@ -99,6 +100,15 @@ class TransformComponent {
 
 	SetTranslation(t) {
 		Scene.SetTranslation_(_entityId, t.x, t.y, t.z)
+	}
+
+	GetRotation() {
+		var result = Scene.GetRotation_(_entityId)
+		return Vector3.new(result[0], result[1], result[2])
+	}
+
+	SetRotation(t) {
+		Scene.SetRotation_(_entityId, t.x, t.y, t.z)
 	}
 
 }
