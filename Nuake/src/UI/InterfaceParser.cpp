@@ -133,9 +133,9 @@ namespace Nuake
 				node->NormalStyle.BackgroundColor = GetColor(a.value());
 			if (name == "onclick")
 			{
-				std::string signature = a.value();
-				Root->Script->RegisterMethod(a.value());
-				node->OnClickSignature = a.value();
+				//std::string signature = a.value();
+				//Root->Script->RegisterMethod(a.value());
+				//node->OnClickSignature = a.value();
 			}
 		}
 
@@ -289,15 +289,14 @@ namespace Nuake
 				node->NormalStyle.BackgroundColor = GetColor(a.value());
 			if (name == "script")
 			{
-				auto s = split(a.value(), ' ');
-				std::string path = s[0];
-				std::string module = s[1];
-				node->Script = ScriptingEngine::RegisterScript(path, module);
+				auto scriptModule = String::Split(a.value(), ' ');
+				node->ScriptsToLoad.push_back({ scriptModule[0], scriptModule[1] });
+				//node->Script = ScriptingEngine::RegisterScript(FileSystem::Root + path, module);
 			}
 			if (name == "stylesheet")
 			{
 				std::string path = a.value();
-				node->StyleSheet = UI::StyleSheet::New(path);
+				node->StyleSheet = UI::StyleSheet::New(FileSystem::Root + path);
 			}
 		}
 

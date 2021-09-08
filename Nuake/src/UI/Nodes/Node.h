@@ -325,8 +325,6 @@ namespace Nuake
 			float height = YGNodeLayoutGetHeight(YogaNode);
 
 			float scrollRange = height;
-
-
 			float padding = YGNodeLayoutGetPadding(YogaNode, YGEdgeLeft);
 			float left = YGNodeLayoutGetLeft(YogaNode); //+ offset.x;
 			float top = YGNodeLayoutGetTop(YogaNode);// +offset.y;

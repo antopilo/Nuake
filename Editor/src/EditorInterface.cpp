@@ -33,6 +33,7 @@
 #include <src/Scene/Components/PrefabComponent.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include "src/Rendering/Renderer.h"
+#include <src/Scene/Components/InterfaceComponent.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -503,6 +504,11 @@ namespace Nuake {
                     {
                         m_SelectedEntity.AddComponent<MeshColliderComponent>();
                     }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Interface Component") && !m_SelectedEntity.HasComponent<InterfaceComponent>())
+                    {
+                        m_SelectedEntity.AddComponent< InterfaceComponent>();
+                    }
 
                     // your popup code
                     ImGui::EndPopup();
@@ -521,6 +527,36 @@ namespace Nuake {
                 ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
                 ImGuiHelper::DrawVec3("Scale", &component.Scale);
                 ImGui::Separator();
+            }
+
+            if (m_SelectedEntity.HasComponent<InterfaceComponent>())
+            {
+                if (ImGui::CollapsingHeader("Interface", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    InterfaceComponent& component = m_SelectedEntity.GetComponent<InterfaceComponent>();
+                    std::string& path = component.Path;
+                    char pathBuffer[256];
+                    memset(pathBuffer, 0, sizeof(pathBuffer));
+                    std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
+
+                    ImGui::Text("Interface: ");
+                    ImGui::SameLine();
+
+                    if (ImGui::InputText("##InterfacePath", pathBuffer, sizeof(pathBuffer)))
+                        path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
+
+                    if (ImGui::BeginDragDropTarget())
+                    {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Interface"))
+                        {
+                            char* file = (char*)payload->Data;
+                            std::string fullPath = std::string(file, 256);
+                            path = FileSystem::AbsoluteToRelative(fullPath);
+                            component.SetInterface(path);
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                }
             }
 
             if (m_SelectedEntity.HasComponent<MeshComponent>()) 

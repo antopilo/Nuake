@@ -8,6 +8,7 @@
 #include "../Components/QuakeMap.h"
 #include "../Components/WrenScriptComponent.h"
 #include "../Components/CharacterControllerComponent.h"
+#include <src/Scene/Components/MeshComponent.h>
 
 namespace Nuake
 {
@@ -38,6 +39,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>());
 		if (HasComponent<CharacterControllerComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>());
+		if (HasComponent<MeshComponent>())
+			SERIALIZE_OBJECT_REF_LBL("MeshComponent", GetComponent<MeshComponent>());
 		END_SERIALIZE();
 	}
 
@@ -50,6 +53,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(CameraComponent);
 		DESERIALIZE_COMPONENT(QuakeMapComponent);
 		DESERIALIZE_COMPONENT(LightComponent);
+		DESERIALIZE_COMPONENT(MeshComponent);
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		return true;

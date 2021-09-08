@@ -8,6 +8,8 @@
 #include "src/Core/Maths.h"
 #include "Styling/Stylesheet.h"
 #include "Font/Font.h"
+#include <vector>
+#include <string>
 
 namespace Nuake {
 	namespace UI {
@@ -23,7 +25,9 @@ namespace Nuake {
 
 			YGConfigRef yoga_config;
 			YGNodeRef yoga_root;
-		
+			
+			std::vector<std::string> m_Scripts;
+
 			Ref<Node> GetNodeByIDRecurse(Ref<Node> node, const std::string& id);
 			void RecursiveHover(Ref<Node> node, Vector2 pos);
 		public:
@@ -53,6 +57,8 @@ namespace Nuake {
 			Ref<Node> GetNodeByID(const std::string& id);
 
 			void ConsumeMouseClick(Vector2 pos);
+
+			std::string GetPath() const { return m_Path; }
 		};
 	}
 }

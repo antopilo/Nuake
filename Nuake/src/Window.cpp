@@ -18,6 +18,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include "Resource/FontAwesome5.h"
 #include "Engine.h"
+#include <src/Scene/Components/InterfaceComponent.h>
 
 namespace Nuake {
     // TODO: Use abstraction for vertex buffers
@@ -306,13 +307,24 @@ namespace Nuake {
             m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
             m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 
+            glDisable(GL_CULL_FACE);
+
             Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+            deferredShader->Bind();
             deferredShader->SetUniform1i("m_Depth", 5);
             deferredShader->SetUniform1i("m_Albedo", 6);
             deferredShader->SetUniform1i("m_Normal", 7);
             deferredShader->SetUniform1i("m_Material", 8);
 
             Renderer::DrawQuad(Matrix4());
+
+            auto interfaceView = m_Scene->m_Registry.view<InterfaceComponent>();
+            for (auto i : interfaceView)
+            {
+                InterfaceComponent& uInterface = interfaceView.get<InterfaceComponent>(i);
+                if (uInterface.Interface)
+                    uInterface.Interface->Draw(m_DeferredBuffer->GetSize());
+            }
         }
         m_DeferredBuffer->Unbind();
         glEnable(GL_DEPTH_TEST);

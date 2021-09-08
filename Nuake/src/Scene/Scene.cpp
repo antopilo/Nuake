@@ -2,10 +2,7 @@
 #include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
-
 #include "src/Scene/Systems/QuakeMapBuilder.h"
-#include "src/Scene/Components/BSPBrushComponent.h"
-
 #include "Scene.h"
 #include "Entities/Entity.h"
 
@@ -18,10 +15,12 @@
 
 #include "Engine.h"
 #include "src/Core/FileSystem.h"
-#include "Components/Components.h"
-#include "Components/BoxCollider.h"
-#include "Components/LuaScriptComponent.h"
-#include "Components/WrenScriptComponent.h"
+#include "src/Scene/Components/Components.h"
+#include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/LuaScriptComponent.h"
+#include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Components/BSPBrushComponent.h"
+#include "src/Scene/Components/InterfaceComponent.h"
 
 #include <fstream>
 #include <streambuf>
@@ -713,16 +712,19 @@ namespace Nuake {
 
 	void Scene::ReloadInterfaces()
 	{
-		for (auto& i : m_Interfaces)
-			i->Reload();
+		auto interfaceView = m_Registry.view<InterfaceComponent>();
+		for (auto i : interfaceView)
+		{
+			InterfaceComponent& uInterface = interfaceView.get<InterfaceComponent>(i);
+			if (uInterface.Interface)
+				uInterface.Interface->Reload();
+		}
 	}
-
 
 	void Scene::AddInterface(Ref<UI::UserInterface> interface)
 	{
 		this->m_Interfaces.push_back(interface);
 	}
-
 
 	json Scene::Serialize()
 	{

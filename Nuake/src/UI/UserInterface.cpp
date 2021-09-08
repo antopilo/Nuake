@@ -15,7 +15,7 @@ namespace Nuake {
 			m_Path = path;
 
 			font = FontLoader::LoadFont("resources/Fonts/OpenSans-Regular.ttf");
-			Root = InterfaceParser::Parse(path);
+			Root = InterfaceParser::Parse(FileSystem::Root + path);
 
 			if (!Root)
 			{
@@ -37,7 +37,7 @@ namespace Nuake {
 
 		void UserInterface::Reload()
 		{
-			Root = InterfaceParser::Parse(this->m_Path);
+			Root = InterfaceParser::Parse(FileSystem::Root + this->m_Path);
 			if (!Root)
 			{
 				Logger::Log("Failed to generate interface structure", CRITICAL);
@@ -112,6 +112,7 @@ namespace Nuake {
 			Calculate(size.x, size.y);
 			Renderer2D::BeginDraw(size);
 			DrawRecursive(Root, 0);
+			Renderer2D::EndDraw();
 			Size = size;
 		}
 
@@ -129,9 +130,7 @@ namespace Nuake {
 				return;
 
 			for (auto& c : node->Childrens)
-			{
 				DrawRecursive(c, z + 1);
-			}
 		}
 
 		void UserInterface::Update(Timestep ts)

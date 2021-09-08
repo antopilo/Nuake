@@ -1,9 +1,11 @@
 #pragma once
 #include "Node.h"
-#include "../Core/Core.h"
-#include "../Scripting/WrenScript.h"
-#include <map>
-#include "../Styling/Stylesheet.h"
+#include "src/Core/Core.h"
+#include "src/Scripting/WrenScript.h"
+#include "src/UI/Styling/Stylesheet.h"
+
+#include <vector>
+#include <string>
 
 namespace Nuake {
 	class Canvas : public Node
@@ -11,6 +13,8 @@ namespace Nuake {
 	private:
 
 	public:
+		std::vector<std::pair<std::string, std::string>> ScriptsToLoad;
+
 		Ref<WrenScript> Script;
 		Ref<UI::StyleSheet> StyleSheet;
 

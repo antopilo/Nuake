@@ -51,34 +51,8 @@ namespace Nuake
 				parentTop += YGNodeLayoutGetTop(parent);
 				parent = YGNodeGetParent(parent);
 			}
-			if (parent)
-			{
-				//parentLeft = YGNodeLayoutGetLeft(parent);
-				//parentTop = YGNodeLayoutGetTop(parent);
-				//float parentPaddingTop = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-				//float parentPaddingLeft = YGNodeLayoutGetPadding(parent, YGEdgeTop);
-				// Overflow hidden.
-				//float parentwidth = YGNodeLayoutGetWidth(parent);
-				//if (parentwidth - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeLeft) < width)
-				//	width = parentwidth - parentPaddingLeft;
-				//float parentHeight = YGNodeLayoutGetHeight(parent);
-				//if (parentHeight < height)
-				//	height = parentHeight - YGNodeLayoutGetMargin(this->YogaNode, YGEdgeTop) - parentPaddingTop;
-			}
-
 			transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, 0.f));
-			//transform = glm::scale(transform, Vector3(width, height, 1.0));
-			//Renderer2D::UIShader->Bind();
-			//Renderer2D::UIShader->SetUniformMat4f("model", transform);
-			//Renderer2D::UIShader->SetUniform1f("u_BorderRadius", Border.Left.Value);
-			//Renderer2D::UIShader->SetUniform2f("u_Size", width, height);
-
-			//Renderer2D::DrawRect();
-
-			//Logger::Log("Left: " + std::to_string(left) + " Top:" + std::to_string(top));
-
 			Renderer2D::DrawString(content, textStyle, transform);
-			//Renderer2D::DrawString(content, style.font, Vector2(Position.Left, Position.Top), 2.0);
 		}
 	};
 }

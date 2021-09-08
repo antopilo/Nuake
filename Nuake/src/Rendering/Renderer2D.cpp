@@ -180,7 +180,8 @@ namespace Nuake
 
 	void Renderer2D::EndDraw()
 	{
-
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 	}
 }
 
