@@ -59,12 +59,9 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-			{
 				for (auto& g : split(a.value(), ' '))
-				{
 					node->AddGroup(g);
-				}
-			}
+
 			if (name == "id")
 				node->ID = a.value();
 			if (name == "height")
@@ -109,12 +106,9 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-			{
 				for (auto& g : split(a.value(), ' '))
-				{
 					node->AddGroup(g);
-				}
-			}
+
 			if (name == "id")
 				node->ID = a.value();
 			if (name == "height")
@@ -174,86 +168,51 @@ namespace Nuake
 		}
 	}
 
-	std::vector<std::string> InterfaceParser::split(std::string const& str, const char delim)
-	{
-		std::vector<std::string> result;
-		size_t start;
-		size_t end = 0;
-
-		while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
-		{
-			end = str.find(delim, start);
-			result.push_back(str.substr(start, end - start));
-		}
-
-		return result;
-	}
-
 	Layout::LayoutVec4 InterfaceParser::GetVec4Unit(const std::string& value)
 	{
-		std::regex regex("[0-9]+[^ ]+");
-		std::smatch match_value;
 		Layout::LayoutVec4 result;
 
-		std::vector<std::string> splits = split(value, ' ');
-		int idx = 0;
-		for (auto& s : splits)
+		std::regex regex("[0-9]+[^ ]+");
+		std::smatch match_value;
+
+		std::vector<std::string> splits = String::Split(value, ' ');
+		for (int i = 0; i < splits.size(); i++)
 		{
-			if (std::regex_search(value.begin(), value.end(), match_value, regex))
-			{
-				if (idx == 0)
-				{
-					result.Left = GetUnit(s);
-				}
-				else if (idx == 1)
-				{
-					result.Right = GetUnit(s);
-				}
-				else if (idx == 2)
-				{
-					result.Top = GetUnit(s);
-				}
-				else
-				{
-					result.Bottom = GetUnit(s);
-				}
-				idx++;
-			}
+			if (!std::regex_search(value.begin(), value.end(), match_value, regex))
+				continue;
+
+			if (i == 0)
+				result.Left = GetUnit(splits[i]);
+			else if (i == 1)
+				result.Right = GetUnit(splits[i]);
+			else if (i == 2)
+				result.Top = GetUnit(splits[i]);
+			else
+				result.Bottom = GetUnit(splits[i]);
 		}
+		
 		return result;
 	}
 
 	Color InterfaceParser::GetColor(const std::string& value)
 	{
-		std::regex regex("[0-9]+[^ ]+");
-		std::smatch match_value;
 		Color result;
 
+		std::regex regex("[0-9]+[^ ]+");
+		std::smatch match_value;
+
 		std::vector<std::string> splits = split(value, ' ');
-		int idx = 0;
-		for (auto& s : splits)
+		for (int i = 0; i < splits.size(); i++)
 		{
-			if (std::regex_search(value.begin(), value.end(), match_value, regex))
-			{
-				if (idx == 0)
-				{
-					result.r = std::stof(s);
-				}
-				else if (idx == 1)
-				{
-					result.g = std::stof(s);
-				}
-				else if (idx == 2)
-				{
-					result.b = std::stof(s);
-				}
-				else
-				{
-					result.a = std::stof(s);
-				}
-				idx++;
-			}
+			if (!std::regex_search(value.begin(), value.end(), match_value, regex))
+				continue;
+
+			if (i == 0) result.r = std::stof(splits[i]);
+			else if (i == 1) result.g = std::stof(splits[i]);
+			else if (i == 2) result.b = std::stof(splits[i]);
+			else result.a = std::stof(splits[i]);
 		}
+
 		return result;
 	}
 
@@ -265,35 +224,31 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-			{
 				for (auto& g : split(a.value(), ' '))
-				{
 					node->AddGroup(g);
-				}
-			}
 			if (name == "id")
 				node->ID = a.value();
-			if (name == "height")
+			else if (name == "height")
 				node->NormalStyle.Height = GetUnit(a.value());
-			if (name == "width")
+			else if (name == "width")
 				node->NormalStyle.Width = GetUnit(a.value());
-			if (name == "margin")
+			else if (name == "margin")
 				node->NormalStyle.Margin = GetVec4Unit(a.value());
-			if (name == "padding")
+			else if (name == "padding")
 				node->NormalStyle.Padding = GetVec4Unit(a.value());
-			if (name == "border")
+			else if (name == "border")
 				node->NormalStyle.Border = GetVec4Unit(a.value());
-			if (name == "position")
+			else if (name == "position")
 				node->NormalStyle.Position = GetVec4Unit(a.value());
-			if (name == "color")
+			else if (name == "color")
 				node->NormalStyle.BackgroundColor = GetColor(a.value());
-			if (name == "script")
+			else if (name == "script")
 			{
 				auto scriptModule = String::Split(a.value(), ' ');
 				node->ScriptsToLoad.push_back({ scriptModule[0], scriptModule[1] });
 				//node->Script = ScriptingEngine::RegisterScript(FileSystem::Root + path, module);
 			}
-			if (name == "stylesheet")
+			else if (name == "stylesheet")
 			{
 				std::string path = a.value();
 				node->StyleSheet = UI::StyleSheet::New(FileSystem::Root + path);
