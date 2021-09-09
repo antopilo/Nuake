@@ -11,6 +11,17 @@ namespace Nuake {
 		return prefab;
 	}
 
+	Ref<Prefab> Prefab::New(const std::string& path)
+	{
+		Ref<Prefab> newPrefab = CreateRef<Prefab>();
+		newPrefab->Path = path;
+
+		std::string prefabTextContent = FileSystem::ReadFile(path);
+		newPrefab->Deserialize(prefabTextContent);
+
+		return newPrefab;
+	}
+
 	void Prefab::EntityWalker(Entity entity)
 	{
 		entity.GetComponent<NameComponent>().IsPrefab = true;

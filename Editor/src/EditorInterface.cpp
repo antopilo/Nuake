@@ -34,6 +34,7 @@
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include "src/Rendering/Renderer.h"
 #include <src/Scene/Components/InterfaceComponent.h>
+#include "src/Core/Input.h"
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -270,6 +271,7 @@ namespace Nuake {
                     parent.Children.push_back(payload_entity);
                 }
             }
+            ImGui::EndDragDropTarget();
         }
 
         if (ImGui::IsItemClicked())
@@ -386,53 +388,66 @@ namespace Nuake {
             ImGui::EndChild();
 
             ImGui::Separator();
-
             // Draw a tree of entities.
-            std::vector<Entity> entities = scene->GetAllEntities();
-            for (Entity e : entities)
+            if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), true))
             {
-                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-                std::string name = e.GetComponent<NameComponent>().Name;
-                // If selected add selected flag.
-                if (m_SelectedEntity == e)
-                    base_flags |= ImGuiTreeNodeFlags_Selected;
-
-                // Write in normal font.
-                ImGui::PushFont(normalFont);
-
-                // Small icons + name.
-                std::string label = ICON_FA_CIRCLE + std::string(" ") + name;
-
-                // Draw all entity without parents.
-                if (!e.GetComponent<ParentComponent>().HasParent)
+                std::vector<Entity> entities = scene->GetAllEntities();
+                for (Entity e : entities)
                 {
-                    // Recursively draw childrens.
-                    DrawEntityTree(e);
+                    ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                        std::string name = e.GetComponent<NameComponent>().Name;
+                        // If selected add selected flag.
+                        if (m_SelectedEntity == e)
+                            base_flags |= ImGuiTreeNodeFlags_Selected;
 
+                        // Write in normal font.
+                            ImGui::PushFont(normalFont);
+
+                    // Small icons + name.
+                    std::string label = ICON_FA_CIRCLE + std::string(" ") + name;
+
+                    // Draw all entity without parents.
+                    if (!e.GetComponent<ParentComponent>().HasParent)
+                    {
+                        // Recursively draw childrens.
+                        DrawEntityTree(e);
+                    }
+
+                    // Pop font.
+                    ImGui::PopFont();
+
+                    // Right click menu
+                    //if (ImGui::BeginPopupContextItem())
+                    //    ImGui::EndPopup();
                 }
+                ImGui::EndChild();
+            }
+            
+            if (ImGui::BeginDragDropTarget()) // Drag n drop new prefab file into scene tree
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Prefab"))
+                {
+                    char* file = (char*)payload->Data;
+                    std::string fullPath = std::string(file, 256);
+                    std::string relPath = FileSystem::AbsoluteToRelative(fullPath);
 
-                // Pop font.
-                ImGui::PopFont();
-
-                // Right click menu
-                //if (ImGui::BeginPopupContextItem())
-                //    ImGui::EndPopup();
+                    Entity newEntity = Engine::GetCurrentScene()->CreateEntity("New prefab Entity");
+                    PrefabComponent& prefabComponent = newEntity.AddComponent<PrefabComponent>();
+                    prefabComponent.PrefabInstance = Prefab::New(relPath);
+                }
+                ImGui::EndDragDropTarget();
             }
 
-            // Delete entity
+            // Deleted entity queue
             if (QueueDeletion.GetHandle() != -1)
             {
                 Engine::GetCurrentScene()->DestroyEntity(QueueDeletion);
 
                 if (m_SelectedEntity == QueueDeletion)
-                {
                     m_IsEntitySelected = false;
-                }
 
                 QueueDeletion = Entity{ (entt::entity)-1, scene.get() };
-                //ImGui::TreePop();
             }
-
         }
         ImGui::End();
     }
@@ -1389,6 +1404,7 @@ namespace Nuake {
 
     }
 
+    json SceneSnapshot;
     void EditorInterface::Draw()
     {
         Init();
@@ -1595,9 +1611,19 @@ namespace Nuake {
             float needed = half - used;
             ImGui::Dummy(ImVec2(needed, 10));
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_PLAY)) Engine::EnterPlayMode();
+            if (ImGui::Button(ICON_FA_PLAY))
+            {
+                SceneSnapshot = Engine::GetCurrentScene()->Serialize();
+                Engine::EnterPlayMode();
+            }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_STOP)) Engine::ExitPlayMode(); 
+            if (ImGui::Button(ICON_FA_STOP) || Input::IsKeyPressed(297))
+            {
+                Engine::ExitPlayMode();
+
+                Engine::GetCurrentScene()->Deserialize(SceneSnapshot.dump());
+                m_IsEntitySelected = false;
+            }
         }
         ImGui::End();
     }

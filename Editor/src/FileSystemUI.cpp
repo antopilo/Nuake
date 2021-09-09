@@ -123,6 +123,8 @@ namespace Nuake {
                     dragType = "_Model";
                 else if (file->Type == ".interface")
                     dragType = "_Interface";
+                else if (file->Type == ".prefab")
+                    dragType = "_Prefab";
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
                 ImGui::Text(file->name.c_str());

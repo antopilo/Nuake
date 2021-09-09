@@ -1,8 +1,11 @@
 #pragma once
+#include "src/Scene/Entities/Entity.h"
+#include "src/Scene/Components/ParentComponent.h"
+#include "src/Resource/Serializable.h"
+#include "Engine.h"
+
 #include <string>
 #include <vector>
-#include <src/Scene/Entities/Entity.h>
-#include "src/Resource/Serializable.h"
 namespace Nuake {
 	class Prefab : ISerializable
 	{
@@ -11,6 +14,8 @@ namespace Nuake {
 		std::vector<Entity> Entities;
 		
 		static Ref<Prefab> CreatePrefabFromEntity(Entity entity);
+
+		static Ref<Prefab> New(const std::string& path);
 
 		Prefab() 
 		{
@@ -47,7 +52,25 @@ namespace Nuake {
 		{
 			BEGIN_DESERIALIZE();
 			Path = j["Path"];
+			if (j.contains("Entities"))
+			{
+				for (json e : j["Entities"])
+				{
+					Entity entity = Entity { Engine::GetCurrentScene()->m_Registry.create(), Engine::GetCurrentScene().get() };
+					entity.Deserialize(e.dump());
+					this->AddEntity(entity);
+				}
 
+				for (auto& e : Entities)
+				{
+					auto parentC = e.GetComponent<ParentComponent>();
+					if (!parentC.HasParent)
+						continue;
+
+					auto parent = Engine::GetCurrentScene()->GetEntityByID(parentC.ParentID);
+					parent.AddChild(e);
+				}
+			}
 			return true;
 		}
 

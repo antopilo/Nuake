@@ -45,10 +45,10 @@ namespace Nuake
 			BEGIN_DESERIALIZE();
 			this->HasParent = j["HasParent"];
 			if (HasParent)
+			{
 				this->ParentID = j["ParentID"];
-
-			//this->Parent = Entity{ j["Parent"], Engine::GetCurrentScene().get() };
-
+				//this->Parent = Entity{ j["Parent"], Engine::GetCurrentScene().get() };
+			}
 			return true;
 		}
 	};

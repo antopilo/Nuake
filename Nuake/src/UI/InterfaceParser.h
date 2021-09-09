@@ -25,8 +25,6 @@ namespace Nuake
 		static Ref<Canvas> CreateCanvas(const pugi::xml_node& xml_node);
 		static Ref<TextNode> CreateTextNode(const pugi::xml_node& xml_node);
 
-		static std::vector<std::string> split(std::string const& str, const char delim);
-
 		static Layout::LayoutUnit GetUnit(const std::string& value);
 		static Layout::LayoutVec4 GetVec4Unit(const std::string& value);
 		static Color GetColor(const std::string& value);

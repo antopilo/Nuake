@@ -70,8 +70,7 @@ int main()
 
         //newEditor.Update(0.f);
 
-        if (Nuake::Input::IsKeyPressed(GLFW_KEY_F8))
-            Nuake::Engine::ExitPlayMode();
+        
         
         Nuake::Vector2 WindowSize = Nuake::Engine::GetCurrentWindow()->GetSize();
         glViewport(0, 0, WindowSize.x, WindowSize.y);

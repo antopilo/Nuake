@@ -1,6 +1,6 @@
 #include "InterfaceParser.h"
 #include "Styling/Stylesheet.h"
-
+#include "src/Core/String.h"
 namespace Nuake
 {
 	Ref<Canvas> InterfaceParser::Root = CreateRef<Canvas>();
@@ -59,7 +59,7 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-				for (auto& g : split(a.value(), ' '))
+				for (auto& g : String::Split(a.value(), ' '))
 					node->AddGroup(g);
 
 			if (name == "id")
@@ -106,7 +106,7 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-				for (auto& g : split(a.value(), ' '))
+				for (auto& g : String::Split(a.value(), ' '))
 					node->AddGroup(g);
 
 			if (name == "id")
@@ -201,7 +201,7 @@ namespace Nuake
 		std::regex regex("[0-9]+[^ ]+");
 		std::smatch match_value;
 
-		std::vector<std::string> splits = split(value, ' ');
+		std::vector<std::string> splits = String::Split(value, ' ');
 		for (int i = 0; i < splits.size(); i++)
 		{
 			if (!std::regex_search(value.begin(), value.end(), match_value, regex))
@@ -224,7 +224,7 @@ namespace Nuake
 		{
 			std::string name = a.name();
 			if (name == "groups")
-				for (auto& g : split(a.value(), ' '))
+				for (auto& g : String::Split(a.value(), ' '))
 					node->AddGroup(g);
 			if (name == "id")
 				node->ID = a.value();

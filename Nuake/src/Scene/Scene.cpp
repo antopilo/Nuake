@@ -748,6 +748,8 @@ namespace Nuake {
 		if (!j.contains("Name"))
 			return false;
 
+		m_Registry.clear();
+
 		Name = j["Name"];
 
 		m_Environement = CreateRef<Environment>();
@@ -785,14 +787,4 @@ namespace Nuake {
 
 		return true;
 	}
-
-	void Scene::Snapshot()
-	{
-
-	}
-
-	void Scene::LoadSnapshot()
-	{
-	}
-
 }
