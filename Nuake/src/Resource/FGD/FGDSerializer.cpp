@@ -51,6 +51,41 @@ namespace Nuake {
 		return true;
 	}
 
+	bool FGDSerializer::SerializePoint(FGDPointEntity fgdPoint)
+	{
+		std::string line = "@";
+		line += "PointClass = ";
+		line += fgdPoint.Name + " : \"" + fgdPoint.Description + "\"";
+
+		// Exit early
+		if (fgdPoint.Properties.size() == 0)
+		{
+			line += " [] \n";
+			FileSystem::WriteLine(line);
+			return true;
+		}
+
+		// Properties here.
+		line += "\n [ \n";
+		for (auto& p : fgdPoint.Properties)
+		{
+			// E.g: myProp(integer) : "description"
+			line += "    "; // Tabulation
+			line += p.name;
+			line += "(";
+			if (p.type == ClassPropertyType::Integer)
+				line += "integer";
+			line += ") : ";
+			line += "\"" + p.description + "\"";
+			line += "\n";
+
+		}
+
+		line += "]";
+
+		FileSystem::WriteLine(line);
+	}
+
 	bool FGDSerializer::SerializeBrush(FGDBrushEntity fgdClass)
 	{
 		std::string line = "@";

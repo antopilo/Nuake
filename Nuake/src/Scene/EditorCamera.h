@@ -7,6 +7,12 @@ namespace Nuake
 	class EditorCamera : public Camera
 	{
 	public:
+		EditorCamera()
+		{
+			Translation = Vector3(10, 10, 10);
+			SetDirection(Vector3(-1, -1, -1));
+		}
+
 		void Update(Timestep ts);
 	private:
 		bool controlled = false;

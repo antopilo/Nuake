@@ -22,6 +22,7 @@ extern "C" {
 #include "src/Scene/Components/TriggerZone.h"
 #include "src/Resource/FGD/FGDClass.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Components/PrefabComponent.h"
 
 namespace Nuake {
     struct ProcessedMesh
@@ -329,6 +330,7 @@ namespace Nuake {
             return;
 
         QuakeMapComponent& quakeMapC = ent.GetComponent<QuakeMapComponent>();
+        ScaleFactor = quakeMapC.ScaleFactor;
         Scene* m_Scene = ent.GetScene();
 
         // TODO: Tag entities *owned* by the map.
@@ -363,8 +365,10 @@ namespace Nuake {
             std::string target = "";
             std::string targetname = "";
             FGDBrushEntity fgdBrush;
+            FGDPointEntity pointEntity;
             bool isEntity = false;
             bool isWorldSpawn = false;
+            bool isPointEntity = false;
             for (int i = 0; i < entity_inst->property_count; i++)
             {
                 property* prop = &(entity_inst->properties)[i];
@@ -378,7 +382,7 @@ namespace Nuake {
                     float y = String::ToFloat(splits[2]);
                     float z = String::ToFloat(splits[0]);
 
-                    Vector3 position = Vector3(x, y, z) * (ScaleFactor * (1.0f / 64.0f));
+                    Vector3 position = Vector3(x, y, z) * ScaleFactor * (1.0f / 64.0f);
                     newEntity.GetComponent<TransformComponent>().Translation = position;
                 }
 
@@ -397,6 +401,15 @@ namespace Nuake {
                             else
                                 isWorldSpawn = true;
                         }
+
+                        if (type == EntityType::Point)
+                        {
+                            if (value != "")
+                                isPointEntity = true;
+
+                            pointEntity = file->GetPointEntity(value);
+                           
+                        }
                     }
                     else
                     {
@@ -411,6 +424,21 @@ namespace Nuake {
             }
             if (!isWorldSpawn)
             {
+                if (isPointEntity)
+                {
+                    Entity newPEntity = Engine::GetCurrentScene()->CreateEntity("New prefab Entity");
+                    newEntity.AddChild(newPEntity);
+                    PrefabComponent& prefabComponent = newPEntity.AddComponent<PrefabComponent>();
+                    prefabComponent.SetPrefab(Prefab::New(pointEntity.Prefab));
+                    for (auto& e : prefabComponent.PrefabInstance->Entities)
+                    {
+                        if (!e.GetComponent<ParentComponent>().HasParent)
+                        {
+                            newPEntity.AddChild(e);
+                        }
+                    }
+                }
+
                 for (int b = 0; b < entity_inst->brush_count; ++b)
                 {
                     brush* brush_inst = &entity_inst->brushes[b];
@@ -473,7 +501,12 @@ namespace Nuake {
                         for (int i = 0; i < face_geo_inst->vertex_count; ++i)
                         {
                             face_vertex vertex = face_geo_inst->vertices[i];
-                            vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
+                            vertex_uv vertex_uv;
+
+                            if (face->is_valve_uv)
+                                vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
+                            else
+                                vertex_uv = get_standard_uv(vertex.vertex, face, texture->width, texture->height);
 
                             Vector3 vertexPos = Vector3(
                                 vertex.vertex.y * quakeMapC.ScaleFactor,
@@ -531,6 +564,7 @@ namespace Nuake {
             }
             
             isEntity = false;
+            isPointEntity = false;
         }
     }
 }

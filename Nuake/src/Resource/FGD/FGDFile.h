@@ -31,26 +31,17 @@ namespace Nuake {
 		json Serialize() override
 		{
 			BEGIN_SERIALIZE();
-			int i = 0;
-			for (auto& c : this->BrushEntities)
-			{
-				j["BrushEntities"][i] = c.Serialize();
-				i++;
-			}
+			for (int i = 0; i < BrushEntities.size(); i++)
+				j["BrushEntities"][i] = BrushEntities[i].Serialize();
 
-			i = 0;
-			for (auto& c : this->PointEntities)
-			{
-				j["PointEntities"][i] = c.Serialize();
-				i++;
-			}
+			for (int i = 0; i < PointEntities.size(); i++)
+				j["PointEntities"][i] = PointEntities[i].Serialize();
 			END_SERIALIZE();
 		}
 
 		bool Deserialize(const std::string& str)
 		{
 			BEGIN_DESERIALIZE();
-
 			if (j.contains("BrushEntities"))
 			{
 				for (auto& brush : j["BrushEntities"])
@@ -63,7 +54,12 @@ namespace Nuake {
 
 			if (j.contains("PointEntities"))
 			{
-
+				for (auto& point : j["PointEntities"])
+				{
+					FGDPointEntity pointEntity = FGDPointEntity();
+					pointEntity.Deserialize(point.dump());
+					PointEntities.push_back(pointEntity);
+				}
 			}
 
 			return true;
@@ -75,6 +71,15 @@ namespace Nuake {
 			{
 				if (name == b.Name)
 					return b;
+			}
+		}
+
+		FGDPointEntity& GetPointEntity(const std::string& name)
+		{
+			for (auto& p : PointEntities)
+			{
+				if (name == p.Name) 
+					return p;
 			}
 		}
 

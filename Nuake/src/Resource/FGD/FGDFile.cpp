@@ -82,7 +82,7 @@ namespace Nuake {
 
 		for (auto& p : PointEntities)
 		{
-
+			FGDSerializer::SerializePoint(p);
 		}
 
 		for (auto& b : BrushEntities)

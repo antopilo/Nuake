@@ -188,6 +188,8 @@ namespace Nuake
                 Type = (LightType)j["Type"];
             if (j.contains("IsVolumetric"))
                 IsVolumetric = j["IsVolumetric"];
+            if (j.contains("Color"))
+                Color = Vector3(j["Color"]["x"], j["Color"]["y"], j["Color"]["z"]);
             if (j.contains("Strength"))
                 Strength = j["Strength"];
             if (j.contains("SyncDirectionWithSky"))

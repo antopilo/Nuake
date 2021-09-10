@@ -143,22 +143,44 @@ namespace Nuake {
                         ImGui::TableHeadersRow();
 
                         ImGui::TableNextColumn();
+                        int i = 0;
                         for (auto& pE : file->PointEntities)
                         {
-                            ImGui::Text(pE.Name.c_str());
+                            ImGuiTextSTD("##PName" + std::to_string(i), pE.Name);
+                            for (int i = 0; i < pE.Name.size(); i++)
+                            {
+                                if (pE.Name[i] == ' ')
+                                    pE.Name[i] = '_';
+                            }
                             ImGui::TableNextColumn();
-                            ImGui::Text(pE.Description.c_str());
+                            ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
                             ImGui::TableNextColumn();
                             ImGui::Button("Edit");
                             ImGui::TableNextColumn();
-                            ImGui::Text(pE.Prefab.c_str());
-                            ImGui::SameLine();
-                            ImGui::Button("Browse");
+                            ImGuiTextSTD("Prefab##" + std::to_string(i), pE.Prefab);
+                            if (ImGui::BeginDragDropTarget())
+                            {
+                                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Prefab"))
+                                {
+                                    char* file = (char*)payload->Data;
+                                    std::string fullPath = std::string(file, 256);
+                                    pE.Prefab = FileSystem::AbsoluteToRelative(fullPath);
+                                }
+                                ImGui::EndDragDropTarget();
+                            }
+                            ImGui::TableNextColumn();
+                            i++;
                         }
 
                         ImGui::EndTable();
                     }
                     ImGui::EndChild();
+
+                    if (ImGui::Button("Add new"))
+                    {
+                        file->PointEntities.push_back(FGDPointEntity("NewPointEntity"));
+                    }
+
                     ImGui::EndTabItem();
                 }
 

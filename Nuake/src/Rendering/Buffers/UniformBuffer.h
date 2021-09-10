@@ -1,12 +1,17 @@
 #pragma once
 
+namespace Nuake
+{
+	class UniformBuffer {
+	private:
+		unsigned int RendererID;
+	public:
+		UniformBuffer(unsigned int size);
 
-class UniformBuffer {
-private:
-	unsigned int RendererID;
-public:
-	UniformBuffer();
+		void Bind();
+		void Unbind();
 
-	void Bind();
-	void Unbind();
-};
+		void UpdateData(unsigned int size, void* data);
+		void Push(unsigned int slot = 0);
+	};
+}

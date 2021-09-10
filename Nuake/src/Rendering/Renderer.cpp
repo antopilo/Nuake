@@ -33,9 +33,10 @@ namespace Nuake
     VertexArray*  Renderer::CubeVertexArray;
     VertexBuffer* Renderer::CubeVertexBuffer;
 
+    Ref<UniformBuffer> Renderer::m_LightsUniformBuffer;
     RenderList Renderer::m_RenderList = RenderList();
 
-    glm::vec3 CubeVertices[36]{
+    glm::vec3 CubeVertices[36] {
            glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,   0.5f, -0.5f),
            glm::vec3(0.5f,   0.5f, -0.5f), glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
            glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(0.5f,  -0.5f,  0.5f), glm::vec3(0.5f,   0.5f,  0.5f),
@@ -65,6 +66,8 @@ namespace Nuake
         RenderCommand::SetRendererAPI(RendererPlatforms::OpenGL);
 
         LoadShaders();
+
+        m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
         // Cube buffer
         CubeVertexArray = new VertexArray();
@@ -137,6 +140,8 @@ namespace Nuake
         Vector3 pos = transform.GlobalTranslation;
         Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
+        
+
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
         if (light.CastShadows)
         {
@@ -163,6 +168,7 @@ namespace Nuake
         if (m_Lights.size() == 20)
             return;
 
+
         Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         deferredShader->Bind();
         m_Lights.push_back({ transform , light });
@@ -175,16 +181,18 @@ namespace Nuake
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
-        if (light.CastShadows)
+        int shadowmapAmount = 0;
+        if (light.CastShadows && light.Type == Directional)
         {
             for (unsigned int i = 0; i < CSM_AMOUNT; i++)
             {
                 light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
-                deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(i) + "]", 17 + i);
-                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMapsIDs[" + std::to_string(i) + "]", i);
+                deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowmapAmount + i) + "]", 17 + i);
+                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMapsIDs[" + std::to_string(i) + "]", shadowmapAmount + i);
                 deferredShader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
                 deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
             }
+            shadowmapAmount += CSM_AMOUNT;
         }
 
        deferredShader->SetUniform1i("LightCount", idx);
@@ -194,6 +202,9 @@ namespace Nuake
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
+
+       m_LightsUniformBuffer->Bind();
+       //m_LightsUniformBuffer->UpdateData()
     }
 
     void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) 
@@ -211,21 +222,6 @@ namespace Nuake
 
         CubeVertexArray->Bind();
         RenderCommand::DrawArrays(0, 36);
-        //glBindVertexArray(CubeVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, 1.0f);
-
-        //glPolygonMode(GL_FRONT, GL_LINE);
-        //glPolygonMode(GL_BACK, GL_LINE);
-        //glLineWidth(4);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //
-        //// Turn off wireframe mode
-        //glPolygonMode(GL_FRONT, GL_FILL);
-        //glPolygonMode(GL_BACK, GL_FILL);
-        //glEnable(GL_DEPTH_TEST);
-
     }
 
     // TODO: See above

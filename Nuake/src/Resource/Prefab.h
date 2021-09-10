@@ -12,7 +12,8 @@ namespace Nuake {
 	public:
 		std::string Path;
 		std::vector<Entity> Entities;
-		
+		Entity Root;
+
 		static Ref<Prefab> CreatePrefabFromEntity(Entity entity);
 
 		static Ref<Prefab> New(const std::string& path);
@@ -41,10 +42,21 @@ namespace Nuake {
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(Path);
+
 			std::vector<json> entities = std::vector<json>();
 			for (Entity e : Entities)
 				entities.push_back(e.Serialize());
+
 			SERIALIZE_VAL_LBL("Entities", entities);
+
+			// Manual correction to remove parent if we are prefabing a child. 
+			// We want to get rid of parent link in the prefab itself.
+			for (auto& e : j["Entities"])
+			{
+				if (e["NameComponent"]["ID"] == Root.GetComponent<NameComponent>().ID)
+					e["ParentComponent"]["HasParent"] = false;
+			}
+				
 			END_SERIALIZE();
 		}
 

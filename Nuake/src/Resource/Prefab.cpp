@@ -24,6 +24,7 @@ namespace Nuake {
 
 	void Prefab::EntityWalker(Entity entity)
 	{
+		Root = entity;
 		entity.GetComponent<NameComponent>().IsPrefab = true;
 		Entities.push_back(entity);
 

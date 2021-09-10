@@ -80,6 +80,18 @@ namespace Nuake {
 		std::vector<ClassProperty> Properties;
 		FGDBaseEntity BaseClass;
 
+		FGDPointEntity(const std::string name)
+		{
+			Name = name;
+			Description = "";
+		}
+
+		FGDPointEntity()
+		{
+			Name = "";
+			Description = "";
+		}
+
 		json Serialize() override
 		{
 			BEGIN_SERIALIZE();
@@ -91,11 +103,16 @@ namespace Nuake {
 
 		bool Deserialize(const std::string& str) override
 		{
+			BEGIN_DESERIALIZE();
+			Name = j["Name"];
+			Description = j["Description"];
+			Prefab = j["Prefab"];
 			return true;
 		}
 	};
 
-	class FGDClass {
+	class FGDClass 
+	{
 	public:
 		FGDClassType Type;
 		std::string Name;

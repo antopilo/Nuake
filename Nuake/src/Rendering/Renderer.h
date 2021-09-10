@@ -1,9 +1,11 @@
 #pragma once
+#include "src/Core/Maths.h"
 #include "Shaders/Shader.h"
 #include "src/Scene/Components/Components.h"
 #include "src/Core/Core.h"
 #include "Buffers/VertexArray.h"
 #include "RenderList.h"
+#include "Buffers/UniformBuffer.h"
 
 namespace Nuake
 {
@@ -11,6 +13,24 @@ namespace Nuake
 	{
 		TransformComponent transform;
 		LightComponent light;
+	};
+
+	const int MAX_LIGHT = 64;
+	//struct LightDataArray
+	//{
+	//	LightData Lights[MAX_LIGHT];
+	//};
+
+	struct LightData
+	{
+		int ShadowMapsIDs[CSM_AMOUNT];
+		float CascadeDepth[CSM_AMOUNT];
+		Matrix4 LightTransforms[CSM_AMOUNT];
+		int Type;
+		Vector3 Position;
+		Vector3 Direction;
+		Vector3 Color;
+		int Volumetric;
 	};
 
 	class Renderer 
@@ -31,6 +51,8 @@ namespace Nuake
 		static Ref<Shader> m_DeferredShader;
 		static Ref<Shader> m_ProceduralSkyShader;
 		static Ref<Shader> m_DebugShader;
+
+		static Ref<UniformBuffer> m_LightsUniformBuffer;
 
 		static void Init();
 		static void LoadShaders();
