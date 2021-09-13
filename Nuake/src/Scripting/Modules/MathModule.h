@@ -26,6 +26,8 @@ namespace Nuake {
 				RegisterMethod("Radians(_)", (void*)Radians);
 				RegisterMethod("Degrees(_)", (void*)Degrees);
 				RegisterMethod("Cross_(_,_,_,_,_,_)", (void*)Cross);
+				RegisterMethod("Dot_(_,_,_,_,_,_)", (void*)Dot);
+				RegisterMethod("Length_(_,_,_)", (void*)Length);
 			}
 
 			static void Sqrt(WrenVM* vm)
@@ -84,6 +86,28 @@ namespace Nuake {
 				wrenInsertInList(vm, 0, -1, 1);
 				wrenInsertInList(vm, 0, -1, 2);
 				wrenInsertInList(vm, 0, -1, 3);
+			}
+
+			static void Dot(WrenVM* vm)
+			{
+				Vector3 v1 = Vector3(wrenGetSlotDouble(vm, 1),
+					wrenGetSlotDouble(vm, 2),
+					wrenGetSlotDouble(vm, 3));
+				Vector3 v2 = Vector3(wrenGetSlotDouble(vm, 4),
+					wrenGetSlotDouble(vm, 5),
+					wrenGetSlotDouble(vm, 6));
+				float dot = glm::dot(v1, v2);
+
+				wrenSetSlotDouble(vm, 0, dot);
+			}
+
+			static void Length(WrenVM* vm)
+			{
+				Vector3 v1 = Vector3(wrenGetSlotDouble(vm, 1),
+					wrenGetSlotDouble(vm, 2),
+					wrenGetSlotDouble(vm, 3));
+
+				wrenSetSlotDouble(vm, 0, v1.length());
 			}
 		};
 	}

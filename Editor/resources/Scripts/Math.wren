@@ -10,11 +10,16 @@ class Math {
 		return Vector3.new(result[0], result[1], result[2])
 	}
 
+	static Dot(vec1, vec2) {
+		return this.Dot_(vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z)
+	}
+
+	foreign static Dot_(x, y, z, x1, y2, z2)
 	foreign static Cross_(x, y, z, x1, y2, z2)
+	foreign static Length_(x, y, z)
 }
 
 class Vector3 {
-
 	x {_x}
 	y {_y}
 	z {_z}
@@ -113,7 +118,11 @@ class Vector3 {
 		this.Normalize() * vec.Normalize()
 	}
 
+	Dot(vec) {
+		return Math.Dot(this, vec)
+	}
+
 	Length() {
-		this.Sqrt()
+		return Math.Length_(_x, _y, _z)
 	}
 }

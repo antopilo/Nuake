@@ -24,7 +24,6 @@ namespace Nuake {
     {
     }
 
-
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
@@ -53,7 +52,7 @@ namespace Nuake {
     void FileSystemUI::DrawDirectory(Ref<Directory> directory)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
-        std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
+        std::string id = directory->name;
 
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
             m_CurrentDirectory = directory;
@@ -131,9 +130,9 @@ namespace Nuake {
                 ImGui::EndDragDropSource();
             }
         }
+
         ImGui::Text(file->name.c_str());
         ImGui::PopFont();
-
     }
 
     bool Splitter(bool split_vertically, float thickness, float* size1, float* size2, float min_size1, float min_size2, float splitter_long_axis_size = -1.0f)
@@ -147,6 +146,7 @@ namespace Nuake {
         bb.Max = bb.Min + CalcItemSize(split_vertically ? ImVec2(thickness, splitter_long_axis_size) : ImVec2(splitter_long_axis_size, thickness), 0.0f, 0.0f);
         return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
     }
+
     float h = 200;
     static float sz1 = 300;
     static float sz2 = 300;
@@ -168,17 +168,19 @@ namespace Nuake {
                 bool is_selected = m_CurrentDirectory == FileSystem::RootDirectory;
                 if (is_selected)
                     base_flags |= ImGuiTreeNodeFlags_Selected;
-                std::string icon = ICON_FA_FOLDER;
 
+                std::string icon = ICON_FA_FOLDER;
                 bool open = ImGui::TreeNodeEx((icon + " " + "Project files").c_str(), base_flags);
                 if (ImGui::IsItemClicked())
                 {
                     m_CurrentDirectory = FileSystem::RootDirectory;
                 }
+
                 if (open)
                 {
                     for(auto& d : rootDirectory->Directories)
                         EditorInterfaceDrawFiletree(d);
+
                     ImGui::TreePop();
                 }
 
@@ -192,6 +194,7 @@ namespace Nuake {
 
             Ref<Directory> currentParent = m_CurrentDirectory;
             paths.push_back(m_CurrentDirectory);
+
             while (currentParent != nullptr) 
             {
                 paths.push_back(currentParent);
@@ -206,14 +209,19 @@ namespace Nuake {
                 if (ImGui::BeginChild("Path", avail))
                 {
                     if (ImGui::Button("Refresh"))
+                    {
                         FileSystem::Scan();
+                        m_CurrentDirectory = FileSystem::RootDirectory;
+                    }
+
                     ImGui::SameLine();
-                    for (int i = paths.size() - 1; i > 0; i--) {
+                    for (int i = paths.size() - 1; i > 0; i--) 
+                    {
                         if (i != paths.size())
                             ImGui::SameLine();
-                        if (ImGui::Button(paths[i]->name.c_str())) {
+
+                        if (ImGui::Button(paths[i]->name.c_str()))
                             m_CurrentDirectory = paths[i];
-                        }
 
                         ImGui::SameLine();
                         ImGui::Text("/");
@@ -226,9 +234,9 @@ namespace Nuake {
 
                 if (ImGui::BeginChild("Content", avail))
                 {
-                    int width = ImGui::GetWindowWidth() * 0.8f;
+                    int width = avail.x;
                     ImVec2 buttonSize = ImVec2(80, 80);
-                    int amount = (int)(width / 100);
+                    int amount = (int)(width / 200);
                     if (amount <= 0) amount = 1;
 
                     int i = 1; // current amount of item per row.
@@ -246,13 +254,15 @@ namespace Nuake {
 
                         if (m_CurrentDirectory && m_CurrentDirectory->Directories.size() > 0)
                         {
-                            for (auto d : m_CurrentDirectory->Directories)
+                            for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
                                 DrawDirectory(d);
-                                if (i - 1 % amount != 0)
+
+                                if (i + 1 % amount != 0)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
+
                                 i++;
                             }
                         }
