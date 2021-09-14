@@ -9,6 +9,36 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
+const std::string TEMPLATE_SCRIPT_BEGIN = "import \"Nuake:Engine\" for Engine \
+import \"Nuake:ScriptableEntity\" for ScriptableEntity \
+import \"Nuake:Input\" for Input \
+import \"Nuake:Scene\" for Scene \
+\
+class ";
+
+const std::string TEMPLATE_SCRIPT_END = " is ScriptableEntity {\
+construct new(){\
+	_ReloadSpeed = 0.1\
+	_Intensity = 0.0\
+}\
+\
+init() {\
+}\
+\
+// Updates every frame\
+update(ts) {\
+\
+}\
+\
+// Updates every tick\
+fixedUpdate(ts) {\
+	\
+}\
+\
+exit() {\
+}\
+}";
+
 namespace Nuake {
     // TODO: add filetree in same panel
     void FileSystemUI::Draw()
@@ -279,55 +309,66 @@ namespace Nuake {
                                 i++;
                             }
                         }
-                        if (ImGui::BeginPopupContextItem("item context menu"))
-                        {
-                            float value;
-                            if (ImGui::Selectable("Set to zero")) value = 0.0f;
-                            if (ImGui::Selectable("Set to PI")) value = 3.1415f;
-                            ImGui::SetNextItemWidth(-1);
-                            ImGui::DragFloat("##Value", &value, 0.1f, 0.0f, 0.0f);
-                            ImGui::EndPopup();
-                        }
+						
+
+		
+
                         if (ImGui::BeginPopupContextWindow())
                         {
                             if (ImGui::MenuItem("New Wren script"))
                             {
-                                ImGui::OpenPopup("CreateNewFile");
+                                ImGui::OpenPopup("new_file");
 
                             }
+
                             if (ImGui::MenuItem("New interface script"))
                             {
                             }
+
                             if (ImGui::MenuItem("New Scene"))
                             {
                             }
+
                             if (ImGui::MenuItem("New folder"))
                             {
                             }
+
                             if (ImGui::MenuItem("New interface"))
                             {
                             }
+
                             if (ImGui::MenuItem("New stylesheet"))
                             {
                             }
-                            if (ImGui::BeginPopup("CreateNewFile"))
-                            {
-                                static char name[32] = "Label1";
-                                char buf[64];
-                                sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
 
-                                ImGui::Text("Edit name:");
-                                ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
-                                if (ImGui::Button("Close"))
-                                    ImGui::CloseCurrentPopup();
-                                if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)))
-                                    ImGui::CloseCurrentPopup();
-                                ImGui::EndPopup();
-                            }
-                            ImGui::EndPopup();
+							ImGui::EndPopup();
                         }
+
+						if (ImGui::BeginPopup("new_file"))
+						{
+							static char name[32] = "NewWrenScript";
+							char buf[64];
+							sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
+
+							ImGui::Text("Edit name:");
+							ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
+							if (ImGui::Button("Close"))
+								ImGui::CloseCurrentPopup();
+							if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)) && name != "")
+							{
+								FileSystem::BeginWriteFile(m_CurrentDirectory->fullPath + name + ".wren");
+
+								FileSystem::WriteLine(TEMPLATE_SCRIPT_BEGIN + name + TEMPLATE_SCRIPT_END);
+
+								FileSystem::EndWriteFile();
+								ImGui::CloseCurrentPopup();
+							}
+
+							ImGui::EndPopup();
+						}
                         ImGui::EndTable();
                     }
+
                 }
                 ImGui::EndChild();
             }
