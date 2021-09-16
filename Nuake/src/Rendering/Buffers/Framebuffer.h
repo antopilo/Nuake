@@ -35,6 +35,7 @@ namespace Nuake
 		void Unbind();
 		void QueueResize(Vector2 size);
 		Vector2 GetSize() const { return m_Size; }
+		void SetSize(const Vector2& size) { m_Size = size; }
 		void UpdateSize(Vector2 size);
 
 		void SetDrawBuffer(GLenum draw);

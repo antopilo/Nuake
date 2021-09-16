@@ -34,6 +34,8 @@ namespace Nuake {
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(VolumetricFog);
 		SERIALIZE_VAL(VolumetricStepCount);
+		SERIALIZE_VAL(BloomBlurAmount);
+		SERIALIZE_VAL(BloomThreshold);
 		SERIALIZE_VEC4(AmbientColor);
 		SERIALIZE_OBJECT(ProceduralSkybox);
 		END_SERIALIZE();
@@ -41,6 +43,16 @@ namespace Nuake {
 
 	bool Environment::Deserialize(const std::string& str)
 	{
+		BEGIN_DESERIALIZE();
+
+		if (j.contains("VolumetricFog"))
+			VolumetricFog = j["VolumetricFog"];
+		if (j.contains("VolumetricStepCount"))
+			VolumetricFog = j["VolumetricStepCount"];
+		if (j.contains("BloomBlurAmount"))
+			VolumetricFog = j["BloomBlurAmount"];
+		if (j.contains("BloomThreshold"))
+			VolumetricFog = j["BloomThreshold"];
 		return false;
 	}
 }

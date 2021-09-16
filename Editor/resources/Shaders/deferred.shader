@@ -226,7 +226,8 @@ void main()
 {
     vec3 worldPos = WorldPosFromDepth(texture(m_Depth, UV).r);
 
-    if (texture(m_Depth, UV).r == 1) {
+    if (texture(m_Depth, UV).r == 1) 
+    {
         FragColor = vec4(0, 0, 0, 0);
         return;
     }
@@ -313,12 +314,13 @@ void main()
     vec3 ambient = (kD * diffuse + specular) * ao;
     vec3 color = ambient + Lo;
     color += fog;
-    color = color / (color + vec3(1.0));
-    const float gamma = 2.2;
-    // HDR tonemapping
-    color = vec3(1.0) - exp(-color * u_Exposure);
-    // gamma correct
-    color = pow(color, vec3(1.0 / gamma));
+
+    //color = color / (color + vec3(1.0));
+    //const float gamma = 2.2;
+    //// HDR tonemapping
+    //color = vec3(1.0) - exp(-color * 1.0);
+    //// gamma correct
+    //color = pow(color, vec3(1.0 / gamma));
 
     FragColor = mix(vec4(color, 1.0), vec4(albedo, 1.0), 0);
 }

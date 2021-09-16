@@ -342,7 +342,7 @@ namespace Nuake {
         if (ImGui::Begin("Environnement"))
         {
             Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
-            if (ImGui::CollapsingHeader("Procedural Sky"))
+            if (ImGui::CollapsingHeader("Procedural Sky", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::DragFloat("Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f);
 
@@ -354,7 +354,13 @@ namespace Nuake {
                 ImGuiHelper::DrawVec3("Mie Scattering", &mieScattering);
                 env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
             }
-            if (ImGui::CollapsingHeader("Fog"))
+            if (ImGui::CollapsingHeader("Bloom", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::DragFloat("Threshold", &env->BloomThreshold, 0.01f, 0.0f, 300.0f);
+                ImGui::DragFloat("Blur", &env->BloomBlurAmount, 0.01f, 0.0f, 300.0f);
+               
+            }
+            if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::DragFloat("Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);

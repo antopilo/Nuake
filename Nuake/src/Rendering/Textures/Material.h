@@ -47,11 +47,11 @@ namespace Nuake
 			0, // Padding byte
 			Vector3(0.f, 0.f, 0.f),	// Albedo color
 			0,						// Has metalness 
-			0.5f,					// Metalness value
+			0.f,					// Metalness value
 			0,						// u_HasRoughness
-			0.5f,					// u_RoughnessValue
+			1.f,					// u_RoughnessValue
 			0,						// u_HasAO
-			0.5f,					// u_AOValue
+			1.f,					// u_AOValue
 			0,						// u_HasNormal
 			0,						// u_HasDisplacement
 			0

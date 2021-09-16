@@ -36,17 +36,25 @@ namespace Nuake
 			std::cout << "Error: failed to load texture: " << path << std::endl;
 	}
 
-	Texture::Texture(glm::vec2 size, GLenum format)
+	Texture::Texture(glm::vec2 size, GLenum format, GLenum format2, GLenum format3)
 	{
 		m_RendererId = 0;
 		m_Format = format;
+
+		m_Format2 = format;
+		if (format2 != 0)
+			m_Format2 = format2;
+
+		m_Format3 = GL_UNSIGNED_BYTE;
+		if (format3 != 0)
+			m_Format3 = format3;
 
 		m_Width = size.x;
 		m_Height = size.y;
 
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0, format, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, format2, size.x, size.y, 0, format, format3, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		//glGenerateMipmap(GL_TEXTURE_2D);
@@ -103,7 +111,7 @@ namespace Nuake
 		m_Height = size.y;
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, m_Format, size.x, size.y, 0, m_Format, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, m_Format2, size.x, size.y, 0, m_Format, m_Format3, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}

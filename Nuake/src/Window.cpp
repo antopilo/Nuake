@@ -19,8 +19,11 @@
 #include "Resource/FontAwesome5.h"
 #include "Engine.h"
 #include <src/Scene/Components/InterfaceComponent.h>
+#include "src/Rendering/PostFX/Bloom.h"
 
 namespace Nuake {
+
+    Bloom bloom;
     // TODO: Use abstraction for vertex buffers
     unsigned int vbo;
     unsigned int vao;
@@ -96,7 +99,6 @@ namespace Nuake {
         return Vector2(w, h);
     }
 
-
     int Window::Init()
     {
         if (!glfwInit())
@@ -105,43 +107,43 @@ namespace Nuake {
             return -1;
         }
 
-        // Create window
-        m_Window = glfwCreateWindow(m_Width, m_Height, "Nuake - Dev build", NULL, NULL);
+        { // Create window
+            m_Window = glfwCreateWindow(m_Width, m_Height, "Nuake - Dev build", NULL, NULL);
+            if (!m_Window)
+            {
+                Logger::Log("Window creation failed.", CRITICAL);
+                return -1;
+            }
 
-        if (!m_Window)
-        {
-            Logger::Log("Window creation failed.", CRITICAL);
-            return -1;
+            glfwMakeContextCurrent(m_Window);
+
+            Logger::Log((char*)glGetString(GL_VERSION));
+
+            if (glewInit() != GLEW_OK)
+            {
+                Logger::Log("GLEW initialization failed!", CRITICAL);
+                return -1;
+            }
+
+            // TODO: Move this to renderer init. The window shouldnt have to do gl calls.
+            glfwWindowHint(GLFW_SAMPLES, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+            // TODO: have clear color in environnement.
+            glClearColor(0.f, 0.f, 0.f, 1.0f);
+
+            glfwSwapInterval(1);
+            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_MULTISAMPLE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            //glEnable(GL_CULL_FACE);
         }
-
-        glfwMakeContextCurrent(m_Window);
-
-        Logger::Log((char*)glGetString(GL_VERSION));
-
-        if (glewInit() != GLEW_OK)
-        {
-            Logger::Log("GLEW initialization failed!", CRITICAL);
-            return -1;
-        }
-
-        // TODO: Move this to renderer init. The window shouldnt have to do gl calls.
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        // TODO: have clear color in environnement.
-        glClearColor(0.019f, 0.501f, 1.0f, 1.0f);
-
-        glfwSwapInterval(1);
-        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_MULTISAMPLE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        //glEnable(GL_CULL_FACE);
 
         // Create viewports
         m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080));
@@ -154,86 +156,78 @@ namespace Nuake {
         m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
 
         m_DeferredBuffer = CreateRef<FrameBuffer>(true, Vector2(1920, 1080));
-        m_DeferredBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB));
+        m_DeferredBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB, GL_RGB16F, GL_FLOAT));
 
-        // Temporary quad vbo for deferred.
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        m_BloomFrameBuffer = CreateRef<FrameBuffer>(false, Vector2(1920, 1080));
+        m_BloomFrameBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGBA, GL_RGBA16F, GL_FLOAT));
+       
+        bloom = Bloom(m_DeferredBuffer->GetTexture(), 5);
 
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        {
+            ImGui::CreateContext();
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
+            //io.Fonts->AddFontDefault();
+            io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 16.0);
+            io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+            ImGui::StyleColorsDark();
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            ImGui::GetStyle().FrameRounding = 2.0f;
+            ImGui::GetStyle().GrabRounding = 2.0f;
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)0);
-        glEnableVertexAttribArray(0);
+            ImVec4* colors = ImGui::GetStyle().Colors;
+            colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
+            colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
+            colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
+            colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
+            colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+            colors[ImGuiCol_Border] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
+            colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+            colors[ImGuiCol_FrameBg] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
+            colors[ImGuiCol_FrameBgHovered] = ImVec4(0.12f, 0.20f, 0.28f, 1.00f);
+            colors[ImGuiCol_FrameBgActive] = ImVec4(0.09f, 0.12f, 0.14f, 1.00f);
+            colors[ImGuiCol_TitleBg] = ImVec4(0.09f, 0.12f, 0.14f, 0.65f);
+            colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
+            colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+            colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
+            colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.39f);
+            colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
+            colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.18f, 0.22f, 0.25f, 1.00f);
+            colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.09f, 0.21f, 0.31f, 1.00f);
+            colors[ImGuiCol_CheckMark] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
+            colors[ImGuiCol_SliderGrab] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
+            colors[ImGuiCol_SliderGrabActive] = ImVec4(0.37f, 0.61f, 1.00f, 1.00f);
+            colors[ImGuiCol_Button] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
+            colors[ImGuiCol_ButtonHovered] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
+            colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+            colors[ImGuiCol_Header] = ImVec4(0.20f, 0.25f, 0.29f, 0.55f);
+            colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+            colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+            colors[ImGuiCol_Separator] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
+            colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
+            colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
+            colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
+            colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+            colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+            colors[ImGuiCol_Tab] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
+            colors[ImGuiCol_TabHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
+            colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
+            colors[ImGuiCol_TabUnfocused] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
+            colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
+            colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+            colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+            colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+            colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+            colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+            colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
+            colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+            colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+            colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+            colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
-        glEnableVertexAttribArray(1);
-
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        //io.Fonts->AddFontDefault();
-        io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 16.0);
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        ImGui::StyleColorsDark();
-
-        ImGui::GetStyle().FrameRounding = 2.0f;
-        ImGui::GetStyle().GrabRounding = 2.0f;
-
-        ImVec4* colors = ImGui::GetStyle().Colors;
-        colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
-        colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
-        colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
-        colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-        colors[ImGuiCol_Border] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
-        colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-        colors[ImGuiCol_FrameBg] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_FrameBgHovered] = ImVec4(0.12f, 0.20f, 0.28f, 1.00f);
-        colors[ImGuiCol_FrameBgActive] = ImVec4(0.09f, 0.12f, 0.14f, 1.00f);
-        colors[ImGuiCol_TitleBg] = ImVec4(0.09f, 0.12f, 0.14f, 0.65f);
-        colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.10f, 0.12f, 1.00f);
-        colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
-        colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
-        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.39f);
-        colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.18f, 0.22f, 0.25f, 1.00f);
-        colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.09f, 0.21f, 0.31f, 1.00f);
-        colors[ImGuiCol_CheckMark] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
-        colors[ImGuiCol_SliderGrab] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
-        colors[ImGuiCol_SliderGrabActive] = ImVec4(0.37f, 0.61f, 1.00f, 1.00f);
-        colors[ImGuiCol_Button] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_ButtonHovered] = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
-        colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
-        colors[ImGuiCol_Header] = ImVec4(0.20f, 0.25f, 0.29f, 0.55f);
-        colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-        colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        colors[ImGuiCol_Separator] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.40f, 0.75f, 0.78f);
-        colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
-        colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
-        colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-        colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
-        colors[ImGuiCol_Tab] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_TabHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
-        colors[ImGuiCol_TabActive] = ImVec4(0.20f, 0.25f, 0.29f, 1.00f);
-        colors[ImGuiCol_TabUnfocused] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
-        colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
-        colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
-        colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
-        colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
-        colors[ImGuiCol_TextSelectedBg] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
-        colors[ImGuiCol_DragDropTarget] = ImVec4(1.00f, 1.00f, 0.00f, 0.90f);
-        colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-        colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-        colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-        colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
-        ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-        ImGui_ImplOpenGL3_Init("#version 330");
+            ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+            ImGui_ImplOpenGL3_Init("#version 330");
+        }
+        
         return 0;
     }
 
@@ -248,6 +242,8 @@ namespace Nuake {
     {
         m_Scene->FixedUpdate(ts);
     }
+
+
 
     void Window::Draw()
     {
@@ -327,6 +323,72 @@ namespace Nuake {
             }
         }
         m_DeferredBuffer->Unbind();
+
+        bloom.Threshold = GetScene()->GetEnvironment()->BloomThreshold;
+        bloom.BlurAmount = GetScene()->GetEnvironment()->BloomBlurAmount;
+
+        bloom.Draw();
+
+
+
+       // m_BloomFrameBuffer->Bind();
+       // m_BloomFrameBuffer->Clear();
+       // m_BloomFrameBuffer->SetTexture(m_BloomTextures[0]);
+       // {
+       //    
+       //     Ref<Shader> bloomShader = ShaderManager::GetShader("resources/Shaders/bloom.shader");
+       //     bloomShader->Bind();
+       //
+       //     // Threshold 
+       //     bloomShader->SetUniform1i("u_Stage", 0);
+       //     bloomShader->SetUniform1f("u_Threshold", 0.5);
+       //     m_DeferredBuffer->GetTexture()->Bind(1);
+       //     bloomShader->SetUniform1i("u_LightingBuffer", 1);
+       //
+       //     Renderer::DrawQuad(Matrix4());
+
+            // Downsample
+
+           //m_BloomTextures.clear();
+           //const int DownsampleAmount = 4;
+           //m_BloomTextures.reserve(4);
+           //m_BloomTextures.push_back(m_BloomFrameBuffer->GetTexture());
+           //
+           //Vector2 originalSize = m_BloomFrameBuffer->GetSize();
+           //Vector2 currentSize = originalSize;
+           //for (unsigned int i = 1; i < DownsampleAmount; i++)  // # of iterations for down sample
+           //{
+           //    m_BloomFrameBuffer->Clear();
+           //    currentSize /= 2;
+           //    m_BloomTextures.push_back(m_BloomFrameBuffer->GetTexture());
+           //
+           //    m_BloomFrameBuffer->SetSize(currentSize);
+           //    m_BloomFrameBuffer->SetTexture(CreateRef<Texture>(currentSize, GL_RGB));
+           //
+           //    m_BloomFrameBuffer->Clear();
+           //    bloomShader->SetUniform1i("u_Stage", 1);
+           //    bloomShader->SetUniform1i("u_DownsamplingSource", m_BloomTextures[i - 1]->GetID());
+           //    Renderer::DrawQuad(Matrix4());
+           //
+           //    if (ImGui::Begin(("Downsample " + std::to_string(i)).c_str()))
+           //    {
+           //        ImGui::Image((void*)m_BloomTextures[i]->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+           //    }
+           //    ImGui::End();
+           //}
+
+            // Upsample
+
+
+        //}
+        //m_BloomFrameBuffer->Unbind();
+
+        //if (ImGui::Begin("Bloom"))
+        //{
+        //    ImGui::Image((void*)bloom.GetThreshold()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+        //}
+        //ImGui::End();
+
         glEnable(GL_DEPTH_TEST);
         Renderer::EndDraw();
     }

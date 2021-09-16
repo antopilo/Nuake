@@ -16,6 +16,8 @@ namespace Nuake
 		std::string m_FilePath;
 		unsigned char* m_LocalBuffer;
 		GLenum m_Format;
+		GLenum m_Format2;
+		GLenum m_Format3;
 
 		int m_Width;
 		int m_Height;
@@ -24,7 +26,7 @@ namespace Nuake
 	public:
 		Texture(const std::string& path);
 		Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t);
-		Texture(glm::vec2 size, GLenum format);
+		Texture(glm::vec2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0);
 		Texture(Vector2 size, unsigned char* data, int len);
 		~Texture();
 

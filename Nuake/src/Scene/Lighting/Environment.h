@@ -13,6 +13,9 @@ namespace Nuake
 
 		float VolumetricFog = 0.95f;
 		float VolumetricStepCount = 100.f;
+		float BloomThreshold = 0.6f;
+		float BloomBlurAmount = 12.0f;
+
 		glm::vec4 AmbientColor;
 		Ref<ProceduralSky> ProceduralSkybox;
 

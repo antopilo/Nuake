@@ -107,7 +107,8 @@ namespace Nuake {
 					wrenGetSlotDouble(vm, 2),
 					wrenGetSlotDouble(vm, 3));
 
-				wrenSetSlotDouble(vm, 0, v1.length());
+				float length = glm::length(v1);
+				wrenSetSlotDouble(vm, 0, glm::length(v1));
 			}
 		};
 	}

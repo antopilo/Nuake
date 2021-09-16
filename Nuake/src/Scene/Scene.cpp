@@ -387,7 +387,7 @@ namespace Nuake {
 		deferredShader->Bind();
 		deferredShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
 		deferredShader->SetUniformMat4f("u_View", cam->GetTransform());
-		deferredShader->SetUniform1f("u_Exposure", 1.0);
+		//deferredShader->SetUniform1f("u_Exposure", 1.0);
 
 		Vector3 camPosition = cam->GetTranslation();
 		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
@@ -442,7 +442,7 @@ namespace Nuake {
 		pbrShader->SetUniform1i("u_ShowNormal", 0);
 		if (m_EditorCamera)
 		{
-			Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
+			//Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
 			Renderer::m_Shader->SetUniform3f("u_EyePosition", m_EditorCamera->GetTranslation().x, m_EditorCamera->GetTranslation().y, m_EditorCamera->GetTranslation().z);
 			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
 			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
@@ -563,7 +563,7 @@ namespace Nuake {
 		deferredShader->Bind();
 		deferredShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
 		deferredShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-		deferredShader->SetUniform1f("u_Exposure", 1.0);
+		//deferredShader->SetUniform1f("u_Exposure", 1.0);
 
 		Vector3 camPosition = m_EditorCamera->GetTranslation();
 		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
