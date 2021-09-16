@@ -62,6 +62,9 @@ namespace Nuake {
 
 		bool Deserialize(const std::string& str)
 		{
+			if (str == "")
+				return false;
+
 			BEGIN_DESERIALIZE();
 			Path = j["Path"];
 			if (j.contains("Entities"))

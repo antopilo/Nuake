@@ -13,13 +13,14 @@ include "Nuake/dependencies/glfw_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/bullet_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
+include "Nuake/dependencies/soloud_p5.lua"
 
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
     language "C++"
     
-    defines 
+    defines
     {
         "BT_THREADSAFE=1",
         "BT_USE_DOUBLE_PRECISION",
@@ -60,7 +61,8 @@ project "Nuake"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-        "%{prj.name}/../Nuake/src/Vendors/wren/src/include"
+        "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
+		"%(prj.name}/../Nuake/Dependencies/soloud/include"
     }
 
     links
@@ -90,6 +92,7 @@ project "Editor"
     
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	debugdir ("%{prj.name}")
 
     files
     {
@@ -131,7 +134,8 @@ project "Editor"
         "BulletCollision",
         "BulletDynamics",
         "LinearMath",
-		"Freetype"
+		"Freetype",
+		"SoloudStatic"
     }
 
     filter "system:windows"

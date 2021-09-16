@@ -426,8 +426,8 @@ namespace Nuake {
                     //if (ImGui::BeginPopupContextItem())
                     //    ImGui::EndPopup();
                 }
-                ImGui::EndChild();
             }
+			ImGui::EndChild();
             
             if (ImGui::BeginDragDropTarget()) // Drag n drop new prefab file into scene tree
             {
