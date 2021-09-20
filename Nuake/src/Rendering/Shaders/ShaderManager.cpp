@@ -3,15 +3,16 @@
 
 namespace Nuake
 {
-	std::map<std::string, Ref<Shader>> ShaderManager::m_Shaders = std::map<std::string, Ref<Shader>>();
+	std::map<std::string, Scope<Shader>> ShaderManager::m_Shaders = std::map<std::string, Scope<Shader>>();
 
-	Ref<Shader> ShaderManager::GetShader(const std::string& path)
+	Shader* ShaderManager::GetShader(const std::string& path)
 	{
 		if (m_Shaders.find(path) == m_Shaders.end())
 		{
-			m_Shaders[path] = CreateRef<Shader>(path);
+			m_Shaders[path] = CreateScope<Shader>(path);
 		}
 
-		return m_Shaders[path];
+
+		return m_Shaders[path].get();
 	}
 }

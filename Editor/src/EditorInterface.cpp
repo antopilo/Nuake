@@ -22,6 +22,7 @@
 
 #include "Dependencies/GLEW/include/GL/glew.h"
 
+#include "src/Scene/Scene.h"
 #include "src/Scene/Components/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/LuaScriptComponent.h"
@@ -70,12 +71,9 @@ namespace Nuake {
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
             Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
-            Ref<FrameBuffer> framebuffer = Engine::GetCurrentWindow()->GetDeferredBuffer();
+            Ref<FrameBuffer> framebuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
             if (framebuffer->GetSize() != viewportPanelSize)
-            {
-                Engine::GetCurrentWindow()->GetGBuffer()->QueueResize(viewportPanelSize);
                 framebuffer->QueueResize(viewportPanelSize);
-            }
 
             Ref<Texture> texture = framebuffer->GetTexture();
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
@@ -341,7 +339,7 @@ namespace Nuake {
 
         if (ImGui::Begin("Environnement"))
         {
-            Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
+            const Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
             if (ImGui::CollapsingHeader("Procedural Sky", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::DragFloat("Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f);
@@ -356,16 +354,23 @@ namespace Nuake {
             }
             if (ImGui::CollapsingHeader("Bloom", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                ImGui::DragFloat("Threshold", &env->BloomThreshold, 0.01f, 0.0f, 300.0f);
-                ImGui::DragFloat("Blur", &env->BloomBlurAmount, 0.01f, 0.0f, 300.0f);
-               
+                float threshold = env->mBloom->GetThreshold();
+                ImGui::DragFloat("Threshold", &threshold, 0.01f, 0.0f, 500.0f);
+                env->mBloom->SetThreshold(threshold);
+
+                int iteration = env->mBloom->GetIteration();
+                ImGui::DragInt("Iteration", &iteration, 1.0f, 0, 8);
+                env->mBloom->SetIteration(iteration);
             }
             if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 ImGui::DragFloat("Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
             }
-
+            if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::DragFloat("Exposure", &Engine::GetCurrentScene()->m_EditorCamera->Exposure, .01f, 0.0f, 5.0f);
+            }
         }
         ImGui::End();
 
@@ -1515,10 +1520,6 @@ namespace Nuake {
             }
             if (ImGui::BeginMenu("View"))
             {
-                if (ImGui::MenuItem("Reload Interfaces", NULL))
-                {
-                    Engine::GetCurrentScene()->ReloadInterfaces();
-                }
                 if (ImGui::MenuItem("Lighting", NULL, true)) {}
                 if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
                     m_DrawGrid = !m_DrawGrid;

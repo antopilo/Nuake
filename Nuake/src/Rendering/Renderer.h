@@ -43,14 +43,14 @@ namespace Nuake
 		static VertexArray* Renderer::CubeVertexArray;
 		static VertexBuffer* Renderer::CubeVertexBuffer;
 
-		static Ref<Shader> m_Shader;
-		static Ref<Shader> m_ShadowmapShader;
-		static Ref<Shader> m_SkyboxShader;
-		static Ref<Shader> m_BRDShader;
-		static Ref<Shader> m_GBufferShader;
-		static Ref<Shader> m_DeferredShader;
-		static Ref<Shader> m_ProceduralSkyShader;
-		static Ref<Shader> m_DebugShader;
+		static Shader* m_Shader;
+		static Shader* m_ShadowmapShader;
+		static Shader* m_SkyboxShader;
+		static Shader* m_BRDShader;
+		static Shader* m_GBufferShader;
+		static Shader* m_DeferredShader;
+		static Shader* m_ProceduralSkyShader;
+		static Shader* m_DebugShader;
 
 		static Ref<UniformBuffer> m_LightsUniformBuffer;
 
@@ -59,7 +59,7 @@ namespace Nuake
 
 		static void BeginScene();
 		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform);
-		static void Flush(Ref<Shader> shader, bool depthOnly = false);
+		static void Flush(Shader* shader, bool depthOnly = false);
 
 		// Drawing states
 		static void BeginDraw(Ref<Camera> camera);
@@ -76,6 +76,6 @@ namespace Nuake
 		static void DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
 		static void DrawCube(TransformComponent transform, glm::vec4 color);
 		static void DrawSphere(TransformComponent transform, glm::vec4 color);
-		static void DrawQuad(Matrix4 transform);
+		static void DrawQuad(Matrix4 transform = Matrix4());
 	};
 }

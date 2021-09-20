@@ -2,6 +2,16 @@
 #include "GL/glew.h"
 
 namespace Nuake {
+	void OGLRendererAPI::Enable(const RendererEnum enumType)
+	{
+		glEnable(GetType(enumType));
+	}
+
+	void OGLRendererAPI::Disable(const RendererEnum enumType)
+	{
+		glDisable(GetType(enumType));
+	}
+
 	void OGLRendererAPI::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -86,6 +96,8 @@ namespace Nuake {
 			case RendererEnum::INT: return GL_INT;
 			case RendererEnum::UINT: return GL_UNSIGNED_INT;
 			case RendererEnum::TRIANGLES: return GL_TRIANGLES;
+			case RendererEnum::DEPTH_TEST: return GL_DEPTH_TEST;
+			case RendererEnum::FACE_CULL: return GL_CULL_FACE;
 		}
 
 		return 0;

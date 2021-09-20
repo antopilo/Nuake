@@ -19,6 +19,16 @@ namespace Nuake {
 		sRendererAPI->SetClearColor(color);
 	}
 
+	void RenderCommand::Enable(const RendererEnum enumType)
+	{
+		sRendererAPI->Enable(enumType);
+	}
+
+	void RenderCommand::Disable(const RendererEnum enumType)
+	{
+		sRendererAPI->Disable(enumType);
+	}
+
 	void RenderCommand::GenBuffer(unsigned int& bufferID)
 	{
 		sRendererAPI->GenBuffer(bufferID);

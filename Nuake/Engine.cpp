@@ -48,26 +48,22 @@ namespace Nuake
 		m_LastFrameTime = m_Time;
 
 		// Dont update if no scene is loaded.
-		if (CurrentWindow->GetScene())
-		{
+		if (CurrentWindow->GetScene()) {
 			CurrentWindow->Update(timestep);
+
 			// Play mode update all the entities, Editor does not.
-			if (Engine::IsPlayMode)
-			{
-				
+			if (Engine::IsPlayMode) {
 				m_FixedUpdateDifference += timestep;
 
 				// Fixed update
-				if (m_FixedUpdateDifference >= m_FixedUpdateRate)
-				{
-					CurrentWindow->FixedUpdate(m_FixedUpdateRate);
-					m_FixedUpdateDifference = 0.f;
+				if (m_FixedUpdateDifference >= m_FixedUpdateRate) {
+					CurrentWindow->FixedUpdate(m_FixedUpdateDifference);
+
+					m_FixedUpdateDifference -= m_FixedUpdateRate;
 				}
 			}
 			else
-			{
 				GetCurrentScene()->EditorUpdate(timestep);
-			}
 		}
 
 		Input::Update();

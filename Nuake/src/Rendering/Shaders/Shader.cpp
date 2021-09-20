@@ -1,9 +1,9 @@
 #pragma once
+#include "src/Core/Core.h"
 #include "Shader.h"
 #include <sstream>
 #include <GL\glew.h>
 
-#define ASSERT(x) if (!(x)) assert(false)
 
 namespace Nuake
 {
@@ -146,6 +146,22 @@ namespace Nuake
 	}
 
 	// Uniforms
+
+	void Shader::SetUniformVec4(const std::string& name, Vector4 vec)
+	{
+		SetUniform4f(name, vec.x, vec.y, vec.z, vec.w);
+	}
+
+	void Shader::SetUniformVec3(const std::string& name, Vector3 vec)
+	{
+		SetUniform3f(name, vec.x, vec.y, vec.z);
+	}
+
+	void Shader::SetUniformVec2(const std::string& name, Vector2 vec)
+	{
+		SetUniform2f(name, vec.x, vec.y);
+	}
+
 	void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) 
 	{
 		int addr = FindUniformLocation(name);
@@ -167,7 +183,7 @@ namespace Nuake
 		glUniform2f(addr, v0, v1);
 	}
 
-	void Shader::SetUniform1i(const std::string& name, int v0) 
+	void Shader::SetUniform1i(const std::string& name, int v0)
 	{
 		int addr = FindUniformLocation(name);
 		ASSERT(addr != -1);
@@ -181,14 +197,14 @@ namespace Nuake
 		glUniform1iv(addr, size, value);
 	}
 
-	void Shader::SetUniformMat3f(const std::string& name, glm::mat3 mat)
+	void Shader::SetUniformMat3f(const std::string& name, Matrix3 mat)
 	{
 		int addr = FindUniformLocation(name);
 		ASSERT(addr != -1);
 		glUniformMatrix3fv(addr, 1, GL_FALSE, &mat[0][0]);
 	}
 
-	void Shader::SetUniformMat4f(const std::string& name, glm::mat4 mat)
+	void Shader::SetUniformMat4f(const std::string& name, Matrix4 mat)
 	{
 		int addr = FindUniformLocation(name);
 		ASSERT(addr != -1);
@@ -200,5 +216,12 @@ namespace Nuake
 		int addr = FindUniformLocation(name);
 		ASSERT(addr != -1);
 		glUniform1f(addr, v0);
+	}
+
+	void Shader::SetUniformTex(const std::string& name, Texture* texture, unsigned int slot)
+	{
+		ASSERT(texture != nullptr);
+		SetUniform1i(name, slot);
+		texture->Bind(slot);
 	}
 }

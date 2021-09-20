@@ -15,6 +15,8 @@ namespace Nuake {
 		static void Clear();
 		static void SetClearColor(const Color& color);
 
+		static void Enable(const RendererEnum enumType);
+		static void Disable(const RendererEnum enumType);
 		static void GenBuffer(unsigned int& bufferID);
 		static void BindBuffer(const RendererEnum bufferType, const unsigned int& bufferID);
 		static void SetBufferData(const RendererEnum bufferType, const void* data, unsigned int size);

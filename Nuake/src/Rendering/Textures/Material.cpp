@@ -84,7 +84,7 @@ namespace Nuake
 
 	Material::~Material() {}
 
-	void Material::Bind(Ref<Shader> shader)
+	void Material::Bind(Shader* shader)
 	{
 		//if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
 		//	return;

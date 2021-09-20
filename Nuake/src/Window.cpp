@@ -22,8 +22,6 @@
 #include "src/Rendering/PostFX/Bloom.h"
 
 namespace Nuake {
-
-    Bloom bloom;
     // TODO: Use abstraction for vertex buffers
     unsigned int vbo;
     unsigned int vao;
@@ -80,16 +78,6 @@ namespace Nuake {
     Ref<FrameBuffer> Window::GetFrameBuffer() const
     {
         return m_Framebuffer;
-    }
-
-    Ref<FrameBuffer> Window::GetGBuffer() const
-    {
-        return m_GBuffer;
-    }
-
-    Ref<FrameBuffer> Window::GetDeferredBuffer() const
-    {
-        return m_DeferredBuffer;
     }
 
     Vector2 Window::GetSize()
@@ -149,19 +137,8 @@ namespace Nuake {
         m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080));
         m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(1920, 1080), GL_RGB));
 
-        m_GBuffer = CreateRef<FrameBuffer>(false, Vector2(1920, 1080));
-        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
-        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
-        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT1);
-        m_GBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
-
-        m_DeferredBuffer = CreateRef<FrameBuffer>(true, Vector2(1920, 1080));
-        m_DeferredBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB, GL_RGB16F, GL_FLOAT));
-
-        m_BloomFrameBuffer = CreateRef<FrameBuffer>(false, Vector2(1920, 1080));
-        m_BloomFrameBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGBA, GL_RGBA16F, GL_FLOAT));
        
-        bloom = Bloom(m_DeferredBuffer->GetTexture(), 5);
+     
 
         {
             ImGui::CreateContext();
@@ -258,76 +235,70 @@ namespace Nuake {
 
         Vector2 size = m_Framebuffer->GetSize();
         cam->AspectRatio = size.x / size.y;
+        m_Scene->m_EditorCamera->OnWindowResize(size.x, size.y);
 
-        //Renderer::BeginDraw(cam);
-
-        m_Scene->DrawShadows();
-
-       //m_Framebuffer->Bind();
-       //m_Framebuffer->Clear();
-       //{
-       //    if (Engine::IsPlayMode)
-       //        m_Scene->Draw();
-       //    //else
-       //    //    m_Scene->EditorDraw();
-       //
-       //    m_Scene->DrawInterface(m_Framebuffer->GetSize());
-       //}
-       //m_Framebuffer->Unbind();
-
-
-        m_Scene->m_EditorCamera->OnWindowResize(m_GBuffer->GetSize().x, m_GBuffer->GetSize().y);
-        m_GBuffer->Bind();
-        m_GBuffer->Clear();
+        if (Engine::IsPlayMode)
         {
-            if (Engine::IsPlayMode)
-                m_Scene->DrawDeferred();
-            else
-                m_Scene->EditorDrawDeferred();
+            m_Scene->Draw(*m_Framebuffer.get());
         }
-        
-        m_GBuffer->Unbind();
-
-        m_DeferredBuffer->Bind();
-        m_DeferredBuffer->Clear();
+        else
         {
-            glDisable(GL_CULL_FACE);
-
-            if (Engine::IsPlayMode)
-                m_Scene->DrawDeferredShading();
-            else
-                m_Scene->EditorDrawDeferredShading();
-
-            m_GBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
-            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
-            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
-            m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
-
-            glDisable(GL_CULL_FACE);
-
-            Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
-            deferredShader->Bind();
-            deferredShader->SetUniform1i("m_Depth", 5);
-            deferredShader->SetUniform1i("m_Albedo", 6);
-            deferredShader->SetUniform1i("m_Normal", 7);
-            deferredShader->SetUniform1i("m_Material", 8);
-
-            Renderer::DrawQuad(Matrix4());
-
-            auto interfaceView = m_Scene->m_Registry.view<InterfaceComponent>();
-            for (auto i : interfaceView)
-            {
-                InterfaceComponent& uInterface = interfaceView.get<InterfaceComponent>(i);
-                if (uInterface.Interface)
-                    uInterface.Interface->Draw(m_DeferredBuffer->GetSize());
-            }
+            m_Scene->Draw(*m_Framebuffer.get(), m_Scene->m_EditorCamera->GetPerspective(), m_Scene->m_EditorCamera->GetTransform());
         }
-        m_DeferredBuffer->Unbind();
 
-        bloom.Threshold = GetScene()->GetEnvironment()->BloomThreshold;
-        bloom.BlurAmount = GetScene()->GetEnvironment()->BloomBlurAmount;
 
-        bloom.Draw();
+       
+        //m_GBuffer->Bind();
+        //m_GBuffer->Clear();
+        //{
+        //    if (Engine::IsPlayMode)
+        //        m_Scene->DrawDeferred();
+        //    else
+        //        m_Scene->EditorDrawDeferred();
+        //}
+        //
+        //m_GBuffer->Unbind();
+        //
+        //m_DeferredBuffer->Bind();
+        //m_DeferredBuffer->Clear();
+        //{
+        //    glDisable(GL_CULL_FACE);
+        //
+        //    if (Engine::IsPlayMode)
+        //        m_Scene->DrawDeferredShading();
+        //    else
+        //        m_Scene->EditorDrawDeferredShading();
+        //
+        //    m_GBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+        //    m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
+        //    m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
+        //    m_GBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
+        //
+        //    glDisable(GL_CULL_FACE);
+        //
+        //    Shader* deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        //    deferredShader->Bind();
+        //    deferredShader->SetUniform1i("m_Depth", 5);
+        //    deferredShader->SetUniform1i("m_Albedo", 6);
+        //    deferredShader->SetUniform1i("m_Normal", 7);
+        //    deferredShader->SetUniform1i("m_Material", 8);
+        //
+        //    Renderer::DrawQuad(Matrix4());
+        //
+        //    auto interfaceView = m_Scene->m_Registry.view<InterfaceComponent>();
+        //    for (auto i : interfaceView)
+        //    {
+        //        InterfaceComponent& uInterface = interfaceView.get<InterfaceComponent>(i);
+        //        if (uInterface.Interface)
+        //            uInterface.Interface->Draw(m_DeferredBuffer->GetSize());
+        //    }
+        //}
+        //m_DeferredBuffer->Unbind();
+        //
+        //bloom.Threshold = GetScene()->GetEnvironment()->BloomThreshold;
+        //bloom.BlurAmount = GetScene()->GetEnvironment()->BloomBlurAmount;
+        //
+        //bloom.Draw();
 
 
 

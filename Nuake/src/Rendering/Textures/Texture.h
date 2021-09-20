@@ -42,5 +42,6 @@ namespace Nuake
 		inline std::string GetPath() { return m_FilePath; }
 		inline int GetWidth() const { return m_Width; }
 		inline int GetHeight() const { return m_Height; }
+		inline Vector2 GetSize() const { return Vector2(m_Width, m_Height); }
 	};
 }

@@ -8,6 +8,9 @@ namespace Nuake {
 	public:
 		OGLRendererAPI() {};
 
+		void Enable(const RendererEnum enumType) override;
+		void Disable(const RendererEnum enumType) override;
+
 		void Clear() override;
 		void SetClearColor(const Color& color) override;
 

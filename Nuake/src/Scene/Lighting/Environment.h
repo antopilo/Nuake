@@ -3,6 +3,9 @@
 #include "src/Core/Core.h"
 #include "src/Scene/Environment/ProceduralSky.h"
 #include "src/Resource/Serializable.h"
+#include "src/Rendering/PostFX/Bloom.h"
+
+#include <vector>
 
 namespace Nuake
 {
@@ -10,11 +13,12 @@ namespace Nuake
 	{
 	public:
 		Environment();
+		float VolumetricFog = 0.90f;
+		float VolumetricStepCount = 50.f;
 
-		float VolumetricFog = 0.95f;
-		float VolumetricStepCount = 100.f;
-		float BloomThreshold = 0.6f;
-		float BloomBlurAmount = 12.0f;
+		Scope<Bloom> mBloom;
+
+		Vector3 ClearColor;
 
 		glm::vec4 AmbientColor;
 		Ref<ProceduralSky> ProceduralSkybox;

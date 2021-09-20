@@ -34,45 +34,35 @@ namespace Nuake
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	}
 
-	void ProceduralSky::Draw(Ref<Camera> cam) {
+	void ProceduralSky::Draw(Matrix4 projection, Matrix4 view) {
+		Shader* skyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
+		skyShader->Bind();
+		skyShader->SetUniform1f("SurfaceRadius", SurfaceRadius);
+		skyShader->SetUniform1f("AtmosphereRadius", AtmosphereRadius);
+		skyShader->SetUniform1f("SunIntensity", SunIntensity);
 
-		glm::vec3 CameraDirection = cam->GetDirection();
-
-		Renderer::m_ProceduralSkyShader->Bind();
-		Renderer::m_ProceduralSkyShader->SetUniform1f("SurfaceRadius", SurfaceRadius);
-		Renderer::m_ProceduralSkyShader->SetUniform1f("AtmosphereRadius", AtmosphereRadius);
-		Renderer::m_ProceduralSkyShader->SetUniform1f("SunIntensity", SunIntensity);
-
-		Renderer::m_ProceduralSkyShader->SetUniform3f("RayleighScattering",
+		skyShader->SetUniform3f("RayleighScattering",
 			RayleighScattering.r,
 			RayleighScattering.g,
 			RayleighScattering.b);
 
-		Renderer::m_ProceduralSkyShader->SetUniform3f("MieScattering",
+		skyShader->SetUniform3f("MieScattering",
 			MieScattering.r,
 			MieScattering.g,
 			MieScattering.b);
 
-		Renderer::m_ProceduralSkyShader->SetUniform3f("CenterPoint",
+		skyShader->SetUniform3f("CenterPoint",
 			CenterPoint.x,
 			CenterPoint.y,
 			CenterPoint.z);
 
-		Renderer::m_ProceduralSkyShader->SetUniform3f("SunDirection",
+		skyShader->SetUniform3f("SunDirection",
 			SunDirection.x,
 			SunDirection.y,
 			SunDirection.z);
 
-		Renderer::m_ProceduralSkyShader->SetUniform1f("u_Exposure", cam->Exposure);
-
-		//Renderer::m_ProceduralSkyShader->SetUniform3f("CamDirection",
-		//	CameraDirection.x,
-		//	CameraDirection.y,
-		//	CameraDirection.z);
-
-
-		Renderer::m_ProceduralSkyShader->SetUniformMat4f("InvProjection", cam->GetPerspective());
-		Renderer::m_ProceduralSkyShader->SetUniformMat4f("InvView", cam->GetTransformRotation());
+		skyShader->SetUniformMat4f("Projection", projection);
+		skyShader->SetUniformMat4f("View", view);
 		//glm::vec3 CamRight = cam->cameraRight;
 		//Renderer::m_ProceduralSkyShader->SetUniform3f("CamRight",
 		//	CamRight.x,

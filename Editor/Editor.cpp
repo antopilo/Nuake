@@ -55,8 +55,8 @@ int main()
     // Register Gizmo textures
     Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
     Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
-    Ref<Nuake::Shader> GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
-    Ref<Nuake::Shader> ditherShader = Nuake::ShaderManager::GetShader("resources/Shaders/dither.shader");
+       Nuake::Shader* GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
+       Nuake::Shader* ditherShader = Nuake::ShaderManager::GetShader("resources/Shaders/dither.shader");
 
     //Nuake::NewEditor newEditor = Nuake::NewEditor();
     

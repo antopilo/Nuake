@@ -13,8 +13,8 @@ namespace Nuake
 		static unsigned int VAO;
 		static unsigned int VBO;
 	public:
-		static Ref<Shader> UIShader;
-		static Ref<Shader> TextShader;
+		static Shader* UIShader;
+		static Shader* TextShader;
 		static Matrix4 Projection;
 
 		static void Init();

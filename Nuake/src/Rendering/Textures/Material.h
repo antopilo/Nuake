@@ -70,7 +70,7 @@ namespace Nuake
 
 		~Material();
 
-		void Bind(Ref<Shader> shader);
+		void Bind(Shader* shader);
 
 		void SetupUniformBuffer();
 

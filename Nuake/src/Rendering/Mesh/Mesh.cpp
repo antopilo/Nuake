@@ -55,7 +55,7 @@ namespace Nuake
         m_VertexArray->Unbind();
     }
 
-    void Mesh::Draw(Ref<Shader> shader, bool bindMaterial)
+    void Mesh::Draw(Shader* shader, bool bindMaterial)
     {
         if (bindMaterial)
             m_Material->Bind(shader);

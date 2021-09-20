@@ -151,9 +151,9 @@ void main()
 
         vec3 color = outputColor.rgb;
 
-        color = acesOperator(color);
+        //color = acesOperator(color);
 
-        color = color / (color + vec3(1.0));
+        color = color / (color + vec3(2.0));
         color = vec3(1.0) - exp(-color * 1.0);
         color = pow(color, vec3(1.0 / 2.2));
 

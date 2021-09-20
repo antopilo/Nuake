@@ -5,13 +5,13 @@
 #include <src/Vendors/glm/ext/vector_float2.hpp>
 #include <src/Vendors/glm/ext/matrix_float4x4.hpp>
 
-
-
 namespace Nuake
 {
+	// Type definitions
 	using Vector3 = glm::vec3;
 	using Vector2 = glm::vec2;
 	using Vector4 = glm::vec4;
 	using Color = glm::vec4;
 	using Matrix4 = glm::mat4;
+	using Matrix3 = glm::mat3;
 }

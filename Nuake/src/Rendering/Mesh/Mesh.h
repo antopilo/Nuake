@@ -21,7 +21,7 @@ namespace Nuake
 		
 		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Ref<Material> material);
 
-		void Draw(Ref<Shader> shader, bool bindMaterial = true);
+		void Draw(Shader* shader, bool bindMaterial = true);
 		void DebugDraw();
 		
 		inline AABB GetAABB() const { return m_AABB; }

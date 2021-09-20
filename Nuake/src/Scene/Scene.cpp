@@ -3,6 +3,8 @@
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
+
+#include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
 #include "Entities/Entity.h"
 
@@ -38,15 +40,18 @@ namespace Nuake {
 		m_Systems = std::vector<Ref<System>>();
 		m_EditorCamera = CreateRef<EditorCamera>();
 		m_Environement = CreateRef<Environment>();
-		m_Interfaces = std::vector<Ref<UI::UserInterface>>();
 
 		// Adding systems - Order is important
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+
+		mSceneRenderer = new SceneRenderer();
+		mSceneRenderer->Init();
 	}
 
-	Scene::~Scene() {}
+	Scene::~Scene() {
+	}
 
 	std::string Scene::GetName()
 	{
@@ -108,215 +113,11 @@ namespace Nuake {
 
 	void Scene::EditorUpdate(Timestep ts)
 	{
-		UpdatePositions();
-
 		m_EditorCamera->Update(ts);
-
-		for (auto i : m_Interfaces)
-			i->Update(ts);
 	}
 
-	void Scene::UpdatePositions()
+	void Scene::Draw(FrameBuffer& framebuffer)
 	{
-		auto transformView = m_Registry.view<ParentComponent, TransformComponent>();
-		for (auto e : transformView) 
-		{
-			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
-			Entity currentParent = Entity{ e, this };
-			Vector3 globalPos = Vector3();
-			if (parent.HasParent)
-			{
-				while (currentParent.GetComponent<ParentComponent>().HasParent) 
-				{
-					currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-					globalPos += currentParent.GetComponent<TransformComponent>().Translation;
-				}
-
-				transform.GlobalTranslation = globalPos + transform.Translation;
-			}
-			else
-			{
-				transform.GlobalTranslation = transform.Translation;
-			}
-		}
-	}
-
-	struct BSPDrawObject
-	{
-		float distance;
-		BSPBrushComponent brush;
-		Matrix4 transform;
-	};
-
-	bool DepthSort(BSPDrawObject& one, BSPDrawObject& two)
-	{
-		return one.distance < two.distance;
-	}
-
-	void Scene::DrawShadows()
-	{
-		glEnable(GL_DEPTH_TEST);
-		auto meshView = m_Registry.view<TransformComponent, MeshComponent>();
-		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
-		auto view = m_Registry.view<TransformComponent, LightComponent>();
-
-		Ref<Camera> cam = m_EditorCamera;
-		//if (Engine::IsPlayMode) 
-		//{
-		//	auto view = m_Registry.view<TransformComponent, CameraComponent>();
-		//	for (auto e : view) 
-		//	{
-		//		auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-		//		cam = camera.CameraInstance;
-		//		break;
-		//	}
-		//}
-
-		Ref<Shader> shadowShader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
-		shadowShader->Bind();
-
-		glCullFace(GL_BACK);
-
-		// Build a list of mesh to draw.
-		for (auto l : view) 
-		{
-			auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);
-			if (light.Type != LightType::Directional || !light.CastShadows)
-				continue;
-
-			light.CalculateViewProjection(cam->GetTransform(), cam->GetPerspective());
-			
-			for (int i = 0; i < CSM_AMOUNT; i++)
-			{
-				light.m_Framebuffers[i]->Bind();
-				light.m_Framebuffers[i]->Clear();
-				
-				Frustum lightFrustum = Frustum(light.mViewProjections[i]);
-				shadowShader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
-				
-				for (auto e : meshView)
-				{
-					auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
-					for(auto& m : mesh.meshes)
-						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-				}
-
-				auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent>();
-				for (auto e : quakeView) 
-				{
-					auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
-
-					if (model.IsTransparent)
-						continue;
-
-					for (Ref<Mesh>& m : model.Meshes)
-					{
-						AABB modelAABB = m->GetAABB();
-						modelAABB.Transform(transform.GetGlobalTransform());
-
-						bool isInFrustum = lightFrustum.IsBoxVisible(modelAABB.Min, modelAABB.Max);
-						if (isInFrustum)
-							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-					}
-				}
-
-				Renderer::Flush(shadowShader, true);
-				light.m_Framebuffers[i]->Unbind();
-			}
-		}
-	}
-
-	void Scene::DrawInterface(Vector2 screensize)
-	{
-		for (auto i : m_Interfaces)
-			i->Draw(screensize);
-	}
-
-	void Scene::Draw()
-	{
-		// Find the camera of the scene.
-		Ref<Camera> cam = nullptr;
-		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
-			for (auto e : view) {
-				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
-				cam = camera.CameraInstance;
-				cam->Translation = transform.GlobalTranslation;
-				break;
-			}
-		}
-
-		Ref<Shader> pbrShader = ShaderManager::GetShader("resources/Shaders/pbr.shader");
-
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-		Ref<Environment> env = GetEnvironment();
-		if (env->ProceduralSkybox)
-			env->ProceduralSkybox->Draw(cam);
-
-		pbrShader->Bind();
-		env->Push();
-
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-
-		// Register the lights
-		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
-		for (auto l : view) 
-		{
-			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-
-			if (light.SyncDirectionWithSky)
-				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
-
-			Renderer::RegisterLight(transform, light);
-		}
-
-		pbrShader->SetUniform3f("u_EyePosition", cam->GetTranslation().x, cam->GetTranslation().y, cam->GetTranslation().z);
-		pbrShader->SetUniform1i("u_ShowNormal", 0);
-
-		
-		if (cam)
-		{
-			pbrShader->SetUniform1f("u_Exposure", cam->Exposure);
-			pbrShader->SetUniformMat4f("u_View", cam->GetTransform());
-			pbrShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-
-			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-			for (auto e : view)
-			{
-				auto [transform, model, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-				for (auto& m : model.meshes)
-					Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-			}
-
-			glCullFace(GL_BACK);
-			Renderer::Flush(pbrShader);
-			glCullFace(GL_FRONT);
-
-			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-			for (auto e : quakeView)
-			{
-				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-				if (model.IsTransparent)
-					continue;
-
-				for (auto& b : model.Meshes)
-				{
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
-				}
-			}
-
-			Renderer::Flush(pbrShader);
-
-			PhysicsManager::Get()->DrawDebug();
-		}
-	}
-
-	void Scene::DrawDeferred()
-	{
-		glEnable(GL_DEPTH_TEST);
-
 		Ref<Camera> cam = nullptr;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
@@ -331,260 +132,16 @@ namespace Nuake {
 		if (!cam)
 			return;
 
-		Ref<Shader> gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
-		gBufferShader->Bind();
-		gBufferShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-		gBufferShader->SetUniformMat4f("u_View", cam->GetTransform());
-
-		auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-		for (auto e : view)
-		{
-			auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-			for (auto& m : mesh.meshes)
-				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-		}
-
-		glCullFace(GL_BACK);
-		Renderer::Flush(gBufferShader, false);
-
-		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-		for (auto e : quakeView)
-		{
-			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-
-			if (model.IsTransparent)
-				continue;
-
-			for (auto& b : model.Meshes)
-				Renderer::SubmitMesh(b, transform.GetGlobalTransform());
-		}
-		glCullFace(GL_FRONT);
-		Renderer::Flush(gBufferShader, false);
+		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform());
+		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
 
-	void Scene::DrawDeferredShading()
+	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
-		glDisable(GL_DEPTH_TEST);
-
-		Ref<Camera> cam = nullptr;
-		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
-			for (auto e : view) {
-				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
-				cam = camera.CameraInstance;
-				cam->Translation = transform.GlobalTranslation;
-				break;
-			}
-		}
-
-		if (!cam)
-			return;
-
-		if (GetEnvironment()->ProceduralSkybox)
-			GetEnvironment()->ProceduralSkybox->Draw(cam);
-
-		Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
-		deferredShader->Bind();
-		deferredShader->SetUniformMat4f("u_Projection", cam->GetPerspective());
-		deferredShader->SetUniformMat4f("u_View", cam->GetTransform());
-		//deferredShader->SetUniform1f("u_Exposure", 1.0);
-
-		Vector3 camPosition = cam->GetTranslation();
-		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
-
-		Ref<Environment> env = GetEnvironment();
-		deferredShader->SetUniform1f("u_FogAmount", env->VolumetricFog);
-		deferredShader->SetUniform1f("u_FogStepCount", env->VolumetricStepCount);
-
-		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
-		for (auto l : view)
-		{
-			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-
-			if (light.SyncDirectionWithSky)
-				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
-
-			Renderer::RegisterDeferredLight(transform, light);
-		}
+		mSceneRenderer->BeginRenderScene(projection, view);
+		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
-
-	void Scene::EditorDraw()
-	{
-		Ref<Environment> env = GetEnvironment();
-
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-
-		if (env->ProceduralSkybox)
-			env->ProceduralSkybox->Draw(m_EditorCamera);
-
-		glEnable(GL_CULL_FACE);
-
-		Ref<Shader> pbrShader = ShaderManager::GetShader("resources/Shaders/pbr.shader");
-		pbrShader->Bind();
-
-		env->Push();
-
-		glEnable(GL_DEPTH_TEST);
-
-		// Register the lights
-		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
-		for (auto l : view) 
-		{
-			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-
-			if (light.SyncDirectionWithSky)
-				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
-
-			Renderer::RegisterLight(transform, light);
-		}
-
-		pbrShader->SetUniform1i("u_ShowNormal", 0);
-		if (m_EditorCamera)
-		{
-			//Renderer::m_Shader->SetUniform1f("u_Exposure", m_EditorCamera->Exposure);
-			Renderer::m_Shader->SetUniform3f("u_EyePosition", m_EditorCamera->GetTranslation().x, m_EditorCamera->GetTranslation().y, m_EditorCamera->GetTranslation().z);
-			Renderer::m_Shader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-			Renderer::m_Shader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-			
-			auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-			for (auto e : view) 
-			{
-				auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-				for(auto& m : mesh.meshes)
-					Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-			}
-			glCullFace(GL_BACK);
-			Renderer::Flush(pbrShader);
-
-			auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-			for (auto e : quakeView) 
-			{
-				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-
-				if (model.IsTransparent)
-					continue;
-
-				for (auto& b : model.Meshes)
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
-			}
-
-			glCullFace(GL_FRONT);
-			Renderer::Flush(pbrShader);
-
-			Ref<Shader> flatShader = ShaderManager::GetShader("resources/Shaders/flat.shader");
-			flatShader->Bind();
-			flatShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-			flatShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-			auto boxCollider = m_Registry.view<TransformComponent, BoxColliderComponent, ParentComponent>();
-			for (auto e : boxCollider) 
-			{
-				auto [transform, box, parent] = boxCollider.get<TransformComponent, BoxColliderComponent, ParentComponent>(e);
-
-				TransformComponent t = transform;
-				t.Scale = (box.Size * 2.f) * transform.Scale;
-				Renderer::DrawCube(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
-			}
-
-			auto sphereCollider = m_Registry.view<TransformComponent, SphereColliderComponent, ParentComponent>();
-			for (auto e : sphereCollider) 
-			{
-				auto [transform, box, parent] = sphereCollider.get<TransformComponent, SphereColliderComponent, ParentComponent>(e);
-
-				flatShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
-
-				TransformComponent t = transform;
-				t.Scale = (box.Radius * 2.f) * transform.Scale;
-				Renderer::DrawSphere(t, glm::vec4(0.0f, 0.0f, 0.9f, 0.2f));
-			}
-
-			auto quakeViewTransparent = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-			for (auto e : quakeViewTransparent)
-			{
-				auto [transform, model, parent] = quakeViewTransparent.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-
-				if (!model.IsTransparent)
-					continue;
-
-				flatShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
-				flatShader->SetUniform4f("u_Color", 1.f, 0.0f, 0.1f, 0.5f);
-
-				for (auto& b : model.Meshes)
-				{
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
-				}
-			}
-
-			Renderer::Flush(flatShader, true);
-		}
-	}
-
-	void Scene::EditorDrawDeferred()
-	{
-		glEnable(GL_DEPTH_TEST);
-		
-		Ref<Shader> gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
-		gBufferShader->Bind();
-		gBufferShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-		gBufferShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-		
-		auto view = m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
-		for (auto e : view)
-		{
-			auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-			for (auto& m : mesh.meshes)
-				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-		}
-		glCullFace(GL_BACK);
-		Renderer::Flush(gBufferShader, false);
-
-		auto quakeView = m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
-		for (auto e : quakeView)
-		{
-			auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
-
-			if (model.IsTransparent)
-				continue;
-
-			for (auto& b : model.Meshes)
-				Renderer::SubmitMesh(b, transform.GetGlobalTransform());
-		}
-		glCullFace(GL_FRONT);
-		Renderer::Flush(gBufferShader, false);
-	}
-
-	void Scene::EditorDrawDeferredShading()
-	{
-		glDisable(GL_DEPTH_TEST);
-		if (GetEnvironment()->ProceduralSkybox)
-			GetEnvironment()->ProceduralSkybox->Draw(m_EditorCamera);
-
-		Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
-		deferredShader->Bind();
-		deferredShader->SetUniformMat4f("u_Projection", m_EditorCamera->GetPerspective());
-		deferredShader->SetUniformMat4f("u_View", m_EditorCamera->GetTransform());
-		//deferredShader->SetUniform1f("u_Exposure", 1.0);
-
-		Vector3 camPosition = m_EditorCamera->GetTranslation();
-		deferredShader->SetUniform3f("u_EyePosition", camPosition.x, camPosition.y, camPosition.z);
-		
-		Ref<Environment> env = GetEnvironment();
-		deferredShader->SetUniform1f("u_FogAmount", env->VolumetricFog);
-		deferredShader->SetUniform1f("u_FogStepCount", env->VolumetricStepCount);
-
-		// Register the lights
-		auto view = m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
-		for (auto l : view)
-		{
-			auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
-
-			if (light.SyncDirectionWithSky)
-				light.Direction = GetEnvironment()->ProceduralSkybox->GetSunDirection();
-
-			Renderer::RegisterDeferredLight(transform, light);
-		}
-	}
-
+	
 	std::vector<Entity> Scene::GetAllEntities() 
 	{
 		std::vector<Entity> allEntities;
@@ -598,20 +155,6 @@ namespace Nuake {
 		}
 		return allEntities;
 	}
-
-	glm::vec3 Scene::GetGlobalPosition(Entity ent)
-	{
-		glm::vec3 globalPos = ent.GetComponent<TransformComponent>().Translation;
-		Entity currentParent = ent.AddComponent<ParentComponent>().Parent;
-		while (currentParent.GetHandle() != -1)
-		{
-			globalPos += currentParent.GetComponent<TransformComponent>().Translation;
-			currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-		}
-
-		return globalPos;
-	}
-
 
 	Entity Scene::GetEntity(const std::string& name)
 	{
@@ -628,8 +171,6 @@ namespace Nuake {
 	Entity Scene::CreateEntity(const std::string& name) 
 	{
 		Entity entity = { m_Registry.create(), this };
-
-		// Must have transform
 		entity.AddComponent<TransformComponent>();
 
 		NameComponent& nameComponent = entity.AddComponent<NameComponent>();
@@ -686,7 +227,7 @@ namespace Nuake {
 		return m_EditorCamera;
 	}
 
-	Ref<Environment> Scene::GetEnvironment() 
+	Ref<Environment> Scene::GetEnvironment() const
 	{
 		return m_Environement;
 	}
@@ -710,22 +251,6 @@ namespace Nuake {
 		return true;
 	}
 
-	void Scene::ReloadInterfaces()
-	{
-		auto interfaceView = m_Registry.view<InterfaceComponent>();
-		for (auto i : interfaceView)
-		{
-			InterfaceComponent& uInterface = interfaceView.get<InterfaceComponent>(i);
-			if (uInterface.Interface)
-				uInterface.Interface->Reload();
-		}
-	}
-
-	void Scene::AddInterface(Ref<UI::UserInterface> interface)
-	{
-		this->m_Interfaces.push_back(interface);
-	}
-
 	json Scene::Serialize()
 	{
 		BEGIN_SERIALIZE();
@@ -737,7 +262,6 @@ namespace Nuake {
 		SERIALIZE_VAL_LBL("Entities", entities);
 		END_SERIALIZE();
 	}
-
 
 	bool Scene::Deserialize(const std::string& str)
 	{

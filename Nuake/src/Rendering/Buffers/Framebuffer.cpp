@@ -84,6 +84,9 @@ namespace Nuake
 
 	void FrameBuffer::QueueResize(Vector2 size)
 	{
+		if (size == m_Size)
+			return;
+
 		ResizeQueued = true;
 		m_Size = size;
 	}

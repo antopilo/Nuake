@@ -8,7 +8,8 @@ namespace Nuake {
 		ARRAY_BUFFER,
 		ELEMENT_ARRAY_BUFFER,
 		TRIANGLES,
-		DEPTH_ATTACHMENT, COLOR_ATTACHMENT0, COLOR_ATTACHMENT1
+		DEPTH_ATTACHMENT, COLOR_ATTACHMENT0, COLOR_ATTACHMENT1,
+		DEPTH_TEST, FACE_CULL
 	};
 
 	class RendererAPI
@@ -16,6 +17,9 @@ namespace Nuake {
 	public:
 		virtual void Clear() = 0;
 		virtual void SetClearColor(const Color& color) = 0;
+
+		virtual void Enable(const RendererEnum enumType) = 0;
+		virtual void Disable(const RendererEnum enumType) = 0;
 
 		virtual void GenBuffer(unsigned int& bufferID) = 0;
 		virtual void BindBuffer(const RendererEnum bufferType, const unsigned int& bufferID) = 0;
