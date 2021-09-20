@@ -1,5 +1,5 @@
 #pragma once
-#include <glm\ext\matrix_float4x4.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
 #include <vector>
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Resource/Serializable.h"

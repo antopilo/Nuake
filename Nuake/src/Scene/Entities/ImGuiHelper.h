@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <glm\ext\vector_float3.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_stdlib.h>
 #include <imgui/imgui_internal.h>
