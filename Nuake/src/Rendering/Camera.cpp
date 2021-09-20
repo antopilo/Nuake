@@ -1,11 +1,11 @@
 #include "Camera.h"
 #include "src/Core/Maths.h"
 #include "../Core/Input.h"
-#include <glm\ext\vector_float3.hpp>
-#include <glm\ext\matrix_clip_space.hpp>
-#include <glm\ext\matrix_float4x4.hpp>
-#include <glm\ext\matrix_transform.hpp>
-#include <GLFW\glfw3.h>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <GLFW/glfw3.h>
 
 
 namespace Nuake

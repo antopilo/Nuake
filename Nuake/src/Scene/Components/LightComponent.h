@@ -1,13 +1,13 @@
 #pragma once
-#include <glm\ext\vector_float3.hpp>
-#include <glm\ext\vector_float2.hpp>
+#include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float2.hpp>
 #include "TransformComponent.h"
 #include "../Rendering/Camera.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "BaseComponent.h"
 #include "../Resource/Serializable.h"
 
-#include <glm\ext\matrix_clip_space.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 namespace Nuake
 {
