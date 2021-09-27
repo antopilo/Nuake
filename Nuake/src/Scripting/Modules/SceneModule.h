@@ -184,7 +184,7 @@ namespace Nuake {
 
 				auto& cam = ent.GetComponent<CameraComponent>();
 
-				Vector3 right = cam.CameraInstance->cameraRight;
+				Vector3 right = cam.CameraInstance->GetRight();
 
 				// set the slots
 				wrenSetSlotDouble(vm, 1, right.x);

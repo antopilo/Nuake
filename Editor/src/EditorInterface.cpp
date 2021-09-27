@@ -40,6 +40,7 @@
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
+    ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
     void EditorInterface::Init()
     {
@@ -63,6 +64,8 @@ namespace Nuake {
         std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
         if (ImGui::Begin(name.c_str()))
         {
+
+
             ImGui::PopStyleVar();
             Overlay();
             ImGuizmo::BeginFrame();
@@ -146,68 +149,6 @@ namespace Nuake {
             ImGui::PopStyleVar();
         }
         ImGui::End();
-
-        if (m_IsEntitySelected)
-        {
-            //if (ImGui::Begin("DEFERRED"))
-            //{
-            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetDeferredBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
-            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //
-            //}
-            //ImGui::End();
-            //
-            //if (ImGui::Begin("GBUFFER"))
-            //{
-            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_DEPTH_ATTACHMENT);
-            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //
-            //}
-            //ImGui::End();
-            //if (ImGui::Begin("GBUFFER2"))
-            //{
-            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT0);
-            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //
-            //}
-            //ImGui::End();
-            //if (ImGui::Begin("GBUFFER3"))
-            //{
-            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT1);
-            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //
-            //}
-            //ImGui::End();
-            //if (ImGui::Begin("GBUFFER4"))
-            //{
-            //    ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //    glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //    Ref<Texture> texture = Engine::GetCurrentWindow()->GetGBuffer()->GetTexture(GL_COLOR_ATTACHMENT2);
-            //    ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //
-            //}
-            //ImGui::End();
-            //
-            //if (ImGui::Begin("CSM 2"))
-            //{
-            //    if (m_SelectedEntity.HasComponent<LightComponent>())
-            //    {
-            //        ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-            //        glm::vec2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
-            //        Ref<Texture> texture = m_SelectedEntity.GetComponent<LightComponent>().m_Framebuffers[1]->GetTexture(GL_DEPTH_ATTACHMENT);
-            //        ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
-            //    }
-            //}
-            //ImGui::End();
-        }
     }
 
     static int selected = 0;
@@ -223,9 +164,13 @@ namespace Nuake {
         if (m_SelectedEntity == e)
             base_flags |= ImGuiTreeNodeFlags_Selected;
 
+        ImGui::TableNextColumn();
+        
+
+        ImGui::TableNextColumn();
+
         // Write in normal font.
         ImGui::PushFont(normalFont);
-
         // If has no childrens draw tree node leaf
         if (parent.Children.size() <= 0)
             base_flags |= ImGuiTreeNodeFlags_Leaf;
@@ -278,45 +223,49 @@ namespace Nuake {
             m_IsEntitySelected = true;
         }
 
-        if (ImGui::BeginPopupContextItem())
+        if (m_IsEntitySelected)
         {
-            if (m_SelectedEntity.HasComponent<CameraComponent>())
+            if (ImGui::BeginPopupContextItem())
             {
-                if (ImGui::Selectable("Focus camera"))
+                if (m_SelectedEntity.HasComponent<CameraComponent>())
                 {
-                    Engine::GetCurrentScene()->m_EditorCamera->Translation = m_SelectedEntity.GetComponent<TransformComponent>().Translation;
-                    Engine::GetCurrentScene()->m_EditorCamera->SetDirection(m_SelectedEntity.GetComponent<CameraComponent>().CameraInstance->GetDirection());
+                    if (ImGui::Selectable("Focus camera"))
+                    {
+                        Engine::GetCurrentScene()->m_EditorCamera->Translation = m_SelectedEntity.GetComponent<TransformComponent>().Translation;
+                        Engine::GetCurrentScene()->m_EditorCamera->SetDirection(m_SelectedEntity.GetComponent<CameraComponent>().CameraInstance->GetDirection());
+                    }
+                    ImGui::Separator();
                 }
-                ImGui::Separator();
-            }
 
-            if (ImGui::Selectable("Remove")) 
-            {
-                QueueDeletion = e;
-            }
-
-
-            if (ImGui::Selectable("Move to root"))
-            {
-                auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
-                if (p.HasParent) 
+                if (ImGui::Selectable("Remove"))
                 {
-                    auto& pp = p.Parent.GetComponent<ParentComponent>();
-                    pp.RemoveChildren(m_SelectedEntity);
-                    p.HasParent = false;
+                    QueueDeletion = e;
                 }
+
+
+                if (ImGui::Selectable("Move to root"))
+                {
+                    auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
+                    if (p.HasParent)
+                    {
+                        auto& pp = p.Parent.GetComponent<ParentComponent>();
+                        pp.RemoveChildren(m_SelectedEntity);
+                        p.HasParent = false;
+                    }
+                }
+                if (ImGui::Selectable("Save as new prefab"))
+                {
+                    Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(m_SelectedEntity);
+                    std::string savePath = FileDialog::SaveFile("*.prefab");
+                    newPrefab->SaveAs(savePath);
+                    m_SelectedEntity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+                }
+                ImGui::EndPopup();
             }
-			if (ImGui::Selectable("Save as new prefab"))
-			{
-				Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(m_SelectedEntity);
-                std::string savePath = FileDialog::SaveFile("*.prefab");
-                newPrefab->SaveAs(savePath);
-                m_SelectedEntity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
-			}
-            ImGui::EndPopup();
         }
         if (open)
         {
+            
             // Caching list to prevent deletion while iterating.
             std::vector<Entity> childrens = parent.Children;
             for (auto c : childrens)
@@ -324,11 +273,9 @@ namespace Nuake {
 
             ImGui::TreePop();
         }
+         
         ImGui::PopFont();
     }
-
-
-
 
     void EditorInterface::DrawSceneTree()
     {
@@ -375,64 +322,78 @@ namespace Nuake {
         ImGui::End();
 
         std::string title = ICON_FA_TREE + std::string(" Hierarchy");
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
-            if(ImGui::BeginChild("Buttons", ImVec2(300, 20), false))
+            if(ImGui::BeginChild("Buttons", ImVec2(300, 30), false))
             {
                 // Add entity.
-                if (ImGui::Button("Add"))
+                if (ImGui::Button(ICON_FA_PLUS))
                     Engine::GetCurrentScene()->CreateEntity("Entity");
 
-                ImGui::SameLine();
-
-                // Remove Entity
-                if (ImGui::Button("Remove"))
-                {
-                    scene->DestroyEntity(m_SelectedEntity);
-
-                    // Unselect delted entity.
-                    m_SelectedEntity = scene->GetAllEntities().at(0);
-                }
+               //// Remove Entity
+               //if (ImGui::Button("Remove"))
+               //{
+               //    scene->DestroyEntity(m_SelectedEntity);
+               //
+               //    // Unselect delted entity.
+               //    m_SelectedEntity = scene->GetAllEntities().at(0);
+               //}
 
             }
             ImGui::EndChild();
 
             ImGui::Separator();
             // Draw a tree of entities.
-            if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), true))
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
+            if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                std::vector<Entity> entities = scene->GetAllEntities();
-                for (Entity e : entities)
+                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody))
                 {
-                    ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                    std::string icon = ICON_FA_EYE;
+                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 16);
+                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
+                    ImGui::TableHeadersRow();
+                    ImGui::TableNextRow();
+
+                    std::vector<Entity> entities = scene->GetAllEntities();
+                    for (Entity e : entities)
+                    {
+                        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
                         std::string name = e.GetComponent<NameComponent>().Name;
                         // If selected add selected flag.
                         if (m_SelectedEntity == e)
                             base_flags |= ImGuiTreeNodeFlags_Selected;
 
                         // Write in normal font.
-                            ImGui::PushFont(normalFont);
+                        ImGui::PushFont(normalFont);
 
-                    // Small icons + name.
-                    std::string label = ICON_FA_CIRCLE + std::string(" ") + name;
+                        // Small icons + name.
+                        std::string label = ICON_FA_CIRCLE + std::string(" ") + name;
 
-                    // Draw all entity without parents.
-                    if (!e.GetComponent<ParentComponent>().HasParent)
-                    {
-                        // Recursively draw childrens.
-                        DrawEntityTree(e);
+                        // Draw all entity without parents.
+                        if (!e.GetComponent<ParentComponent>().HasParent)
+                        {
+                            // Recursively draw childrens.
+                            DrawEntityTree(e);
+                        }
+
+                        // Pop font.
+                        ImGui::PopFont();
+
+                        // Right click menu
+                        //if (ImGui::BeginPopupContextItem())
+                        //    ImGui::EndPopup();
                     }
-
-                    // Pop font.
-                    ImGui::PopFont();
-
-                    // Right click menu
-                    //if (ImGui::BeginPopupContextItem())
-                    //    ImGui::EndPopup();
                 }
+
+                
+
+                ImGui::EndTable();
             }
 			ImGui::EndChild();
+            ImGui::PopStyleColor();
             
             if (ImGui::BeginDragDropTarget()) // Drag n drop new prefab file into scene tree
             {
@@ -461,6 +422,7 @@ namespace Nuake {
             }
         }
         ImGui::End();
+        ImGui::PopStyleVar();
     }
 
 
@@ -542,23 +504,84 @@ namespace Nuake {
                 ImGui::Separator();
             }
 
-            ImGui::PushFont(normalFont);
+            
             std::string iconTransform = ICON_FA_MAP_MARKER;
-            if (ImGui::CollapsingHeader((iconTransform + " Transform").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+
+            ImGui::PushFont(boldFont);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
+            bool headerOpened = ImGui::CollapsingHeader(" TRANSFORM", ImGuiTreeNodeFlags_DefaultOpen);
+            if (headerOpened)
             {
-                ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Transform properties");
+                ImGui::PopFont();
+                ImGui::PopStyleVar();
+                if (ImGui::BeginTable("TransformTable", 3, ImGuiTableFlags_BordersInner))
+                {
+                    TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
+
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("Translation");
+                    ImGui::TableNextColumn();
+                    ImGuiHelper::DrawVec3("Translation", &component.Translation);
+                    ImGui::TableNextColumn();
+
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetTranslation = ICON_FA_UNDO + std::string("##ResetTranslation");
+                    if (ImGui::Button(resetTranslation.c_str())) component.Translation = Vector3(0, 0, 0);
+                    ImGui::PopStyleColor();
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("Rotation");
+
+                    ImGui::TableNextColumn();
+                    ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
+
+                    ImGui::TableNextColumn();
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetRotation = ICON_FA_UNDO + std::string("##ResetRotation");
+                    if (ImGui::Button(resetRotation.c_str())) component.Rotation = Vector3(0, 0, 0);
+                    ImGui::PopStyleColor();
+
+                    ImGui::TableNextColumn();
+                    ImGui::Text("Scale");
+
+                    ImGui::TableNextColumn();
+                    ImGuiHelper::DrawVec3("Scale", &component.Scale);
+
+                    ImGui::TableNextColumn();
+                    std::string resetScale = ICON_FA_UNDO + std::string("##ResetScale");
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    if (ImGui::Button(resetScale.c_str())) component.Scale = Vector3(1, 1, 1);
+                    ImGui::PopStyleColor();
+
+                    ImGui::EndTable();
+                }
                 //ImGui::InputText("Name:", selectedEntity->m_Name.data(), 12);
-                TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
-                ImGuiHelper::DrawVec3("Translation", &component.Translation);
-                ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
-                ImGuiHelper::DrawVec3("Scale", &component.Scale);
-                ImGui::Separator();
+
             }
+            else
+            {
+                ImGui::PopStyleVar();
+                ImGui::PopFont();
+            }
+
+            ImGui::PopStyleVar();
 
             if (m_SelectedEntity.HasComponent<InterfaceComponent>())
             {
-                if (ImGui::CollapsingHeader("Interface", ImGuiTreeNodeFlags_DefaultOpen))
+                ImGui::PushFont(boldFont);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
+
+                headerOpened = ImGui::CollapsingHeader("Interface", ImGuiTreeNodeFlags_DefaultOpen);
+                if (headerOpened)
                 {
+                    ImGui::PopFont();
+                    ImGui::PopStyleVar();
                     InterfaceComponent& component = m_SelectedEntity.GetComponent<InterfaceComponent>();
                     std::string& path = component.Path;
                     char pathBuffer[256];
@@ -583,7 +606,16 @@ namespace Nuake {
                         ImGui::EndDragDropTarget();
                     }
                 }
+                else
+                {
+                    ImGui::PopStyleVar();
+                    ImGui::PopFont();
+                }
+
+
+                ImGui::PopStyleVar();
             }
+           
 
             if (m_SelectedEntity.HasComponent<MeshComponent>()) 
             {
@@ -674,14 +706,137 @@ namespace Nuake {
 
             }
 
-            if (m_SelectedEntity.HasComponent<LightComponent>()) {
-                std::string icon = ICON_FA_LIGHTBULB;
-                if (ImGui::CollapsingHeader((icon + " " + "Light").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    m_SelectedEntity.GetComponent<LightComponent>().DrawEditor();
-                    ImGui::Separator();
-                }
+            if (m_SelectedEntity.HasComponent<LightComponent>()) 
+            {
+                ImGui::PushFont(boldFont);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
 
+                bool headerOpened = ImGui::CollapsingHeader(" LIGHT", ImGuiTreeNodeFlags_DefaultOpen);
+                if (headerOpened)
+                {
+                    ImGui::PopFont();
+                    ImGui::PopStyleVar();
+                    if (ImGui::BeginTable("TransformTable", 3, ImGuiTableFlags_BordersInner))
+                    {
+                        LightComponent& component = m_SelectedEntity.GetComponent<LightComponent>();
+
+                        ImGui::TableSetupColumn("name", 0, 0.3);
+                        ImGui::TableSetupColumn("set", 0, 0.6);
+                        ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                        ImGui::TableNextColumn();
+                        ImGui::Text("Color");
+                        ImGui::TableNextColumn();
+                        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+                        ImGui::ColorEdit3("##lightcolor", &component.Color.r, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+                        ImGui::PopItemWidth();
+                        ImGui::TableNextColumn();
+
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetColor = ICON_FA_UNDO + std::string("##ResetTranslation");
+                        if (ImGui::Button(resetColor.c_str())) component.Color = Vector3(1, 1, 1);
+                        ImGui::PopStyleColor();
+
+                        ImGui::TableNextColumn();
+                        ImGui::Text("Strength");
+
+                        ImGui::TableNextColumn();
+                        ImGui::SliderFloat("Strength", &component.Strength, 0.0f, 100.0f);
+
+                        ImGui::TableNextColumn();
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetStrength = ICON_FA_UNDO + std::string("##resetStrength");
+                        if (ImGui::Button(resetStrength.c_str())) component.Strength = 10.0f;
+                        ImGui::PopStyleColor();
+
+                        ImGui::TableNextColumn();
+                        ImGui::Text("Cast Shadows");
+
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##CastShadows", &component.CastShadows);
+
+                        ImGui::TableNextColumn();
+                        std::string resetShadow = ICON_FA_UNDO + std::string("##resetShadow");
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        if (ImGui::Button(resetShadow.c_str())) component.CastShadows = false;
+                        ImGui::PopStyleColor();
+
+                        ImGui::TableNextColumn();
+                        ImGui::Text("Type");
+                        ImGui::TableNextColumn();
+                        const char* types[] = { "Directional", "Point", "Spot" };
+                        static const char* current_item = types[component.Type];
+
+                        if (ImGui::BeginCombo("Type", current_item)) // The second parameter is the label previewed before opening the combo.
+                        {
+                            for (int n = 0; n < IM_ARRAYSIZE(types); n++)
+                            {
+                                bool is_selected = (current_item == types[n]); // You can store your selection however you want, outside or inside your objects
+                                if (ImGui::Selectable(types[n], is_selected)) 
+                                {
+                                    current_item = types[n];
+                                    component.Type = (LightType)n;
+                                }
+                                if (is_selected)
+                                    ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+                            }
+                            ImGui::EndCombo();
+                        }
+
+                        ImGui::TableNextColumn();
+                        std::string resetType = ICON_FA_UNDO + std::string("##resetType");
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        if (ImGui::Button(resetShadow.c_str())) component.Type = Point;
+                        ImGui::PopStyleColor();
+
+
+                        if (component.Type == Directional)
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::Text("Is Volumetric");
+
+                            ImGui::TableNextColumn();
+                            ImGui::Checkbox("##Volumetric", &component.IsVolumetric);
+
+                            ImGui::TableNextColumn();
+                            std::string resetIsVolumetric = ICON_FA_UNDO + std::string("##IsVolumetric");
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            if (ImGui::Button(resetIsVolumetric.c_str())) component.IsVolumetric = false;
+                            ImGui::PopStyleColor();
+
+                            ImGui::TableNextColumn();
+                            ImGui::Text("Sync Sky Direction");
+
+                            ImGui::TableNextColumn();
+                            ImGui::Checkbox("##SyncSky", &component.SyncDirectionWithSky);
+
+                            ImGui::TableNextColumn();
+                            std::string resetSyncDirectionWithSky = ICON_FA_UNDO + std::string("##resetSyncDirectionWithSky");
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            if (ImGui::Button(resetSyncDirectionWithSky.c_str())) component.SyncDirectionWithSky = false;
+                            ImGui::PopStyleColor();
+
+                            ImGui::TableNextColumn();
+                            ImGui::Text("Direction");
+                            ImGui::TableNextColumn();
+                            ImGuiHelper::DrawVec3("Direction", &component.Direction);
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetDirection = ICON_FA_UNDO + std::string("##resetDirection");
+                            if (ImGui::Button(resetDirection.c_str())) component.Direction = Vector3(0, -1, 0);
+                            ImGui::PopStyleColor();
+                        }
+                        ImGui::EndTable();
+                    }
+                }
+                else
+                {
+                    ImGui::PopStyleVar();
+                    ImGui::PopFont();
+                }
+                ImGui::PopStyleVar();
             }
 
             if (m_SelectedEntity.HasComponent<WrenScriptComponent>()) {
@@ -841,7 +996,6 @@ namespace Nuake {
                 }
             }
 
-            ImGui::PopFont();
         }
         ImGui::End();
     }
@@ -1078,9 +1232,9 @@ namespace Nuake {
     {
         // FIXME-VIEWPORT: Select a default viewport
         const float DISTANCE = 10.0f;
-        static int corner = 3;
+        int corner = 0;
         ImGuiIO& io = ImGui::GetIO();
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
         if (corner != -1)
         {
             window_flags |= ImGuiWindowFlags_NoMove;
@@ -1093,24 +1247,42 @@ namespace Nuake {
             ImGui::SetNextWindowViewport(viewport->ID);
         }
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
         if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
         {
-            ImGui::Text("Developpement build 0.1");
-            ImGui::Separator();
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            if (ImGui::BeginPopupContextWindow())
-            {
-                if (ImGui::MenuItem("Custom", NULL, corner == -1)) corner = -1;
-                if (ImGui::MenuItem("Top-left", NULL, corner == 0)) corner = 0;
-                if (ImGui::MenuItem("Top-right", NULL, corner == 1)) corner = 1;
-                if (ImGui::MenuItem("Bottom-left", NULL, corner == 2)) corner = 2;
-                if (ImGui::MenuItem("Bottom-right", NULL, corner == 3)) corner = 3;
-                if (m_ShowOverlay && ImGui::MenuItem("Close")) m_ShowOverlay = false;
-                ImGui::EndPopup();
-            }
-
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+            if (ImGui::Button(ICON_FA_HAND_POINTER)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_ARROWS_ALT)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_EXPAND_ALT)) CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            ImGui::PopStyleVar();
 
         }
+        ImGui::PopStyleVar();
+        ImGui::End();
+        int corner2 = 1;
+
+        window_flags |= ImGuiWindowFlags_NoMove;
+        ImGuiViewport* viewport = ImGui::GetWindowViewport();
+        ImVec2 work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+        ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
+        ImVec2 window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+        ImVec2 window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+        if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+            if (ImGui::Button("...")) {};
+            ImGui::PopStyleVar();
+        }
+
+        ImGui::PopStyleVar();
         ImGui::End();
     }
 
@@ -1642,7 +1814,7 @@ namespace Nuake {
         static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
         ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
         normalFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 11.0f, &icons_config, icons_ranges);
-
+        boldFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Bold.ttf", 16.0);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
         ImGui::GetIO().Fonts->AddFontDefault();
         icons_config.MergeMode = true;

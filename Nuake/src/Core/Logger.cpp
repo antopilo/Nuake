@@ -12,7 +12,7 @@ namespace Nuake
 	{
 		char buff[100];
 		time_t now = time(0);
-		strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000", localtime(&now));
+		strftime(buff, 100, "%H:%M:%S", localtime(&now));
 
 		LogEntry newLog = {
 			type,
@@ -20,8 +20,8 @@ namespace Nuake
 			log
 		};
 
-		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
-		printf((msg + "\n").c_str());
+		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log + "\n";
+		printf((msg).c_str());
 
 		if (m_Logs.size() >= MAX_LOG)
 			m_Logs.erase(m_Logs.begin());

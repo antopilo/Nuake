@@ -14,11 +14,10 @@ namespace Nuake
 	{
 		m_Type = PERSPECTIVE;
 		Translation = position;
-		cameraDirection = glm::vec3(0, 0, 1);
-		up = glm::vec3(0.0f, 1.0f, 0.0f);
-		cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-		cameraUp = glm::cross(cameraDirection, cameraRight);
-		cameraFront = cameraDirection;
+
+		Direction = Vector3(0, 0, 1);
+		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
+		Up = glm::cross(Direction, Right);
 
 		m_Frustum = Frustum(GetTransform());
 	}
@@ -27,10 +26,9 @@ namespace Nuake
 	{
 		m_Type = PERSPECTIVE;
 		Translation = glm::vec3(0, 0, 0);
-		cameraDirection = glm::vec3(0, 0, 1);
-		up = glm::vec3(0.0f, 1.0f, 0.0f);
-		cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-		cameraUp = glm::cross(cameraDirection, cameraRight);
+		Direction = Vector3(0, 0, 1);
+		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
+		Up = glm::cross(Direction, Right);
 	}
 
 	void Camera::SetType(CAMERA_TYPE type)
@@ -52,9 +50,8 @@ namespace Nuake
 		//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 		//cam->cameraFront = glm::normalize(cam->cameraDirection);
 		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
-		cameraDirection = glm::normalize(direction);
-		cameraFront = cameraDirection;
-		cameraRight = glm::normalize(glm::cross(up, cameraFront));
+		Direction = glm::normalize(direction);
+		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
 	}
 
 	Vector3 Camera::GetTranslation() {
@@ -62,7 +59,7 @@ namespace Nuake
 	}
 
 	Vector3 Camera::GetDirection() {
-		return cameraDirection;
+		return Direction;
 	}
 
 	Matrix4 Camera::GetPerspective()
@@ -74,13 +71,13 @@ namespace Nuake
 
 	Matrix4 Camera::GetTransform()
 	{
-		glm::mat4 tr = lookAt(Translation, Translation + cameraFront, cameraUp);
+		glm::mat4 tr = lookAt(Translation, Translation + Direction, Up);
 		return tr;
 	}
 
 	Matrix4 Camera::GetTransformRotation()
 	{
-		return lookAt(glm::vec3(), cameraFront, cameraUp);
+		return lookAt(glm::vec3(), Direction, Up);
 	}
 	
 	bool Camera::BoxFrustumCheck(const AABB& aabb)

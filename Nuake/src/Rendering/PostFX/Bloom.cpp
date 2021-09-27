@@ -102,14 +102,6 @@ namespace Nuake
 			m_DownSampleFB[i]->Unbind();
 		}
 
-		if (ImGui::Begin("Downsample"))
-		{
-			ImGui::DragInt("MIP", &downsampleMip, 1.0f, 0, m_Iteration - 1);
-			ImGui::Image((void*)m_DownSampleFB[downsampleMip]->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
-
-
 		for (int i = 0; i < m_Iteration; i++)
 		{
 			// Horizontal blur
@@ -165,14 +157,6 @@ namespace Nuake
 				Renderer::DrawQuad(Matrix4());
 			m_UpSampleFB[i]->Unbind();
 		}
-
-		if (ImGui::Begin("UpSample"))
-		{
-			ImGui::DragInt("MIP", &upSampleMip, 1.0f, 0, m_Iteration - 1);
-			ImGui::Image((void*)m_UpSampleFB[upSampleMip]->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
-
 		m_FinalFB->Bind();
 		m_FinalFB->Clear();
 		{
@@ -186,11 +170,6 @@ namespace Nuake
 		}
 		
 		m_FinalFB->Unbind();
-		if (ImGui::Begin("Final"))
-		{
-			ImGui::Image((void*)m_FinalFB->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
 	}
 
 	void Bloom::Resize(Vector2 size)

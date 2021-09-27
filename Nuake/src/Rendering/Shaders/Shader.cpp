@@ -34,13 +34,13 @@ namespace Nuake
 
 		enum class ShaderType 
 		{
-			NONE = -1, VERTEX = 0, FRAGMENT = 1
+			NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2, COMPUTE = 3
 		};
 
 		ShaderType type = ShaderType::NONE;
 
 		std::string line;
-		std::stringstream ss[2];
+		std::stringstream ss[4];
 
 		while (getline(stream, line))
 		{
@@ -58,6 +58,14 @@ namespace Nuake
 					// set mode to fragment
 					type = ShaderType::FRAGMENT;
 				}
+				else if (line.find("geometry") != std::string::npos)
+				{
+					type = ShaderType::GEOMETRY;
+				}
+				else if (line.find("compute") != std::string::npos)
+				{
+					type = ShaderType::COMPUTE;
+				}
 			}
 			else
 			{
@@ -65,7 +73,7 @@ namespace Nuake
 			}
 		}
 
-		return { ss[0].str(), ss[1].str() };
+		return { ss[0].str(), ss[1].str(), ss[2].str(), ss[3].str() };
 	}
 
 	// Parse both source and creates a shader program.
@@ -73,8 +81,23 @@ namespace Nuake
 	unsigned int Shader::CreateProgram() 
 	{
 		unsigned int program = glCreateProgram();
+
 		unsigned int vs = Compile(GL_VERTEX_SHADER);
 		unsigned int fs = Compile(GL_FRAGMENT_SHADER);
+		unsigned int gs = 0;
+		unsigned int cs = 0;
+
+		if (Source.GeometryShader != "")
+		{
+			gs = Compile(GL_GEOMETRY_SHADER);
+			glAttachShader(program, gs);
+		}
+
+		if (Source.ComputeShader != "")
+		{
+			cs = Compile(GL_COMPUTE_SHADER);
+			glAttachShader(program, cs);
+		}
 
 		glAttachShader(program, vs);
 		glAttachShader(program, fs);
@@ -83,6 +106,11 @@ namespace Nuake
 
 		glDeleteShader(vs);
 		glDeleteShader(fs);
+
+		if (gs != 0)
+			glDeleteShader(gs);
+		if (cs != 0)
+			glDeleteShader(cs);
 
 		return program;
 	}
@@ -95,6 +123,8 @@ namespace Nuake
 		const char* src;
 		if (type == GL_FRAGMENT_SHADER) src = Source.FragmentShader.c_str();
 		if (type == GL_VERTEX_SHADER)   src = Source.VertexShader.c_str();
+		if (type == GL_GEOMETRY_SHADER) src = Source.GeometryShader.c_str();
+		if (type == GL_COMPUTE_SHADER)  src = Source.ComputeShader.c_str();
 
 		glShaderSource(id, 1, &src, nullptr);
 		glCompileShader(id);
@@ -115,10 +145,16 @@ namespace Nuake
 
 			glGetShaderInfoLog(id, length, &length, message);
 
+			std::string stype;
+			if (type == GL_FRAGMENT_SHADER) stype = "Fragment";
+			if (type == GL_VERTEX_SHADER)  stype = "Vertex";
+			if (type == GL_GEOMETRY_SHADER) stype = "Geometry";
+			if (type == GL_COMPUTE_SHADER) stype = "Compute";
+
 			std::cout << "Failed to compile " <<
 				(type == GL_VERTEX_SHADER ? "vertex" : "Fragment") << " shader!" << std::endl;
-			std::cout << message << std::endl;
 
+			std::cout << message << std::endl;
 			// Delete invalid shader
 			glDeleteShader(id);
 			return 0;

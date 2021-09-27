@@ -5,6 +5,8 @@
 #include "src/Scene/Scene.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Rendering/PostFX/Bloom.h"
+#include "src/Rendering/PostFX/Volumetric.h"
+
 namespace Nuake {
 	class SceneRenderer {
 	public:
@@ -19,6 +21,7 @@ namespace Nuake {
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<Bloom> mBloom;
+		Scope<Volumetric> mVolumetric;
 
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);

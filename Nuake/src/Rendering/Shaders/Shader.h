@@ -13,6 +13,8 @@ namespace Nuake
 	{
 		std::string VertexShader;
 		std::string FragmentShader;
+		std::string GeometryShader;
+		std::string ComputeShader;
 	};
 
 	class Shader 
@@ -28,8 +30,6 @@ namespace Nuake
 		void Bind() const;
 		void Unbind() const;
 
-
-		// Todo: Other uniform types.
 		void SetUniformVec4(const std::string& name, Vector4 vec);
 		void SetUniformVec3(const std::string& name, Vector3 vec);
 		void SetUniformVec2(const std::string& name, Vector2 vec);

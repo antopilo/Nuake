@@ -18,7 +18,7 @@ namespace Nuake {
 		const unsigned int MIN_ITERATION = 1;
 
 	private:
-		float m_Threshold = 0.3f;
+		float m_Threshold = 2.3f;
 		float m_BlurAmount = 12.0f;
 		unsigned int m_Iteration;
 		Vector2 m_Size;

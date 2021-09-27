@@ -3,6 +3,7 @@
 
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <GL\glew.h>
+
 namespace Nuake {
 	void SceneRenderer::Init()
 	{
@@ -19,6 +20,8 @@ namespace Nuake {
 
 		mBloom = CreateScope<Bloom>(4);
 		mBloom->SetSource(shadedTexture);
+
+		mVolumetric = CreateScope<Volumetric>();
 	}
 
 	void SceneRenderer::Cleanup()
@@ -46,12 +49,25 @@ namespace Nuake {
 		scene.GetEnvironment()->mBloom->Resize(framebuffer.GetSize());
 		scene.GetEnvironment()->mBloom->Draw();
 
+		auto view = scene.m_Registry.view<LightComponent>();
+		std::vector<LightComponent> lightList = std::vector<LightComponent>();
+		for (auto l : view)
+		{
+			auto& lc = view.get<LightComponent>(l);
+			if (lc.Type == Directional && lc.IsVolumetric)
+				lightList.push_back(lc);
+		}
+			
+
+		mVolumetric->Resize(framebuffer.GetSize());
+		mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
+		mVolumetric->Draw(mProjection, mView, lightList);
+
 		// Copy final output to target framebuffer
 		framebuffer.Bind();
 		{
 			Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
 			shader->Bind();
-
 			shader->SetUniformTex("u_Source", scene.GetEnvironment()->mBloom->GetOutput().get());
 			Renderer::DrawQuad();
 		}
@@ -171,8 +187,6 @@ namespace Nuake {
 			shadingShader->SetUniformVec3("u_EyePosition", mView[3]);
 
 			Ref<Environment> env = scene.GetEnvironment();
-			shadingShader->SetUniform1f("u_FogAmount", env->VolumetricFog);
-			shadingShader->SetUniform1f("u_FogStepCount", env->VolumetricStepCount);
 
 			auto view = scene.m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
 			for (auto l : view)

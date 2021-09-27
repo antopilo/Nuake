@@ -32,13 +32,6 @@ in mat4 InvView;
 uniform float u_Exposure;
 uniform vec3  u_EyePosition;
 
-// Environmnent
-uniform float u_FogAmount;
-uniform float u_FogStepCount;
-uniform samplerCube u_IrradianceMap;
-uniform samplerCube u_PrefilterMap;
-uniform sampler2D   u_BrdfLUT;
-
 // GBuffer
 uniform sampler2D m_Depth;
 uniform sampler2D m_Albedo; 
@@ -55,7 +48,6 @@ struct Light {
     vec3 Color;
     float Strength;
     vec3 Position;
-    mat4 LightTransform;
     int ShadowMapsIDs[4];
     float CascadeDepth[4];
     mat4 LightTransforms[4];
@@ -147,7 +139,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     if (shadowmap == -1)
         return 1.0;
 
-    vec4 fragPosLightSpace = light.LightTransforms[0] * vec4(FragPos, 1.0f);
+    vec4 fragPosLightSpace = light.LightTransforms[shadowmap] * vec4(FragPos, 1.0f);
 
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -161,65 +153,8 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
 
     float shadow = 0.0;
 
-    float pcfDepth = texture(ShadowMaps[0], projCoords.xy).r;
+    float pcfDepth = texture(ShadowMaps[shadowmap], projCoords.xy).r;
     return currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-}
-
-// Mie scaterring approximated with Henyey-Greenstein phase function.
-float ComputeScattering(float lightDotView)
-{
-    float result = 1.0f - u_FogAmount * u_FogAmount;
-    result /= (4.0f * PI * pow(1.0f + u_FogAmount * u_FogAmount - (2.0f * u_FogAmount) * lightDotView, 1.5f));
-    return result;
-}
-
-
-vec3 ComputeVolumetric(vec3 FragPos, Light light)
-{
-    // world space frag position.
-    vec3 startPosition = u_EyePosition;             // Camera Position
-    vec3 rayVector = FragPos - startPosition;  // Ray Direction
-
-    float rayLength = length(rayVector);            // Length of the raymarched
-
-    float stepLength = rayLength / u_FogStepCount;        // Step length
-    vec3 rayDirection = rayVector / rayLength;
-    vec3 step = rayDirection * stepLength;          // Normalized to step length direction
-
-    vec3 currentPosition = startPosition;           // First step position
-    vec3 accumFog = vec3(0.0f, 0.0f, 0.0f);         // accumulative color
-
-    // Raymarching
-    for (int i = 0; i < u_FogStepCount; i++)
-    {
-        vec4 fragPosLightSpace = light.LightTransforms[0] * vec4(currentPosition, 1.0f);
-        // perform perspective divide
-        vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-        // transform to [0,1] range
-        projCoords = projCoords * 0.5 + 0.5;
-
-        float currentDepth = projCoords.z;
-
-        // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-        vec2 texelSize = 1.0 / textureSize(ShadowMaps[0], 0);
-
-        float closestDepth = texture(ShadowMaps[0], projCoords.xy).r;
-
-        if (closestDepth > currentDepth)
-            accumFog += (ComputeScattering(dot(rayDirection, light.Direction)).xxx * light.Color);
-
-        //float ditherPattern[4][4] = { 
-        //    { 0.0f, 0.5f, 0.125f, 0.625f},
-        //    { 0.75f, 0.22f, 0.875f, 0.375f},
-        //    { 0.1875f, 0.6875f, 0.0625f, 0.5625},
-        //    { 0.9375f, 0.4375f, 0.8125f, 0.3125} 
-        //};
-
-        currentPosition += step; //* ditherPattern[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
-    }
-    accumFog /= u_FogStepCount;
-
-    return accumFog;
 }
 
 void main()
@@ -246,12 +181,11 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     // reflectance equation
+    vec3 eyeDirection = normalize(u_EyePosition - worldPos);
+
     vec3 Lo = vec3(0.0);
     vec3 fog = vec3(0.0);
     float shadow = 0.0f;
-
-    vec3 eyeDirection = normalize(u_EyePosition - worldPos);
-    
     for (int i = 0; i < LightCount; i++)
     {
         vec3 L = normalize(Lights[i].Position - worldPos);
@@ -262,10 +196,6 @@ void main()
         if (Lights[i].Type == 0) {
             L = normalize(Lights[i].Direction);
             attenuation = 1.0f;
-
-            if (Lights[i].Volumetric == 1)
-                fog += ComputeVolumetric(worldPos, Lights[i]);
-
             shadow += ShadowCalculation(Lights[i], worldPos, N);
         }
 
@@ -304,14 +234,6 @@ void main()
 
     vec3 ambient = (kD * albedo) * ao;
     vec3 color = ambient + Lo;
-    color += fog;
 
-    //color = color / (color + vec3(1.0));
-    //const float gamma = 2.2;
-    //// HDR tonemapping
-    //color = vec3(1.0) - exp(-color * 1.0);
-    //// gamma correct
-    //color = pow(color, vec3(1.0 / gamma));
-
-    FragColor = mix(vec4(color, 1.0), vec4(albedo, 1.0), 0);
+    FragColor = vec4(color, 1.0);
 }
