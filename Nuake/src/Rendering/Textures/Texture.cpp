@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "src/Core/Logger.h"
 #include <GL\glew.h>
 #include <iostream>
 #include <src/Core/FileSystem.h>
@@ -15,7 +16,6 @@ namespace Nuake
 		m_BPP = 0;
 
 		stbi_set_flip_vertically_on_load(1);
-
 		m_LocalBuffer = stbi_load((path).c_str(), &m_Width, &m_Height, &m_BPP, 4);
 
 		glGenTextures(1, &m_RendererId);

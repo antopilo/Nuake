@@ -108,7 +108,8 @@ namespace Nuake {
             return nullptr;
 
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        Ref<Material> newMaterial = MaterialManager::Get()->GetMaterial(directory + std::to_string(mesh->mMaterialIndex) + material->GetName().C_Str());
+        std::string materialPath = directory + std::to_string(mesh->mMaterialIndex) + material->GetName().C_Str();
+        Ref<Material> newMaterial = MaterialManager::Get()->GetMaterial(materialPath);
 
         aiString str;
             
@@ -126,7 +127,13 @@ namespace Nuake {
         }
         else
         {
-            newMaterial->SetAlbedo(TextureManager::Get()->GetTexture(FileSystem::Root + directory + str.C_Str()));
+            std::string texturePath = FileSystem::Root + directory + str.C_Str();
+            if (!FileSystem::FileExists(texturePath))
+            {
+                Logger::Log("Texture file couldn't be found: " + texturePath, Nuake::LOG_TYPE::CRITICAL);
+                texturePath = "resources/Textures/default/Default.png";
+            }
+            newMaterial->SetAlbedo(TextureManager::Get()->GetTexture(texturePath));
         }
 
         material->GetTexture(aiTextureType_NORMALS, 0, &str);

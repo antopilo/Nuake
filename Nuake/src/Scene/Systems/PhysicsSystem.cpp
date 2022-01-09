@@ -37,7 +37,7 @@ namespace Nuake
 
 				rigidbody.m_Rigidbody = btRigidbody;
 
-				btRigidbody->SetKinematic(rigidbody.IsKinematic);
+				//btRigidbody->SetKinematic(rigidbody.IsKinematic);
 
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
@@ -61,16 +61,16 @@ namespace Nuake
 		{
 			auto [transform, brush] = bspView.get<TransformComponent, BSPBrushComponent>(e);
 
-			if (brush.IsSolid)
+			if (!brush.IsSolid)
+				continue;
+
+			for (auto m : brush.Meshes)
 			{
-				for (auto m : brush.Meshes)
-				{
-					Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-					Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
-					btRigidbody->SetEntityID(Entity{ e, m_Scene });
-					brush.Rigidbody.push_back(btRigidbody);
-					PhysicsManager::Get()->RegisterBody(btRigidbody);
-				}
+				Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
+				btRigidbody->SetEntityID(Entity{ e, m_Scene });
+				brush.Rigidbody.push_back(btRigidbody);
+				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
 		}
 
@@ -92,8 +92,6 @@ namespace Nuake
 	{
 		if (!Engine::IsPlayMode)
 			return;
-
-		PhysicsManager::Get()->Step(ts);
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
 		for (auto e : brushes)
@@ -121,7 +119,6 @@ namespace Nuake
 				}
 			}
 		}
-
 
 		auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
 		for (auto e : bspTriggerView)
@@ -156,7 +153,10 @@ namespace Nuake
 
 	void PhysicsSystem::FixedUpdate(Timestep ts)
 	{
-		
+		if (!Engine::IsPlayMode)
+			return;
+
+		PhysicsManager::Get()->Step(ts);
 	}
 
 	void PhysicsSystem::Exit()

@@ -54,11 +54,14 @@ namespace Nuake
 
 		static Ref<UniformBuffer> m_LightsUniformBuffer;
 
+		static Ref<Mesh> CubeMesh;
+
 		static void Init();
 		static void LoadShaders();
 
 		static void BeginScene();
 		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform);
+		static void SubmitCube(Matrix4 transform);
 		static void Flush(Shader* shader, bool depthOnly = false);
 
 		// Drawing states
@@ -73,6 +76,7 @@ namespace Nuake
 		
 
 		// Debug
+		static void DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform = Matrix4());
 		static void DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
 		static void DrawCube(TransformComponent transform, glm::vec4 color);
 		static void DrawSphere(TransformComponent transform, glm::vec4 color);

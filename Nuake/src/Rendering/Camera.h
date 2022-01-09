@@ -35,6 +35,7 @@ namespace Nuake
 		Vector3 Translation = { 0.0f, 0.0f, 0.0f };
 		float Fov = 88.0f;
 		float Exposure = 1.0f;
+		float Gamma = 2.2f;
 		float Speed = 1.0f;
 
 		Camera();
@@ -51,8 +52,9 @@ namespace Nuake
 		Matrix4 GetTransform();
 		Matrix4 GetTransformRotation();
 		inline Vector3 GetRight() const { return Right; }
+		inline Vector3 GetUp() const { return glm::cross(Direction, Right); }
 		bool BoxFrustumCheck(const AABB& aabb);
-
+		Frustum GetFrustum();
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;
 

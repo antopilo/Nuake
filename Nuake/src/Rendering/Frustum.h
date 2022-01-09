@@ -1,6 +1,7 @@
 #pragma once
 #include "src/Core/Maths.h"
 #include <glm/matrix.hpp>
+#include <vector>
 
 namespace Nuake {
 	class Frustum
@@ -38,6 +39,16 @@ namespace Nuake {
 
 		Vector4   m_planes[Count];
 		Vector3   m_points[8];
+
+	public:
+
+		std::vector<Vector3> GetPoints()
+		{
+			std::vector<Vector3> result = std::vector<Vector3>();
+			for (int i = 0; i < 8; i++)
+				result.push_back(m_points[i]);
+			return result;
+		}
 	};
 
 	inline Frustum::Frustum(Matrix4 m)

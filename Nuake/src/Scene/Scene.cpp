@@ -50,7 +50,8 @@ namespace Nuake {
 		mSceneRenderer->Init();
 	}
 
-	Scene::~Scene() {
+	Scene::~Scene() 
+	{
 	}
 
 	std::string Scene::GetName()
@@ -251,6 +252,15 @@ namespace Nuake {
 		return true;
 	}
 
+	Scene* Scene::Copy()
+	{
+		Scene* sceneCopy = new Scene();
+		sceneCopy->Path = this->Path;
+		sceneCopy->Name = this->Name;
+
+		return sceneCopy;
+	}
+
 	json Scene::Serialize()
 	{
 		BEGIN_SERIALIZE();
@@ -285,28 +295,26 @@ namespace Nuake {
 		}
 
 		// Parse entities
+		if (!j.contains("Entities"))
+			return 0;
+		
+		for (json e : j["Entities"])
 		{
-			if (j.contains("Entities"))
-			{
-				for (json e : j["Entities"])
-				{
-					std::string name = e["NameComponent"]["Name"];
-					Entity ent = { m_Registry.create(), this };
-					ent.Deserialize(e.dump());
-				}
+			std::string name = e["NameComponent"]["Name"];
+			Entity ent = { m_Registry.create(), this };
+			ent.Deserialize(e.dump());
+		}
 
-				auto view = m_Registry.view<ParentComponent>();
-				for (auto e : view)
-				{
-					auto parentC = view.get<ParentComponent>(e);
-					if (!parentC.HasParent)
-						continue;
+		auto view = m_Registry.view<ParentComponent>();
+		for (auto e : view)
+		{
+			auto& parentComponent = view.get<ParentComponent>(e);
+			if (!parentComponent.HasParent)
+				continue;
 
-					auto& p = Entity{ e, this };
-					auto parent = GetEntityByID(parentC.ParentID);
-					parent.AddChild(p);
-				}
-			}
+			auto& entity = Entity{ e, this };
+			auto parentEntity = GetEntityByID(parentComponent.ParentID);
+			parentEntity.AddChild(entity);
 		}
 
 		return true;

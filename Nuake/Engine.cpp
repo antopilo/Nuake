@@ -18,7 +18,7 @@ namespace Nuake
 	Ref<Window> Engine::CurrentWindow;
 
 	float Engine::m_LastFrameTime = 0.0f;
-	float Engine::m_FixedUpdateRate = 1.0 / 144.0f;
+	float Engine::m_FixedUpdateRate = 1.0f / 90.0f;
 	float Engine::m_FixedUpdateDifference = 0.f;
 	float Engine::m_Time = 0.f;
 
@@ -59,7 +59,7 @@ namespace Nuake
 				if (m_FixedUpdateDifference >= m_FixedUpdateRate) {
 					CurrentWindow->FixedUpdate(m_FixedUpdateDifference);
 
-					m_FixedUpdateDifference -= m_FixedUpdateRate;
+					m_FixedUpdateDifference = 0.0f;
 				}
 			}
 			else
@@ -96,6 +96,8 @@ namespace Nuake
 
 	void Engine::Draw()
 	{
+		Nuake::RenderCommand::Clear();
+
 		// Start imgui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();

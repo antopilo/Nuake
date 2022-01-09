@@ -129,8 +129,6 @@ namespace Nuake
 			}
 		}
 
-
-
 		void CharacterController::UpdatePosition()
 		{
 			// Ray cast, ignore rigid body

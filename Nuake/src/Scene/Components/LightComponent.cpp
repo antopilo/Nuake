@@ -67,7 +67,7 @@ namespace Nuake {
         //start = glm::rotate(start, glm::radians(Direction.z), glm::vec3(0, 0, 1));
 
         //return glm::vec3(start * glm::vec4(defaultDirection, 1.0f));
-        return Direction;
+        return glm::normalize(Direction);
     }
 
 

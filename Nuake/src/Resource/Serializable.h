@@ -6,9 +6,13 @@ using json = nlohmann::json;
 #define BEGIN_SERIALIZE() json j;
 #define SERIALIZE_VAL_LBL(lbl, v) j[lbl] = v;
 #define SERIALIZE_VAL(v) j[#v] = this->v;
-#define SERIALIZE_VEC3(v) \
+
+#define SERIALIZE_VEC2(v) \
 		j[#v]["x"] = this->v.x; \
-		j[#v]["y"] = this->v.y; \
+		j[#v]["y"] = this->v.y;
+
+#define SERIALIZE_VEC3(v) \
+		SERIALIZE_VEC2(v) \
 		j[#v]["z"] = this->v.z;
 
 #define SERIALIZE_VEC4(v) \
@@ -25,7 +29,6 @@ using json = nlohmann::json;
 #define DESERIALIZE_COMPONENT(c) \
 		if(j.contains(#c)) \
 			AddComponent<c>().Deserialize(j[#c].dump());
-
 
 class ISerializable
 {

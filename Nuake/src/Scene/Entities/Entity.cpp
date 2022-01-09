@@ -8,7 +8,12 @@
 #include "../Components/QuakeMap.h"
 #include "../Components/WrenScriptComponent.h"
 #include "../Components/CharacterControllerComponent.h"
+
+#include <src/Scene/Components/BoxCollider.h>
 #include <src/Scene/Components/MeshComponent.h>
+
+//#include <src/Scene/Components/BoxCollider.h>
+#include "src/Scene/Components/BSPBrushComponent.h"
 
 namespace Nuake
 {
@@ -39,8 +44,13 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>());
 		if (HasComponent<CharacterControllerComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>());
+
+		if (HasComponent<BoxColliderComponent>())
+			SERIALIZE_OBJECT_REF_LBL("BoxColliderComponent", GetComponent<BoxColliderComponent>());
 		if (HasComponent<MeshComponent>())
 			SERIALIZE_OBJECT_REF_LBL("MeshComponent", GetComponent<MeshComponent>());
+		if (HasComponent<BSPBrushComponent>())
+			SERIALIZE_OBJECT_REF_LBL("BSPBrushComponent", GetComponent<BSPBrushComponent>());
 		END_SERIALIZE();
 	}
 
@@ -56,6 +66,8 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(MeshComponent);
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
+		//DESERIALIZE_COMPONENT(BSPBrushComponent);
+		DESERIALIZE_COMPONENT(BoxColliderComponent);
 		return true;
 	}
 

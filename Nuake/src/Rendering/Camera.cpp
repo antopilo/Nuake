@@ -52,6 +52,7 @@ namespace Nuake
 		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
 		Direction = glm::normalize(direction);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
+
 	}
 
 	Vector3 Camera::GetTranslation() {
@@ -84,6 +85,12 @@ namespace Nuake
 	{
 		m_Frustum = Frustum(GetPerspective() * GetTransform());
 		return m_Frustum.IsBoxVisible(aabb.Min, aabb.Max);
+	}
+
+	Frustum Camera::GetFrustum()
+	{
+		m_Frustum = Frustum(GetPerspective() * GetTransform());
+		return m_Frustum;
 	}
 
 	json Camera::Serialize()

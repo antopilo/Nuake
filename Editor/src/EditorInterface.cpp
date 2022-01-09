@@ -280,7 +280,7 @@ namespace Nuake {
     void EditorInterface::DrawSceneTree()
     {
         Ref<Scene> scene = Engine::GetCurrentScene();
-
+          
         if (!scene)
             return;
 
@@ -299,8 +299,14 @@ namespace Nuake {
                 ImGuiHelper::DrawVec3("Mie Scattering", &mieScattering);
                 env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
             }
+            if (ImGui::CollapsingHeader("HDR", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                ImGui::DragFloat("Exposure", &env->Exposure, .01f, 0.0f, 10.0f);
+                ImGui::DragFloat("Gamma", &env->Gamma, 0.1f, 0.0f, 10.0f);
+            }
             if (ImGui::CollapsingHeader("Bloom", ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::Checkbox("Enabled", &env->BloomEnabled);
                 float threshold = env->mBloom->GetThreshold();
                 ImGui::DragFloat("Threshold", &threshold, 0.01f, 0.0f, 500.0f);
                 env->mBloom->SetThreshold(threshold);
@@ -311,6 +317,7 @@ namespace Nuake {
             }
             if (ImGui::CollapsingHeader("Fog", ImGuiTreeNodeFlags_DefaultOpen))
             {
+                ImGui::Checkbox("Enabled", &env->VolumetricEnabled);
                 ImGui::DragFloat("Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
                 ImGui::DragFloat("Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
             }
@@ -340,7 +347,6 @@ namespace Nuake {
                //    // Unselect delted entity.
                //    m_SelectedEntity = scene->GetAllEntities().at(0);
                //}
-
             }
             ImGui::EndChild();
 
@@ -388,8 +394,6 @@ namespace Nuake {
                     }
                 }
 
-                
-
                 ImGui::EndTable();
             }
 			ImGui::EndChild();
@@ -421,11 +425,10 @@ namespace Nuake {
                 QueueDeletion = Entity{ (entt::entity)-1, scene.get() };
             }
         }
+
         ImGui::End();
         ImGui::PopStyleVar();
     }
-
-
 
     void EditorInterface::DrawEntityPropreties()
     {
@@ -433,11 +436,21 @@ namespace Nuake {
         {
             if (!m_IsEntitySelected)
             {
-                ImGui::Text("No entity selected");
+                std::string text = "No entity selected";
+                auto windowWidth = ImGui::GetWindowSize().x;
+                auto windowHeight = ImGui::GetWindowSize().y;
+
+                auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+                auto textHeight = ImGui::CalcTextSize(text.c_str()).y;
+                ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+                ImGui::SetCursorPosY((windowHeight - textHeight) * 0.5f);
+
+                ImGui::PushFont(boldFont);
+                ImGui::Text(text.c_str());
+                ImGui::PopFont();
                 ImGui::End();
                 return;
             }
-
 
             if (m_SelectedEntity.HasComponent<NameComponent>()) {
                 auto& name = m_SelectedEntity.GetComponent<NameComponent>().Name;
@@ -612,10 +625,8 @@ namespace Nuake {
                     ImGui::PopFont();
                 }
 
-
                 ImGui::PopStyleVar();
             }
-           
 
             if (m_SelectedEntity.HasComponent<MeshComponent>()) 
             {
@@ -754,7 +765,13 @@ namespace Nuake {
                         ImGui::Text("Cast Shadows");
 
                         ImGui::TableNextColumn();
+                        
+                        // This will create framebuffers and textures.
+                        bool castShadows = component.CastShadows;
                         ImGui::Checkbox("##CastShadows", &component.CastShadows);
+                        if (castShadows != component.CastShadows)
+                            component.SetCastShadows(castShadows);
+
 
                         ImGui::TableNextColumn();
                         std::string resetShadow = ICON_FA_UNDO + std::string("##resetShadow");
@@ -1086,14 +1103,16 @@ namespace Nuake {
         else
         {
             const char* icon = ICON_FA_FILE;
+
             if (file->Type == ".shader")
                 icon = ICON_FA_FILE_CODE;
-            if (file->Type == ".map")
+            else if (file->Type == ".map")
                 icon = ICON_FA_BROOM;
-            if (file->Type == ".ogg" || file->Type == ".mp3" || file->Type == ".wav" || file->Type == ".flac")
+            else if (file->Type == ".ogg" || file->Type == ".mp3" || file->Type == ".wav" || file->Type == ".flac")
                 icon = ICON_FA_FILE_AUDIO;
-            if (file->Type == ".cpp" || file->Type == ".h" || file->Type == ".cs" || file->Type == ".py" || file->Type == ".lua")
+            else if (file->Type == ".cpp" || file->Type == ".h" || file->Type == ".cs" || file->Type == ".py" || file->Type == ".lua")
                 icon = ICON_FA_FILE_CODE;
+
             if (ImGui::Button(icon, ImVec2(100, 100)))
             {
                 if (ImGui::BeginPopupContextItem("item context menu"))
@@ -1106,7 +1125,6 @@ namespace Nuake {
         }
         ImGui::Text(file->name.c_str());
         ImGui::PopFont();
-
     }
 
     void EditorInterface::DrawDirectoryExplorer()
@@ -1367,7 +1385,7 @@ namespace Nuake {
         if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
         {
             unsigned int textureID = 0;
-            if (material->HasRougness())
+            if (material->HasRoughness())
                 textureID = material->m_Roughness->GetID();
             if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
             {
@@ -1506,7 +1524,7 @@ namespace Nuake {
                 if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasRougness())
+                    if (m_SelectedMaterial->HasRoughness())
                         textureID = m_SelectedMaterial->m_Roughness->GetID();
                     if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
                     {
@@ -1564,6 +1582,8 @@ namespace Nuake {
         Engine::LoadProject(project);
 
         pInterface.m_CurrentProject = project;
+
+        Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name); 
     }
 
     void OpenScene()
@@ -1657,12 +1677,12 @@ namespace Nuake {
                 ImGui::Separator();
                 if (ImGui::MenuItem("New scene"))
                 {
-                    OpenScene();
+                    Engine::LoadScene(Scene::New());
                     m_IsEntitySelected = false;
                 }
                 if (ImGui::MenuItem("Open scene...", "CTRL+SHIFT+O"))
                 {
-                    Engine::LoadScene(Scene::New());
+                    OpenScene();
                     m_IsEntitySelected = false;
                 }
                 if (ImGui::MenuItem("Save scene", "CTR+SHIFT+L+S"))

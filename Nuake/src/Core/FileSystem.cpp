@@ -90,6 +90,12 @@ namespace Nuake
 		return false;
 	}
 
+	bool FileSystem::FileExists(const std::string path)
+	{
+		std::ifstream f(path.c_str());
+		return f.good();
+	}
+
 	void FileSystem::SetRootDirectory(const std::string path)
 	{
 		Root = path;

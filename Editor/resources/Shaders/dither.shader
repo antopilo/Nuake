@@ -1,7 +1,6 @@
 #shader vertex
 #version 460 core
 
-
 layout(location = 0) in vec3 VertexPosition;
 
 uniform mat4 u_Projection;

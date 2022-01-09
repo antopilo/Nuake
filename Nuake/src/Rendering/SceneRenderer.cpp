@@ -45,9 +45,15 @@ namespace Nuake {
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
 
-		scene.GetEnvironment()->mBloom->SetSource(mShadingBuffer->GetTexture());
-		scene.GetEnvironment()->mBloom->Resize(framebuffer.GetSize());
-		scene.GetEnvironment()->mBloom->Draw();
+		Texture* finalOutput = mShadingBuffer->GetTexture().get();
+		if (scene.GetEnvironment()->BloomEnabled)
+		{
+			scene.GetEnvironment()->mBloom->SetSource(mShadingBuffer->GetTexture());
+			scene.GetEnvironment()->mBloom->Resize(framebuffer.GetSize());
+			scene.GetEnvironment()->mBloom->Draw();
+
+			finalOutput = scene.GetEnvironment()->mBloom->GetOutput().get();
+		}
 
 		auto view = scene.m_Registry.view<LightComponent>();
 		std::vector<LightComponent> lightList = std::vector<LightComponent>();
@@ -57,18 +63,26 @@ namespace Nuake {
 			if (lc.Type == Directional && lc.IsVolumetric)
 				lightList.push_back(lc);
 		}
-			
+		
+		if (scene.GetEnvironment()->VolumetricEnabled)
+		{
+			mVolumetric->Resize(framebuffer.GetSize());
+			mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
+			mVolumetric->Draw(mProjection, mView, lightList);
 
-		mVolumetric->Resize(framebuffer.GetSize());
-		mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
-		mVolumetric->Draw(mProjection, mView, lightList);
+			finalOutput = mVolumetric->GetFinalOutput();
+		}
+		
 
 		// Copy final output to target framebuffer
 		framebuffer.Bind();
 		{
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+			Shader* shader = ShaderManager::GetShader("resources/Shaders/tonemap.shader");
 			shader->Bind();
-			shader->SetUniformTex("u_Source", scene.GetEnvironment()->mBloom->GetOutput().get());
+
+			shader->SetUniform1f("u_Exposure", scene.GetEnvironment()->Exposure);
+			shader->SetUniform1f("u_Gamma", scene.GetEnvironment()->Gamma);
+			shader->SetUniformTex("u_Source", finalOutput);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -184,7 +198,7 @@ namespace Nuake {
 			shadingShader->Bind();
 			shadingShader->SetUniformMat4f("u_Projection", mProjection);
 			shadingShader->SetUniformMat4f("u_View", mView);
-			shadingShader->SetUniformVec3("u_EyePosition", mView[3]);
+			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
 
 			Ref<Environment> env = scene.GetEnvironment();
 

@@ -32,9 +32,14 @@ namespace Nuake {
 		glBindBuffer(GetType(bufferType), bufferID);
 	}
 
-	void OGLRendererAPI::SetBufferData(const RendererEnum bufferType, const void* data, unsigned int size)
+	void OGLRendererAPI::SetBufferData(const RendererEnum bufferType, const void* data, unsigned int size, const RendererEnum bufferDataHint)
 	{
-		glBufferData(GetType(bufferType), size, data, GL_STATIC_DRAW);
+		glBufferData(GetType(bufferType), size, data, GetType(bufferDataHint));
+	}
+
+	void OGLRendererAPI::SetBufferSubData(const RendererEnum bufferType, const void* data, unsigned int size, unsigned int offset)
+	{
+		glBufferSubData(GetType(bufferType), offset, size, data);
 	}
 
 	void OGLRendererAPI::DeleteBuffer(const unsigned int& bufferID)
@@ -83,6 +88,11 @@ namespace Nuake {
 		glDrawArrays(GL_TRIANGLES, from, count);
 	}
 
+	void OGLRendererAPI::DrawLines(int from, int count)
+	{
+		glDrawArrays(GL_LINES, from, count);
+	}
+
 	GLenum OGLRendererAPI::GetType(const RendererEnum& bufferType)
 	{
 		switch (bufferType)
@@ -96,8 +106,12 @@ namespace Nuake {
 			case RendererEnum::INT: return GL_INT;
 			case RendererEnum::UINT: return GL_UNSIGNED_INT;
 			case RendererEnum::TRIANGLES: return GL_TRIANGLES;
+			case RendererEnum::LINES: return GL_LINES;
 			case RendererEnum::DEPTH_TEST: return GL_DEPTH_TEST;
 			case RendererEnum::FACE_CULL: return GL_CULL_FACE;
+			case RendererEnum::STATIC_DRAW: return GL_STATIC_DRAW;
+			case RendererEnum::DYNAMIC_DRAW: return GL_DYNAMIC_DRAW;
+			case RendererEnum::STREAM_DRAW: return GL_STREAM_DRAW;
 		}
 
 		return 0;

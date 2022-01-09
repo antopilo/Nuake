@@ -4,12 +4,13 @@
 #include <string>
 #include "src/Core/Maths.h"
 #include "msdfgen/core/BitmapRef.hpp"
+#include "src/Resource/Serializable.h"
 
 namespace Nuake
 {
 	typedef unsigned int GLenum;
 
-	class Texture
+	class Texture : ISerializable
 	{
 	private:
 		unsigned int m_RendererId;
@@ -43,5 +44,21 @@ namespace Nuake
 		inline int GetWidth() const { return m_Width; }
 		inline int GetHeight() const { return m_Height; }
 		inline Vector2 GetSize() const { return Vector2(m_Width, m_Height); }
+
+		json Serialize() override
+		{
+			BEGIN_SERIALIZE();
+			j["Path"] = this->m_FilePath;
+			END_SERIALIZE();
+		}
+
+		bool Deserialize(const std::string& str) override
+		{
+			BEGIN_DESERIALIZE();
+			if (j.contains("Path"))
+				return false;
+
+
+		}
 	};
 }

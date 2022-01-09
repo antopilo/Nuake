@@ -96,7 +96,7 @@ namespace Nuake
 
 		void DynamicWorld::StepSimulation(Timestep ts)
 		{
-			dynamicsWorld->stepSimulation(ts);
+			dynamicsWorld->stepSimulation(ts, 0);
 			for (int j = dynamicsWorld->getNumCollisionObjects() - 1; j >= 0; j--)
 			{
 				btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[j];

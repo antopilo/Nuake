@@ -103,7 +103,7 @@ class Vector3 {
 	}
 
 	Cross(vec) {
-		Math.Cross(this, vec)
+		return Math.Cross(this, vec)
 	}
 
 	Normalize() {

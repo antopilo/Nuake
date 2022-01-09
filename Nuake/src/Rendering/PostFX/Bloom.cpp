@@ -2,6 +2,7 @@
 #include <dependencies/GLEW/include/GL/glew.h>
 #include "src/Rendering/Renderer.h"
 #include <src/Vendors/imgui/imgui.h>
+#include "Engine.h"
 
 namespace Nuake
 {
@@ -72,6 +73,7 @@ namespace Nuake
 		if (!m_Source) return;
 
 		Shader* shader = ShaderManager::GetShader("resources/Shaders/bloom.shader");
+
 
 		m_ThresholdFB->Bind();
 		{
@@ -163,7 +165,6 @@ namespace Nuake
 			shader->SetUniform1i("u_Stage", 5);
 			shader->SetUniform1i("u_Source", 1);
 			shader->SetUniform1i("u_Source2", 2);
-
 			m_UpSampleFB[m_Iteration - 1]->GetTexture()->Bind(1);
 			m_Source->Bind(2);
 			Renderer::DrawQuad(Matrix4());

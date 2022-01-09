@@ -69,6 +69,8 @@ namespace Nuake {
 		void AddInterface(Ref<UI::UserInterface> interface);
 
 		json Serialize() override;
+
+		Scene* Copy();
 		bool Deserialize(const std::string& str) override;
 	};
 }

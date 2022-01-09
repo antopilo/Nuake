@@ -12,7 +12,6 @@ namespace Nuake
 			m_Shaders[path] = CreateScope<Shader>(path);
 		}
 
-
 		return m_Shaders[path].get();
 	}
 }

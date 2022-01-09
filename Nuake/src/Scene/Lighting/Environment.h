@@ -13,11 +13,15 @@ namespace Nuake
 	{
 	public:
 		Environment();
+		bool VolumetricEnabled = false;
 		float VolumetricFog = 0.90f;
 		float VolumetricStepCount = 50.f;
 
-		Scope<Bloom> mBloom;
+		float Exposure = 3.5f;
+		float Gamma = 1.1f;
 
+		bool BloomEnabled = false;
+		Scope<Bloom> mBloom;
 		Vector3 ClearColor;
 
 		glm::vec4 AmbientColor;

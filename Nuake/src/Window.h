@@ -11,8 +11,11 @@ namespace Nuake
 	class Window
 	{
 	private:
+		const std::string DEFAULT_TITLE = "Untitled Window";
+
 		static Ref<Window> s_Instance;
 
+		std::string m_Title;
 		int m_Width = 1280;
 		int m_Height = 720;
 
@@ -42,6 +45,9 @@ namespace Nuake
 		Vector2 GetSize();
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);
+
+		void SetTitle(const std::string& title);
+		std::string GetTitle();
 	};
 }
 

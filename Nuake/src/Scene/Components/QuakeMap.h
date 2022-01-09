@@ -26,6 +26,12 @@ namespace Nuake {
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(HasCollisions);
 			SERIALIZE_VAL(Path);
+
+			for (unsigned int i = 0; i < m_Meshes.size(); i++)
+			{
+				j["Meshes"][i] = m_Meshes[i]->Serialize();
+			}
+			
 			END_SERIALIZE();
 		}
 
@@ -34,7 +40,6 @@ namespace Nuake {
 			BEGIN_DESERIALIZE();
 			this->Path = j["Path"];
 			this->HasCollisions = j["HasCollisions"];
-
 			return true;
 		}
 	};
