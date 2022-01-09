@@ -136,8 +136,8 @@ vec3 scatter(vec3 o, vec3 d, float L, vec3 Lo) {
 	return vec3(1.0);
 }
 
-uniform mat4 InvProjection;
-uniform mat4 InvView;
+uniform mat4 Projection;
+uniform mat4 View;
 void main()
 {
 	// Might add camera position in here.
@@ -145,7 +145,7 @@ void main()
 	
 	vec2 NDC = UV * 2.0 - 1;
 
-	vec4 camSpace = inverse(InvProjection * InvView) * vec4(vec3(NDC, 1.0), 1.0);
+	vec4 camSpace = inverse(Projection * View) * vec4(vec3(NDC, 1.0), 1.0);
 	vec3 direction = normalize(camSpace.xyz);
 	vec3 D = direction;
 
@@ -153,9 +153,5 @@ void main()
 	vec3 col = vec3(1.0);
 	float L = escape(O, D, AtmosphereRadius);
 	col = scatter(O, D, L, col);
-	col = col / (col + vec3(1.0));
-	// gamma correct
-	col = pow(col, vec3(1.0 / u_Exposure));
-
 	FragColor = vec4(col, 1.);
 }

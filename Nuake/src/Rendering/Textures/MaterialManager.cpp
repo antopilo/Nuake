@@ -7,6 +7,8 @@
 #include "json/json.hpp"
 
 #include "../Rendering/Textures/Material.h"
+#include "src/Core/FileSystem.h"
+#include "src/Core/Logger.h"
 
 namespace Nuake
 {
@@ -17,16 +19,25 @@ namespace Nuake
 	MaterialManager::MaterialManager()
 	{
 		m_Materials = std::map<std::string, Ref<Material>>();
+
+		GetMaterial(DEFAULT_MATERIAL);
 	}
 
-	Ref<Material>  MaterialManager::GetMaterial(const std::string name)
+	Ref<Material> MaterialManager::GetMaterial(std::string name)
 	{
+		if (!FileSystem::FileExists(name))
+		{
+			Logger::Log("Couldn't load material: " + name + " - File doesn't exists", Nuake::LOG_TYPE::CRITICAL);
+			name = DEFAULT_MATERIAL;
+		}
+
 		if (!IsMaterialLoaded(name))
 		{
 			Ref<Material> newMaterial = CreateRef<Material>(name);
 			RegisterMaterial(newMaterial);
 			return newMaterial;
 		}
+
 		return m_Materials[name];
 	}
 

@@ -7,7 +7,7 @@
 #include "src/Core/Physics/Rigibody.h"
 
 namespace Nuake {
-	class BSPBrushComponent 
+	class BSPBrushComponent
 	{
 	public:
 		std::vector<Ref<Mesh>> Meshes;
@@ -22,10 +22,28 @@ namespace Nuake {
 		bool IsTransparent = false;
 		bool IsFunc = false;
 
-		BSPBrushComponent() {
+		BSPBrushComponent() 
+		{
 			Meshes = std::vector<Ref<Mesh>>();
 			Materials = std::vector<Ref<Material>>();
 			Rigidbody = std::vector<Ref<Physics::RigidBody>>();
+		}
+
+		json Serialize()
+		{
+			BEGIN_SERIALIZE();
+
+			for (unsigned int i = 0; i < Meshes.size(); i++)
+			{
+				j["Meshes"][i] = Meshes[i]->Serialize();
+			}
+
+			END_SERIALIZE();
+		}
+
+		bool Deserialize()
+		{
+
 		}
 	};
 }

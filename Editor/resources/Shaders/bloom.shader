@@ -19,7 +19,8 @@ uniform int u_Stage;
 
 uniform sampler2D u_Source;
 uniform vec2 u_SourceSize;
-
+uniform float u_Exposure;
+uniform float u_Gamma;
 uniform sampler2D u_Source2;
 uniform vec2 u_Source2Size;
 
@@ -99,28 +100,7 @@ vec4 blur9(sampler2D image, vec2 uv, vec2 resolution, vec2 direction) {
     return color;
 }
 
-vec3 acesOperator(vec3 rgbColour)
-{
-    const mat3 inputMatrix = mat3
-    (
-        vec3(0.59719, 0.07600, 0.02840),
-        vec3(0.35458, 0.90834, 0.13383),
-        vec3(0.04823, 0.01566, 0.83777)
-    );
 
-    const mat3 outputMatrix = mat3
-    (
-        vec3(1.60475, -0.10208, -0.00327),
-        vec3(-0.53108, 1.10813, -0.07276),
-        vec3(-0.07367, -0.00605, 1.07602)
-    );
-
-    vec3 inputColour = inputMatrix * rgbColour;
-    vec3 a = inputColour * (inputColour + vec3(0.0245786)) - vec3(0.000090537);
-    vec3 b = inputColour * (0.983729 * inputColour + 0.4329510) + 0.238081;
-    vec3 c = a / b;
-    return outputMatrix * c;
-}
 
 void main()
 {
@@ -150,15 +130,7 @@ void main()
         outputColor += texture(u_Source2, UV);
 
         vec3 color = outputColor.rgb;
-
-        color = acesOperator(color);
-
-        color = color / (color + vec3(1.0));
-        color = vec3(1.0) - exp(-color * 1.0);
-        color = pow(color, vec3(1.0 / 2.2));
-
         outputColor = vec4(color, 1.0);//vec4(acesOperator(outputColor.rgb), 1.0f);
-
     }
     FragColor = outputColor;
 }

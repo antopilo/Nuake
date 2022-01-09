@@ -13,20 +13,24 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include "Buffers/VertexBufferLayout.h"
+#include "src/Rendering/Textures/MaterialManager.h"
+#include "src/Rendering/Vertex.h"
 
 namespace Nuake
 {
     unsigned int depthTexture;
     unsigned int depthFBO;
 
-    Ref<Shader> Renderer::m_Shader;
-    Ref<Shader> Renderer::m_SkyboxShader;
-    Ref<Shader> Renderer::m_BRDShader;
-    Ref<Shader> Renderer::m_GBufferShader;
-    Ref<Shader> Renderer::m_DeferredShader;
-    Ref<Shader> Renderer::m_ProceduralSkyShader;
-    Ref<Shader> Renderer::m_DebugShader;
-    Ref<Shader> Renderer::m_ShadowmapShader;
+    Ref<Mesh> Renderer::CubeMesh;
+
+    Shader* Renderer::m_Shader;
+    Shader* Renderer::m_SkyboxShader;
+    Shader* Renderer::m_BRDShader;
+    Shader* Renderer::m_GBufferShader;
+    Shader* Renderer::m_DeferredShader;
+    Shader* Renderer::m_ProceduralSkyShader;
+    Shader* Renderer::m_DebugShader;
+    Shader* Renderer::m_ShadowmapShader;
 
     VertexArray* Renderer::QuadVertexArray;
     VertexBuffer* Renderer::QuadVertexBuffer;
@@ -36,19 +40,26 @@ namespace Nuake
     Ref<UniformBuffer> Renderer::m_LightsUniformBuffer;
     RenderList Renderer::m_RenderList = RenderList();
 
-    glm::vec3 CubeVertices[36] {
-           glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,   0.5f, -0.5f),
-           glm::vec3(0.5f,   0.5f, -0.5f), glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
-           glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(0.5f,  -0.5f,  0.5f), glm::vec3(0.5f,   0.5f,  0.5f),
-           glm::vec3(0.5f,   0.5f,  0.5f), glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(-0.5f, -0.5f,  0.5f),
-           glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
-           glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-0.5f,  0.5f,  0.5f),
-           glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(0.5f, -0.5f, -0.5f),
-           glm::vec3(0.5f, -0.5f, -0.5f),  glm::vec3(0.5f, -0.5f,  0.5f),  glm::vec3(0.5f,  0.5f,  0.5f),
-           glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f, -0.5f), glm::vec3(0.5f,  -0.5f,  0.5f),
-           glm::vec3(0.5f,  -0.5f,  0.5f), glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-0.5f, -0.5f, -0.5f),
-           glm::vec3(-0.5f, 0.5f, -0.5f),  glm::vec3(0.5f,  0.5f, -0.5f),  glm::vec3(0.5f,  0.5f,  0.5f),
-           glm::vec3(0.5f,  0.5f,  0.5f),  glm::vec3(-0.5f, 0.5f,  0.5f),  glm::vec3(-0.5f, 0.5f, -0.5f)
+    std::vector<Vertex> CubeVertices
+    {
+        {Vector3(-0.5f, -0.5f, -0.5f), Vector2(0, 0), Vector3(-1, 0, 0)},
+        {Vector3( 0.5f, -0.5f, -0.5f), Vector2(1, 0), Vector3(-1, -1, 0)},
+        {Vector3( 0.5f,  0.5f, -0.5f), Vector2(0, 1), Vector3(-1, 0, 0)},
+        {Vector3(-0.5f,  0.5f, -0.5f), Vector2(1, 1), Vector3(-1, 0, 0)},
+        {Vector3(-0.5f, -0.5f,  0.5f), Vector2(0, 1), Vector3(-1, 0, 0)},
+        {Vector3( 0.5f, -0.5f,  0.5f), Vector2(1, 0), Vector3(-1, 0, 0)},
+        {Vector3( 0.5f,  0.5f,  0.5f), Vector2(1, 1), Vector3(-1, 0, 0)},
+        {Vector3(-0.5f,  0.5f,  0.5f), Vector2(1, 1), Vector3(-1, 0, 0)}
+    };
+
+    std::vector<unsigned int> CubeIndices
+    {
+        0, 1, 3, 3, 1, 2,
+        1, 5, 2, 2, 5, 6,
+        5, 4, 6, 6, 4, 7,
+        4, 0, 7, 7, 0, 3,
+        3, 2, 7, 7, 2, 6,
+        4, 5, 0, 0, 5, 1
     };
 
     float QuadVertices[] = {
@@ -69,14 +80,18 @@ namespace Nuake
 
         m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
-        // Cube buffer
-        CubeVertexArray = new VertexArray();
-        CubeVertexArray->Bind();
-        CubeVertexBuffer = new VertexBuffer(CubeVertices, sizeof(CubeVertices));
+        Ref<Material> material = MaterialManager::Get()->GetMaterial("default");
 
+        CubeMesh = CreateRef<Mesh>(CubeVertices, CubeIndices, material);
+
+        // Cube buffer
+        //CubeVertexArray = new VertexArray();
+        //CubeVertexArray->Bind();
+        //CubeVertexBuffer = new VertexBuffer(CubeVertices, sizeof(CubeVertices));
+        //
         VertexBufferLayout vblayout = VertexBufferLayout();
         vblayout.Push<float>(3);
-        CubeVertexArray->AddBuffer(*CubeVertexBuffer, vblayout);
+        //CubeVertexArray->AddBuffer(*CubeVertexBuffer, vblayout);
 
         // Quad buffer
         QuadVertexArray = new VertexArray();
@@ -91,14 +106,6 @@ namespace Nuake
 
     void Renderer::LoadShaders()
     {
-        m_ShadowmapShader   = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
-        m_SkyboxShader      = ShaderManager::GetShader("resources/Shaders/skybox.shader");
-        m_BRDShader         = ShaderManager::GetShader("resources/Shaders/BRD.shader");
-        m_GBufferShader     = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
-        m_DeferredShader    = ShaderManager::GetShader("resources/Shaders/deferred.shader");
-        m_ProceduralSkyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
-        m_DebugShader       = ShaderManager::GetShader("resources/Shaders/debug.shader");
-        m_Shader            = ShaderManager::GetShader("resources/Shaders/pbr.shader");
     }
 
     void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform)
@@ -106,13 +113,23 @@ namespace Nuake
         m_RenderList.AddToRenderList(mesh, transform);
     }
 
-    void Renderer::Flush(Ref<Shader> shader, bool depthOnly)
+    void Renderer::SubmitCube(Matrix4 transform)
+    {
+        m_RenderList.AddToRenderList(CubeMesh, transform);
+    }
+
+    void Renderer::Flush(Shader* shader, bool depthOnly)
     {
         m_RenderList.Flush(shader, depthOnly);
     }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
+        Shader* lineShader = ShaderManager::GetShader("resources/Shaders/line.shader");
+        lineShader->Bind();
+        lineShader->SetUniformMat4f("u_Projection", camera->GetPerspective());
+        lineShader->SetUniformMat4f("u_View", camera->GetTransform());
+
         m_Shader->Bind();
         m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
         m_Shader->SetUniformMat4f("u_View", camera->GetTransform());
@@ -127,57 +144,19 @@ namespace Nuake
     // List of all lights queued to be used for rendering this frame.
     std::vector<Light> Renderer::m_Lights;
 
-    void Renderer::RegisterLight(TransformComponent transform, LightComponent light)
-    {
-        if (m_Lights.size() == 20)
-            return;
-
-        m_Lights.push_back({ transform , light });
-
-        int idx = m_Lights.size();
-
-        Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GlobalTranslation;
-        Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        
-
-        //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
-        if (light.CastShadows)
-        {
-            for (unsigned int i = 0; i < CSM_AMOUNT; i++)
-            {
-                light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
-                m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMaps[" + std::to_string(i) + "]", 17 + i);
-                m_Shader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
-                m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
-            }
-        }
-
-        m_Shader->SetUniform1i("LightCount", idx);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
-        m_Shader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
-        m_Shader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z);
-        m_Shader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
-        m_Shader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
-        m_Shader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
-    }
-
     void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light)
     {
         if (m_Lights.size() == 20)
             return;
 
-
-        Ref<Shader> deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        Shader* deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         deferredShader->Bind();
         m_Lights.push_back({ transform , light });
 
         int idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GetGlobalTransform()[3];
-        Matrix4 lightView = glm::lookAt(pos, pos - direction, glm::vec3(0.0f, 1.0f, 0.0f));
+        Vector3 pos = transform.GlobalTranslation;
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
@@ -197,14 +176,37 @@ namespace Nuake
 
        deferredShader->SetUniform1i("LightCount", idx);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
-       deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransform", light.GetProjection() * lightView);
-       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position",pos.x, pos.y, pos.z);
+       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", pos.x, pos.y, pos.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
 
        m_LightsUniformBuffer->Bind();
        //m_LightsUniformBuffer->UpdateData()
+    }
+
+    void Renderer::DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform)
+    {
+        Shader* shader = ShaderManager::GetShader("resources/Shaders/line.shader");
+        shader->Bind();
+        shader->SetUniformMat4f("u_Model", transform);
+        shader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
+        
+        std::vector<Vertex> vertices
+        {
+            {start, Vector2(0, 0), Vector3(-1, 0, 0)},
+            {end, Vector2(1, 0), Vector3(-1, -1, 0)}
+        };
+
+        VertexArray lineVertexArray = VertexArray();
+        lineVertexArray.Bind();
+        VertexBuffer lineVertexBuffer = VertexBuffer(&vertices, size(vertices));
+    
+        VertexBufferLayout vblayout = VertexBufferLayout();
+        vblayout.Push<float>(3);
+        lineVertexArray.AddBuffer(lineVertexBuffer, vblayout);
+
+        RenderCommand::DrawLines(0, 2);
     }
 
     void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) 

@@ -23,22 +23,19 @@ namespace Nuake
 
 		Vector3 Rotation = { 0.0f, 0.0f, 0.0f };
 		Vector3 Scale = { 1.0f, 1.0f, 1.0f };
+		Vector3 Up = Vector3(0, 1, 0);
+		Vector3 Right = Vector3(1, 0, 0);
 		Matrix4 m_Perspective;
+
 
 	public:
 		float AspectRatio = 16.0f / 9.0f;
-		// TODO: remove duplicate direction and have a proper api.
-		Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
-		Vector3 cameraFront = Vector3(0.0f, 0.0f, 1.0f);
-
-		Vector3 cameraTarget;
-		Vector3 cameraDirection;
-
+		
+		Vector3 Direction = Vector3(0, 0, 1);
 		Vector3 Translation = { 0.0f, 0.0f, 0.0f };
-		Vector3 cameraRight;
-		Vector3 cameraUp;
 		float Fov = 88.0f;
 		float Exposure = 1.0f;
+		float Gamma = 2.2f;
 		float Speed = 1.0f;
 
 		Camera();
@@ -54,9 +51,10 @@ namespace Nuake
 		Matrix4 GetPerspective();
 		Matrix4 GetTransform();
 		Matrix4 GetTransformRotation();
-		
+		inline Vector3 GetRight() const { return Right; }
+		inline Vector3 GetUp() const { return glm::cross(Direction, Right); }
 		bool BoxFrustumCheck(const AABB& aabb);
-
+		Frustum GetFrustum();
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;
 

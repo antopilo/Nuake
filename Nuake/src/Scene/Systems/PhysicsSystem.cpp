@@ -37,7 +37,7 @@ namespace Nuake
 
 				rigidbody.m_Rigidbody = btRigidbody;
 
-				btRigidbody->SetKinematic(rigidbody.IsKinematic);
+				//btRigidbody->SetKinematic(rigidbody.IsKinematic);
 
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
@@ -61,16 +61,16 @@ namespace Nuake
 		{
 			auto [transform, brush] = bspView.get<TransformComponent, BSPBrushComponent>(e);
 
-			if (brush.IsSolid)
+			if (!brush.IsSolid)
+				continue;
+
+			for (auto m : brush.Meshes)
 			{
-				for (auto m : brush.Meshes)
-				{
-					Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-					Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
-					btRigidbody->SetEntityID(Entity{ e, m_Scene });
-					brush.Rigidbody.push_back(btRigidbody);
-					PhysicsManager::Get()->RegisterBody(btRigidbody);
-				}
+				Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
+				btRigidbody->SetEntityID(Entity{ e, m_Scene });
+				brush.Rigidbody.push_back(btRigidbody);
+				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
 		}
 
@@ -93,14 +93,12 @@ namespace Nuake
 		if (!Engine::IsPlayMode)
 			return;
 
-		PhysicsManager::Get()->Step(ts);
-
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
-		for (auto e : brushes) 
+		for (auto e : brushes)
 		{
 			auto [transform, brush] = brushes.get<TransformComponent, BSPBrushComponent>(e);
 
-			for (auto& r : brush.Rigidbody) 
+			for (auto& r : brush.Rigidbody)
 			{
 				r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
 				r->UpdateTransform(*r->m_Transform);
@@ -111,27 +109,26 @@ namespace Nuake
 
 			brush.Targets.clear();
 			auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-			for (auto e2 : targetnameView) 
+			for (auto e2 : targetnameView)
 			{
 				auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
 
-				if (name.Name == brush.target) 
+				if (name.Name == brush.target)
 				{
 					brush.Targets.push_back(Entity{ e2, m_Scene });
 				}
 			}
 		}
 
-
 		auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		for (auto e : bspTriggerView) 
+		for (auto e : bspTriggerView)
 		{
 			auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
 			trigger.GhostObject->ScanOverlap();
 
 			brush.Targets.clear();
 			auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-			for (auto e2 : targetnameView) 
+			for (auto e2 : targetnameView)
 			{
 				auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
 
@@ -156,7 +153,10 @@ namespace Nuake
 
 	void PhysicsSystem::FixedUpdate(Timestep ts)
 	{
+		if (!Engine::IsPlayMode)
+			return;
 
+		PhysicsManager::Get()->Step(ts);
 	}
 
 	void PhysicsSystem::Exit()

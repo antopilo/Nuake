@@ -78,7 +78,7 @@ void main()
     if (u_HasAlbedo == 1)
         gAlbedo.rgb = texture(m_Albedo, UV).rgb;
 
-    gAlbedo.rgb = texture(m_Albedo, UV).rgb;
+    gAlbedo.rgb = texture(m_Albedo, UV).rgb * m_AlbedoColor.rgb;
     
     // Material
     float finalMetalness = u_MetalnessValue;

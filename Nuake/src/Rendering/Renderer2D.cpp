@@ -7,8 +7,8 @@
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 namespace Nuake
 {
-	Ref<Shader> Renderer2D::UIShader;
-	Ref<Shader> Renderer2D::TextShader;
+	Shader* Renderer2D::UIShader;
+	Shader* Renderer2D::TextShader;
 
 	unsigned int Renderer2D::VAO;
 	unsigned int Renderer2D::VBO;

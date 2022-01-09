@@ -30,7 +30,7 @@ namespace Nuake
 			m_RenderList[mesh->m_Material].push_back({mesh, transform});
 		}
 
-		void Flush(Ref<Shader> shader, bool depthOnly = false)
+		void Flush(Shader* shader, bool depthOnly = false)
 		{
 			shader->Bind();
 			for (auto& i : m_RenderList)

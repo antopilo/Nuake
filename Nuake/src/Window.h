@@ -11,17 +11,17 @@ namespace Nuake
 	class Window
 	{
 	private:
+		const std::string DEFAULT_TITLE = "Untitled Window";
+
 		static Ref<Window> s_Instance;
 
+		std::string m_Title;
 		int m_Width = 1280;
 		int m_Height = 720;
 
 		GLFWwindow* m_Window;
 
 		Ref<FrameBuffer> m_Framebuffer;
-		Ref<FrameBuffer> m_GBuffer;
-		Ref<FrameBuffer> m_DeferredBuffer;
-		Ref<FrameBuffer> m_BloomFrameBuffer;
 
 		Ref<Scene> m_Scene;
 		Vector2 m_FramebufferOffset;
@@ -42,11 +42,12 @@ namespace Nuake
 		void EndDraw();
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
-		Ref<FrameBuffer> GetGBuffer() const;
-		Ref<FrameBuffer> GetDeferredBuffer() const;
 		Vector2 GetSize();
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);
+
+		void SetTitle(const std::string& title);
+		std::string GetTitle();
 	};
 }
 

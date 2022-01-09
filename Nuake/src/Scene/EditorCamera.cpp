@@ -52,18 +52,18 @@ namespace Nuake
 			glm::vec3 movement = glm::vec3(0, 0, 0);
 
 			if (Input::IsKeyDown(GLFW_KEY_D))
-				movement -= cameraRight * (Speed * ts);
+				movement -= Right * (Speed * ts);
 			if (Input::IsKeyDown(GLFW_KEY_A))
-				movement += cameraRight * (Speed * ts);
+				movement += Right * (Speed * ts);
 
 			if (Input::IsKeyDown(GLFW_KEY_W))
-				movement += cameraDirection * (Speed * ts);
+				movement += Direction * (Speed * ts);
 			if (Input::IsKeyDown(GLFW_KEY_S))
-				movement -= cameraDirection * (Speed * ts);
+				movement -= Direction * (Speed * ts);
 			if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
-				movement -= up * (Speed * ts);
+				movement -= Up * (Speed * ts);
 			if (Input::IsKeyDown(GLFW_KEY_SPACE))
-				movement += up * (Speed * ts);
+				movement += Up * (Speed * ts);
 
 			Translation += Vector3(movement);
 		}
@@ -93,10 +93,10 @@ namespace Nuake
 		if (Pitch < -89.0f)
 			Pitch = -89.0f;
 
-		cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		cameraDirection.y = sin(glm::radians(Pitch));
-		cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		cameraFront = glm::normalize(cameraDirection);
-		cameraRight = glm::normalize(glm::cross(up, cameraFront));
+		Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction.y = sin(glm::radians(Pitch));
+		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction = glm::normalize(Direction);
+		Right = glm::normalize(glm::cross(Up, Direction));
 	}
 }

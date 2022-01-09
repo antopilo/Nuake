@@ -23,6 +23,8 @@ namespace Nuake
 
 	Material::Material(const std::string albedo)
 	{
+		InitUniformBuffer();
+
 		glGenBuffers(1, &UBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
@@ -56,6 +58,8 @@ namespace Nuake
 
 	Material::Material(const glm::vec3 albedoColor)
 	{
+		InitUniformBuffer();
+
 		glGenBuffers(1, &UBO);
 		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
 		glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
@@ -84,7 +88,7 @@ namespace Nuake
 
 	Material::~Material() {}
 
-	void Material::Bind(Ref<Shader> shader)
+	void Material::Bind(Shader* shader)
 	{
 		//if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
 		//	return;
@@ -142,6 +146,7 @@ namespace Nuake
 
 	void Material::SetupUniformBuffer()
 	{
+
 	}
 
 	void Material::SetName(const std::string name)

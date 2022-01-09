@@ -19,6 +19,16 @@ namespace Nuake {
 		sRendererAPI->SetClearColor(color);
 	}
 
+	void RenderCommand::Enable(const RendererEnum enumType)
+	{
+		sRendererAPI->Enable(enumType);
+	}
+
+	void RenderCommand::Disable(const RendererEnum enumType)
+	{
+		sRendererAPI->Disable(enumType);
+	}
+
 	void RenderCommand::GenBuffer(unsigned int& bufferID)
 	{
 		sRendererAPI->GenBuffer(bufferID);
@@ -29,9 +39,14 @@ namespace Nuake {
 		sRendererAPI->BindBuffer(bufferType, bufferID);
 	}
 
-	void RenderCommand::SetBufferData(const RendererEnum bufferType, const void* data, unsigned int size)
+	void RenderCommand::SetBufferData(const RendererEnum bufferType, const void* data, unsigned int size, const RendererEnum dataHint)
 	{
-		sRendererAPI->SetBufferData(bufferType, data, size);
+		sRendererAPI->SetBufferData(bufferType, data, size, dataHint);
+	}
+
+	void RenderCommand::SetBufferSubData(const RendererEnum bufferType, const void* data, unsigned int size, unsigned int offset)
+	{
+		sRendererAPI->SetBufferSubData(bufferType, data, size, offset);
 	}
 
 	void RenderCommand::DeleteBuffer(unsigned int bufferID)
@@ -77,5 +92,10 @@ namespace Nuake {
 	void RenderCommand::DrawArrays(int first, int count)
 	{
 		sRendererAPI->DrawArrays(first, count);
+	}
+
+	void RenderCommand::DrawLines(int first, int count)
+	{
+		sRendererAPI->DrawLines(first, count);
 	}
 }

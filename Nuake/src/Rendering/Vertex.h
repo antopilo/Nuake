@@ -12,5 +12,11 @@ namespace Nuake
 		Vector3 bitangent;
 		float texture;
 	};
+
+	struct LineVertex
+	{
+		Vector3 position;
+		Vector4 color;
+	};
 }
 

@@ -218,7 +218,44 @@ void generate_brush_vertices(int entity_idx, int brush_idx)
                         face *face_inst = &entities[entity_idx].brushes[brush_idx].faces[f0];
                         face_geometry *face_geo_inst = &entity_geo[entity_idx].brushes[brush_idx].faces[f0];
 
-                        vec3 normal = face_inst->plane_normal;
+                        vec3 normal;
+
+                        const char* phong_property = map_data_get_entity_property(entity_idx, "_phong");
+                        bool phong = phong_property != NULL && strcmp(phong_property, "1") == 0;
+
+                        if (phong)
+                        {
+                            const char* phong_angle_property = map_data_get_entity_property(entity_idx, "_phong_angle");
+                            if (phong_angle_property != NULL)
+                            {
+                                double threshold = cos((atof(phong_angle_property) + 0.01) * 0.0174533);
+                                normal = brush_inst->faces[f0].plane_normal;
+                                if (vec3_dot(brush_inst->faces[f0].plane_normal, brush_inst->faces[f1].plane_normal) > threshold)
+                                {
+                                    normal = vec3_add(normal, brush_inst->faces[f1].plane_normal);
+                                }
+                                if (vec3_dot(brush_inst->faces[f0].plane_normal, brush_inst->faces[f2].plane_normal) > threshold)
+                                {
+                                    normal = vec3_add(normal, brush_inst->faces[f2].plane_normal);
+                                }
+                                normal = vec3_normalize(normal);
+                            }
+                            else
+                            {
+                                normal = vec3_normalize(
+                                    vec3_add(
+                                        brush_inst->faces[f0].plane_normal,
+                                        vec3_add(
+                                            brush_inst->faces[f1].plane_normal,
+                                            brush_inst->faces[f2].plane_normal)));
+                            }
+                        }
+                        else
+                        {
+                            normal = face_inst->plane_normal;
+                        }
+
+                        
 
                         texture_data *texture = map_data_get_texture(face_inst->texture_idx);
 
@@ -242,6 +279,7 @@ void generate_brush_vertices(int entity_idx, int brush_idx)
                             tangent = get_standard_tangent(face_inst);
                         }
 
+
                         bool unique_vertex = true;
                         int duplicate_index = -1;
 
@@ -262,10 +300,10 @@ void generate_brush_vertices(int entity_idx, int brush_idx)
                             face_geo_inst->vertices = realloc(face_geo_inst->vertices, face_geo_inst->vertex_count * sizeof(face_vertex));
                             face_geo_inst->vertices[face_geo_inst->vertex_count - 1] = (face_vertex){vertex, normal, uv, tangent};
                         }
-                        //else if(phong)
-                        //{
-                        //    face_geo_inst->vertices[duplicate_index].normal = vec3_add(face_geo_inst->vertices[duplicate_index].normal, normal);
-                        //}
+                        else if(phong)
+                        {
+                            face_geo_inst->vertices[duplicate_index].normal = vec3_add(face_geo_inst->vertices[duplicate_index].normal, normal);
+                        }
                         
                     }
                 }

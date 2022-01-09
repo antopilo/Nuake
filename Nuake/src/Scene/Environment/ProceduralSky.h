@@ -21,7 +21,7 @@ namespace Nuake
 		unsigned int VAO;
 		unsigned int VBO;
 		ProceduralSky();
-		void Draw(Ref<Camera> cam);
+		void Draw(Matrix4 projection, Matrix4 view);
 
 		Vector3 GetSunDirection();
 

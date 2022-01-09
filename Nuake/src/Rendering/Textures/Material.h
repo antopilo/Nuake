@@ -5,6 +5,7 @@
 #include "src/Rendering/Shaders/Shader.h"
 #include "src/Rendering/Textures/TextureManager.h"
 #include "Texture.h"
+#include <src/Resource/Serializable.h>
 
 
 namespace Nuake
@@ -26,11 +27,31 @@ namespace Nuake
 		int u_Unlit;
 	};
 
-	class Material
+	class Material : ISerializable
 	{
 	private:
 		std::string m_Name;
 		unsigned int UBO;
+
+		void InitUniformBuffer()
+		{
+			data = {
+				0, // Has albedo texture
+				0, // Padding byte
+				0, // Padding byte
+				0, // Padding byte
+				Vector3(1.f, 1.f, 1.f),	// Albedo color
+				0,						// Has metalness 
+				0.f,					// Metalness value
+				0,						// u_HasRoughness
+				1.f,					// u_RoughnessValue
+				0,						// u_HasAO
+				0.5f,					// u_AOValue
+				0,						// u_HasNormal
+				0,						// u_HasDisplacement
+				0
+			};
+		}
 	public:
 		Ref<Texture> m_Albedo;
 		Ref<Texture> m_AO;
@@ -39,23 +60,7 @@ namespace Nuake
 		Ref<Texture> m_Normal;
 		Ref<Texture> m_Displacement;
 
-		UBOStructure data
-		{
-			0, // Has albedo texture
-			0, // Padding byte
-			0, // Padding byte
-			0, // Padding byte
-			Vector3(0.f, 0.f, 0.f),	// Albedo color
-			0,						// Has metalness 
-			0.f,					// Metalness value
-			0,						// u_HasRoughness
-			1.f,					// u_RoughnessValue
-			0,						// u_HasAO
-			1.f,					// u_AOValue
-			0,						// u_HasNormal
-			0,						// u_HasDisplacement
-			0
-		};
+		UBOStructure data;
 
 		static Ref<Texture> m_DefaultAlbedo;
 		static Ref<Texture> m_DefaultAO;
@@ -64,20 +69,19 @@ namespace Nuake
 		static Ref<Texture> m_DefaultNormal;
 		static Ref<Texture> m_DefaultDisplacement;
 
+		Material();
 		Material(const std::string albedo);
 		Material(Ref<Texture> texture) { m_Albedo = texture; }
 		Material(const glm::vec3 albedoColor);
-
 		~Material();
 
-		void Bind(Ref<Shader> shader);
-
+		void Bind(Shader* shader);
 		void SetupUniformBuffer();
 
 		void SetName(const std::string name);
 		std::string GetName();
 
-		inline void SetUnlit(bool value)  {data.u_Unlit = value; }
+		inline void SetUnlit(bool value) { data.u_Unlit = value; }
 		inline bool GetUnlit() { return data.u_Unlit == 1; }
 
 		bool HasAlbedo() { return m_Albedo != nullptr; }
@@ -92,7 +96,7 @@ namespace Nuake
 		void SetMetalness(const std::string albedo);
 		void SetMetalness(Ref<Texture> texture) { m_Metalness = texture; }
 
-		bool HasRougness() { return m_Roughness != nullptr; }
+		bool HasRoughness() { return m_Roughness != nullptr; }
 		void SetRoughness(const std::string albedo);
 		void SetRoughness(Ref<Texture> texture) { m_Roughness = texture; }
 
@@ -103,5 +107,28 @@ namespace Nuake
 		bool HasDisplacement() { return m_Displacement != nullptr; }
 		void SetDisplacement(const std::string displacement);
 		void SetDisplacement(Ref<Texture> texture) { m_Displacement = texture; }
+
+		json Serialize() override
+		{
+			BEGIN_SERIALIZE();
+			j["Path"] = this->m_Name;
+			j["HasAlbedo"] = this->HasAlbedo();
+			if (HasAlbedo())
+			{
+				j["Abledo"] = this->m_Albedo->Serialize();
+			}
+			j["HasAO"] = this->HasAO();
+			j["HasMetalness"] = this->HasMetalness();
+			j["HasRoughness"] = this->HasRoughness();
+			j["HasNormal"] = this->HasNormal();
+			j["HasDisplacement"] = this->HasDisplacement();
+			
+			END_SERIALIZE();
+		}
+
+		bool Deserialize(const std::string& str) override
+		{
+			return true;
+		}
 	};
 }
