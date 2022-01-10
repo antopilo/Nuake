@@ -68,12 +68,11 @@ namespace Nuake {
 		{
 			mVolumetric->Resize(framebuffer.GetSize());
 			mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
-			mVolumetric->Draw(mProjection, mView, lightList);
+			mVolumetric->Draw(mProjection , mView, lightList);
 
 			finalOutput = mVolumetric->GetFinalOutput();
 		}
 		
-
 		// Copy final output to target framebuffer
 		framebuffer.Bind();
 		{
@@ -191,7 +190,16 @@ namespace Nuake {
 			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
-			scene.GetEnvironment()->ProceduralSkybox->Draw(mProjection, mView);
+			Ref<Environment> environment = scene.GetEnvironment();
+			if (environment->CurrentSkyType == SkyType::ProceduralSky)
+			{
+				environment->ProceduralSkybox->Draw(mProjection, mView);
+			}
+			else if (environment->CurrentSkyType == SkyType::ClearColor)
+			{
+				RenderCommand::SetClearColor(environment->AmbientColor);
+				RenderCommand::Clear();
+			}
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
 			Shader* shadingShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");

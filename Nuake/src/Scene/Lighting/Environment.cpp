@@ -30,6 +30,7 @@ namespace Nuake {
 	json Environment::Serialize()
 	{
 		BEGIN_SERIALIZE();
+		SERIALIZE_VAL(CurrentSkyType);
 		SERIALIZE_VAL(VolumetricFog);
 		SERIALIZE_VAL(VolumetricStepCount);
 		SERIALIZE_VEC4(AmbientColor);
@@ -40,7 +41,8 @@ namespace Nuake {
 	bool Environment::Deserialize(const std::string& str)
 	{
 		BEGIN_DESERIALIZE();
-
+		if (j.contains("CurrentSkyType"))
+			CurrentSkyType = j["CurrentSkyType"];
 		if (j.contains("VolumetricFog"))
 			VolumetricFog = j["VolumetricFog"];
 		if (j.contains("VolumetricStepCount"))

@@ -9,10 +9,22 @@
 
 namespace Nuake
 {
+	enum class SkyType {
+		ProceduralSky = 0,
+		ClearColor = 1
+		// CubeMap
+	};
+
 	class Environment : public ISerializable
 	{
 	public:
 		Environment();
+
+		SkyType CurrentSkyType = SkyType::ClearColor;
+
+		Color AmbientColor = Color(0, 0, 0, 1);
+		Ref<ProceduralSky> ProceduralSkybox;
+
 		bool VolumetricEnabled = false;
 		float VolumetricFog = 0.90f;
 		float VolumetricStepCount = 50.f;
@@ -23,9 +35,6 @@ namespace Nuake
 		bool BloomEnabled = false;
 		Scope<Bloom> mBloom;
 		Vector3 ClearColor;
-
-		glm::vec4 AmbientColor;
-		Ref<ProceduralSky> ProceduralSkybox;
 
 		glm::vec4 m_AmbientColor;
 		glm::vec4 GetAmbientColor();

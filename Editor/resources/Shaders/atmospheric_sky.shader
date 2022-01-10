@@ -121,7 +121,7 @@ vec3 scatter(vec3 o, vec3 d, float L, vec3 Lo) {
 	I_R = I_M = vec3(0.);
 	
 	// Compute T(P -> O) and I_M and I_R
-	scatterIn(o, d, L, 16.);
+	scatterIn(o, d, L, 32.);
 	
 	// mu = cos(alpha)
 	float mu = dot(d, SunDirection);
@@ -141,16 +141,18 @@ uniform mat4 View;
 void main()
 {
 	// Might add camera position in here.
+	// It was already in there, I removed it.
 	vec3 O = vec3(0., 0., 0.);
 	
 	vec2 NDC = UV * 2.0 - 1;
-
-	vec4 camSpace = inverse(Projection * View) * vec4(vec3(NDC, 1.0), 1.0);
+	mat4 newView = View;
+	newView[3] = vec4(0,0,0,1);
+	vec4 camSpace = inverse(Projection * newView) * vec4(vec3(NDC, 1.0), 1.0);
 	vec3 direction = normalize(camSpace.xyz);
 	vec3 D = direction;
 
 
-	vec3 col = vec3(1.0);
+	vec3 col = vec3(0.0);
 	float L = escape(O, D, AtmosphereRadius);
 	col = scatter(O, D, L, col);
 	FragColor = vec4(col, 1.);

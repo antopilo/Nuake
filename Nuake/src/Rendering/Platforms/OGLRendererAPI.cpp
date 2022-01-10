@@ -19,7 +19,7 @@ namespace Nuake {
 
 	void OGLRendererAPI::SetClearColor(const Color& color)
 	{
-		glClearColor(color.r, color.g, color.g, color.a);
+		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
 	void OGLRendererAPI::GenBuffer(unsigned int& bufferID)
