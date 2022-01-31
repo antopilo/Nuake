@@ -2,6 +2,7 @@
 #include "../Core/Input.h"
 #include <GLFW/glfw3.h>
 #include <glm/trigonometric.hpp>
+#include "src/Core/Logger.h"
 
 namespace Nuake
 {
@@ -98,5 +99,14 @@ namespace Nuake
 		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 		Direction = glm::normalize(Direction);
 		Right = glm::normalize(glm::cross(Up, Direction));
+	}
+	Ref<EditorCamera> EditorCamera::Copy()
+	{
+		Ref<EditorCamera> copy = CreateRef<EditorCamera>();
+		copy->Translation = this->Translation;
+		copy->Yaw = this->Yaw;
+		copy->Pitch = this->Pitch;
+
+		return copy;
 	}
 }

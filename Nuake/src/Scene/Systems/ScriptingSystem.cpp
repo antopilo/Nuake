@@ -13,22 +13,17 @@ namespace Nuake {
 	{
 		ScriptingEngine::Init();
 
-		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto e : entities)
+		auto& entities = m_Scene->m_Registry.view<WrenScriptComponent>();
+		for (auto& e : entities)
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
-			if (wren.Script != "" && wren.Class != "")
-			{
-				wren.mWrenScript = CreateRef<WrenScript>(wren.Script, wren.Class, true);
-				if (!wren.mWrenScript->CompiledSuccesfully)
-					return false;
-			}
+			wren.mWrenScript->Build(wren.mModule, true);
+			
+			if (!wren.mWrenScript->HasCompiledSuccesfully())
+				return false;
 
-			if (wren.mWrenScript != nullptr)
-			{
-				wren.mWrenScript->SetScriptableEntityID((int)e);
-				wren.mWrenScript->CallInit();
-			}
+			wren.mWrenScript->SetScriptableEntityID((int)e);
+			wren.mWrenScript->CallInit();
 		}
 
 		return true;

@@ -18,7 +18,7 @@ namespace Nuake
         }
     }
 
-    DirectionalLight::~DirectionalLight()
+    DirectionalLight::~DirectionalLight() 
     {
         for (int i = 0; i < CSM_SPLIT_AMOUNT; i++)
         {
@@ -42,10 +42,6 @@ namespace Nuake
             const float d = 0.91f * (log - uniform) + uniform;
             m_CascadeSplits[i] = (d - CSM_NEAR_CLIP) / CSM_CLIP_RANGE;
         }
-
-        //mCascadeSplits[0] = 0.2f;
-        //mCascadeSplits[1] = 0.45f;
-        //mCascadeSplits[2] = 1.0f;
 
         float lastSplitDist = 0.0f;
         // Calculate Orthographic Projection matrix for each cascade
@@ -113,6 +109,9 @@ namespace Nuake
             roundOffset = roundOffset * 2.0f / ShadowMapResolution;
             roundOffset.z = 0.0f;
             roundOffset.w = 0.0f;
+            lightProjectionMatrix[0] += roundOffset;
+            lightProjectionMatrix[1] += roundOffset;
+            lightProjectionMatrix[2] += roundOffset;
             lightProjectionMatrix[3] += roundOffset;
 
             // Store SplitDistance and ViewProjection-Matrix

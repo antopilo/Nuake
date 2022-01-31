@@ -5,17 +5,18 @@
 #include "ScriptModule.h"
 #include <iostream>
 #include <wren.h>
+
 namespace Nuake
 {
 	namespace ScriptAPI
 	{
 		class EngineModule : public ScriptModule
 		{
-			std::string ModuleName = "Engine";
+			const std::string ModuleName = "Engine";
 
 			std::string GetModuleName() override
 			{
-				return "Engine";
+				return ModuleName;
 			}
 
 			void RegisterModule(WrenVM* vm) override

@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderManager.h"
+#include "src/Core/Logger.h"
 
 namespace Nuake
 {
@@ -13,5 +14,16 @@ namespace Nuake
 		}
 
 		return m_Shaders[path].get();
+	}
+
+	void ShaderManager::RebuildShaders()
+	{
+		for (auto& s : m_Shaders)
+		{
+			if (!s.second->Rebuild())
+			{
+				Logger::Log("Failed to rebuild shader: " + s.first, Nuake::CRITICAL);
+			}
+		}
 	}
 }

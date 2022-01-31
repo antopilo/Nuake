@@ -1,8 +1,6 @@
 #pragma once
-#include <vcruntime_string.h>
 #include <string>
 #include <src/Vendors/imgui/imgui.h>
-
 
 void ImGuiTextSTD(const std::string& label, std::string& value)
 {

@@ -1,18 +1,22 @@
 #pragma once
 #include <src/Core/FileSystem.h>
 #include <src/Scene/Entities/Entity.h>
+#include "EditorInterface.h"
 
 namespace Nuake {
 	class FileSystemUI
 	{
 	private:
-
+		EditorInterface* Editor;
 
 	public:
 		Ref<Directory> m_CurrentDirectory;
-		FileSystemUI() {
+
+		FileSystemUI(EditorInterface* editor) {
 			m_CurrentDirectory = FileSystem::RootDirectory;
+			Editor = editor;
 		}
+
 		void Draw();
 		void DrawDirectoryContent();
 		void DrawFiletree();

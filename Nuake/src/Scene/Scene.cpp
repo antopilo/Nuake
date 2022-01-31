@@ -83,6 +83,8 @@ namespace Nuake {
 		}
 	}
 
+
+
 	bool Scene::OnInit()
 	{
 		for (auto& system : m_Systems)
@@ -139,7 +141,7 @@ namespace Nuake {
 
 	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
-		mSceneRenderer->BeginRenderScene(projection, view);
+		mSceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform());
 		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
 	
@@ -171,12 +173,17 @@ namespace Nuake {
 
 	Entity Scene::CreateEntity(const std::string& name) 
 	{
+		return CreateEntity(name, (int)OS::GetTime());
+	}
+
+	Entity Scene::CreateEntity(const std::string& name, int id)
+	{
 		Entity entity = { m_Registry.create(), this };
 		entity.AddComponent<TransformComponent>();
 
 		NameComponent& nameComponent = entity.AddComponent<NameComponent>();
 		nameComponent.Name = name;
-		nameComponent.ID = (int)OS::GetTime();
+		nameComponent.ID = id;
 
 		ParentComponent& parentComponent = entity.AddComponent<ParentComponent>();
 
@@ -233,6 +240,11 @@ namespace Nuake {
 		return m_Environement;
 	}
 
+	void Scene::SetEnvironment(Ref<Environment> env)
+	{
+		m_Environement = env;
+	}
+
 	bool Scene::Save()
 	{
 		if (Path == "")
@@ -252,11 +264,52 @@ namespace Nuake {
 		return true;
 	}
 
-	Scene* Scene::Copy()
+	template<typename Component>
+	void Scene::CopyComponent(entt::registry& dst, entt::registry& src)
 	{
-		Scene* sceneCopy = new Scene();
+		auto view = src.view<Component>();
+		for (auto e : view)
+		{
+			int id = src.get<NameComponent>(e).ID;
+			auto& component = src.get<Component>(e);
+
+			auto idView = dst.view<NameComponent>();
+			for (auto de : idView)
+			{
+				if (idView.get<NameComponent>(de).ID == src.get<NameComponent>(e).ID)
+				{
+					dst.emplace_or_replace<Component>(de, component);
+				}
+			}
+		}
+
+	}
+
+	Ref<Scene> Scene::Copy()
+	{
+		Ref<Scene> sceneCopy = CreateRef<Scene>();
 		sceneCopy->Path = this->Path;
 		sceneCopy->Name = this->Name;
+
+		sceneCopy->m_EditorCamera = this->m_EditorCamera->Copy();
+
+		sceneCopy->SetEnvironment(this->GetEnvironment()->Copy());
+		
+		auto& srcRegistry = this->m_Registry;
+		auto& dstRegistry = sceneCopy->m_Registry;
+		auto idView = srcRegistry.view<NameComponent>();
+		for (auto e : idView)
+		{
+			NameComponent& nameComponent = srcRegistry.get<NameComponent>(e);
+			int id = nameComponent.ID;
+			std::string& name = nameComponent.Name;
+			sceneCopy->CreateEntity(name, id);
+		}
+
+		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<MeshComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<CameraComponent>(sceneCopy->m_Registry, this->m_Registry);
 
 		return sceneCopy;
 	}

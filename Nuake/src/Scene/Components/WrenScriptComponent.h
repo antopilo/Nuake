@@ -7,15 +7,14 @@ namespace Nuake {
 	{
 	public:
 		std::string Script;
-		std::string Class;
 
+		unsigned int mModule = 0;
 		Ref<WrenScript> mWrenScript;
 
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(Script);
-			SERIALIZE_VAL(Class);
 			END_SERIALIZE();
 		}
 
@@ -24,8 +23,6 @@ namespace Nuake {
 			BEGIN_DESERIALIZE();
 			if (j.contains("Script"))
 				Script = j["Script"];
-			if (j.contains("Class"))
-				Class = j["Class"];
 
 
 			return true;

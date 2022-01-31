@@ -114,54 +114,53 @@ namespace Nuake {
     void FileSystemUI::DrawFile(Ref<File> file)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
-        if (file->Type == ".png" || file->Type == ".jpg")
+        std::string fileExtension = file->GetExtension();
+        if (fileExtension == ".png" || fileExtension == ".jpg")
         {
-            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->fullPath);
+            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->GetAbsolutePath());
             ImGui::ImageButton((void*)texture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         }
         else
         {
             const char* icon = ICON_FA_FILE;
-            if (file->Type == ".shader")
+            if (fileExtension == ".shader" || fileExtension == ".wren")
                 icon = ICON_FA_FILE_CODE;
-            if (file->Type == ".map")
+            if (fileExtension == ".map")
                 icon = ICON_FA_BROOM;
-            if (file->Type == ".ogg" || file->Type == ".mp3" || file->Type == ".wav" || file->Type == ".flac")
+            if (fileExtension == ".ogg" || fileExtension == ".mp3" || fileExtension == ".wav")
                 icon = ICON_FA_FILE_AUDIO;
-            if (file->Type == ".wren")
-                icon = ICON_FA_FILE_CODE;
-            if (file->Type == ".md3" || file->Type == ".obj")
+            if (fileExtension == ".md3" || fileExtension == ".obj")
                 icon = ICON_FA_FILE_IMAGE;
 
-            std::string fullName = icon + std::string("##") + file->fullPath;
+            std::string fullName = icon + std::string("##") + file->GetAbsolutePath();
             if (ImGui::Button(fullName.c_str(), ImVec2(100, 100)))
             {
-
+                Editor->Selection = EditorSelection(file);
             }
 
             if (ImGui::BeginDragDropSource())
             {
                 char pathBuffer[256];
-                std::strncpy(pathBuffer, file->fullPath.c_str(), sizeof(pathBuffer));
+                std::strncpy(pathBuffer, file->GetAbsolutePath().c_str(), sizeof(pathBuffer));
                 std::string dragType;
-                if (file->Type == ".wren")
+                if (fileExtension == ".wren")
                     dragType = "_Script";
-                else if (file->Type == ".map")
+                else if (fileExtension == ".map")
                     dragType = "_Map";
-                else if (file->Type == ".obj" || file->Type == ".mdl" || file->Type == ".gltf" || file->Type == ".md3" || file->Type == ".fbx")
+                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx")
                     dragType = "_Model";
-                else if (file->Type == ".interface")
+                else if (fileExtension == ".interface")
                     dragType = "_Interface";
-                else if (file->Type == ".prefab")
+                else if (fileExtension == ".prefab")
                     dragType = "_Prefab";
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
-                ImGui::Text(file->name.c_str());
+                ImGui::Text(file->GetName().c_str());
                 ImGui::EndDragDropSource();
             }
         }
 
-        ImGui::Text(file->name.c_str());
+        ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
     }
 
@@ -266,7 +265,7 @@ namespace Nuake {
                 {
                     int width = avail.x;
                     ImVec2 buttonSize = ImVec2(80, 80);
-                    int amount = (int)(width / 200);
+                    int amount = (int)(width / 100);
                     if (amount <= 0) amount = 1;
 
                     int i = 1; // current amount of item per row.

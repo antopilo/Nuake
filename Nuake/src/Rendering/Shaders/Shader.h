@@ -20,6 +20,7 @@ namespace Nuake
 	class Shader 
 	{
 	public:
+		std::string Path;
 		ShaderSource Source;
 		unsigned int ProgramId;
 
@@ -27,6 +28,7 @@ namespace Nuake
 
 		Shader(const std::string& filePath);
 
+		bool Rebuild();
 		void Bind() const;
 		void Unbind() const;
 
@@ -37,6 +39,7 @@ namespace Nuake
 		void SetUniform3f(const std::string& name, float v0, float v1, float v2);
 		void SetUniform2f(const std::string& name, float v0, float v1);
 		void SetUniform1f(const std::string& name, float v0);
+		void SetUniform1b(const std::string& name, bool v0);
 		void SetUniformTex(const std::string& name, Texture* texture, unsigned int slot = 0);
 		void SetUniform1i(const std::string& name, int v0);
 
@@ -46,8 +49,8 @@ namespace Nuake
 
 	private:
 		ShaderSource ParseShader(const std::string& filePath);
-		unsigned int CreateProgram();
-		unsigned int Compile(unsigned int type);
+		unsigned int CreateProgram(ShaderSource source);
+		unsigned int Compile(unsigned int type, ShaderSource source);
 		int FindUniformLocation(std::string uniform);
 	};
 }

@@ -3,18 +3,20 @@
 #include "src/Vendors/imgui/imgui.h"
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
-#include "FileSystemUI.h"
 
-
+#include "../Actions/EditorSelection.h"
+#include "EditorSelectionPanel.h"
 
 namespace Nuake {
 	class Material;
+	class FileSystemUI;
 	class EditorInterface
 	{
 	private:
-		FileSystemUI filesystem = FileSystemUI();
+		FileSystemUI* filesystem; 
 		
 		
+
 		bool m_DrawGrid = false;
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = false;
@@ -27,8 +29,11 @@ namespace Nuake {
 		bool m_IsMaterialSelected = false;
 
 	public:
-		bool m_IsEntitySelected = false;
-		Entity m_SelectedEntity;
+		EditorSelection Selection;
+		EditorSelectionPanel SelectionPanel;
+
+		EditorInterface();
+
 		static ImFont* bigIconFont;
 		void BuildFonts();
 		void Init();

@@ -1,6 +1,7 @@
 #pragma once
 #include "../Core/Timestep.h"
 #include "../Rendering/Camera.h"
+#include "src/Core/Core.h"
 
 namespace Nuake
 {
@@ -14,6 +15,9 @@ namespace Nuake
 		}
 
 		void Update(Timestep ts);
+
+
+		Ref<EditorCamera> Copy();
 	private:
 		bool controlled = false;
 		bool firstMouse = false;
@@ -21,7 +25,7 @@ namespace Nuake
 		float mouseLastX;
 		float mouseLastY;
 
-		float Yaw = 0.f;
-		float Pitch = 0.f;
+		float Yaw = -135.f;
+		float Pitch = -45.f;
 	};
 }

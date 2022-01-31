@@ -25,6 +25,8 @@ namespace Nuake
 
 		Vector3 GetSunDirection();
 
+		Ref<ProceduralSky> Copy();
+
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;
 	};

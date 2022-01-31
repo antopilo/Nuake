@@ -10,9 +10,22 @@ namespace Nuake
 	// TODO: Register all uniform when creating shader.
 	Shader::Shader(const std::string& filePath) 
 	{
-		Source = ParseShader(filePath);
+		Path = filePath;
 
-		ProgramId = CreateProgram();
+		Source = ParseShader(this->Path);
+		ProgramId = CreateProgram(Source);
+	}
+
+	bool Shader::Rebuild()
+	{
+		ShaderSource newSource = ParseShader(this->Path);
+		unsigned int newProgramId = CreateProgram(newSource);
+
+		if(newProgramId == 0)
+			return false;
+
+		Source = newSource;
+		ProgramId = newProgramId;
 	}
 
 	// Bind the shader
@@ -78,24 +91,30 @@ namespace Nuake
 
 	// Parse both source and creates a shader program.
 	// This returns the program id.
-	unsigned int Shader::CreateProgram() 
+	unsigned int Shader::CreateProgram(ShaderSource source)
 	{
 		unsigned int program = glCreateProgram();
 
-		unsigned int vs = Compile(GL_VERTEX_SHADER);
-		unsigned int fs = Compile(GL_FRAGMENT_SHADER);
+		unsigned int vs = Compile(GL_VERTEX_SHADER, source);
+		unsigned int fs = Compile(GL_FRAGMENT_SHADER, source);
 		unsigned int gs = 0;
 		unsigned int cs = 0;
 
+		if (vs == 0)
+			return 0;
+
+		if (fs == 0)
+			return 0;
+
 		if (Source.GeometryShader != "")
 		{
-			gs = Compile(GL_GEOMETRY_SHADER);
+			gs = Compile(GL_GEOMETRY_SHADER, source);
 			glAttachShader(program, gs);
 		}
 
 		if (Source.ComputeShader != "")
 		{
-			cs = Compile(GL_COMPUTE_SHADER);
+			cs = Compile(GL_COMPUTE_SHADER, source);
 			glAttachShader(program, cs);
 		}
 
@@ -116,14 +135,14 @@ namespace Nuake
 	}
 
 	// Compile a single shader and checks for error.
-	unsigned int Shader::Compile(unsigned int type)
+	unsigned int Shader::Compile(unsigned int type, ShaderSource source)
 	{
 		unsigned int id = glCreateShader(type);
 
 		const char* src;
-		if (type == GL_FRAGMENT_SHADER) src = Source.FragmentShader.c_str();
-		if (type == GL_VERTEX_SHADER)   src = Source.VertexShader.c_str();
-		if (type == GL_GEOMETRY_SHADER) src = Source.GeometryShader.c_str();
+		if (type == GL_FRAGMENT_SHADER) src = source.FragmentShader.c_str();
+		if (type == GL_VERTEX_SHADER)   src = source.VertexShader.c_str();
+		if (type == GL_GEOMETRY_SHADER) src = source.GeometryShader.c_str();
 		if (type == GL_COMPUTE_SHADER)  src = Source.ComputeShader.c_str();
 
 		glShaderSource(id, 1, &src, nullptr);
@@ -171,7 +190,7 @@ namespace Nuake
 			int addr = glGetUniformLocation(ProgramId, uniform.c_str());
 
 			if (addr == -1)
-				std::cout << "Warning: uniform '" << uniform << "' doesn't exists!" << std::endl;
+				return addr;//std::cout << "Warning: uniform '" << uniform << "' doesn't exists!" << std::endl;
 			else 
 				UniformCache[uniform] = addr;
 
@@ -201,62 +220,77 @@ namespace Nuake
 	void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) 
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform4f(addr, v0, v1, v2, v3);
+		//ASSERT(addr != -1);
+
+		if (addr != -1)
+			glUniform4f(addr, v0, v1, v2, v3);
 	}
 
 	void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2) 
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform3f(addr, v0, v1, v2);
+		//ASSERT(addr != -1);
+
+		if (addr != -1)
+			glUniform3f(addr, v0, v1, v2);
 	}
 
 	void Shader::SetUniform2f(const std::string& name, float v0, float v1) 
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform2f(addr, v0, v1);
+		//ASSERT(addr != -1);
+
+		if (addr != -1)
+			glUniform2f(addr, v0, v1);
 	}
 
 	void Shader::SetUniform1i(const std::string& name, int v0)
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform1i(addr, v0);
+		//ASSERT(addr != -1);
+
+		if (addr != -1)
+			glUniform1i(addr, v0);
 	}
 
 	void Shader::SetUniform1iv(const std::string& name, int size, int* value)
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform1iv(addr, size, value);
+		//ASSERT(addr != -1);
+		if (addr != -1)
+			glUniform1iv(addr, size, value);
 	}
 
 	void Shader::SetUniformMat3f(const std::string& name, Matrix3 mat)
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniformMatrix3fv(addr, 1, GL_FALSE, &mat[0][0]);
+		//ASSERT(addr != -1);
+		if(addr != -1)
+			glUniformMatrix3fv(addr, 1, GL_FALSE, &mat[0][0]);
 	}
 
 	void Shader::SetUniformMat4f(const std::string& name, Matrix4 mat)
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniformMatrix4fv(addr, 1, GL_FALSE, &mat[0][0]);
+
+		if (addr != -1)
+			glUniformMatrix4fv(addr, 1, GL_FALSE, &mat[0][0]);
 	}
 
 	void Shader::SetUniform1f(const std::string& name, float v0) 
 	{
 		int addr = FindUniformLocation(name);
-		ASSERT(addr != -1);
-		glUniform1f(addr, v0);
+		//ASSERT(addr != -1);
+
+		if (addr != -1)
+			glUniform1f(addr, v0);
 	}
+
 
 	void Shader::SetUniformTex(const std::string& name, Texture* texture, unsigned int slot)
 	{
-		ASSERT(texture != nullptr);
+		//ASSERT(texture != nullptr);
+
 		SetUniform1i(name, slot);
 		texture->Bind(slot);
 	}

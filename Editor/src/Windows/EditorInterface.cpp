@@ -25,11 +25,9 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
-#include "src/Scene/Components/LuaScriptComponent.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Components/LightComponent.h"
-#include "UIComponents/Viewport.h"
+#include "../UIComponents/Viewport.h"
 #include <src/Resource/Prefab.h>
 #include <src/Scene/Components/PrefabComponent.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
@@ -37,11 +35,25 @@
 #include <src/Scene/Components/InterfaceComponent.h>
 #include "src/Core/Input.h"
 
+#include "../Actions/EditorSelection.h"
+#include "FileSystemUI.h"
+
+#include "../Misc/InterfaceFonts.h"
+
+#include "WelcomeWindow.h"
+#include "src/Rendering/SceneRenderer.h"
+
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
+
+    EditorInterface::EditorInterface()
+    {
+        filesystem = new FileSystemUI(this);
+    }
+
     void EditorInterface::Init()
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -64,8 +76,6 @@ namespace Nuake {
         std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
         if (ImGui::Begin(name.c_str()))
         {
-
-
             ImGui::PopStyleVar();
             Overlay();
             ImGuizmo::BeginFrame();
@@ -91,10 +101,10 @@ namespace Nuake {
                     glm::value_ptr(glm::identity<glm::mat4>()), 100.f);
             }
 
-            if (m_IsEntitySelected && !Engine::IsPlayMode)
+            if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode)
             {
-                TransformComponent& tc = m_SelectedEntity.GetComponent<TransformComponent>();
-                ParentComponent& parent = m_SelectedEntity.GetComponent<ParentComponent>();
+                TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
+                ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                 Matrix4 oldTransform = tc.GetGlobalTransform();
                 Vector3 oldRotation = tc.Rotation;
                 ImGuizmo::Manipulate(
@@ -104,9 +114,10 @@ namespace Nuake {
                 );
 
                 if (ImGuizmo::IsUsing())
+                if (ImGuizmo::IsUsing())
                 {
                     Vector3 globalPos = Vector3();
-                    Entity currentParent = m_SelectedEntity;
+                    Entity currentParent = Selection.Entity;
                     if (parent.HasParent)
                     {
                         Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GlobalTransform);
@@ -161,7 +172,7 @@ namespace Nuake {
 		std::string name = nameComponent.Name;
         ParentComponent& parent = e.GetComponent<ParentComponent>();
 
-        if (m_SelectedEntity == e)
+        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
             base_flags |= ImGuiTreeNodeFlags_Selected;
 
         ImGui::TableNextColumn();
@@ -218,57 +229,57 @@ namespace Nuake {
         }
 
         if (ImGui::IsItemClicked())
-        {
-            m_SelectedEntity = e;
-            m_IsEntitySelected = true;
-        }
+            Selection = EditorSelection(e);
 
-        if (m_IsEntitySelected)
+        if (ImGui::BeginPopupContextItem())
         {
-            if (ImGui::BeginPopupContextItem())
+            Selection = EditorSelection(e);
+
+            Entity entity = Selection.Entity;
+            if (entity.HasComponent<CameraComponent>())
             {
-                if (m_SelectedEntity.HasComponent<CameraComponent>())
+                // Moves the editor camera to the camera position and direction.
+                if (ImGui::Selectable("Focus camera"))
                 {
-                    if (ImGui::Selectable("Focus camera"))
-                    {
-                        Engine::GetCurrentScene()->m_EditorCamera->Translation = m_SelectedEntity.GetComponent<TransformComponent>().Translation;
-                        Engine::GetCurrentScene()->m_EditorCamera->SetDirection(m_SelectedEntity.GetComponent<CameraComponent>().CameraInstance->GetDirection());
-                    }
-                    ImGui::Separator();
+                    Ref<EditorCamera> editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+                    editorCam->Translation = entity.GetComponent<TransformComponent>().Translation;
+                    Vector3 camDirection = entity.GetComponent<CameraComponent>().CameraInstance->GetDirection();
+                    editorCam->SetDirection(camDirection);
                 }
-
-                if (ImGui::Selectable("Remove"))
-                {
-                    QueueDeletion = e;
-                }
-
-
-                if (ImGui::Selectable("Move to root"))
-                {
-                    auto& p = m_SelectedEntity.GetComponent<ParentComponent>();
-                    if (p.HasParent)
-                    {
-                        auto& pp = p.Parent.GetComponent<ParentComponent>();
-                        pp.RemoveChildren(m_SelectedEntity);
-                        p.HasParent = false;
-                    }
-                }
-                if (ImGui::Selectable("Save as new prefab"))
-                {
-                    Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(m_SelectedEntity);
-                    std::string savePath = FileDialog::SaveFile("*.prefab");
-                    newPrefab->SaveAs(savePath);
-                    m_SelectedEntity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
-                }
-                ImGui::EndPopup();
+                ImGui::Separator();
             }
+
+            if (ImGui::Selectable("Remove"))
+            {
+                QueueDeletion = e;
+            }
+
+            if (entity.GetComponent<ParentComponent>().HasParent && ImGui::Selectable("Move to root"))
+            {
+                auto& parentComp = Selection.Entity.GetComponent<ParentComponent>();
+                if (parentComp.HasParent)
+                {
+                    auto& parentParentComp = parentComp.Parent.GetComponent<ParentComponent>();
+                    parentParentComp.RemoveChildren(entity);
+                    parentComp.HasParent = false;
+                }
+            }
+
+            if (ImGui::Selectable("Save entity as a new prefab"))
+            {
+                Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(Selection.Entity);
+                std::string savePath = FileDialog::SaveFile("*.prefab");
+                newPrefab->SaveAs(savePath);
+                Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+            }
+            ImGui::EndPopup();
         }
+        
         if (open)
         {
-            
             // Caching list to prevent deletion while iterating.
             std::vector<Entity> childrens = parent.Children;
-            for (auto c : childrens)
+            for (auto& c : childrens)
                 DrawEntityTree(c);
 
             ImGui::TreePop();
@@ -334,7 +345,6 @@ namespace Nuake {
 
                 else if (env->CurrentSkyType == SkyType::ProceduralSky)
                 {
-
                     {   // Sun Intensity
                         ImGui::Text("Sun Intensity");
                         ImGui::TableNextColumn();
@@ -477,8 +487,6 @@ namespace Nuake {
                 ImGui::EndTable();
             }
 
-
-
             if (ImGui::CollapsingHeader("Post processing", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
@@ -593,6 +601,195 @@ namespace Nuake {
                         }
                     }
 
+                    SSR* ssr = scene->mSceneRenderer->mSSR.get();
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSR RayStep");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##SSRRS", &ssr->RayStep, 0.01f, 0.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("iterationCount");
+                        ImGui::TableNextColumn();
+                        ImGui::DragInt("##SSRRSi", &ssr->IterationCount, 1, 1);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("distanceBias");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##SSRRSid", &ssr->DistanceBias, 0.01f, 0.f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("sampleCount");
+                        ImGui::TableNextColumn();
+                        ImGui::DragInt("##SSRRSids", &ssr->SampleCount, 1, 0);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Sampling Enabled");
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##SSRRSidss", &ssr->SamplingEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Expo");
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##SSRRSidsse", &ssr->ExpoStep);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Adaptive Steps");
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##SSRRSidssse", &ssr->AdaptiveStep);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Binary Searcg");
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##SSRRSidsssbe", &ssr->BinarySearch);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Debug");
+                        ImGui::TableNextColumn();
+                        ImGui::Checkbox("##SSRRSidsssbed", &ssr->DebugDraw);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("samplingCoefficient");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##samplingCoefficient", &ssr->SampleingCoefficient, 0.001f, 0.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    if (env->VolumetricEnabled)
+                    {
+                        ImGui::TableNextColumn();
+                        {
+                            // Title
+                            ImGui::Text("Volumetric Scattering");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
+                            ImGui::TableNextColumn();
+
+                            // Reset button
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
+                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {
+                            // Title
+                            ImGui::Text("Step count");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
+                            ImGui::TableNextColumn();
+
+                            // Reset button
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
+                            if (ImGui::Button(resetQuality.c_str())) env->VolumetricStepCount = 50.f;
+                            ImGui::PopStyleColor();
+                        }
+                    }
+
                 }
                 ImGui::EndTable();
 
@@ -610,7 +807,7 @@ namespace Nuake {
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
-            if(ImGui::BeginChild("Buttons", ImVec2(300, 30), false))
+            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvailWidth(), 30), false))
             {
                 // Add entity.
                 if (ImGui::Button(ICON_FA_PLUS))
@@ -646,7 +843,7 @@ namespace Nuake {
                         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
                         std::string name = e.GetComponent<NameComponent>().Name;
                         // If selected add selected flag.
-                        if (m_SelectedEntity == e)
+                        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
                             base_flags |= ImGuiTreeNodeFlags_Selected;
 
                         // Write in normal font.
@@ -696,8 +893,8 @@ namespace Nuake {
             {
                 Engine::GetCurrentScene()->DestroyEntity(QueueDeletion);
 
-                if (m_SelectedEntity == QueueDeletion)
-                    m_IsEntitySelected = false;
+                // Clear Selection
+                Selection = EditorSelection();
 
                 QueueDeletion = Entity{ (entt::entity)-1, scene.get() };
             }
@@ -709,596 +906,15 @@ namespace Nuake {
 
     void EditorInterface::DrawEntityPropreties()
     {
-        if (ImGui::Begin("Propreties"))
-        {
-            if (!m_IsEntitySelected)
-            {
-                std::string text = "No entity selected";
-                auto windowWidth = ImGui::GetWindowSize().x;
-                auto windowHeight = ImGui::GetWindowSize().y;
-
-                auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-                auto textHeight = ImGui::CalcTextSize(text.c_str()).y;
-                ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-                ImGui::SetCursorPosY((windowHeight - textHeight) * 0.5f);
-
-                ImGui::PushFont(boldFont);
-                ImGui::Text(text.c_str());
-                ImGui::PopFont();
-                ImGui::End();
-                return;
-            }
-
-            if (m_SelectedEntity.HasComponent<NameComponent>()) {
-                auto& name = m_SelectedEntity.GetComponent<NameComponent>().Name;
-
-                char buffer[256];
-                memset(buffer, 0, sizeof(buffer));
-                std::strncpy(buffer, name.c_str(), sizeof(buffer));
-                ImGui::Text("Name: ");
-                ImGui::SameLine();
-                if (ImGui::InputText("##Name", buffer, sizeof(buffer)))
-                {
-                    name = std::string(buffer);
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Add component"))
-                {
-                    ImGui::OpenPopup("add_component_popup");
-
-                }
-                if (ImGui::BeginPopup("add_component_popup"))
-                {
-                    if (ImGui::MenuItem("Wren Script") && !m_SelectedEntity.HasComponent<WrenScriptComponent>())
-                        m_SelectedEntity.AddComponent<WrenScriptComponent>();
-                    ImGui::Separator();
-                    if (ImGui::MenuItem("Camera Component") && !m_SelectedEntity.HasComponent<CameraComponent>())
-                        m_SelectedEntity.AddComponent<CameraComponent>();
-                    ImGui::Separator();
-                    if (ImGui::MenuItem("Light Component") && !m_SelectedEntity.HasComponent<LightComponent>())
-                        m_SelectedEntity.AddComponent<LightComponent>();
-                    ImGui::Separator();
-                    if (ImGui::MenuItem("Mesh Component") && !m_SelectedEntity.HasComponent<MeshComponent>())
-                        m_SelectedEntity.AddComponent<MeshComponent>();
-                    if (ImGui::MenuItem("Quake map Component") && !m_SelectedEntity.HasComponent<QuakeMapComponent>())
-                        m_SelectedEntity.AddComponent<QuakeMapComponent>();
-                    ImGui::Separator();
-                    if (ImGui::MenuItem("Character controller") && !m_SelectedEntity.HasComponent<CharacterControllerComponent>())
-                        m_SelectedEntity.AddComponent<CharacterControllerComponent>();
-                    if (ImGui::MenuItem("Rigidbody Component") && !m_SelectedEntity.HasComponent<RigidBodyComponent>())
-                    {
-                        m_SelectedEntity.AddComponent<RigidBodyComponent>();
-                        auto transformComponent = m_SelectedEntity.GetComponent<TransformComponent>();
-                    }
-                    if (ImGui::MenuItem("Box collider Component") && !m_SelectedEntity.HasComponent<BoxColliderComponent>())
-                    {
-                        m_SelectedEntity.AddComponent<BoxColliderComponent>();
-                    }
-                    if (ImGui::MenuItem("Sphere collider Component") && !m_SelectedEntity.HasComponent<SphereColliderComponent>())
-                    {
-                        m_SelectedEntity.AddComponent<SphereColliderComponent>();
-                    }
-                    if (ImGui::MenuItem("Mesh collider Component") && !m_SelectedEntity.HasComponent<MeshColliderComponent>())
-                    {
-                        m_SelectedEntity.AddComponent<MeshColliderComponent>();
-                    }
-                    ImGui::Separator();
-                    if (ImGui::MenuItem("Interface Component") && !m_SelectedEntity.HasComponent<InterfaceComponent>())
-                    {
-                        m_SelectedEntity.AddComponent< InterfaceComponent>();
-                    }
-
-                    // your popup code
-                    ImGui::EndPopup();
-                }
-                ImGui::Separator();
-            }
-
-            
-            std::string iconTransform = ICON_FA_MAP_MARKER;
-
-            ImGui::PushFont(boldFont);
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
-            bool headerOpened = ImGui::CollapsingHeader(" TRANSFORM", ImGuiTreeNodeFlags_DefaultOpen);
-            if (headerOpened)
-            {
-                ImGui::PopFont();
-                ImGui::PopStyleVar();
-                if (ImGui::BeginTable("TransformTable", 3, ImGuiTableFlags_BordersInner))
-                {
-                    TransformComponent& component = m_SelectedEntity.GetComponent<TransformComponent>();
-
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Translation");
-                    ImGui::TableNextColumn();
-                    ImGuiHelper::DrawVec3("Translation", &component.Translation);
-                    ImGui::TableNextColumn();
-
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetTranslation = ICON_FA_UNDO + std::string("##ResetTranslation");
-                    if (ImGui::Button(resetTranslation.c_str())) component.Translation = Vector3(0, 0, 0);
-                    ImGui::PopStyleColor();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Rotation");
-
-                    ImGui::TableNextColumn();
-                    ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
-
-                    ImGui::TableNextColumn();
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetRotation = ICON_FA_UNDO + std::string("##ResetRotation");
-                    if (ImGui::Button(resetRotation.c_str())) component.Rotation = Vector3(0, 0, 0);
-                    ImGui::PopStyleColor();
-
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Scale");
-
-                    ImGui::TableNextColumn();
-                    ImGuiHelper::DrawVec3("Scale", &component.Scale);
-
-                    ImGui::TableNextColumn();
-                    std::string resetScale = ICON_FA_UNDO + std::string("##ResetScale");
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    if (ImGui::Button(resetScale.c_str())) component.Scale = Vector3(1, 1, 1);
-                    ImGui::PopStyleColor();
-
-                    ImGui::EndTable();
-                }
-                //ImGui::InputText("Name:", selectedEntity->m_Name.data(), 12);
-
-            }
-            else
-            {
-                ImGui::PopStyleVar();
-                ImGui::PopFont();
-            }
-
-            ImGui::PopStyleVar();
-
-            if (m_SelectedEntity.HasComponent<InterfaceComponent>())
-            {
-                ImGui::PushFont(boldFont);
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
-
-                headerOpened = ImGui::CollapsingHeader("Interface", ImGuiTreeNodeFlags_DefaultOpen);
-                if (headerOpened)
-                {
-                    ImGui::PopFont();
-                    ImGui::PopStyleVar();
-                    InterfaceComponent& component = m_SelectedEntity.GetComponent<InterfaceComponent>();
-                    std::string& path = component.Path;
-                    char pathBuffer[256];
-                    memset(pathBuffer, 0, sizeof(pathBuffer));
-                    std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
-
-                    ImGui::Text("Interface: ");
-                    ImGui::SameLine();
-
-                    if (ImGui::InputText("##InterfacePath", pathBuffer, sizeof(pathBuffer)))
-                        path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
-
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Interface"))
-                        {
-                            char* file = (char*)payload->Data;
-                            std::string fullPath = std::string(file, 256);
-                            path = FileSystem::AbsoluteToRelative(fullPath);
-                            component.SetInterface(path);
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-                }
-                else
-                {
-                    ImGui::PopStyleVar();
-                    ImGui::PopFont();
-                }
-
-                ImGui::PopStyleVar();
-            }
-
-            if (m_SelectedEntity.HasComponent<MeshComponent>()) 
-            {
-                std::string icon = ICON_FA_MALE;
-                if (ImGui::CollapsingHeader((icon + " " + "Mesh").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Mesh properties");
-                    auto& component = m_SelectedEntity.GetComponent<MeshComponent>();
-                    // Path
-                    std::string path = component.ModelPath;
-                    char pathBuffer[256];
-
-                    memset(pathBuffer, 0, sizeof(pathBuffer));
-                    std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
-
-                    std::string oldPath = component.ModelPath;
-                    ImGui::Text("Model: ");
-                    ImGui::SameLine();
-                    if (ImGui::InputText("##ModelPath", pathBuffer, sizeof(pathBuffer)))
-                        path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
-                        {
-                            char* file = (char*)payload->Data;
-                            std::string fullPath = std::string(file, 256);
-                            path = FileSystem::AbsoluteToRelative(fullPath);
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-
-                    if (component.ModelPath != path)
-                    {
-                        component.ModelPath = path;
-                        component.LoadModel();
-                    }
-
-                    ImGui::SameLine();
-
-                    if (ImGui::Button("Reimport"))
-                    {
-                        component.LoadModel();
-                    }
-
-                    ImGui::Indent(16.0f);
-                    if (ImGui::CollapsingHeader("Meshes"))
-                    {
-                        ImGui::Indent(16.0f);
-                        uint16_t index = 0;
-                        for (auto& m : component.meshes)
-                        {
-                            if (ImGui::CollapsingHeader(std::to_string(index).c_str()))
-                            {
-                                std::string materialName = "No material";
-                                if (m->m_Material)
-                                    materialName = m->m_Material->GetName();
-
-                                ImGui::Indent(16.0f);
-                                if (ImGui::CollapsingHeader(materialName.c_str()))
-                                {
-                                    //if (ImGui::BeginChild("Material child", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysAutoResize))
-                                    //{
-                                    ImGui::Indent(16.0f);
-                                    DrawMaterialEditor(m->m_Material);
-                                    //}
-                                    //ImGui::EndChild();
-                                }
-
-                                if (ImGui::BeginDragDropTarget())
-                                {
-                                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Material"))
-                                    {
-                                        char* file = (char*)payload->Data;
-                                        std::string fullPath = std::string(file, 256);
-                                        path = FileSystem::AbsoluteToRelative(fullPath);
-                                    }
-                                    ImGui::EndDragDropTarget();
-                                }
-                            }
-
-                            index++;
-                        }
-                        
-                    }
-
-                    ImGui::Separator();
-                }
-
-            }
-
-            if (m_SelectedEntity.HasComponent<LightComponent>()) 
-            {
-                ImGui::PushFont(boldFont);
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 8));
-
-                bool headerOpened = ImGui::CollapsingHeader(" LIGHT", ImGuiTreeNodeFlags_DefaultOpen);
-                if (headerOpened)
-                {
-                    ImGui::PopFont();
-                    ImGui::PopStyleVar();
-                    if (ImGui::BeginTable("TransformTable", 3, ImGuiTableFlags_BordersInner))
-                    {
-                        LightComponent& component = m_SelectedEntity.GetComponent<LightComponent>();
-
-                        ImGui::TableSetupColumn("name", 0, 0.3);
-                        ImGui::TableSetupColumn("set", 0, 0.6);
-                        ImGui::TableSetupColumn("reset", 0, 0.1);
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Color");
-                        ImGui::TableNextColumn();
-                        ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-                        ImGui::ColorEdit3("##lightcolor", &component.Color.r, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
-                        ImGui::PopItemWidth();
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetColor = ICON_FA_UNDO + std::string("##ResetTranslation");
-                        if (ImGui::Button(resetColor.c_str())) component.Color = Vector3(1, 1, 1);
-                        ImGui::PopStyleColor();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Strength");
-
-                        ImGui::TableNextColumn();
-                        ImGui::SliderFloat("Strength", &component.Strength, 0.0f, 100.0f);
-
-                        ImGui::TableNextColumn();
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetStrength = ICON_FA_UNDO + std::string("##resetStrength");
-                        if (ImGui::Button(resetStrength.c_str())) component.Strength = 10.0f;
-                        ImGui::PopStyleColor();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Cast Shadows");
-
-                        ImGui::TableNextColumn();
-                        
-                        // This will create framebuffers and textures.
-                        bool castShadows = component.CastShadows;
-                        ImGui::Checkbox("##CastShadows", &component.CastShadows);
-                        if (castShadows != component.CastShadows)
-                            component.SetCastShadows(castShadows);
-
-
-                        ImGui::TableNextColumn();
-                        std::string resetShadow = ICON_FA_UNDO + std::string("##resetShadow");
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        if (ImGui::Button(resetShadow.c_str())) component.CastShadows = false;
-                        ImGui::PopStyleColor();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("Type");
-                        ImGui::TableNextColumn();
-                        const char* types[] = { "Directional", "Point", "Spot" };
-                        static const char* current_item = types[component.Type];
-
-                        if (ImGui::BeginCombo("Type", current_item)) // The second parameter is the label previewed before opening the combo.
-                        {
-                            for (int n = 0; n < IM_ARRAYSIZE(types); n++)
-                            {
-                                bool is_selected = (current_item == types[n]); // You can store your selection however you want, outside or inside your objects
-                                if (ImGui::Selectable(types[n], is_selected)) 
-                                {
-                                    current_item = types[n];
-                                    component.Type = (LightType)n;
-                                }
-                                if (is_selected)
-                                    ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-                            }
-                            ImGui::EndCombo();
-                        }
-
-                        ImGui::TableNextColumn();
-                        std::string resetType = ICON_FA_UNDO + std::string("##resetType");
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        if (ImGui::Button(resetShadow.c_str())) component.Type = Point;
-                        ImGui::PopStyleColor();
-
-
-                        if (component.Type == Directional)
-                        {
-                            ImGui::TableNextColumn();
-                            ImGui::Text("Is Volumetric");
-
-                            ImGui::TableNextColumn();
-                            ImGui::Checkbox("##Volumetric", &component.IsVolumetric);
-
-                            ImGui::TableNextColumn();
-                            std::string resetIsVolumetric = ICON_FA_UNDO + std::string("##IsVolumetric");
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            if (ImGui::Button(resetIsVolumetric.c_str())) component.IsVolumetric = false;
-                            ImGui::PopStyleColor();
-
-                            ImGui::TableNextColumn();
-                            ImGui::Text("Sync Sky Direction");
-
-                            ImGui::TableNextColumn();
-                            ImGui::Checkbox("##SyncSky", &component.SyncDirectionWithSky);
-
-                            ImGui::TableNextColumn();
-                            std::string resetSyncDirectionWithSky = ICON_FA_UNDO + std::string("##resetSyncDirectionWithSky");
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            if (ImGui::Button(resetSyncDirectionWithSky.c_str())) component.SyncDirectionWithSky = false;
-                            ImGui::PopStyleColor();
-
-                            ImGui::TableNextColumn();
-                            ImGui::Text("Direction");
-                            ImGui::TableNextColumn();
-                            ImGuiHelper::DrawVec3("Direction", &component.Direction);
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetDirection = ICON_FA_UNDO + std::string("##resetDirection");
-                            if (ImGui::Button(resetDirection.c_str())) component.Direction = Vector3(0, -1, 0);
-                            ImGui::PopStyleColor();
-                        }
-                        ImGui::EndTable();
-                    }
-                }
-                else
-                {
-                    ImGui::PopStyleVar();
-                    ImGui::PopFont();
-                }
-                ImGui::PopStyleVar();
-            }
-
-            if (m_SelectedEntity.HasComponent<WrenScriptComponent>()) {
-                std::string icon = ICON_FA_FILE;
-                if (ImGui::CollapsingHeader((icon + " " + "Wren Script").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Script properties");
-                    auto& component = m_SelectedEntity.GetComponent<WrenScriptComponent>();
-
-                    // Path
-                    std::string path = component.Script;
-                    char pathBuffer[256];
-
-                    memset(pathBuffer, 0, sizeof(pathBuffer));
-                    std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
-
-                    ImGui::Text("Script: ");
-                    ImGui::SameLine();
-                    if (ImGui::InputText("##ScriptPath", pathBuffer, sizeof(pathBuffer)))
-                        path = FileSystem::AbsoluteToRelative(std::string(pathBuffer));
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
-                        {
-                            char* file = (char*)payload->Data;
-                            std::string fullPath = std::string(file, 256);
-                            path = FileSystem::AbsoluteToRelative(fullPath);
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-
-
-                    component.Script = path;
-
-                    // Class
-                    std::string module = component.Class;
-
-                    char classBuffer[256];
-
-                    memset(classBuffer, 0, sizeof(classBuffer));
-                    std::strncpy(classBuffer, module.c_str(), sizeof(classBuffer));
-
-                    ImGui::Text("Class: ");
-                    ImGui::SameLine();
-                    if (ImGui::InputText("##ScriptModule", classBuffer, sizeof(classBuffer)))
-                        module = std::string(classBuffer);
-
-                    component.Class = module;
-                    ImGui::Separator();
-                }
-            }
-
-            if (m_SelectedEntity.HasComponent<CameraComponent>()) {
-
-                std::string icon = ICON_FA_LIGHTBULB;
-                if (ImGui::CollapsingHeader((icon + " " + "Camera").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Camera properties");
-                    m_SelectedEntity.GetComponent<CameraComponent>().DrawEditor();
-                    ImGui::Separator();
-                }
-
-            }
-
-            if (m_SelectedEntity.HasComponent<CharacterControllerComponent>())
-            {
-                if (ImGui::CollapsingHeader("Character controller", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Character controller properties");
-                    auto& c = m_SelectedEntity.GetComponent<CharacterControllerComponent>();
-                    ImGui::InputFloat("Height", &c.Height);
-                    ImGui::InputFloat("Radius", &c.Radius);
-                    ImGui::InputFloat("Mass", &c.Mass);
-                    ImGui::Separator();
-                }
-            }
-            if (m_SelectedEntity.HasComponent<RigidBodyComponent>())
-            {
-                std::string icon = ICON_FA_BOWLING_BALL;
-                if (ImGui::CollapsingHeader((icon + " Rigidbody").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Rigidbody properties");
-                    RigidBodyComponent& rbComponent = m_SelectedEntity.GetComponent<RigidBodyComponent>();
-                    ImGui::DragFloat("Mass", &rbComponent.mass, 0.1, 0.0);
-                    ImGui::Separator();
-                }
-            }
-            if (m_SelectedEntity.HasComponent<BoxColliderComponent>())
-            {
-                std::string icon = ICON_FA_BOX;
-                if (ImGui::CollapsingHeader((icon + " Box collider").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Box collider properties");
-                    BoxColliderComponent& component = m_SelectedEntity.GetComponent<BoxColliderComponent>();
-                    ImGuiHelper::DrawVec3("Size", &component.Size);
-                    ImGui::Checkbox("Is trigger", &component.IsTrigger);
-
-                    ImGui::Separator();
-                }
-            }
-            if (m_SelectedEntity.HasComponent<SphereColliderComponent>())
-            {
-                std::string icon = ICON_FA_CIRCLE;
-                if (ImGui::CollapsingHeader((icon + " Sphere collider").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Sphere properties");
-                    SphereColliderComponent& component = m_SelectedEntity.GetComponent<SphereColliderComponent>();
-                    ImGui::DragFloat("Radius", &component.Radius, 0.1f, 0.0f, 100.0f);
-                    ImGui::Checkbox("Is trigger", &component.IsTrigger);
-
-                    ImGui::Separator();
-                }
-            }
-            if (m_SelectedEntity.HasComponent<QuakeMapComponent>())
-            {
-                
-                std::string icon = ICON_FA_BROOM;
-                if (ImGui::CollapsingHeader((icon + " " + "Quake map").c_str(), ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    ImGui::TextColored(ImGui::GetStyleColorVec4(1), "Quake map properties");
-                    auto& component = m_SelectedEntity.GetComponent<QuakeMapComponent>();
-                    std::string path = component.Path;
-
-
-                    char pathBuffer[256];
-                    memset(pathBuffer, 0, sizeof(pathBuffer));
-                    std::strncpy(pathBuffer, path.c_str(), sizeof(pathBuffer));
-                    ImGui::Text("Map file: ");
-                    ImGui::SameLine();
-                    if (ImGui::InputText("##MapPath", pathBuffer, sizeof(pathBuffer)))
-                    {
-                        path = std::string(pathBuffer);
-                    }
-
-                    if (ImGui::BeginDragDropTarget())
-                    {
-                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Map"))
-                        {
-                            char* file = (char*)payload->Data;
-                            std::string fullPath = std::string(file, 256);
-                            path = FileSystem::AbsoluteToRelative(fullPath);
-                        }
-                        ImGui::EndDragDropTarget();
-                    }
-
-                    component.Path = path;
-
-                    ImGui::InputFloat("Scale factor", &component.ScaleFactor, 0.01f, 0.1f);
-
-                    ImGui::Checkbox("Build collisions", &component.HasCollisions);
-                    if (ImGui::Button("Build Geometry"))
-                    {
-                        QuakeMapBuilder mapBuilder;
-                        mapBuilder.BuildQuakeMap(m_SelectedEntity);
-                    }
-                    ImGui::Separator();
-                }
-            }
-
-        }
-        ImGui::End();
+        SelectionPanel.Draw(Selection);
+        
     }
 
     void EditorInterface::DrawGizmos()
     {
         Ref<Scene> scene = Engine::GetCurrentScene();
 
-        if (!m_IsEntitySelected)
+        if (!Selection.Type == EditorSelectionType::Entity)
             return;
     }
 
@@ -1372,23 +988,23 @@ namespace Nuake {
     void EditorInterface::DrawFile(Ref<File> file)
     {
         ImGui::PushFont(bigIconFont);
-        if (file->Type == ".png" || file->Type == ".jpg")
+
+        std::string fileExtenstion = file->GetExtension();
+        if (fileExtenstion == ".png" || fileExtenstion == ".jpg")
         {
-            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->fullPath);
+            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->GetAbsolutePath());
             ImGui::ImageButton((void*)texture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         }
         else
         {
             const char* icon = ICON_FA_FILE;
 
-            if (file->Type == ".shader")
+            if (fileExtenstion == ".shader" || fileExtenstion == ".wren")
                 icon = ICON_FA_FILE_CODE;
-            else if (file->Type == ".map")
+            else if (fileExtenstion == ".map")
                 icon = ICON_FA_BROOM;
-            else if (file->Type == ".ogg" || file->Type == ".mp3" || file->Type == ".wav" || file->Type == ".flac")
+            else if (fileExtenstion == ".ogg" || fileExtenstion == ".mp3" || fileExtenstion == ".wav")
                 icon = ICON_FA_FILE_AUDIO;
-            else if (file->Type == ".cpp" || file->Type == ".h" || file->Type == ".cs" || file->Type == ".py" || file->Type == ".lua")
-                icon = ICON_FA_FILE_CODE;
 
             if (ImGui::Button(icon, ImVec2(100, 100)))
             {
@@ -1400,7 +1016,7 @@ namespace Nuake {
                 }
             }
         }
-        ImGui::Text(file->name.c_str());
+        ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
     }
 
@@ -1884,11 +1500,16 @@ namespace Nuake {
 
     }
 
-    json SceneSnapshot;
+
+    Ref<Scene> SceneSnapshot;
+    WelcomeWindow window = WelcomeWindow();
     void EditorInterface::Draw()
     {
         Init();
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
+
+        
+        
 
         if (ImGui::BeginPopupModal("Welcome", NULL, flags))
         {
@@ -1903,7 +1524,7 @@ namespace Nuake {
             if (ImGui::Button("Open Project")) 
             {
                 OpenProject();
-                filesystem.m_CurrentDirectory = FileSystem::RootDirectory;
+                filesystem->m_CurrentDirectory = FileSystem::RootDirectory;
             }
 
 
@@ -1924,27 +1545,27 @@ namespace Nuake {
                 {
                     NewProject();
 
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Open...", "CTRL+O"))
                 {
                     OpenProject();
 
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Save", "CTRL+S"))
                 {
                     Engine::GetProject()->Save();
                     Engine::GetCurrentScene()->Save();
 
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S"))
                 {
                     std::string savePath = FileDialog::SaveFile("*.project");
                     Engine::GetProject()->SaveAs(savePath);
 
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Set current scene as default")) 
@@ -1955,24 +1576,24 @@ namespace Nuake {
                 if (ImGui::MenuItem("New scene"))
                 {
                     Engine::LoadScene(Scene::New());
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Open scene...", "CTRL+SHIFT+O"))
                 {
                     OpenScene();
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Save scene", "CTR+SHIFT+L+S"))
                 {
                     Engine::GetCurrentScene()->Save();
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Save scene as...", "CTRL+SHIFT+S"))
                 {
                     std::string savePath = FileDialog::SaveFile("*.scene");
                     Engine::GetCurrentScene()->SaveAs(savePath);
 
-                    m_IsEntitySelected = false;
+                    Selection = EditorSelection();
                 }
 
                 ImGui::EndMenu();
@@ -2044,6 +1665,12 @@ namespace Nuake {
             if (ImGui::BeginMenu("Debug"))
             {
                 if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;
+                if (ImGui::MenuItem("Rebuild Shaders", NULL))
+                {
+                    Nuake::Logger::Log("Rebuilding Shaders...");
+                    Nuake::ShaderManager::RebuildShaders();
+                    Nuake::Logger::Log("Shaders Rebuilt.");
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();
@@ -2062,8 +1689,8 @@ namespace Nuake {
         DrawLogger();
 
         // new stuff
-        filesystem.Draw();
-        filesystem.DrawDirectoryExplorer();
+        filesystem->Draw();
+        filesystem->DrawDirectoryExplorer();
 
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
@@ -2089,7 +1716,7 @@ namespace Nuake {
             ImGui::SameLine();
             if (ImGui::Button(ICON_FA_PLAY))
             {
-                SceneSnapshot = Engine::GetCurrentScene()->Serialize();
+                SceneSnapshot = Engine::GetCurrentScene()->Copy();
                 Engine::EnterPlayMode();
             }
             ImGui::SameLine();
@@ -2097,8 +1724,8 @@ namespace Nuake {
             {
                 Engine::ExitPlayMode();
 
-                Engine::GetCurrentScene()->Deserialize(SceneSnapshot.dump());
-                m_IsEntitySelected = false;
+                Engine::LoadScene(SceneSnapshot);
+                Selection = EditorSelection();
             }
         }
         ImGui::End();
@@ -2107,14 +1734,7 @@ namespace Nuake {
 
     void EditorInterface::BuildFonts()
     {
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-        ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-        normalFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 11.0f, &icons_config, icons_ranges);
-        boldFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Bold.ttf", 16.0);
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
-        ImGui::GetIO().Fonts->AddFontDefault();
-        icons_config.MergeMode = true;
-        bigIconFont = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 42.0f, &icons_config, icons_ranges);
+        FontManager::LoadFonts();
     }
 }

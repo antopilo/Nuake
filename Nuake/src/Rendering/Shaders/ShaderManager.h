@@ -14,5 +14,6 @@ namespace Nuake
 
 	public:
 		static Shader* GetShader(const std::string& path);
+		static void RebuildShaders();
 	};
 }

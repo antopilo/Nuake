@@ -27,6 +27,25 @@ namespace Nuake {
 		Renderer::m_Shader->SetUniform1f("u_FogStepCount", VolumetricStepCount);
 	}
 
+	Ref<Environment> Environment::Copy()
+	{
+		Ref<Environment> copy = CreateRef<Environment>();
+		copy->CurrentSkyType = this->CurrentSkyType;
+		copy->ProceduralSkybox = this->ProceduralSkybox->Copy();
+		copy->VolumetricEnabled = this->VolumetricEnabled;
+		copy->VolumetricFog = this->VolumetricFog;
+		copy->VolumetricStepCount = this->VolumetricStepCount;
+
+		copy->Exposure = this->Exposure;
+		copy->Gamma = this->Gamma;
+
+		copy->BloomEnabled = this->BloomEnabled;
+		copy->ClearColor = this->ClearColor;
+		copy->AmbientColor = this->AmbientColor;
+
+		return copy;
+	}
+
 	json Environment::Serialize()
 	{
 		BEGIN_SERIALIZE();

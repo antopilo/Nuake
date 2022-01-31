@@ -1,5 +1,7 @@
 #pragma once
 #include "ScriptingEngine.h"
+
+#include "src/Core/FileSystem.h"
 #include <map>
 #include <string>
 
@@ -8,7 +10,14 @@ class WrenHandle;
 namespace Nuake {
 	class WrenScript
 	{
+	private:
+		bool CompiledSuccesfully;
+		bool IsEntity = false;
+		std::vector<std::string> mModules;
+
 	public:
+		Ref<File> mFile;
+
 		std::map <std::string, WrenHandle*> methods;
 		WrenHandle* m_Instance;
 		WrenHandle* m_OnInitHandle;
@@ -17,10 +26,14 @@ namespace Nuake {
 		WrenHandle* m_OnExitHandle;
 		WrenHandle* m_SetEntityIDHandle;
 
-		bool CompiledSuccesfully;
+		// Building
+		WrenScript(Ref<File> file, bool isEntity);
 
-		WrenScript(const std::string& path, const std::string& mod, bool isEntity = false);
+		void ParseModules();
+		std::vector<std::string> GetModules();
+		void Build(unsigned int moduleId, bool isEntity = false);
 
+		// Method calls
 		void CallInit();
 		void CallUpdate(float timestep);
 		void CallFixedUpdate(float timestep);
@@ -30,5 +43,7 @@ namespace Nuake {
 		void CallMethod(const std::string& signature);
 
 		void SetScriptableEntityID(int id);
+
+		bool HasCompiledSuccesfully() { return CompiledSuccesfully; }
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "src/Core/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
+
 namespace Nuake {
 	class BoxColliderComponent
 	{

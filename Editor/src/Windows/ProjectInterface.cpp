@@ -1,7 +1,7 @@
 #include "ProjectInterface.h"
 #include <src/Vendors/imgui/imgui.h>
 #include "Engine.h"
-#include "ImGuiTextHelper.h"
+//#include "ImGuiTextHelper.h"
 
 namespace Nuake {
     void ProjectInterface::DrawProjectSettings()
@@ -45,7 +45,7 @@ namespace Nuake {
 
             ImGui::Text("Trenchbroom path:");
             ImGui::SameLine();
-            ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
+            //ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
             ImGui::SameLine();
             if (ImGui::Button("Browse"))
             {
@@ -62,8 +62,8 @@ namespace Nuake {
             auto flags = ImGuiWindowFlags_NoTitleBar;
             if (ImGui::BeginPopupModal("Create new point entity", NULL, flags))
             {
-                ImGuiTextSTD("Name", newEntity.Name);
-                ImGuiTextMultiline("Description", newEntity.Description);
+                //ImGuiTextSTD("Name", newEntity.Name);
+                //ImGuiTextMultiline("Description", newEntity.Description);
 
                 if (ImGui::BeginTable("DictCreate", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable))
                 {
@@ -75,7 +75,7 @@ namespace Nuake {
                     int idx = 0;
                     for (auto& p : newEntity.Properties)
                     {
-                        ImGuiTextSTD("Name", p.name);
+                        //ImGuiTextSTD("Name", p.name);
                         ImGui::TableNextColumn();
                         std::string current_item = NULL;
                         if (ImGui::BeginCombo(("TypeSelection" + std::to_string(idx)).c_str(), current_item.c_str()))
@@ -146,18 +146,18 @@ namespace Nuake {
                         int i = 0;
                         for (auto& pE : file->PointEntities)
                         {
-                            ImGuiTextSTD("##PName" + std::to_string(i), pE.Name);
+                            //ImGuiTextSTD("##PName" + std::to_string(i), pE.Name);
                             for (int i = 0; i < pE.Name.size(); i++)
                             {
                                 if (pE.Name[i] == ' ')
                                     pE.Name[i] = '_';
                             }
                             ImGui::TableNextColumn();
-                            ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
+                            //ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
                             ImGui::TableNextColumn();
                             ImGui::Button("Edit");
                             ImGui::TableNextColumn();
-                            ImGuiTextSTD("Prefab##" + std::to_string(i), pE.Prefab);
+                            //ImGuiTextSTD("Prefab##" + std::to_string(i), pE.Prefab);
                             if (ImGui::BeginDragDropTarget())
                             {
                                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Prefab"))
@@ -201,10 +201,10 @@ namespace Nuake {
                         int i = 0;
                         for (auto& pE : file->BrushEntities)
                         {
-                            ImGuiTextSTD("##Name" + std::to_string(i), pE.Name);
+                            //ImGuiTextSTD("##Name" + std::to_string(i), pE.Name);
                             ImGui::TableNextColumn();
 
-                            ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
+                            //ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
                             ImGui::TableNextColumn();
 
                             ImGui::Checkbox(std::string("Visible##" + std::to_string(i)).c_str(), &pE.Visible);
@@ -215,7 +215,7 @@ namespace Nuake {
 
                             ImGui::TableNextColumn();
 
-                            ImGuiTextSTD("Script##" + std::to_string(i), pE.Script);
+                            //ImGuiTextSTD("Script##" + std::to_string(i), pE.Script);
                             if (ImGui::BeginDragDropTarget())
                             {
                                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
@@ -227,7 +227,7 @@ namespace Nuake {
 
                                 ImGui::EndDragDropTarget();
                             }
-                            ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
+                            //ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
                             ImGui::TableNextColumn();
 
                             i++;
@@ -238,8 +238,8 @@ namespace Nuake {
 
                         if (ImGui::BeginPopupModal("CreateBrush", NULL, flags))
                         {
-                            ImGuiTextSTD("Name", newEntity.Name);
-                            ImGuiTextMultiline("Description", newEntity.Description);
+                            //ImGuiTextSTD("Name", newEntity.Name);
+                            //ImGuiTextMultiline("Description", newEntity.Description);
 
                             bool isSolid = true;
                             bool isTrigger = false;

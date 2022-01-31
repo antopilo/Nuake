@@ -214,7 +214,7 @@ namespace Nuake {
         {
             auto& wrenScript = brushEntity.AddComponent<WrenScriptComponent>();
             wrenScript.Script = fgdBrush.Script;
-            wrenScript.Class = fgdBrush.Class;
+            wrenScript.mModule = 0; // TODO
         }
 
         if (bsp.IsTrigger)

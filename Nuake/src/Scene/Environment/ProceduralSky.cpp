@@ -85,6 +85,20 @@ namespace Nuake
 		return SunDirection;
 	}
 
+	Ref<ProceduralSky> ProceduralSky::Copy()
+	{
+		auto copy = CreateRef<ProceduralSky>();
+		copy->SurfaceRadius = this->SurfaceRadius;
+		copy->AtmosphereRadius = this->AtmosphereRadius;
+		copy->RayleighScattering = this->RayleighScattering;
+		copy->MieScattering = this->MieScattering;
+		copy->SunIntensity = this->SunIntensity;
+		copy->CenterPoint = this->CenterPoint;
+		copy->SunDirection = this->SunDirection;
+		
+		return copy;
+	}
+
 	json ProceduralSky::Serialize()
 	{
 		BEGIN_SERIALIZE()

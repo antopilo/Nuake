@@ -18,7 +18,7 @@ namespace Nuake {
 
 	void Volumetric::Init()
 	{
-		mFinalFramebuffer = CreateScope<FrameBuffer>(false, mSize);
+		mFinalFramebuffer = CreateScope<FrameBuffer>(true, mSize);
 		mFinalFramebuffer->SetTexture(CreateRef<Texture>(mSize, GL_RGBA, GL_RGBA16F, GL_FLOAT));
 	}
 
@@ -35,18 +35,19 @@ namespace Nuake {
 	{
 		mFinalFramebuffer->Bind();
 			mFinalFramebuffer->Clear();
-			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
+
+			Vector3 cameraPosition = view[3];
 			Shader* volumetricShader = ShaderManager::GetShader("resources/Shaders/volumetric.shader");
 			volumetricShader->Bind();
 			volumetricShader->SetUniformMat4f("u_Projection", projection);
 			volumetricShader->SetUniformMat4f("u_View", view);
-			volumetricShader->SetUniformTex("u_Depth", mDepth, 0);
-			volumetricShader->SetUniformVec3("u_CamPosition", view[3]);
+			volumetricShader->SetUniformTex("u_Depth", mDepth, 1);
+			volumetricShader->SetUniformVec3("u_CamPosition", cameraPosition);
 			volumetricShader->SetUniform1i("u_StepCount", mStepCount);
 			volumetricShader->SetUniform1f("u_FogAmount", mFogAmount);
-			volumetricShader->SetUniform1i("u_LightCount", lights.size());
+			volumetricShader->SetUniform1i("u_LightCount", 1);
 
 			for (uint16_t i = 0; i < lights.size(); i++)
 			{
@@ -57,10 +58,18 @@ namespace Nuake {
 				volumetricShader->SetUniformVec3(u_light + "color", light.Color);
 				volumetricShader->SetUniformVec3(u_light + "direction", light.GetDirection());
 
-				volumetricShader->SetUniformTex(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 1 + i);
+				volumetricShader->SetUniformTex("lightShadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 2 + i);
 			}
+
+
 
 			Renderer::DrawQuad();
 		mFinalFramebuffer->Unbind();
+
+		if (ImGui::Begin("Volumetric debug"))
+		{
+			ImGui::Image((void*)mFinalFramebuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		}
+		ImGui::End();
 	}
 }

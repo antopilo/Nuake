@@ -117,25 +117,51 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 
-
-float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
+int GetCSMDepth(float depth, Light light)
 {
-    // Get Depth
-    float depth = length(FragPos - u_EyePosition);
-    int shadowmap = 0;
-
+    int shadowmap = -1;
     // Get CSM depth
     for (int i = 0; i < 4; i++)
     {
         float CSMDepth = light.CascadeDepth[i];
-    
-        if (depth < CSMDepth + 0.0001)
+
+        if (depth < CSMDepth + 0.0001f)
         {
             shadowmap = i;
             break;
         }
     }
-    
+
+    return shadowmap;
+}
+
+float SampleShadowMap(sampler2D shadowMap, vec2 coords, float compare)
+{
+    return step(compare, texture(shadowMap, coords.xy).r);
+}
+
+float SampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
+{
+    vec2 pixelPos = coords / texelSize + vec2(0.5);
+    vec2 fracPart = fract(pixelPos);
+    vec2 startTexel = (pixelPos - fracPart) * texelSize;
+
+    float blTexel = SampleShadowMap(shadowMap, startTexel, compare);
+    float brTexel = SampleShadowMap(shadowMap, startTexel + vec2(texelSize.x, 0.0), compare);
+    float tlTexel = SampleShadowMap(shadowMap, startTexel + vec2(0.0, texelSize.y), compare);
+    float trTexel = SampleShadowMap(shadowMap, startTexel + texelSize, compare);
+
+    float mixA = mix(blTexel, tlTexel, fracPart.y);
+    float mixB = mix(brTexel, trTexel, fracPart.y);
+
+    return mix(mixA, mixB, fracPart.x);
+}
+
+float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
+{
+    // Get Depth
+    float depth = length(FragPos - u_EyePosition);
+    int shadowmap = GetCSMDepth(depth, light);
     if (shadowmap == -1)
         return 1.0;
 
@@ -149,18 +175,40 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-    float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
-
     float shadow = 0.0;
+    float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
+    //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
-    float pcfDepth = texture(ShadowMaps[shadowmap], projCoords.xy).r;
-    return currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+    if (shadowmap <= 3)
+    {
+        const float NUM_SAMPLES = 4.f;
+        const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
+        const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
+        vec2 texelSize = 1.0 / vec2(2048, 2048);
+
+        float result = 0.0f;
+        for (float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0f)
+        {
+            for (float x = -SAMPLES_START; x <= SAMPLES_START; x += 1.0f)
+            {
+                vec2 coordsOffset = vec2(x, y) * texelSize;
+                result += SampleShadowMapLinear(ShadowMaps[shadowmap], projCoords.xy + coordsOffset, currentDepth - bias, texelSize);
+            }
+        }
+
+        return result / NUM_SAMPLES_SQUARED;
+    }
+    
+    else
+    {
+        return SampleShadowMap(ShadowMaps[shadowmap], projCoords.xy, currentDepth - bias);
+    }
+   
 }
 
 void main()
 {
     vec3 worldPos = WorldPosFromDepth(texture(m_Depth, UV).r);
-
     if (texture(m_Depth, UV).r == 1) 
     {
         FragColor = vec4(0, 0, 0, 0);
@@ -202,7 +250,7 @@ void main()
         vec3 radiance = Lights[i].Color * attenuation ;
 
         if (Lights[i].Type == 0) {
-            radiance *= 1.0f - shadow;
+            radiance *= shadow;
         }
 
         // Cook-Torrance BRDF
@@ -234,6 +282,19 @@ void main()
 
     vec3 ambient = (kD * albedo) * ao;
     vec3 color = ambient + Lo;
+
+    // Display CSM splits..
+    /*float depth = length(worldPos - u_EyePosition);
+    int cascade = GetCSMDepth(depth, Lights[0]);
+    if (cascade == 0)
+        color *= vec3(1.0, 0.0, 0.0);
+    if (cascade == 1)
+        color *= vec3(0.0, 1.0, 0.0);
+    if (cascade == 2)
+        color *= vec3(0.0, 0.0, 1.0);
+    if (cascade == 3)
+        color *= vec3(0.0, 1.0, 1.0);
+    */
 
     FragColor = vec4(color, 1.0);
 }

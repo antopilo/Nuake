@@ -6,6 +6,7 @@
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
+#include <src/Rendering/PostFX/SSR.h>
 
 namespace Nuake {
 	class SceneRenderer {
@@ -15,11 +16,15 @@ namespace Nuake {
 
 		void BeginRenderScene(const Matrix4& projection, const Matrix4& view);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
+
+
+		Scope<SSR> mSSR;
 	private:
 		Matrix4 mProjection, mView;
 
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
+		Scope<FrameBuffer> mToneMapBuffer;
 		Scope<Bloom> mBloom;
 		Scope<Volumetric> mVolumetric;
 

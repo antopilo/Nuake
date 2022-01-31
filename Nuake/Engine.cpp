@@ -85,10 +85,7 @@ namespace Nuake
 	{
 		// Dont trigger exit if already not in play mode.
 		if (IsPlayMode) 
-		{
 			GetCurrentScene()->OnExit();
-			Input::ShowMouse();
-		}
 
 		Input::ShowMouse();
 		IsPlayMode = false;

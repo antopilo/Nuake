@@ -42,8 +42,8 @@ namespace Nuake {
 		inline Matrix4 GetCascadeViewProjection(const int i) { return m_CascadeViewProjections[i]; }
 	private:
 		static const int CSM_SPLIT_AMOUNT = 4;
-		const float CSM_NEAR_CLIP = 0.01f;
-		const float CSM_FAR_CLIP = 1000.0f;
+		const float CSM_NEAR_CLIP = 0.001f;
+		const float CSM_FAR_CLIP = 500.0f;
 		const float CSM_CLIP_RANGE = CSM_FAR_CLIP - CSM_NEAR_CLIP;
 
 		const float mCascadeNearPlaneOffset = 0.0;

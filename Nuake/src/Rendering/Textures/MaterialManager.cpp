@@ -25,12 +25,6 @@ namespace Nuake
 
 	Ref<Material> MaterialManager::GetMaterial(std::string name)
 	{
-		if (!FileSystem::FileExists(name))
-		{
-			Logger::Log("Couldn't load material: " + name + " - File doesn't exists", Nuake::LOG_TYPE::CRITICAL);
-			name = DEFAULT_MATERIAL;
-		}
-
 		if (!IsMaterialLoaded(name))
 		{
 			Ref<Material> newMaterial = CreateRef<Material>(name);

@@ -42,6 +42,8 @@ namespace Nuake
 
 		void Push();
 
+		Ref<Environment> Copy();
+
 		json Serialize() override;
 		bool Deserialize(const std::string& str) override;
 	};

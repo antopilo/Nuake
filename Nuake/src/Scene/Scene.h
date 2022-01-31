@@ -21,7 +21,7 @@ namespace Nuake {
 	{
 		friend Entity;
 	private:
-		std::string Name; // Name of the scene
+		std::string Name;
 		bool has_changed = true;
 
 		// The systems are what updates the components.
@@ -29,21 +29,15 @@ namespace Nuake {
 		// In the scene constructor.
 		std::vector<Ref<System>> m_Systems;
 		Ref<Environment> m_Environement;
-		SceneRenderer* mSceneRenderer;
 	public:
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
 		std::string Path = "";
 
+		SceneRenderer* mSceneRenderer;
 		static Ref<Scene> New();
 		Scene();
 		~Scene();
-
-		std::string GetName();
-		bool SetName(std::string& newName);
-
-		Entity GetEntity(int handle);
-		Entity GetEntityByID(int id);
 
 		bool OnInit();
 		void OnExit();
@@ -54,23 +48,31 @@ namespace Nuake {
 		void Draw(FrameBuffer& framebuffer);
 		void Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view);
 
-		std::vector<Entity> GetAllEntities();
-		Entity GetEntity(const std::string& name);
-
-		Entity CreateEntity(const std::string& name);
-		void DestroyEntity(Entity entity); // TODO: Could return bool
+		std::string GetName();
+		bool SetName(std::string& newName);
 
 		Ref<Camera> GetCurrentCamera();
+
+		Entity CreateEntity(const std::string& name);
+		Entity CreateEntity(const std::string& name, int id);
+		void DestroyEntity(Entity entity);		
+
+		std::vector<Entity> GetAllEntities();
+		Entity GetEntity(const std::string& name);
+		Entity GetEntity(int handle);
+		Entity GetEntityByID(int id);
+
+		template<typename Component>
+		static void CopyComponent(entt::registry& dst, entt::registry& src);
+
 		Ref<Environment> GetEnvironment() const;
+		void SetEnvironment(Ref<Environment> env);
 
 		bool Save();
 		bool SaveAs(const std::string& path);
-
-		void AddInterface(Ref<UI::UserInterface> interface);
+		Ref<Scene> Copy();
 
 		json Serialize() override;
-
-		Scene* Copy();
 		bool Deserialize(const std::string& str) override;
 	};
 }

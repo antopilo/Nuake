@@ -44,9 +44,9 @@ namespace Nuake
 				0,						// Has metalness 
 				0.f,					// Metalness value
 				0,						// u_HasRoughness
-				1.f,					// u_RoughnessValue
+				0.f,					// u_RoughnessValue
 				0,						// u_HasAO
-				0.5f,					// u_AOValue
+				1.f,					// u_AOValue
 				0,						// u_HasNormal
 				0,						// u_HasDisplacement
 				0

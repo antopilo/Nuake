@@ -4,6 +4,7 @@
 #include "Core.h"
 #include <iostream>
 #include <fstream>
+#include "String.h"
 
 namespace Nuake
 {
@@ -14,24 +15,8 @@ namespace Nuake
 		static std::string SaveFile(const char* filter);
 	};
 
-	struct Directory;
-	struct File
-	{
-		std::string Type;
-		std::string name;
-
-		std::string fullPath;
-		Ref<Directory> Parent;
-	};
-
-	struct Directory
-	{
-		std::string name;
-		std::string fullPath;
-		Ref<Directory> Parent;
-		std::vector<Ref<Directory>> Directories;
-		std::vector<Ref<File>> Files;
-	};
+	class Directory;
+	class File;
 
 	class FileSystem
 	{
@@ -45,6 +30,7 @@ namespace Nuake
 		static void Scan();
 		static std::string AbsoluteToRelative(const std::string& path);
 		static Ref<Directory> GetFileTree();
+		static Ref<File> GetFile(const std::string& path);
 		static void ScanDirectory(Ref<Directory> directory);
 		static void GetDirectories();
 
@@ -57,5 +43,41 @@ namespace Nuake
 		static bool BeginWriteFile(const std::string path);
 		static bool WriteLine(const std::string line);
 		static void EndWriteFile();
+	};
+
+	class File
+	{
+	private:
+		std::string Type;
+		std::string Name;
+		std::string RelativePath;
+		std::string AbsolutePath;
+		Ref<Directory> Parent;
+	public:
+
+		std::string GetExtension() { return Type; }
+		std::string GetName() { return Name; }
+		std::string GetRelativePath() { return RelativePath; }
+		std::string GetAbsolutePath() { return AbsolutePath; }
+		Ref<Directory> GetParent() { return Parent; }
+
+		File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
+		{
+			AbsolutePath = absolutePath;
+			Parent = parentDir;
+			RelativePath = FileSystem::AbsoluteToRelative(absolutePath);
+			Name = name;
+			Type = type;
+		}
+	};
+
+	class Directory
+	{
+	public:
+		std::string name;
+		std::string fullPath;
+		Ref<Directory> Parent;
+		std::vector<Ref<Directory>> Directories;
+		std::vector<Ref<File>> Files;
 	};
 }

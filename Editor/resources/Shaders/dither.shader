@@ -25,7 +25,6 @@ void main()
         discard;
 
     vec4 finalColor = u_Color;
-    finalColor.a = (sin(u_Time * 4.0) + 1.0) / 4.0 + 0.1;
     FragColor = finalColor;
     
 }

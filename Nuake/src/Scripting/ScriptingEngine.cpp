@@ -88,18 +88,18 @@ namespace Nuake {
         return result;
     }
 
-    Ref<WrenScript> ScriptingEngine::RegisterScript(const std::string& path, const std::string& mod)
-    {
-        // Check if scripts has already been loaded.
-        // You can't import the same module twice, otherwise, compile error.
-        if (m_Scripts.find(path) == m_Scripts.end())
-        {
-            std::string query = "import \"" + path + "\" for " + mod;
-            wrenInterpret(m_WrenVM, "main", query.c_str());
-        }
-
-        return CreateRef<WrenScript>(path, mod);
-    }
+    //Ref<WrenScript> ScriptingEngine::RegisterScript(const std::string& path, const std::string& mod)
+    //{
+    //    //// Check if scripts has already been loaded.
+    //    //// You can't import the same module twice, otherwise, compile error.
+    //    //if (m_Scripts.find(path) == m_Scripts.end())
+    //    //{
+    //    //    std::string query = "import \"" + path + "\" for " + mod;
+    //    //    wrenInterpret(m_WrenVM, "main", query.c_str());
+    //    //}
+    //    //
+    //    //return CreateRef<WrenScript>(path, mod);
+    //}
 
     // Useful to check if a script has been imported, importing a script
     // twice gives a compile error.
@@ -119,8 +119,6 @@ namespace Nuake {
             return;
         m_LoadedScripts.push_back(path);
     }
-
-
 
     void ScriptingEngine::RegisterModule(Ref<ScriptModule> scriptModule)
     {

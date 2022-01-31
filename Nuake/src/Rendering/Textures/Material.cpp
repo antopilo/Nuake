@@ -94,45 +94,54 @@ namespace Nuake
 		//	return;
 
 		MaterialManager::Get()->CurrentlyBoundedMaterial = m_Name;
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);
+		
 
 		// Albedo
 		if (m_Albedo != nullptr)
+		{
+			data.u_HasAlbedo = 1;
 			m_Albedo->Bind(4);
+		}
 		else
 			m_DefaultAlbedo->Bind(4);
 		shader->SetUniform1i("m_Albedo", 4);
 
 		// AO
 		if (m_AO != nullptr)
+		{
+			data.u_HasAO = 1;
 			m_AO->Bind(5);
+		}
 		else
 			m_DefaultAO->Bind(5);
 		shader->SetUniform1i("m_AO", 5);
 
 		// Metallic
-		if (m_Metalness != nullptr)
+		if (m_Metalness != nullptr) {
+			data.u_HasMetalness = 1; 
 			m_Metalness->Bind(6);
+		}
 		else
 			m_DefaultMetalness->Bind(6);
 		shader->SetUniform1i("m_Metalness", 6);
 
 		// Roughness
-		if (m_Roughness != nullptr)
+		if (m_Roughness != nullptr) {
+			data.u_HasRoughness = 1;
 			m_Roughness->Bind(7);
+		}
 		else
 			m_DefaultRoughness->Bind(7);
 		shader->SetUniform1i("m_Roughness", 7);
 
 		// Normal
-		if (m_Normal != nullptr)
+		if (m_Normal != nullptr) {
+			data.u_HasNormal = 1;
 			m_Normal->Bind(8);
+		}
 		else
 			m_DefaultNormal->Bind(8);
+
 		shader->SetUniform1i("m_Normal", 8);
 
 		// Displacement
@@ -140,6 +149,12 @@ namespace Nuake
 			m_Displacement->Bind(9);
 		else
 			m_DefaultDisplacement->Bind(9);
+
+		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);
 		//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
 		//Renderer::m_Shader->SetUniform1i("m_Displacement", 9);
 	}

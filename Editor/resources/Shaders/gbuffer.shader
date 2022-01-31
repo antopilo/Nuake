@@ -17,8 +17,15 @@ out vec2 UV;
 
 void main()
 {
-    vec3 N = normalize((u_Model * vec4(Normal, 0.0f)).xyz);
+    //mat3 normalMatrix = transpose(inverse(mat3(u_Model)));
+    //vec3 T = normalize(normalMatrix * Tangent);
+    //vec3 N = normalize(normalMatrix * Normal);
+    //T = normalize(T - dot(T, N) * N);
+    //vec3 B = cross(N, T);
+
+
     vec3 T = normalize((u_Model * vec4(Tangent, 0.0f)).xyz);
+    vec3 N = normalize((u_Model * vec4(Normal, 0.0f)).xyz);
     vec3 B = normalize((u_Model * vec4(Bitangent, 0.0f)).xyz);
     TBN = mat3(T, B, N);
 
@@ -68,10 +75,8 @@ void main()
     if (u_HasNormal == 1)
         normal = texture(m_Normal, UV).rgb;
     normal = normal * 2.0 - 1.0;
-
     normal = TBN * normalize(normal);
-
-    gNormal = vec4(normal, 1.0) / 2.0 + 0.5;
+    gNormal = vec4(normal / 2.0 + 0.5, 1.0);
 
     // Albedo
     gAlbedo = vec4(m_AlbedoColor, 1.0);

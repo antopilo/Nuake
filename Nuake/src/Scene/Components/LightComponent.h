@@ -63,11 +63,11 @@ namespace Nuake
             glm::mat4 inverseViewProjection = glm::inverse(viewProjection);
 
             // TODO: Automate this
-            const float nearClip = 0.01f;
-            const float farClip = 1000.0f;
+            const float nearClip = 0.0001f;
+            const float farClip = 800.0f;
             const float clipRange = farClip - nearClip;
 
-            const float mCascadeNearPlaneOffset = 0.0;
+            const float mCascadeNearPlaneOffset = -100.0f;
             const float mCascadeFarPlaneOffset = 0.0;
 
             // Calculate the optimal cascade distances

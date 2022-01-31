@@ -75,11 +75,14 @@ namespace Nuake
 			}
 			else if (entry.is_regular_file())
 			{
-				Ref<File> newFile = CreateRef<File>();
-				newFile->Type = entry.path().extension().string();
-				newFile->name = entry.path().filename().string();
-				newFile->Parent = directory;
-				newFile->fullPath = entry.path().string();
+				std::string absolutePath = entry.path().string();
+				std::string name = entry.path().filename().string();
+				std::string extension = entry.path().extension().string();
+				Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
+				//newFile->Type = entry.path().extension().string();
+				//newFile->name = entry.path().filename().string();
+				//newFile->Parent = directory;
+				//newFile->fullPath = entry.path().string();
 				directory->Files.push_back(newFile);
 			}
 		}
@@ -164,6 +167,40 @@ namespace Nuake
 	Ref<Directory> FileSystem::GetFileTree()
 	{
 		return RootDirectory;
+	}
+
+	Ref<File> FileSystem::GetFile(const std::string& path)
+	{
+		// Note, Might be broken on other platforms.
+		auto& splits = String::Split(path, '/');
+
+		int currentDepth = -1;
+		std::string currentDirName = ".";
+		Ref<Directory> currentDirComparator = RootDirectory;
+		while (currentDirName == currentDirComparator->name)
+		{
+			currentDepth++;
+			currentDirName = splits[currentDepth];
+
+			// Find next directory
+			for (auto& d : currentDirComparator->Directories)
+			{
+				if (d->name == currentDirName)
+				{
+					currentDirComparator = d;
+				}
+			}
+
+			// Find in files if can't find in directories.
+			for (auto& f : currentDirComparator->Files)
+			{
+				if (f->GetName() == currentDirName)
+				{
+					return f;
+				}
+			}
+		}
+
 	}
 
 }

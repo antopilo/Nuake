@@ -73,15 +73,22 @@ namespace Nuake {
             vector.z = mesh->mNormals[i].z;
             vertex.normal = vector;
 
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
-            vertex.tangent = vector;
+            if (mesh->mTangents)
+            {
+                vector.x = mesh->mTangents[i].x;
+                vector.y = mesh->mTangents[i].y;
+                vector.z = mesh->mTangents[i].z;
+                vertex.tangent = vector;
+            }
 
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
-            vertex.bitangent = vector;
+            if (mesh->mBitangents)
+            {
+                vector.x = mesh->mBitangents[i].x;
+                vector.y = mesh->mBitangents[i].y;
+                vector.z = mesh->mBitangents[i].z;
+                vertex.bitangent = vector;
+            }
+
 
             if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
             {

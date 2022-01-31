@@ -11,8 +11,6 @@ namespace Nuake {
 		void SetPrefab(Ref<Prefab> prefab)
 		{
 			PrefabInstance = prefab;
-			
-
 		}
 	};
 }

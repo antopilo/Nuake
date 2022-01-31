@@ -37,11 +37,12 @@ struct Light {
     mat4 transform;
     vec3 color;
     vec3 direction;
-    sampler2D shadowmap;
+    int shadowmap;
 };
 
 uniform Light u_Lights[MAX_LIGHT];
 
+uniform sampler2D lightShadowmap;
 in vec2 UV;
 
 out vec4 FragColor;
@@ -57,7 +58,8 @@ float ComputeScattering(float lightDotView)
 
 vec3 ComputeVolumetric(vec3 FragPos, Light light)
 {
-    vec3 rayVector = FragPos - u_CamPosition;  // Ray Direction
+    vec3 startPosition = u_CamPosition;             // Camera Position
+    vec3 rayVector = FragPos - startPosition;  // Ray Direction
 
     float rayLength = length(rayVector);            // Length of the raymarched
 
@@ -68,7 +70,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     vec3 accumFog = vec3(0.0f, 0.0f, 0.0f);         // accumulative color
 
     // Raymarching
-    vec3 currentPosition = u_CamPosition;
+    vec3 currentPosition = startPosition;
     for (int i = 0; i < u_StepCount; i++)
     {
         vec4 fragPosLightSpace = light.transform * vec4(currentPosition, 1.0f);
@@ -78,7 +80,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         projCoords = projCoords * 0.5 + 0.5;
 
         float currentDepth = projCoords.z;
-        float closestDepth = texture(light.shadowmap, projCoords.xy).r;
+        float closestDepth = texture(lightShadowmap, projCoords.xy).r;
         if (closestDepth > currentDepth)
             accumFog += (ComputeScattering(dot(rayDirection, normalize(light.direction))).xxx * light.color);
 
@@ -110,11 +112,10 @@ void main()
     vec3 globalFragmentPosition = WorldPosFromDepth(depth);
 
     vec3 fog = vec3(0, 0, 0);
-
     for (int i = 0; i < u_LightCount; i++)
     {
         fog += ComputeVolumetric(globalFragmentPosition, u_Lights[i]);
     }
-
-    FragColor = vec4(mix(fog, vec3(depth), 0.01), 1.0);
+     
+    FragColor = vec4(mix(fog, ComputeVolumetric(globalFragmentPosition, u_Lights[0]), 0.9f), 1.0);
 }

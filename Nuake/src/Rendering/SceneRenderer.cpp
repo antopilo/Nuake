@@ -20,8 +20,14 @@ namespace Nuake {
 
 		mBloom = CreateScope<Bloom>(4);
 		mBloom->SetSource(shadedTexture);
-
+		
 		mVolumetric = CreateScope<Volumetric>();
+
+		mSSR = CreateScope<SSR>();
+
+		mToneMapBuffer = CreateScope<FrameBuffer>(false, Vector2(1920, 1080));
+		mToneMapBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
+
 	}
 
 	void SceneRenderer::Cleanup()
@@ -70,12 +76,15 @@ namespace Nuake {
 			mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
 			mVolumetric->Draw(mProjection , mView, lightList);
 
+
 			finalOutput = mVolumetric->GetFinalOutput();
 		}
 		
 		// Copy final output to target framebuffer
-		framebuffer.Bind();
+		mToneMapBuffer->QueueResize(framebuffer.GetSize());
+		mToneMapBuffer->Bind();
 		{
+			RenderCommand::Clear();
 			Shader* shader = ShaderManager::GetShader("resources/Shaders/tonemap.shader");
 			shader->Bind();
 
@@ -84,7 +93,23 @@ namespace Nuake {
 			shader->SetUniformTex("u_Source", finalOutput);
 			Renderer::DrawQuad();
 		}
+		mToneMapBuffer->Unbind();
+
+		mSSR->Resize(framebuffer.GetSize());
+		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+			Renderer::DrawQuad();
+		}
 		framebuffer.Unbind();
+
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
@@ -97,6 +122,7 @@ namespace Nuake {
 		Shader* shader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
 		shader->Bind();
 
+		RenderCommand::Disable(RendererEnum::FACE_CULL);
 		glCullFace(GL_BACK);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, MeshComponent>();
