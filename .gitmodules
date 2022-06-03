@@ -13,6 +13,3 @@
 [submodule "Nuake/dependencies/freetype"]
 	path = Nuake/dependencies/freetype
 	url = https://github.com/freetype/freetype.git
-[submodule "Nuake/dependencies/soloud"]
-	path = Nuake/dependencies/soloud
-	url = https://github.com/antopilo/soloud.git
