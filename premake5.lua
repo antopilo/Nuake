@@ -134,8 +134,7 @@ project "Editor"
         "BulletCollision",
         "BulletDynamics",
         "LinearMath",
-		"Freetype",
-		"SoloudStatic"
+		"Freetype"
     }
 
     filter "system:windows"

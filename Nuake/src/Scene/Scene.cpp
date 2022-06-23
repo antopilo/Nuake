@@ -88,10 +88,12 @@ namespace Nuake {
 	bool Scene::OnInit()
 	{
 		for (auto& system : m_Systems)
+		{
 			if (!system->Init())
 			{
 				return false;
 			}
+		}
 
 		return true;
 	}
@@ -99,19 +101,25 @@ namespace Nuake {
 	void Scene::OnExit()
 	{
 		for (auto& system : m_Systems)
+		{
 			system->Exit();
+		}
 	}
 
 	void Scene::Update(Timestep ts)
 	{
 		for (auto& system : m_Systems)
+		{
 			system->Update(ts);
+		}
 	}
 
 	void Scene::FixedUpdate(Timestep ts)
 	{
 		for (auto& system : m_Systems)
+		{
 			system->FixedUpdate(ts);
+		}
 	}
 
 	void Scene::EditorUpdate(Timestep ts)
@@ -124,7 +132,8 @@ namespace Nuake {
 		Ref<Camera> cam = nullptr;
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
-			for (auto e : view) {
+			for (auto e : view) 
+			{
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
 				cam->Translation = transform.GlobalTranslation;
@@ -282,7 +291,6 @@ namespace Nuake {
 				}
 			}
 		}
-
 	}
 
 	Ref<Scene> Scene::Copy()
