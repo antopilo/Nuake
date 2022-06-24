@@ -329,6 +329,8 @@ namespace Nuake {
         if (!ent.HasComponent<QuakeMapComponent>())
             return;
 
+        ent.GetComponent<NameComponent>().IsPrefab = true;
+
         QuakeMapComponent& quakeMapC = ent.GetComponent<QuakeMapComponent>();
         ScaleFactor = quakeMapC.ScaleFactor;
         Scene* m_Scene = ent.GetScene();

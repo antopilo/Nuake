@@ -15,6 +15,6 @@
 #include "CharacterControllerComponent.h"
 #include "ParentComponent.h"
 #include "NameComponent.h"
+#include "BoxCollider.h"
 #include "../Entities/Entity.h"
-
 

@@ -9,17 +9,11 @@
 namespace Nuake {
 	class QuakeMapComponent
 	{
-	private:
-
 	public:
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::string Path;
 		float ScaleFactor = 1.0f;
 		bool HasCollisions = false;
-		void Load(std::string path, bool collisions);
-
-		void Draw();
-		void DrawEditor();
 
 		json Serialize()
 		{

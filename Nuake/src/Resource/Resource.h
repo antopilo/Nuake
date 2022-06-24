@@ -10,7 +10,8 @@ namespace Nuake {
 		Prefab,
 		Map,
 		Mesh,
-		Shader
+		Shader,
+
 	};
 
 
@@ -39,7 +40,7 @@ namespace Nuake {
 	class ModelResource : Resource
 	{
 	public:
-		std::vector<Mesh*> SubMeshes;
+		std::vector<Ref<Mesh>> SubMeshes;
 
 		ModelResource();
 		bool Load(const std::string& path);

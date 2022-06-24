@@ -1,6 +1,6 @@
 #include "EditorSelectionPanel.h"
-#include "src/Scene/Components/ImportComponents.h"
 #include "../Misc/ImGuiTextHelper.h"
+#include <src/Scene/Components/Components.h>
 
 EditorSelectionPanel::EditorSelectionPanel()
 {
