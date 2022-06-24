@@ -116,7 +116,7 @@ namespace Nuake
 			Props[type] = prop;
 		}
 
-		PropValue& GetProp(PropType type)
+		PropValue GetProp(PropType type)
 		{
 			if (Props.find(type) != Props.end())
 				return Props[type];

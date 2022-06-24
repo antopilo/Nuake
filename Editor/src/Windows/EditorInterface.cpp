@@ -52,6 +52,7 @@ namespace Nuake {
     EditorInterface::EditorInterface()
     {
         filesystem = new FileSystemUI(this);
+        _WelcomeWindow = new WelcomeWindow(this);
     }
 
     void EditorInterface::Init()
@@ -1502,14 +1503,10 @@ namespace Nuake {
 
 
     Ref<Scene> SceneSnapshot;
-    WelcomeWindow window = WelcomeWindow();
     void EditorInterface::Draw()
     {
         Init();
         auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
-
-        
-        
 
         if (ImGui::BeginPopupModal("Welcome", NULL, flags))
         {
@@ -1533,7 +1530,7 @@ namespace Nuake {
 
         if (!Engine::GetProject())
         {
-            ImGui::OpenPopup("Welcome");
+            _WelcomeWindow->Draw();
             return;
         }
 

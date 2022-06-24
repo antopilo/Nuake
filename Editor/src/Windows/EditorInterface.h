@@ -6,17 +6,13 @@
 
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"
-
+#include "WelcomeWindow.h"
 namespace Nuake {
 	class Material;
 	class FileSystemUI;
 	class EditorInterface
 	{
 	private:
-		FileSystemUI* filesystem; 
-		
-		
-
 		bool m_DrawGrid = false;
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = false;
@@ -29,6 +25,8 @@ namespace Nuake {
 		bool m_IsMaterialSelected = false;
 
 	public:
+		WelcomeWindow* _WelcomeWindow;
+		FileSystemUI* filesystem;
 		EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
 

@@ -32,13 +32,12 @@ public:
 
                         Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(path);
                         component.mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
-                        auto& modules = component.mWrenScript->GetModules();
+                        auto modules = component.mWrenScript->GetModules();
                     }
                     ImGui::EndDragDropTarget();
                 }
 
                 component.Script = path;
-
 
                 // 
                 //ImGuiHelper::DrawVec3("Translation", &component.Translation);

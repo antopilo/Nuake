@@ -38,10 +38,10 @@ namespace Nuake
 	private:
 		static RenderList m_RenderList;
 	public:
-		static VertexArray* Renderer::QuadVertexArray;
-		static VertexBuffer* Renderer::QuadVertexBuffer;
-		static VertexArray* Renderer::CubeVertexArray;
-		static VertexBuffer* Renderer::CubeVertexBuffer;
+		static VertexArray* QuadVertexArray;
+		static VertexBuffer* QuadVertexBuffer;
+		static VertexArray* CubeVertexArray;
+		static VertexBuffer* CubeVertexBuffer;
 
 		static Shader* m_Shader;
 		static Shader* m_ShadowmapShader;
@@ -72,8 +72,6 @@ namespace Nuake
 		static std::vector<Light> m_Lights;
 		static void RegisterLight(TransformComponent transform, LightComponent light);
 		static void RegisterDeferredLight(TransformComponent transform, LightComponent light);
-
-		
 
 		// Debug
 		static void DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform = Matrix4());

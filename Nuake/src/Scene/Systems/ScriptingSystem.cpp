@@ -17,6 +17,10 @@ namespace Nuake {
 		for (auto& e : entities)
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
+
+			if (!wren.mWrenScript)
+				continue;
+
 			wren.mWrenScript->Build(wren.mModule, true);
 			
 			if (!wren.mWrenScript->HasCompiledSuccesfully())
@@ -28,7 +32,6 @@ namespace Nuake {
 
 		return true;
 	}
-
 
 	void ScriptingSystem::Update(Timestep ts)
 	{

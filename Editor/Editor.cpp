@@ -115,52 +115,6 @@ int main()
 
             glEnable(GL_DEPTH_TEST);
 
-            GuizmoShader->Bind();
-            
-            glDisable(GL_CULL_FACE);
-            glDisable(GL_DEPTH_TEST);
-            auto camView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::CameraComponent>();
-            for (auto e : camView) {
-                auto [transformComponent, cam] = camView.get<Nuake::TransformComponent, Nuake::CameraComponent>(e);
-                
-                Nuake::Vector3 cameraPos = currentScene->m_EditorCamera->GetTranslation();
-                Nuake::Vector3 position = transformComponent.GlobalTranslation;
-                Nuake::Vector3 look = normalize(cameraPos - position);
-                Nuake::Vector3 right = glm::cross(currentScene->m_EditorCamera->GetUp(), look);
-                Nuake::Vector3 up2 = currentScene->m_EditorCamera->GetUp();
-                Nuake::Matrix4 transform = glm::identity<Nuake::Matrix4>();
-                transform[0] = Nuake::Vector4(right, 0);
-                transform[1] = Nuake::Vector4(up2, 0);
-                transform[2] = Nuake::Vector4(look, 0);
-                transform = glm::translate(transform, position);
-                GuizmoShader->SetUniformMat4f("model", transform);
-                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
-                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-            
-                camTexture->Bind(2);
-                GuizmoShader->SetUniform1i("gizmo_texture", 2);
-            
-                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
-            }
-            
-            auto view = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::LightComponent>();
-            for (auto e : view) {
-                auto [transformComponent, light] = view.get<Nuake::TransformComponent, Nuake::LightComponent>(e);
-            
-                GuizmoShader->SetUniformMat4f("model", transformComponent.GetGlobalTransform());
-                GuizmoShader->SetUniformMat4f("view", currentScene->m_EditorCamera->GetTransform());
-                GuizmoShader->SetUniformMat4f("projection", currentScene->m_EditorCamera->GetPerspective());
-            
-                lightTexture->Bind(2);
-                GuizmoShader->SetUniform1i("gizmo_texture", 2);
-            
-                Nuake::Renderer::DrawQuad(transformComponent.GetGlobalTransform());
-            }
-            
-            glEnable(GL_CULL_FACE);
-            
-            GuizmoShader->Unbind();
-            
             ditherShader->Bind();
             ditherShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
             ditherShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
