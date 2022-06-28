@@ -1,12 +1,12 @@
 #include "QuakeMapBuilder.h"
+
+#include "src/Rendering/Mesh/Mesh.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/String.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/QuakeMap.h"
 #include "src/Scene/Components/ParentComponent.h"
-#include <vector>
-#include <map>
 
 extern "C" {
     #include <libmap/h/map_parser.h>
@@ -24,13 +24,15 @@ extern "C" {
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
 
+#include <vector>
+#include <map>
+
 namespace Nuake {
     struct ProcessedMesh
     {
         std::vector<Vertex> Vertices;
-        std::vector<unsigned int> Indices;
+        std::vector<uint32_t> Indices;
     };
-
 
     Ref<Material> DefaultMaterial;
 
@@ -92,7 +94,10 @@ namespace Nuake {
 
             indexOffset += face_geo_inst->vertex_count;
         }
-        bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
+
+        Ref<Mesh> mesh = CreateRef<Mesh>();
+        mesh->AddSurface(vertices, indices);
+        bsp.Meshes.push_back(mesh);
     }
 
     void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, 
@@ -170,10 +175,16 @@ namespace Nuake {
             {
                 lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
 
-                if (std::string(texture->name) == "__TB_empty")
-                    bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
-                else
-                    bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
+                Ref<Mesh> mesh = CreateRef<Mesh>();
+                mesh->AddSurface(vertices, indices);
+
+                if (std::string(texture->name) != "__TB_empty")
+                {
+                    Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
+                    mesh->SetMaterial(material);
+                }
+
+                bsp.Meshes.push_back(mesh);
 
                 index_offset = 0;
                 vertices.clear();
@@ -187,7 +198,15 @@ namespace Nuake {
         }
 
         if (vertices.size() > 0)
-            bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
+        {
+            Ref<Mesh> mesh = CreateRef<Mesh>();
+            mesh->AddSurface(vertices, indices);
+
+            Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
+            mesh->SetMaterial(material);
+
+            bsp.Meshes.push_back(mesh);
+        }
     }
 
     void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
@@ -293,10 +312,16 @@ namespace Nuake {
                 if (lastTextureID != face->texture_idx)
                 {
                     lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
-                    if (std::string(texture->name) == "__TB_empty")
-                        bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
-                    else
-                        bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
+                    Ref<Mesh> mesh = CreateRef<Mesh>();
+                    mesh->AddSurface(vertices, indices);
+
+                    if (std::string(texture->name) != "__TB_empty")
+                    {
+                        Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
+                        mesh->SetMaterial(material);
+                    }
+
+                    bsp.Meshes.push_back(mesh);
 
                     index_offset = 0;
                     vertices.clear();
@@ -316,12 +341,23 @@ namespace Nuake {
 
         if (bsp.IsTrigger)
         {
-            bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, DefaultMaterial));
+            Ref<Mesh> mesh = CreateRef<Mesh>();
+            mesh->AddSurface(vertices, indices);
+
+            bsp.Meshes.push_back(mesh);
             vertices.clear();
         }
 
         if (vertices.size() > 0)
-            bsp.Meshes.push_back(CreateRef<Mesh>(vertices, indices, MaterialManager::Get()->GetMaterial(lastTexturePath)));
+        {
+            Ref<Mesh> mesh = CreateRef<Mesh>();
+            mesh->AddSurface(vertices, indices);
+
+            Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
+            mesh->SetMaterial(material);
+            bsp.Meshes.push_back(mesh);
+        }
+            
     }
 
     void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
@@ -499,7 +535,7 @@ namespace Nuake {
                         face_geometry* face_geo_inst = &brush_geo_inst->faces[f];
 
                         std::vector<Vertex> vertices;
-                        std::vector<unsigned int> indices;
+                        std::vector<uint32_t> indices;
                         for (int i = 0; i < face_geo_inst->vertex_count; ++i)
                         {
                             face_vertex vertex = face_geo_inst->vertices[i];
@@ -533,7 +569,7 @@ namespace Nuake {
 
                         for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
                         {
-                            unsigned int index = face_geo_inst->indices[i];
+                            uint32_t index = face_geo_inst->indices[i];
                             indices.push_back((unsigned int)index);
                         }
 
@@ -548,8 +584,8 @@ namespace Nuake {
                 for (auto& mat : m_StaticWorld)
                 {
                     std::vector<Vertex> batchedVertices;
-                    std::vector<unsigned int> batchedIndices;
-                    int indexOffset = 0;
+                    std::vector<uint32_t> batchedIndices;
+                    uint32_t indexOffset = 0;
                     for (auto& pm : mat.second)
                     {
                         for(auto& vert : pm.Vertices)
@@ -561,7 +597,11 @@ namespace Nuake {
                         indexOffset += pm.Vertices.size();
                     }
 
-                    bsp.Meshes.push_back(CreateRef<Mesh>(batchedVertices, batchedIndices, mat.first));
+                    Ref<Mesh> mesh = CreateRef<Mesh>();
+                    mesh->AddSurface(batchedVertices, batchedIndices);
+                    mesh->SetMaterial(mat.first);
+
+                    bsp.Meshes.push_back(mesh);
                 }
             }
             

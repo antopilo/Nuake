@@ -8,9 +8,12 @@
 namespace Nuake {
 	class ResourceManager {
 	private:
-		static std::unordered_map<UUID, Ref<Resource>> m_Resources;
+		static std::map<UUID, Ref<Resource>> m_Resources;
 
 	public:
 		static Ref<Resource> GetResource(const UUID& uuid);
+
+		template<typename R>
+		static Ref<R> LoadResource(const std::string& path);
 	};
 }

@@ -23,15 +23,11 @@ namespace Nuake
 
     class Char
     {
-    private:
-        unsigned int m_VBO;
-        unsigned int m_VAO;
-
     public:
-        unsigned int Unicode;
-        float Advance;
+        uint32_t Unicode;
+        float Advance = 0.f;
         CharPos PlaneBounds;
-        CharUV AtlasBounds;
+        CharUV AtlasBounds = {};
 
         Char() {};
         Char(const unsigned int unicode, float advance, CharPos plane, CharUV atlas)

@@ -14,6 +14,9 @@
 
 #include "src/Scene/Systems/System.h"
 
+#include "src/Resource/UUID.h"
+#include "src/Resource/Resource.h"
+
 namespace Nuake {
 	class Entity;
 	class SceneRenderer;
@@ -29,6 +32,8 @@ namespace Nuake {
 		// In the scene constructor.
 		std::vector<Ref<System>> m_Systems;
 		Ref<Environment> m_Environement;
+		std::map<UUID, Ref<Resource>> m_Resources;
+
 	public:
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
@@ -67,6 +72,12 @@ namespace Nuake {
 
 		Ref<Environment> GetEnvironment() const;
 		void SetEnvironment(Ref<Environment> env);
+
+		template<class T>
+		Ref<T> GetResource(const UUID& uuid)
+		{
+			return m_Resources[uuid];
+		}
 
 		bool Save();
 		bool SaveAs(const std::string& path);

@@ -216,6 +216,7 @@ namespace Nuake
 					}
 				}
 			}
+
 			ImGui::EndChild();
 		}
 

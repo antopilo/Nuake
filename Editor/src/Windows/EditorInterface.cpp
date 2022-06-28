@@ -822,6 +822,7 @@ namespace Nuake {
                //    // Unselect delted entity.
                //    m_SelectedEntity = scene->GetAllEntities().at(0);
                //}
+
             }
             ImGui::EndChild();
 

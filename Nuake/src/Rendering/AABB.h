@@ -1,9 +1,10 @@
 #pragma once
+#include "src/Core/Maths.h"
 
 namespace Nuake {
 	class AABB
 	{
-		public:
+	public:
 		Vector3 Min;
 		Vector3 Max;
 

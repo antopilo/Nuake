@@ -81,9 +81,9 @@ namespace Nuake
         m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
         Ref<Material> material = MaterialManager::Get()->GetMaterial("default");
-
-        CubeMesh = CreateRef<Mesh>(CubeVertices, CubeIndices, material);
-
+        CubeMesh = CreateRef<Mesh>();
+        CubeMesh->AddSurface(CubeVertices, CubeIndices);
+        CubeMesh->SetMaterial(material);
         // Cube buffer
         //CubeVertexArray = new VertexArray();
         //CubeVertexArray->Bind();

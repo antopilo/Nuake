@@ -2,9 +2,9 @@
 #include "PhysicsShapes.h"
 #include "../Core/Core.h"
 #include <glm/ext/vector_float3.hpp>
-struct btTransform;
-struct btRigidBody;
-struct btVector3;
+class btTransform;
+class btRigidBody;
+class btVector3;
 
 namespace Nuake
 {

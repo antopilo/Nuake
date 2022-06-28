@@ -20,8 +20,8 @@ namespace Nuake {
 	private:
 		float m_Threshold = 2.3f;
 		float m_BlurAmount = 12.0f;
-		unsigned int m_Iteration;
-		Vector2 m_Size;
+		uint32_t m_Iteration = 4;
+		Vector2 m_Size = Vector2();
 
 		Ref<Texture> m_Source;
 		Ref<FrameBuffer> m_FinalFB;

@@ -24,10 +24,12 @@ namespace Nuake
 
 		void AddToRenderList(Ref<Mesh> mesh, Matrix4 transform)
 		{
-			if (m_RenderList.find(mesh->m_Material) == m_RenderList.end())
-				m_RenderList[mesh->m_Material] = std::vector<RenderMesh>();
+			Ref<Material> material = mesh->GetMaterial();
 
-			m_RenderList[mesh->m_Material].push_back({mesh, transform});
+			if (m_RenderList.find(material) == m_RenderList.end())
+				m_RenderList[material] = std::vector<RenderMesh>();
+
+			m_RenderList[material].push_back({mesh, transform});
 		}
 
 		void Flush(Shader* shader, bool depthOnly = false)

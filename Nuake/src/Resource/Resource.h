@@ -1,48 +1,20 @@
 #pragma once
+#include "src/Resource/UUID.h"
+
 #include <string>
-#include <vector>
-#include "src/Rendering/Mesh/Mesh.h"
 
-namespace Nuake {
-	enum class ResourceType
-	{
-		Texture,
-		Prefab,
-		Map,
-		Mesh,
-		Shader,
-
-	};
-
-
+namespace Nuake 
+{
 	class Resource
 	{
 	public:
-		unsigned int Id;
-		ResourceType Type;
+		UUID Id;
 
-		bool IsEmbedded;
+		bool IsEmbedded = false;
 		std::string Path; // Only if embedded
 
 		void MakeExternal();
 		void Duplicate();
 		void MakeEmbedded();
-	};
-
-	class TextureResource : Resource
-	{
-	public:
-		std::string TexturePath;
-		// texture flags
-	};
-
-
-	class ModelResource : Resource
-	{
-	public:
-		std::vector<Ref<Mesh>> SubMeshes;
-
-		ModelResource();
-		bool Load(const std::string& path);
 	};
 }

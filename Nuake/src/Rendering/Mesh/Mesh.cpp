@@ -1,19 +1,53 @@
 #include "Mesh.h"
-#include "src/Rendering/Renderer.h"
+
+#include "src/Core/Maths.h"
+#include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Textures/MaterialManager.h"
+#include "src/Rendering/Renderer.h"
+#include "src/Rendering/Shaders/Shader.h"
+#include "src/Rendering/Vertex.h"
+#include "src/Rendering/Buffers/VertexBuffer.h"
+#include "src/Rendering/Buffers/VertexArray.h"
+#include "src/Rendering/Buffers/VertexBufferLayout.h"
 
 namespace Nuake
 {
-    Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Ref<Material> material)
+    Mesh::Mesh() {}
+    Mesh::~Mesh() {}
+
+    void Mesh::AddSurface(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
     {
         this->m_Vertices = vertices;
         this->m_Indices = indices;
-        this->m_Material = material;
-
-        MaterialManager::Get()->RegisterMaterial(material);
 
         SetupMesh();
         CalculateAABB();
+
+        if (m_Material == nullptr)
+        {
+            m_Material = MaterialManager::Get()->GetMaterial("default");
+        }
+    }
+
+    std::vector<Vertex>& Mesh::GetVertices()
+    {
+        return m_Vertices;
+    }
+
+    std::vector<uint32_t>& Mesh::GetIndices()
+    {
+        return m_Indices;
+    }
+
+    Ref<Material> Mesh::GetMaterial() inline const
+    {
+        return m_Material;
+    }
+
+    void Mesh::SetMaterial(Ref<Material> material)
+    {
+        m_Material = material;
+        MaterialManager::Get()->RegisterMaterial(material);
     }
 	
 	void Mesh::CalculateAABB()
@@ -24,7 +58,8 @@ namespace Nuake
         float maxX = 0.0f;
         float maxY = 0.0f;
         float maxZ = 0.0f;
-		for (Vertex& v : m_Vertices)
+
+		for (const Vertex& v : m_Vertices)
 		{
 			minX = v.position.x < minX ? v.position.x : minX;
 			minY = v.position.y < minY ? v.position.y : minY;
@@ -33,15 +68,16 @@ namespace Nuake
 			maxY = v.position.y > maxY ? v.position.y : maxY;
 			maxZ = v.position.z > maxZ ? v.position.z : maxZ;
 		}
+
         this->m_AABB = { Vector3(minX, minY, minZ), Vector3(maxX, maxY, maxZ) };
 	}
 
     void Mesh::SetupMesh()
     {
-        m_VertexArray = new VertexArray();
+        m_VertexArray = CreateScope<VertexArray>();
         m_VertexArray->Bind();
-        m_VertexBuffer = new VertexBuffer(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
-        m_ElementBuffer = new VertexBuffer(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
+        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
+        m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
 
         VertexBufferLayout bufferLayout = VertexBufferLayout();
         bufferLayout.Push<float>(3); // Position
@@ -71,5 +107,32 @@ namespace Nuake
 
         m_VertexArray->Bind();
         RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_Indices.size(), RendererEnum::UINT, 0);
+    }
+
+    json Mesh::Serialize()
+    {
+        BEGIN_SERIALIZE();
+
+        j["Material"] = m_Material->Serialize();
+        j["Indices"] = m_Indices;
+
+        for (unsigned int i = 0; i < m_Vertices.size(); i++)
+        {
+            j["Vertices"][i]["Position"] = SERIALIZE_VEC3(m_Vertices[i].position);
+            j["Vertices"][i]["Normal"] = SERIALIZE_VEC3(m_Vertices[i].normal);
+            j["Vertices"][i]["UV"] = SERIALIZE_VEC2(m_Vertices[i].uv);
+            j["Vertices"][i]["Tangent"] = SERIALIZE_VEC3(m_Vertices[i].tangent);
+            j["Vertices"][i]["Bitangent"] = SERIALIZE_VEC3(m_Vertices[i].bitangent);
+        }
+
+        END_SERIALIZE();
+    }
+
+    bool Mesh::Deserialize(const std::string& str)
+    {
+        BEGIN_DESERIALIZE();
+
+
+        return true;
     }
 }

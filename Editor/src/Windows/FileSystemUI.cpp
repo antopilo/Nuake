@@ -255,9 +255,8 @@ namespace Nuake {
                         ImGui::SameLine();
                         ImGui::Text("/");
                     }
-
-                    ImGui::EndChild();
                 }
+                ImGui::EndChild();
 
                 avail = ImGui::GetContentRegionAvail();
 

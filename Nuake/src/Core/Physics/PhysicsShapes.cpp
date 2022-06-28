@@ -1,5 +1,6 @@
 #include "PhysicsShapes.h"
 #include "btBulletDynamicsCommon.h"
+#include "src/Rendering/Vertex.h"
 
 namespace Nuake
 {
@@ -52,11 +53,13 @@ namespace Nuake
 			m_Mesh = mesh;
 			btTriangleMesh* trimesh = new btTriangleMesh();
 
-			for (unsigned int i = 0; i < mesh->m_Indices.size(); i += 3)
+			auto& indices = mesh->GetIndices();
+			auto& vertices = mesh->GetVertices();
+			for (unsigned int i = 0; i < std::size(indices); i += 3)
 			{
-				Vector3 tri1 = mesh->m_Vertices[mesh->m_Indices[i]].position;
-				Vector3 tri2 = mesh->m_Vertices[mesh->m_Indices[i + 1]].position;
-				Vector3 tri3 = mesh->m_Vertices[mesh->m_Indices[i + 2]].position;
+				Vector3 tri1 = vertices[indices[i]].position;
+				Vector3 tri2 = vertices[indices[i + 1]].position;
+				Vector3 tri3 = vertices[indices[i + 2]].position;
 			
 				btVector3 btri1 = btVector3(tri1.x, tri1.y, tri1.z);
 				btVector3 btri2 = btVector3(tri2.x, tri2.y, tri2.z);

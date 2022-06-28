@@ -206,7 +206,11 @@ namespace Nuake {
         }
         //newMaterial->SetAO(TextureManager::Get()->GetTexture(directory + str.C_Str()));
 
-        return CreateRef<Mesh>(vertices, indices, newMaterial);
+        Ref<Mesh> nuakeMesh = CreateRef<Mesh>();
+        nuakeMesh->AddSurface(vertices, indices);
+        nuakeMesh->SetMaterial(newMaterial);
+
+        return nuakeMesh;
     }
 
     std::vector<Texture*> MeshComponent::LoadMaterialTextures(aiMaterial* mat, aiTextureType type)

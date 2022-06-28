@@ -19,23 +19,8 @@
 #include "Resource/FontAwesome5.h"
 #include "Engine.h"
 #include <src/Scene/Components/InterfaceComponent.h>
-#include "src/Rendering/PostFX/Bloom.h"
 
 namespace Nuake {
-    // TODO: Use abstraction for vertex buffers
-    unsigned int vbo;
-    unsigned int vao;
-
-    // TODO: Move to primitive storage.
-    float vertices[] = {
-        1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
-        1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-    };
-
-
     Ref<Window> Window::s_Instance;
 
     Window::Window()

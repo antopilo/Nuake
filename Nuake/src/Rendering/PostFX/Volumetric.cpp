@@ -28,7 +28,7 @@ namespace Nuake {
 			return;
 
 		mSize = size * mRenderRatio;
-		Init();	
+		mFinalFramebuffer->QueueResize(mSize);
 	}
 
 	void Volumetric::Draw(Matrix4 projection, Matrix4 view, std::vector<LightComponent>& lights)
@@ -36,7 +36,6 @@ namespace Nuake {
 		mFinalFramebuffer->Bind();
 			mFinalFramebuffer->Clear();
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
-
 
 			Vector3 cameraPosition = view[3];
 			Shader* volumetricShader = ShaderManager::GetShader("resources/Shaders/volumetric.shader");
@@ -60,7 +59,6 @@ namespace Nuake {
 
 				volumetricShader->SetUniformTex("lightShadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 2 + i);
 			}
-
 
 
 			Renderer::DrawQuad();
