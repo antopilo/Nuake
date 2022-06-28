@@ -6,7 +6,8 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "Texture.h"
 #include <src/Resource/Serializable.h>
-
+#include "src/Resource/Resource.h"
+#include "src/Core/FileSystem.h"
 
 namespace Nuake
 {
@@ -27,7 +28,7 @@ namespace Nuake
 		int u_Unlit;
 	};
 
-	class Material : ISerializable
+	class Material : ISerializable, public Resource
 	{
 	private:
 		std::string m_Name;
@@ -75,6 +76,8 @@ namespace Nuake
 		Material(const glm::vec3 albedoColor);
 		~Material();
 
+		void InitDefaultTextures();
+
 		void Bind(Shader* shader);
 		void SetupUniformBuffer();
 
@@ -111,11 +114,10 @@ namespace Nuake
 		json Serialize() override
 		{
 			BEGIN_SERIALIZE();
-			j["Path"] = this->m_Name;
 			j["HasAlbedo"] = this->HasAlbedo();
 			if (HasAlbedo())
 			{
-				j["Abledo"] = this->m_Albedo->Serialize();
+				j["Albedo"] = this->m_Albedo->Serialize();
 			}
 			j["HasAO"] = this->HasAO();
 			j["HasMetalness"] = this->HasMetalness();
@@ -128,6 +130,56 @@ namespace Nuake
 
 		bool Deserialize(const std::string& str) override
 		{
+			BEGIN_DESERIALIZE();
+
+			if (j.contains("Path"))
+			{
+				this->Path = j["Path"];
+				if (FileSystem::FileExists(FileSystem::Root + Path))
+				{
+					std::string content = FileSystem::ReadFile(Path);
+					Deserialize(content);
+				}
+			}
+			else
+			{
+				if (j.contains("Albedo"))
+				{
+					Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(j["Albedo"]["Path"]);
+					SetAlbedo(albedoTexture);
+				}
+
+				if (j.contains("Normal"))
+				{
+					Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(j["Normal"]["Path"]);
+					SetMetalness(normalTexture);
+				}
+
+				if (j.contains("AO"))
+				{
+					Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(j["AO"]["Path"]);
+					SetAO(aoTexture);
+				}
+
+				if (j.contains("Metalness"))
+				{
+					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(j["Metalness"]["Path"]);
+					SetMetalness(metalTexture);
+				}
+
+				if (j.contains("Roughness"))
+				{
+					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(j["Roughness"]["Path"]);
+					SetRoughness(metalTexture);
+				}
+
+				if (j.contains("Displacement"))
+				{
+					Ref<Texture> displacementTexture = TextureManager::Get()->GetTexture(j["Displacement"]["Path"]);
+					SetDisplacement(displacementTexture);
+				}
+			}
+
 			return true;
 		}
 	};

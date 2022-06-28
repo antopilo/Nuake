@@ -823,9 +823,9 @@ namespace Nuake {
                //    m_SelectedEntity = scene->GetAllEntities().at(0);
                //}
 
+				
             }
             ImGui::EndChild();
-
             ImGui::Separator();
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
@@ -870,9 +870,10 @@ namespace Nuake {
                     }
                 }
 
-                ImGui::EndTable();
+				ImGui::EndTable();
+				
             }
-			ImGui::EndChild();
+            ImGui::EndChild();
             ImGui::PopStyleColor();
             
             if (ImGui::BeginDragDropTarget()) // Drag n drop new prefab file into scene tree
@@ -1410,6 +1411,10 @@ namespace Nuake {
                     if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
                     {
                         std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+						if (texture != "")
+						{
+							m_SelectedMaterial->SetMetalness(TextureManager::Get()->GetTexture(texture));
+						}
                     }
                     ImGui::SameLine();
                     //ImGui::Checkbox("Use##4", &m_SelectedMaterial->data.u_HasMetalness);
@@ -1424,6 +1429,7 @@ namespace Nuake {
                     if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
                     {
                         std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+                        m_SelectedMaterial->SetRoughness(TextureManager::Get()->GetTexture(texture));
                     }
                     ImGui::SameLine();
                     //ImGui::Checkbox("Use##5", &m_SelectedMaterial->data.u_HasRoughness);

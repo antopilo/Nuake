@@ -263,10 +263,11 @@ namespace Nuake {
 
 	bool Scene::SaveAs(const std::string& path)
 	{
-		std::ofstream sceneFile;
-		sceneFile.open(FileSystem::Root + path);
-		sceneFile << Serialize().dump(4);
-		sceneFile.close();
+		std::string fileContent = Serialize().dump(4);
+
+		FileSystem::BeginWriteFile(FileSystem::Root + path);
+		FileSystem::WriteLine(fileContent);
+		FileSystem::EndWriteFile();
 
 		Logger::Log("Scene saved successfully");
 		return true;

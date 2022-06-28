@@ -144,7 +144,7 @@ namespace Nuake {
 					for (auto e : meshView)
 					{
 						auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
-						for (auto& m : mesh.meshes)
+						for (auto& m : mesh.ModelResource->GetMeshes())
 							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
 					}
 
@@ -183,11 +183,16 @@ namespace Nuake {
 			for (auto e : view)
 			{
 				auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
-				for (auto& m : mesh.meshes)
-					Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+				
+				if (mesh.ModelResource)
+				{
+					for (auto& m : mesh.ModelResource->GetMeshes())
+						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+				}
 			}
 
 			glCullFace(GL_BACK);
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			Renderer::Flush(gBufferShader, false);
 
 			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
@@ -201,7 +206,6 @@ namespace Nuake {
 				for (auto& b : model.Meshes)
 					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
 			}
-			glCullFace(GL_FRONT);
 			Renderer::Flush(gBufferShader, false);
 		}
 		mGBuffer->Unbind();

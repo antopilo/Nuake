@@ -23,6 +23,7 @@ extern "C" {
 #include "src/Resource/FGD/FGDClass.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
+#include "src/Scene/Components/MeshComponent.h"
 
 #include <vector>
 #include <map>
@@ -498,6 +499,7 @@ namespace Nuake {
 
                 TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
                 BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
+                
                 bsp.IsSolid = true;
                 bsp.IsTransparent = false;
                 bsp.IsFunc = false;
@@ -580,6 +582,8 @@ namespace Nuake {
                     }
                 }
 
+                Ref<Model> model = CreateRef<Model>();
+
                 // Batching process
                 for (auto& mat : m_StaticWorld)
                 {
@@ -601,8 +605,12 @@ namespace Nuake {
                     mesh->AddSurface(batchedVertices, batchedIndices);
                     mesh->SetMaterial(mat.first);
 
-                    bsp.Meshes.push_back(mesh);
+                    model->AddMesh(mesh);
+                    //bsp.Meshes.push_back(mesh);
                 }
+
+                MeshComponent& modelComponent = brushEntity.AddComponent<MeshComponent>();
+                modelComponent.ModelResource = model;
             }
             
             isEntity = false;

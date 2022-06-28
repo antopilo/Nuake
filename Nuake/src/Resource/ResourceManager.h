@@ -15,5 +15,16 @@ namespace Nuake {
 
 		template<typename R>
 		static Ref<R> LoadResource(const std::string& path);
+
+		void RegisterResource(Ref<Resource> resource)
+		{
+			m_Resources[resource->Id] = resource;
+		}
+
+		template<typename R>
+		static Ref<R> GetResource(const UUID& uuid)
+		{
+			return reinterpret_pointer_cast<Ref<R>>(m_Resources[uuid]);
+		}
 	};
 }

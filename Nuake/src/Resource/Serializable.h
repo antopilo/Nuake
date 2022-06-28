@@ -19,6 +19,13 @@ using json = nlohmann::json;
 		SERIALIZE_VEC3(v) \
 		j[#v]["w"] = this->v.z;
 
+#define DESERIALIZE_VEC3(v, p) \
+	p = Vector3(v["x"], v["y"], v["z"]);
+
+#define DESERIALIZE_VEC2(v, p) \
+	p = Vector2(v["x"], v["y"]);
+
+
 #define SERIALIZE_OBJECT(v) j[#v] = v->Serialize();
 #define SERIALIZE_OBJECT_REF(v) j[#v] = v.Serialize();
 #define SERIALIZE_OBJECT_REF_LBL(lbl, v) j[lbl] = v.Serialize();

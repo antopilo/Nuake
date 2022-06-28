@@ -1,40 +1,29 @@
 #pragma once
-#include <glm/ext/matrix_float4x4.hpp>
 #include <vector>
 
-#include "src/Rendering/Mesh/Mesh.h"
-#include "src/Rendering/Textures/Texture.h"
-
 #include "src/Resource/Serializable.h"
-#include "assimp/Importer.hpp"
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "src/Resource/Model.h"
+
 #include <string>
 
 namespace Nuake
 {
     struct MeshComponent
     {
+        Ref<Model> ModelResource;
         std::string ModelPath;
 
-        MeshComponent()
-        {
-            //loadModel(path);
-        }
+        MeshComponent();
 
         void LoadModel();
-        void Draw();
-        std::vector<Ref<Mesh>> meshes;
+       
         std::string directory;
-
-        void ProcessNode(aiNode* node, const aiScene* scene);
-        Ref<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
-        std::vector<Texture*> LoadMaterialTextures(aiMaterial* mat, aiTextureType type);
 
         json Serialize() 
         {
             BEGIN_SERIALIZE();
             SERIALIZE_VAL(ModelPath);
+            SERIALIZE_OBJECT(ModelResource);
             END_SERIALIZE();
         }
 
@@ -42,7 +31,14 @@ namespace Nuake
         {
             BEGIN_DESERIALIZE();
             ModelPath = j["ModelPath"];
-            LoadModel();
+            ModelResource = CreateRef<Model>();
+
+            if (j.contains("ModelResource"))
+            {
+                auto res = j["ModelResource"];
+                ModelResource->Deserialize(res.dump());
+            }
+
             return true;
         }
     };

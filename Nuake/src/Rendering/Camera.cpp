@@ -39,8 +39,8 @@ namespace Nuake
 	void Camera::OnWindowResize(int x, int y)
 	{
 		AspectRatio = (float)x / (float)y;
-		float width = y * (16 * 9);
-		float height = y;
+		float width = (float)y * (16.0f * 9.0f);
+		float height = (float)y;
 	}
 
 	void Camera::SetDirection(Vector3 direction)

@@ -11,7 +11,7 @@ namespace Nuake {
 	{
 	public:
 		std::vector<Ref<Mesh>> Meshes;
-		std::vector< Ref<Material>> Materials;
+		std::vector<Ref<Material>> Materials;
 		std::vector<Ref<Physics::RigidBody>> Rigidbody;
 
 		std::string target = "";
@@ -33,7 +33,7 @@ namespace Nuake {
 		{
 			BEGIN_SERIALIZE();
 
-			for (unsigned int i = 0; i < Meshes.size(); i++)
+			for (uint32_t i = 0; i < Meshes.size(); i++)
 			{
 				j["Meshes"][i] = Meshes[i]->Serialize();
 			}
@@ -41,9 +41,13 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize()
+		bool Deserialize(const std::string& str)
 		{
+			BEGIN_DESERIALIZE();
 
+
+
+			return true;
 		}
 	};
 }

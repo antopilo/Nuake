@@ -199,14 +199,17 @@ namespace Nuake
 
 						auto project = Project::New();
 						auto projectFileData = FileSystem::ReadFile(projectPath, true);
-						if (!project->Deserialize(projectFileData))
+						try {
+							project->Deserialize(projectFileData);
+							project->FullPath = projectPath;
+							Engine::LoadProject(project);
+						}
+						catch (std::exception exception)
 						{
 							Logger::Log("Error loading project: " + projectPath, CRITICAL);
-							return;
+							Logger::Log(exception.what());
 						}
-
-						project->FullPath = projectPath;
-						Engine::LoadProject(project);
+						
 						Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
 					}
 

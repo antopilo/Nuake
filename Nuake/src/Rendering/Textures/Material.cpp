@@ -20,6 +20,16 @@ namespace Nuake
 	Ref<Texture> Material::m_DefaultMetalness;
 	Ref<Texture> Material::m_DefaultDisplacement;
 
+	Material::Material() 
+	{
+		InitDefaultTextures();
+		InitUniformBuffer();
+
+		glGenBuffers(1, &UBO);
+		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	}
 
 	Material::Material(const std::string albedo)
 	{
@@ -43,21 +53,12 @@ namespace Nuake
 		}
 
 		m_Name = albedo;
-
-		if (m_DefaultAO == nullptr)
-			m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
-		if (m_DefaultNormal == nullptr)
-			m_DefaultNormal = TextureManager::Get()->GetTexture("resources/Textures/default/defaultNormal.png");
-		if (m_DefaultDisplacement == nullptr)
-			m_DefaultDisplacement = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
-		if (m_DefaultRoughness == nullptr)
-			m_DefaultRoughness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
-		if (m_DefaultMetalness == nullptr)
-			m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+		InitDefaultTextures();
 	}
 
 	Material::Material(const glm::vec3 albedoColor)
 	{
+		InitDefaultTextures();
 		InitUniformBuffer();
 
 		glGenBuffers(1, &UBO);
@@ -69,11 +70,15 @@ namespace Nuake
 
 		m_Name = "New material";
 
+		m_Albedo = m_DefaultAlbedo;
+	}
+
+	Material::~Material() {}
+
+	void Material::InitDefaultTextures()
+	{
 		if (m_DefaultAlbedo == nullptr)
 			m_DefaultAlbedo = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
-
-		m_Albedo = m_DefaultAlbedo;
-
 		if (m_DefaultAO == nullptr)
 			m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 		if (m_DefaultNormal == nullptr)
@@ -85,8 +90,6 @@ namespace Nuake
 		if (m_DefaultMetalness == nullptr)
 			m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
 	}
-
-	Material::~Material() {}
 
 	void Material::Bind(Shader* shader)
 	{

@@ -131,11 +131,13 @@ namespace Nuake
 		if (scenePath == "") // Not set correctly.
 			return true;
 
+		if (!FileSystem::FileExists(FileSystem::Root + scenePath))
+			return true;
+
 		std::string sceneContent = FileSystem::ReadFile(scenePath, false);
 		if (!DefaultScene->Deserialize(sceneContent))
 		{
 			Logger::Log("Error loading scene: " + scenePath, CRITICAL);
-			return false;
 		}
 
 		DefaultScene->Path = scenePath;

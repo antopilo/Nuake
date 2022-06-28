@@ -116,14 +116,31 @@ namespace Nuake
         j["Material"] = m_Material->Serialize();
         j["Indices"] = m_Indices;
 
-        for (unsigned int i = 0; i < m_Vertices.size(); i++)
+		json v;
+        for (uint32_t i = 0; i < m_Vertices.size(); i++)
         {
-            j["Vertices"][i]["Position"] = SERIALIZE_VEC3(m_Vertices[i].position);
-            j["Vertices"][i]["Normal"] = SERIALIZE_VEC3(m_Vertices[i].normal);
-            j["Vertices"][i]["UV"] = SERIALIZE_VEC2(m_Vertices[i].uv);
-            j["Vertices"][i]["Tangent"] = SERIALIZE_VEC3(m_Vertices[i].tangent);
-            j["Vertices"][i]["Bitangent"] = SERIALIZE_VEC3(m_Vertices[i].bitangent);
+			v["Position"]["x"] = m_Vertices[i].position.x;
+			v["Position"]["y"] = m_Vertices[i].position.y;
+			v["Position"]["z"] = m_Vertices[i].position.z;
+
+			v["UV"]["x"] = m_Vertices[i].uv.x;
+			v["UV"]["y"] = m_Vertices[i].uv.y;
+
+			v["Normal"]["x"] = m_Vertices[i].normal.x;
+			v["Normal"]["y"] = m_Vertices[i].normal.y;
+			v["Normal"]["z"] = m_Vertices[i].normal.z;
+
+			v["Tangent"]["x"] = m_Vertices[i].tangent.x;
+			v["Tangent"]["y"] = m_Vertices[i].tangent.y;
+			v["Tangent"]["z"] = m_Vertices[i].tangent.z;
+
+			v["Bitangent"]["x"] = m_Vertices[i].bitangent.x;
+			v["Bitangent"]["y"] = m_Vertices[i].bitangent.y;
+			v["Bitangent"]["z"] = m_Vertices[i].bitangent.z;
+
+            j["Vertices"][i] = v;
         }
+
 
         END_SERIALIZE();
     }
@@ -131,8 +148,33 @@ namespace Nuake
     bool Mesh::Deserialize(const std::string& str)
     {
         BEGIN_DESERIALIZE();
+         
+        m_Material = CreateRef<Material>();
+        m_Material->Deserialize(j["Material"].dump());
 
+        std::vector<uint32_t> indices;
+        for (auto& i : j["Indices"])
+        {
+            indices.push_back(i);
+        }
+        m_Indices = indices;
 
+        std::vector<Vertex> vertices;
+        for (auto& v : j["Vertices"])
+        {
+            Vertex vertex;
+            DESERIALIZE_VEC3(v["Position"], vertex.position)
+			DESERIALIZE_VEC3(v["Normal"], vertex.normal)
+			DESERIALIZE_VEC2(v["UV"], vertex.uv)
+			DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
+			DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+
+            vertices.push_back(vertex);
+        }
+
+        m_Vertices = vertices;
+
+		SetupMesh();
         return true;
     }
 }
