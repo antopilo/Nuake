@@ -852,3 +852,4 @@ bin-int/Debug-windows-x86_64/Editor/Editor.vcxproj.FileListAbsolute.txt
 bin-int/Debug-windows-x86_64/Nuake/meshcomponent.obj.enc
 bin-int/Debug-windows-x86_64/Nuake/scene.obj.enc
 bin-int/Debug-windows-x86_64/Nuake/userinterface.obj.enc
+Editor/recent.json
