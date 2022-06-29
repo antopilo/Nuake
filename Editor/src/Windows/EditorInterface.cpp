@@ -115,7 +115,6 @@ namespace Nuake {
                 );
 
                 if (ImGuizmo::IsUsing())
-                if (ImGuizmo::IsUsing())
                 {
                     Vector3 globalPos = Vector3();
                     Entity currentParent = Selection.Entity;
@@ -1540,6 +1539,8 @@ namespace Nuake {
             _WelcomeWindow->Draw();
             return;
         }
+
+        pInterface.m_CurrentProject = Engine::GetProject();
 
         if (ImGui::BeginMainMenuBar())
         {

@@ -8,6 +8,8 @@
 #include "../ComponentsPanel/ScriptPanel.h"
 #include "../ComponentsPanel/MeshPanel.h"
 #include "../ComponentsPanel/QuakeMapPanel.h"
+#include "../Actions/EditorSelection.h"
+#include <src/Resource/Project.h>
 
 class EditorSelectionPanel {
 private:
@@ -16,6 +18,9 @@ private:
 	ScriptPanel mScriptPanel;
 	MeshPanel mMeshPanel;
 	QuakeMapPanel mQuakeMapPanel;
+
+	Ref<Nuake::File> currentFile;
+	Ref<Nuake::Resource> selectedResource;
 public:
 	EditorSelectionPanel();
 
@@ -27,4 +32,9 @@ public:
 
 	void DrawFile(Nuake::File* file);
 	void DrawResource(Nuake::Resource resource);
+
+private:
+	void ResolveFile(Ref<Nuake::File> file);
+	void DrawMaterialPanel(Ref<Nuake::Material> material);
+	void DrawProjectPanel(Ref<Nuake::Project> project);
 };

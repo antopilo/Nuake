@@ -135,7 +135,7 @@ namespace Nuake
 			if (j.contains("Path"))
 			{
 				this->Path = j["Path"];
-				if (FileSystem::FileExists(FileSystem::Root + Path))
+				if (FileSystem::FileExists(Path))
 				{
 					std::string content = FileSystem::ReadFile(Path);
 					Deserialize(content);

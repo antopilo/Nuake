@@ -8,7 +8,7 @@ namespace Nuake
 	class Resource
 	{
 	public:
-		UUID Id;
+		UUID ID;
 
 		bool IsEmbedded = false;
 		std::string Path; // Only if embedded

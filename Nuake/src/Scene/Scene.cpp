@@ -157,7 +157,8 @@ namespace Nuake {
 	{
 		std::vector<Entity> allEntities;
 		auto view = m_Registry.view<NameComponent>();
-		for (auto e : view) {
+		for (auto e : view) 
+		{
 			Entity newEntity(e, this);
 
 			// Check if valid for deleted entities.
@@ -177,6 +178,8 @@ namespace Nuake {
 			if (namec.Name == name)
 				return Entity{ e, this };
 		}
+
+		return Entity();
 	}
 
 	Entity Scene::CreateEntity(const std::string& name) 
@@ -314,6 +317,7 @@ namespace Nuake {
 			sceneCopy->CreateEntity(name, id);
 		}
 
+		CopyComponent<ParentComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<MeshComponent>(sceneCopy->m_Registry, this->m_Registry);

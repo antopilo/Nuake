@@ -32,7 +32,6 @@ namespace Nuake {
 		// In the scene constructor.
 		std::vector<Ref<System>> m_Systems;
 		Ref<Environment> m_Environement;
-		std::map<UUID, Ref<Resource>> m_Resources;
 
 	public:
 		Ref<EditorCamera> m_EditorCamera;

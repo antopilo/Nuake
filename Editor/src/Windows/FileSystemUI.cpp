@@ -39,6 +39,8 @@ exit() {\
 }\
 }";
 
+#include <src/Rendering/Textures/Material.h>
+
 namespace Nuake {
     // TODO: add filetree in same panel
     void FileSystemUI::Draw()
@@ -176,6 +178,49 @@ namespace Nuake {
         return SplitterBehavior(bb, id, split_vertically ? ImGuiAxis_X : ImGuiAxis_Y, size1, size2, min_size1, min_size2, 0.0f);
     }
 
+    void FileSystemUI::DrawContextMenu()
+    {
+		if (ImGui::BeginPopupContextWindow())
+		{
+			if (ImGui::MenuItem("New folder"))
+			{
+
+			}
+
+			if (ImGui::MenuItem("New Scene"))
+			{
+			}
+
+			if (ImGui::BeginMenu("New Resource"))
+			{
+				if (ImGui::MenuItem("Material"))
+				{
+					std::string path = FileDialog::SaveFile("*.material");
+					if (!String::EndsWith(path, ".material"))
+					{
+						path += ".material";
+					}
+
+					if (path != "")
+					{
+						Ref<Material> material = CreateRef<Material>();
+						material->IsEmbedded = false;
+						auto jsonData = material->Serialize();
+
+						FileSystem::BeginWriteFile(path);
+						FileSystem::WriteLine(jsonData.dump(4));
+						FileSystem::EndWriteFile();
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndPopup();
+		}
+
+    }
+
     float h = 200;
     static float sz1 = 300;
     static float sz2 = 300;
@@ -229,7 +274,6 @@ namespace Nuake {
                 paths.push_back(currentParent);
                 currentParent = currentParent->Parent;
             }
-
 
             avail = ImGui::GetContentRegionAvail();
             if (ImGui::BeginChild("Wrapper", avail))
@@ -300,6 +344,7 @@ namespace Nuake {
                             for (auto f : m_CurrentDirectory->Files)
                             {
                                 DrawFile(f);
+
                                 if (i - 1 % amount != 0)
                                     ImGui::TableNextColumn();
                                 else
@@ -307,63 +352,8 @@ namespace Nuake {
                                 i++;
                             }
                         }
-						
 
-		
-
-                        if (ImGui::BeginPopupContextWindow())
-                        {
-                            if (ImGui::MenuItem("New Wren script"))
-                            {
-                                ImGui::OpenPopup("new_file");
-
-                            }
-
-                            if (ImGui::MenuItem("New interface script"))
-                            {
-                            }
-
-                            if (ImGui::MenuItem("New Scene"))
-                            {
-                            }
-
-                            if (ImGui::MenuItem("New folder"))
-                            {
-                            }
-
-                            if (ImGui::MenuItem("New interface"))
-                            {
-                            }
-
-                            if (ImGui::MenuItem("New stylesheet"))
-                            {
-                            }
-
-							ImGui::EndPopup();
-                        }
-
-						if (ImGui::BeginPopup("new_file"))
-						{
-							static char name[32] = "NewWrenScript";
-							char buf[64];
-							sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
-
-							ImGui::Text("Edit name:");
-							ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
-							if (ImGui::Button("Close"))
-								ImGui::CloseCurrentPopup();
-							if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)) && name != "")
-							{
-								FileSystem::BeginWriteFile(m_CurrentDirectory->fullPath + name + ".wren");
-
-								FileSystem::WriteLine(TEMPLATE_SCRIPT_BEGIN + name + TEMPLATE_SCRIPT_END);
-
-								FileSystem::EndWriteFile();
-								ImGui::CloseCurrentPopup();
-							}
-
-							ImGui::EndPopup();
-						}
+                        DrawContextMenu();
                         ImGui::EndTable();
                     }
 

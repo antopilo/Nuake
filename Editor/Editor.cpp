@@ -27,65 +27,22 @@
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include "src/Actions/EditorSelection.h"
 
-std::string WindowTitle = "Nuake Engine";
+#include "src/Misc/GizmoDrawer.h"
 
-void OpenProject()
-{
-    // Parse the project and load it.
-    std::string projectPath = Nuake::FileDialog::OpenFile("Project file|*.project;");
-
-    Nuake::FileSystem::SetRootDirectory(projectPath + "/../");
-    Ref<Nuake::Project> project = Nuake::Project::New();
-    if (!project->Deserialize(Nuake::FileSystem::ReadFile(projectPath, true)))
-    {
-        Nuake::Logger::Log("Error loading project: " + projectPath, Nuake::CRITICAL);
-        return;
-    }
-
-    project->FullPath = projectPath;
-    Nuake::Engine::LoadProject(project);
-}
-
-std::vector<Nuake::LineVertex> vertices
-{
-    Nuake::LineVertex {{10000.f, 0.0f, 0.0f},  {1.f, 0.f, 0.f, 1.f}},
-    Nuake::LineVertex {{0.0f,    0.0f, 0.0f }, {1.f, 0.f, 0.f, 1.f}},
-    Nuake::LineVertex {{0.f,      0.f, 10000.f }, {0.f, 1.f, 0.f, 1.f}},
-    Nuake::LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 1.f, 0.f, 1.f}},
-    Nuake::LineVertex {{0.f,  10000.f, 0.0f }, {0.f, 0.f, 1.f, 1.f}},
-    Nuake::LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 0.f, 1.f, 1.f}}
-};
+const std::string WindowTitle = "Nuake Editor";
 
 int main()
 {
     Nuake::Engine::Init();
-
     Nuake::EditorInterface editor;
     editor.BuildFonts();
 
-    glLineWidth(2.0f);
-
-    Nuake::Shader* lineShader = Nuake::ShaderManager::GetShader("resources/Shaders/line.shader");
-    
-    lineShader->Bind();
-
-    Nuake::VertexArray* lineVertexArray = new Nuake::VertexArray();
-    lineVertexArray->Bind();
-    Nuake::VertexBuffer* lineVertexBuffer = new Nuake::VertexBuffer(vertices.data(), vertices.size() * sizeof(Nuake::LineVertex));
-    Nuake::VertexBufferLayout* vblayout = new Nuake::VertexBufferLayout();
-    vblayout->Push<float>(3);
-    vblayout->Push<float>(4);
-    lineVertexArray->AddBuffer(*lineVertexBuffer, *vblayout);
-
-    // Register Gizmo textures
-    Ref<Nuake::Texture> lightTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Light.png");
-    Ref<Nuake::Texture> camTexture = Nuake::TextureManager::Get()->GetTexture("resources/Icons/Gizmo/Camera.png");
-       Nuake::Shader* GuizmoShader = Nuake::ShaderManager::GetShader("resources/Shaders/gizmo.shader");
-       Nuake::Shader* ditherShader = Nuake::ShaderManager::GetShader("resources/Shaders/dither.shader");
-
-    //Nuake::NewEditor newEditor = Nuake::NewEditor();
     Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
-    window->SetTitle("Nuake Editor");
+    window->SetTitle(WindowTitle);
+
+    using namespace Nuake;
+
+    GizmoDrawer gizmoDrawer = GizmoDrawer();
 
     while (!window->ShouldClose())
     {
@@ -96,58 +53,26 @@ int main()
         glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
 
-        //newEditor.Draw(WindowSize);
-
-        Ref<Nuake::FrameBuffer> sceneFramebuffer = window->GetFrameBuffer();
+        auto sceneFramebuffer = window->GetFrameBuffer();
         sceneFramebuffer->Bind();
-
-        Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
-        if (currentScene && !Nuake::Engine::IsPlayMode)
         {
-            glDisable(GL_DEPTH_TEST);
+			Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+			Ref<EditorCamera> camera;
+			if (currentScene)
+			{
+				camera = currentScene->m_EditorCamera;
+			}
 
-            lineShader->Bind();
-            lineShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
-            lineShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
-
-            lineVertexArray->Bind();
-            Nuake::RenderCommand::DrawLines(0, 6);
-
-            glEnable(GL_DEPTH_TEST);
-
-            ditherShader->Bind();
-            ditherShader->SetUniformMat4f("u_View", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetTransform());
-            ditherShader->SetUniformMat4f("u_Projection", Nuake::Engine::GetCurrentScene()->m_EditorCamera->GetPerspective());
-            ditherShader->SetUniform1f("u_Time", Nuake::Engine::GetTime());
-            ditherShader->SetUniform4f("u_Color", 252.0 / 255.0, 3.0 / 255.0, 65.0 / 255.0, 1.0);
-            
-            if (editor.Selection.Type == EditorSelectionType::Entity && editor.Selection.Entity.HasComponent<Nuake::BSPBrushComponent>())
-            {
-                for (auto& m : editor.Selection.Entity.GetComponent<Nuake::BSPBrushComponent>().Meshes)
-                    Nuake::Renderer::SubmitMesh(m, editor.Selection.Entity.GetComponent<Nuake::TransformComponent>().GetGlobalTransform());
-            
-                Nuake::Renderer::Flush(ditherShader, true);
-            }
-            
-            ditherShader->SetUniform1f("u_Time", Nuake::Engine::GetTime() / 10.0f);
-            ditherShader->SetUniform4f("u_Color", 52.f / 255.f, 235.f / 255.f, 88.f / 255.f, 1);
-            auto cubeCollidersView = currentScene->m_Registry.view<Nuake::TransformComponent, Nuake::BoxColliderComponent>();
-            if (editor.Selection.Type == EditorSelectionType::Entity && editor.Selection.Entity.HasComponent<Nuake::BoxColliderComponent>())
-            {
-                auto transformComponent = editor.Selection.Entity.GetComponent<Nuake::TransformComponent>();
-                auto colliderComponent = editor.Selection.Entity.GetComponent<Nuake::BoxColliderComponent>();
-                Nuake::Matrix4 transform = transformComponent.GetGlobalTransform();
-                transform = glm::scale(transform, colliderComponent.Size);
-                Nuake::Renderer::SubmitCube(transform);
-
-                Nuake::Renderer::Flush(ditherShader, true);
-            }
-            glEnable(GL_DEPTH_TEST);
+			if (currentScene && !Nuake::Engine::IsPlayMode)
+			{
+				gizmoDrawer.DrawGizmos(currentScene);
+			}
         }
         sceneFramebuffer->Unbind();
 
         editor.Draw();
 
+        // Swap buffers.
         Nuake::Engine::EndDraw();
     }
 

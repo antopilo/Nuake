@@ -131,7 +131,7 @@ namespace Nuake
 		if (scenePath == "") // Not set correctly.
 			return true;
 
-		if (!FileSystem::FileExists(FileSystem::Root + scenePath))
+		if (!FileSystem::FileExists(scenePath))
 			return true;
 
 		std::string sceneContent = FileSystem::ReadFile(scenePath, false);

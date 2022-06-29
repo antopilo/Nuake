@@ -35,7 +35,7 @@ namespace Nuake
 		static void GetDirectories();
 
 		static bool DirectoryExists(const std::string path);
-		static bool FileExists(const std::string path);
+		static bool FileExists(const std::string path, bool absolute = false);
 
 		static std::string ReadFile(const std::string& path, bool absolute = false);
 
@@ -60,6 +60,11 @@ namespace Nuake
 		std::string GetRelativePath() { return RelativePath; }
 		std::string GetAbsolutePath() { return AbsolutePath; }
 		Ref<Directory> GetParent() { return Parent; }
+
+		std::string Read()
+		{
+			return FileSystem::ReadFile(AbsolutePath);
+		}
 
 		File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
 		{

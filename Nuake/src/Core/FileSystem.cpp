@@ -93,9 +93,11 @@ namespace Nuake
 		return false;
 	}
 
-	bool FileSystem::FileExists(const std::string path)
+	bool FileSystem::FileExists(const std::string path, bool absolute)
 	{
-		std::ifstream f(path.c_str());
+		std::string fullPath = absolute ? path : FileSystem::Root + path;
+
+		std::ifstream f(fullPath.c_str());
 		return f.good();
 	}
 

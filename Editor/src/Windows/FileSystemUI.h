@@ -25,5 +25,6 @@ namespace Nuake {
 		bool EntityContainsItself(Entity source, Entity target);
 		void DrawFile(Ref<File> file);
 		void DrawDirectoryExplorer();
+		void DrawContextMenu();
 	};
 }

@@ -11,7 +11,6 @@ namespace Nuake
 	{
 	private:
 		std::vector<Ref<Mesh>> m_Meshes;
-
 	public:
 		Model();
 		Model(const std::string path);

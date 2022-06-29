@@ -230,7 +230,7 @@ namespace Nuake
 
 	void WelcomeWindow::ParseRecentFile()
 	{
-		if (!FileSystem::FileExists(_RecentProjectFilePath))
+		if (!FileSystem::FileExists(_RecentProjectFilePath, true))
 		{
 			FileSystem::BeginWriteFile(_RecentProjectFilePath);
 			FileSystem::WriteLine(_RecentProjectFileDefaultContent);

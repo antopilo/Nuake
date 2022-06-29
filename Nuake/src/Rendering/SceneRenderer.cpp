@@ -144,8 +144,11 @@ namespace Nuake {
 					for (auto e : meshView)
 					{
 						auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
-						for (auto& m : mesh.ModelResource->GetMeshes())
-							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+						if (mesh.ModelResource != nullptr)
+						{
+							for (auto& m : mesh.ModelResource->GetMeshes())
+								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+						}
 					}
 
 					for (auto e : quakeView)

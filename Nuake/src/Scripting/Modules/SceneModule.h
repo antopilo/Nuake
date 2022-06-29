@@ -67,49 +67,41 @@ namespace Nuake {
 				std::string name = wrenGetSlotString(vm, 2);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
-				if (name == "Transform")
+				bool result = false;
+				if (handle == -1)
 				{
-					bool result = ent.HasComponent<TransformComponent>();
 					wrenSetSlotBool(vm, 0, result);
+					return;
 				}
-				if (name == "Light")
-				{
-					bool result = ent.HasComponent<LightComponent>();
-					wrenSetSlotBool(vm, 0, result);
-				}
-				if (name == "QuakeMap")
-				{
-					bool result = ent.HasComponent<QuakeMapComponent>();
-					wrenSetSlotBool(vm, 0, result);
-				}
+
+				if (name == "Transform")	result = ent.HasComponent<TransformComponent>();
+				if (name == "Light")		result = ent.HasComponent<LightComponent>();
+				if (name == "QuakeMap")		result = ent.HasComponent<QuakeMapComponent>();
+					
 				if (name == "CharacterController")
 				{
-					bool result = ent.HasComponent<CharacterControllerComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<CharacterControllerComponent>();
 				}
 				if (name == "Camera")
 				{
-					bool result = ent.HasComponent<CameraComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<CameraComponent>();
 				}
 				if (name == "Script")
 				{
-					bool result = ent.HasComponent<CameraComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<WrenScriptComponent>();
 				}
 				if (name == "Rigidbody")
 				{
-					bool result = ent.HasComponent<RigidBodyComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<RigidBodyComponent>();
 				}
 				if (name == "Script") {
-					bool result = ent.HasComponent<WrenScriptComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<WrenScriptComponent>();
 				}
 				if (name == "Brush") {
-					bool result = ent.HasComponent<BSPBrushComponent>();
-					wrenSetSlotBool(vm, 0, result);
+					result = ent.HasComponent<BSPBrushComponent>();
 				}
+
+				wrenSetSlotBool(vm, 0, result);
 			}
 
 			static void GetScript(WrenVM* vm)
