@@ -237,7 +237,7 @@ namespace Nuake {
 
             if (ImGui::BeginChild("Tree browser", ImVec2(sz1, avail.y)))
             {
-                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_SpanAvailWidth;
+                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen;
 
                 bool is_selected = m_CurrentDirectory == FileSystem::RootDirectory;
                 if (is_selected)

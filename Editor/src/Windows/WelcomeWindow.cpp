@@ -199,10 +199,14 @@ namespace Nuake
 
 						auto project = Project::New();
 						auto projectFileData = FileSystem::ReadFile(projectPath, true);
-						try {
+						try 
+						{
 							project->Deserialize(projectFileData);
 							project->FullPath = projectPath;
+
 							Engine::LoadProject(project);
+
+							_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
 						}
 						catch (std::exception exception)
 						{
