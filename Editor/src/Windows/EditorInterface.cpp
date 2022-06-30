@@ -106,52 +106,38 @@ namespace Nuake {
             {
                 TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
                 ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
-                Matrix4 oldTransform = tc.GetGlobalTransform();
-                Vector3 oldRotation = tc.Rotation;
+                Matrix4 transform = tc.GetLocalTransform();
+
+                auto editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
+                Matrix4 cameraView = editorCam->GetTransform();
+                Matrix4 cameraProjection = editorCam->GetPerspective();
                 ImGuizmo::Manipulate(
-                    glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
-                    glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetPerspective()),
-                    CurrentOperation, CurrentMode, glm::value_ptr(oldTransform), 0, 0
+                    glm::value_ptr(cameraView),
+                    glm::value_ptr(cameraProjection),
+                    CurrentOperation, CurrentMode, glm::value_ptr(transform), 0, 0
                 );
 
                 if (ImGuizmo::IsUsing())
                 {
-                    Vector3 globalPos = Vector3();
-                    Entity currentParent = Selection.Entity;
-                    if (parent.HasParent)
-                    {
-                        Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GlobalTransform);
-                        oldTransform *= inverseParent;
-                    }
+					//Entity currentParent = Selection.Entity;
+					//if (parent.HasParent)
+					//{
+					//    Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GlobalTransform);
+					//    transform *= inverseParent;
+					//}
 
                     Vector3 scale;
                     glm::quat rotation;
                     Vector3 translation;
                     Vector3 skew;
                     Vector4 perspective;
-                    glm::decompose(oldTransform, scale, rotation, translation, skew, perspective);
+                    glm::decompose(transform, scale, rotation, translation, skew, perspective);
 
                     rotation = glm::conjugate(rotation);
-                    Vector3 euler = glm::eulerAngles(rotation);
 
-                    if(CurrentOperation == ImGuizmo::TRANSLATE)
-                        tc.Translation = translation;
-                    if (CurrentOperation == ImGuizmo::ROTATE)
-                    {
-                        float signX = 1.0f;
-                        if (oldRotation.x < 0.0f) signX = -1.0f;
-                        float signY = 1.0f;
-                        if (oldRotation.y < 0.0f) signY = -1.0f;
-                        float signZ = 1.0f;
-                        if (oldRotation.z < 0.0f) signZ = -1.0f;
-
-                        tc.Rotation = glm::vec3(glm::degrees(euler.x),
-                           glm::degrees(euler.y),
-                           glm::degrees(euler.z));
-                    }
-                        
-                    if (CurrentOperation == ImGuizmo::SCALE)
-                        tc.Scale = scale;
+                    tc.Translation = translation;
+                    tc.Orientation = rotation;
+                    tc.Scale = scale;
                 }
             }
         }
@@ -906,67 +892,6 @@ namespace Nuake {
         ImGui::PopStyleVar();
     }
 
-    void EditorInterface::DrawEntityPropreties()
-    {
-        SelectionPanel.Draw(Selection);
-        
-    }
-
-    void EditorInterface::DrawGizmos()
-    {
-        Ref<Scene> scene = Engine::GetCurrentScene();
-
-        if (!Selection.Type == EditorSelectionType::Entity)
-            return;
-    }
-
-    void EditorInterface::EditorInterfaceDrawFiletree(Ref<Directory> dir)
-    {
-        for (auto d : dir->Directories)
-        {
-            ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-            bool is_selected = m_CurrentDirectory == d;
-            if (is_selected)
-                base_flags |= ImGuiTreeNodeFlags_Selected;
-
-            if (d->Directories.size() == 0)
-            {
-                base_flags = ImGuiTreeNodeFlags_Leaf;
-            }
-            std::string icon = ICON_FA_FOLDER;
-            if (is_selected)
-                icon = ICON_FA_FOLDER_OPEN;
-            bool open = ImGui::TreeNodeEx((icon + " " + d->name).c_str(), base_flags);
-
-            if (ImGui::IsItemClicked())
-                m_CurrentDirectory = d;
-            if (open)
-            {
-                if (d->Directories.size() > 0)
-                    EditorInterfaceDrawFiletree(d);
-                ImGui::TreePop();
-            }
-
-        }
-    }
-
-    void EditorInterface::DrawFileSystem()
-    {
-        Ref<Directory> rootDirectory = FileSystem::GetFileTree();
-        if (!rootDirectory)
-            return;
-    }
-
-    void EditorInterface::DrawDirectory(Ref<Directory> directory)
-    {
-        ImGui::PushFont(bigIconFont);
-        std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
-        if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
-            m_CurrentDirectory = directory;
-        ImGui::Text(directory->name.c_str());
-        ImGui::PopFont();
-    }
-
     bool EditorInterface::EntityContainsItself(Entity source, Entity target)
     {
         ParentComponent& targeParentComponent = target.GetComponent<ParentComponent>();
@@ -985,102 +910,6 @@ namespace Nuake {
                 return true;
         }
         return true;
-    }
-
-    void EditorInterface::DrawFile(Ref<File> file)
-    {
-        ImGui::PushFont(bigIconFont);
-
-        std::string fileExtenstion = file->GetExtension();
-        if (fileExtenstion == ".png" || fileExtenstion == ".jpg")
-        {
-            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->GetAbsolutePath());
-            ImGui::ImageButton((void*)texture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-        }
-        else
-        {
-            const char* icon = ICON_FA_FILE;
-
-            if (fileExtenstion == ".shader" || fileExtenstion == ".wren")
-                icon = ICON_FA_FILE_CODE;
-            else if (fileExtenstion == ".map")
-                icon = ICON_FA_BROOM;
-            else if (fileExtenstion == ".ogg" || fileExtenstion == ".mp3" || fileExtenstion == ".wav")
-                icon = ICON_FA_FILE_AUDIO;
-
-            if (ImGui::Button(icon, ImVec2(100, 100)))
-            {
-                if (ImGui::BeginPopupContextItem("item context menu"))
-                {
-                    if (ImGui::Selectable("Set to zero"));
-                    if (ImGui::Selectable("Set to PI"));
-                    ImGui::EndPopup();
-                }
-            }
-        }
-        ImGui::Text(file->GetName().c_str());
-        ImGui::PopFont();
-    }
-
-    void EditorInterface::DrawDirectoryExplorer()
-    {
-        if (ImGui::Begin("File browser"))
-        {
-            // Wrapping.
-            int width = ImGui::GetWindowWidth();
-            ImVec2 buttonSize = ImVec2(100, 100);
-            int amount = (width / 100); // -2 because button overflow width + ... button.
-            int i = 1; // current amount of item per row.
-            if (ImGui::BeginTable("ssss", amount))
-            {
-                // Button to go up a level.
-                if (m_CurrentDirectory != FileSystem::RootDirectory)
-                {
-                    ImGui::TableNextColumn();
-                    if (ImGui::Button("..", ImVec2(100, 100)))
-                        m_CurrentDirectory = m_CurrentDirectory->Parent;
-                    ImGui::TableNextColumn();
-                    // Increment item per row tracker.
-                    i++;
-                }
-
-                // Exit if no current directory.
-                if (!m_CurrentDirectory) 
-                {
-                    ImGui::EndTable();
-                    ImGui::End();
-                    return;
-                }
-
-                if (m_CurrentDirectory && m_CurrentDirectory->Directories.size() > 0)
-                {
-                    for (auto d : m_CurrentDirectory->Directories)
-                    {
-                        DrawDirectory(d);
-                        if (i - 1 % amount != 0)
-                            ImGui::TableNextColumn();
-                        else
-                            ImGui::TableNextRow();
-                        i++;
-                    }
-                }
-                if (m_CurrentDirectory && m_CurrentDirectory->Files.size() > 0)
-                {
-                    for (auto f : m_CurrentDirectory->Files)
-                    {
-                        DrawFile(f);
-                        if (i - 1 % amount != 0)
-                            ImGui::TableNextColumn();
-                        else
-                            ImGui::TableNextRow();
-                        i++;
-                    }
-                }
-            }
-
-            ImGui::EndTable();
-        }
-        ImGui::End();
     }
 
     bool LogErrors = true;
@@ -1126,6 +955,8 @@ namespace Nuake {
 
                     ImGui::TableNextColumn();
                 }
+				if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+					ImGui::SetScrollHereY(1.0f);
 
                 ImGui::EndTable();
             }
@@ -1138,8 +969,6 @@ namespace Nuake {
         }
         ImGui::End();
     }
-
-
 
     void EditorInterface::Overlay()
     {
@@ -1164,8 +993,6 @@ namespace Nuake {
         if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
         {
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button(ICON_FA_HAND_POINTER)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-            ImGui::SameLine();
             if (ImGui::Button(ICON_FA_ARROWS_ALT)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             ImGui::SameLine();
             if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
@@ -1196,253 +1023,6 @@ namespace Nuake {
         }
 
         ImGui::PopStyleVar();
-        ImGui::End();
-    }
-
-    void EditorInterface::DrawMaterialEditor(Ref<Material> material)
-    {
-
-        ImGui::Text("Flags");
-        bool unlit = material->data.u_Unlit == 1;
-        ImGui::Checkbox("Unlit", &unlit);
-        material->data.u_Unlit = (int)unlit;
-        if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            unsigned int textureID = 0;
-            textureID = material->m_Albedo->GetID();
-
-
-            ImGui::ColorEdit3("Color", &material->data.m_AlbedoColor.r);
-            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
-            {
-                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-                if (texture != "" && texture != material->m_Albedo->GetPath())
-                    material->m_Albedo = TextureManager::Get()->GetTexture(texture);
-            }
-
-            ImGui::SameLine();
-            bool isAlbedo = material->data.u_HasAlbedo == 1;
-            ImGui::Checkbox("Use##1", &isAlbedo);
-            material->data.u_HasAlbedo = (int)isAlbedo;
-
-        }
-        if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            unsigned int textureID = 0;
-            if (material->HasAO())
-                textureID = material->m_AO->GetID();
-            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
-            {
-                std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
-                if (texture != "")
-                {
-                    m_SelectedMaterial->SetAO(TextureManager::Get()->GetTexture(texture));
-                }
-            }
-            ImGui::SameLine();
-            bool hasAO = material->data.u_HasAO == 1;
-            ImGui::Checkbox("Use##1", &hasAO);
-            material->data.u_HasAO = (int)hasAO;
-
-            ImGui::SameLine();
-            ImGui::DragFloat("Value##2", &material->data.u_AOValue, 0.01f, 0.0f, 1.0f);
-        }
-        if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            unsigned int textureID = 0;
-            if (material->HasNormal())
-                textureID = material->m_Normal->GetID();
-            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
-            {
-                std::string texture = FileDialog::OpenFile("*.png");
-                if (texture != "")
-                {
-                    material->SetNormal(TextureManager::Get()->GetTexture(texture));
-                }
-            }
-            //ImGui::SameLine();
-            //ImGui::Checkbox("Use##3", &m_SelectedMaterial->data.u_HasNormal);
-        }
-        if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            unsigned int textureID = 0;
-            if (material->HasMetalness())
-                textureID = material->m_Metalness->GetID();
-            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
-            {
-                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-            }
-            ImGui::SameLine();
-            //ImGui::Checkbox("Use##4", &m_SelectedMaterial->data.u_HasMetalness);
-            ImGui::SameLine();
-            ImGui::DragFloat("Value##4", &material->data.u_MetalnessValue, 0.01f, 0.0f, 1.0f);
-        }
-        if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            unsigned int textureID = 0;
-            if (material->HasRoughness())
-                textureID = material->m_Roughness->GetID();
-            if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
-            {
-                std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-            }
-            ImGui::SameLine();
-            //ImGui::Checkbox("Use##5", &m_SelectedMaterial->data.u_HasRoughness);
-            ImGui::SameLine();
-            ImGui::DragFloat("Value##5", &material->data.u_RoughnessValue, 0.01f, 0.0f, 1.0f);
-        }
-    }
-
-
-    void EditorInterface::DrawRessourceWindow()
-    {
-        std::map<std::string, Ref<Material>> materials = MaterialManager::Get()->GetAllMaterials();
-
-        if (ImGui::Begin("Materials"))
-        {
-            int width = ImGui::GetWindowWidth();
-            ImVec2 buttonSize = ImVec2(100, 100);
-            int amount = (width / 100) - 1;
-            if (amount > 0)
-            {
-                int i = 1;
-                for (auto m : materials)
-                {
-                    unsigned int textureID = 0;
-                    if (m.second->HasAlbedo())
-                        textureID = m.second->m_Albedo->GetID();
-                    std::string id = "materialButton" + std::to_string(i);
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID(id.c_str()), (void*)textureID, ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
-                    {
-                        m_SelectedMaterial = m.second;
-                        m_IsMaterialSelected = true;
-                    }
-                    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-                    {
-                        // Set payload to carry the index of our item (could be anything)
-                        ImGui::SetDragDropPayload("MaterialName", &m.first, sizeof(int));
-
-                        // Display preview (could be anything, e.g. when dragging an image we could decide to display
-                        // the filename and a small preview of the image, etc.)
-                        ImGui::Text("hello");
-                        ImGui::EndDragDropSource();
-                    }
-                    if (i % amount != 0)
-                        ImGui::SameLine();
-                    i++;
-                }
-            }
-
-
-        }
-        ImGui::End();
-        if (ImGui::Begin("Material property"))
-        {
-            if (m_IsMaterialSelected)
-            {
-                ImGui::Text("Flags");
-                bool unlit = m_SelectedMaterial->data.u_Unlit == 1;
-                ImGui::Checkbox("Unlit", &unlit);
-                m_SelectedMaterial->data.u_Unlit = (int)unlit;
-                if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasAlbedo())
-                        textureID = m_SelectedMaterial->m_Albedo->GetID();
-
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
-                    {
-                        std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-                        if (texture != "" && texture != m_SelectedMaterial->m_Albedo->GetPath())
-                            m_SelectedMaterial->m_Albedo = TextureManager::Get()->GetTexture(texture);
-                    }
-
-                    ImGui::SameLine();
-                    bool isAlbedo = m_SelectedMaterial->data.u_HasAlbedo == 1;
-                    ImGui::Checkbox("Use##1", &isAlbedo);
-                    m_SelectedMaterial->data.u_HasAlbedo = (int)isAlbedo;
-
-                    ImGui::SameLine();
-                    ImGui::ColorPicker3("Color", &m_SelectedMaterial->data.m_AlbedoColor.r);
-                }
-                if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasAO())
-                        textureID = m_SelectedMaterial->m_AO->GetID();
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
-                    {
-                        std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
-                        if (texture != "")
-                        {
-                            m_SelectedMaterial->SetAO(TextureManager::Get()->GetTexture(texture));
-                        }
-                    }
-                    ImGui::SameLine();
-                    bool hasAO = m_SelectedMaterial->data.u_HasAO == 1;
-                    ImGui::Checkbox("Use##1", &hasAO);
-                    m_SelectedMaterial->data.u_HasAO = (int)hasAO;
-
-                    ImGui::SameLine();
-                    ImGui::DragFloat("Value##2", &m_SelectedMaterial->data.u_AOValue, 0.01f, 0.0f, 1.0f);
-                }
-                if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasNormal())
-                        textureID = m_SelectedMaterial->m_Normal->GetID();
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
-                    {
-                        std::string texture = FileDialog::OpenFile("*.png");
-                        if (texture != "")
-                        {
-                            m_SelectedMaterial->SetNormal(TextureManager::Get()->GetTexture(texture));
-                        }
-                    }
-                    //ImGui::SameLine();
-                    //ImGui::Checkbox("Use##3", &m_SelectedMaterial->data.u_HasNormal);
-                }
-                if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasMetalness())
-                        textureID = m_SelectedMaterial->m_Metalness->GetID();
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
-                    {
-                        std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-						if (texture != "")
-						{
-							m_SelectedMaterial->SetMetalness(TextureManager::Get()->GetTexture(texture));
-						}
-                    }
-                    ImGui::SameLine();
-                    //ImGui::Checkbox("Use##4", &m_SelectedMaterial->data.u_HasMetalness);
-                    ImGui::SameLine();
-                    ImGui::DragFloat("Value##4", &m_SelectedMaterial->data.u_MetalnessValue, 0.01f, 0.0f, 1.0f);
-                }
-                if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
-                {
-                    unsigned int textureID = 0;
-                    if (m_SelectedMaterial->HasRoughness())
-                        textureID = m_SelectedMaterial->m_Roughness->GetID();
-                    if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
-                    {
-                        std::string texture = FileDialog::OpenFile("*.png | *.jpg");
-                        m_SelectedMaterial->SetRoughness(TextureManager::Get()->GetTexture(texture));
-                    }
-                    ImGui::SameLine();
-                    //ImGui::Checkbox("Use##5", &m_SelectedMaterial->data.u_HasRoughness);
-                    ImGui::SameLine();
-                    ImGui::DragFloat("Value##5", &m_SelectedMaterial->data.u_RoughnessValue, 0.01f, 0.0f, 1.0f);
-                }
-            }
-            else
-            {
-                ImGui::Text("No material selected.");
-            }
-
-
-        }
         ImGui::End();
     }
 
@@ -1502,37 +1082,10 @@ namespace Nuake {
         Engine::LoadScene(scene);
     }
 
-    void EditorInterface::DrawInit()
-    {
-
-    }
-
-
     Ref<Scene> SceneSnapshot;
     void EditorInterface::Draw()
     {
         Init();
-        auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize;
-
-        if (ImGui::BeginPopupModal("Welcome", NULL, flags))
-        {
-            ImGui::Text("Welcome to Nuake Engine");
-            ImGui::Text("Developement build");
-
-            ImGui::Text("This project is still very early in developement!");
-            if (ImGui::Button("New Project"))
-                NewProject();
-
-            ImGui::SameLine();
-            if (ImGui::Button("Open Project")) 
-            {
-                OpenProject();
-                filesystem->m_CurrentDirectory = FileSystem::RootDirectory;
-            }
-
-
-            ImGui::EndPopup();
-        }
 
         if (!Engine::GetProject())
         {
@@ -1682,18 +1235,12 @@ namespace Nuake {
             ImGui::EndMainMenuBar();
         }
 
-        DrawGizmos();
-
-        DrawRessourceWindow();
-		
 		pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
-        //DrawDirectoryExplorer();
-        DrawEntityPropreties();
+        SelectionPanel.Draw(Selection);
         DrawLogger();
 
-        // new stuff
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();
 
@@ -1702,15 +1249,6 @@ namespace Nuake {
 
         if (ImGui::Begin("Toolbar", 0, ImGuiWindowFlags_NoScrollbar | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiWindowFlags_NoDecoration))
         {
-            if (ImGui::Button(ICON_FA_HAND_POINTER)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ARROWS_ALT)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT)) CurrentOperation = ImGuizmo::OPERATION::SCALE;
-            ImGui::SameLine();
-
             float availWidth = ImGui::GetContentRegionAvailWidth();
             float windowWidth = ImGui::GetWindowWidth();
 
@@ -1724,7 +1262,9 @@ namespace Nuake {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
                 Engine::EnterPlayMode();
             }
+
             ImGui::SameLine();
+
             if (ImGui::Button(ICON_FA_STOP) || Input::IsKeyPressed(297))
             {
                 Engine::ExitPlayMode();
@@ -1735,7 +1275,6 @@ namespace Nuake {
         }
         ImGui::End();
     }
-
 
     void EditorInterface::BuildFonts()
     {

@@ -23,7 +23,6 @@ namespace Nuake {
 		Ref<Directory> m_CurrentDirectory;
 
 		bool m_IsMaterialSelected = false;
-
 	public:
 		WelcomeWindow* _WelcomeWindow;
 		FileSystemUI* filesystem;
@@ -39,18 +38,8 @@ namespace Nuake {
 		void DrawViewport();
 		void DrawEntityTree(Entity ent);
 		void DrawSceneTree();
-		void DrawEntityPropreties();
-		void DrawGizmos();
-		void DrawFileSystem();
-		void DrawDirectoryExplorer();
 		void DrawLogger();
-		void DrawDirectory(Ref<Directory> directory);
 		bool EntityContainsItself(Entity ent1, Entity ent2);
-		void DrawFile(Ref<File> file);
-		void DrawRessourceWindow();
-		void DrawInit();
-		void EditorInterfaceDrawFiletree(Ref<Directory> dir);
 		void Overlay();
-		void DrawMaterialEditor(Ref<Material> material);
 	};
 }

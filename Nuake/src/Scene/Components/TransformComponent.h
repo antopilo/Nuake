@@ -6,12 +6,15 @@ namespace Nuake
 {
 	class TransformComponent {
 	public:
+		bool Dirty = false;
 		Vector3 Translation;
+		Quat Orientation;
 		Vector3 Rotation; // TODO: Should use quaternions.
 		Vector3 Scale;
 
 		Vector3 GlobalTranslation;
 		Vector3 GlobalRotation;
+		Quat GlobalOrientation;
 		Vector3 GlobalScale;
 
 		Matrix4 LocalTransform;
@@ -21,6 +24,8 @@ namespace Nuake
 
 		Matrix4 GetGlobalTransform() const;
 		Matrix4 GetLocalTransform() const;
+
+		void SetRotation(float x, float y, float z);
 
 		json Serialize()
 		{

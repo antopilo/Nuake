@@ -51,9 +51,7 @@ namespace Nuake {
 
 			Matrix4 localTransform = Matrix4(1.0f);
 			localTransform = glm::translate(localTransform, transform.Translation);
-			localTransform = glm::rotate(localTransform, glm::radians(transform.Rotation.x), Vector3(1, 0, 0));
-			localTransform = glm::rotate(localTransform, glm::radians(transform.Rotation.y), Vector3(0, 1, 0));
-			localTransform = glm::rotate(localTransform, glm::radians(transform.Rotation.z), Vector3(0, 0, 1));
+			localTransform *=  glm::toMat4(transform.Orientation);
 			localTransform = glm::scale(localTransform, transform.Scale);
 
 			transform.LocalTransform = localTransform;
@@ -69,13 +67,14 @@ namespace Nuake {
 			{
 				// If no parents, then globalTransform is local transform.
 				transform.GlobalTransform = transform.LocalTransform;
+				continue;
 			}
 
 			Entity currentParent = Entity((entt::entity)e, m_Scene);
 
 			Matrix4 globalTransform = transform.LocalTransform;
 			Vector3 globalPosition = transform.Translation;
-			Vector3 globalRotation = transform.Rotation;
+			Quat globalOrientation = transform.Orientation;
 			Vector3 globalScale = transform.Scale;
 
 			ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
@@ -86,15 +85,14 @@ namespace Nuake {
 				globalTransform = transformComponent.LocalTransform * globalTransform;
 
 				globalPosition += transformComponent.Translation;
-				globalRotation += transformComponent.Rotation;
+				globalOrientation *= transformComponent.Orientation;
 				globalScale *= transformComponent.Scale;
 		
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
 				
-				
 			transform.GlobalTranslation = globalPosition;
-			transform.GlobalRotation = globalRotation;
+			transform.GlobalOrientation = globalOrientation;
 			transform.GlobalScale = globalScale;
 
 			transform.GlobalTransform = globalTransform;
