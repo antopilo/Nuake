@@ -49,7 +49,7 @@ namespace Nuake {
 		glm::vec3 newPosition = m_Rigidbody->GetPosition();
 		glm::vec3 newRotation = m_Rigidbody->GetRotation();
 		tc->Translation = newPosition;
-		tc->Rotation = newRotation;
+		//tc->Rotation = newRotation;
 	}
 
 	void RigidBodyComponent::SyncWithTransform(TransformComponent* tc)
@@ -62,7 +62,7 @@ namespace Nuake {
 		newTransform.setOrigin(btVector3(tc->Translation.x, tc->Translation.t, tc->Translation.z));
 
 		btQuaternion quat;
-		quat.setEulerZYX(tc->Rotation.x, tc->Rotation.y, tc->Rotation.z);
+		//quat.setEulerZYX(tc->Rotation.x, tc->Rotation.y, tc->Rotation.z);
 		newTransform.setRotation(quat);
 		m_Rigidbody->UpdateTransform(newTransform);
 	}

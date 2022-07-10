@@ -9,7 +9,7 @@ namespace Nuake
         Translation = Vector3(0, 0, 0);
         Orientation = Quat(0, 0, 0, 0);
         GlobalOrientation = Orientation;
-        Rotation = Vector3(0, 0, 0);
+        //Rotation = Vector3(0, 0, 0);
         Scale = Vector3(1, 1, 1);
     }
 
@@ -24,7 +24,7 @@ namespace Nuake
 
     Matrix4 TransformComponent::GetGlobalTransform() const
     {
-        return GlobalTransform;
+        return LocalTransform;
     }
 
     Matrix4 TransformComponent::GetLocalTransform() const

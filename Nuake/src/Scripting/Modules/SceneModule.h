@@ -234,9 +234,9 @@ namespace Nuake {
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
-				wrenSetSlotDouble(vm, 1, transform.Rotation.x);
-				wrenSetSlotDouble(vm, 2, transform.Rotation.y);
-				wrenSetSlotDouble(vm, 3, transform.Rotation.z);
+				//wrenSetSlotDouble(vm, 1, transform.Rotation.x);
+				//wrenSetSlotDouble(vm, 2, transform.Rotation.y);
+				//wrenSetSlotDouble(vm, 3, transform.Rotation.z);
 
 				// Fill the list
 				wrenSetSlotNewList(vm, 0);
@@ -255,7 +255,7 @@ namespace Nuake {
 				float y = wrenGetSlotDouble(vm, 3);
 				float z = wrenGetSlotDouble(vm, 4);
 
-				transform.Rotation = Vector3(x, y, z);
+				transform.SetRotation(x, y, z);
 			}
 
 			static void SetTranslation(WrenVM* vm)

@@ -93,6 +93,7 @@ namespace Nuake {
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
             ImGuizmo::SetDrawlist();
+            ImGuizmo::AllowAxisFlip(false);
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
 
             if (m_DrawGrid && !Engine::IsPlayMode)
@@ -111,14 +112,19 @@ namespace Nuake {
                 auto editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
                 Matrix4 cameraView = editorCam->GetTransform();
                 Matrix4 cameraProjection = editorCam->GetPerspective();
+
                 ImGuizmo::Manipulate(
                     glm::value_ptr(cameraView),
                     glm::value_ptr(cameraProjection),
-                    CurrentOperation, CurrentMode, glm::value_ptr(transform), 0, 0
+                    CurrentOperation, CurrentMode, 
+                    glm::value_ptr(transform)
                 );
 
                 if (ImGuizmo::IsUsing())
                 {
+                    tc.LocalTransform = transform;
+                    tc.GlobalTransform = transform;
+
 					//Entity currentParent = Selection.Entity;
 					//if (parent.HasParent)
 					//{
@@ -126,18 +132,17 @@ namespace Nuake {
 					//    transform *= inverseParent;
 					//}
 
-                    Vector3 scale;
-                    glm::quat rotation;
-                    Vector3 translation;
-                    Vector3 skew;
-                    Vector4 perspective;
-                    glm::decompose(transform, scale, rotation, translation, skew, perspective);
-
-                    rotation = glm::conjugate(rotation);
-
-                    tc.Translation = translation;
-                    tc.Orientation = rotation;
-                    tc.Scale = scale;
+					//Vector3 scale;
+					//Quat rotation;
+					//Vector3 translation;
+					//Vector3 skew;
+					//Vector4 perspective;
+					//glm::decompose(transform, scale, rotation, translation, skew, perspective);
+					//rotation = glm::conjugate(rotation);
+					//
+					//tc.Translation = translation;
+					//tc.Orientation = rotation;
+					//tc.Scale = scale;
                 }
             }
         }

@@ -6,7 +6,7 @@
 #include <src/Scene/Components/TransformComponent.h>
 #include <src/Scene/Components/CameraComponent.h>
 #include <src/Scene/Components/ParentComponent.h>
-
+#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 namespace Nuake {
 	TransformSystem::TransformSystem(Scene* scene)
 	{
@@ -49,12 +49,17 @@ namespace Nuake {
 		{
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
 
-			Matrix4 localTransform = Matrix4(1.0f);
-			localTransform = glm::translate(localTransform, transform.Translation);
-			localTransform *=  glm::toMat4(transform.Orientation);
-			localTransform = glm::scale(localTransform, transform.Scale);
+			if (transform.Dirty)
+			{
+				Vector3 dum;
+				Vector4 dum2;
+				glm::decompose(transform.LocalTransform, transform.Scale, transform.Orientation, transform.Translation, dum, dum2);
 
-			transform.LocalTransform = localTransform;
+				transform.LocalTransform = Matrix4(1);
+				transform.LocalTransform = glm::translate(transform.LocalTransform, transform.Translation);
+
+				transform.Dirty = false;
+			}
 		}
 
 		// Calculate all global transforms

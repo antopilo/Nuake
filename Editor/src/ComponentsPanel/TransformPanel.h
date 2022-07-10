@@ -30,7 +30,7 @@ public:
                 //ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
                 ImGui::TableNextColumn();
 
-                ComponentTableReset(component.Rotation, Nuake::Vector3(0, 0, 0));
+                //ComponentTableReset(component.Rotation, Nuake::Vector3(0, 0, 0));
             }
             ImGui::TableNextColumn();
             {
