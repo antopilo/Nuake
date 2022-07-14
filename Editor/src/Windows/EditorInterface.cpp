@@ -42,6 +42,7 @@
 
 #include "WelcomeWindow.h"
 #include "src/Rendering/SceneRenderer.h"
+#include <dependencies/glfw/include/GLFW/glfw3.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -124,25 +125,6 @@ namespace Nuake {
                 {
                     tc.SetLocalTransform(transform);
                     tc.SetGlobalTransform(transform);
-
-					//Entity currentParent = Selection.Entity;
-					//if (parent.HasParent)
-					//{
-					//    Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GlobalTransform);
-					//    transform *= inverseParent;
-					//}
-
-					//Vector3 scale;
-					//Quat rotation;
-					//Vector3 translation;
-					//Vector3 skew;
-					//Vector4 perspective;
-					//glm::decompose(transform, scale, rotation, translation, skew, perspective);
-					//rotation = glm::conjugate(rotation);
-					//
-					//tc.Translation = translation;
-					//tc.Orientation = rotation;
-					//tc.Scale = scale;
                 }
             }
         }
@@ -998,11 +980,20 @@ namespace Nuake {
         if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
         {
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button(ICON_FA_ARROWS_ALT)) CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyPressed(GLFW_KEY_W))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT)) CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyPressed(GLFW_KEY_E))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+            }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT)) CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyPressed(GLFW_KEY_R))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            }
             ImGui::PopStyleVar();
 
         }
