@@ -7,10 +7,15 @@ namespace Nuake
     {
         GlobalTranslation = Vector3(0, 0, 0);
         Translation = Vector3(0, 0, 0);
-        Orientation = Quat(0, 0, 0, 0);
-        GlobalOrientation = Orientation;
-        //Rotation = Vector3(0, 0, 0);
-        Scale = Vector3(1, 1, 1);
+
+        Rotation = Quat(0, 0, 0, 1);
+        GlobalRotation = Rotation;
+
+        GlobalScale = Vector3(1, 1, 1);
+        Scale = GlobalScale;
+
+        LocalTransform = Matrix4(1);
+        GlobalTransform = Matrix4(1);
     }
 
     void TransformComponent::SetRotation(float x, float y, float z)
@@ -19,12 +24,12 @@ namespace Nuake
 		Quat QuatAroundY = Quat(0.0, 1.0, 0.0, y);
 		Quat QuatAroundZ = Quat(0.0, 0.0, 1.0, z);
         Quat finalOrientation = QuatAroundX * QuatAroundY * QuatAroundZ;
-        Orientation = finalOrientation;
+        Rotation = finalOrientation;
     }
 
     Matrix4 TransformComponent::GetGlobalTransform() const
     {
-        return LocalTransform;
+        return GlobalTransform;
     }
 
     Matrix4 TransformComponent::GetLocalTransform() const

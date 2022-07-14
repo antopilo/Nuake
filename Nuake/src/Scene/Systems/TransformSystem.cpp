@@ -51,14 +51,12 @@ namespace Nuake {
 
 			if (transform.Dirty)
 			{
-				Vector3 dum;
-				Vector4 dum2;
-				glm::decompose(transform.LocalTransform, transform.Scale, transform.Orientation, transform.Translation, dum, dum2);
-
-				transform.LocalTransform = Matrix4(1);
-				transform.LocalTransform = glm::translate(transform.LocalTransform, transform.Translation);
-
-				transform.Dirty = false;
+				Matrix4 localTransform = Matrix4(1);
+				localTransform = glm::translate(transform.LocalTransform, transform.Translation);
+				localTransform = localTransform * glm::toMat4(transform.Rotation);
+				localTransform = glm::scale(transform.LocalTransform, transform.Scale);
+				
+				transform.LocalTransform = localTransform;
 			}
 		}
 
@@ -79,7 +77,7 @@ namespace Nuake {
 
 			Matrix4 globalTransform = transform.LocalTransform;
 			Vector3 globalPosition = transform.Translation;
-			Quat globalOrientation = transform.Orientation;
+			Quat globalOrientation = transform.Rotation;
 			Vector3 globalScale = transform.Scale;
 
 			ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
@@ -90,14 +88,14 @@ namespace Nuake {
 				globalTransform = transformComponent.LocalTransform * globalTransform;
 
 				globalPosition += transformComponent.Translation;
-				globalOrientation *= transformComponent.Orientation;
+				globalOrientation *= transformComponent.Rotation;
 				globalScale *= transformComponent.Scale;
 		
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
 				
 			transform.GlobalTranslation = globalPosition;
-			transform.GlobalOrientation = globalOrientation;
+			transform.GlobalRotation = globalOrientation;
 			transform.GlobalScale = globalScale;
 
 			transform.GlobalTransform = globalTransform;

@@ -215,7 +215,6 @@ namespace Nuake
         //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
     }
 
-    // TODO: Maybe have a debug primitive draw list
     void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
     {
         //glDisable(GL_DEPTH_TEST);
@@ -226,7 +225,7 @@ namespace Nuake
         RenderCommand::DrawArrays(0, 36);
     }
 
-    // TODO: See above
+
     void Renderer::DrawSphere(TransformComponent transform, glm::vec4 color)
     {
 

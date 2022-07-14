@@ -382,11 +382,11 @@ namespace Nuake {
             m_Scene->DestroyEntity(e);
         }
 
-        map_parser_load(std::string(FileSystem::Root + quakeMapC.Path).c_str());
+        map_parser_load((FileSystem::Root + quakeMapC.Path).c_str());
         geo_generator_run();
 
-        DefaultMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
-        for (int e = 0; e < entity_count; ++e)
+        DefaultMaterial = MaterialManager::Get()->GetMaterial("default");
+        for (uint32_t e = 0; e < entity_count; ++e)
         {
             entity* entity_inst = &entities[e];
             entity_geometry* entity_geo_inst = &entity_geo[e];

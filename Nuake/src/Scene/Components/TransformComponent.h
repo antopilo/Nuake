@@ -7,14 +7,13 @@ namespace Nuake
 	class TransformComponent {
 	public:
 		bool Dirty = true;
+
 		Vector3 Translation;
-		Quat Orientation;
-		//Vector3 Rotation; // TODO: Should use quaternions.
+		Quat Rotation;
 		Vector3 Scale;
 
 		Vector3 GlobalTranslation;
-		//Vector3 GlobalRotation;
-		Quat GlobalOrientation;
+		Quat GlobalRotation;
 		Vector3 GlobalScale;
 
 		Matrix4 LocalTransform;
