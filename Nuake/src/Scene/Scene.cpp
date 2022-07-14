@@ -135,7 +135,7 @@ namespace Nuake {
 			{
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
-				cam->Translation = transform.GlobalTranslation;
+				cam->Translation = transform.GetGlobalPosition();
 				break;
 			}
 		}

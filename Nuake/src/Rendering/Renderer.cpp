@@ -156,7 +156,7 @@ namespace Nuake
         int idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GlobalTranslation;
+        Vector3 pos = transform.GetGlobalPosition();
 
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 

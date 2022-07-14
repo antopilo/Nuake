@@ -122,8 +122,8 @@ namespace Nuake {
 
                 if (ImGuizmo::IsUsing())
                 {
-                    tc.LocalTransform = transform;
-                    tc.GlobalTransform = transform;
+                    tc.SetLocalTransform(transform);
+                    tc.SetGlobalTransform(transform);
 
 					//Entity currentParent = Selection.Entity;
 					//if (parent.HasParent)
@@ -233,7 +233,7 @@ namespace Nuake {
                 if (ImGui::Selectable("Focus camera"))
                 {
                     Ref<EditorCamera> editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-                    editorCam->Translation = entity.GetComponent<TransformComponent>().Translation;
+                    editorCam->Translation = entity.GetComponent<TransformComponent>().GetGlobalPosition();
                     Vector3 camDirection = entity.GetComponent<CameraComponent>().CameraInstance->GetDirection();
                     editorCam->SetDirection(camDirection);
                 }

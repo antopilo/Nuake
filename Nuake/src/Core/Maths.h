@@ -16,4 +16,6 @@ namespace Nuake
 	using Color = glm::vec4;
 	using Matrix4 = glm::mat4;
 	using Matrix3 = glm::mat3;
+
+	Quat QuatFromEuler(float x, float y, float z);
 }

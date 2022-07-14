@@ -8,8 +8,8 @@ namespace Nuake
 	{
 		TransformComponent tc = TransformComponent();
 
-		tc.Translation = glm::vec3(from.x(), from.y(), from.z());
-		tc.Scale = glm::vec3(1.0f);
+		//tc.Translation = glm::vec3(from.x(), from.y(), from.z());
+		//tc.Scale = glm::vec3(1.0f);
 		//tc.Rotation = glm::vec3(0.0f);
 
 		glBegin(GL_LINES);

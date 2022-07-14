@@ -5,9 +5,7 @@
 namespace Nuake
 {
 	class TransformComponent {
-	public:
-		bool Dirty = true;
-
+	private:
 		Vector3 Translation;
 		Quat Rotation;
 		Vector3 Scale;
@@ -18,20 +16,40 @@ namespace Nuake
 
 		Matrix4 LocalTransform;
 		Matrix4 GlobalTransform;
-
+	public:
+		bool Dirty = true;
 		TransformComponent();
 
 		Matrix4 GetGlobalTransform() const;
-		Matrix4 GetLocalTransform() const;
+		void SetGlobalTransform(const Matrix4& transform);
 
-		void SetRotation(float x, float y, float z);
+		Matrix4 GetLocalTransform() const;
+		void SetLocalTransform(const Matrix4& transform);
+
+		void SetLocalRotation(const Quat& quat);
+		Quat GetLocalRotation() const;
+
+		void SetGlobalRotation(const Quat& quat);
+		Quat GetGlobalRotation() const;
+
+		Vector3 GetLocalPosition() const;
+		void SetLocalPosition(const Vector3& position);
+
+		Vector3 GetGlobalPosition() const;
+		void SetGlobalPosition(const Vector3& position);
+
+		void SetLocalScale(const Vector3& scale);
+		Vector3 GetLocalScale() const;
+
+		void SetGlobalScale(const Vector3& scale);
+		Vector3 GetGlobalScale() const;
 
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL_LBL("Type", "TransformComponent");
 			SERIALIZE_VEC3(Translation);
-			//SERIALIZE_VEC3(Rotation);
+			SERIALIZE_VEC4(Rotation);
 			SERIALIZE_VEC3(Scale);
 			END_SERIALIZE();
 		}
@@ -40,8 +58,12 @@ namespace Nuake
 		{
 			BEGIN_DESERIALIZE();
 			this->Translation = Vector3(j["Translation"]["x"], j["Translation"]["y"], j["Translation"]["z"]);
-			//this->Rotation = Vector3(j["Rotation"]["x"], j["Rotation"]["y"], j["Rotation"]["z"]);
+			if(j.contains("Rotation"))
+				this->Rotation = Quat(j["Rotation"]["w"], j["Rotation"]["x"], j["Rotation"]["y"], j["Rotation"]["z"]);
 			this->Scale = Vector3(j["Scale"]["x"], j["Scale"]["y"], j["Scale"]["z"]);
+
+			LocalTransform = Matrix4(1);
+			GlobalTransform = Matrix4(1);
 			return true;
 		}
 	};

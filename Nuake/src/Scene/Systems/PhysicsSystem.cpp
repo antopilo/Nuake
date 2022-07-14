@@ -33,7 +33,7 @@ namespace Nuake
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
 
-				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(mass, transform.Translation, boxShape);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape);
 
 				rigidbody.m_Rigidbody = btRigidbody;
 
@@ -49,7 +49,7 @@ namespace Nuake
 		{
 			auto [transform, cc] = ccview.get<TransformComponent, CharacterControllerComponent>(e);
 
-			cc.CharacterController = CreateRef<Physics::CharacterController>(cc.Height, cc.Radius, cc.Mass, transform.Translation);
+			cc.CharacterController = CreateRef<Physics::CharacterController>(cc.Height, cc.Radius, cc.Mass, transform.GetLocalPosition());
 			Entity ent = Entity({ e, m_Scene });
 			cc.CharacterController->SetEntity(ent);
 
@@ -67,7 +67,7 @@ namespace Nuake
 			for (auto m : brush.Meshes)
 			{
 				Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GlobalTranslation, meshShape);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GetGlobalPosition(), meshShape);
 				btRigidbody->SetEntityID(Entity{ e, m_Scene });
 				brush.Rigidbody.push_back(btRigidbody);
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
@@ -80,7 +80,7 @@ namespace Nuake
 			auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
 
 			Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(brush.Meshes[0]);
-			Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GlobalTranslation, meshShape);
+			Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GetGlobalPosition(), meshShape);
 			trigger.GhostObject = ghostBody;
 
 			PhysicsManager::Get()->RegisterGhostBody(ghostBody);
@@ -100,8 +100,8 @@ namespace Nuake
 
 			for (auto& r : brush.Rigidbody)
 			{
-				r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
-				r->UpdateTransform(*r->m_Transform);
+				//r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
+				//r->UpdateTransform(*r->m_Transform);
 			}
 
 			if (!brush.IsFunc)

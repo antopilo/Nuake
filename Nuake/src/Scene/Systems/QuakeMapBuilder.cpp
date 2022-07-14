@@ -51,9 +51,9 @@ namespace Nuake {
 
         parent.AddChild(brushEntity);
 
-        transformComponent.Translation = Vector3(brush->center.y * (1.0f / 64),
+        transformComponent.SetGlobalPosition(Vector3(brush->center.y * (1.0f / 64),
             brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64));
+            brush->center.x * ScaleFactor * (1.0f / 64)));
 
         BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
         bsp.IsSolid = false;
@@ -113,10 +113,10 @@ namespace Nuake {
 
         parent.AddChild(brushEntity);
 
-        transformComponent.Translation = Vector3(
+        transformComponent.SetGlobalPosition(Vector3(
             brush->center.y * ScaleFactor * (1.0f / 64),
             brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64));
+            brush->center.x * ScaleFactor * (1.0f / 64)));
 
         int index_offset = 0;
         int lastTextureID = -1;
@@ -247,10 +247,10 @@ namespace Nuake {
 
         parent.AddChild(brushEntity);
 
-        transformComponent.Translation = Vector3(
+        transformComponent.SetLocalPosition(Vector3(
             brush->center.y * ScaleFactor * (1.0f / 64),
             brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64));
+            brush->center.x * ScaleFactor * (1.0f / 64)));
 
         int index_offset = 0;
         int lastTextureID = -1;
@@ -422,7 +422,7 @@ namespace Nuake {
                     float z = String::ToFloat(splits[0]);
 
                     Vector3 position = Vector3(x, y, z) * ScaleFactor * (1.0f / 64.0f);
-                    newEntity.GetComponent<TransformComponent>().Translation = position;
+                    newEntity.GetComponent<TransformComponent>().SetLocalPosition(position);
                 }
 
                 if (key == "classname")

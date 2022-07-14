@@ -52,11 +52,13 @@ namespace Nuake {
 			if (transform.Dirty)
 			{
 				Matrix4 localTransform = Matrix4(1);
-				localTransform = glm::translate(transform.LocalTransform, transform.Translation);
-				localTransform = localTransform * glm::toMat4(transform.Rotation);
-				localTransform = glm::scale(transform.LocalTransform, transform.Scale);
+				localTransform = glm::translate(localTransform, transform.GetLocalPosition());
+				localTransform = localTransform * glm::toMat4(transform.GetLocalRotation());
+				localTransform = glm::scale(localTransform, transform.GetLocalScale());
 				
-				transform.LocalTransform = localTransform;
+				transform.SetLocalTransform(localTransform);
+
+				transform.Dirty = false;
 			}
 		}
 
@@ -69,36 +71,35 @@ namespace Nuake {
 			if (!parent.HasParent)
 			{
 				// If no parents, then globalTransform is local transform.
-				transform.GlobalTransform = transform.LocalTransform;
+				transform.SetGlobalTransform(transform.GetLocalTransform());
 				continue;
 			}
 
 			Entity currentParent = Entity((entt::entity)e, m_Scene);
 
-			Matrix4 globalTransform = transform.LocalTransform;
-			Vector3 globalPosition = transform.Translation;
-			Quat globalOrientation = transform.Rotation;
-			Vector3 globalScale = transform.Scale;
+			Matrix4 globalTransform = transform.GetLocalTransform();
+			Vector3 globalPosition = transform.GetLocalPosition();
+			Quat globalOrientation = transform.GetLocalRotation();
+			Vector3 globalScale = transform.GetLocalScale();
 
 			ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
 			while (parentComponent.HasParent)
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 
-				globalTransform = transformComponent.LocalTransform * globalTransform;
+				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
 
-				globalPosition += transformComponent.Translation;
-				globalOrientation *= transformComponent.Rotation;
-				globalScale *= transformComponent.Scale;
+				globalPosition += transformComponent.GetLocalPosition();
+				globalOrientation *= transformComponent.GetLocalRotation();
+				globalScale *= transformComponent.GetLocalScale();
 		
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
 				
-			transform.GlobalTranslation = globalPosition;
-			transform.GlobalRotation = globalOrientation;
-			transform.GlobalScale = globalScale;
-
-			transform.GlobalTransform = globalTransform;
+			transform.SetGlobalPosition(globalPosition);
+			transform.SetGlobalRotation(globalOrientation);
+			transform.SetGlobalScale(globalScale);
+			transform.SetGlobalTransform(globalTransform);
 		}
 	}
 }

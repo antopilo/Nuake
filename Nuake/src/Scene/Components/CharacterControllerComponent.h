@@ -36,7 +36,7 @@ namespace Nuake {
 			btVector3 pos = CharacterController->m_motionTransform.getOrigin();
 			glm::vec3 finalPos = glm::vec3(pos.x(), pos.y(), pos.z());
 
-			tc.Translation = finalPos;
+			tc.SetLocalPosition(finalPos);
 		}
 	};
 }
