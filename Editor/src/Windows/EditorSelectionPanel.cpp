@@ -28,7 +28,7 @@ void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
 
     if (currentFile->GetExtension() == ".material")
     {
-        Ref<Material> material = ResourceLoader::LoadResource(currentFile->GetRelativePath());
+        Ref<Material> material = ResourceLoader::LoadMaterial(currentFile->GetRelativePath());
         selectedResource = material;
     }
 }

@@ -4,6 +4,7 @@
 #include <src/Scene/Components/MeshComponent.h>
 
 #include <src/Resource/ResourceLoader.h>
+#include <src/Core/String.h>
 
 class MeshPanel : ComponentPanel {
 
@@ -32,8 +33,15 @@ public:
                     std::string fullPath = std::string(file, 256);
                     fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
                     
-                    //component.ModelPath = path;
-                    //component.LoadModel();
+                    if (Nuake::String::EndsWith(fullPath, ".model"))
+                    {
+
+                    }
+                    else
+                    {
+                        component.ModelPath = fullPath;
+                        component.LoadModel();
+                    }
                 }
                 ImGui::EndDragDropTarget();
             }
