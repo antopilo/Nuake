@@ -21,6 +21,7 @@ namespace Nuake {
 		ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
 		Ref<Material> m_SelectedMaterial;
 		Ref<Directory> m_CurrentDirectory;
+		Ref<FrameBuffer> m_EntitySelectionFramebuffer;
 
 		bool m_IsMaterialSelected = false;
 	public:
@@ -35,6 +36,7 @@ namespace Nuake {
 		void BuildFonts();
 		void Init();
 		void Draw();
+		void DrawMenuBar();
 		void DrawViewport();
 		void DrawEntityTree(Entity ent);
 		void DrawSceneTree();

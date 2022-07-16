@@ -30,12 +30,12 @@ namespace Nuake
         bool Deserialize(const std::string str) 
         {
             BEGIN_DESERIALIZE();
-            ModelPath = j["ModelPath"];
+            ModelPath = j["ModelPath"].dump();
             ModelResource = CreateRef<Model>();
 
             if (j.contains("ModelResource"))
             {
-                auto res = j["ModelResource"];
+                auto& res = j["ModelResource"];
                 ModelResource->Deserialize(res.dump());
             }
 

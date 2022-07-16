@@ -13,7 +13,7 @@ namespace Nuake {
 		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT1);
 		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
 		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT3);
-	
+
 		mShadingBuffer = CreateScope<FrameBuffer>(true, Vector2(1920, 1080));
 		Ref<Texture> shadedTexture = CreateRef<Texture>(Vector2(1920, 1080), GL_RGB, GL_RGB16F, GL_FLOAT);
 		mShadingBuffer->SetTexture(shadedTexture);
@@ -27,7 +27,6 @@ namespace Nuake {
 
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, Vector2(1920, 1080));
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
-
 	}
 
 	void SceneRenderer::Cleanup()

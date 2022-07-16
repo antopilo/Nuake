@@ -67,6 +67,8 @@ int main()
 			{
 				gizmoDrawer.DrawGizmos(currentScene);
 			}
+
+            //
         }
         sceneFramebuffer->Unbind();
 

@@ -43,6 +43,7 @@
 #include "WelcomeWindow.h"
 #include "src/Rendering/SceneRenderer.h"
 #include <dependencies/glfw/include/GLFW/glfw3.h>
+#include <src/Rendering/Buffers/Framebuffer.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -54,6 +55,8 @@ namespace Nuake {
     {
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
+
+        m_EntitySelectionFramebuffer = CreateRef<FrameBuffer>(false, Vector2(1280, 720));
     }
 
     void EditorInterface::Init()
@@ -1078,19 +1081,8 @@ namespace Nuake {
         Engine::LoadScene(scene);
     }
 
-    Ref<Scene> SceneSnapshot;
-    void EditorInterface::Draw()
+    void EditorInterface::DrawMenuBar()
     {
-        Init();
-
-        if (!Engine::GetProject())
-        {
-            _WelcomeWindow->Draw();
-            return;
-        }
-
-        pInterface.m_CurrentProject = Engine::GetProject();
-
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::BeginMenu("File"))
@@ -1122,7 +1114,7 @@ namespace Nuake {
                     Selection = EditorSelection();
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Set current scene as default")) 
+                if (ImGui::MenuItem("Set current scene as default"))
                 {
                     Engine::GetProject()->DefaultScene = Engine::GetCurrentScene();
                 }
@@ -1180,16 +1172,16 @@ namespace Nuake {
             {
                 if (ImGui::BeginMenu("Create new"))
                 {
-                    if (ImGui::MenuItem("Empty")) 
+                    if (ImGui::MenuItem("Empty"))
                     {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Empty entity");
                     }
-                    if (ImGui::MenuItem("Light")) 
+                    if (ImGui::MenuItem("Light"))
                     {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Light");
                         ent.AddComponent<LightComponent>();
                     }
-                    if (ImGui::MenuItem("Camera")) 
+                    if (ImGui::MenuItem("Camera"))
                     {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Camera");
                         ent.AddComponent<CameraComponent>();
@@ -1204,7 +1196,7 @@ namespace Nuake {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
                         ent.AddComponent<QuakeMapComponent>();
                     }
-                    if (ImGui::MenuItem("Mesh")) 
+                    if (ImGui::MenuItem("Mesh"))
                     {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Mesh");
                         ent.AddComponent<MeshComponent>();
@@ -1230,6 +1222,22 @@ namespace Nuake {
             if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();
             ImGui::EndMainMenuBar();
         }
+    }
+
+    Ref<Scene> SceneSnapshot;
+    void EditorInterface::Draw()
+    {
+        Init();
+
+        if (!Engine::GetProject())
+        {
+            _WelcomeWindow->Draw();
+            return;
+        }
+
+        pInterface.m_CurrentProject = Engine::GetProject();
+
+        DrawMenuBar();
 
 		pInterface.DrawEntitySettings();
         DrawViewport();

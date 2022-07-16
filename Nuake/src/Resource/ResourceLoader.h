@@ -18,8 +18,7 @@ namespace Nuake
 		ResourceLoader() = default;
 		~ResourceLoader() = default;
 
-
-		static Ref<Material> LoadResource(const std::string& path)
+		static Ref<Material> LoadMaterial(const std::string& path)
 		{
 			const std::string FILE_NOT_FOUND = "[Resource Loader] File doesn't exists. \n ";
 			const std::string WRONG_EXTENSION = "[Resource Loader] Resource type mismatch file extension. \n expected: ";
@@ -55,7 +54,6 @@ namespace Nuake
 
 			return material;
 		}
-
 	private:
 		static UUID ReadUUID(json j)
 		{

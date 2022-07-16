@@ -3,6 +3,8 @@
 #include <src/Scene/Entities/ImGuiHelper.h>
 #include <src/Scene/Components/MeshComponent.h>
 
+#include <src/Resource/ResourceLoader.h>
+
 class MeshPanel : ComponentPanel {
 
 public:
@@ -19,18 +21,19 @@ public:
             ImGui::Text("Mesh");
             ImGui::TableNextColumn();
 
-            std::string path = component.ModelPath;
-            ImGui::Button(component.ModelPath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+            std::string label = std::to_string(component.ModelResource->ID);
+            ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+
             if (ImGui::BeginDragDropTarget())
             {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
                 {
                     char* file = (char*)payload->Data;
                     std::string fullPath = std::string(file, 256);
-                    path = Nuake::FileSystem::AbsoluteToRelative(fullPath);
-
-                    component.ModelPath = path;
-                    component.LoadModel();
+                    fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+                    
+                    //component.ModelPath = path;
+                    //component.LoadModel();
                 }
                 ImGui::EndDragDropTarget();
             }
