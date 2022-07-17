@@ -6,7 +6,7 @@
 #include "TransformComponent.h"
 #include "LightComponent.h"
 #include "CameraComponent.h"
-#include "MeshComponent.h"
+#include "ModelComponent.h"
 #include "QuakeMap.h"
 #include "RigidbodyComponent.h"
 #include "SphereCollider.h"

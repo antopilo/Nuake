@@ -4,7 +4,7 @@
 #include "ModelResourceInspector.h"
 
 #include <src/Scene/Entities/ImGuiHelper.h>
-#include <src/Scene/Components/MeshComponent.h>
+#include <src/Scene/Components/ModelComponent.h>
 
 #include <src/Resource/ResourceLoader.h>
 #include <src/Core/String.h>
@@ -21,13 +21,14 @@ public:
 
     void Draw(Nuake::Entity entity) override
     {
-        if (!entity.HasComponent<Nuake::MeshComponent>())
+        using namespace Nuake;
+        if (!entity.HasComponent<ModelComponent>())
             return;
 
-        Nuake::MeshComponent& component = entity.GetComponent<Nuake::MeshComponent>();
-        BeginComponentTable(MESH, Nuake::MeshComponent);
+        ModelComponent& component = entity.GetComponent<ModelComponent>();
+        BeginComponentTable(MESH, ModelComponent);
         {
-            ImGui::Text("Mesh");
+            ImGui::Text("Model");
             ImGui::TableNextColumn();
 
             std::string label = std::to_string(component.ModelResource->ID);

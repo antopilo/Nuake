@@ -9,8 +9,8 @@
 #include "../Components/WrenScriptComponent.h"
 #include "../Components/CharacterControllerComponent.h"
 
+#include "src/Scene/Components/Components.h"
 #include <src/Scene/Components/BoxCollider.h>
-#include <src/Scene/Components/MeshComponent.h>
 
 //#include <src/Scene/Components/BoxCollider.h>
 #include "src/Scene/Components/BSPBrushComponent.h"
@@ -47,8 +47,8 @@ namespace Nuake
 
 		if (HasComponent<BoxColliderComponent>())
 			SERIALIZE_OBJECT_REF_LBL("BoxColliderComponent", GetComponent<BoxColliderComponent>());
-		if (HasComponent<MeshComponent>())
-			SERIALIZE_OBJECT_REF_LBL("MeshComponent", GetComponent<MeshComponent>());
+		if (HasComponent<ModelComponent>())
+			SERIALIZE_OBJECT_REF_LBL("ModelComponent", GetComponent<ModelComponent>());
 		if (HasComponent<BSPBrushComponent>())
 			SERIALIZE_OBJECT_REF_LBL("BSPBrushComponent", GetComponent<BSPBrushComponent>());
 		END_SERIALIZE();
@@ -63,7 +63,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(CameraComponent);
 		DESERIALIZE_COMPONENT(QuakeMapComponent);
 		DESERIALIZE_COMPONENT(LightComponent);
-		DESERIALIZE_COMPONENT(MeshComponent);
+		DESERIALIZE_COMPONENT(ModelComponent);
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		//DESERIALIZE_COMPONENT(BSPBrushComponent);

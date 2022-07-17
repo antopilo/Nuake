@@ -123,7 +123,7 @@ namespace Nuake {
 		RenderCommand::Disable(RendererEnum::FACE_CULL);
 		glCullFace(GL_BACK);
 
-		auto meshView = scene.m_Registry.view<TransformComponent, MeshComponent>();
+		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent>();
 		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent>();
 		auto view = scene.m_Registry.view<TransformComponent, LightComponent>();
 		for (auto l : view)
@@ -142,7 +142,7 @@ namespace Nuake {
 					shader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
 					for (auto e : meshView)
 					{
-						auto [transform, mesh] = meshView.get<TransformComponent, MeshComponent>(e);
+						auto [transform, mesh] = meshView.get<TransformComponent, ModelComponent>(e);
 						if (mesh.ModelResource != nullptr)
 						{
 							for (auto& m : mesh.ModelResource->GetMeshes())
@@ -181,10 +181,10 @@ namespace Nuake {
 			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferShader->SetUniformMat4f("u_View", mView);
 
-			auto view = scene.m_Registry.view<TransformComponent, MeshComponent, ParentComponent>();
+			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
 			for (auto e : view)
 			{
-				auto [transform, mesh, parent] = view.get<TransformComponent, MeshComponent, ParentComponent>(e);
+				auto [transform, mesh, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);
 				
 				if (mesh.ModelResource)
 				{

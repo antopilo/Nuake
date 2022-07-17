@@ -1196,10 +1196,10 @@ namespace Nuake {
                         auto ent = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
                         ent.AddComponent<QuakeMapComponent>();
                     }
-                    if (ImGui::MenuItem("Mesh"))
+                    if (ImGui::MenuItem("Model"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Mesh");
-                        ent.AddComponent<MeshComponent>();
+                        auto ent = Engine::GetCurrentScene()->CreateEntity("Model");
+                        ent.AddComponent<ModelComponent>();
                     }
                     ImGui::EndMenu();
                 }

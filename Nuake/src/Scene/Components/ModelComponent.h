@@ -8,12 +8,12 @@
 
 namespace Nuake
 {
-    struct MeshComponent
+    struct ModelComponent
     {
         Ref<Model> ModelResource;
         std::string ModelPath;
 
-        MeshComponent();
+        ModelComponent();
 
         void LoadModel();
        

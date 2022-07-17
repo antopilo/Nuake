@@ -360,7 +360,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
             MenuItemComponent("Wren Script", Nuake::WrenScriptComponent);
             MenuItemComponent("Camera", Nuake::CameraComponent);
             MenuItemComponent("Light", Nuake::LightComponent);
-            MenuItemComponent("Mesh", Nuake::MeshComponent);
+            MenuItemComponent("Model", Nuake::ModelComponent);
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent);
             MenuItemComponent("Box collider", Nuake::BoxColliderComponent);
             MenuItemComponent("Sphere collider", Nuake::SphereColliderComponent);

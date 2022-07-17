@@ -320,7 +320,7 @@ namespace Nuake {
 		CopyComponent<ParentComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<MeshComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<ModelComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<CameraComponent>(sceneCopy->m_Registry, this->m_Registry);
 
 		return sceneCopy;

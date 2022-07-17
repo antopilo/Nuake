@@ -23,7 +23,7 @@ extern "C" {
 #include "src/Resource/FGD/FGDClass.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
-#include "src/Scene/Components/MeshComponent.h"
+#include "src/Scene/Components/ModelComponent.h"
 
 #include <vector>
 #include <map>
@@ -609,7 +609,7 @@ namespace Nuake {
                     //bsp.Meshes.push_back(mesh);
                 }
 
-                MeshComponent& modelComponent = brushEntity.AddComponent<MeshComponent>();
+                ModelComponent& modelComponent = brushEntity.AddComponent<ModelComponent>();
                 modelComponent.ModelResource = model;
             }
             
