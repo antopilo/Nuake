@@ -1,5 +1,10 @@
 #include "GizmoDrawer.h"
 #include <src/Rendering/Buffers/VertexBuffer.h>
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Resource/ModelLoader.h>
+#include <src/Rendering/RenderList.h>
+#include <dependencies/GLEW/include/GL/glew.h>
+#include <src/Scene/Components/LightComponent.h>
 
 GizmoDrawer::GizmoDrawer()
 {
@@ -14,10 +19,17 @@ GizmoDrawer::GizmoDrawer()
 	vblayout->Push<float>(4);
 
 	mAxisLineBuffer->AddBuffer(*mAxisLineVertexBuffer, *vblayout);
+
+	// Load gizmos
+	ModelLoader loader;
+	_gizmos = std::map<std::string, Ref<Model>>();
+	_gizmos["cam"] = loader.LoadModel("resources/Models/Camera.gltf");
+	_gizmos["light"] = loader.LoadModel("resources/Models/Light.gltf");
 }
 
 void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 {
+	using namespace Nuake;
 	RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 
 	// Draw Axis lignes.
@@ -30,10 +42,36 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
 
-	// Draw Cameras Frustum.
+	auto flatShader = ShaderManager::GetShader("resources/Shaders/flat.shader");
+	flatShader->Bind();
+	flatShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
+	flatShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+	flatShader->SetUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
+	RenderCommand::Disable(RendererEnum::FACE_CULL);
+	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+	RenderList renderList;
+	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
+	for (auto e : camView)
 	{
+		auto [transform, cam] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
+		renderList.AddToRenderList(_gizmos["cam"]->GetMeshes()[0], transform.GetGlobalTransform());
 	}
+	renderList.Flush(flatShader, true);
+
+	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+	for (auto e : lightView)
+	{
+		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+
+		flatShader->SetUniformVec4("u_Color", Vector4(light.Color, 1.0f));
+		renderList.AddToRenderList(_gizmos["light"]->GetMeshes()[0], transform.GetGlobalTransform());
+		renderList.Flush(flatShader, true);
+	}
+
+	RenderCommand::Enable(RendererEnum::FACE_CULL);
+	glCullFace(GL_FRONT);
+	renderList.Flush(flatShader, true);
 
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 }

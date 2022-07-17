@@ -5,11 +5,15 @@
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Vertex.h>
 #include <src/Scene/Scene.h>
+#include <src/Resource/Model.h>
+
 using namespace Nuake;
 
 class GizmoDrawer
 {
 private:
+	std::map<std::string, Ref<Model>> _gizmos;
+
 	const std::vector<LineVertex> vertices
 	{
 		LineVertex {{10000.f, 0.0f, 0.0f},  {1.f, 0.f, 0.f, 1.f}},

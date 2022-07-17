@@ -13,6 +13,7 @@ namespace Nuake
 
 	Ref<Model> ModelLoader::LoadModel(const std::string& path)
 	{
+		m_Meshes.clear();
 		Ref<Model> model = CreateRef<Model>(path);
 
 		Assimp::Importer import;
@@ -25,7 +26,7 @@ namespace Nuake
 			aiProcess_CalcTangentSpace;
 
 		modelDir = path + "/../";
-		const aiScene* scene = import.ReadFile(FileSystem::Root + path, importFlags);
+		const aiScene* scene = import.ReadFile(path, importFlags);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			std::string assimpErrorMsg = std::string(import.GetErrorString());

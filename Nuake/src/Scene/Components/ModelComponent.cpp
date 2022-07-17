@@ -15,7 +15,7 @@ namespace Nuake {
     void ModelComponent::LoadModel()
     {
         auto loader = ModelLoader();
-        this->ModelResource = loader.LoadModel(ModelPath);
+        this->ModelResource = loader.LoadModel(FileSystem::Root + "../" + ModelPath);
     }
 }
 

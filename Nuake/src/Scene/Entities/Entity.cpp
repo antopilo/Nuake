@@ -44,7 +44,6 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>());
 		if (HasComponent<CharacterControllerComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>());
-
 		if (HasComponent<BoxColliderComponent>())
 			SERIALIZE_OBJECT_REF_LBL("BoxColliderComponent", GetComponent<BoxColliderComponent>());
 		if (HasComponent<ModelComponent>())
@@ -66,7 +65,6 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(ModelComponent);
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
-		//DESERIALIZE_COMPONENT(BSPBrushComponent);
 		DESERIALIZE_COMPONENT(BoxColliderComponent);
 		return true;
 	}
@@ -82,7 +80,6 @@ namespace Nuake
 		this->m_EntityHandle = ent.m_EntityHandle;
 		this->m_Scene = ent.m_Scene;
 	}
-
 
 	Entity::Entity() 
 	{
