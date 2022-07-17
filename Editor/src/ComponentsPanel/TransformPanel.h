@@ -2,7 +2,7 @@
 #include "ComponentPanel.h"
 #include <src/Scene/Entities/ImGuiHelper.h>
 #include <src/Scene/Components/TransformComponent.h>
-
+#include <src/Core/Maths.h>
 class TransformPanel : ComponentPanel {
 
 public:
@@ -44,7 +44,7 @@ public:
                 if (eulerLocal != eulerAngles)
                 {
                     Quat rotation = QuatFromEuler(eulerAngles.x, eulerAngles.y, eulerAngles.z);
-                    //component.SetLocalRotation(rotation);
+                    component.SetLocalRotation(rotation);
                 }
                 ImGui::TableNextColumn();
 

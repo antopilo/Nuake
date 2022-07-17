@@ -6,6 +6,7 @@
 #include <src/Vendors/glm/ext/vector_float2.hpp>
 #include <src/Vendors/glm/ext/matrix_float4x4.hpp>
 #include <glm/gtx/quaternion.hpp>
+
 namespace Nuake
 {
 	// Type definitions
