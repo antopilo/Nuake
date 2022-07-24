@@ -31,51 +31,101 @@
 
 const std::string WindowTitle = "Nuake Editor";
 
-int main()
+int main(int argc, char* argv[])
 {
-    Nuake::Engine::Init();
-    Nuake::EditorInterface editor;
-    editor.BuildFonts();
-
-    Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
-    window->SetTitle(WindowTitle);
-
-    using namespace Nuake;
-
-    GizmoDrawer gizmoDrawer = GizmoDrawer();
-
-    while (!window->ShouldClose())
+    bool playMode = false;
+    std::string projectPath = "";
+    for (uint32_t i = 0; i < argc; i++)
     {
-        Nuake::Engine::Tick();
-        Nuake::Engine::Draw();
+        char* arg = argv[i];
+        std::string args = std::string(arg);
 
-        Nuake::Vector2 WindowSize = window->GetSize();
-        glViewport(0, 0, WindowSize.x, WindowSize.y);
-        Nuake::Renderer2D::BeginDraw(WindowSize);
-
-        auto sceneFramebuffer = window->GetFrameBuffer();
-        sceneFramebuffer->Bind();
+        if (args == "--play")
         {
-			Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
-			Ref<EditorCamera> camera;
-			if (currentScene)
-			{
-				camera = currentScene->m_EditorCamera;
-			}
-
-			if (currentScene && !Nuake::Engine::IsPlayMode)
-			{
-				gizmoDrawer.DrawGizmos(currentScene);
-			}
-
-            //
+            if (argc > 2)
+            {
+                projectPath = std::string(argv[i + 1]);
+            }
+            playMode = true;
         }
-        sceneFramebuffer->Unbind();
+    }
 
-        editor.Draw();
+    if (playMode)
+    {
+        Nuake::Engine::Init();
+        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
 
-        // Swap buffers.
-        Nuake::Engine::EndDraw();
+        Ref<Nuake::Project> project = Nuake::Project::New();
+        FileSystem::SetRootDirectory(projectPath + "/../");
+
+        project->FullPath = projectPath;
+        project->Deserialize(FileSystem::ReadFile(projectPath, true));
+
+        window->SetTitle(project->Name);
+
+        Nuake::Engine::LoadProject(project);
+
+        Nuake::Engine::EnterPlayMode();
+        auto shader = Nuake::ShaderManager::GetShader("resources/Shaders/copy.shader");
+        while (!window->ShouldClose())
+        {
+            Nuake::Vector2 WindowSize = window->GetSize();
+            glViewport(0, 0, WindowSize.x, WindowSize.y);
+            Nuake::Engine::Tick();
+            Nuake::Engine::Draw();
+            shader->Bind();
+
+            window->GetFrameBuffer()->GetTexture()->Bind(0);
+            shader->SetUniform1i("u_Source", 0);
+            Nuake::Renderer::DrawQuad(Nuake::Matrix4(1));
+
+            Nuake::Engine::EndDraw();
+        }
+    }
+    else
+    {
+        Nuake::Engine::Init();
+        Nuake::EditorInterface editor;
+        editor.BuildFonts();
+
+        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
+        window->SetTitle(WindowTitle);
+
+        using namespace Nuake;
+
+        GizmoDrawer gizmoDrawer = GizmoDrawer();
+
+        while (!window->ShouldClose())
+        {
+            Nuake::Engine::Tick();
+            Nuake::Engine::Draw();
+
+            Nuake::Vector2 WindowSize = window->GetSize();
+            glViewport(0, 0, WindowSize.x, WindowSize.y);
+            Nuake::Renderer2D::BeginDraw(WindowSize);
+
+            auto sceneFramebuffer = window->GetFrameBuffer();
+            sceneFramebuffer->Bind();
+            {
+                Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+                Ref<EditorCamera> camera;
+                if (currentScene)
+                {
+                    camera = currentScene->m_EditorCamera;
+                }
+
+                if (currentScene && !Nuake::Engine::IsPlayMode)
+                {
+                    gizmoDrawer.DrawGizmos(currentScene);
+                }
+            }
+            sceneFramebuffer->Unbind();
+
+            editor.Draw();
+
+            // Swap buffers.
+            Nuake::Engine::EndDraw();
+        }
     }
 
     Nuake::Engine::Close();
