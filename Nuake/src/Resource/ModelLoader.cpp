@@ -6,6 +6,8 @@
 #include "src/Core/String.h"
 
 #include "src/Resource/Model.h"
+
+
 namespace Nuake
 {
 	ModelLoader::ModelLoader() {}

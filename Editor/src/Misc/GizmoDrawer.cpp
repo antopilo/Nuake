@@ -47,8 +47,11 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	flatShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 	flatShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 	flatShader->SetUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
-	RenderCommand::Disable(RendererEnum::FACE_CULL);
+	
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+	RenderCommand::Enable(RendererEnum::FACE_CULL);
+	glCullFace(GL_BACK);
+
 	RenderList renderList;
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
@@ -69,8 +72,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		renderList.Flush(flatShader, true);
 	}
 
-	RenderCommand::Enable(RendererEnum::FACE_CULL);
-	glCullFace(GL_FRONT);
 	renderList.Flush(flatShader, true);
 
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);

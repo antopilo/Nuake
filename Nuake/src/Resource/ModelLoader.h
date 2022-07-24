@@ -11,8 +11,12 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <bitset>
+
 namespace Nuake
 {
+
+
 	class Model;
 	class ModelLoader
 	{
@@ -23,6 +27,7 @@ namespace Nuake
 		Ref<Model> LoadModel(const std::string& path);
 
 	private:
+		std::bitset<8> _flags;
 		std::string modelDir;
 		std::vector<Ref<Mesh>> m_Meshes;
 
