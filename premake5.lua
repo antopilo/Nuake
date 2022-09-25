@@ -12,6 +12,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 include "Nuake/dependencies/glfw_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
+include "Nuake/dependencies/jolt_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -54,7 +55,7 @@ project "Nuake"
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/build",
+        "%{prj.name}/../Nuake/Dependencies/JoltPhysics/Jolt",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
@@ -101,7 +102,8 @@ project "Editor"
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen"
+        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
+		"%{prj.name}/../Nuake/Dependencies/JoltPhysics/Jolt"
     }
     
     libdirs 
@@ -123,7 +125,8 @@ project "Editor"
         "assimp",
         "glew32s.lib", 
         "opengl32.lib",
-		"Freetype"
+		"Freetype",
+		"JoltPhysics",
     }
 
     filter "system:windows"

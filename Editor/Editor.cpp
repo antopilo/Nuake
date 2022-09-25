@@ -53,7 +53,8 @@ int main(int argc, char* argv[])
     if (playMode)
     {
         Nuake::Engine::Init();
-        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
+        Nuake::EditorInterface editor;
+        editor.BuildFonts();
 
         Ref<Nuake::Project> project = Nuake::Project::New();
         FileSystem::SetRootDirectory(projectPath + "/../");
@@ -61,6 +62,7 @@ int main(int argc, char* argv[])
         project->FullPath = projectPath;
         project->Deserialize(FileSystem::ReadFile(projectPath, true));
 
+        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
         window->SetTitle(project->Name);
 
         Nuake::Engine::LoadProject(project);
@@ -71,8 +73,10 @@ int main(int argc, char* argv[])
         {
             Nuake::Vector2 WindowSize = window->GetSize();
             glViewport(0, 0, WindowSize.x, WindowSize.y);
+            Nuake::Renderer2D::BeginDraw(WindowSize);
             Nuake::Engine::Tick();
             Nuake::Engine::Draw();
+
             shader->Bind();
 
             window->GetFrameBuffer()->GetTexture()->Bind(0);
@@ -123,7 +127,6 @@ int main(int argc, char* argv[])
 
             editor.Draw();
 
-            // Swap buffers.
             Nuake::Engine::EndDraw();
         }
     }
