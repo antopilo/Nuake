@@ -1,2 +1,2 @@
-premake5 vs2019
+premake5 vs2022
 pause

@@ -33,10 +33,8 @@ namespace Nuake {
 		}
 		void SyncWithTransform(TransformComponent& tc)
 		{
-			btVector3 pos = CharacterController->m_motionTransform.getOrigin();
-			glm::vec3 finalPos = glm::vec3(pos.x(), pos.y(), pos.z());
-
-			tc.SetLocalPosition(finalPos);
+			
+			
 		}
 	};
 }

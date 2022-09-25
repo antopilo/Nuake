@@ -151,24 +151,44 @@ namespace Nuake {
         if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
             base_flags |= ImGuiTreeNodeFlags_Selected;
 
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
+        {
+            ImGui::TableNextColumn();
+
+            bool& isVisible = e.GetComponent<VisibilityComponent>().Visible;
+            char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
+
+
+            ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
+            if (ImGui::Button(visibilityIcon, { 40, 40 }))
+            {
+                isVisible = !isVisible;
+            }
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::PopStyleVar();
+
         ImGui::TableNextColumn();
         
-
-        ImGui::TableNextColumn();
-
         // Write in normal font.
         ImGui::PushFont(normalFont);
+
         // If has no childrens draw tree node leaf
         if (parent.Children.size() <= 0)
+        {
             base_flags |= ImGuiTreeNodeFlags_Leaf;
+        }
 
-		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0,255,0,255));
+        if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        }
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
-
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
         ImGui::PopStyleVar();
+
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PopStyleColor();
 		else

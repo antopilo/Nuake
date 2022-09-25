@@ -225,7 +225,6 @@ namespace Nuake {
 
     void Window::Update(Timestep ts)
     {
-        // TODO: have event here?
         m_Scene->Update(ts);
     }
 

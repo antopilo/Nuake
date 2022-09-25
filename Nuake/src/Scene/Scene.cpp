@@ -191,14 +191,14 @@ namespace Nuake {
 	{
 		Entity entity = { m_Registry.create(), this };
 		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<ParentComponent>();
+		entity.AddComponent<VisibilityComponent>();
 
 		NameComponent& nameComponent = entity.AddComponent<NameComponent>();
 		nameComponent.Name = name;
 		nameComponent.ID = id;
 
-		ParentComponent& parentComponent = entity.AddComponent<ParentComponent>();
-
-		Logger::Log("Created entity: " + nameComponent.Name + "\n");
+		Logger::Log("Created entity: " + nameComponent.Name, LOG_TYPE::VERBOSE);
 		return entity;
 	}
 
@@ -214,7 +214,7 @@ namespace Nuake {
 
 		for (auto& c : copyChildrens) 
 		{
-			Logger::Log("Deleting... entity" + std::to_string(c.GetHandle()));
+			Logger::Log("Deleting entity " + std::to_string(c.GetHandle()));
 			DestroyEntity(c);
 		}
 
@@ -318,10 +318,12 @@ namespace Nuake {
 		}
 
 		CopyComponent<ParentComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<VisibilityComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<ModelComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<CameraComponent>(sceneCopy->m_Registry, this->m_Registry);
+		CopyComponent<WrenScriptComponent>(sceneCopy->m_Registry, this->m_Registry);
 
 		return sceneCopy;
 	}

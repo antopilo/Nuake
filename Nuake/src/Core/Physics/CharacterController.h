@@ -2,9 +2,6 @@
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 
-#include <btBulletDynamicsCommon.h>
-#include <BulletCollision/CollisionDispatch/btGhostObject.h>
-
 namespace Nuake
 {
 	class Entity;
@@ -19,23 +16,16 @@ namespace Nuake
 			float m_stepHeight = 0.35f;
 			float m_MaxSlopeAngle = 45.0f;
 
-			btTransform* m_Transform;
-			btCollisionShape* m_CollisionShape;
-			btRigidBody* m_Rigidbody;
-			btPairCachingGhostObject* m_GhostObject;
-			btMotionState* m_MotionState;
 
 			//bool m_onJumpableGround; // A bit lower contact than just onGround
 
 			float m_bottomYOffset;
 			float m_bottomRoundedRegionYOffset;
 
-			btTransform m_motionTransform;
 
 			glm::vec3 m_manualVelocity;
 			std::vector<glm::vec3> m_surfaceHitNormals;
 
-			btVector3 m_previousPosition;
 
 			float m_jumpRechargeTimer;
 			CharacterController(float height, float radius, float mass, Vector3 position);

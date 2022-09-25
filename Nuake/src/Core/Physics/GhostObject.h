@@ -7,13 +7,11 @@
 #include <Engine.h>
 
 
-class btGhostObject;
 
 namespace Nuake
 {
 	class GhostObject {
 	private:
-		btGhostObject* m_BulletObject;
 		std::vector<Entity> m_OverlappingEntities;
 
 	public:
@@ -27,7 +25,5 @@ namespace Nuake
 
 		std::vector<Entity> GetOverlappingEntities();
 
-		// Internal use only.
-		btGhostObject* GetBulletObject();
 	};
 }

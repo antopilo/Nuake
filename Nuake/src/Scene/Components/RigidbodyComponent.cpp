@@ -57,14 +57,7 @@ namespace Nuake {
 		if (!m_Rigidbody)
 			return;
 
-		btTransform newTransform;
-		newTransform.setIdentity();
-		//newTransform.setOrigin(btVector3(tc->Translation.x, tc->Translation.t, tc->Translation.z));
 
-		btQuaternion quat;
-		//quat.setEulerZYX(tc->Rotation.x, tc->Rotation.y, tc->Rotation.z);
-		newTransform.setRotation(quat);
-		m_Rigidbody->UpdateTransform(newTransform);
 	}
 
 	void RigidBodyComponent::DrawShape(TransformComponent* tc)

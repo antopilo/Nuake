@@ -1,6 +1,5 @@
 #include "PhysicsManager.h"
 #include "PhysicsShapes.h"
-#include "btBulletDynamicsCommon.h"
 #include "../Core/Core.h"
 
 namespace Nuake
@@ -33,9 +32,7 @@ namespace Nuake
 
 	RaycastResult PhysicsManager::Raycast(glm::vec3 from, glm::vec3 to)
 	{
-		btVector3 btFrom(from.x, from.y, from.z);
-		btVector3 btTo(to.x, to.y, to.z);
-		btCollisionWorld::ClosestRayResultCallback res(btFrom, btTo);
+
 
 		return m_World->Raycast(from, to);
 
@@ -52,7 +49,6 @@ namespace Nuake
 		m_World = new Physics::DynamicWorld();
 		m_World->SetGravity(glm::vec3(0, -3, 0));
 
-		m_World->GetDynamicWorld()->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 
 		m_IsRunning = false;
 	}

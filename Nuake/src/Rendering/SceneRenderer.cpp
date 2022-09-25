@@ -123,13 +123,13 @@ namespace Nuake {
 		RenderCommand::Disable(RendererEnum::FACE_CULL);
 		glCullFace(GL_BACK);
 
-		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent>();
-		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent>();
-		auto view = scene.m_Registry.view<TransformComponent, LightComponent>();
+		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
+		auto view = scene.m_Registry.view<TransformComponent, LightComponent, VisibilityComponent>();
 		for (auto l : view)
 		{
-			auto [lightTransform, light] = view.get<TransformComponent, LightComponent>(l);
-			if (light.Type != LightType::Directional || !light.CastShadows)
+			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
+			if (light.Type != LightType::Directional || !light.CastShadows || !visibility.Visible)
 				continue;
 
 			light.CalculateViewProjection(mView, mProjection);
@@ -142,8 +142,8 @@ namespace Nuake {
 					shader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
 					for (auto e : meshView)
 					{
-						auto [transform, mesh] = meshView.get<TransformComponent, ModelComponent>(e);
-						if (mesh.ModelResource != nullptr)
+						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+						if (mesh.ModelResource != nullptr && visibility.Visible)
 						{
 							for (auto& m : mesh.ModelResource->GetMeshes())
 								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
@@ -152,9 +152,9 @@ namespace Nuake {
 
 					for (auto e : quakeView)
 					{
-						auto [transform, model] = quakeView.get<TransformComponent, BSPBrushComponent>(e);
+						auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
 
-						if (model.IsTransparent)
+						if (model.IsTransparent || !visibility.Visible)
 							continue;
 
 						for (Ref<Mesh>& m : model.Meshes)
@@ -181,12 +181,12 @@ namespace Nuake {
 			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferShader->SetUniformMat4f("u_View", mView);
 
-			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, ParentComponent>();
+			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, ParentComponent, VisibilityComponent>();
 			for (auto e : view)
 			{
-				auto [transform, mesh, parent] = view.get<TransformComponent, ModelComponent, ParentComponent>(e);
+				auto [transform, mesh, parent, visibility] = view.get<TransformComponent, ModelComponent, ParentComponent, VisibilityComponent>(e);
 				
-				if (mesh.ModelResource)
+				if (mesh.ModelResource && visibility.Visible)
 				{
 					for (auto& m : mesh.ModelResource->GetMeshes())
 						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
@@ -197,12 +197,12 @@ namespace Nuake {
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			Renderer::Flush(gBufferShader, false);
 
-			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent>();
+			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent, VisibilityComponent>();
 			for (auto e : quakeView)
 			{
-				auto [transform, model, parent] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent>(e);
+				auto [transform, model, parent, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent, VisibilityComponent>(e);
 
-				if (model.IsTransparent)
+				if (model.IsTransparent || !visibility.Visible)
 					continue;
 
 				for (auto& b : model.Meshes)

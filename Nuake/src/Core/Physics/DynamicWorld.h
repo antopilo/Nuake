@@ -1,5 +1,4 @@
 #pragma once
-#include <btBulletDynamicsCommon.h>
 #include <glm/ext/vector_float3.hpp>
 #include "Rigibody.h"
 #include "src/Core/Timestep.h"
@@ -15,8 +14,6 @@ namespace Nuake
 	namespace Physics {
 		class DynamicWorld {
 		private:
-			btDiscreteDynamicsWorld* dynamicsWorld;
-			std::map<btRigidBody*, Ref<RigidBody>> m_Bodies;
 		public:
 			DynamicWorld();
 
@@ -33,7 +30,6 @@ namespace Nuake
 			void StepSimulation(Timestep ts);
 			void Clear();
 
-			btDiscreteDynamicsWorld* GetDynamicWorld() { return dynamicsWorld; }
 		};
 	}
 }

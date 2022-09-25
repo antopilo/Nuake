@@ -21,7 +21,7 @@ namespace Nuake
 		};
 
 		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log + "\n";
-		printf((msg).c_str());
+		std::cout << msg << std::endl;
 
 		if (m_Logs.size() >= MAX_LOG)
 			m_Logs.erase(m_Logs.begin());

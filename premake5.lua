@@ -11,9 +11,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Nuake/dependencies/glfw_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
-include "Nuake/dependencies/bullet_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
-include "Nuake/dependencies/soloud_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -55,21 +53,16 @@ project "Nuake"
         "%{prj.name}/../Nuake/src/Vendors",
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/bullet3/src",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
-		"%(prj.name}/../Nuake/Dependencies/soloud/include"
     }
 
     links
     {
-        "BulletCollision",
-        "BulletDynamics",
-        "LinearMath",
 		"Freetype"
     }
 
@@ -106,7 +99,6 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors",
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/bullet3/src",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen"
@@ -130,10 +122,7 @@ project "Editor"
         "GLFW",
         "assimp",
         "glew32s.lib", 
-        "opengl32.lib", 
-        "BulletCollision",
-        "BulletDynamics",
-        "LinearMath",
+        "opengl32.lib",
 		"Freetype"
     }
 

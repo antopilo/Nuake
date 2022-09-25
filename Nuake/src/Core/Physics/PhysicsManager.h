@@ -13,7 +13,6 @@ namespace Nuake
 	private:
 		Physics::DynamicWorld* m_World;
 		bool m_IsRunning = false;
-		btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
 		bool m_DrawDebug = false;
 		static PhysicsManager* m_Instance;

@@ -33,6 +33,8 @@ public:
                         Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(path);
                         component.mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
                         auto modules = component.mWrenScript->GetModules();
+                        if (modules.size() > 0)
+                            component.mModule = 0;
                     }
                     ImGui::EndDragDropTarget();
                 }
@@ -50,12 +52,26 @@ public:
                 ImGui::Text("Module");
                 ImGui::TableNextColumn();
 
-                // Todo: Automatically parse available modules. and offer a dropdown
-                //ImGuiHelper::DrawVec3("Rotation", &component.Rotation);
+                // Here we create a dropdown for every modules
+
+                auto wrenScript = component.mWrenScript;
+
+                if (wrenScript)
+                {
+                    auto modules = wrenScript->GetModules();
+
+                    std::vector<const char*> modulesC;
+
+                    for (auto& m : modules)
+                    {
+                        modulesC.push_back(m.c_str());
+                    }
+                    static int currentModule = (int)component.mModule;
+                    ImGui::Combo("##WrenModule", &currentModule, &modulesC[0], modules.size());
+                    component.mModule = currentModule;
+                }
+                
                 ImGui::TableNextColumn();
-
-
-
                 //ComponentTableReset(component.Class, "");
             }
         }

@@ -34,6 +34,7 @@ namespace Nuake
 		SERIALIZE_OBJECT_REF_LBL("NameComponent", GetComponent<NameComponent>());
 		SERIALIZE_OBJECT_REF_LBL("ParentComponent", GetComponent<ParentComponent>());
 		SERIALIZE_OBJECT_REF_LBL("TransformComponent", GetComponent<TransformComponent>());
+		SERIALIZE_OBJECT_REF_LBL("VisibilityComponent", GetComponent<VisibilityComponent>());
 		if (HasComponent<CameraComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CameraComponent", GetComponent<CameraComponent>());
 		if (HasComponent<QuakeMapComponent>())
@@ -57,6 +58,11 @@ namespace Nuake
 	{
 		BEGIN_DESERIALIZE();
 		DESERIALIZE_COMPONENT(TransformComponent);
+		DESERIALIZE_COMPONENT(VisibilityComponent)
+		else
+		{
+			AddComponent<VisibilityComponent>();
+		}
 		DESERIALIZE_COMPONENT(NameComponent);
 		DESERIALIZE_COMPONENT(ParentComponent);
 		DESERIALIZE_COMPONENT(CameraComponent);
