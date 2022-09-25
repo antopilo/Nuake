@@ -62,7 +62,7 @@ namespace Nuake
 
 					// Selectors
 					KatanaStyleRule* stylerule = (KatanaStyleRule*)rule;
-					for (int j = 0; j < stylerule->selectors->length; j++)
+					for (uint32_t j = 0; j < stylerule->selectors->length; j++)
 					{
 						KatanaSelector* selector = (KatanaSelector*)stylerule->selectors->data[j];
 						std::string name = selector->data->value;
@@ -82,7 +82,7 @@ namespace Nuake
 					}
 
 					// Declarations
-					for (int k = 0; k < stylerule->declarations->length; k++)
+					for (uint32_t k = 0; k < stylerule->declarations->length; k++)
 					{
 						KatanaDeclaration* declaration = (KatanaDeclaration*)(stylerule->declarations->data[k]);
 						std::string value = declaration->raw;
@@ -253,7 +253,7 @@ namespace Nuake
 			{
 				std::string content = FileSystem::ReadFile(this->Path, true);
 				Data = katana_parse(content.c_str(), content.length(), KatanaParserModeStylesheet);
-				for (int i = 0; i < Data->stylesheet->rules.length; i++)
+				for (uint32_t i = 0; i < Data->stylesheet->rules.length; i++)
 				{
 					KatanaRule* rule = (KatanaRule*)Data->stylesheet->rules.data[i];
 					ParseRule(rule);

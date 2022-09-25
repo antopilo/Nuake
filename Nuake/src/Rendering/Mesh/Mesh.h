@@ -9,7 +9,7 @@ namespace Nuake
 	class VertexBuffer;
 	class VertexArray;
 	class Material;
-	class Vertex;
+	struct Vertex;
 	class Shader;
 
 	class Mesh : ISerializable, Resource

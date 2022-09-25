@@ -10,7 +10,11 @@ project 'JoltPhysics'
     objdir ("JoltPhysics/bin-obj/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "Jolt/Jolt.h"
-	pchsource "../Jolt.cpp"
+	pchsource "JoltPhysics/Jolt.cpp"
+
+	defines {
+		
+	}
 
 	includedirs {
 		"JoltPhysics"
@@ -19,17 +23,15 @@ project 'JoltPhysics'
 	files {
 		"JoltPhysics/Jolt/**.h",
 		"JoltPhysics/Jolt/**.cpp",
-		"Jolt.cpp"
+		"JoltPhysics/Jolt.cpp",
 	}
 
-	defines {
-
-	}
-	
 	filter "configurations:Debug"
+		cppdialect "C++17"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
+		cppdialect "C++17"
 		runtime "Release"
 		optimize "on"

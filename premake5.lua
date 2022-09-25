@@ -21,8 +21,6 @@ project "Nuake"
     
     defines
     {
-        "BT_THREADSAFE=1",
-        "BT_USE_DOUBLE_PRECISION",
         "GLEW_STATIC",
         "_MBCS"
     }
@@ -55,11 +53,12 @@ project "Nuake"
         "%{prj.name}/../Nuake/Dependencies/GLEW/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/JoltPhysics/Jolt",
+        "%{prj.name}/../Nuake/Dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
+        "%{prj.name}/../Nuake/Dependencies/build"
     }
 
     links
@@ -103,7 +102,8 @@ project "Editor"
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-		"%{prj.name}/../Nuake/Dependencies/JoltPhysics/Jolt"
+		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/Dependencies/build"
     }
     
     libdirs 
@@ -116,6 +116,7 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/win64",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
+        "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/"
     }
 
     links
@@ -126,7 +127,7 @@ project "Editor"
         "glew32s.lib", 
         "opengl32.lib",
 		"Freetype",
-		"JoltPhysics",
+		"JoltPhysics"
     }
 
     filter "system:windows"

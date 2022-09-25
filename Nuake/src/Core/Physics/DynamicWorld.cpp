@@ -4,11 +4,15 @@
 #include <src/Vendors/glm/ext/quaternion_common.hpp>
 #include <src/Core/Logger.h>
 
+#include <Jolt/Jolt.h>
+
+
 namespace Nuake
 {
 	namespace Physics
 	{
-		DynamicWorld::DynamicWorld() {
+		DynamicWorld::DynamicWorld() 
+		{
 			///collision configuration contains default setup for memory, collision setup. Advanced users can create their own configuration.
 			
 			SetGravity(Vector3(0, -10000, 0));

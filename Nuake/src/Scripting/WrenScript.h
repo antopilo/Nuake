@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 
-class WrenHandle;
+struct WrenHandle;
 
 namespace Nuake {
 	class WrenScript
