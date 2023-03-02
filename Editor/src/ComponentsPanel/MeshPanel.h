@@ -31,15 +31,25 @@ public:
             ImGui::Text("Model");
             ImGui::TableNextColumn();
 
-            std::string label = std::to_string(component.ModelResource->ID);
+            std::string label = "None";
+
+            const bool isModelNone = component.ModelResource == nullptr;
+            if (!isModelNone)
+            {
+                label = std::to_string(component.ModelResource->ID);
+            }
+
             if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)))
             {
-                if (!_expanded)
+                if (!isModelNone)
                 {
-                    _modelInspector = CreateScope<ModelResourceInspector>(component.ModelResource);
-                }
+                    if (!_expanded)
+                    {
+                        _modelInspector = CreateScope<ModelResourceInspector>(component.ModelResource);
+                    }
 
-                _expanded = !_expanded;
+                    _expanded = !_expanded;
+                }
             }
 
             if (_expanded)
