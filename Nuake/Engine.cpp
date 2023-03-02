@@ -48,7 +48,8 @@ namespace Nuake
 		m_LastFrameTime = m_Time;
 
 		// Dont update if no scene is loaded.
-		if (CurrentWindow->GetScene()) {
+		if (CurrentWindow->GetScene()) 
+		{
 			CurrentWindow->Update(timestep);
 
 			// Play mode update all the entities, Editor does not.

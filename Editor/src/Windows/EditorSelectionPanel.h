@@ -8,6 +8,8 @@
 #include "../ComponentsPanel/ScriptPanel.h"
 #include "../ComponentsPanel/MeshPanel.h"
 #include "../ComponentsPanel/QuakeMapPanel.h"
+#include "../ComponentsPanel/CameraPanel.h"
+
 #include "../Actions/EditorSelection.h"
 #include <src/Resource/Project.h>
 
@@ -18,6 +20,7 @@ private:
 	ScriptPanel mScriptPanel;
 	MeshPanel mMeshPanel;
 	QuakeMapPanel mQuakeMapPanel;
+	CameraPanel mCameraPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

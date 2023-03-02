@@ -27,7 +27,6 @@ namespace Nuake
 		Vector3 Right = Vector3(1, 0, 0);
 		Matrix4 m_Perspective;
 
-
 	public:
 		float AspectRatio = 16.0f / 9.0f;
 		
