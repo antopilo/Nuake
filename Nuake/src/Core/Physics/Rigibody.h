@@ -3,6 +3,7 @@
 #include "../Core/Core.h"
 #include <glm/ext/vector_float3.hpp>
 
+
 namespace Nuake
 {
 	class Entity;
@@ -11,8 +12,7 @@ namespace Nuake
 		private:
 			bool m_IsDynamic = false;
 			bool m_IsKinematic = false;
-			glm::vec3 m_InitialVel;
-
+			Vector3 m_InitialVel;
 
 			Ref<PhysicShape> m_CollisionShape;
 		public:
@@ -22,10 +22,9 @@ namespace Nuake
 			RigidBody(glm::vec3 position, Entity handle);
 			RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel = glm::vec3(0, 0, 0));
 
-
 			void UpdateTransform();
-			glm::vec3 GetPosition() const;
-			glm::vec3 GetRotation() const;
+			Vector3 GetPosition() const;
+			Vector3 GetRotation() const;
 
 			void SetEntityID(Entity ent);
 

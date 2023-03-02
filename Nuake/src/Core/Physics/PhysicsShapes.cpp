@@ -21,10 +21,7 @@ namespace Nuake
 			m_Type = BOX;
 		}
 
-		btCollisionShape* Box::GetBulletShape()
-		{
-			return bShape;
-		}
+
 
 		// Sphere
 		Sphere::Sphere(float radius) {
@@ -35,11 +32,6 @@ namespace Nuake
 
 		void Sphere::SetRadius(float radius) {
 			Radius = radius;
-		}
-
-		btCollisionShape* Sphere::GetBulletShape()
-		{
-			return bShape;
 		}
 
 		MeshShape::MeshShape(Ref<Mesh> mesh)
@@ -59,9 +51,5 @@ namespace Nuake
 		
 		}
 
-		btCollisionShape* MeshShape::GetBulletShape()
-		{
-			return bShape;
-		}
 	}
 }

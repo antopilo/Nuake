@@ -9,11 +9,28 @@
 #include <src/Core/Physics/GhostObject.h>
 #include "CharacterController.h"
 
+namespace JPH
+{
+	class PhysicsSystem;
+	class JobSystemThreadPool;
+	class ContactListener;
+	class BodyActivationListener;
+}
+
 namespace Nuake
 {
+	class MyContactListener;
+	class MyBodyActivationListener;
+
 	namespace Physics {
 		class DynamicWorld {
 		private:
+			uint32_t _stepCount;
+			Ref<JPH::PhysicsSystem> _JoltPhysicsSystem;
+			JPH::JobSystemThreadPool* _JoltJobSystem;
+			Scope<MyContactListener> _contactListener;
+			Scope<MyBodyActivationListener> _bodyActivationListener;
+
 		public:
 			DynamicWorld();
 
@@ -23,13 +40,11 @@ namespace Nuake
 			void AddRigidbody(Ref<RigidBody> rb);
 
 			void AddGhostbody(Ref<GhostObject> gb);
-
-			void AddCharacterController(Ref < CharacterController> cc);
+			void AddCharacterController(Ref<CharacterController> cc);
 
 			RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
 			void StepSimulation(Timestep ts);
 			void Clear();
-
 		};
 	}
 }

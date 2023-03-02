@@ -8,22 +8,7 @@ namespace Nuake
 	{
 		CharacterController::CharacterController(float height, float radius, float mass, Vector3 position)
 		{
-			m_surfaceHitNormals = std::vector<glm::vec3>();
 
-			m_bottomRoundedRegionYOffset = (height + radius) / 2.0f;
-			m_bottomYOffset = height / 2.0f + radius;
-
-			
-
-			//m_CollisionShape->calculateLocalInertia(mass, inertia);
-
-			
-			//rigidBodyCI.m_additionalDamping = true;
-			//rigidBodyCI.m_additionalLinearDampingThresholdSqr= 1.0f;
-			//rigidBodyCI.m_additionalLinearDampingThresholdSqr = 0.5f;
-			
-			// Specify filters manually, otherwise ghost doesn't collide with statics for some reason
-			//m_pPhysicsWorld->m_pDynamicsWorld->addCollisionObject(m_pGhostObject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 		}
 
 		void CharacterController::SetEntity(Entity& ent)
@@ -31,12 +16,8 @@ namespace Nuake
 			
 		}
 
-
-
 		void CharacterController::MoveAndSlide(glm::vec3 velocity)
 		{
-			
-
 			IsOnGround = false;
 			ParseGhostContacts();
 			UpdatePosition();

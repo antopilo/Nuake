@@ -89,6 +89,8 @@ namespace Nuake
     void TransformComponent::SetGlobalTransform(const Matrix4& transform)
     {
         GlobalTransform = transform;
+
+        GlobalTranslation = Vector3(transform[3]);
     }
 
     Matrix4 TransformComponent::GetLocalTransform() const
@@ -99,5 +101,6 @@ namespace Nuake
     void TransformComponent::SetLocalTransform(const Matrix4& transform)
     {
         LocalTransform = transform;
+        Translation = Vector3(transform[3]);
     }
 }

@@ -214,7 +214,7 @@ namespace Nuake
 			return texture;
 		}
 		
-		std::string texturePath = FileSystem::Root + modelDir + path;
+		std::string texturePath = modelDir + path;
 		if (!FileSystem::FileExists(texturePath, true))
 		{
 			std::string textureNotFoundmsg = "Texture file couldn't be found: " + texturePath;
