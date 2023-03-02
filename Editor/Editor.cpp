@@ -1,14 +1,12 @@
 #include <Engine.h>
-#include <src/Core/Maths.h>
-#include "src/Core/Input.h"
 
+#include <src/Core/Maths.h>
+#include <src/Core/Input.h>
 #include <src/Scene/Scene.h>
 #include <src/Scene/Entities/Entity.h>
 #include <src/Scene/Components/Components.h>
 
 #include "src/Windows/EditorInterface.h"
-
-
 
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Vendors/imgui/imgui.h>
@@ -25,9 +23,10 @@
 #include "src/UI/UserInterface.h"
 #include "src/NewEditor.h"
 #include <src/Scene/Components/BSPBrushComponent.h>
-#include "src/Actions/EditorSelection.h"
 
+#include "src/Actions/EditorSelection.h"
 #include "src/Misc/GizmoDrawer.h"
+#include "src/Windows/FileSystemUI.h"
 
 const std::string WindowTitle = "Nuake Editor";
 
@@ -50,6 +49,13 @@ int main(int argc, char* argv[])
         }
     }
 
+    bool shouldLoadProject = false;
+    if (!playMode && argc > 1)
+    {
+        shouldLoadProject = true;
+        projectPath = std::string(argv[1]);
+    }
+
     if (playMode)
     {
         Nuake::Engine::Init();
@@ -57,7 +63,7 @@ int main(int argc, char* argv[])
         editor.BuildFonts();
 
         Ref<Nuake::Project> project = Nuake::Project::New();
-        FileSystem::SetRootDirectory(projectPath + "/../");
+        FileSystem::SetRootDirectory(projectPath );
 
         project->FullPath = projectPath;
         project->Deserialize(FileSystem::ReadFile(projectPath, true));
@@ -99,6 +105,24 @@ int main(int argc, char* argv[])
 
         GizmoDrawer gizmoDrawer = GizmoDrawer();
 
+        FileSystem::SetRootDirectory(projectPath + "/../");
+
+        auto project = Project::New();
+        auto projectFileData = FileSystem::ReadFile(projectPath, true);
+        try
+        {
+            project->Deserialize(projectFileData);
+            project->FullPath = projectPath;
+
+            Engine::LoadProject(project);
+
+            editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+        }
+        catch (std::exception exception)
+        {
+            Logger::Log("Error loading project: " + projectPath, CRITICAL);
+            Logger::Log(exception.what());
+        }
         while (!window->ShouldClose())
         {
             Nuake::Engine::Tick();
