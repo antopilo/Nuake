@@ -121,7 +121,7 @@ vec3 scatter(vec3 o, vec3 d, float L, vec3 Lo) {
 	I_R = I_M = vec3(0.);
 	
 	// Compute T(P -> O) and I_M and I_R
-	scatterIn(o, d, L, 32.);
+	scatterIn(o, d, L, 16.);
 	
 	// mu = cos(alpha)
 	float mu = dot(d, SunDirection);
@@ -151,9 +151,9 @@ void main()
 	vec3 direction = normalize(camSpace.xyz);
 	vec3 D = direction;
 
-
 	vec3 col = vec3(0.0);
 	float L = escape(O, D, AtmosphereRadius);
 	col = scatter(O, D, L, col);
-	FragColor = vec4(col, 1.);
+
+	FragColor = vec4(sqrt(col), 1.);
 }

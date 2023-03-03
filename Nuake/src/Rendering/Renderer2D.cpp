@@ -21,13 +21,13 @@ namespace Nuake
 		TextShader = ShaderManager::GetShader("resources/Shaders/sdf_text.shader");
 
 		float quad_Vertices[] = {
-			// positions        // texture Coords
+			// positions      texture Coords
 			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			 1.0f,  1.0f, 1.0f, 1.0f, 1.0f,
-			0.0f,  1.0f, 1.0f, 0.0f, 1.0f,
-			 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			 1.0f,  1.0f, 1.0f, 1.0f, 1.0f
+			1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 		};
 
 		// setup plane VAO
@@ -40,7 +40,6 @@ namespace Nuake
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
 	}
 
 	void Renderer2D::BeginDraw(Vector2 size)

@@ -20,9 +20,11 @@
 namespace Nuake {
 	class Entity;
 	class SceneRenderer;
+
 	class Scene : public ISerializable
 	{
 		friend Entity;
+
 	private:
 		std::string Name;
 		bool has_changed = true;

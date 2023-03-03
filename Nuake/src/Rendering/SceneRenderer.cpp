@@ -93,6 +93,19 @@ namespace Nuake {
 		}
 		mToneMapBuffer->Unbind();
 
+		RenderCommand::Disable(RendererEnum::FACE_CULL);
+		Ref<Environment> environment = scene.GetEnvironment();
+		if (environment->CurrentSkyType == SkyType::ProceduralSky)
+		{
+			environment->ProceduralSkybox->Draw(mProjection, mView, environment->Exposure);
+		}
+		else if (environment->CurrentSkyType == SkyType::ClearColor)
+		{
+			RenderCommand::SetClearColor(environment->AmbientColor);
+			RenderCommand::Clear();
+		}
+		RenderCommand::Enable(RendererEnum::FACE_CULL);
+
 		//mSSR->Resize(framebuffer.GetSize());
 		//mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
@@ -219,19 +232,6 @@ namespace Nuake {
 		mShadingBuffer->Clear();
 		{
 			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-
-			RenderCommand::Disable(RendererEnum::FACE_CULL);
-			Ref<Environment> environment = scene.GetEnvironment();
-			if (environment->CurrentSkyType == SkyType::ProceduralSky)
-			{
-				environment->ProceduralSkybox->Draw(mProjection, mView);
-			}
-			else if (environment->CurrentSkyType == SkyType::ClearColor)
-			{
-				RenderCommand::SetClearColor(environment->AmbientColor);
-				RenderCommand::Clear();
-			}
-			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
 			Shader* shadingShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
 			shadingShader->Bind();

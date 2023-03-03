@@ -26,7 +26,7 @@ namespace Nuake
 
 	void Engine::Init()
 	{
-		Logger::Log("Engine initialization...");
+		Logger::Log("Nuake initializing");
 
 		PhysicsManager::Get()->Init();
 		Logger::Log("Physics initialized");
@@ -53,18 +53,22 @@ namespace Nuake
 			CurrentWindow->Update(timestep);
 
 			// Play mode update all the entities, Editor does not.
-			if (Engine::IsPlayMode) {
+			if (Engine::IsPlayMode) 
+			{
 				m_FixedUpdateDifference += timestep;
 
 				// Fixed update
-				if (m_FixedUpdateDifference >= m_FixedUpdateRate) {
+				if (m_FixedUpdateDifference >= m_FixedUpdateRate) 
+				{
 					CurrentWindow->FixedUpdate(m_FixedUpdateDifference);
 
 					m_FixedUpdateDifference = 0.0f;
 				}
 			}
 			else
+			{
 				GetCurrentScene()->EditorUpdate(timestep);
+			}
 		}
 
 		Input::Update();
@@ -74,19 +78,30 @@ namespace Nuake
 	{
 		// Dont trigger init if already in player mode.
 		if (IsPlayMode)
+		{
+			Logger::Log("Cannot enter play mode if is already in play mode.", WARNING);
 			return;
+		}
 
 		if (GetCurrentScene()->OnInit())
+		{
 			IsPlayMode = true;
+		}
 		else
+		{
+			Logger::Log("Cannot enter play mode. Scene OnInit failed", CRITICAL);
 			GetCurrentScene()->OnExit();
+		}
 	}
 
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (IsPlayMode) 
+		if (IsPlayMode)
+		{
+			Logger::Log("Cannot exit play mode. Scene must be in play mode.", WARNING);
 			GetCurrentScene()->OnExit();
+		}
 
 		Input::ShowMouse();
 		IsPlayMode = false;
@@ -135,7 +150,9 @@ namespace Nuake
 		CurrentProject = project;
 
 		if (!Engine::LoadScene(CurrentProject->DefaultScene))
+		{
 			return false;
+		}
 
 		FileSystem::SetRootDirectory(project->FullPath + "/../");
 		return true;

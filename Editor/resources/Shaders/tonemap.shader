@@ -37,11 +37,11 @@ void main()
 {
     vec3 color = texture(u_Source, UV).rgb;
 
-    color = mix(color, color * u_Exposure, 0.1f);
+    //color = vec3(1.0) - exp(-color * u_Exposure);
     // reinhard
-    color = color / (color + vec3(1.0));
+    //color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0 / u_Gamma));
+    //color = pow(color, vec3(1.0 / u_Gamma));
 
     FragColor = vec4(color, 1.0);
 }

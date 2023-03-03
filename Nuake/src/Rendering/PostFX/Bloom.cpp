@@ -74,7 +74,6 @@ namespace Nuake
 
 		Shader* shader = ShaderManager::GetShader("resources/Shaders/bloom.shader");
 
-
 		m_ThresholdFB->Bind();
 		{
 			m_ThresholdFB->Clear();

@@ -159,13 +159,17 @@ namespace Nuake
 		for (auto& k : m_Keys)
 		{
 			if (!IsKeyDown(k.first))
+			{
 				k.second = false;
+			}
 		}
 
 		for (int i = 0; i < 5; i++)
 		{
 			if (!IsMouseButtonDown(i))
+			{
 				m_MouseButtons[i] = false;
+			}
 		}
 	}
 }

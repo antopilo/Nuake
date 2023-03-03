@@ -8,7 +8,7 @@ namespace Nuake
 {
 	std::vector<LogEntry>  Logger::m_Logs = std::vector<LogEntry>();
 
-	void Logger::Log(std::string log, LOG_TYPE type)
+	void Logger::Log(const std::string& log, LOG_TYPE type)
 	{
 		char buff[100];
 		time_t now = time(0);
