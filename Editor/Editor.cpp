@@ -105,24 +105,28 @@ int main(int argc, char* argv[])
 
         GizmoDrawer gizmoDrawer = GizmoDrawer();
 
-        FileSystem::SetRootDirectory(projectPath + "/../");
-
-        auto project = Project::New();
-        auto projectFileData = FileSystem::ReadFile(projectPath, true);
-        try
+        if (shouldLoadProject)
         {
-            project->Deserialize(projectFileData);
-            project->FullPath = projectPath;
+			FileSystem::SetRootDirectory(projectPath + "/../");
 
-            Engine::LoadProject(project);
+			auto project = Project::New();
+			auto projectFileData = FileSystem::ReadFile(projectPath, true);
+			try
+			{
+				project->Deserialize(projectFileData);
+				project->FullPath = projectPath;
 
-            editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+				Engine::LoadProject(project);
+
+				editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+			}
+			catch (std::exception exception)
+			{
+				Logger::Log("Error loading project: " + projectPath, CRITICAL);
+				Logger::Log(exception.what());
+			}
         }
-        catch (std::exception exception)
-        {
-            Logger::Log("Error loading project: " + projectPath, CRITICAL);
-            Logger::Log(exception.what());
-        }
+        
         while (!window->ShouldClose())
         {
             Nuake::Engine::Tick();
