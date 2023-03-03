@@ -20,7 +20,7 @@ namespace Nuake
 			log
 		};
 
-		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log + "\n";
+		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
 		std::cout << msg << std::endl;
 
 		if (m_Logs.size() >= MAX_LOG)
