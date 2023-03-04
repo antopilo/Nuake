@@ -6,7 +6,7 @@
 
 namespace Nuake
 {
-	class TextStyle;
+	struct TextStyle;
 	class Renderer2D
 	{
 	private:

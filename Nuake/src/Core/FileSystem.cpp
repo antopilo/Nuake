@@ -202,5 +202,7 @@ namespace Nuake
 				}
 			}
 		}
+
+		return nullptr;
 	}
 }

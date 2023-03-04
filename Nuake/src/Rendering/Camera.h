@@ -41,7 +41,7 @@ namespace Nuake
 		Camera(CAMERA_TYPE type, Vector3 position);
 
 		void SetType(CAMERA_TYPE type);
-		void OnWindowResize(int x, int y);
+		void OnWindowResize(float x, float y);
 
 		void SetDirection(Vector3 direction);
 

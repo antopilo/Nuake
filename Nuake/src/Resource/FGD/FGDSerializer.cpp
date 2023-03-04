@@ -84,6 +84,8 @@ namespace Nuake {
 		line += "]";
 
 		FileSystem::WriteLine(line);
+
+		return true;
 	}
 
 	bool FGDSerializer::SerializeBrush(FGDBrushEntity fgdClass)

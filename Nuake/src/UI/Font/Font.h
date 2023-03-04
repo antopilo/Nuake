@@ -9,10 +9,10 @@ namespace Nuake
 {
     struct CharPos
     {
-        double left;
-        double right;
-        double top;
-        double bottom;
+        float left;
+        float right;
+        float top;
+        float bottom;
     };
 
     struct CharUV

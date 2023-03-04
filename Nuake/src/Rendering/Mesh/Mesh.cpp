@@ -97,7 +97,7 @@ namespace Nuake
             m_Material->Bind(shader);
 
         m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_Indices.size(), RendererEnum::UINT, 0);
+        RenderCommand::DrawElements(RendererEnum::TRIANGLES, (int)m_Indices.size(), RendererEnum::UINT, 0);
     }
 
     void Mesh::DebugDraw()
@@ -106,7 +106,7 @@ namespace Nuake
         Renderer::m_DebugShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
 
         m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_Indices.size(), RendererEnum::UINT, 0);
+        RenderCommand::DrawElements(RendererEnum::TRIANGLES, (int)m_Indices.size(), RendererEnum::UINT, 0);
     }
 
     json Mesh::Serialize()

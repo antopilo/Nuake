@@ -153,7 +153,7 @@ namespace Nuake
         deferredShader->Bind();
         m_Lights.push_back({ transform , light });
 
-        int idx = m_Lights.size();
+        size_t idx = m_Lights.size();
 
         Vector3 direction = light.GetDirection();
         Vector3 pos = transform.GetGlobalPosition();
@@ -174,7 +174,7 @@ namespace Nuake
             shadowmapAmount += CSM_AMOUNT;
         }
 
-       deferredShader->SetUniform1i("LightCount", idx);
+       deferredShader->SetUniform1i("LightCount", (int)idx);
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", pos.x, pos.y, pos.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
@@ -200,7 +200,7 @@ namespace Nuake
 
         VertexArray lineVertexArray = VertexArray();
         lineVertexArray.Bind();
-        VertexBuffer lineVertexBuffer = VertexBuffer(&vertices, size(vertices));
+        VertexBuffer lineVertexBuffer = VertexBuffer(&vertices, static_cast<int>(size(vertices)));
     
         VertexBufferLayout vblayout = VertexBufferLayout();
         vblayout.Push<float>(3);

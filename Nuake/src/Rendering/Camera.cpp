@@ -36,7 +36,7 @@ namespace Nuake
 		m_Type = type;
 	}
 
-	void Camera::OnWindowResize(int x, int y)
+	void Camera::OnWindowResize(float x, float y)
 	{
 		AspectRatio = (float)x / (float)y;
 		float width = (float)y * (16.0f * 9.0f);

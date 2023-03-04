@@ -13,7 +13,7 @@ public:
 
 		ImGui::PushID(label.c_str());
 		
-		float availWidth = (ImGui::GetContentRegionAvailWidth() / 3.0) - 9.0;
+		float availWidth = (ImGui::GetContentRegionAvailWidth() / 3.0f) - 9.0f;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;

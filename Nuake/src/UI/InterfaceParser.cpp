@@ -166,6 +166,8 @@ namespace Nuake
 				}
 			}
 		}
+
+		return Layout::LayoutUnit{ 1.0f, Layout::Unit::AUTO };
 	}
 
 	Layout::LayoutVec4 InterfaceParser::GetVec4Unit(const std::string& value)

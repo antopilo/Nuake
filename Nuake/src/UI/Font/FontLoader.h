@@ -56,7 +56,7 @@ namespace Nuake
 			// Setup generator settings
 			generator.setAttributes(config.generatorAttributes);
 			generator.setThreadCount(config.threadCount);
-			generator.generate(glyphs.data(), glyphs.size());
+			generator.generate(glyphs.data(), static_cast<int>(glyphs.size()));
 
 			// Create bitmap
 			msdfgen::BitmapConstRef<T, N> bitmap = (msdfgen::BitmapConstRef<T, N>) generator.atlasStorage();
@@ -120,11 +120,14 @@ namespace Nuake
 			atlasPacker.setMiterLimit(config.miterLimit);
 
 			// Pack atlas
-			if (int remaining = atlasPacker.pack(glyphs.data(), glyphs.size())) {
-				if (remaining < 0) {
+			if (int remaining = atlasPacker.pack(glyphs.data(), static_cast<int>(glyphs.size()))) 
+			{
+				if (remaining < 0) 
+				{
 					Logger::Log("Failed to pack atlas.", CRITICAL);
 				}
-				else {
+				else 
+				{
 					printf("Error: Could not fit %d out of %d glyphs into the atlas.\n", remaining, (int)glyphs.size());
 
 				}
@@ -145,30 +148,37 @@ namespace Nuake
 			//	glyph.edgeColoring(config.edgeColoring, config.angleThreshold, glyphSeed);
 			//}
 
-			msdf_atlas::Workload([&glyphs, &config](int i, int threadNo) -> bool {
+			msdf_atlas::Workload([&glyphs, &config](int i, int threadNo) -> bool 
+				{
 				unsigned long long glyphSeed = (6364136223846793005ull * (config.coloringSeed ^ i) + 1442695040888963407ull) * !!config.coloringSeed;
 				glyphs[i].edgeColoring(config.edgeColoring, config.angleThreshold, glyphSeed);
 				return true;
-				}, glyphs.size()).finish(config.threadCount);
+				}, (int)glyphs.size()).finish(config.threadCount);
 
 				// Create bitmap and char structure
 				auto bitmap = makeAtlas<byte, float, 4, msdf_atlas::mtsdfGenerator>(glyphs, fonts, config, font);
 
 				for (auto& g : glyphs)
 				{
-					CharPos plane = {};
-					g.getQuadPlaneBounds(plane.left, plane.bottom, plane.right, plane.top);
+					double planeLeft, planeBottom, planeRight, planeTop;
+					g.getQuadPlaneBounds(planeLeft, planeBottom, planeRight, planeTop);
 
-					CharUV box = {};
-
+					CharPos plane {
+						static_cast<float>(planeLeft), 
+						static_cast<float>(planeRight),
+						static_cast<float>(planeTop),
+						static_cast<float>(planeBottom)
+					};
 
 					double x2, y2, z2, w2;
 					g.getQuadAtlasBounds(x2, y2, z2, w2);
-					box.Pos.x = x2;
-					box.Pos.y = y2;
-					box.Size.x = z2;
-					box.Size.y = w2;
-					font->AddChar(g.getCodepoint(), g.getAdvance(), plane, box);
+
+					CharUV box {
+						Vector2{x2, y2},
+						Vector2{z2, w2}
+					};
+
+					font->AddChar(g.getCodepoint(), static_cast<float>(g.getAdvance()), plane, box);
 				}
 
 				return font;

@@ -44,7 +44,7 @@ namespace Nuake
 
 			if (m_hittingWall)
 			{
-				for (unsigned int i = 0, size = m_surfaceHitNormals.size(); i < size; i++)
+				for (size_t i = 0, size = m_surfaceHitNormals.size(); i < size; i++)
 				{
 					// Cancel velocity across normal
 					glm::vec3 velInNormalDir(glm::reflect(m_manualVelocity, m_surfaceHitNormals[i]));

@@ -82,9 +82,7 @@ namespace Nuake {
             path += ".wren";
 
         std::string str = FileSystem::ReadFile(path, true);
-        char* c = strcpy(new char[str.length() + 1], str.c_str());
-
-        result.source = c;
+        result.source = str.c_str();
         return result;
     }
 
@@ -173,7 +171,7 @@ namespace Nuake {
         wrenFreeVM(m_WrenVM);
     }
 
-    WrenForeignMethodFn ScriptingEngine::bindForeignMethod(WrenVM* vm, const char* module, const char* className, bool isStatic, const char* signature)
+    WrenForeignMethodFn ScriptingEngine::bindForeignMethod(WrenVM* vm, const char* modul, const char* className, bool isStatic, const char* signature)
     {
         if (Modules.find(className) != Modules.end())
         {
@@ -181,6 +179,8 @@ namespace Nuake {
             void* ptr = mod->GetMethodPointer(signature);
             return (WrenForeignMethodFn)ptr;
         }
+
+        return nullptr;
     }
 
     WrenVM* ScriptingEngine::GetWrenVM()

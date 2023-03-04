@@ -32,38 +32,38 @@ namespace Nuake {
 
 			static void Sqrt(WrenVM* vm)
 			{
-				float x = wrenGetSlotDouble(vm, 1);
-				float y = wrenGetSlotDouble(vm, 2);
-				float z = wrenGetSlotDouble(vm, 3);
-				float result = glm::sqrt((x * x) + (y * y) + (z * z));
+				double x = wrenGetSlotDouble(vm, 1);
+				double y = wrenGetSlotDouble(vm, 2);
+				double z = wrenGetSlotDouble(vm, 3);
+				double result = glm::sqrt((x * x) + (y * y) + (z * z));
 				wrenSetSlotDouble(vm, 0, result);
 			}
 
 			static void Cos(WrenVM* vm)
 			{
-				float d = wrenGetSlotDouble(vm, 1);
-				float result = glm::cos(d);
+				double d = wrenGetSlotDouble(vm, 1);
+				double result = glm::cos(d);
 				wrenSetSlotDouble(vm, 0, result);
 			}
 
 			static void Sin(WrenVM* vm)
 			{
-				float d = wrenGetSlotDouble(vm, 1);
-				float result = glm::sin(d);
+				double d = wrenGetSlotDouble(vm, 1);
+				double result = glm::sin(d);
 				wrenSetSlotDouble(vm, 0, result);
 			}
 
 			static void Radians(WrenVM* vm)
 			{
-				float d = wrenGetSlotDouble(vm, 1);
-				float result = glm::radians(d);
+				double d = wrenGetSlotDouble(vm, 1);
+				double result = glm::radians(d);
 				wrenSetSlotDouble(vm, 0, result);
 			}
 
 			static void Degrees(WrenVM* vm)
 			{
-				float d = wrenGetSlotDouble(vm, 1);
-				float result = glm::degrees(d);
+				double d = wrenGetSlotDouble(vm, 1);
+				double result = glm::degrees(d);
 				wrenSetSlotDouble(vm, 0, result);
 			}
 

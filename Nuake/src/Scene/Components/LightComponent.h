@@ -156,7 +156,7 @@ namespace Nuake
 
                 // Store SplitDistance and ViewProjection-Matrix
                 mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;
-                mViewProjections[cascade] = lightProjectionMatrix * lightViewMatrix;
+                mViewProjections[cascade] = shadowMatrix;
                 lastSplitDist = mCascadeSplits[cascade];
 
                 // -----------------------Debug only-----------------------

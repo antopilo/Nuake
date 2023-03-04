@@ -75,11 +75,14 @@ namespace Nuake {
 	Entity Scene::GetEntityByID(int id)
 	{
 		auto idView = m_Registry.view<NameComponent>();
-		for (auto e : idView) {
+		for (auto e : idView) 
+		{
 			NameComponent& nameC = idView.get<NameComponent>(e);
 			if (nameC.ID == id)
 				return Entity{ e, this };
 		}
+
+		assert("Not found");
 	}
 
 

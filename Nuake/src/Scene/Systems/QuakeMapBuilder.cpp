@@ -386,7 +386,7 @@ namespace Nuake {
         geo_generator_run();
 
         DefaultMaterial = MaterialManager::Get()->GetMaterial("default");
-        for (uint32_t e = 0; e < entity_count; ++e)
+        for (uint32_t e = 0; e < (uint32_t)entity_count; ++e)
         {
             entity* entity_inst = &entities[e];
             entity_geometry* entity_geo_inst = &entity_geo[e];
@@ -598,7 +598,7 @@ namespace Nuake {
                         for (auto& index : pm.Indices)
                             batchedIndices.push_back(indexOffset + index);
 
-                        indexOffset += pm.Vertices.size();
+                        indexOffset += static_cast<uint32_t>(pm.Vertices.size());
                     }
 
                     Ref<Mesh> mesh = CreateRef<Mesh>();

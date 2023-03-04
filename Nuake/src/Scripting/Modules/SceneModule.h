@@ -63,7 +63,7 @@ namespace Nuake {
 
 			static void EntityHasComponent(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				std::string name = wrenGetSlotString(vm, 2);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
@@ -106,7 +106,7 @@ namespace Nuake {
 
 			static void GetScript(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				if (ent.HasComponent<WrenScriptComponent>())
@@ -117,18 +117,18 @@ namespace Nuake {
 
 			static void SetLightIntensity(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
-				float intensity = wrenGetSlotDouble(vm, 2);
+				double handle = wrenGetSlotDouble(vm, 1);
+				double intensity = wrenGetSlotDouble(vm, 2);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				auto& light = ent.GetComponent<LightComponent>();
-				light.Strength = intensity;
+				light.Strength = static_cast<float>(intensity);
 			}
 
 			static void GetLightIntensity(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
-				float intensity = wrenGetSlotDouble(vm, 2);
+				double handle = wrenGetSlotDouble(vm, 1);
+				double intensity = wrenGetSlotDouble(vm, 2);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				auto& light = ent.GetComponent<LightComponent>();
@@ -137,10 +137,10 @@ namespace Nuake {
 
 			static void SetCameraDirection(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
-				float x = wrenGetSlotDouble(vm, 2);
-				float y = wrenGetSlotDouble(vm, 3);
-				float z = wrenGetSlotDouble(vm, 4);
+				double handle = wrenGetSlotDouble(vm, 1);
+				double x = wrenGetSlotDouble(vm, 2);
+				double y = wrenGetSlotDouble(vm, 3);
+				double z = wrenGetSlotDouble(vm, 4);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& cam = ent.GetComponent<CameraComponent>();
 				cam.CameraInstance->SetDirection(Vector3(x, y, z));
@@ -148,7 +148,7 @@ namespace Nuake {
 
 			static void GetCameraDirection(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				auto& cam = ent.GetComponent<CameraComponent>();
@@ -171,7 +171,7 @@ namespace Nuake {
 
 			static void GetCameraRight(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				auto& cam = ent.GetComponent<CameraComponent>();
@@ -192,7 +192,7 @@ namespace Nuake {
 
 			static void IsCharacterControllerOnGround(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
 				bool result = characterController.CharacterController->IsOnGround;
@@ -201,10 +201,10 @@ namespace Nuake {
 
 			static void MoveAndSlide(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
-				float x = wrenGetSlotDouble(vm, 2);
-				float y = wrenGetSlotDouble(vm, 3);
-				float z = wrenGetSlotDouble(vm, 4);
+				double handle = wrenGetSlotDouble(vm, 1);
+				double x = wrenGetSlotDouble(vm, 2);
+				double y = wrenGetSlotDouble(vm, 3);
+				double z = wrenGetSlotDouble(vm, 4);
 
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
@@ -213,7 +213,7 @@ namespace Nuake {
 
 			static void GetTranslation(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
@@ -231,7 +231,7 @@ namespace Nuake {
 
 			static void GetRotation(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
@@ -248,33 +248,33 @@ namespace Nuake {
 
 			static void SetRotation(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
-				float x = wrenGetSlotDouble(vm, 2);
-				float y = wrenGetSlotDouble(vm, 3);
-				float z = wrenGetSlotDouble(vm, 4);
+				float x = (float)wrenGetSlotDouble(vm, 2);
+				float y = (float)wrenGetSlotDouble(vm, 3);
+				float z = (float)wrenGetSlotDouble(vm, 4);
 
 				transform.SetLocalRotation(QuatFromEuler(x, y, z));
 			}
 
 			static void SetTranslation(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
-				float x = wrenGetSlotDouble(vm, 2);
-				float y = wrenGetSlotDouble(vm, 3);
-				float z = wrenGetSlotDouble(vm, 4);
+				double x = wrenGetSlotDouble(vm, 2);
+				double y = wrenGetSlotDouble(vm, 3);
+				double z = wrenGetSlotDouble(vm, 4);
 
 				transform.SetGlobalPosition(Vector3(x, y, z));
 			}
 
 			static void TriggerGetOverlappingBodyCount(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				TriggerZone trigger = ent.GetComponent<TriggerZone>();
@@ -286,14 +286,14 @@ namespace Nuake {
 
 			static void TriggerGetOverlappingBodies(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				TriggerZone trigger = ent.GetComponent<TriggerZone>();
 
 				std::vector<Entity> entities = trigger.GetOverlappingBodies();
 
-				wrenEnsureSlots(vm, entities.size());
+				wrenEnsureSlots(vm, static_cast<int>(entities.size()));
 
 				wrenSetSlotNewList(vm, 0);
 				int idx = 1;
@@ -307,11 +307,11 @@ namespace Nuake {
 
 			static void BrushGetTargets(WrenVM* vm)
 			{
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				BSPBrushComponent& brush = ent.GetComponent<BSPBrushComponent>();
-				wrenEnsureSlots(vm, brush.Targets.size());
+				wrenEnsureSlots(vm, static_cast<int>(brush.Targets.size()));
 				wrenSetSlotNewList(vm, 0);
 
 				int idx = 1;
@@ -324,11 +324,11 @@ namespace Nuake {
 			}
 
 			static void BrushGetTargetsCount(WrenVM* vm) {
-				int handle = wrenGetSlotDouble(vm, 1);
+				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
 				BSPBrushComponent& brush = ent.GetComponent<BSPBrushComponent>();
-				wrenSetSlotDouble(vm, 0, brush.Targets.size());
+				wrenSetSlotDouble(vm, 0, static_cast<int>(brush.Targets.size()));
 			}
 		};
 	}

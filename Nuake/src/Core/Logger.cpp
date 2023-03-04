@@ -12,7 +12,9 @@ namespace Nuake
 	{
 		char buff[100];
 		time_t now = time(0);
-		strftime(buff, 100, "%H:%M:%S", localtime(&now));
+		struct tm timeinfo;
+		localtime_s(&timeinfo, &now);
+		strftime(buff, 100, "%H:%M:%S", &timeinfo);
 
 		LogEntry newLog = {
 			type,

@@ -39,7 +39,7 @@ namespace Nuake
 		m_VBlurFB = std::vector<Ref<FrameBuffer>>();
 
 		Vector2 currentSize = m_Size / 2.0f;
-		for (int i = 0; i < m_Iteration; i++)
+		for (uint32_t i = 0; i < m_Iteration; i++)
 		{
 			Ref<FrameBuffer> fb = CreateRef<FrameBuffer>(false, currentSize);
 			fb->SetTexture(CreateRef<Texture>(currentSize, GL_RGBA, GL_RGBA16F, GL_FLOAT));
@@ -48,7 +48,7 @@ namespace Nuake
 			currentSize *= DownsamplingScale;
 		}
 
-		for (int i = 0; i < m_Iteration; i++)
+		for (uint32_t i = 0; i < m_Iteration; i++)
 		{
 			Ref<FrameBuffer> fb = CreateRef<FrameBuffer>(false, currentSize);
 			fb->SetTexture(CreateRef<Texture>(currentSize, GL_RGBA, GL_RGBA16F, GL_FLOAT));
@@ -86,7 +86,7 @@ namespace Nuake
 			Renderer::DrawQuad(Matrix4());
 		}
 
-		for (int i = 0; i < m_Iteration; i++)
+		for (uint32_t i = 0; i < m_Iteration; i++)
 		{
 			m_DownSampleFB[i]->Bind();
 			m_DownSampleFB[i]->Clear();
@@ -103,7 +103,7 @@ namespace Nuake
 			m_DownSampleFB[i]->Unbind();
 		}
 
-		for (int i = 0; i < m_Iteration; i++)
+		for (uint32_t i = 0; i < m_Iteration; i++)
 		{
 			// Horizontal blur
 			m_HBlurFB[i]->Bind();
@@ -115,7 +115,7 @@ namespace Nuake
 				Ref<Texture> blurTexture = m_DownSampleFB[m_Iteration - i - 1]->GetTexture();
 				blurTexture->Bind(1);
 				shader->SetUniform1i("u_Source", 1);
-				shader->SetUniform2f("u_SourceSize", blurTexture->GetWidth(), blurTexture->GetHeight());
+				shader->SetUniform2f("u_SourceSize", (float)blurTexture->GetWidth(), (float)blurTexture->GetHeight());
 
 				Renderer::DrawQuad(Matrix4());
 			m_HBlurFB[i]->Unbind();
@@ -129,7 +129,7 @@ namespace Nuake
 
 				m_HBlurFB[i]->GetTexture()->Bind(1);
 				shader->SetUniform1i("u_Source", 1);
-				shader->SetUniform2f("u_SourceSize", m_HBlurFB[i]->GetTexture()->GetWidth(), m_HBlurFB[i]->GetTexture()->GetHeight());
+				shader->SetUniform2f("u_SourceSize", (float)m_HBlurFB[i]->GetTexture()->GetWidth(), (float)m_HBlurFB[i]->GetTexture()->GetHeight());
 
 				Renderer::DrawQuad(Matrix4());
 			m_VBlurFB[i]->Unbind();
@@ -153,7 +153,7 @@ namespace Nuake
 
 					m_UpSampleFB[i - 1]->GetTexture()->Bind(2);
 					shader->SetUniform1i("u_Source2", 2);
-					shader->SetUniform2f("u_Source2Size", m_UpSampleFB[i]->GetTexture()->GetWidth(), m_UpSampleFB[i]->GetTexture()->GetHeight());
+					shader->SetUniform2f("u_Source2Size", (float)m_UpSampleFB[i]->GetTexture()->GetWidth(), (float)m_UpSampleFB[i]->GetTexture()->GetHeight());
 				}
 				Renderer::DrawQuad(Matrix4());
 			m_UpSampleFB[i]->Unbind();

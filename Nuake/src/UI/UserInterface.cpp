@@ -56,7 +56,7 @@ namespace Nuake {
 		void UserInterface::Calculate(int available_width, int available_height)
 		{
 			YGNodeRef root = Root->YogaNode;
-			YGNodeCalculateLayout(root, available_width, available_height, YGDirectionLTR);
+			YGNodeCalculateLayout(root, static_cast<float>(available_width), static_cast<float>(available_height), YGDirectionLTR);
 		}
 
 		void UserInterface::CreateYogaLayout()
@@ -109,7 +109,7 @@ namespace Nuake {
 
 		void UserInterface::Draw(Vector2 size)
 		{
-			Calculate(size.x, size.y);
+			Calculate((int)size.x, (int)size.y);
 			Renderer2D::BeginDraw(size);
 			DrawRecursive(Root, 0);
 			Renderer2D::EndDraw();
@@ -194,6 +194,8 @@ namespace Nuake {
 				if (result)
 					return result;
 			}
+
+			return nullptr;
 		}
 
 		Ref<Node> UserInterface::GetNodeByIDRecurse(Ref<Node> node, const std::string& id)

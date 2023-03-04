@@ -72,6 +72,8 @@ namespace Nuake {
 				if (name == b.Name)
 					return b;
 			}
+
+			assert(false && "Brush entity not found!");
 		}
 
 		FGDPointEntity& GetPointEntity(const std::string& name)
@@ -81,6 +83,8 @@ namespace Nuake {
 				if (name == p.Name) 
 					return p;
 			}
+
+			assert(false && "Point entity not found!");
 		}
 
 		EntityType GetTypeOfEntity(const std::string& className)

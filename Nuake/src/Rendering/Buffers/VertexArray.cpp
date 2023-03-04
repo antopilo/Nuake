@@ -23,7 +23,7 @@ namespace Nuake {
 		{
 			const auto& element = elements[i];
 			RenderCommand::EnableVertexAttribArray(i);
-			RenderCommand::VertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(), (const void*)offset);
+			RenderCommand::VertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(), (const void*)(uintptr_t)offset);
 			offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
 		}
 	}
