@@ -170,6 +170,9 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 				}
 				ImGui::EndPopup();
 			}
+
+			ImGui::SameLine();
+			ImGui::DragFloat("Value##7", &material->data.u_AOValue, 0.01f, 0.0f, 1.0f);
 		}
 		ImGui::EndChild();
 	}
@@ -243,6 +246,8 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 				}
 				ImGui::EndPopup();
 			}
+			ImGui::SameLine();
+			ImGui::DragFloat("Value##6", &material->data.u_RoughnessValue, 0.01f, 0.0f, 1.0f);
 		}
 		ImGui::EndChild();
 	}
