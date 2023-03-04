@@ -14,19 +14,18 @@ namespace Nuake {
 		void Init();
 		void Cleanup();
 
-		void BeginRenderScene(const Matrix4& projection, const Matrix4& view);
+		void BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
-
 
 		Scope<SSR> mSSR;
 	private:
 		Matrix4 mProjection, mView;
+		Vector3 mCamPos;
 
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
-		Scope<Bloom> mBloom;
-		Scope<Volumetric> mVolumetric;
+		
 
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);

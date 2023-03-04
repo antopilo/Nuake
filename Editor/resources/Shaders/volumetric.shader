@@ -31,13 +31,13 @@ uniform vec3 u_CamPosition;
 uniform int u_StepCount;
 uniform float u_FogAmount;
 
-const int MAX_LIGHT = 25;
+const int MAX_LIGHT = 20;
 uniform int u_LightCount;
 struct Light {
     mat4 transform;
     vec3 color;
     vec3 direction;
-    int shadowmap;
+    sampler2D shadowmap;
 };
 
 uniform Light u_Lights[MAX_LIGHT];
@@ -62,7 +62,8 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     vec3 rayVector = FragPos - startPosition;  // Ray Direction
 
     float rayLength = length(rayVector);            // Length of the raymarched
-
+    if(rayLength > 100)
+        return vec3(0);
     float stepLength = rayLength / u_StepCount;        // Step length
     vec3 rayDirection = rayVector / rayLength;
     vec3 step = rayDirection * stepLength;          // Normalized to step length direction
@@ -76,15 +77,21 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         vec4 fragPosLightSpace = light.transform * vec4(currentPosition, 1.0f);
         // perform perspective divide
         vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
         // transform to [0,1] range
         projCoords = projCoords * 0.5 + 0.5;
 
         float currentDepth = projCoords.z;
-        float closestDepth = texture(lightShadowmap, projCoords.xy).r;
-        if (closestDepth > currentDepth)
-            accumFog += (ComputeScattering(dot(rayDirection, normalize(light.direction))).xxx * light.color);
-
+        float closestDepth = texture(light.shadowmap, projCoords.xy).r;
+        if (closestDepth > currentDepth && closestDepth < 999)
+        {
+            //accumFog = vec3(light.color);
+            accumFog += (ComputeScattering(dot(rayDirection, light.direction)).xxx * light.color * 10.0);
+            //accumFog = vec3(projCoords.x, projCoords.y, 1.0);
+            
+        }
         currentPosition += step; //* ditherPattern[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
+        //accumFog = vec3(projCoords);
     }
     accumFog /= u_StepCount;
 
@@ -116,6 +123,11 @@ void main()
     {
         fog += ComputeVolumetric(globalFragmentPosition, u_Lights[i]);
     }
-     
-    FragColor = vec4(mix(fog, ComputeVolumetric(globalFragmentPosition, u_Lights[0]), 0.9f), 1.0);
+
+    FragColor = vec4(fog, 1.0f);
+    //FragColor = vec4(mix(fog, ComputeVolumetric(globalFragmentPosition, u_Lights[0]), 0.9f), 0.01);
+    //FragColor = vec4(globalFragmentPosition * 10.0, 1.0f);
+    //FragColor = vec4(globalFragmentPosition.xyz * 100.0, 1.0f);
+    //FragColor = vec4(worldSpacePosition.x, worldSpacePosition.y, worldSpacePosition.z, 1);
+    //FragColor = vec4(ComputeVolumetric(globalFragmentPosition, u_Lights[0]), 1.0);
 }

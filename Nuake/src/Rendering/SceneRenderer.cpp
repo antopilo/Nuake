@@ -18,11 +18,6 @@ namespace Nuake {
 		Ref<Texture> shadedTexture = CreateRef<Texture>(Vector2(1920, 1080), GL_RGB, GL_RGB16F, GL_FLOAT);
 		mShadingBuffer->SetTexture(shadedTexture);
 
-		mBloom = CreateScope<Bloom>(4);
-		mBloom->SetSource(shadedTexture);
-		
-		mVolumetric = CreateScope<Volumetric>();
-
 		mSSR = CreateScope<SSR>();
 
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, Vector2(1920, 1080));
@@ -34,10 +29,11 @@ namespace Nuake {
 		
 	}
 
-	void SceneRenderer::BeginRenderScene(const Matrix4& projection, const Matrix4& view)
+	void SceneRenderer::BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos)
 	{
 		mProjection = projection;
 		mView = view;
+		mCamPos = camPos;
 	}
 
 	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer) 
@@ -46,16 +42,18 @@ namespace Nuake {
 
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
-		 
+
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
+
+		auto& sceneEnv = scene.GetEnvironment();
 
 		Texture* finalOutput = mShadingBuffer->GetTexture().get();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
-			scene.GetEnvironment()->mBloom->SetSource(mShadingBuffer->GetTexture());
-			scene.GetEnvironment()->mBloom->Resize(framebuffer.GetSize());
-			scene.GetEnvironment()->mBloom->Draw();
+			sceneEnv->mBloom->SetSource(mShadingBuffer->GetTexture());
+			sceneEnv->mBloom->Resize(framebuffer.GetSize());
+			sceneEnv->mBloom->Draw();
 
 			finalOutput = scene.GetEnvironment()->mBloom->GetOutput().get();
 		}
@@ -65,18 +63,33 @@ namespace Nuake {
 		for (auto l : view)
 		{
 			auto& lc = view.get<LightComponent>(l);
-			if (lc.Type == Directional && lc.IsVolumetric)
+			if (lc.Type == Directional && lc.IsVolumetric && lc.CastShadows)
 				lightList.push_back(lc);
 		}
 		
 		if (scene.GetEnvironment()->VolumetricEnabled)
 		{
-			mVolumetric->Resize(framebuffer.GetSize());
-			mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
-			mVolumetric->Draw(mProjection , mView, lightList);
+			sceneEnv->mVolumetric->Resize(framebuffer.GetSize());
+			sceneEnv->mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
+			sceneEnv->mVolumetric->Draw(mProjection , mView, mCamPos, lightList);
 
-			finalOutput = mVolumetric->GetFinalOutput();
+			//finalOutput = mVolumetric->GetFinalOutput().get();
+
+			// combine
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", finalOutput, 0);
+				shader->SetUniformTex("u_Source2", sceneEnv->mVolumetric->GetFinalOutput().get(), 1);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
 		}
+
+		finalOutput = framebuffer.GetTexture().get();
 		
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
@@ -93,21 +106,10 @@ namespace Nuake {
 		}
 		mToneMapBuffer->Unbind();
 
-		RenderCommand::Disable(RendererEnum::FACE_CULL);
-		Ref<Environment> environment = scene.GetEnvironment();
-		if (environment->CurrentSkyType == SkyType::ProceduralSky)
-		{
-			environment->ProceduralSkybox->Draw(mProjection, mView, environment->Exposure);
-		}
-		else if (environment->CurrentSkyType == SkyType::ClearColor)
-		{
-			RenderCommand::SetClearColor(environment->AmbientColor);
-			RenderCommand::Clear();
-		}
-		RenderCommand::Enable(RendererEnum::FACE_CULL);
+		
 
-		//mSSR->Resize(framebuffer.GetSize());
-		//mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+		mSSR->Resize(framebuffer.GetSize());
+		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 		framebuffer.Bind();
 		{
@@ -116,7 +118,7 @@ namespace Nuake {
 			shader->Bind();
 
 			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mToneMapBuffer->GetTexture().get(), 1);
+			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -232,6 +234,18 @@ namespace Nuake {
 		mShadingBuffer->Clear();
 		{
 			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
+			Ref<Environment> environment = scene.GetEnvironment();
+			if (environment->CurrentSkyType == SkyType::ProceduralSky)
+			{
+				environment->ProceduralSkybox->Draw(mProjection, mView);
+			}
+			else if (environment->CurrentSkyType == SkyType::ClearColor)
+			{
+				RenderCommand::SetClearColor(environment->AmbientColor);
+				RenderCommand::Clear();
+			}
+			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
 			Shader* shadingShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
 			shadingShader->Bind();

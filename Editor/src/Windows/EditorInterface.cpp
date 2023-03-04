@@ -570,7 +570,9 @@ namespace Nuake {
                             ImGui::Text("Volumetric Scattering");
                             ImGui::TableNextColumn();
 
-                            ImGui::DragFloat("##Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
+                            float fogAmount = env->mVolumetric->GetFogAmount();
+                            ImGui::DragFloat("##Volumetric Scattering", &fogAmount, .001f, 0.f, 1.0f);
+                            env->mVolumetric->SetFogAmount(fogAmount);
                             ImGui::TableNextColumn();
 
                             // Reset button
@@ -586,7 +588,10 @@ namespace Nuake {
                             ImGui::Text("Step count");
                             ImGui::TableNextColumn();
 
-                            ImGui::DragFloat("##Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
+                            int stepCount = env->mVolumetric->GetStepCount();
+                            ImGui::DragInt("##Volumetric Step Count", &stepCount, 1.f, 0.0f);
+                            env->mVolumetric->SetStepCount(stepCount);
+
                             ImGui::TableNextColumn();
 
                             // Reset button

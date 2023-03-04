@@ -23,7 +23,7 @@ namespace Nuake {
 		void SetDepth(Texture* depth);
 		void Init();
 		void Resize(Vector2 size);
-		void Draw(Matrix4 projection, Matrix4 view, std::vector<LightComponent>& lights);
+		void Draw(Matrix4 projection, Matrix4 view, const Vector3& camPos, std::vector<LightComponent>& lights);
 
 		inline int GetStepCount() const { return mStepCount;}
 
@@ -35,9 +35,9 @@ namespace Nuake {
 			if (amount > 0) mFogAmount = amount;
 		}
 
-		Texture* GetFinalOutput() 
+		Ref<Texture> GetFinalOutput() 
 		{
-			return mFinalFramebuffer->GetTexture().get();
+			return mFinalFramebuffer->GetTexture();
 		}
 	};
 }

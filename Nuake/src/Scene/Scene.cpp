@@ -144,13 +144,13 @@ namespace Nuake {
 		if (!cam)
 			return;
 
-		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform());
+		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
 		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
 
 	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
-		mSceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform());
+		mSceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
 		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
 	

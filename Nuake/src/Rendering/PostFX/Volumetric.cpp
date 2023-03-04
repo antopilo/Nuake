@@ -31,22 +31,22 @@ namespace Nuake {
 		mFinalFramebuffer->QueueResize(mSize);
 	}
 
-	void Volumetric::Draw(Matrix4 projection, Matrix4 view, std::vector<LightComponent>& lights)
+	void Volumetric::Draw(Matrix4 projection, Matrix4 view, const Vector3& camPos, std::vector<LightComponent>& lights)
 	{
 		mFinalFramebuffer->Bind();
 			mFinalFramebuffer->Clear();
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
-			Vector3 cameraPosition = view[3];
+			Vector3 cameraPosition = Vector3(view[3]);
 			Shader* volumetricShader = ShaderManager::GetShader("resources/Shaders/volumetric.shader");
 			volumetricShader->Bind();
 			volumetricShader->SetUniformMat4f("u_Projection", projection);
 			volumetricShader->SetUniformMat4f("u_View", view);
 			volumetricShader->SetUniformTex("u_Depth", mDepth, 1);
-			volumetricShader->SetUniformVec3("u_CamPosition", cameraPosition);
+			volumetricShader->SetUniformVec3("u_CamPosition", camPos);
 			volumetricShader->SetUniform1i("u_StepCount", mStepCount);
 			volumetricShader->SetUniform1f("u_FogAmount", mFogAmount);
-			volumetricShader->SetUniform1i("u_LightCount", 1);
+			volumetricShader->SetUniform1i("u_LightCount", static_cast<int>(lights.size()));
 
 			for (uint16_t i = 0; i < lights.size(); i++)
 			{
@@ -57,7 +57,7 @@ namespace Nuake {
 				volumetricShader->SetUniformVec3(u_light + "color", light.Color);
 				volumetricShader->SetUniformVec3(u_light + "direction", light.GetDirection());
 
-				volumetricShader->SetUniformTex("lightShadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 2 + i);
+				volumetricShader->SetUniformTex(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 5 + i);
 			}
 
 
@@ -66,7 +66,12 @@ namespace Nuake {
 
 		if (ImGui::Begin("Volumetric debug"))
 		{
-			ImGui::Image((void*)mFinalFramebuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((void*)(uintptr_t)(mFinalFramebuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		}
+		ImGui::End();
+		if (ImGui::Begin("Volumetric debug depth"))
+		{
+			ImGui::Image((void*)(uintptr_t)(mDepth->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 		}
 		ImGui::End();
 	}

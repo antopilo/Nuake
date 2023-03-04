@@ -9,6 +9,7 @@ namespace Nuake {
 		m_AmbientColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		ProceduralSkybox = CreateRef<ProceduralSky>();
 		mBloom = CreateScope<Bloom>(4);
+		mVolumetric = CreateScope<Volumetric>();
 	}
 
 	glm::vec4 Environment::GetAmbientColor()

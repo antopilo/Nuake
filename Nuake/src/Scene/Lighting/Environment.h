@@ -4,6 +4,7 @@
 #include "src/Scene/Environment/ProceduralSky.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/PostFX/Bloom.h"
+#include "src/Rendering/PostFX/Volumetric.h"
 
 #include <vector>
 
@@ -34,6 +35,8 @@ namespace Nuake
 
 		bool BloomEnabled = false;
 		Scope<Bloom> mBloom;
+		Scope<Volumetric> mVolumetric;
+
 		Vector3 ClearColor;
 
 		glm::vec4 m_AmbientColor;
