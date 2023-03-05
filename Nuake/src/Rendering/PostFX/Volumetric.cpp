@@ -74,7 +74,7 @@ namespace Nuake {
 		{
 			ImGui::Image((void*)(uintptr_t)(mDepth->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 		}
-		*/
-		ImGui::End();
+		
+		ImGui::End();*/
 	}
 }
