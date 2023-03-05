@@ -34,6 +34,7 @@ namespace Nuake {
 	void Volumetric::Draw(Matrix4 projection, Matrix4 view, const Vector3& camPos, std::vector<LightComponent>& lights)
 	{
 		mFinalFramebuffer->Bind();
+
 			mFinalFramebuffer->Clear();
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
@@ -62,6 +63,7 @@ namespace Nuake {
 
 
 			Renderer::DrawQuad();
+
 		mFinalFramebuffer->Unbind();
 
 		/*

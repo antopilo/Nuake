@@ -5,7 +5,7 @@
 namespace Nuake
 {
 	class TransformComponent {
-	private:
+	public:
 		Vector3 Translation;
 		Quat Rotation;
 		Vector3 Scale;

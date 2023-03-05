@@ -79,13 +79,13 @@ namespace Nuake {
 		{
 			NameComponent& nameC = idView.get<NameComponent>(e);
 			if (nameC.ID == id)
+			{
 				return Entity{ e, this };
+			}
 		}
 
 		assert("Not found");
 	}
-
-
 
 	bool Scene::OnInit()
 	{
@@ -132,6 +132,7 @@ namespace Nuake {
 	void Scene::Draw(FrameBuffer& framebuffer)
 	{
 		Ref<Camera> cam = nullptr;
+		Matrix4 camTransform = Matrix4();
 		{
 			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
 			for (auto e : view) 
@@ -139,7 +140,9 @@ namespace Nuake {
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
 				cam->Translation = transform.GetGlobalPosition();
-				cam->SetDirection(Vector3(Vector4(0, 0, 1, 0) * transform.GetGlobalTransform()));
+				cam->SetDirection(Vector3(Vector4(0, 0, -1, 0) * transform.GetGlobalTransform()));
+				camTransform = transform.GetGlobalTransform();
+
 				break;
 			}
 		}
@@ -322,6 +325,21 @@ namespace Nuake {
 		}
 
 		CopyComponent<ParentComponent>(sceneCopy->m_Registry, this->m_Registry);
+
+		/*auto parentView = m_Registry.view<ParentComponent, NameComponent>();
+		for (auto e : parentView)
+		{
+			auto& [parentComponent, nameComponent] = m_Registry.get<ParentComponent, NameComponent>(e);
+
+			if (parentComponent.HasParent)
+			{
+				int id = parentComponent.ParentID;
+
+				auto newEnt = sceneCopy->GetEntityByID(nameComponent.ID);
+				sceneCopy->GetEntityByID(id).AddChild(newEnt);
+			}
+		}*/
+
 		CopyComponent<VisibilityComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);

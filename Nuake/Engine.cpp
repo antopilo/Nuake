@@ -99,12 +99,10 @@ namespace Nuake
 		// Dont trigger exit if already not in play mode.
 		if (IsPlayMode)
 		{
-			Logger::Log("Cannot exit play mode. Scene must be in play mode.", WARNING);
 			GetCurrentScene()->OnExit();
+			Input::ShowMouse();
+			IsPlayMode = false;
 		}
-
-		Input::ShowMouse();
-		IsPlayMode = false;
 	}
 
 	void Engine::Draw()

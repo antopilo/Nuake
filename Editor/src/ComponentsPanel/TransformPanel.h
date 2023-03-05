@@ -38,13 +38,14 @@ public:
                 ImGui::TableNextColumn();
 
                 Vector3 eulerAngles = glm::eulerAngles(component.GetLocalRotation());
-                ImGuiHelper::DrawVec3("Rotation", &eulerAngles);
+                Vector3 eulerDegrees = Vector3(glm::degrees(eulerAngles.x), glm::degrees(eulerAngles.y), glm::degrees(eulerAngles.z));
+                ImGuiHelper::DrawVec3("Rotation", &eulerDegrees);
+                Vector3 eulerAnglesDelta = Vector3(glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y), glm::radians(eulerDegrees.z));
 
-                Vector3 eulerLocal = glm::eulerAngles(component.GetLocalRotation());
-                if (eulerLocal != eulerAngles)
+                if (eulerAngles != eulerAnglesDelta)
                 {
-                    Quat rotation = QuatFromEuler(eulerAngles.x, eulerAngles.y, eulerAngles.z);
-                    component.SetLocalRotation(rotation);
+                    Quat rotation = QuatFromEuler(eulerAnglesDelta.x, eulerAnglesDelta.y, eulerAnglesDelta.z);
+                    //component.SetLocalRotation(rotation);
                 }
                 ImGui::TableNextColumn();
 

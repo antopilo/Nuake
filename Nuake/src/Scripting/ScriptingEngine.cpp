@@ -82,7 +82,9 @@ namespace Nuake {
             path += ".wren";
 
         std::string str = FileSystem::ReadFile(path, true);
-        result.source = str.c_str();
+        char* c = strcpy(new char[str.length() + 1], str.c_str());
+
+        result.source = c;
         return result;
     }
 

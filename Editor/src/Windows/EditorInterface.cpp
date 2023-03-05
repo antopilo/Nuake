@@ -111,8 +111,8 @@ namespace Nuake {
             {
                 TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
                 ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
-                Matrix4 transform = tc.GetLocalTransform();
-
+                Matrix4 transform = tc.GetGlobalTransform();
+                
                 auto editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
                 Matrix4 cameraView = editorCam->GetTransform();
                 Matrix4 cameraProjection = editorCam->GetPerspective();
@@ -123,11 +123,44 @@ namespace Nuake {
                     CurrentOperation, CurrentMode, 
                     glm::value_ptr(transform)
                 );
-
+                Matrix4 oldTransform = transform;
                 if (ImGuizmo::IsUsing())
                 {
-                    tc.SetLocalTransform(transform);
+                    Vector3 globalPos = Vector3();
+                    Entity currentParent = Selection.Entity;
+                    if (parent.HasParent)
+                    {
+                        Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GetGlobalTransform());
+                        oldTransform *= inverseParent;
+                    }
+
+                    Vector3 scale = Vector3();
+                    Quat rotation = Quat();
+                    Vector3 pos = Vector3();
+                    Vector3 skew = Vector3();
+                    Vector4 pesp = Vector4();
+                    glm::decompose(oldTransform, scale, rotation, pos, skew, pesp);
+                    
+
+                    tc.Translation = pos;
+                    tc.Rotation = rotation;
+                    tc.Scale = scale;
+                    tc.LocalTransform = oldTransform;
+                    
+
+                    Vector3 gscale = Vector3();
+                    Quat grotation = Quat();
+                    Vector3 gpos = Vector3();
+                    Vector3 gskew = Vector3();
+                    Vector4 gpesp = Vector4();
+                    glm::decompose(transform, gscale, grotation, gpos, skew, pesp);
+                    
+
+                    tc.SetGlobalPosition(gpos);
+                    tc.SetGlobalRotation(grotation);
+                    tc.SetGlobalScale(gscale);
                     tc.SetGlobalTransform(transform);
+                    
                 }
             }
         }
@@ -1285,6 +1318,7 @@ namespace Nuake {
     }
 
     Ref<Scene> SceneSnapshot;
+    
     void EditorInterface::Draw()
     {
         Init();

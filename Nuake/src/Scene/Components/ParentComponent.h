@@ -1,5 +1,6 @@
 #pragma once
 #include "../Entities/Entity.h"
+#include "Engine.h"
 
 namespace Nuake
 {
@@ -47,6 +48,7 @@ namespace Nuake
 			if (HasParent)
 			{
 				this->ParentID = j["ParentID"];
+				
 				//this->Parent = Entity{ j["Parent"], Engine::GetCurrentScene().get() };
 			}
 			return true;

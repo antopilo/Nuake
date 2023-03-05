@@ -41,6 +41,8 @@ namespace Nuake {
 		{
 			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+
+			camera.CameraInstance->Translation = transform.GlobalTranslation;
 		}
 
 		// Calculate all local transforms
@@ -51,13 +53,17 @@ namespace Nuake {
 
 			if (transform.Dirty)
 			{
-				Matrix4 localTransform = Matrix4(1);
-				localTransform = glm::translate(localTransform, transform.GetLocalPosition());
-				localTransform = localTransform * glm::toMat4(transform.GetLocalRotation());
-				localTransform = glm::scale(localTransform, transform.GetLocalScale());
-				
-				transform.SetLocalTransform(localTransform);
+				Matrix4 localTransform = Matrix4(1.0f);
+				auto& localTranslate = transform.GetLocalPosition();
+				auto& localRot = transform.GetLocalRotation();
+				auto& localScale = transform.GetLocalScale();
 
+				Matrix4 rotationMatrix = glm::toMat4(localRot);
+				localTransform = glm::translate(localTransform, localTranslate);
+				localTransform = glm::toMat4(localRot) * localTransform;
+				localTransform = glm::scale(localTransform, localScale);
+
+				transform.SetLocalTransform(localTransform);
 				transform.Dirty = false;
 			}
 		}
@@ -72,6 +78,9 @@ namespace Nuake {
 			{
 				// If no parents, then globalTransform is local transform.
 				transform.SetGlobalTransform(transform.GetLocalTransform());
+				transform.SetGlobalPosition(transform.GetLocalPosition());
+				transform.SetGlobalRotation(transform.GetLocalRotation());
+				transform.SetGlobalScale(transform.GetLocalScale());
 				continue;
 			}
 
@@ -93,6 +102,9 @@ namespace Nuake {
 				globalOrientation *= transformComponent.GetLocalRotation();
 				globalScale *= transformComponent.GetLocalScale();
 		
+				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
+				//std::cout << "Name:" << nameComponent.Name << std::endl;
+
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
 				
