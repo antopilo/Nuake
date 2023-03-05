@@ -36,7 +36,7 @@ namespace Nuake
 			std::cout << "Error: failed to load texture: " << path << std::endl;
 	}
 
-	Texture::Texture(glm::vec2 size, GLenum format, GLenum format2, GLenum format3)
+	Texture::Texture(glm::vec2 size, GLenum format, GLenum format2, GLenum format3, void* data)
 	{
 		m_RendererId = 0;
 		m_Format = format;
@@ -54,7 +54,7 @@ namespace Nuake
 
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, format2, size.x, size.y, 0, format, format3, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, format2, size.x, size.y, 0, format, format3, data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);

@@ -507,6 +507,41 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    if (env->SSAOEnabled)
+                    {
+                        ImGui::TableNextColumn();
+                        {
+                            // Title
+                            ImGui::Text("SSAO Radius");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.01f, 0.0f, 1.0f);
+                            ImGui::TableNextColumn();
+
+                            // Reset button
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetRadius = ICON_FA_UNDO + std::string("##resetRadius");
+                            if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 0.5f;
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {
+                            // Title
+                            ImGui::Text("SSAO Bias");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.0f, 0.5f);
+                            ImGui::TableNextColumn();
+
+                            // Reset button
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOBias");
+                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias =  0.025f;
+                            ImGui::PopStyleColor();
+                        }
+                    }
+
                     if (env->BloomEnabled)
                     {
                         ImGui::TableNextColumn();

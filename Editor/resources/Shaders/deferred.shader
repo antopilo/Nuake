@@ -37,6 +37,7 @@ uniform sampler2D m_Depth;
 uniform sampler2D m_Albedo; 
 uniform sampler2D m_Material; 
 uniform sampler2D m_Normal;
+uniform sampler2D m_SSAO;
 
 // Lights
 const int MaxLight = 29;
@@ -221,7 +222,7 @@ void main()
     float metallic   = texture(m_Material, UV).r;
     float roughness  = texture(m_Material, UV).b;
     float ao         = texture(m_Material, UV).g;
-
+    float ssao      = texture(m_SSAO, UV).r;
     vec3 N = normal;
     vec3 V = normalize(u_EyePosition - worldPos);
     vec3 R = reflect(-V, N);
@@ -280,8 +281,8 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (kD * albedo) * ao;
-    vec3 color = ambient + Lo;
+    vec3 ambient = (kD * albedo) * (ao);
+    vec3 color = (ambient * ssao) + Lo;
 
     // Display CSM splits..
     /*float depth = length(worldPos - u_EyePosition);

@@ -3,8 +3,10 @@
 #include "src/Core/Core.h"
 #include "src/Scene/Environment/ProceduralSky.h"
 #include "src/Resource/Serializable.h"
+
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
+#include "src/Rendering/PostFX/SSAO.h"
 
 #include <vector>
 
@@ -26,7 +28,7 @@ namespace Nuake
 		Color AmbientColor = Color(0, 0, 0, 1);
 		Ref<ProceduralSky> ProceduralSkybox;
 
-		bool VolumetricEnabled = false;
+		bool VolumetricEnabled = true;
 		float VolumetricFog = 0.90f;
 		float VolumetricStepCount = 50.f;
 
@@ -36,6 +38,9 @@ namespace Nuake
 		bool BloomEnabled = false;
 		Scope<Bloom> mBloom;
 		Scope<Volumetric> mVolumetric;
+
+		bool SSAOEnabled = true;
+		Scope<SSAO> mSSAO;
 
 		Vector3 ClearColor;
 

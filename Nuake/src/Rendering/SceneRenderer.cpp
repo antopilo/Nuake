@@ -90,7 +90,10 @@ namespace Nuake {
 		}
 
 		finalOutput = framebuffer.GetTexture().get();
-		
+		// SSAO
+		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
+		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
 		mToneMapBuffer->Bind();
@@ -252,6 +255,8 @@ namespace Nuake {
 			shadingShader->SetUniformMat4f("u_Projection", mProjection);
 			shadingShader->SetUniformMat4f("u_View", mView);
 			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
+
+			shadingShader->SetUniformTex("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
 
 			Ref<Environment> env = scene.GetEnvironment();
 

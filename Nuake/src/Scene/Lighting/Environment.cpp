@@ -10,6 +10,7 @@ namespace Nuake {
 		ProceduralSkybox = CreateRef<ProceduralSky>();
 		mBloom = CreateScope<Bloom>(4);
 		mVolumetric = CreateScope<Volumetric>();
+		mSSAO = CreateScope<SSAO>();
 	}
 
 	glm::vec4 Environment::GetAmbientColor()
