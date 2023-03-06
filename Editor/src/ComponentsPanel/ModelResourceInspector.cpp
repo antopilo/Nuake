@@ -9,7 +9,7 @@ ModelResourceInspector::ModelResourceInspector(Ref<Nuake::Model> model)
 
 void ModelResourceInspector::Draw()
 {
-	ImGui::BeginChild("modelInspector", ImVec2(0, 0), true);
+	ImGui::BeginChild("modelInspector", ImVec2(0, 100 * std::size(_model->GetMeshes())), true);
 	{
 		for (uint32_t i = 0; i < std::size(_model->GetMeshes()); i++)
 		{

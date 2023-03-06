@@ -27,22 +27,16 @@ public:
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
                     {
                         char* file = (char*)payload->Data;
-                        std::string fullPath = std::string(file, 256);
-                        path = Nuake::FileSystem::AbsoluteToRelative(fullPath);
 
-                        Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(path);
-                        component.mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
-                        auto modules = component.mWrenScript->GetModules();
-                        if (modules.size() > 0)
-                            component.mModule = 0;
+                        std::string fullPath = std::string(file, 512);
+                        path = Nuake::FileSystem::AbsoluteToRelative(std::move(fullPath));
+
+                        component.LoadScript(path);
                     }
                     ImGui::EndDragDropTarget();
                 }
 
                 component.Script = path;
-
-                // 
-                //ImGuiHelper::DrawVec3("Translation", &component.Translation);
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.Script, "");
@@ -53,9 +47,7 @@ public:
                 ImGui::TableNextColumn();
 
                 // Here we create a dropdown for every modules
-
-                auto wrenScript = component.mWrenScript;
-
+                auto& wrenScript = component.mWrenScript;
                 if (wrenScript)
                 {
                     auto modules = wrenScript->GetModules();

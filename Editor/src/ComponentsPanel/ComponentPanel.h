@@ -38,8 +38,8 @@
         ImGui::PopStyleVar();                                                           \
         if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_BordersInner))                  \
         {                                                                               \
-            ImGui::TableSetupColumn("name", 0, 0.3f);                                   \
-            ImGui::TableSetupColumn("set", 0, 0.6f);                                    \
+            ImGui::TableSetupColumn("name", 0, 0.25f);                                   \
+            ImGui::TableSetupColumn("set", 0, 0.65f);                                    \
             ImGui::TableSetupColumn("reset", 0, 0.1f);                                  \
                                                                                         \
             ImGui::TableNextColumn();
