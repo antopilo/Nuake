@@ -46,6 +46,7 @@ namespace Nuake
 
 		json Serialize()
 		{
+			Rotation = glm::normalize(Rotation);
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL_LBL("Type", "TransformComponent");
 			SERIALIZE_VEC3(Translation);
@@ -58,12 +59,21 @@ namespace Nuake
 		{
 			BEGIN_DESERIALIZE();
 			this->Translation = Vector3(j["Translation"]["x"], j["Translation"]["y"], j["Translation"]["z"]);
-			if(j.contains("Rotation"))
-				this->Rotation = Quat(j["Rotation"]["w"], j["Rotation"]["x"], j["Rotation"]["y"], j["Rotation"]["z"]);
+			if (j.contains("Rotation"))
+			{
+				float w = j["Rotation"]["w"];
+				float x = j["Rotation"]["x"];
+				float y = j["Rotation"]["y"];
+				float z = j["Rotation"]["z"];
+				this->Rotation = Quat(w, x, y, z);
+			}
+
+				
 			this->Scale = Vector3(j["Scale"]["x"], j["Scale"]["y"], j["Scale"]["z"]);
 
 			LocalTransform = Matrix4(1);
 			GlobalTransform = Matrix4(1);
+			Dirty = true;
 			return true;
 		}
 	};
