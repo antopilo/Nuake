@@ -17,6 +17,8 @@ namespace Nuake {
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = false;
 		bool m_ShowOverlay = true;
+		bool m_IsHoveringViewport = false;
+
 		ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
 		Ref<Material> m_SelectedMaterial;
@@ -36,6 +38,7 @@ namespace Nuake {
 		void BuildFonts();
 		void Init();
 		void Draw();
+		void Update(float ts);
 		void DrawMenuBar();
 		void DrawViewport();
 		void DrawEntityTree(Entity ent);

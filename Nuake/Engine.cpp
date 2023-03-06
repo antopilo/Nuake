@@ -21,6 +21,7 @@ namespace Nuake
 	float Engine::m_FixedUpdateRate = 1.0f / 90.0f;
 	float Engine::m_FixedUpdateDifference = 0.f;
 	float Engine::m_Time = 0.f;
+	Timestep Engine::m_TimeStep = 0.f;
 
 	bool Engine::IsPlayMode = false;
 
@@ -35,6 +36,8 @@ namespace Nuake
 		CurrentWindow = Window::Get();
 		Logger::Log("Window initialized");
 
+		Input::Init();
+
 		Renderer2D::Init();
 		Logger::Log("2D renderer initialized");
 
@@ -44,18 +47,18 @@ namespace Nuake
 	void Engine::Tick()
 	{
 		m_Time = (float)glfwGetTime();
-		Timestep timestep = m_Time - m_LastFrameTime;
+		m_TimeStep = m_Time - m_LastFrameTime;
 		m_LastFrameTime = m_Time;
 
 		// Dont update if no scene is loaded.
 		if (CurrentWindow->GetScene()) 
 		{
-			CurrentWindow->Update(timestep);
+			CurrentWindow->Update(m_TimeStep);
 
 			// Play mode update all the entities, Editor does not.
 			if (Engine::IsPlayMode) 
 			{
-				m_FixedUpdateDifference += timestep;
+				m_FixedUpdateDifference += m_TimeStep;
 
 				// Fixed update
 				if (m_FixedUpdateDifference >= m_FixedUpdateRate) 
@@ -67,7 +70,7 @@ namespace Nuake
 			}
 			else
 			{
-				GetCurrentScene()->EditorUpdate(timestep);
+				GetCurrentScene()->EditorUpdate(m_TimeStep);
 			}
 		}
 

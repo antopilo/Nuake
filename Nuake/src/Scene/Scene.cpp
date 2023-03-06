@@ -126,7 +126,7 @@ namespace Nuake {
 
 	void Scene::EditorUpdate(Timestep ts)
 	{
-		m_EditorCamera->Update(ts);
+		
 	}
 
 	void Scene::Draw(FrameBuffer& framebuffer)

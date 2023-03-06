@@ -96,6 +96,13 @@ namespace Nuake {
             Ref<Texture> texture = framebuffer->GetTexture();
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
+            const Vector2& mousePos = Input::GetMousePosition();
+            const ImVec2& windowPos = ImGui::GetWindowPos();
+            const ImVec2& windowSize = ImGui::GetWindowSize();
+            const bool isInsideWidth = mousePos.x > windowPos.x && mousePos.x < windowPos.x + windowSize.x;
+            const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
+            m_IsHoveringViewport = isInsideWidth && isInsideHeight;
+
             ImGuizmo::SetDrawlist();
             ImGuizmo::AllowAxisFlip(false);
             ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
@@ -1091,10 +1098,11 @@ namespace Nuake {
                 CurrentOperation = ImGuizmo::OPERATION::SCALE;
             }
             ImGui::PopStyleVar();
-
         }
         ImGui::PopStyleVar();
         ImGui::End();
+
+        
         int corner2 = 1;
 
         window_flags |= ImGuiWindowFlags_NoMove;
@@ -1107,10 +1115,23 @@ namespace Nuake {
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+        ImGui::SetNextWindowSize(ImVec2(25, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0));
         if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
         {
+            const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+            const float camSpeed = editorCam->Speed;
+
+            const float maxSpeed = 50.0f;
+            const float minSpeed = 0.1f;
+            const float normalizedSpeed = camSpeed / maxSpeed;
+
+            ImVec2 start = ImGui::GetWindowPos();
+            ImVec2 end = start + ImGui::GetWindowSize();
+
+            ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * ImGui::GetWindowHeight()));
+
+            ImGui::GetWindowDrawList()->AddRectFilled(startOffset, end, IM_COL32(255, 255, 255, 180), 200.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button("...")) {};
             ImGui::PopStyleVar();
         }
 
@@ -1372,6 +1393,19 @@ namespace Nuake {
             }
         }
         ImGui::End();
+    }
+
+    void EditorInterface::Update(float ts)
+    {
+        auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+        editorCam->Update(ts, m_IsHoveringViewport);
+
+        const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
+        if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
+        {
+            editorCam->IsMoving = true;
+            editorCam->TargetPos = Vector3(0, 0, 0);
+        }
     }
 
     void EditorInterface::BuildFonts()

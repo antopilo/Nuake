@@ -56,7 +56,7 @@ namespace Nuake
 			sample = glm::normalize(sample);
 			sample *= randomFloats(generator);
 
-			float scale = (float)i / 64.0;
+			float scale = (float)i / 64.0f;
 			scale = lerp(0.1f, 1.0f, scale * scale);
 			sample *= scale;
 			_ssaoKernel.push_back(sample);

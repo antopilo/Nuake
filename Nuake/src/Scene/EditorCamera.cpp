@@ -6,100 +6,167 @@
 
 namespace Nuake
 {
-	void EditorCamera::Update(Timestep ts)
+	void EditorCamera::Update(Timestep ts, const bool hover)
 	{
-		float x = Input::GetMouseX();
-		float y = Input::GetMouseY();
-
-		if (!controlled && Input::IsMouseButtonDown(1))
+		if (IsMoving)
 		{
-			mouseLastX = x;
-			mouseLastY = y;
+			Translation = glm::mix(Translation, TargetPos, 3.1f * ts);
+			Direction = glm::mix(Direction, TargetPos - Translation, 3.1f * ts);
+			if (glm::length(Translation - TargetPos) < 3.0f)
+			{
+				IsMoving = false;
+				Translation = Translation - TargetPos;
+			}
 		}
 
-		controlled = Input::IsMouseButtonDown(1);
+		const float x = Input::GetMouseX();
+		const float y = Input::GetMouseY();
 
-		//if (!controlled)
-		//	Input::ShowMouse();
-		//else
-		//	Input::HideMouse();
+		const bool isFlying = Input::IsMouseButtonDown(1) || Input::IsMouseButtonDown(2);
+		const bool isPressingMouse = isFlying || Input::YScroll != 0.0f;
+		
+		if (hover)
+		{
+			controlled = isPressingMouse;
+		}
+		else
+		{
+			if (controlled && !isPressingMouse)
+			{
+				controlled = false;
+			}
+		}
 
-		// Should probably not have speed binding in here.
-		if (Input::IsKeyDown(GLFW_KEY_UP))
-			Speed += 0.1f;
-		else if (Input::IsKeyDown(GLFW_KEY_DOWN))
-			Speed -= 0.1f;
-
-		if (Speed < 0)
-			Speed = 0;
-
-		// Keyboard
 		if (!controlled)
-			return;
-
-		if (m_Type == CAMERA_TYPE::ORTHO) 
 		{
-			if (Input::IsKeyDown(GLFW_KEY_RIGHT))
-				Translation.x += Speed * ts;
-			if (Input::IsKeyDown(GLFW_KEY_LEFT))
-				Translation.x -= Speed * ts;
-			if (Input::IsKeyDown(GLFW_KEY_UP))
-				Translation.y += Speed * ts;
-			if (Input::IsKeyDown(GLFW_KEY_DOWN))
-				Translation.y -= Speed * ts;
+			Input::ShowMouse();
 		}
-		else 
+		else if(hover)
 		{
-			glm::vec3 movement = glm::vec3(0, 0, 0);
-
-			if (Input::IsKeyDown(GLFW_KEY_D))
-				movement -= Right * (Speed * ts);
-			if (Input::IsKeyDown(GLFW_KEY_A))
-				movement += Right * (Speed * ts);
-
-			if (Input::IsKeyDown(GLFW_KEY_W))
-				movement += Direction * (Speed * ts);
-			if (Input::IsKeyDown(GLFW_KEY_S))
-				movement -= Direction * (Speed * ts);
-			if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
-				movement -= Up * (Speed * ts);
-			if (Input::IsKeyDown(GLFW_KEY_SPACE))
-				movement += Up * (Speed * ts);
-
-			Translation += Vector3(movement);
+			Input::HideMouse();
 		}
 
-		if (firstMouse)
+		if (Input::IsKeyDown(GLFW_KEY_LEFT_ALT))
 		{
-			mouseLastX = x;
-			mouseLastY = y;
-			firstMouse = false;
+			if (Input::YScroll != 0.0f) 
+			{
+				this->Fov += Input::YScroll;
+
+				if (Fov < 5.0f)
+				{
+					Fov = 5.0f;
+				}
+
+				Input::YScroll = 0.0f;
+			}
 		}
+		else
+		{
+			// Keyboard
+			if (!controlled)
+			{
+				mouseLastX = x;
+				mouseLastY = y;
+				return;
+			}
 
-		// mouse
-		float diffx = x - mouseLastX;
-		float diffy = mouseLastY - y;
-		mouseLastX = x;
-		mouseLastY = y;
+			if (Input::IsMouseButtonDown(1))
+			{
+				// Should probably not have speed binding in here.
+				if (Input::YScroll != 0)
+				{
+					Speed += Input::YScroll;
+					Input::YScroll = 0.0f;
+				}
 
-		const float sensitivity = 0.1f;
-		diffx *= sensitivity;
-		diffy *= sensitivity;
+				if (Speed < 0)
+					Speed = 0;
 
-		Yaw += diffx;
-		Pitch += diffy;
 
-		if (Pitch > 89.0f)
-			Pitch = 89.0f;
-		if (Pitch < -89.0f)
-			Pitch = -89.0f;
+				if (m_Type == CAMERA_TYPE::ORTHO)
+				{
+					if (Input::IsKeyDown(GLFW_KEY_RIGHT))
+						Translation.x += Speed * ts;
+					if (Input::IsKeyDown(GLFW_KEY_LEFT))
+						Translation.x -= Speed * ts;
+					if (Input::IsKeyDown(GLFW_KEY_UP))
+						Translation.y += Speed * ts;
+					if (Input::IsKeyDown(GLFW_KEY_DOWN))
+						Translation.y -= Speed * ts;
+				}
+				else
+				{
+					glm::vec3 movement = glm::vec3(0, 0, 0);
 
-		Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		Direction.y = sin(glm::radians(Pitch));
-		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		Direction = glm::normalize(Direction);
-		Right = glm::normalize(glm::cross(Up, Direction));
+					if (Input::IsKeyDown(GLFW_KEY_D))
+						movement -= Right * (Speed * ts);
+					if (Input::IsKeyDown(GLFW_KEY_A))
+						movement += Right * (Speed * ts);
+
+					if (Input::IsKeyDown(GLFW_KEY_W))
+						movement += Direction * (Speed * ts);
+					if (Input::IsKeyDown(GLFW_KEY_S))
+						movement -= Direction * (Speed * ts);
+					if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+						movement -= Up * (Speed * ts);
+					if (Input::IsKeyDown(GLFW_KEY_SPACE))
+						movement += Up * (Speed * ts);
+
+					Translation += Vector3(movement);
+				}
+
+				if (firstMouse)
+				{
+					mouseLastX = x;
+					mouseLastY = y;
+					firstMouse = false;
+				}
+
+				// mouse
+				float diffx = x - mouseLastX;
+				float diffy = mouseLastY - y;
+				mouseLastX = x;
+				mouseLastY = y;
+
+				const float sensitivity = 0.1f;
+				diffx *= sensitivity;
+				diffy *= sensitivity;
+
+				Yaw += diffx;
+				Pitch += diffy;
+
+				if (Pitch > 89.0f)
+					Pitch = 89.0f;
+				if (Pitch < -89.0f)
+					Pitch = -89.0f;
+
+				Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+				Direction.y = sin(glm::radians(Pitch));
+				Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+				Direction = glm::normalize(Direction);
+				Right = glm::normalize(glm::cross(Up, Direction));
+			}
+			else if (Input::IsMouseButtonDown(2))
+			{
+				Vector3 movement = Vector3(0);
+				const float deltaX = x - mouseLastX;
+				const float deltaY = y - mouseLastY;
+				movement += Right * (deltaX * ts);
+				movement += Up * (deltaY * ts);
+				Translation += Vector3(movement) * 0.5f;
+
+				mouseLastX = x;
+				mouseLastY = y;
+				controlled = true;
+			}
+			else if (Input::YScroll != 0)
+			{
+				Translation += Vector3(Direction) * Input::YScroll;
+				Input::YScroll = 0.0f;
+			}
+		}
 	}
+
 	Ref<EditorCamera> EditorCamera::Copy()
 	{
 		Ref<EditorCamera> copy = CreateRef<EditorCamera>();

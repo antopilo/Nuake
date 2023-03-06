@@ -1,5 +1,7 @@
 #include "Input.h"
 #include "../Window.h"
+
+#include <Imgui/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 
 namespace Nuake
@@ -7,6 +9,16 @@ namespace Nuake
 	Input* Input::s_Instance;
 	std::map<int, bool> Input::m_Keys = std::map<int, bool>();
 	bool Input::m_MouseButtons[5] = { false, false, false, false, false };
+	float Input::XScroll = 0.0f;
+	float Input::YScroll = 0.0f;
+
+	void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		XScroll = (float)xoffset;
+		YScroll = (float)yoffset;
+
+		ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+	}
 
 #pragma region Keys
 	// Only true if the key is currently being pressed
@@ -82,7 +94,6 @@ namespace Nuake
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
-
 	// Action
 	bool Input::IsMouseButtonDown(int button)
 	{
@@ -150,6 +161,7 @@ namespace Nuake
 	{
 		//auto window = Application::Get().GetWindow()->GetNative();
 		//glfwSetKeyCallback(window, Input::HandleInputCallback);
+		glfwSetScrollCallback(Window::Get()->GetHandle(), Input::ScrollCallback);
 		return false;
 	}
 

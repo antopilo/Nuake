@@ -3,6 +3,8 @@
 #include "../Core/Maths.h"
 #include <map>
 
+struct GLFWwindow;
+
 namespace Nuake
 {
 	class Input
@@ -15,6 +17,9 @@ namespace Nuake
 		static bool IsKeyDown(int keycode);
 		static bool IsKeyReleased(int keycode);
 
+		static float YScroll;
+		static float XScroll;
+		static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 		static void HideMouse();
 		static void ShowMouse();

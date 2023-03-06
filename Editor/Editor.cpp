@@ -132,6 +132,8 @@ int main(int argc, char* argv[])
             Nuake::Engine::Tick();
             Nuake::Engine::Draw();
 
+            Timestep ts = Nuake::Engine::GetTimestep();
+
             Nuake::Vector2 WindowSize = window->GetSize();
             glViewport(0, 0, WindowSize.x, WindowSize.y);
             Nuake::Renderer2D::BeginDraw(WindowSize);
@@ -153,6 +155,7 @@ int main(int argc, char* argv[])
             }
             sceneFramebuffer->Unbind();
 
+            editor.Update(ts);
             editor.Draw();
 
             Nuake::Engine::EndDraw();

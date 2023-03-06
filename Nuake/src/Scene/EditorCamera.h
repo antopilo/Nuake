@@ -14,9 +14,10 @@ namespace Nuake
 			SetDirection(Vector3(-1, -1, -1));
 		}
 
-		void Update(Timestep ts);
+		void Update(Timestep ts, const bool hover);
 
-
+		Vector3 TargetPos = Vector3(0, 0, 0);
+		bool IsMoving = false;
 		Ref<EditorCamera> Copy();
 	private:
 		bool controlled = false;

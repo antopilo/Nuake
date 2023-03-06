@@ -26,6 +26,7 @@ namespace Nuake
 		static float m_FixedUpdateRate;
 		static float m_FixedUpdateDifference;
 		static float m_Time;
+		static Timestep m_TimeStep;
 	public:
 		static bool IsPlayMode; // Is currently in runtime..
 
@@ -40,6 +41,7 @@ namespace Nuake
 		static void Draw();    // Start new frame
 		static void EndDraw(); // Swap buffer
 		static inline float GetTime() { return m_Time; }
+		static inline Timestep GetTimestep() { return m_TimeStep; }
 		static Ref<Window> GetCurrentWindow();
 
 		static bool LoadScene(Ref<Scene> scene);
