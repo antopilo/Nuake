@@ -51,6 +51,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("ModelComponent", GetComponent<ModelComponent>());
 		if (HasComponent<BSPBrushComponent>())
 			SERIALIZE_OBJECT_REF_LBL("BSPBrushComponent", GetComponent<BSPBrushComponent>());
+		if (HasComponent<QuakeMapComponent>())
+			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>());
 		END_SERIALIZE();
 	}
 

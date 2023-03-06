@@ -42,7 +42,8 @@ public:
                 ImGuiHelper::DrawVec3("Rotation", &eulerDegrees);
                 Vector3 eulerAnglesDelta = Vector3(glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y), glm::radians(eulerDegrees.z));
 
-                if (eulerAngles != eulerAnglesDelta)
+                float delta = glm::length(eulerAngles - eulerAnglesDelta);
+                if (delta > 0.f)
                 {
                     Quat rotation = QuatFromEuler(eulerAnglesDelta.x, eulerAnglesDelta.y, eulerAnglesDelta.z);
                     //component.SetLocalRotation(rotation);

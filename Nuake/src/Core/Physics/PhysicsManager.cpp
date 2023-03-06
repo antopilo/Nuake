@@ -63,7 +63,6 @@ namespace Nuake
 		m_World = new Physics::DynamicWorld();
 		m_World->SetGravity(glm::vec3(0, -3, 0));
 
-
 		m_IsRunning = false;
 	}
 }

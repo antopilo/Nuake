@@ -346,7 +346,7 @@ namespace Nuake {
 		CopyComponent<ModelComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<CameraComponent>(sceneCopy->m_Registry, this->m_Registry);
 		CopyComponent<WrenScriptComponent>(sceneCopy->m_Registry, this->m_Registry);
-
+		CopyComponent<QuakeMapComponent>(sceneCopy->m_Registry, this->m_Registry);
 		return sceneCopy;
 	}
 

@@ -261,6 +261,14 @@ namespace Nuake
 			glUniform1iv(addr, size, value);
 	}
 
+	void Shader::SetUniform1fv(const std::string& name, int size, float* value)
+	{
+		int addr = FindUniformLocation(name);
+		//ASSERT(addr != -1);
+		if (addr != -1)
+			glUniform1fv(addr, size, value);
+	}
+
 	void Shader::SetUniformMat3f(const std::string& name, Matrix3 mat)
 	{
 		int addr = FindUniformLocation(name);

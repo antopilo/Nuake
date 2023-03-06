@@ -44,6 +44,7 @@ namespace Nuake
 		void SetUniform1i(const std::string& name, int v0);
 
 		void SetUniform1iv(const std::string& name, int size, int* value);
+		void SetUniform1fv(const std::string& name, int size, float* value);
 		void SetUniformMat3f(const std::string& name, Matrix3 mat);
 		void SetUniformMat4f(const std::string& name, Matrix4 mat);
 
