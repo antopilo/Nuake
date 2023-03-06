@@ -14,6 +14,7 @@ namespace Nuake {
 	{
 	private:
 		bool m_DrawGrid = false;
+		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = false;
 		bool m_ShowOverlay = true;
@@ -46,5 +47,7 @@ namespace Nuake {
 		void DrawLogger();
 		bool EntityContainsItself(Entity ent1, Entity ent2);
 		void Overlay();
+
+		bool ShouldDrawAxis() const { return m_DrawAxis; }
 	};
 }

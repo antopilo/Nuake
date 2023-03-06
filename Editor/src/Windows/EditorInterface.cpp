@@ -1273,6 +1273,8 @@ namespace Nuake {
                 if (ImGui::MenuItem("Lighting", NULL, true)) {}
                 if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
                     m_DrawGrid = !m_DrawGrid;
+                if (ImGui::MenuItem("Draw Axis", NULL, m_DrawAxis))
+                    m_DrawAxis = !m_DrawAxis;
                 if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
                 {
                     m_DebugCollisions = !m_DebugCollisions;
