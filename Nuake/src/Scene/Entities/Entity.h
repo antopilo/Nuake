@@ -36,18 +36,20 @@ namespace Nuake
 		}
 
 		template<typename T>
-		void RemoveComponent() {
+		void RemoveComponent() 
+		{
 			m_Scene->m_Registry.remove<T>(m_EntityHandle);
 		}
 
 		template<typename T>
-		T& GetComponent() {
+		T& GetComponent() 
+		{
 			T& component = m_Scene->m_Registry.get<T>(m_EntityHandle);
 			return component;
 		}
 
-		void Destroy() {
-			Logger::Log("Deleted eneity :" + std::to_string((int)m_EntityHandle));
+		void Destroy() 
+		{
 			m_Scene->m_Registry.destroy(m_EntityHandle);
 		}
 

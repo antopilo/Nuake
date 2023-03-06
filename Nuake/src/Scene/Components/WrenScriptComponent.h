@@ -11,10 +11,22 @@ namespace Nuake {
 		unsigned int mModule = 0;
 		Ref<WrenScript> mWrenScript;
 
+		void LoadScript(const std::string& path)
+		{
+			Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(Script);
+			mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
+			auto modules = mWrenScript->GetModules();
+			if (modules.size() > 0)
+			{
+				mModule = 0;
+			}
+		}
+
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(Script);
+			SERIALIZE_VAL(mModule)
 			END_SERIALIZE();
 		}
 
@@ -22,8 +34,15 @@ namespace Nuake {
 		{
 			BEGIN_DESERIALIZE();
 			if (j.contains("Script"))
+			{
 				Script = j["Script"];
+				LoadScript(Script);
+			}
 
+			if (j.contains("mModule"))
+			{
+				mModule = j["mModule"];
+			}
 
 			return true;
 		}

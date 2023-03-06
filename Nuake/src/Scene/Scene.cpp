@@ -214,7 +214,9 @@ namespace Nuake {
 		ParentComponent& parentC = entity.GetComponent<ParentComponent>();
 		std::vector<Entity> copyChildrens = parentC.Children;
 
-		if (parentC.HasParent) {  // Remove self from parents children lists.
+		if (parentC.HasParent) 
+		{  
+			// Remove self from parents children lists.
 			ParentComponent& parent = parentC.Parent.GetComponent<ParentComponent>();
 			parent.RemoveChildren(entity);
 		}
@@ -306,47 +308,10 @@ namespace Nuake {
 	Ref<Scene> Scene::Copy()
 	{
 		Ref<Scene> sceneCopy = CreateRef<Scene>();
-		sceneCopy->Path = this->Path;
-		sceneCopy->Name = this->Name;
-
-		sceneCopy->m_EditorCamera = this->m_EditorCamera->Copy();
-
-		sceneCopy->SetEnvironment(this->GetEnvironment()->Copy());
 		
-		auto& srcRegistry = this->m_Registry;
-		auto& dstRegistry = sceneCopy->m_Registry;
-		auto idView = srcRegistry.view<NameComponent>();
-		for (auto e : idView)
-		{
-			NameComponent& nameComponent = srcRegistry.get<NameComponent>(e);
-			int id = nameComponent.ID;
-			std::string& name = nameComponent.Name;
-			sceneCopy->CreateEntity(name, id);
-		}
+		json serializedScene = Serialize();
 
-		CopyComponent<ParentComponent>(sceneCopy->m_Registry, this->m_Registry);
-
-		/*auto parentView = m_Registry.view<ParentComponent, NameComponent>();
-		for (auto e : parentView)
-		{
-			auto& [parentComponent, nameComponent] = m_Registry.get<ParentComponent, NameComponent>(e);
-
-			if (parentComponent.HasParent)
-			{
-				int id = parentComponent.ParentID;
-
-				auto newEnt = sceneCopy->GetEntityByID(nameComponent.ID);
-				sceneCopy->GetEntityByID(id).AddChild(newEnt);
-			}
-		}*/
-
-		CopyComponent<VisibilityComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<TransformComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<LightComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<ModelComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<CameraComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<WrenScriptComponent>(sceneCopy->m_Registry, this->m_Registry);
-		CopyComponent<QuakeMapComponent>(sceneCopy->m_Registry, this->m_Registry);
+		sceneCopy->Deserialize(serializedScene.dump());
 		return sceneCopy;
 	}
 

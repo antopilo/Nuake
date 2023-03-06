@@ -103,7 +103,6 @@ namespace Nuake {
 				globalScale *= transformComponent.GetLocalScale();
 		
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
-				//std::cout << "Name:" << nameComponent.Name << std::endl;
 
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
