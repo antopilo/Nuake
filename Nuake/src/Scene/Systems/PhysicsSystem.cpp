@@ -28,7 +28,7 @@ namespace Nuake
 
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
-				float mass = rigidbody.mass;
+				float mass = rigidbody.Mass;
 
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);

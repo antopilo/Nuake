@@ -13,7 +13,7 @@ namespace Nuake
 	ModelLoader::ModelLoader() {}
 	ModelLoader::~ModelLoader() {}
 
-	Ref<Model> ModelLoader::LoadModel(const std::string& path)
+	Ref<Model> ModelLoader::LoadModel(const std::string& path, bool absolute)
 	{
 		m_Meshes.clear();
 		Ref<Model> model = CreateRef<Model>(path);
@@ -27,8 +27,9 @@ namespace Nuake
 			aiProcess_FixInfacingNormals | 
 			aiProcess_CalcTangentSpace;
 
-		modelDir = path + "/../";
-		const aiScene* scene = import.ReadFile(path, importFlags);
+		modelDir = absolute ? path + "/../" : FileSystem::Root + path + "/../";
+		const std::string filePath = absolute ? path : FileSystem::Root + path;
+		const aiScene* scene = import.ReadFile(filePath, importFlags);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			std::string assimpErrorMsg = std::string(import.GetErrorString());

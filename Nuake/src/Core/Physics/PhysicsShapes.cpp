@@ -10,6 +10,7 @@ namespace Nuake
 			Size = glm::vec3(1);
 			m_Type = BOX;
 		}
+
 		// Sphere
 		Box::Box(glm::vec3 size) {
 			Size = size;
@@ -20,8 +21,6 @@ namespace Nuake
 			Size = glm::vec3(x, y, z);
 			m_Type = BOX;
 		}
-
-
 
 		// Sphere
 		Sphere::Sphere(float radius) {

@@ -14,6 +14,7 @@ EditorSelectionPanel::EditorSelectionPanel()
     mScriptPanel = ScriptPanel();
     mQuakeMapPanel = QuakeMapPanel();
     mCameraPanel = CameraPanel();
+    mRigidbodyPanel = RigidbodyPanel();
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -96,6 +97,8 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mMeshPanel.Draw(entity);
     mQuakeMapPanel.Draw(entity);
     mCameraPanel.Draw(entity);
+    mRigidbodyPanel.Draw(entity);
+
     /*
     if (Selection.Entity.HasComponent<MeshComponent>())
     {

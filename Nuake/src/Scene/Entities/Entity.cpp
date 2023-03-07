@@ -8,12 +8,11 @@
 #include "../Components/QuakeMap.h"
 #include "../Components/WrenScriptComponent.h"
 #include "../Components/CharacterControllerComponent.h"
+#include "../Components/RigidbodyComponent.h"
+#include "src/Scene/Components/BSPBrushComponent.h"
 
 #include "src/Scene/Components/Components.h"
 #include <src/Scene/Components/BoxCollider.h>
-
-//#include <src/Scene/Components/BoxCollider.h>
-#include "src/Scene/Components/BSPBrushComponent.h"
 
 namespace Nuake
 {
@@ -53,6 +52,9 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("BSPBrushComponent", GetComponent<BSPBrushComponent>());
 		if (HasComponent<QuakeMapComponent>())
 			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>());
+		if (HasComponent<RigidBodyComponent>())
+			SERIALIZE_OBJECT_REF_LBL("RigidBodyComponent", GetComponent<RigidBodyComponent>());
+		
 		END_SERIALIZE();
 	}
 
@@ -74,6 +76,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		DESERIALIZE_COMPONENT(BoxColliderComponent);
+		DESERIALIZE_COMPONENT(RigidBodyComponent);
 		return true;
 	}
 

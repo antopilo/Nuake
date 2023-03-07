@@ -4,6 +4,8 @@
 #include <src/Vendors/glm/ext/quaternion_common.hpp>
 #include <src/Core/Logger.h>
 
+#include <src/Core/Physics/PhysicsShapes.h>
+
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
@@ -257,6 +259,40 @@ namespace Nuake
 
 		void DynamicWorld::AddRigidbody(Ref<RigidBody> rb)
 		{
+			JPH::BodyInterface& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+
+			auto rbShape = rb->GetShape();
+			switch (rbShape->GetType())
+			{
+			case RigidbodyShapes::BOX:
+			{
+				Box* box = (Box*)rbShape.get();
+				const Vector3& boxSize = box->GetSize();
+				JPH::BoxShapeSettings boxShapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
+
+				// Create the shape
+				JPH::ShapeSettings::ShapeResult floor_shape_result = boxShapeSettings.Create();
+				JPH::ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
+
+				// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
+				JPH::BodyCreationSettings boxSettings(floor_shape, JPH::Vec3(0.0f, -1.0f, 0.0f), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+
+				// Create the actual rigid body
+				JPH::Body* floor = bodyInterface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
+
+				bodyInterface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
+			}
+					break;
+			case RigidbodyShapes::SPHERE:
+
+				break;
+			case RigidbodyShapes::CAPSULE:
+
+				break;
+			case RigidbodyShapes::MESH:
+
+				break;
+			}
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)

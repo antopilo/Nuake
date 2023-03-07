@@ -1406,7 +1406,12 @@ namespace Nuake {
         if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
         {
             editorCam->IsMoving = true;
-            editorCam->TargetPos = Vector3(0, 0, 0);
+            editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();
+        }
+
+        if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_ESCAPE))
+        {
+            Selection = EditorSelection();
         }
     }
 

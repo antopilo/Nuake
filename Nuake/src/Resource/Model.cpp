@@ -53,7 +53,7 @@ namespace Nuake
 			this->IsEmbedded = true;
 
 			ModelLoader loader;
-			auto otherModel = loader.LoadModel(FileSystem::Root + j["Path"].dump());
+			auto otherModel = loader.LoadModel(j["Path"], false);
 			m_Meshes = otherModel->GetMeshes();
 
 			this->Path = j["Path"];

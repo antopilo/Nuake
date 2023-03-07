@@ -65,15 +65,14 @@ namespace Nuake
 				float x = j["Rotation"]["x"];
 				float y = j["Rotation"]["y"];
 				float z = j["Rotation"]["z"];
+
 				this->Rotation = Quat(w, x, y, z);
 			}
-
 				
 			this->Scale = Vector3(j["Scale"]["x"], j["Scale"]["y"], j["Scale"]["z"]);
 
 			LocalTransform = Matrix4(1);
 			GlobalTransform = Matrix4(1);
-			Dirty = true;
 			return true;
 		}
 	};

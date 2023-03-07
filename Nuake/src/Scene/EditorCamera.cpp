@@ -15,7 +15,8 @@ namespace Nuake
 			if (glm::length(Translation - TargetPos) < 3.0f)
 			{
 				IsMoving = false;
-				Translation = Translation - TargetPos;
+				Translation = TargetPos - glm::normalize((TargetPos - Translation)) * 3.0f;
+				Direction = TargetPos - Translation;
 			}
 		}
 
@@ -27,7 +28,14 @@ namespace Nuake
 		
 		if (hover)
 		{
+			bool previous = controlled;
 			controlled = isPressingMouse;
+
+			if (!previous && controlled)
+			{
+				mouseLastX = x;
+				mouseLastY = y;
+			}
 		}
 		else
 		{
@@ -164,6 +172,9 @@ namespace Nuake
 				Translation += Vector3(Direction) * Input::YScroll;
 				Input::YScroll = 0.0f;
 			}
+
+			mouseLastX = x;
+			mouseLastY = y;
 		}
 	}
 

@@ -9,6 +9,7 @@
 #include "../ComponentsPanel/MeshPanel.h"
 #include "../ComponentsPanel/QuakeMapPanel.h"
 #include "../ComponentsPanel/CameraPanel.h"
+#include "../ComponentsPanel/RigidbodyPanel.h"
 
 #include "../Actions/EditorSelection.h"
 #include <src/Resource/Project.h>
@@ -21,6 +22,7 @@ private:
 	MeshPanel mMeshPanel;
 	QuakeMapPanel mQuakeMapPanel;
 	CameraPanel mCameraPanel;
+	RigidbodyPanel mRigidbodyPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

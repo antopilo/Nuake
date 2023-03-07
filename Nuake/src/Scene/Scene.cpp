@@ -320,7 +320,7 @@ namespace Nuake {
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Name);
 		SERIALIZE_OBJECT(m_Environement)
-			std::vector<json> entities = std::vector<json>();
+		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 			entities.push_back(e.Serialize());
 		SERIALIZE_VAL_LBL("Entities", entities);
