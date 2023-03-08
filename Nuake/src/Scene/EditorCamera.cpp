@@ -33,6 +33,7 @@ namespace Nuake
 
 			if (!previous && controlled)
 			{
+				firstMouse = true;
 				mouseLastX = x;
 				mouseLastY = y;
 			}
@@ -42,6 +43,7 @@ namespace Nuake
 			if (controlled && !isPressingMouse)
 			{
 				controlled = false;
+				firstMouse = true;
 			}
 		}
 
@@ -145,6 +147,7 @@ namespace Nuake
 
 				if (Pitch > 89.0f)
 					Pitch = 89.0f;
+
 				if (Pitch < -89.0f)
 					Pitch = -89.0f;
 
@@ -172,7 +175,9 @@ namespace Nuake
 				Translation += Vector3(Direction) * Input::YScroll;
 				Input::YScroll = 0.0f;
 			}
-
+			else
+			{
+			}
 			mouseLastX = x;
 			mouseLastY = y;
 		}

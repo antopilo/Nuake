@@ -35,10 +35,6 @@ namespace Nuake
 
 				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape);
 
-				rigidbody.m_Rigidbody = btRigidbody;
-
-				//btRigidbody->SetKinematic(rigidbody.IsKinematic);
-
 				PhysicsManager::Get()->RegisterBody(btRigidbody);
 			}
 		}

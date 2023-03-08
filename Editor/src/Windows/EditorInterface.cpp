@@ -1399,6 +1399,11 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
+        if (!Engine::GetCurrentScene())
+        {
+            return;
+        }
+
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
         editorCam->Update(ts, m_IsHoveringViewport);
 

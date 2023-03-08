@@ -1,7 +1,9 @@
 #pragma once
 #include "../Actions/EditorSelection.h"
 #include "src/Scene/Entities/Entity.h"
+
 #include "src/Core/FileSystem.h"
+#include <src/Resource/Project.h>
 
 #include "../ComponentsPanel/TransformPanel.h"
 #include "../ComponentsPanel/LightPanel.h"
@@ -10,9 +12,7 @@
 #include "../ComponentsPanel/QuakeMapPanel.h"
 #include "../ComponentsPanel/CameraPanel.h"
 #include "../ComponentsPanel/RigidbodyPanel.h"
-
-#include "../Actions/EditorSelection.h"
-#include <src/Resource/Project.h>
+#include "../ComponentsPanel/BoxColliderPanel.h"
 
 class EditorSelectionPanel {
 private:
@@ -23,9 +23,11 @@ private:
 	QuakeMapPanel mQuakeMapPanel;
 	CameraPanel mCameraPanel;
 	RigidbodyPanel mRigidbodyPanel;
+	BoxColliderPanel mBoxColliderPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
+
 public:
 	EditorSelectionPanel();
 

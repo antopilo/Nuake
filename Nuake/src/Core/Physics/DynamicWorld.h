@@ -15,10 +15,12 @@ namespace JPH
 	class JobSystemThreadPool;
 	class ContactListener;
 	class BodyActivationListener;
+	class BodyInterface;
 }
 
 namespace Nuake
 {
+	class BPLayerInterfaceImpl;
 	class MyContactListener;
 	class MyBodyActivationListener;
 
@@ -30,7 +32,8 @@ namespace Nuake
 			JPH::JobSystemThreadPool* _JoltJobSystem;
 			Scope<MyContactListener> _contactListener;
 			Scope<MyBodyActivationListener> _bodyActivationListener;
-
+			JPH::BodyInterface* _JoltBodyInterface;
+			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 		public:
 			DynamicWorld();
 

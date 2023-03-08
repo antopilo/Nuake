@@ -185,6 +185,7 @@ namespace Nuake
 		}
 	};
 	JPH::BodyID sphere_id;
+	BPLayerInterfaceImpl JoltBroadphaseLayerInterface = BPLayerInterfaceImpl();
 	namespace Physics
 	{
 		DynamicWorld::DynamicWorld() : _stepCount(0)
@@ -194,10 +195,10 @@ namespace Nuake
 			const uint32_t MaxBodyPairs = 1024;
 			const uint32_t MaxContactConstraints = 1024;
 
-			BPLayerInterfaceImpl broad_phase_layer_interface;
 
+			
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
-			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, broad_phase_layer_interface, MyBroadPhaseCanCollide, MyObjectCanCollide);
+			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
 
 			// A body activation listener gets notified when bodies activate and go to sleep
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
@@ -213,7 +214,7 @@ namespace Nuake
 
 			// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
 			// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-			JPH::BodyInterface& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+			_JoltBodyInterface = &_JoltPhysicsSystem->GetBodyInterface();
 
 			// Next we can create a rigid body to serve as the floor, we make a large box
 			// Create the settings for the collision volume (the shape). 
@@ -228,16 +229,16 @@ namespace Nuake
 			JPH::BodyCreationSettings floor_settings(floor_shape, JPH::Vec3(0.0f, -1.0f, 0.0f), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
 			// Create the actual rigid body
-			JPH::Body* floor = bodyInterface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
+			JPH::Body* floor = _JoltBodyInterface->CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
 
-			bodyInterface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
+			_JoltBodyInterface->AddBody(floor->GetID(), JPH::EActivation::DontActivate);
 
 			JPH::BodyCreationSettings sphere_settings(new JPH::SphereShape(0.5f), JPH::Vec3(0.0, 2.0, 0.0), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
-			sphere_id = bodyInterface.CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
+			sphere_id = _JoltBodyInterface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
 
 			// Now you can interact with the dynamic body, in this case we're going to give it a velocity.
 			// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-			bodyInterface.SetLinearVelocity(sphere_id, JPH::Vec3(0.0f, -5.0f, 0.0f));
+			_JoltBodyInterface->SetLinearVelocity(sphere_id, JPH::Vec3(0.0f, -5.0f, 0.0f));
 
 			// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 			const float cDeltaTime = 1.0f / 60.0f;
@@ -245,7 +246,7 @@ namespace Nuake
 			// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
 			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 			// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-			_JoltPhysicsSystem->OptimizeBroadPhase();
+			//_JoltPhysicsSystem->OptimizeBroadPhase();
 			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 		}
 
@@ -271,16 +272,15 @@ namespace Nuake
 				JPH::BoxShapeSettings boxShapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
 
 				// Create the shape
-				JPH::ShapeSettings::ShapeResult floor_shape_result = boxShapeSettings.Create();
-				JPH::ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
+				JPH::ShapeSettings::ShapeResult boxShapeResult = boxShapeSettings.Create();
+				JPH::ShapeRefC boxShape = boxShapeResult.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
 
 				// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-				JPH::BodyCreationSettings boxSettings(floor_shape, JPH::Vec3(0.0f, -1.0f, 0.0f), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+				const auto& startPos = rb->GetPosition();
+				JPH::BodyCreationSettings bodySettings(boxShape, JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
 				// Create the actual rigid body
-				JPH::Body* floor = bodyInterface.CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
-
-				bodyInterface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
+				JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::DontActivate); // Note that if we run out of bodies this can return nullptr
 			}
 					break;
 			case RigidbodyShapes::SPHERE:

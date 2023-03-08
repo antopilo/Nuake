@@ -9,8 +9,6 @@ public:
 	KinematicBody();
 	~KinematicBody();
 
-
-
 	void MoveAndCollide();
 	void MoveAndSlide();
 };

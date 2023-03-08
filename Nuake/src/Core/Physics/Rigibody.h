@@ -9,9 +9,10 @@ namespace Nuake
 	namespace Physics {
 		class RigidBody {
 		private:
-			Ref<PhysicShape> m_CollisionShape;
+			Ref<PhysicShape> _collisionShape;
+			Vector3 _position;
 		public:
-			float m_Mass;
+			float _mass;
 
 			RigidBody();
 			RigidBody(glm::vec3 position, Entity handle);
@@ -20,10 +21,10 @@ namespace Nuake
 			void UpdateTransform();
 
 			void SetEntityID(Entity ent);
-
-			bool HasShape() { return m_CollisionShape != nullptr; }
+			Vector3 GetPosition() const { return _position; }
+			bool HasShape() { return _collisionShape != nullptr; }
 			void SetShape(Ref<PhysicShape> shape);
-			Ref<PhysicShape> GetShape() const { return m_CollisionShape; }
+			Ref<PhysicShape> GetShape() const { return _collisionShape; }
 		};
 	}
 }

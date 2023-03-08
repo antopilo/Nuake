@@ -45,7 +45,7 @@ public:
                 ImGui::Text("Collision");
                 ImGui::TableNextColumn();
 
-                ImGui::Checkbox("#Collison", &component.HasCollisions);
+                ImGui::Checkbox("##Collison", &component.HasCollisions);
                 ImGui::TableNextColumn();
                 ComponentTableReset(component.HasCollisions, true);
             }
