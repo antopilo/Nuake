@@ -2,6 +2,7 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/SphereCollider.h"
+#include "src/Scene/Components/MeshCollider.h"
 
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include "src/Scene/Entities/Entity.h"
@@ -35,6 +36,18 @@ namespace Nuake
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
 
 				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape, ent);
+				PhysicsManager::Get()->RegisterBody(rigidBody);
+ 			}
+
+			if (ent.HasComponent<SphereColliderComponent>())
+			{
+				float mass = rigidbody.Mass;
+
+				const auto& component = ent.GetComponent<SphereColliderComponent>();
+				auto shape = CreateRef<Physics::Sphere>(component.Radius);
+
+				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), shape, ent);
+				PhysicsManager::Get()->RegisterBody(rigidBody);
 			}
 
 			if (ent.HasComponent<SphereColliderComponent>())
