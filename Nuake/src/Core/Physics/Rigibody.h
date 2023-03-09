@@ -1,6 +1,8 @@
 #pragma once
 #include "PhysicsShapes.h"
 #include "../Core/Core.h"
+#include "../Scene/Entities/Entity.h"
+
 #include <glm/ext/vector_float3.hpp>
 
 namespace Nuake
@@ -11,12 +13,13 @@ namespace Nuake
 		private:
 			Ref<PhysicShape> _collisionShape;
 			Vector3 _position;
+			Entity _entity;
 		public:
 			float _mass;
 
 			RigidBody();
 			RigidBody(glm::vec3 position, Entity handle);
-			RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel = glm::vec3(0, 0, 0));
+			RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, Entity entity, glm::vec3 initialVel = glm::vec3(0, 0, 0));
 
 			void UpdateTransform();
 
@@ -25,6 +28,7 @@ namespace Nuake
 			bool HasShape() { return _collisionShape != nullptr; }
 			void SetShape(Ref<PhysicShape> shape);
 			Ref<PhysicShape> GetShape() const { return _collisionShape; }
+			Entity GetEntity() const { return _entity; }
 		};
 	}
 }

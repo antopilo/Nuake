@@ -15,6 +15,10 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/CylinderShape.h>
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
@@ -195,8 +199,6 @@ namespace Nuake
 			const uint32_t MaxBodyPairs = 1024;
 			const uint32_t MaxContactConstraints = 1024;
 
-
-			
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
 
@@ -262,6 +264,7 @@ namespace Nuake
 		{
 			JPH::BodyInterface& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
 
+			JPH::ShapeSettings::ShapeResult shapeResult;
 			auto rbShape = rb->GetShape();
 			switch (rbShape->GetType())
 			{
@@ -269,30 +272,67 @@ namespace Nuake
 			{
 				Box* box = (Box*)rbShape.get();
 				const Vector3& boxSize = box->GetSize();
-				JPH::BoxShapeSettings boxShapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
-
-				// Create the shape
-				JPH::ShapeSettings::ShapeResult boxShapeResult = boxShapeSettings.Create();
-				JPH::ShapeRefC boxShape = boxShapeResult.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
-
-				// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-				const auto& startPos = rb->GetPosition();
-				JPH::BodyCreationSettings bodySettings(boxShape, JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
-
-				// Create the actual rigid body
-				JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::DontActivate); // Note that if we run out of bodies this can return nullptr
+				JPH::BoxShapeSettings shapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
+				shapeResult = shapeSettings.Create();
 			}
 					break;
 			case RigidbodyShapes::SPHERE:
-
+			{
+				Sphere* sphere = (Sphere*)rbShape.get();
+				const float sphereRadius = sphere->GetRadius();
+				JPH::SphereShapeSettings shapeSettings(sphereRadius);
+				shapeResult = shapeSettings.Create();
+			}
 				break;
 			case RigidbodyShapes::CAPSULE:
-
+			{
+				Capsule* capsule = (Capsule*)rbShape.get();
+				const float radius = capsule->GetRadius();
+				const float height = capsule->GetHeight();
+				JPH::CapsuleShapeSettings shapeSettings(height / 2.0f, radius);
+				shapeResult = shapeSettings.Create();
+			}
 				break;
+			case RigidbodyShapes::CYLINDER:
+			{
+				Cylinder* capsule = (Cylinder*)rbShape.get();
+				const float radius = capsule->GetRadius();
+				const float height = capsule->GetHeight();
+				JPH::CylinderShapeSettings shapeSettings(height / 2.0f, radius);
+				shapeResult = shapeSettings.Create();
+			}
+			break;
 			case RigidbodyShapes::MESH:
+			{
+				MeshShape* meshShape = (MeshShape*)rbShape.get();
+				const auto& mesh = meshShape->GetMesh();
+				const auto& vertices = mesh->GetVertices();
+				const auto& indices = mesh->GetIndices();
+				
+				JPH::TriangleList triangles;
+				triangles.reserve(indices.size());
 
+				for (int i = 0; i < indices.size(); i += 3)
+				{
+					const Vector3& p1 = vertices[i].position;
+					const Vector3& p2 = vertices[i + 1].position;
+					const Vector3& p3 = vertices[i + 2].position;
+
+					triangles.push_back(JPH::Triangle(JPH::Float3(p1.x, p1.y, p1.z), JPH::Float3(p2.x, p2.y, p2.z), JPH::Float3(p3.x, p3.y, p3.z)));
+				}
+
+				JPH::MeshShapeSettings shapeSettings(std::move(triangles));
+			}
 				break;
 			}
+
+			const auto& startPos = rb->GetPosition();
+			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
+			bodySettings.mUserData = rb->GetEntity().GetID();
+
+			// Create the actual rigid body
+			JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+			_registeredBodies.push_back((uint32_t)floor.GetIndexAndSequenceNumber());
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -325,12 +365,32 @@ namespace Nuake
 			++_stepCount;
 			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
 
-			// Output current position and velocity of the sphere
-			JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(sphere_id);
-			JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(sphere_id);
+			for (const auto& body : _registeredBodies)
+			{
+				JPH::BodyID bodyId = static_cast<JPH::BodyID>(body);
+				JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
+				JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
+				JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
+				Matrix4 transform = glm::mat4(
+					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
+					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
+					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
+					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
+				);
 
-			std::cout << "Step " << _stepCount << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << std::endl;
+				uint32_t entId = bodyInterface.GetUserData(bodyId);
+				Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
 
+				const std::string& name = entity.GetComponent<NameComponent>().Name;
+				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
+				transformComponent.GlobalTransform = transform;
+				transformComponent.SetGlobalPosition(Vector3(position.GetX(), position.GetY(), position.GetZ()));
+				transformComponent.SetGlobalTransform(transform);
+				transformComponent.SetLocalTransform(transform);
+				std::cout << "Object with Name: " << name << " has moved!";
+				std::cout << "Step " << _stepCount << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << std::endl;
+
+			}
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
 			const int cCollisionSteps = 1;
 
@@ -343,7 +403,14 @@ namespace Nuake
 
 		void DynamicWorld::Clear()
 		{
-			
+			_stepCount = 0;
+
+			for (auto& b : _registeredBodies)
+			{
+				_JoltBodyInterface->RemoveBody((JPH::BodyID)b);
+			}
+
+			_registeredBodies.clear();
 		}
 	}
 }

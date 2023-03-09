@@ -32,23 +32,5 @@ namespace Nuake
 		void Sphere::SetRadius(float radius) {
 			Radius = radius;
 		}
-
-		MeshShape::MeshShape(Ref<Mesh> mesh)
-		{
-			m_Mesh = mesh;
-
-			auto& indices = mesh->GetIndices();
-			auto& vertices = mesh->GetVertices();
-			for (unsigned int i = 0; i < std::size(indices); i += 3)
-			{
-				Vector3 tri1 = vertices[indices[i]].position;
-				Vector3 tri2 = vertices[indices[i + 1]].position;
-				Vector3 tri3 = vertices[indices[i + 2]].position;
-			
-			
-			}
-		
-		}
-
 	}
 }

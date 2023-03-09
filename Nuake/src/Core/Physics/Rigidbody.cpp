@@ -18,10 +18,11 @@ namespace Nuake
 			
 		}
 
-		RigidBody::RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, glm::vec3 initialVel) :
+		RigidBody::RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, Entity entity, glm::vec3 initialVel) :
 			_position(position),
 			_collisionShape(shape),
-			_mass(mass)
+			_mass(mass),
+			_entity(entity)
 		{
 			
 		}

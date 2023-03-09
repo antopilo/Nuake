@@ -9,6 +9,7 @@
 #include <src/Core/Physics/GhostObject.h>
 #include "CharacterController.h"
 
+#include <Jolt/Jolt.h>
 namespace JPH
 {
 	class PhysicsSystem;
@@ -28,12 +29,15 @@ namespace Nuake
 		class DynamicWorld {
 		private:
 			uint32_t _stepCount;
+
 			Ref<JPH::PhysicsSystem> _JoltPhysicsSystem;
 			JPH::JobSystemThreadPool* _JoltJobSystem;
 			Scope<MyContactListener> _contactListener;
 			Scope<MyBodyActivationListener> _bodyActivationListener;
 			JPH::BodyInterface* _JoltBodyInterface;
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
+
+			std::vector<uint32_t> _registeredBodies;
 		public:
 			DynamicWorld();
 

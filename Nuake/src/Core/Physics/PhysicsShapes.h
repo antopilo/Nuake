@@ -8,7 +8,7 @@ namespace Nuake
 	{
 		enum RigidbodyShapes 
 		{
-			BOX, SPHERE, CAPSULE, MESH
+			BOX, SPHERE, CAPSULE, MESH, CYLINDER
 		};
 
 		class PhysicShape 
@@ -41,7 +41,34 @@ namespace Nuake
 
 			float GetRadius() const { return Radius; }
 			void SetRadius(float radius);
+		};
 
+		class Capsule : public PhysicShape
+		{
+		private:
+			float Radius;
+			float Height;
+		public:
+			Capsule(float radius, float height) : Radius(radius), Height(height) {}
+
+			float GetRadius() const { return Radius; }
+			void SetRadius(float radius) { Radius = radius; }
+			float GetHeight() const { return Height; }
+			void SetHeight(float height) { Height = height; }
+		};
+
+		class Cylinder : public PhysicShape
+		{
+		private:
+			float Radius;
+			float Height;
+		public:
+			Cylinder(float radius, float height) : Radius(radius), Height(height) {}
+
+			float GetRadius() const { return Radius; }
+			void SetRadius(float radius) { Radius = radius; }
+			float GetHeight() const { return Height; }
+			void SetHeight(float height) { Height = height; }
 		};
 
 		class MeshShape : public PhysicShape 
@@ -49,11 +76,10 @@ namespace Nuake
 		private:
 			Ref<Mesh> m_Mesh;
 		public:
-			MeshShape(Ref<Mesh> mesh);
+			MeshShape(Ref<Mesh> mesh) : m_Mesh(mesh) {}
 
-			void SetMesh(Mesh* mesh);
-			Mesh* GetMesh();
-
+			void SetMesh(Ref<Mesh> mesh) { m_Mesh = mesh; }
+			Ref<Mesh> GetMesh() { return m_Mesh; }
 		};
 	}
 
