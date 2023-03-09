@@ -26,6 +26,10 @@ project 'JoltPhysics'
 		"JoltPhysics/Jolt.cpp",
 	}
 
+	prebuildcommands {
+		"{COPY} %{prj.location}../Jolt.cpp %{prj.location}"
+	}
+
 	filter "configurations:Debug"
 		cppdialect "C++17"
 		runtime "Debug"
