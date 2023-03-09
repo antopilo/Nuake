@@ -3,7 +3,7 @@
 #include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/SphereCollider.h"
 #include "src/Scene/Components/MeshCollider.h"
-
+#include "src/Scene/Components/ModelComponent.h"
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include "src/Scene/Entities/Entity.h"
 #include <src/Core/Physics/PhysicsManager.h>
@@ -50,15 +50,28 @@ namespace Nuake
 				PhysicsManager::Get()->RegisterBody(rigidBody);
 			}
 
-			if (ent.HasComponent<SphereColliderComponent>())
+			if (ent.HasComponent<MeshColliderComponent>())
 			{
-				float mass = rigidbody.Mass;
+				if (!ent.HasComponent<ModelComponent>())
+				{
+					Logger::Log("Cannot use mesh collider without model component", WARNING);
+				}
+				const auto& modelComponent = ent.GetComponent<ModelComponent>();
+				const auto& component = ent.GetComponent<MeshColliderComponent>();
 
-				const auto& component = ent.GetComponent<SphereColliderComponent>();
-				auto shape = CreateRef<Physics::Sphere>(component.Radius);
-
-				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), shape, ent);
-				PhysicsManager::Get()->RegisterBody(rigidBody);
+				if (modelComponent.ModelResource)
+				{
+					uint32_t subMeshId = component.SubMesh;
+					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
+					if (subMeshId >= submeshes.size())
+					{
+						Logger::Log("Cannot create mesh collider, invalid submesh ID", WARNING);
+					}
+					Ref<Mesh> mesh = submeshes[subMeshId];
+					auto shape = CreateRef<Physics::MeshShape>(mesh);
+					rigidBody = CreateRef<Physics::RigidBody>(1.0f, transform.GetGlobalPosition(), shape, ent);
+					PhysicsManager::Get()->RegisterBody(rigidBody);
+				}
 			}
 		}
 

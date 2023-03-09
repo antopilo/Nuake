@@ -6,8 +6,23 @@ namespace Nuake {
 	class MeshColliderComponent
 	{
 	public:
-		Ref<Physics::MeshShape> MeshShape;
-		Ref<Mesh> Mesh;
+		int SubMesh = 0;
 		bool IsTrigger;
+
+		json Serialize()
+		{
+			BEGIN_SERIALIZE();
+			j["IsTrigger"] = IsTrigger;
+			SERIALIZE_VAL(SubMesh);
+			END_SERIALIZE();
+		}
+
+		bool Deserialize(const std::string& str)
+		{
+			BEGIN_DESERIALIZE();
+			this->IsTrigger = j["IsTrigger"];
+			this->SubMesh = j["SubMesh"];
+			return true;
+		}
 	};
 }

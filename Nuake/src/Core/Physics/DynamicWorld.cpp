@@ -254,6 +254,7 @@ namespace Nuake
 
 		void DynamicWorld::DrawDebug()
 		{
+
 		}
 
 		void DynamicWorld::SetGravity(glm::vec3 g)
@@ -371,6 +372,7 @@ namespace Nuake
 				JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
 				JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 				JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
+
 				Matrix4 transform = glm::mat4(
 					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
 					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
@@ -387,9 +389,6 @@ namespace Nuake
 				transformComponent.SetGlobalPosition(Vector3(position.GetX(), position.GetY(), position.GetZ()));
 				transformComponent.SetGlobalTransform(transform);
 				transformComponent.SetLocalTransform(transform);
-				std::cout << "Object with Name: " << name << " has moved!";
-				std::cout << "Step " << _stepCount << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << std::endl;
-
 			}
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
 			const int cCollisionSteps = 1;
@@ -404,12 +403,7 @@ namespace Nuake
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
-
-			for (auto& b : _registeredBodies)
-			{
-				_JoltBodyInterface->RemoveBody((JPH::BodyID)b);
-			}
-
+			_JoltBodyInterface->RemoveBodies((JPH::BodyID*)_registeredBodies.data(), _registeredBodies.size());
 			_registeredBodies.clear();
 		}
 	}

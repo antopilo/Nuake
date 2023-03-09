@@ -48,6 +48,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("BoxColliderComponent", GetComponent<BoxColliderComponent>());
 		if (HasComponent<SphereColliderComponent>())
 			SERIALIZE_OBJECT_REF_LBL("SphereColliderComponent", GetComponent<SphereColliderComponent>());
+		if (HasComponent<MeshColliderComponent>())
+			SERIALIZE_OBJECT_REF_LBL("MeshColliderComponent", GetComponent<MeshColliderComponent>());
 		if (HasComponent<ModelComponent>())
 			SERIALIZE_OBJECT_REF_LBL("ModelComponent", GetComponent<ModelComponent>());
 		if (HasComponent<BSPBrushComponent>())
@@ -78,6 +80,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		DESERIALIZE_COMPONENT(BoxColliderComponent);
+		DESERIALIZE_COMPONENT(MeshColliderComponent);
 		DESERIALIZE_COMPONENT(SphereColliderComponent);
 		DESERIALIZE_COMPONENT(RigidBodyComponent);
 		return true;
