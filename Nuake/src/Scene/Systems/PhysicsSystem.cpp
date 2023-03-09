@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/SphereCollider.h"
 
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include "src/Scene/Entities/Entity.h"
@@ -25,7 +26,7 @@ namespace Nuake
 		{
 			auto [transform, rigidbody] = view.get<TransformComponent, RigidBodyComponent>(e);
 			Entity ent = Entity({ e, m_Scene });
-
+			Ref<Physics::RigidBody> rigidBody;
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
 				float mass = rigidbody.Mass;
@@ -33,9 +34,18 @@ namespace Nuake
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
 
-				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape);
+				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape, ent);
+			}
 
-				PhysicsManager::Get()->RegisterBody(btRigidbody);
+			if (ent.HasComponent<SphereColliderComponent>())
+			{
+				float mass = rigidbody.Mass;
+
+				const auto& component = ent.GetComponent<SphereColliderComponent>();
+				auto shape = CreateRef<Physics::Sphere>(component.Radius);
+
+				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), shape, ent);
+				PhysicsManager::Get()->RegisterBody(rigidBody);
 			}
 		}
 

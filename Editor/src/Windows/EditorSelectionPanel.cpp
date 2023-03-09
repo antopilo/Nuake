@@ -100,7 +100,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mCameraPanel.Draw(entity);
     mRigidbodyPanel.Draw(entity);
     mBoxColliderPanel.Draw(entity);
-
+    mSphereColliderPanel.Draw(entity);
     /*
     if (Selection.Entity.HasComponent<MeshComponent>())
     {
