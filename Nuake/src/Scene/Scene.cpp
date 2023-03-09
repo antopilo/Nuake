@@ -148,7 +148,9 @@ namespace Nuake {
 		}
 
 		if (!cam)
+		{
 			return;
+		}
 
 		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
 		mSceneRenderer->RenderScene(*this, framebuffer);

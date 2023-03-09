@@ -167,7 +167,6 @@ namespace Nuake {
                     tc.SetGlobalRotation(grotation);
                     tc.SetGlobalScale(gscale);
                     tc.SetGlobalTransform(transform);
-                    
                 }
             }
         }

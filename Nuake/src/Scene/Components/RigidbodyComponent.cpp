@@ -20,22 +20,18 @@ namespace Nuake {
 	{
 		if (!m_Rigidbody)
 			return;
-
 	}
 
 	void RigidBodyComponent::SyncWithTransform(TransformComponent* tc)
 	{
 		if (!m_Rigidbody)
 			return;
-
-
 	}
 
 	void RigidBodyComponent::DrawShape(TransformComponent* tc)
 	{
 
 	}
-
 
 	void RigidBodyComponent::DrawEditor() {
 
