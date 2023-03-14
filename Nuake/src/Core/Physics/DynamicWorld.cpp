@@ -313,24 +313,28 @@ namespace Nuake
 				JPH::TriangleList triangles;
 				triangles.reserve(indices.size());
 
-				for (int i = 0; i < indices.size(); i += 3)
+				for (int i = 0; i < indices.size() - 3; i += 3)
 				{
-					const Vector3& p1 = vertices[i].position;
-					const Vector3& p2 = vertices[i + 1].position;
-					const Vector3& p3 = vertices[i + 2].position;
+					const Vector3& p1 = vertices[indices[i]].position;
+					const Vector3& p2 = vertices[indices[i + 1]].position;
+					const Vector3& p3 = vertices[indices[i + 2]].position;
 
 					triangles.push_back(JPH::Triangle(JPH::Float3(p1.x, p1.y, p1.z), JPH::Float3(p2.x, p2.y, p2.z), JPH::Float3(p3.x, p3.y, p3.z)));
 				}
 
 				JPH::MeshShapeSettings shapeSettings(std::move(triangles));
+				
+				shapeResult = shapeSettings.Create();
 			}
 				break;
 			}
 
 			const auto& startPos = rb->GetPosition();
 			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
-			bodySettings.mUserData = rb->GetEntity().GetID();
 
+			bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+			bodySettings.mMassPropertiesOverride.mMass = 10.0f;
+			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
 			JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
 			_registeredBodies.push_back((uint32_t)floor.GetIndexAndSequenceNumber());

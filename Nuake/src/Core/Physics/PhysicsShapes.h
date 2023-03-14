@@ -49,7 +49,12 @@ namespace Nuake
 			float Radius;
 			float Height;
 		public:
-			Capsule(float radius, float height) : Radius(radius), Height(height) {}
+			Capsule(float radius, float height) :
+				Radius(radius),
+				Height(height)
+			{
+				m_Type = CAPSULE;
+			}
 
 			float GetRadius() const { return Radius; }
 			void SetRadius(float radius) { Radius = radius; }
@@ -63,7 +68,10 @@ namespace Nuake
 			float Radius;
 			float Height;
 		public:
-			Cylinder(float radius, float height) : Radius(radius), Height(height) {}
+			Cylinder(float radius, float height) : Radius(radius), Height(height)
+			{
+				m_Type = CYLINDER;
+			}
 
 			float GetRadius() const { return Radius; }
 			void SetRadius(float radius) { Radius = radius; }
@@ -76,7 +84,10 @@ namespace Nuake
 		private:
 			Ref<Mesh> m_Mesh;
 		public:
-			MeshShape(Ref<Mesh> mesh) : m_Mesh(mesh) {}
+			MeshShape(Ref<Mesh> mesh) : m_Mesh(mesh)
+			{
+				m_Type = MESH;
+			}
 
 			void SetMesh(Ref<Mesh> mesh) { m_Mesh = mesh; }
 			Ref<Mesh> GetMesh() { return m_Mesh; }
