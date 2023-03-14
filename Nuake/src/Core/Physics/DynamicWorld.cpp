@@ -312,14 +312,18 @@ namespace Nuake
 				
 				JPH::TriangleList triangles;
 				triangles.reserve(indices.size());
-
+				Matrix4 transform = rb->_transform;
+				transform[3] = Vector4(0, 0, 0, 1.0f);
 				for (int i = 0; i < indices.size() - 3; i += 3)
 				{
 					const Vector3& p1 = vertices[indices[i]].position;
 					const Vector3& p2 = vertices[indices[i + 1]].position;
 					const Vector3& p3 = vertices[indices[i + 2]].position;
 
-					triangles.push_back(JPH::Triangle(JPH::Float3(p1.x, p1.y, p1.z), JPH::Float3(p2.x, p2.y, p2.z), JPH::Float3(p3.x, p3.y, p3.z)));
+					const Vector4& tp1 = transform * Vector4(p1, 1.0f);
+					const Vector4& tp2 = transform * Vector4(p2, 1.0f);
+					const Vector4& tp3 = transform * Vector4(p3, 1.0f);
+					triangles.push_back(JPH::Triangle(JPH::Float3(tp1.x, tp1.y, tp1.z), JPH::Float3(tp2.x, tp2.y, tp2.z), JPH::Float3(tp3.x, tp3.y, tp3.z)));
 				}
 
 				JPH::MeshShapeSettings shapeSettings(std::move(triangles));

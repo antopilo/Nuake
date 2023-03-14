@@ -16,10 +16,11 @@ namespace Nuake
 			Entity _entity;
 		public:
 			float _mass;
+			Matrix4 _transform;
 
 			RigidBody();
 			RigidBody(glm::vec3 position, Entity handle);
-			RigidBody(float mass, glm::vec3 position, Ref<PhysicShape> shape, Entity entity, glm::vec3 initialVel = glm::vec3(0, 0, 0));
+			RigidBody(float mass, glm::vec3 position, Matrix4 _transform, Ref<PhysicShape> shape, Entity entity, glm::vec3 initialVel = glm::vec3(0, 0, 0));
 
 			void UpdateTransform();
 

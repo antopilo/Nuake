@@ -25,28 +25,28 @@ namespace Nuake
 		auto view = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
 		for (auto e : view)
 		{
-			auto [transform, rigidbody] = view.get<TransformComponent, RigidBodyComponent>(e);
+			auto [transform, rigidBodyComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
 			Entity ent = Entity({ e, m_Scene });
 			Ref<Physics::RigidBody> rigidBody;
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
-				float mass = rigidbody.Mass;
+				float mass = rigidBodyComponent.Mass;
 
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
 
-				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), boxShape, ent);
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), boxShape, ent);
 				PhysicsManager::Get()->RegisterBody(rigidBody);
  			}
 
 			if (ent.HasComponent<SphereColliderComponent>())
 			{
-				float mass = rigidbody.Mass;
+				float mass = rigidBodyComponent.Mass;
 
 				const auto& component = ent.GetComponent<SphereColliderComponent>();
 				auto shape = CreateRef<Physics::Sphere>(component.Radius);
 
-				rigidBody = CreateRef<Physics::RigidBody>(mass, transform.GetGlobalPosition(), shape, ent);
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
 				PhysicsManager::Get()->RegisterBody(rigidBody);
 			}
 
@@ -69,7 +69,7 @@ namespace Nuake
 					}
 					Ref<Mesh> mesh = submeshes[subMeshId];
 					auto shape = CreateRef<Physics::MeshShape>(mesh);
-					rigidBody = CreateRef<Physics::RigidBody>(1.0f, transform.GetGlobalPosition(), shape, ent);
+					rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
 					PhysicsManager::Get()->RegisterBody(rigidBody);
 				}
 			}
