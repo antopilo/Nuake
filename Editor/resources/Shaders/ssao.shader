@@ -36,7 +36,9 @@ uniform mat4 u_Projection;
 uniform vec2 u_NoiseScale;
 uniform float u_Radius = 0.5f;
 uniform float u_Bias = 0.025f;
-uniform float u_Area;
+uniform float u_Falloff = 0.0022;
+uniform float u_Area = 0.0075;
+uniform float u_Strength = 2.0f;
 in vec2 UV;
 in mat4 v_View;
 in mat4 v_InvView;
@@ -92,24 +94,46 @@ void main()
     float depth = texture(u_Depth, UV).r ;
     vec3 fragPos = ViewPosFromDepth(depth);
     
-    vec3 normal = normal_from_depth(depth, UV) ;
+    if(depth > 0.9999999f)
+    {
+        FragColor = vec4(0, 0, 0, 0);
+        return;
+    }
+    vec3 goodNormal = normal_from_depth(depth, UV);
+    vec3 normal = texture(u_Normal, UV).rgb * 2.0 - 1.0;
+    vec4 normalT = v_View * vec4(normal, 1.0);
+    normalT *= -1.0f;
+    normal = normalT.xyz;
+    normal = normalize(normal);
+    normal = goodNormal;
+    normal = normalT.xyz;
     vec3 randomVec = texture(u_Noise, UV * u_NoiseScale).xyz;  
     float radius_depth = u_Radius/depth;
     float occlusion = 0.0;
     vec3 position = vec3(UV, depth);
-    const float falloff = 0.0002;
-    const float area = 0.0075;
+
+    int skipped = 0;
     for(int i=0; i < 64; i++) 
     {
         vec3 ray = radius_depth * reflect(u_Samples[i], randomVec);
-        vec3 hemi_ray = position + sign(dot(ray,normal)) * ray;
+
+        /*
+        if(dot(normal, normalize(ray)) < u_Falloff)
+        {
+            skipped++;
+            continue;
+        }*/
+
+        vec3 hemi_ray = position + sign(dot(ray, normal)) * ray;
         
         float occ_depth = texture(u_Depth, hemi_ray.xy).r;
-        float difference = depth - occ_depth ;
-        occlusion += step(falloff, difference) * (1.0 - smoothstep(falloff, u_Bias, difference));
+        float difference = depth - occ_depth + u_Bias;
+        float rangeCheck = smoothstep(0.0, 1.0, u_Radius * 10.0 / abs(depth - occ_depth));
+        //float rangeCheck = abs(depth - occ_depth) < u_Radius  ? 1.0 : 0.0;
+        occlusion += ( occ_depth <= hemi_ray.z - u_Bias ? 1.0 : 0.0) * rangeCheck;
     }
   
-    float ao = 1.0 - 2.0 * occlusion * (1.0 / 64);
+    float ao = 1.0 - u_Strength * occlusion * (1.0 / (64 ));
 
     FragColor = vec4(ao, ao, ao , 1.0);
 }

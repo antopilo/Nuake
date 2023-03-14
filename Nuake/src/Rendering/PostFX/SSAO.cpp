@@ -101,6 +101,9 @@ namespace Nuake
 			shader->SetUniform1i("u_KernelSize", 64);
 			shader->SetUniform1f("u_Radius", Radius);
 			shader->SetUniform1f("u_Bias", Bias);
+			shader->SetUniform1f("u_Falloff", Falloff);
+			shader->SetUniform1f("u_Area", Area);
+			shader->SetUniform1f("u_Strength", Strength);
 			shader->SetUniformVec2("u_NoiseScale", Vector2(_size.x / 4, _size.y / 4) );
 
 			int i = 0;
