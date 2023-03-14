@@ -332,12 +332,23 @@ namespace Nuake
 			}
 				break;
 			}
+			float mass = rb->_mass;
+
+			JPH::EMotionType motionType = JPH::EMotionType::Static;
+			if (mass > 0.0f)
+			{
+				motionType = JPH::EMotionType::Dynamic;
+			}
 
 			const auto& startPos = rb->GetPosition();
-			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
+			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), motionType, Layers::MOVING);
 
-			bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
-			bodySettings.mMassPropertiesOverride.mMass = 10.0f;
+			if (mass > 0.0f)
+			{
+				bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::CalculateInertia;
+				bodySettings.mMassPropertiesOverride.mMass = mass;
+			}
+			
 			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
 			JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
