@@ -310,7 +310,8 @@ namespace Nuake {
 	Ref<Scene> Scene::Copy()
 	{
 		Ref<Scene> sceneCopy = CreateRef<Scene>();
-		
+		sceneCopy->Path = Path;
+
 		json serializedScene = Serialize();
 
 		sceneCopy->Deserialize(serializedScene.dump());
@@ -322,6 +323,7 @@ namespace Nuake {
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Name);
 		SERIALIZE_OBJECT(m_Environement)
+		SERIALIZE_VAL(Path)
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 			entities.push_back(e.Serialize());
@@ -339,8 +341,12 @@ namespace Nuake {
 			return false;
 
 		m_Registry.clear();
-
 		Name = j["Name"];
+
+		if (j.contains(""))
+		{
+			Path = j["Path"];
+		}
 
 		m_Environement = CreateRef<Environment>();
 		if (j.contains("m_Environement"))
@@ -352,7 +358,9 @@ namespace Nuake {
 
 		// Parse entities
 		if (!j.contains("Entities"))
+		{
 			return 0;
+		}
 		
 		for (json e : j["Entities"])
 		{
