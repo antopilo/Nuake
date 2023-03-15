@@ -148,13 +148,11 @@ namespace Nuake {
                     Vector4 pesp = Vector4();
                     glm::decompose(oldTransform, scale, rotation, pos, skew, pesp);
                     
-
                     tc.Translation = pos;
                     tc.Rotation = rotation;
                     tc.Scale = scale;
                     tc.LocalTransform = oldTransform;
                     
-
                     Vector3 gscale = Vector3();
                     Quat grotation = Quat();
                     Vector3 gpos = Vector3();
@@ -162,7 +160,6 @@ namespace Nuake {
                     Vector4 gpesp = Vector4();
                     glm::decompose(transform, gscale, grotation, gpos, skew, pesp);
                     
-
                     tc.SetGlobalPosition(gpos);
                     tc.SetGlobalRotation(grotation);
                     tc.SetGlobalScale(gscale);
@@ -323,207 +320,216 @@ namespace Nuake {
         ImGui::PopFont();
     }
 
+#define BEGIN_COLLAPSE_HEADER(names) \
+    UIFont* names##_boldFont = new UIFont(Fonts::Bold); \
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f)); \
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f)); \
+    bool names##_Opened = ImGui::CollapsingHeader(#names); \
+    ImGui::PopStyleVar(); \
+    delete names##_boldFont; \
+    if (names##_Opened) { \
+
+#define END_COLLAPSE_HEADER() \
+} \
+    ImGui::PopStyleVar(); \
+
     void EditorInterface::DrawSceneTree()
     {
         Ref<Scene> scene = Engine::GetCurrentScene();
           
         if (!scene)
             return;
+        const Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
 
         if (ImGui::Begin("Environnement"))
         {
-            const Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
-
-            if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
-            {
-                ImGui::TableSetupColumn("name", 0, 0.3);
-                ImGui::TableSetupColumn("set", 0, 0.6);
-                ImGui::TableSetupColumn("reset", 0, 0.1);
-
-                ImGui::TableNextColumn();
+            BEGIN_COLLAPSE_HEADER(SKY);
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
                 {
-                    // Title
-                    ImGui::Text("Sky Type");
-                    ImGui::TableNextColumn();
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
 
-                    // Here we create a dropdown for every sky type.
-                    const char* SkyTypes[] = { "Procedural Sky", "Color" };
-                    static int currentSkyType = (int)env->CurrentSkyType;
-                    ImGui::Combo("##SkyType", &currentSkyType, SkyTypes, IM_ARRAYSIZE(SkyTypes));
-                    env->CurrentSkyType = (SkyType)currentSkyType;
                     ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Sky Type");
+                        ImGui::TableNextColumn();
 
-                    // Reset button
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
-                    if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
-                    ImGui::PopStyleColor();
+                        // Here we create a dropdown for every sky type.
+                        const char* SkyTypes[] = { "Procedural Sky", "Color" };
+                        static int currentSkyType = (int)env->CurrentSkyType;
+                        ImGui::Combo("##SkyType", &currentSkyType, SkyTypes, IM_ARRAYSIZE(SkyTypes));
+                        env->CurrentSkyType = (SkyType)currentSkyType;
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
+                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
+                        ImGui::PopStyleColor();
+                    }
+
+                    if (env->CurrentSkyType == SkyType::ClearColor)
+                    {
+                        ImGui::TableNextColumn();
+
+                        // Title
+                        ImGui::Text("Clear color");
+                        ImGui::TableNextColumn();
+
+                        // Color picker
+                        ImGui::ColorEdit4("##clearColor", &env->AmbientColor.r, ImGuiColorEditFlags_NoAlpha);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetColor = ICON_FA_UNDO + std::string("##ResetColor");
+                        if (ImGui::Button(resetColor.c_str())) env->AmbientColor = Color(0, 0, 0, 1);
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
                 }
-
-                ImGui::TableNextColumn();
-                if(env->CurrentSkyType == SkyType::ClearColor)
+                
+                if (env->CurrentSkyType == SkyType::ProceduralSky)
                 {
-                    // Title
-                    ImGui::Text("Clear color");
-                    ImGui::TableNextColumn();
+                    BEGIN_COLLAPSE_HEADER(SUN)
+                        if (ImGui::BeginTable("SunSettingsTable", 3, ImGuiTableFlags_BordersInner))
+                        {
+                            ImGui::TableSetupColumn("name", 0, 0.3);
+                            ImGui::TableSetupColumn("set", 0, 0.6);
+                            ImGui::TableSetupColumn("reset", 0, 0.1);
+                            ImGui::TableNextColumn();
 
-                    // Color picker
-                    ImGui::ColorEdit4("##clearColor", &env->AmbientColor.r, ImGuiColorEditFlags_NoAlpha);
-                    ImGui::TableNextColumn();
+                            {   // Sun Intensity
+                                ImGui::Text("Sun Intensity");
+                                ImGui::TableNextColumn();
 
-                    // Reset button
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetColor = ICON_FA_UNDO + std::string("##ResetColor");
-                    if (ImGui::Button(resetColor.c_str())) env->AmbientColor = Color(0, 0, 0, 1);
-                    ImGui::PopStyleColor();
+                                ImGui::DragFloat("##Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f, 1000.0f);
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetSunIntensity = ICON_FA_UNDO + std::string("##ResetSunIntensity");
+                                if (ImGui::Button(resetSunIntensity.c_str())) env->ProceduralSkybox->SunIntensity = 100.0f;
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::TableNextColumn();
+                            {   // Sun Direction
+                                ImGui::Text("Sun Direction");
+                                ImGui::TableNextColumn();
+
+                                Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
+                                ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
+                                env->ProceduralSkybox->SunDirection = glm::normalize(sunDirection);
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetSunDirection = ICON_FA_UNDO + std::string("##resetSunDirection");
+                                if (ImGui::Button(resetSunDirection.c_str())) env->ProceduralSkybox->SunDirection = Vector3(0.20000f, 0.95917f, 0.20000f);
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::EndTable();
+                        }
+                    END_COLLAPSE_HEADER()
+
+                    BEGIN_COLLAPSE_HEADER(ATMOSPHERE)
+                        if (ImGui::BeginTable("AtmosphereSettingsTable", 3, ImGuiTableFlags_BordersInner))
+                        {
+                            ImGui::TableSetupColumn("name", 0, 0.3);
+                            ImGui::TableSetupColumn("set", 0, 0.6);
+                            ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                            ImGui::TableNextColumn();
+                            {   // Surface Radius
+                                ImGui::Text("Surface Radius");
+                                ImGui::TableNextColumn();
+
+                                ImGui::DragFloat("##surfaceRadius", &env->ProceduralSkybox->SurfaceRadius, 100.f, 0.0f);
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetSurfaceRadius = ICON_FA_UNDO + std::string("##resetSurfaceRadius");
+                                if (ImGui::Button(resetSurfaceRadius.c_str())) env->ProceduralSkybox->SurfaceRadius = 6360e3f;
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::TableNextColumn();
+                            {   // Atmosphere Radius
+                                ImGui::Text("Atmosphere Radius");
+                                ImGui::TableNextColumn();
+
+                                ImGui::DragFloat("##AtmosphereRadius", &env->ProceduralSkybox->AtmosphereRadius, 100.f, 0.0f);
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetAtmosphereRadius = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
+                                if (ImGui::Button(resetAtmosphereRadius.c_str())) env->ProceduralSkybox->AtmosphereRadius = 6380e3f;
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::TableNextColumn();
+                            {   // Center point
+                                ImGui::Text("Center Point");
+                                ImGui::TableNextColumn();
+
+                                ImGuiHelper::DrawVec3("##Center Point", &env->ProceduralSkybox->CenterPoint, 0.0f, 100.0f, 100.0f);
+                                ImGui::TableNextColumn();
+                                if (env->ProceduralSkybox->CenterPoint.y < -env->ProceduralSkybox->AtmosphereRadius)
+                                    env->ProceduralSkybox->CenterPoint.y = -env->ProceduralSkybox->AtmosphereRadius + 1.f;
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetCenterPoint = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
+                                if (ImGui::Button(resetCenterPoint.c_str())) env->ProceduralSkybox->CenterPoint = Vector3(0, -env->ProceduralSkybox->AtmosphereRadius, 0);
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::TableNextColumn();
+                            {   // Mie Scattering
+                                ImGui::Text("Mie Scattering");
+                                ImGui::TableNextColumn();
+
+                                Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
+                                ImGuiHelper::DrawVec3("##Mie Scattering", &mieScattering, 0.0f, 100.0f, 0.01f);
+                                if (mieScattering.x < 0) mieScattering.x = 0;
+                                if (mieScattering.y < 0) mieScattering.y = 0;
+                                if (mieScattering.z < 0) mieScattering.z = 0;
+                                env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetMieScattering = ICON_FA_UNDO + std::string("##resetMieScattering");
+                                if (ImGui::Button(resetMieScattering.c_str())) env->ProceduralSkybox->MieScattering = Vector3(2e-5f);
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::TableNextColumn();
+                            {   // RayleighScattering
+                                ImGui::Text("Rayleigh Scattering");
+                                ImGui::TableNextColumn();
+
+                                Vector3 rayleighScattering = env->ProceduralSkybox->RayleighScattering * 10000.0f;
+                                ImGuiHelper::DrawVec3("##Ray Scattering", &rayleighScattering, 0.0f, 100.0f, 0.01f);
+                                if (rayleighScattering.r < 0) rayleighScattering.r = 0;
+                                if (rayleighScattering.g < 0) rayleighScattering.g = 0;
+                                if (rayleighScattering.b < 0) rayleighScattering.b = 0;
+                                env->ProceduralSkybox->RayleighScattering = rayleighScattering / 10000.0f;
+                                ImGui::TableNextColumn();
+
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                                std::string resetRayScattering = ICON_FA_UNDO + std::string("##resetRayScattering");
+                                if (ImGui::Button(resetRayScattering.c_str())) env->ProceduralSkybox->RayleighScattering = Vector3(58e-7f, 135e-7f, 331e-7f);
+                                ImGui::PopStyleColor();
+                            }
+
+                            ImGui::EndTable();
+                        }
+                    END_COLLAPSE_HEADER()
                 }
+            END_COLLAPSE_HEADER()
 
-                else if (env->CurrentSkyType == SkyType::ProceduralSky)
-                {
-                    {   // Sun Intensity
-                        ImGui::Text("Sun Intensity");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f, 1000.0f);
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSunIntensity = ICON_FA_UNDO + std::string("##ResetSunIntensity");
-                        if (ImGui::Button(resetSunIntensity.c_str())) env->ProceduralSkybox->SunIntensity = 100.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {   // Sun Direction
-                        ImGui::Text("Sun Direction");
-                        ImGui::TableNextColumn();
-
-                        Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
-                        ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
-                        env->ProceduralSkybox->SunDirection = glm::normalize(sunDirection);
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSunDirection = ICON_FA_UNDO + std::string("##resetSunDirection");
-                        if (ImGui::Button(resetSunDirection.c_str())) env->ProceduralSkybox->SunDirection = Vector3(0.20000f, 0.95917f, 0.20000f);
-                        ImGui::PopStyleColor();
-                    }
-                    
-                    ImGui::TableNextColumn();
-                    {   // Surface Radius
-                        ImGui::Text("Surface Radius");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##surfaceRadius", &env->ProceduralSkybox->SurfaceRadius, 100.f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSurfaceRadius = ICON_FA_UNDO + std::string("##resetSurfaceRadius");
-                        if (ImGui::Button(resetSurfaceRadius.c_str())) env->ProceduralSkybox->SurfaceRadius = 6360e3f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {   // Atmosphere Radius
-                        ImGui::Text("Atmosphere Radius");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##AtmosphereRadius", &env->ProceduralSkybox->AtmosphereRadius, 100.f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetAtmosphereRadius = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                        if (ImGui::Button(resetAtmosphereRadius.c_str())) env->ProceduralSkybox->AtmosphereRadius = 6380e3f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {   // Center point
-                        ImGui::Text("Center Point");
-                        ImGui::TableNextColumn();
-
-                        ImGuiHelper::DrawVec3("##Center Point", &env->ProceduralSkybox->CenterPoint, 0.0f, 100.0f, 100.0f);
-                        ImGui::TableNextColumn();
-                        if (env->ProceduralSkybox->CenterPoint.y < -env->ProceduralSkybox->AtmosphereRadius)
-                            env->ProceduralSkybox->CenterPoint.y = -env->ProceduralSkybox->AtmosphereRadius + 1.f;
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetCenterPoint = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                        if (ImGui::Button(resetCenterPoint.c_str())) env->ProceduralSkybox->CenterPoint = Vector3(0, -env->ProceduralSkybox->AtmosphereRadius, 0);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {   // Mie Scattering
-                        ImGui::Text("Mie Scattering");
-                        ImGui::TableNextColumn();
-
-                        Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
-                        ImGuiHelper::DrawVec3("##Mie Scattering", &mieScattering, 0.0f, 100.0f, 0.01f);
-                        if (mieScattering.x < 0) mieScattering.x = 0;
-                        if (mieScattering.y < 0) mieScattering.y = 0;
-                        if (mieScattering.z < 0) mieScattering.z = 0;
-                        env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetMieScattering = ICON_FA_UNDO + std::string("##resetMieScattering");
-                        if (ImGui::Button(resetMieScattering.c_str())) env->ProceduralSkybox->MieScattering = Vector3(2e-5f);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {   // RayleighScattering
-                        ImGui::Text("Rayleigh Scattering");
-                        ImGui::TableNextColumn();
-
-                        Vector3 rayleighScattering = env->ProceduralSkybox->RayleighScattering * 10000.0f;
-                        ImGuiHelper::DrawVec3("##Ray Scattering", &rayleighScattering, 0.0f, 100.0f, 0.01f);
-                        if (rayleighScattering.r < 0) rayleighScattering.r = 0;
-                        if (rayleighScattering.g < 0) rayleighScattering.g = 0;
-                        if (rayleighScattering.b < 0) rayleighScattering.b = 0;
-                        env->ProceduralSkybox->RayleighScattering = rayleighScattering / 10000.0f;
-                        ImGui::TableNextColumn();
-
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetRayScattering = ICON_FA_UNDO + std::string("##resetRayScattering");
-                        if (ImGui::Button(resetRayScattering.c_str())) env->ProceduralSkybox->RayleighScattering = Vector3(58e-7f, 135e-7f, 331e-7f);
-                        ImGui::PopStyleColor();
-                    }
-                }
-
-                ImGui::TableNextColumn();
-                {   // Exposure
-                    ImGui::Text("Exposure");
-                    ImGui::TableNextColumn();
-
-                    ImGui::DragFloat("Exposure", &env->Exposure, .01f, 0.0f, 100.0f);
-                    ImGui::TableNextColumn();
-
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetExposure = ICON_FA_UNDO + std::string("##resetExposure");
-                    if (ImGui::Button(resetExposure.c_str())) env->Exposure = 3.5f;
-                    ImGui::PopStyleColor();
-                }
-
-                ImGui::TableNextColumn();
-                {   // Gamma
-                    ImGui::Text("Gamma");
-                    ImGui::TableNextColumn();
-
-                    ImGui::DragFloat("Gamma", &env->Gamma, 0.1f, 0.0f, 10.0f);
-                    ImGui::TableNextColumn();
-
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetGamma = ICON_FA_UNDO + std::string("##resetGamma");
-                    if (ImGui::Button(resetGamma.c_str())) env->Gamma = 1.1f;
-                    ImGui::PopStyleColor();
-                }
-
-                ImGui::EndTable();
-            }
-
-            if (ImGui::CollapsingHeader("Post processing", ImGuiTreeNodeFlags_DefaultOpen))
-            {
+            BEGIN_COLLAPSE_HEADER(POSTFX)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
@@ -915,8 +921,7 @@ namespace Nuake {
 
                 }
                 ImGui::EndTable();
-
-            }
+            END_COLLAPSE_HEADER()
 
             if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
             {
