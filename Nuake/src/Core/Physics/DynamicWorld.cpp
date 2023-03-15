@@ -440,8 +440,12 @@ namespace Nuake
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
-			_JoltBodyInterface->RemoveBodies((JPH::BodyID*)_registeredBodies.data(), _registeredBodies.size());
-			_registeredBodies.clear();
+
+			if (_registeredBodies.size() > 0)
+			{
+				_JoltBodyInterface->RemoveBodies((JPH::BodyID*)_registeredBodies.data(), _registeredBodies.size());
+				_registeredBodies.clear();
+			}
 		}
 	}
 }
