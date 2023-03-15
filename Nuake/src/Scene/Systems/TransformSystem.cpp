@@ -50,7 +50,6 @@ namespace Nuake {
 		for (auto tv : localTransformView)
 		{
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
-
 			if (transform.Dirty)
 			{
 				Matrix4 localTransform = Matrix4(1.0f);
@@ -58,9 +57,8 @@ namespace Nuake {
 				auto& localRot = transform.GetLocalRotation();
 				auto& localScale = transform.GetLocalScale();
 
-				Matrix4 rotationMatrix = glm::toMat4(localRot);
 				localTransform = glm::translate(localTransform, localTranslate);
-				localTransform = glm::toMat4(localRot) * localTransform;
+				localTransform = localTransform * glm::toMat4(localRot);
 				localTransform = glm::scale(localTransform, localScale);
 
 				transform.SetLocalTransform(localTransform);
