@@ -11,6 +11,8 @@ namespace Nuake {
 	{
 	public:
 		std::vector<Ref<Mesh>> Meshes;
+		std::vector<std::vector<Vector3>> Hulls;
+
 		std::vector<Ref<Material>> Materials;
 		std::vector<Ref<Physics::RigidBody>> Rigidbody;
 

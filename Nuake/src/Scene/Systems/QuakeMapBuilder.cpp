@@ -532,8 +532,7 @@ namespace Nuake {
                             currentMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
                             texture->height = texture->width = 1;
                         }
-                            
-
+                        
                         face_geometry* face_geo_inst = &brush_geo_inst->faces[f];
 
                         std::vector<Vertex> vertices;
@@ -568,6 +567,18 @@ namespace Nuake {
                                 0.0f
                             });
                         }
+
+                        // We need to push the hull points because the batching
+                        // will create 1 model per material, this prevents us from
+                        // having 1 collision shape per brush(convex).
+                        std::vector<Vector3> hullPoints;
+                        hullPoints.reserve(vertices.size());
+                        for (const auto& v : vertices)
+                        {
+                            hullPoints.push_back(v.position);
+                        }
+
+                        bsp.Hulls.push_back(hullPoints);
 
                         for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
                         {

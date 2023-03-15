@@ -88,23 +88,25 @@ namespace Nuake
 		//	PhysicsManager::Get()->RegisterCharacterController(cc.CharacterController);
 		//}
 
-		//auto bspView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
-		//for (auto e : bspView)
-		//{
-		//	auto [transform, brush] = bspView.get<TransformComponent, BSPBrushComponent>(e);
+		auto bspView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, ModelComponent>();
+		for (auto e : bspView)
+		{
+			Entity ent = Entity({ e, m_Scene });
+			auto [transform, brush, model] = bspView.get<TransformComponent, BSPBrushComponent, ModelComponent>(e);
 
-		//	if (!brush.IsSolid)
-		//		continue;
+			if (!brush.IsSolid)
+				continue;
 
-		//	for (auto m : brush.Meshes)
-		//	{
-		//		Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(m);
-		//		Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GetGlobalPosition(), meshShape);
-		//		btRigidbody->SetEntityID(Entity{ e, m_Scene });
-		//		brush.Rigidbody.push_back(btRigidbody);
-		//		PhysicsManager::Get()->RegisterBody(btRigidbody);
-		//	}
-		//}
+			for (const auto& h : brush.Hulls)
+			{
+				Ref<Physics::ConvexHullShape> meshShape = CreateRef<Physics::ConvexHullShape>(h);
+				Ref<Physics::RigidBody> btRigidbody = CreateRef<Physics::RigidBody>(0.0f, transform.GetGlobalPosition(), transform.GetGlobalTransform(), meshShape, ent);
+
+				btRigidbody->SetEntityID(Entity{ e, m_Scene });
+				brush.Rigidbody.push_back(btRigidbody);
+				PhysicsManager::Get()->RegisterBody(btRigidbody);
+			}
+		}
 
 		//auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
 		//for (auto e : bspTriggerView) 
