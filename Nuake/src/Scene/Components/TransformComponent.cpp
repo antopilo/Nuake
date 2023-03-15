@@ -8,7 +8,7 @@ namespace Nuake
         GlobalTranslation = Vector3(0, 0, 0);
         Translation = Vector3(0, 0, 0);
 
-        Rotation = Quat(0, 0, 0, 1);
+        Rotation = Quat(1, 0, 0, 0);
         GlobalRotation = Rotation;
 
         GlobalScale = Vector3(1, 1, 1);
