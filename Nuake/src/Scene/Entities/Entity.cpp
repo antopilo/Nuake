@@ -83,6 +83,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(MeshColliderComponent);
 		DESERIALIZE_COMPONENT(SphereColliderComponent);
 		DESERIALIZE_COMPONENT(RigidBodyComponent);
+		DESERIALIZE_COMPONENT(BSPBrushComponent);
 		return true;
 	}
 

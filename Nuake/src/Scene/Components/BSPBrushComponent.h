@@ -35,9 +35,18 @@ namespace Nuake {
 		{
 			BEGIN_SERIALIZE();
 
-			for (uint32_t i = 0; i < Meshes.size(); i++)
+			for (uint32_t i = 0; i < Hulls.size() - 1; i++)
 			{
-				j["Meshes"][i] = Meshes[i]->Serialize();
+				json hullPointsJson;
+
+				const size_t hullSize = Hulls[i].size() - 1;
+				for (uint32_t j = 0; j < hullSize; j++)
+				{
+					hullPointsJson[j]["x"] = Hulls[i][j].x;
+					hullPointsJson[j]["y"] = Hulls[i][j].y;
+					hullPointsJson[j]["z"] = Hulls[i][j].z;
+				}
+				j["Hulls"][i] = hullPointsJson;
 			}
 
 			j["IsSolid"] = IsSolid;
@@ -51,6 +60,23 @@ namespace Nuake {
 			if (j.contains("IsSolider"))
 			{
 				IsSolid = j["IsSolid"];
+			}
+
+			if (j.contains("Hulls"))
+			{
+				for (auto& h : j["Hulls"])
+				{
+					std::vector<Vector3> hull;
+					hull.reserve(h.size());
+					for (auto& point : h)
+					{
+						Vector3 pointPos;
+						DESERIALIZE_VEC3(point, pointPos);
+						hull.push_back(std::move(pointPos));
+					}
+
+					Hulls.push_back(hull);
+				}
 			}
 
 			return true;
