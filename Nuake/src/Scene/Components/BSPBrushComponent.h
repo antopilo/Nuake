@@ -38,6 +38,7 @@ namespace Nuake {
 				j["Meshes"][i] = Meshes[i]->Serialize();
 			}
 
+			j["IsSolid"] = IsSolid;
 			END_SERIALIZE();
 		}
 
@@ -45,7 +46,10 @@ namespace Nuake {
 		{
 			BEGIN_DESERIALIZE();
 
-
+			if (j.contains("IsSolider"))
+			{
+				IsSolid = j["IsSolid"];
+			}
 
 			return true;
 		}
