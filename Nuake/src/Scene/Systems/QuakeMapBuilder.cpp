@@ -510,7 +510,7 @@ namespace Nuake {
                 {
                     brush* brush_inst = &entity_inst->brushes[b];
                     brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
-
+                    std::vector<Vector3> pointsInBrush;
                     for (int f = 0; f < brush_inst->face_count; ++f)
                     {
                         face* face = &brush_inst->faces[f];
@@ -553,6 +553,11 @@ namespace Nuake {
                                 vertex.vertex.x * quakeMapC.ScaleFactor
                             );
 
+                            // We need to push the hull points because the batching
+                            // will create 1 model per material, this prevents us from
+                            // having 1 collision shape per brush(convex).
+                            pointsInBrush.push_back(vertexPos);
+
                             Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
                             Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
                             Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
@@ -568,18 +573,6 @@ namespace Nuake {
                             });
                         }
 
-                        // We need to push the hull points because the batching
-                        // will create 1 model per material, this prevents us from
-                        // having 1 collision shape per brush(convex).
-                        std::vector<Vector3> hullPoints;
-                        hullPoints.reserve(vertices.size());
-                        for (const auto& v : vertices)
-                        {
-                            hullPoints.push_back(v.position);
-                        }
-
-                        bsp.Hulls.push_back(hullPoints);
-
                         for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
                         {
                             uint32_t index = face_geo_inst->indices[i];
@@ -591,6 +584,8 @@ namespace Nuake {
                         vertices.clear();
                         indices.clear();
                     }
+
+                    bsp.Hulls.push_back(std::move(pointsInBrush));
                 }
 
                 Ref<Model> model = CreateRef<Model>();
