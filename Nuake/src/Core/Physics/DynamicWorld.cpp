@@ -330,12 +330,30 @@ namespace Nuake
 				
 				shapeResult = shapeSettings.Create();
 			}
-				break;
+			break;
+			case CONVEX_HULL:
+			{
+				ConvexHullShape* shape = (ConvexHullShape*)rbShape.get();
+
+				const auto& hullPoints = shape->GetPoints();
+				JPH::Array<JPH::Vec3> points;
+				points.reserve(std::size(hullPoints));
+				for (const auto& p : hullPoints)
+				{
+					points.push_back(JPH::Vec3(p.x, p.y, p.z));
+				}
+
+				JPH::ConvexHullShapeSettings shapeSettings(points);
+				shapeResult = shapeSettings.Create();
 			}
-			float mass = rb->_mass;
+			break;
+			}
 
 			JPH::EMotionType motionType = JPH::EMotionType::Static;
-			if (mass > 0.0f)
+
+			float mass = rb->_mass;
+			// According to jolt documentation, Mesh shapes should only be static.
+			if (mass > 0.0f && rb->GetShape()->GetType() != MESH)
 			{
 				motionType = JPH::EMotionType::Dynamic;
 			}

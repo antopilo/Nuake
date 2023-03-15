@@ -8,7 +8,7 @@ namespace Nuake
 	{
 		enum RigidbodyShapes 
 		{
-			BOX, SPHERE, CAPSULE, MESH, CYLINDER
+			BOX, SPHERE, CAPSULE, MESH, CYLINDER, CONVEX_HULL
 		};
 
 		class PhysicShape 
@@ -92,6 +92,23 @@ namespace Nuake
 			void SetMesh(Ref<Mesh> mesh) { m_Mesh = mesh; }
 			Ref<Mesh> GetMesh() { return m_Mesh; }
 		};
-	}
 
+		class ConvexHullShape : public PhysicShape
+		{
+		private:
+			std::vector<Vector3> _points;
+
+		public:
+			ConvexHullShape(const std::vector<Vector3>& points) : _points(points)
+			{
+				m_Type = CONVEX_HULL;
+			}
+
+			std::vector<Vector3> GetPoints() const { return _points; }
+			void SetPoints(const std::vector<Vector3>& points)
+			{
+				_points = points;
+			}
+		};
+	}
 }
