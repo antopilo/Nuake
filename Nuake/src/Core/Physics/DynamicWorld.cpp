@@ -6,6 +6,8 @@
 
 #include <src/Core/Physics/PhysicsShapes.h>
 
+#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
+
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
@@ -18,6 +20,7 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 #include <Jolt/Physics/Collision/Shape/CylinderShape.h>
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
@@ -188,7 +191,7 @@ namespace Nuake
 			std::cout << "A body went to sleep" << std::endl;
 		}
 	};
-	JPH::BodyID sphere_id;
+
 	BPLayerInterfaceImpl JoltBroadphaseLayerInterface = BPLayerInterfaceImpl();
 	namespace Physics
 	{
@@ -217,33 +220,6 @@ namespace Nuake
 			// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
 			// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
 			_JoltBodyInterface = &_JoltPhysicsSystem->GetBodyInterface();
-
-			// Next we can create a rigid body to serve as the floor, we make a large box
-			// Create the settings for the collision volume (the shape). 
-			// Note that for simple shapes (like boxes) you can also directly construct a BoxShape.
-			JPH::BoxShapeSettings floor_shape_settings(JPH::Vec3(100.0f, 1.0f, 100.0f));
-
-			// Create the shape
-			JPH::ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-			JPH::ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
-
-			// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
-			JPH::BodyCreationSettings floor_settings(floor_shape, JPH::Vec3(0.0f, -1.0f, 0.0f), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
-
-			// Create the actual rigid body
-			JPH::Body* floor = _JoltBodyInterface->CreateBody(floor_settings); // Note that if we run out of bodies this can return nullptr
-
-			_JoltBodyInterface->AddBody(floor->GetID(), JPH::EActivation::DontActivate);
-
-			JPH::BodyCreationSettings sphere_settings(new JPH::SphereShape(0.5f), JPH::Vec3(0.0, 2.0, 0.0), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, Layers::MOVING);
-			sphere_id = _JoltBodyInterface->CreateAndAddBody(sphere_settings, JPH::EActivation::Activate);
-
-			// Now you can interact with the dynamic body, in this case we're going to give it a velocity.
-			// (note that if we had used CreateBody then we could have set the velocity straight on the body before adding it to the physics system)
-			_JoltBodyInterface->SetLinearVelocity(sphere_id, JPH::Vec3(0.0f, -5.0f, 0.0f));
-
-			// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
-			const float cDeltaTime = 1.0f / 60.0f;
 
 			// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
 			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
@@ -359,7 +335,8 @@ namespace Nuake
 			}
 
 			const auto& startPos = rb->GetPosition();
-			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), JPH::Vec3(startPos.x, startPos.y, startPos.z), JPH::Quat::sIdentity(), motionType, Layers::MOVING);
+			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
+			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), joltPos, JPH::Quat::sIdentity(), motionType, Layers::MOVING);
 
 			if (mass > 0.0f)
 			{
@@ -417,14 +394,22 @@ namespace Nuake
 					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
 				);
 
+				Vector3 scale = Vector3();
+				Quat rotation = Quat();
+				Vector3 pos = Vector3();
+				Vector3 skew = Vector3();
+				Vector4 pesp = Vector4();
+				glm::decompose(transform, scale, rotation, pos, skew, pesp);
+
 				uint32_t entId = bodyInterface.GetUserData(bodyId);
 				Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
 
 				const std::string& name = entity.GetComponent<NameComponent>().Name;
 				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
 				transformComponent.GlobalTransform = transform;
-				transformComponent.SetGlobalPosition(Vector3(position.GetX(), position.GetY(), position.GetZ()));
-				transformComponent.SetGlobalTransform(transform);
+				//transformComponent.SetLocalPosition(pos);
+				//transformComponent.SetLocalRotation(rotation);
+				//transformComponent.SetLocalScale(scale);
 				transformComponent.SetLocalTransform(transform);
 			}
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
