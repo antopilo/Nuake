@@ -1392,8 +1392,6 @@ namespace Nuake {
         }
     }
 
-    Ref<Scene> SceneSnapshot;
-    
     void EditorInterface::Draw()
     {
         Init();

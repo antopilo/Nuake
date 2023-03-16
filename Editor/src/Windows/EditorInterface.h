@@ -7,12 +7,15 @@
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
+
 namespace Nuake {
 	class Material;
 	class FileSystemUI;
 	class EditorInterface
 	{
 	private:
+		Ref<Scene> SceneSnapshot;
+
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;
