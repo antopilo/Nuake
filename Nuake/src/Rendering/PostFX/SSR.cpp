@@ -19,10 +19,11 @@ namespace Nuake {
 
 	void SSR::Resize(Vector2 size)
 	{
-		if (mSize == size)
+		Vector2 newSize = size * 0.5f;
+		if (mSize == newSize)
 			return;
 
-		mSize = size * 0.5f;
+		mSize = newSize;
 		Init();
 	}
 
