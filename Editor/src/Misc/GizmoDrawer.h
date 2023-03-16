@@ -18,15 +18,20 @@ private:
 	{
 		LineVertex {{10000.f, 0.0f, 0.0f},  {1.f, 0.f, 0.f, 1.f}},
 		LineVertex {{0.0f,    0.0f, 0.0f }, {1.f, 0.f, 0.f, 1.f}},
-		LineVertex {{0.f,      0.f, 10000.f }, {0.f, 1.f, 0.f, 1.f}},
-		LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 1.f, 0.f, 1.f}},
-		LineVertex {{0.f,  10000.f, 0.0f }, {0.f, 0.f, 1.f, 1.f}},
-		LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 0.f, 1.f, 1.f}}
+		LineVertex {{0.f,      0.f, 10000.f }, {0.f, 0.f, 1.f, 1.f}},
+		LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 0.f, 1.f, 1.f}},
+		LineVertex {{0.f,  10000.f, 0.0f }, {0.f, 1.f, 0.f, 1.f}},
+		LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 1.f, 0.f, 1.f}}
 	};
+	std::vector<LineVertex> circleVertices;
 
 	Ref<VertexArray> mAxisLineBuffer;
 	Ref<VertexBuffer> mAxisLineVertexBuffer;
+	Ref<VertexArray> mCircleBuffer;
+	Ref<VertexBuffer> mCircleVertexBuffer;
 	Shader* mLineShader;
+
+	void GenerateSphereGizmo();
 
 public:
 	GizmoDrawer();
