@@ -34,6 +34,9 @@ int main(int argc, char* argv[])
 {
     bool playMode = false;
     std::string projectPath = "";
+
+    Vector2 editorResolution = Vector2(1280, 720);
+    int monitorIdx = -1;
     for (uint32_t i = 0; i < argc; i++)
     {
         char* arg = argv[i];
@@ -46,6 +49,31 @@ int main(int argc, char* argv[])
                 projectPath = std::string(argv[i + 1]);
             }
             playMode = true;
+        }
+
+        if (args == "--resolution")
+        {
+            if (argc >= i + 1)
+            {
+                std::string resString = std::string(argv[i + 1]);
+                const auto& resSplits = String::Split(resString, 'x');
+                if (resSplits.size() == 2)
+                {
+                    int width = stoi(resSplits[0]);
+                    int height = stoi(resSplits[1]);
+                    editorResolution = Vector2(width, height);
+                }
+            }
+        }
+
+        if (args == "--monitor")
+        {
+            if (argc >= i + 1)
+            {
+                std::string monitorIdxString = std::string(argv[i + 1]);
+                monitorIdx = stoi(monitorIdxString);
+               
+            }
         }
     }
 
@@ -95,11 +123,18 @@ int main(int argc, char* argv[])
     else
     {
         Nuake::Engine::Init();
+        Engine::GetCurrentWindow()->SetSize(editorResolution);
+
         Nuake::EditorInterface editor;
         editor.BuildFonts();
 
         Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
         window->SetTitle(WindowTitle);
+
+        if (monitorIdx != -1)
+        {
+            window->SetMonitor(monitorIdx);
+        }
 
         using namespace Nuake;
 

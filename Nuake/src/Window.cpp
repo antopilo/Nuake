@@ -78,11 +78,31 @@ namespace Nuake {
         return m_Framebuffer;
     }
 
-    Vector2 Window::GetSize()
+    Vector2 Window::GetSize() const
     {
         int w, h = 0;
         glfwGetWindowSize(m_Window, &w, &h);
         return Vector2(w, h);
+    }
+
+    void Window::SetSize(const Vector2& size)
+    {
+        m_Width = size.x;
+        m_Height = size.y;
+        glfwSetWindowSize(m_Window, size.x, size.y);
+    }
+
+    void Window::SetMonitor(int monitorIdx)
+    {
+        int monitorCount;
+        GLFWmonitor** monitors = glfwGetMonitors(&monitorCount);
+
+        if (monitorIdx <= monitorCount)
+        {
+            const auto monitor = *(monitors + monitorIdx);
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+            glfwSetWindowMonitor(m_Window, monitor, 0, 0, m_Width, m_Height, mode->refreshRate);
+        }
     }
 
     int Window::Init()

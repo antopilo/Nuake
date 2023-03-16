@@ -42,7 +42,11 @@ namespace Nuake
 		void EndDraw();
 
 		Ref<FrameBuffer> GetFrameBuffer() const;
-		Vector2 GetSize();
+		Vector2 GetSize() const;
+		void SetSize(const Vector2& size);
+
+		void SetMonitor(int monitor);
+
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);
 
