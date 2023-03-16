@@ -556,7 +556,7 @@ namespace Nuake {
                             // We need to push the hull points because the batching
                             // will create 1 model per material, this prevents us from
                             // having 1 collision shape per brush(convex).
-                            pointsInBrush.push_back(vertexPos);
+                            pointsInBrush.push_back(vertexPos * (1.0f / 64.0f));
 
                             Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
                             Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
