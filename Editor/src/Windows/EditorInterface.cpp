@@ -82,9 +82,67 @@ namespace Nuake {
         if (ImGui::Begin(name.c_str()))
         {
             ImGui::PopStyleVar();
+
+
             Overlay();
             ImGuizmo::BeginFrame();
 
+            float availWidth = ImGui::GetContentRegionAvailWidth();
+            float windowWidth = ImGui::GetWindowWidth();
+
+            float used = windowWidth - availWidth;
+            float half = windowWidth / 2.0;
+            float needed = half - used;
+            //ImGui::Dummy(ImVec2(needed, 10));
+            //ImGui::SameLine();
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 8));
+            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
+            {
+                SceneSnapshot = Engine::GetCurrentScene()->Copy();
+                Engine::EnterPlayMode();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(297))
+            {
+                Engine::ExitPlayMode();
+
+                Engine::LoadScene(SceneSnapshot);
+                Selection = EditorSelection();
+            }
+
+            ImGui::SameLine();
+            
+            const auto& io = ImGui::GetIO();
+            float frameTime = 1000.0f / io.Framerate;
+            int fps = (int) io.Framerate;
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1, 0.1, 0.1, 1));
+            ImGui::BeginChild("FPS", ImVec2(60, 30), false);
+
+            std::string text = std::to_string(fps) + "fps";
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize(text.c_str()).x
+                - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text(text.c_str());
+
+            ImGui::EndChild();
+            ImGui::SameLine();
+            ImGui::BeginChild("frametime", ImVec2(60, 30), false);
+            std::ostringstream out;
+            out.precision(2);
+            out << std::fixed << frameTime;
+            text = out.str() + "ms";
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize(text.c_str()).x
+                - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+            ImGui::Text(text.c_str());
+
+            ImGui::EndChild();
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
+
+            ImGui::PopStyleVar(1);
             ImGuizmo::SetOrthographic(false);
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
             Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
@@ -94,6 +152,7 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize);
 
             Ref<Texture> texture = framebuffer->GetTexture();
+            ImVec2 imagePos = ImGui::GetCursorPos();
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
             const Vector2& mousePos = Input::GetMousePosition();
@@ -104,8 +163,8 @@ namespace Nuake {
             m_IsHoveringViewport = isInsideWidth && isInsideHeight;
 
             ImGuizmo::SetDrawlist();
-            ImGuizmo::AllowAxisFlip(false);
-            ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+            ImGuizmo::AllowAxisFlip(true);
+            ImGuizmo::SetRect(imagePos.x, imagePos.y * 3.0, viewportPanelSize.x, viewportPanelSize.y);
 
             if (m_DrawGrid && !Engine::IsPlayMode)
             {
@@ -1127,7 +1186,7 @@ namespace Nuake {
             ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
             ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
             ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-            ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+            ImGui::SetNextWindowPos(window_pos + ImVec2(0, 36), ImGuiCond_Always, window_pos_pivot);
             ImGui::SetNextWindowViewport(viewport->ID);
         }
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
