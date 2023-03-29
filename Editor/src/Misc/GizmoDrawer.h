@@ -24,15 +24,20 @@ private:
 		LineVertex {{0.0f,    0.0f, 0.0f }, {0.f, 1.f, 0.f, 1.f}}
 	};
 	std::vector<LineVertex> circleVertices;
+	Ref<VertexArray> mCircleBuffer;
+	Ref<VertexBuffer> mCircleVertexBuffer;
+
+	std::vector<LineVertex> capsuleVertices;
+	Ref<VertexArray> mCapsuleBuffer;
+	Ref<VertexBuffer> mCapsuleVertexBuffer;
 
 	Ref<VertexArray> mAxisLineBuffer;
 	Ref<VertexBuffer> mAxisLineVertexBuffer;
-	Ref<VertexArray> mCircleBuffer;
-	Ref<VertexBuffer> mCircleVertexBuffer;
+
 	Shader* mLineShader;
 
 	void GenerateSphereGizmo();
-
+	void GenerateCapsuleGizmo();
 public:
 	GizmoDrawer();
 	~GizmoDrawer() = default;
