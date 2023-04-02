@@ -52,6 +52,9 @@ namespace Nuake
 			RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
 			void StepSimulation(Timestep ts);
 			void Clear();
+
+		private:
+
 		};
 	}
 }

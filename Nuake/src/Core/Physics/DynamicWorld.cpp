@@ -389,10 +389,11 @@ namespace Nuake
 
 			for (const auto& body : _registeredBodies)
 			{
-				JPH::BodyID bodyId = static_cast<JPH::BodyID>(body);
+				auto bodyId = static_cast<JPH::BodyID>(body);
 				JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
 				JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 				JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
+				const auto bodyRotation = bodyInterface.GetRotation(bodyId);
 
 				Matrix4 transform = glm::mat4(
 					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
@@ -416,7 +417,7 @@ namespace Nuake
 				//transformComponent.GlobalTransform = transform;
 				transformComponent.SetLocalPosition(pos);
 				transformComponent.Dirty = false;
-				transformComponent.SetLocalRotation(rotation);
+				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				//transformComponent.SetLocalScale(scale);
 
 				Matrix4 newTransform = Matrix4(1.0f);
@@ -430,30 +431,34 @@ namespace Nuake
 				const std::string& logMsg = "Physics pos: " + name + " at " + posStr;
 				Logger::Log(logMsg);
 			}
-			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
+
+			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable.
+			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
-			const float minStepDuration = 1.0f / 60.0f;
+			constexpr float minStepDuration = 1.0f / 60.0f;
 			if(ts > minStepDuration)
 			{
-				collisionSteps = ts / minStepDuration;
+				collisionSteps = static_cast<float>(ts) / minStepDuration;
 			}
 
 			// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
-			const int cIntegrationSubSteps = 1;
+			constexpr int subSteps = 1;
 
 			// Step the world
-			_JoltPhysicsSystem->Update(ts, collisionSteps, cIntegrationSubSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+			_JoltPhysicsSystem->Update(ts, collisionSteps, subSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
 		}
 
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
 
-			if (_registeredBodies.size() > 0)
+			if (_registeredBodies.empty())
 			{
-				_JoltBodyInterface->RemoveBodies((JPH::BodyID*)_registeredBodies.data(), _registeredBodies.size());
-				_registeredBodies.clear();
+				return;
 			}
+			
+			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
+			_registeredBodies.clear();
 		}
 	}
 }
