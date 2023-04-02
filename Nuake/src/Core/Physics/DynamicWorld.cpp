@@ -406,20 +406,36 @@ namespace Nuake
 
 				const std::string& name = entity.GetComponent<NameComponent>().Name;
 				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
-				transformComponent.GlobalTransform = transform;
-				//transformComponent.SetLocalPosition(pos);
-				//transformComponent.SetLocalRotation(rotation);
+				//transformComponent.GlobalTransform = transform;
+				transformComponent.SetLocalPosition(pos);
+				transformComponent.Dirty = false;
+				transformComponent.SetLocalRotation(rotation);
 				//transformComponent.SetLocalScale(scale);
+
+				Matrix4 newTransform = Matrix4(1.0f);
+				newTransform = glm::translate(newTransform, pos);
+				newTransform = newTransform * glm::toMat4(rotation);
+				newTransform = glm::scale(newTransform, transformComponent.GetGlobalScale());
+
 				transformComponent.SetLocalTransform(transform);
+
+				const std::string& posStr = "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ", " + std::to_string(pos.z) + ")";
+				const std::string& logMsg = "Physics pos: " + name + " at " + posStr;
+				Logger::Log(logMsg);
 			}
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
-			const int cCollisionSteps = 1;
+			int collisionSteps = 1;
+			const float minStepDuration = 1.0f / 60.0f;
+			if(ts > minStepDuration)
+			{
+				collisionSteps = ts / minStepDuration;
+			}
 
 			// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
 			const int cIntegrationSubSteps = 1;
 
 			// Step the world
-			_JoltPhysicsSystem->Update(ts, cCollisionSteps, cIntegrationSubSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+			_JoltPhysicsSystem->Update(ts, collisionSteps, cIntegrationSubSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
 		}
 
 		void DynamicWorld::Clear()

@@ -39,7 +39,7 @@ namespace Nuake {
 			{
 				json hullPointsJson;
 
-				const size_t hullSize = Hulls[i].size() - 1;
+				const size_t hullSize = Hulls[i].size();
 				for (uint32_t j = 0; j < hullSize; j++)
 				{
 					hullPointsJson[j]["x"] = Hulls[i][j].x;
@@ -57,7 +57,7 @@ namespace Nuake {
 		{
 			BEGIN_DESERIALIZE();
 
-			if (j.contains("IsSolider"))
+			if (j.contains("IsSolid"))
 			{
 				IsSolid = j["IsSolid"];
 			}
@@ -72,7 +72,7 @@ namespace Nuake {
 					{
 						Vector3 pointPos;
 						DESERIALIZE_VEC3(point, pointPos);
-						hull.push_back(std::move(pointPos));
+						hull.push_back((pointPos));
 					}
 
 					Hulls.push_back(hull);

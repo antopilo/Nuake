@@ -50,6 +50,8 @@ namespace Nuake
 		m_TimeStep = m_Time - m_LastFrameTime;
 		m_LastFrameTime = m_Time;
 
+		m_TimeStep = std::min((float)m_TimeStep, 0.5f);
+
 		// Dont update if no scene is loaded.
 		if (CurrentWindow->GetScene()) 
 		{

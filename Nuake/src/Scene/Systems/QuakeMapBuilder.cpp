@@ -467,7 +467,7 @@ namespace Nuake {
                 {
                     Entity newPEntity = Engine::GetCurrentScene()->CreateEntity("New prefab Entity");
                     newEntity.AddChild(newPEntity);
-                    PrefabComponent& prefabComponent = newPEntity.AddComponent<PrefabComponent>();
+                    auto& prefabComponent = newPEntity.AddComponent<PrefabComponent>();
                     prefabComponent.SetPrefab(Prefab::New(pointEntity.Prefab));
                     for (auto& e : prefabComponent.PrefabInstance->Entities)
                     {
@@ -497,8 +497,8 @@ namespace Nuake {
                 Entity brushEntity = m_Scene->CreateEntity("WorldSpawn");
                 newEntity.AddChild(brushEntity);
 
-                TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
-                BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
+                auto& transformComponent = brushEntity.GetComponent<TransformComponent>();
+                auto& bsp = brushEntity.AddComponent<BSPBrushComponent>();
                 
                 bsp.IsSolid = true;
                 bsp.IsTransparent = false;
