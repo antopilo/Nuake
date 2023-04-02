@@ -353,6 +353,7 @@ namespace Nuake
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
 		{
+
 		}
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
@@ -409,27 +410,20 @@ namespace Nuake
 				Vector4 pesp = Vector4();
 				glm::decompose(transform, scale, rotation, pos, skew, pesp);
 
-				uint32_t entId = bodyInterface.GetUserData(bodyId);
+				auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId));
 				Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
-
-				const std::string& name = entity.GetComponent<NameComponent>().Name;
-				TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
-				//transformComponent.GlobalTransform = transform;
+				auto& transformComponent = entity.GetComponent<TransformComponent>();
 				transformComponent.SetLocalPosition(pos);
-				transformComponent.Dirty = false;
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
-				//transformComponent.SetLocalScale(scale);
-
-				Matrix4 newTransform = Matrix4(1.0f);
-				newTransform = glm::translate(newTransform, pos);
-				newTransform = newTransform * glm::toMat4(rotation);
-				newTransform = glm::scale(newTransform, transformComponent.GetGlobalScale());
-
 				transformComponent.SetLocalTransform(transform);
+				transformComponent.Dirty = false;
 
+				/* Logging
+				const std::string& name = entity.GetComponent<NameComponent>().Name;
 				const std::string& posStr = "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ", " + std::to_string(pos.z) + ")";
 				const std::string& logMsg = "Physics pos: " + name + " at " + posStr;
 				Logger::Log(logMsg);
+				*/
 			}
 
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable.

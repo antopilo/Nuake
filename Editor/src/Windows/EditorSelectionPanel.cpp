@@ -38,7 +38,7 @@ void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
 
 void EditorSelectionPanel::Draw(EditorSelection selection)
 {
-    if (ImGui::Begin("Propreties"))
+    if (ImGui::Begin("Properties"))
     {
         switch (selection.Type)
         {
@@ -101,6 +101,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mRigidbodyPanel.Draw(entity);
     mBoxColliderPanel.Draw(entity);
     mSphereColliderPanel.Draw(entity);
+	mCapsuleColliderPanel.Draw(entity);
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
 }
@@ -126,6 +127,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)
             MenuItemComponent("Box collider", Nuake::BoxColliderComponent)
+			MenuItemComponent("Capsule collider", Nuake::CapsuleColliderComponent)
             MenuItemComponent("Sphere collider", Nuake::SphereColliderComponent)
             MenuItemComponent("Mesh collider", Nuake::MeshColliderComponent)
 			ImGui::Separator();

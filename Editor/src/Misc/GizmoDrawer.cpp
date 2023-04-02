@@ -11,6 +11,8 @@
 
 #include <dependencies/GLEW/include/GL/glew.h>
 
+#include "src/Scene/Components/CapsuleColliderComponent.h"
+
 GizmoDrawer::GizmoDrawer()
 {
 	mLineShader = Nuake::ShaderManager::GetShader("resources/Shaders/line.shader");
@@ -199,10 +201,10 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
-	auto capsuleColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
+	auto capsuleColliderView = scene->m_Registry.view<TransformComponent, CapsuleColliderComponent>();
 	for (auto e : capsuleColliderView)
 	{
-		auto [transform, capsule] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
+		auto [transform, capsule] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
 		mLineShader->Bind();
 		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation));
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());

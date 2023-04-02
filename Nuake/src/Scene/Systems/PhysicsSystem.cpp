@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/CapsuleColliderComponent.h"
 #include "src/Scene/Components/SphereCollider.h"
 #include "src/Scene/Components/MeshCollider.h"
 #include "src/Scene/Components/ModelComponent.h"
@@ -38,6 +39,17 @@ namespace Nuake
 				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), boxShape, ent);
 				PhysicsManager::Get()->RegisterBody(rigidBody);
  			}
+
+			if (ent.HasComponent<CapsuleColliderComponent>())
+			{
+				auto& capsuleComponent = ent.GetComponent<CapsuleColliderComponent>();
+				float radius = capsuleComponent.Radius;
+				float height = capsuleComponent.Height;
+				auto capsuleShape = CreateRef<Physics::Capsule>(radius, height);
+
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), capsuleShape, ent);
+				PhysicsManager::Get()->RegisterBody(rigidBody);
+			}
 
 			if (ent.HasComponent<SphereColliderComponent>())
 			{

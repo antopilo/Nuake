@@ -13,6 +13,7 @@
 #include "../ComponentsPanel/CameraPanel.h"
 #include "../ComponentsPanel/RigidbodyPanel.h"
 #include "../ComponentsPanel/BoxColliderPanel.h"
+#include "../ComponentsPanel/CapsuleColliderPanel.h"
 #include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
@@ -29,6 +30,8 @@ private:
 	BoxColliderPanel mBoxColliderPanel;
 	SphereColliderPanel mSphereColliderPanel;
 	MeshColliderPanel mMeshColliderPanel;
+	CapsuleColliderPanel mCapsuleColliderPanel;
+
 	CharacterControllerPanel mCharacterControllerPanel;
 
 	Ref<Nuake::File> currentFile;
