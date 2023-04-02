@@ -75,6 +75,13 @@ namespace Nuake
 			}
 		}
 
+		const auto characterControllerView = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
+		for (auto e : characterControllerView)
+		{
+			auto [transformComponent, characterControllerComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
+
+		}
+
 		//// character controllers
 		//auto ccview = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 		//for (auto e : ccview)

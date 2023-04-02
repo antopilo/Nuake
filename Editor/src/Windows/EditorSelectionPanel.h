@@ -15,6 +15,7 @@
 #include "../ComponentsPanel/BoxColliderPanel.h"
 #include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
+#include "../ComponentsPanel/CharacterControllerPanel.h"
 
 class EditorSelectionPanel {
 private:
@@ -28,6 +29,7 @@ private:
 	BoxColliderPanel mBoxColliderPanel;
 	SphereColliderPanel mSphereColliderPanel;
 	MeshColliderPanel mMeshColliderPanel;
+	CharacterControllerPanel mCharacterControllerPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

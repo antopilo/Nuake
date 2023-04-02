@@ -41,7 +41,7 @@ namespace Nuake
 		Renderer2D::Init();
 		Logger::Log("2D renderer initialized");
 
-		Logger::Log("Engine initialized succesfully!");
+		Logger::Log("Engine initialized successfully!");
 	}
 
 	void Engine::Tick()

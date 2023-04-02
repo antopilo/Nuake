@@ -24,6 +24,7 @@
 
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <Jolt/Physics/Character/Character.h>
 
 namespace Nuake
 {
@@ -356,6 +357,12 @@ namespace Nuake
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 		{
+			auto settings = new JPH::CharacterSettings();
+			settings->mMaxSlopeAngle = JPH::DegreesToRadians(45.0f);
+			settings->mLayer = Layers::MOVING;
+			settings->mFriction = 0.5f;
+
+			// Shape here
 		}
 
 		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)

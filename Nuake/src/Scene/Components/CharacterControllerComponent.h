@@ -5,7 +5,7 @@ namespace Nuake {
 	class CharacterControllerComponent
 	{
 	public:
-		Ref < Physics::CharacterController>  CharacterController;
+		Ref<Physics::CharacterController>  CharacterController;
 
 		float Height = 1.0f;
 		float Radius = 0.2f;
