@@ -22,20 +22,14 @@ namespace Nuake
 
 	void AudioManager::PlayTTS(const std::string& text)
 	{
-		SoLoud::Speech speech;
-		speech.setText(text.c_str());
-		_soloud->play(speech);
 
-		// Wait until sounds have finished
-		while (_soloud->getActiveVoiceCount() > 0)
-		{
-			// Still going, sleep for a bit
-			SoLoud::Thread::sleep(100);
-		}
 	}
 
 	void AudioManager::AudioThreadLoop()
 	{
+		SoLoud::Speech speech;
+		speech.setText("Nuake");
+		_soloud->play(speech);
 		while(_audioThreadRunning)
 		{
 			

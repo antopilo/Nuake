@@ -7,6 +7,7 @@
 namespace SoLoud
 {
 	class Soloud;
+	class AudioSource;
 }
 
 namespace Nuake
@@ -21,6 +22,7 @@ namespace Nuake
 		std::thread _audioThread;
 		std::mutex _audioMutex;
 
+		const int MAX_VOICE_COUNT = 32;
 	public:
 		AudioManager() = default;
 		~AudioManager() = default;

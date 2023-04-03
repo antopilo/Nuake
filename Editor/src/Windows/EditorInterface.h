@@ -4,13 +4,17 @@
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
 
+
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
+#include "AudioWindow.h"
 
-namespace Nuake {
+namespace Nuake
+{
 	class Material;
 	class FileSystemUI;
+
 	class EditorInterface
 	{
 	private:
@@ -32,6 +36,7 @@ namespace Nuake {
 		bool m_IsMaterialSelected = false;
 	public:
 		WelcomeWindow* _WelcomeWindow;
+		AudioWindow* _audioWindow;
 		FileSystemUI* filesystem;
 		EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
