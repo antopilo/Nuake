@@ -1389,7 +1389,7 @@ namespace Nuake {
                 if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
                 {
                     m_DebugCollisions = !m_DebugCollisions;
-                    PhysicsManager::Get()->SetDrawDebug(m_DebugCollisions);
+                    PhysicsManager::Get().SetDrawDebug(m_DebugCollisions);
                 }
 
                 if (ImGui::MenuItem("Settings", NULL)) {}

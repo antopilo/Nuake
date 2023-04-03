@@ -70,13 +70,13 @@ namespace Nuake
 		i >> j;
 
 		// validation
-		std::string projectName = "";
+		std::string projectName;
 		if (!j.contains("ProjectName"))
 			return nullptr;
 
 		projectName = j["ProjectName"];
 
-		std::string description = "";
+		std::string description;
 		if (j.contains("Description"))
 			description = j["Description"];
 

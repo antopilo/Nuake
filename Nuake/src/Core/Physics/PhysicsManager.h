@@ -17,11 +17,10 @@ namespace Nuake
 		bool m_DrawDebug = false;
 		static PhysicsManager* m_Instance;
 	public:
-		static PhysicsManager* Get()
+		static PhysicsManager& Get()
 		{
-			if (!m_Instance)
-				m_Instance = new PhysicsManager();
-			return m_Instance;
+			static PhysicsManager instance;
+			return instance;
 		}
 
 		Physics::DynamicWorld* GetWorld() { return m_World; }

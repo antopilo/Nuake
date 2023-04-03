@@ -13,6 +13,7 @@ include "Nuake/dependencies/glfw_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
 include "Nuake/dependencies/jolt_p5.lua"
+include "Nuake/dependencies/soloud_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -58,12 +59,14 @@ project "Nuake"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
-        "%{prj.name}/../Nuake/Dependencies/build"
+        "%{prj.name}/../Nuake/Dependencies/build",
+        "%{prj.name}/../Nuake/Dependencies/soloud/include"
     }
 
     links
     {
-		"Freetype"
+		"Freetype",
+        "soloud"
     }
 
     filter "system:windows"
@@ -103,7 +106,8 @@ project "Editor"
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
 		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/Dependencies/build"
+        "%{prj.name}/../Nuake/Dependencies/build",
+        "%{prj.name}/../Nuake/Dependencies/soloud/include"
     }
     
     libdirs 
@@ -116,7 +120,8 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/win64",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
-        "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/"
+        "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
+        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
     }
 
     links
@@ -127,7 +132,8 @@ project "Editor"
         "glew32s.lib", 
         "opengl32.lib",
 		"Freetype",
-		"JoltPhysics"
+		"JoltPhysics",
+        "soloud"
     }
 
     filter "system:windows"

@@ -5,6 +5,7 @@
 #include "src/Core/Input.h"
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
+#include "src/Audio/AudioManager.h"
 
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
@@ -29,7 +30,12 @@ namespace Nuake
 	{
 		Logger::Log("Nuake initializing");
 
-		PhysicsManager::Get()->Init();
+		AudioManager::Get().Initialize();
+		Logger::Log("Audio engine initialized");
+
+		AudioManager::Get().PlayTTS("Nuake Engine debug");
+
+		PhysicsManager::Get().Init();
 		Logger::Log("Physics initialized");
 
 		// Creates the window
