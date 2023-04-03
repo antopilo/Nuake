@@ -16,3 +16,6 @@
 [submodule "Nuake/dependencies/JoltPhysics"]
 	path = Nuake/dependencies/JoltPhysics
 	url = https://github.com/antopilo/JoltPhysics.git
+[submodule "Nuake/dependencies/soloud"]
+	path = Nuake/dependencies/soloud
+	url = https://github.com/antopilo/soloud.git
