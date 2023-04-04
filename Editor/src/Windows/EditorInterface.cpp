@@ -1479,6 +1479,7 @@ namespace Nuake {
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
 
+        /*
         if (ImGui::Begin("Toolbar", 0, ImGuiWindowFlags_NoScrollbar | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiWindowFlags_NoDecoration))
         {
             float availWidth = ImGui::GetContentRegionAvailWidth();
@@ -1506,6 +1507,7 @@ namespace Nuake {
             }
         }
         ImGui::End();
+        */
     }
 
     void EditorInterface::Update(float ts)

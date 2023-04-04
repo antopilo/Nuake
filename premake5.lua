@@ -93,7 +93,9 @@ project "Editor"
     files
     {
         "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp"
+        "%{prj.name}/**.cpp",
+        "%{prj.name}/resources/*.rc",
+        "%{prj.name}/resources/**.ico"
     }
 
     includedirs

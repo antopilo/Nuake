@@ -15,6 +15,15 @@ namespace Nuake
 		_audioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 	}
 
+	AudioManager::~AudioManager()
+	{
+		Deinitialize();
+
+		_audioThreadRunning = false;
+		_audioThread.join();
+	}
+
+
 	void AudioManager::Deinitialize()
 	{
 		_soloud->deinit();
@@ -27,9 +36,6 @@ namespace Nuake
 
 	void AudioManager::AudioThreadLoop()
 	{
-		SoLoud::Speech speech;
-		speech.setText("Nuake");
-		_soloud->play(speech);
 		while(_audioThreadRunning)
 		{
 			

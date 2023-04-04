@@ -25,7 +25,7 @@ namespace Nuake
 		const int MAX_VOICE_COUNT = 32;
 	public:
 		AudioManager() = default;
-		~AudioManager() = default;
+		~AudioManager();
 
 		static AudioManager& Get()
 		{
