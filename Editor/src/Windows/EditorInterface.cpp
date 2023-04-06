@@ -55,7 +55,7 @@ namespace Nuake {
     {
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
-
+        _audioWindow = new AudioWindow();
         m_EntitySelectionFramebuffer = CreateRef<FrameBuffer>(false, Vector2(1280, 720));
     }
 
@@ -1389,7 +1389,7 @@ namespace Nuake {
                 if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
                 {
                     m_DebugCollisions = !m_DebugCollisions;
-                    PhysicsManager::Get()->SetDrawDebug(m_DebugCollisions);
+                    PhysicsManager::Get().SetDrawDebug(m_DebugCollisions);
                 }
 
                 if (ImGui::MenuItem("Settings", NULL)) {}
@@ -1463,6 +1463,8 @@ namespace Nuake {
 
         pInterface.m_CurrentProject = Engine::GetProject();
 
+        _audioWindow->Draw();
+
         DrawMenuBar();
 
 		pInterface.DrawEntitySettings();
@@ -1477,6 +1479,7 @@ namespace Nuake {
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
 
+        /*
         if (ImGui::Begin("Toolbar", 0, ImGuiWindowFlags_NoScrollbar | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiWindowFlags_NoDecoration))
         {
             float availWidth = ImGui::GetContentRegionAvailWidth();
@@ -1504,6 +1507,7 @@ namespace Nuake {
             }
         }
         ImGui::End();
+        */
     }
 
     void EditorInterface::Update(float ts)

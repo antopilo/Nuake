@@ -5,6 +5,7 @@
 #include "src/Core/Input.h"
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
+#include "src/Audio/AudioManager.h"
 
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
@@ -29,7 +30,12 @@ namespace Nuake
 	{
 		Logger::Log("Nuake initializing");
 
-		PhysicsManager::Get()->Init();
+		AudioManager::Get().Initialize();
+		Logger::Log("Audio engine initialized");
+
+		AudioManager::Get().PlayTTS("Nuake Engine debug");
+
+		PhysicsManager::Get().Init();
 		Logger::Log("Physics initialized");
 
 		// Creates the window
@@ -41,7 +47,7 @@ namespace Nuake
 		Renderer2D::Init();
 		Logger::Log("2D renderer initialized");
 
-		Logger::Log("Engine initialized succesfully!");
+		Logger::Log("Engine initialized successfully!");
 	}
 
 	void Engine::Tick()
@@ -49,6 +55,8 @@ namespace Nuake
 		m_Time = (float)glfwGetTime();
 		m_TimeStep = m_Time - m_LastFrameTime;
 		m_LastFrameTime = m_Time;
+
+		m_TimeStep = std::min((float)m_TimeStep, 0.5f);
 
 		// Dont update if no scene is loaded.
 		if (CurrentWindow->GetScene()) 

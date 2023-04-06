@@ -33,7 +33,7 @@ namespace Nuake {
 					wrenGetSlotDouble(vm, 5),
 					wrenGetSlotDouble(vm, 6));
 
-				RaycastResult result = PhysicsManager::Get()->Raycast(v1, v2);
+				RaycastResult result = PhysicsManager::Get().Raycast(v1, v2);
 				wrenSetSlotNewList(vm, 0);
 
 				// Returns a list with 3 vectors placed sequentially

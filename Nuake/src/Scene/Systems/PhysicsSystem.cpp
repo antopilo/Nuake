@@ -1,6 +1,7 @@
 #include "PhysicsSystem.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/CapsuleColliderComponent.h"
 #include "src/Scene/Components/SphereCollider.h"
 #include "src/Scene/Components/MeshCollider.h"
 #include "src/Scene/Components/ModelComponent.h"
@@ -36,8 +37,19 @@ namespace Nuake
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
 
 				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), boxShape, ent);
-				PhysicsManager::Get()->RegisterBody(rigidBody);
+				PhysicsManager::Get().RegisterBody(rigidBody);
  			}
+
+			if (ent.HasComponent<CapsuleColliderComponent>())
+			{
+				auto& capsuleComponent = ent.GetComponent<CapsuleColliderComponent>();
+				float radius = capsuleComponent.Radius;
+				float height = capsuleComponent.Height;
+				auto capsuleShape = CreateRef<Physics::Capsule>(radius, height);
+
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), capsuleShape, ent);
+				PhysicsManager::Get().RegisterBody(rigidBody);
+			}
 
 			if (ent.HasComponent<SphereColliderComponent>())
 			{
@@ -47,7 +59,7 @@ namespace Nuake
 				auto shape = CreateRef<Physics::Sphere>(component.Radius);
 
 				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
-				PhysicsManager::Get()->RegisterBody(rigidBody);
+				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 
 			if (ent.HasComponent<MeshColliderComponent>())
@@ -70,9 +82,16 @@ namespace Nuake
 					Ref<Mesh> mesh = submeshes[subMeshId];
 					auto shape = CreateRef<Physics::MeshShape>(mesh);
 					rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
-					PhysicsManager::Get()->RegisterBody(rigidBody);
+					PhysicsManager::Get().RegisterBody(rigidBody);
 				}
 			}
+		}
+
+		const auto characterControllerView = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
+		for (auto e : characterControllerView)
+		{
+			auto [transformComponent, characterControllerComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
+
 		}
 
 		//// character controllers
@@ -104,7 +123,7 @@ namespace Nuake
 
 				btRigidbody->SetEntityID(Entity{ e, m_Scene });
 				brush.Rigidbody.push_back(btRigidbody);
-				PhysicsManager::Get()->RegisterBody(btRigidbody);
+				PhysicsManager::Get().RegisterBody(btRigidbody);
 			}
 		}
 
@@ -190,11 +209,11 @@ namespace Nuake
 		if (!Engine::IsPlayMode)
 			return;
 
-		PhysicsManager::Get()->Step(ts);
+		PhysicsManager::Get().Step(ts);
 	}
 
 	void PhysicsSystem::Exit()
 	{
-		PhysicsManager::Get()->Reset();
+		PhysicsManager::Get().Reset();
 	}
 }

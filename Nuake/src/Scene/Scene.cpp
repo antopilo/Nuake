@@ -166,13 +166,15 @@ namespace Nuake {
 	{
 		std::vector<Entity> allEntities;
 		auto view = m_Registry.view<NameComponent>();
-		for (auto e : view) 
+		for (auto& e : view) 
 		{
 			Entity newEntity(e, this);
 
 			// Check if valid for deleted entities.
 			if (newEntity.IsValid())
+			{
 				allEntities.push_back(newEntity);
+			}
 		}
 		return allEntities;
 	}
