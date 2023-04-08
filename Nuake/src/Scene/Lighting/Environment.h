@@ -23,7 +23,7 @@ namespace Nuake
 	public:
 		Environment();
 
-		SkyType CurrentSkyType = SkyType::ClearColor;
+		SkyType CurrentSkyType = SkyType::ProceduralSky;
 
 		Color AmbientColor = Color(0, 0, 0, 1);
 		Ref<ProceduralSky> ProceduralSkybox;

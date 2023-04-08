@@ -166,12 +166,41 @@ namespace Nuake
 				if (ImGui::Button("New Project", buttonSize))
 				{
 					std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-					if (selectedProject == "") // Hit cancel
-						return;
 
-					auto pathSplit = String::Split(selectedProject, '/');
+					std::string projectPathWithExtension = selectedProject;
+					const bool endsWithExtension = String::EndsWith(projectPathWithExtension, ".project");
+					if(!endsWithExtension)
+					{
+						projectPathWithExtension += ".project";
+					}
+
+					
+					if (selectedProject.empty())
+					{
+						return;
+					}
+
+					auto driveSplit = std::string(selectedProject.begin() + 3, selectedProject.end());
+					auto pathSplit = String::Split(driveSplit, '/');
 					auto projectFileName = pathSplit[pathSplit.size() - 1];
-					Ref<Project> project = Project::New(projectFileName, "no description", selectedProject + ".project");
+
+					// We should create a folder now
+					// We substring minus 8 because we dont want the extension(.project) which is 8 chars.
+					const std::string directoryName = std::string(driveSplit.begin(), driveSplit.end());
+
+					const std::string finalProjectPath = 
+					if(!endsWithExtension)
+					{
+						bool dirCreated = std::filesystem::create_directory(selectedProject);
+						if (!dirCreated)
+						{
+							Logger::Log("Failed to create project directory: " + selectedProject);
+						}
+					}
+
+
+					const std::string projectFilePath = selectedProject + "/" + projectFileName + ".project";
+					Ref<Project> project = Project::New(projectFileName, "no description", projectFilePath);
 					Engine::LoadProject(project);
 					Engine::LoadScene(Scene::New());
 					project->Save();
