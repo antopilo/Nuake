@@ -271,6 +271,13 @@ namespace Nuake {
             return;
 
         Vector2 size = m_Framebuffer->GetSize();
+
+        if (size.x < 1 || size.y < 1)
+        {
+            size.x = 1.0;
+            size.y = 1.0;
+        }
+
         cam->AspectRatio = size.x / size.y;
         m_Scene->m_EditorCamera->OnWindowResize(size.x, size.y);
 
