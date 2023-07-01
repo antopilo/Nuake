@@ -167,44 +167,41 @@ namespace Nuake
 				{
 					std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
 
-					auto backslashSplits = String::Split(selectedProject, '\\');
-					auto fileName = backslashSplits[backslashSplits.size() - 1];
-
-					std::string finalPath = selectedProject;
-
-					bool endsWithExtension = String::EndsWith(fileName, ".project");
-					if (!endsWithExtension)
+					if (!selectedProject.empty())
 					{
-						// We need to createa folder
-						auto dirPath = selectedProject;
-						bool result = std::filesystem::create_directory(dirPath);
-						if (!result)
-						{   
-							// Should we continue?
-							Logger::Log("Failed creating project directoy: " + dirPath);
+						auto backslashSplits = String::Split(selectedProject, '\\');
+						auto fileName = backslashSplits[backslashSplits.size() - 1];
+
+						std::string finalPath = selectedProject;
+
+						if (String::EndsWith(fileName, ".project"))
+						{
+							// We need to create a folder
+							if (const auto& dirPath = selectedProject;
+								std::filesystem::create_directory(dirPath))
+							{
+								// Should we continue?
+								Logger::Log("Failed creating project directory: " + dirPath);
+							}
+
+							finalPath += "\\" + fileName + ".project";
 						}
 
-						finalPath += "\\" + fileName + ".project";
+						auto project = Project::New(fileName, "no description", finalPath);
+						Engine::LoadProject(project);
+						Engine::LoadScene(Scene::New());
+						project->Save();
+
+						auto projectPreview = ProjectPreview();
+						projectPreview.Name = project->Name;
+						projectPreview.Description = project->Description;
+						projectPreview.Path = project->FullPath;
+
+						_Projects.push_back(projectPreview);
 					}
-					
-					if (selectedProject.empty())
-					{
-						return;
-					}
-
-					auto project = Project::New(fileName, "no description", finalPath);
-					Engine::LoadProject(project);
-					Engine::LoadScene(Scene::New());
-					project->Save();
-
-					auto projectPreview = ProjectPreview();
-					projectPreview.Name = project->Name;
-					projectPreview.Description = project->Description;
-					projectPreview.Path = project->FullPath;
-
-					_Projects.push_back(projectPreview);
 				}
 				ImGui::Separator();
+
 				if (SelectedProject != -1)
 				{
 					if (ImGui::Button("Load Project", buttonSize))
