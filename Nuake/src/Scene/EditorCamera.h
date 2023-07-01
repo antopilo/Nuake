@@ -19,6 +19,13 @@ namespace Nuake
 		Vector3 TargetPos = Vector3(0, 0, 0);
 		bool IsMoving = false;
 		Ref<EditorCamera> Copy();
+
+		json Serialize();
+		bool Deserialize(const std::string& str);
+
+		void SetYaw(float yaw);
+		void SetPitch(float pitch);
+
 	private:
 		bool controlled = false;
 		bool firstMouse = false;
@@ -28,5 +35,6 @@ namespace Nuake
 
 		float Yaw = -135.f;
 		float Pitch = -45.f;
+		void UpdateDirection();
 	};
 }

@@ -42,5 +42,4 @@ class ISerializable
 public:
 	virtual json Serialize() = 0;
 	virtual bool Deserialize(const std::string& str) = 0;
-
 };

@@ -326,10 +326,14 @@ namespace Nuake {
 		SERIALIZE_VAL(Name);
 		SERIALIZE_OBJECT(m_Environement)
 		SERIALIZE_VAL(Path)
+		
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 			entities.push_back(e.Serialize());
 		SERIALIZE_VAL_LBL("Entities", entities);
+
+		SERIALIZE_OBJECT(m_EditorCamera);
+
 		END_SERIALIZE();
 	}
 
@@ -369,6 +373,11 @@ namespace Nuake {
 			std::string name = e["NameComponent"]["Name"];
 			Entity ent = { m_Registry.create(), this };
 			ent.Deserialize(e.dump());
+		}
+
+		if (j.contains("m_EditorCamera"))
+		{
+			m_EditorCamera->Deserialize(j["m_EditorCamera"].dump());
 		}
 
 		auto view = m_Registry.view<ParentComponent>();

@@ -192,4 +192,47 @@ namespace Nuake
 
 		return copy;
 	}
+
+	void EditorCamera::UpdateDirection()
+	{
+		Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction.y = sin(glm::radians(Pitch));
+		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction = glm::normalize(Direction);
+		Right = glm::normalize(glm::cross(Up, Direction));
+	}
+
+	void EditorCamera::SetYaw(float yaw)
+	{
+		Yaw = yaw;
+		UpdateDirection();
+	}
+
+	void EditorCamera::SetPitch(float pitch)
+	{
+		Pitch = pitch;
+		UpdateDirection();
+	}
+
+	json EditorCamera::Serialize()
+	{
+		BEGIN_SERIALIZE();
+
+		SERIALIZE_VEC3(Translation);
+		j["Yaw"] = Yaw;
+		j["Pitch"] = Pitch;
+
+		return j;
+	}
+
+	bool EditorCamera::Deserialize(const std::string& str)
+	{
+		BEGIN_DESERIALIZE();
+
+		DESERIALIZE_VEC3(j["Translation"], Translation);
+		SetYaw(j["Yaw"]);
+		SetPitch(j["Pitch"]);
+
+		return true;
+	}
 }
