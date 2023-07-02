@@ -62,8 +62,8 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     vec3 rayVector = FragPos - startPosition;  // Ray Direction
 
     float rayLength = length(rayVector);            // Length of the raymarched
-    if(rayLength > 100)
-        return vec3(0);
+    if(rayLength > 1000.0)
+        return vec3(1.0, 1.0, 1.0);
     float stepLength = rayLength / u_StepCount;        // Step length
     vec3 rayDirection = rayVector / rayLength;
     vec3 step = rayDirection * stepLength;          // Normalized to step length direction

@@ -34,8 +34,8 @@ namespace Nuake
 			if (!previous && controlled)
 			{
 				firstMouse = true;
-				mouseLastX = x;
-				mouseLastY = y;
+				//mouseLastX = x;
+				//mouseLastY = y;
 			}
 		}
 		else
@@ -61,12 +61,7 @@ namespace Nuake
 			if (Input::YScroll != 0.0f) 
 			{
 				this->Fov += Input::YScroll;
-
-				if (Fov < 5.0f)
-				{
-					Fov = 5.0f;
-				}
-
+				Fov = glm::max(Fov, 5.0f);
 				Input::YScroll = 0.0f;
 			}
 		}
@@ -92,7 +87,6 @@ namespace Nuake
 				if (Speed < 0)
 					Speed = 0;
 
-
 				if (m_Type == CAMERA_TYPE::ORTHO)
 				{
 					if (Input::IsKeyDown(GLFW_KEY_RIGHT))
@@ -106,7 +100,7 @@ namespace Nuake
 				}
 				else
 				{
-					glm::vec3 movement = glm::vec3(0, 0, 0);
+					auto movement = Vector3(0, 0, 0);
 
 					if (Input::IsKeyDown(GLFW_KEY_D))
 						movement -= Right * (Speed * ts);
@@ -175,9 +169,7 @@ namespace Nuake
 				Translation += Vector3(Direction) * Input::YScroll;
 				Input::YScroll = 0.0f;
 			}
-			else
-			{
-			}
+
 			mouseLastX = x;
 			mouseLastY = y;
 		}

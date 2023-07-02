@@ -242,15 +242,16 @@ void main()
         float distance = length(Lights[i].Position - worldPos);
         float attenuation = 1.0 / (distance * distance);
 
-        if (Lights[i].Type == 0) {
+        if (Lights[i].Type == 0) 
+        {
             L = normalize(Lights[i].Direction);
             attenuation = 1.0f;
             shadow += ShadowCalculation(Lights[i], worldPos, N);
         }
 
         vec3 radiance = Lights[i].Color * attenuation ;
-
-        if (Lights[i].Type == 0) {
+        if (Lights[i].Type == 0) 
+        {
             radiance *= shadow;
         }
 
@@ -281,8 +282,8 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (kD * albedo) * (ao);
-    vec3 color = (ambient * ssao) + Lo;
+    vec3 ambient = (kD * albedo) * (ao) * ssao;
+    vec3 color = (ambient) + Lo;
 
     // Display CSM splits..
     /*float depth = length(worldPos - u_EyePosition);

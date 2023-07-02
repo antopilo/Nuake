@@ -38,7 +38,7 @@ namespace Nuake {
 			mFinalFramebuffer->Clear();
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
-			Vector3 cameraPosition = Vector3(view[3]);
+			auto cameraPosition = Vector3(view[3]);
 			Shader* volumetricShader = ShaderManager::GetShader("resources/Shaders/volumetric.shader");
 			volumetricShader->Bind();
 			volumetricShader->SetUniformMat4f("u_Projection", projection);

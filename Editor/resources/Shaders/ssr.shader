@@ -176,11 +176,11 @@ void main() {
 			}
 			
 
-			outColor = vec4(resultingColor.xyz * Fresnel, metallic) ;
+			outColor = vec4(resultingColor.xyz * Fresnel, 1.0) ;
 			
 		}
 		else {
-			outColor = vec4(SSR(position, normalize(reflectionDirection)) * Fresnel, metallic);
+			outColor = vec4(SSR(position, normalize(reflectionDirection)) * Fresnel, 1.0);
 			if (outColor.xyz == vec3(0.f)) {
 				outColor = texture(textureFrame, UV);
 			}
