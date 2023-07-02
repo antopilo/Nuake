@@ -31,10 +31,5 @@ namespace Nuake {
 			Mass = j["Mass"];
 			return true;
 		}
-		void SyncWithTransform(TransformComponent& tc)
-		{
-			
-			
-		}
 	};
 }

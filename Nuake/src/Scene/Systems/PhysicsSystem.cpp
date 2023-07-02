@@ -87,12 +87,14 @@ namespace Nuake
 			}
 		}
 
-		const auto characterControllerView = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
-		for (auto e : characterControllerView)
-		{
-			auto [transformComponent, characterControllerComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
+		//const auto characterControllerView = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
+		//for (auto e : characterControllerView)
+		//{
+		//	Entity ent = Entity({ e, m_Scene });
+		//	auto [transformComponent, ccc] = view.get<TransformComponent, CharacterControllerComponent>(e);
 
-		}
+		//auto& physicsObject = CreateRef<Physics::CharacterController>(ccc.);
+		//}
 
 		//// character controllers
 		//auto ccview = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
@@ -173,35 +175,36 @@ namespace Nuake
 			}
 		}
 
-		auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		for (auto e : bspTriggerView)
-		{
-			auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
-			trigger.GhostObject->ScanOverlap();
+		//auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
+		//for (auto e : bspTriggerView)
+		//{
+		//	auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
+		//	trigger.GhostObject->ScanOverlap();
 
-			brush.Targets.clear();
-			auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-			for (auto e2 : targetnameView)
-			{
-				auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
+		//	brush.Targets.clear();
+		//	auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
+		//	for (auto e2 : targetnameView)
+		//	{
+		//		auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
 
-				if (name.Name == brush.target) {
-					brush.Targets.push_back(Entity{ e2, m_Scene });
-				}
-			}
-		}
+		//		if (name.Name == brush.target) {
+		//			brush.Targets.push_back(Entity{ e2, m_Scene });
+		//		}
+		//	}
+		//}
 
-		auto physicGroup = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
+
+		/*auto physicGroup = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
 		for (auto e : physicGroup) {
 			auto [transform, rb] = physicGroup.get<TransformComponent, RigidBodyComponent>(e);
 			rb.SyncTransformComponent(&m_Scene->m_Registry.get<TransformComponent>(e));
-		}
+		}*/
 
-		auto ccGroup = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
-		for (auto e : ccGroup) {
-			auto [transform, rb] = ccGroup.get<TransformComponent, CharacterControllerComponent>(e);
-			rb.SyncWithTransform(m_Scene->m_Registry.get<TransformComponent>(e));
-		}
+		//auto ccGroup = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
+		//for (auto e : ccGroup) {
+		//	auto [transform, rb] = ccGroup.get<TransformComponent, CharacterControllerComponent>(e);
+		//	rb.SyncWithTransform(m_Scene->m_Registry.get<TransformComponent>(e));
+		//}
 	}
 
 	void PhysicsSystem::FixedUpdate(Timestep ts)

@@ -35,19 +35,19 @@ namespace Nuake {
 		{
 			BEGIN_SERIALIZE();
 
-			for (uint32_t i = 0; i < Hulls.size() - 1; i++)
-			{
-				json hullPointsJson;
+			//for (uint32_t i = 0; i < Hulls.size() - 1; i++)
+			//{
+			//	json hullPointsJson;
 
-				const size_t hullSize = Hulls[i].size();
-				for (uint32_t j = 0; j < hullSize; j++)
-				{
-					hullPointsJson[j]["x"] = Hulls[i][j].x;
-					hullPointsJson[j]["y"] = Hulls[i][j].y;
-					hullPointsJson[j]["z"] = Hulls[i][j].z;
-				}
-				j["Hulls"][i] = hullPointsJson;
-			}
+			//	size_t hullSize = Hulls[i].size();
+			//	for (uint32_t j = 0; j < hullSize; j++)
+			//	{
+			//		hullPointsJson[j]["x"] = Hulls[i][j].x;
+			//		hullPointsJson[j]["y"] = Hulls[i][j].y;
+			//		hullPointsJson[j]["z"] = Hulls[i][j].z;
+			//	}
+			//	j["Hulls"][i] = hullPointsJson;
+			//}
 
 			j["IsSolid"] = IsSolid;
 			END_SERIALIZE();
