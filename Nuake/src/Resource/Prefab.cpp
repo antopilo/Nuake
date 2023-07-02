@@ -16,8 +16,11 @@ namespace Nuake {
 		Ref<Prefab> newPrefab = CreateRef<Prefab>();
 		newPrefab->Path = path;
 
-		std::string prefabTextContent = FileSystem::ReadFile(path);
-		newPrefab->Deserialize(prefabTextContent);
+		if (FileSystem::FileExists(path, false))
+		{
+			std::string prefabTextContent = FileSystem::ReadFile(path);
+			newPrefab->Deserialize(prefabTextContent);
+		}
 
 		return newPrefab;
 	}
