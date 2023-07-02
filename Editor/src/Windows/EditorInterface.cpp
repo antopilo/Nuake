@@ -429,6 +429,121 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    if (env->CurrentSkyType == SkyType::ProceduralSky)
+                    {
+                        ImGui::TableNextColumn();
+
+                        {   // Sun Intensity
+                            ImGui::Text("Sun Intensity");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f, 1000.0f);
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetSunIntensity = ICON_FA_UNDO + std::string("##ResetSunIntensity");
+                            if (ImGui::Button(resetSunIntensity.c_str())) env->ProceduralSkybox->SunIntensity = 100.0f;
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // Sun Direction
+                            ImGui::Text("Sun Direction");
+                            ImGui::TableNextColumn();
+
+                            Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
+                            ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
+                            env->ProceduralSkybox->SunDirection = glm::normalize(sunDirection);
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetSunDirection = ICON_FA_UNDO + std::string("##resetSunDirection");
+                            if (ImGui::Button(resetSunDirection.c_str())) env->ProceduralSkybox->SunDirection = Vector3(0.20000f, 0.95917f, 0.20000f);
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // Surface Radius
+                            ImGui::Text("Surface Radius");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##surfaceRadius", &env->ProceduralSkybox->SurfaceRadius, 100.f, 0.0f);
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetSurfaceRadius = ICON_FA_UNDO + std::string("##resetSurfaceRadius");
+                            if (ImGui::Button(resetSurfaceRadius.c_str())) env->ProceduralSkybox->SurfaceRadius = 6360e3f;
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // Atmosphere Radius
+                            ImGui::Text("Atmosphere Radius");
+                            ImGui::TableNextColumn();
+
+                            ImGui::DragFloat("##AtmosphereRadius", &env->ProceduralSkybox->AtmosphereRadius, 100.f, 0.0f);
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetAtmosphereRadius = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
+                            if (ImGui::Button(resetAtmosphereRadius.c_str())) env->ProceduralSkybox->AtmosphereRadius = 6380e3f;
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // Center point
+                            ImGui::Text("Center Point");
+                            ImGui::TableNextColumn();
+
+                            ImGuiHelper::DrawVec3("##Center Point", &env->ProceduralSkybox->CenterPoint, 0.0f, 100.0f, 100.0f);
+                            ImGui::TableNextColumn();
+                            if (env->ProceduralSkybox->CenterPoint.y < -env->ProceduralSkybox->AtmosphereRadius)
+                                env->ProceduralSkybox->CenterPoint.y = -env->ProceduralSkybox->AtmosphereRadius + 1.f;
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetCenterPoint = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
+                            if (ImGui::Button(resetCenterPoint.c_str())) env->ProceduralSkybox->CenterPoint = Vector3(0, -env->ProceduralSkybox->AtmosphereRadius, 0);
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // Mie Scattering
+                            ImGui::Text("Mie Scattering");
+                            ImGui::TableNextColumn();
+
+                            Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
+                            ImGuiHelper::DrawVec3("##Mie Scattering", &mieScattering, 0.0f, 100.0f, 0.01f);
+                            if (mieScattering.x < 0) mieScattering.x = 0;
+                            if (mieScattering.y < 0) mieScattering.y = 0;
+                            if (mieScattering.z < 0) mieScattering.z = 0;
+                            env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetMieScattering = ICON_FA_UNDO + std::string("##resetMieScattering");
+                            if (ImGui::Button(resetMieScattering.c_str())) env->ProceduralSkybox->MieScattering = Vector3(2e-5f);
+                            ImGui::PopStyleColor();
+                        }
+
+                        ImGui::TableNextColumn();
+                        {   // RayleighScattering
+                            ImGui::Text("Rayleigh Scattering");
+                            ImGui::TableNextColumn();
+
+                            Vector3 rayleighScattering = env->ProceduralSkybox->RayleighScattering * 10000.0f;
+                            ImGuiHelper::DrawVec3("##Ray Scattering", &rayleighScattering, 0.0f, 100.0f, 0.01f);
+                            if (rayleighScattering.r < 0) rayleighScattering.r = 0;
+                            if (rayleighScattering.g < 0) rayleighScattering.g = 0;
+                            if (rayleighScattering.b < 0) rayleighScattering.b = 0;
+                            env->ProceduralSkybox->RayleighScattering = rayleighScattering / 10000.0f;
+                            ImGui::TableNextColumn();
+
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                            std::string resetRayScattering = ICON_FA_UNDO + std::string("##resetRayScattering");
+                            if (ImGui::Button(resetRayScattering.c_str())) env->ProceduralSkybox->RayleighScattering = Vector3(58e-7f, 135e-7f, 331e-7f);
+                            ImGui::PopStyleColor();
+                        }
+                    }
+
                     if (env->CurrentSkyType == SkyType::ClearColor)
                     {
                         ImGui::TableNextColumn();
@@ -450,146 +565,10 @@ namespace Nuake {
 
                     ImGui::EndTable();
                 }
-                
-                if (env->CurrentSkyType == SkyType::ProceduralSky)
-                {
-                    BEGIN_COLLAPSE_HEADER(SUN)
-                        if (ImGui::BeginTable("SunSettingsTable", 3, ImGuiTableFlags_BordersInner))
-                        {
-                            ImGui::TableSetupColumn("name", 0, 0.3);
-                            ImGui::TableSetupColumn("set", 0, 0.6);
-                            ImGui::TableSetupColumn("reset", 0, 0.1);
-                            ImGui::TableNextColumn();
-
-                            {   // Sun Intensity
-                                ImGui::Text("Sun Intensity");
-                                ImGui::TableNextColumn();
-
-                                ImGui::DragFloat("##Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f, 1000.0f);
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetSunIntensity = ICON_FA_UNDO + std::string("##ResetSunIntensity");
-                                if (ImGui::Button(resetSunIntensity.c_str())) env->ProceduralSkybox->SunIntensity = 100.0f;
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::TableNextColumn();
-                            {   // Sun Direction
-                                ImGui::Text("Sun Direction");
-                                ImGui::TableNextColumn();
-
-                                Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
-                                ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
-                                env->ProceduralSkybox->SunDirection = glm::normalize(sunDirection);
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetSunDirection = ICON_FA_UNDO + std::string("##resetSunDirection");
-                                if (ImGui::Button(resetSunDirection.c_str())) env->ProceduralSkybox->SunDirection = Vector3(0.20000f, 0.95917f, 0.20000f);
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::EndTable();
-                        }
-                    END_COLLAPSE_HEADER()
-
-                    BEGIN_COLLAPSE_HEADER(ATMOSPHERE)
-                        if (ImGui::BeginTable("AtmosphereSettingsTable", 3, ImGuiTableFlags_BordersInner))
-                        {
-                            ImGui::TableSetupColumn("name", 0, 0.3);
-                            ImGui::TableSetupColumn("set", 0, 0.6);
-                            ImGui::TableSetupColumn("reset", 0, 0.1);
-
-                            ImGui::TableNextColumn();
-                            {   // Surface Radius
-                                ImGui::Text("Surface Radius");
-                                ImGui::TableNextColumn();
-
-                                ImGui::DragFloat("##surfaceRadius", &env->ProceduralSkybox->SurfaceRadius, 100.f, 0.0f);
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetSurfaceRadius = ICON_FA_UNDO + std::string("##resetSurfaceRadius");
-                                if (ImGui::Button(resetSurfaceRadius.c_str())) env->ProceduralSkybox->SurfaceRadius = 6360e3f;
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::TableNextColumn();
-                            {   // Atmosphere Radius
-                                ImGui::Text("Atmosphere Radius");
-                                ImGui::TableNextColumn();
-
-                                ImGui::DragFloat("##AtmosphereRadius", &env->ProceduralSkybox->AtmosphereRadius, 100.f, 0.0f);
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetAtmosphereRadius = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                                if (ImGui::Button(resetAtmosphereRadius.c_str())) env->ProceduralSkybox->AtmosphereRadius = 6380e3f;
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::TableNextColumn();
-                            {   // Center point
-                                ImGui::Text("Center Point");
-                                ImGui::TableNextColumn();
-
-                                ImGuiHelper::DrawVec3("##Center Point", &env->ProceduralSkybox->CenterPoint, 0.0f, 100.0f, 100.0f);
-                                ImGui::TableNextColumn();
-                                if (env->ProceduralSkybox->CenterPoint.y < -env->ProceduralSkybox->AtmosphereRadius)
-                                    env->ProceduralSkybox->CenterPoint.y = -env->ProceduralSkybox->AtmosphereRadius + 1.f;
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetCenterPoint = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                                if (ImGui::Button(resetCenterPoint.c_str())) env->ProceduralSkybox->CenterPoint = Vector3(0, -env->ProceduralSkybox->AtmosphereRadius, 0);
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::TableNextColumn();
-                            {   // Mie Scattering
-                                ImGui::Text("Mie Scattering");
-                                ImGui::TableNextColumn();
-
-                                Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
-                                ImGuiHelper::DrawVec3("##Mie Scattering", &mieScattering, 0.0f, 100.0f, 0.01f);
-                                if (mieScattering.x < 0) mieScattering.x = 0;
-                                if (mieScattering.y < 0) mieScattering.y = 0;
-                                if (mieScattering.z < 0) mieScattering.z = 0;
-                                env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetMieScattering = ICON_FA_UNDO + std::string("##resetMieScattering");
-                                if (ImGui::Button(resetMieScattering.c_str())) env->ProceduralSkybox->MieScattering = Vector3(2e-5f);
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::TableNextColumn();
-                            {   // RayleighScattering
-                                ImGui::Text("Rayleigh Scattering");
-                                ImGui::TableNextColumn();
-
-                                Vector3 rayleighScattering = env->ProceduralSkybox->RayleighScattering * 10000.0f;
-                                ImGuiHelper::DrawVec3("##Ray Scattering", &rayleighScattering, 0.0f, 100.0f, 0.01f);
-                                if (rayleighScattering.r < 0) rayleighScattering.r = 0;
-                                if (rayleighScattering.g < 0) rayleighScattering.g = 0;
-                                if (rayleighScattering.b < 0) rayleighScattering.b = 0;
-                                env->ProceduralSkybox->RayleighScattering = rayleighScattering / 10000.0f;
-                                ImGui::TableNextColumn();
-
-                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                                std::string resetRayScattering = ICON_FA_UNDO + std::string("##resetRayScattering");
-                                if (ImGui::Button(resetRayScattering.c_str())) env->ProceduralSkybox->RayleighScattering = Vector3(58e-7f, 135e-7f, 331e-7f);
-                                ImGui::PopStyleColor();
-                            }
-
-                            ImGui::EndTable();
-                        }
-                    END_COLLAPSE_HEADER()
-                }
             END_COLLAPSE_HEADER()
 
-            BEGIN_COLLAPSE_HEADER(POSTFX)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+            BEGIN_COLLAPSE_HEADER(BLOOM)
+                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -611,127 +590,51 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
-                    if (env->SSAOEnabled)
+                    ImGui::TableNextColumn();
                     {
+                        // Title
+                        ImGui::Text("Bloom Threshold");
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("SSAO Strength");
-                            ImGui::TableNextColumn();
 
-                            ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.1f, 0.0f, 10.0f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetRadius = ICON_FA_UNDO + std::string("##resetStrength");
-                            if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Strength = 2.0f;
-                            ImGui::PopStyleColor();
-                        }
-
+                        float threshold = env->mBloom->GetThreshold();
+                        ImGui::DragFloat("##Threshold", &threshold, 0.01f, 0.0f, 500.0f);
+                        env->mBloom->SetThreshold(threshold);
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("SSAO Radius");
-                            ImGui::TableNextColumn();
 
-                            ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.01f, 0.0f, 1.0f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetRadius = ICON_FA_UNDO + std::string("##resetRadius");
-                            if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 0.5f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("SSAO Bias");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.0f, 0.5f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOBias");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias =  0.025f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("SSAO Area");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##SSAOArea", &env->mSSAO->Area, 0.0001f, 0.0f, 0.5f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOArea");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Area = 0.0075f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("SSAO Falloff");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##SSAOFalloff", &env->mSSAO->Falloff, 0.0001f, 0.0f, 0.5f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOFalloff");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Falloff = 0.0022f;
-                            ImGui::PopStyleColor();
-                        }
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
+                        ImGui::PopStyleColor();
                     }
 
-                    if (env->BloomEnabled)
+                    ImGui::TableNextColumn();
                     {
+                        // Title
+                        ImGui::Text("Bloom Quality");
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Bloom Threshold");
-                            ImGui::TableNextColumn();
 
-                            float threshold = env->mBloom->GetThreshold();
-                            ImGui::DragFloat("##Threshold", &threshold, 0.01f, 0.0f, 500.0f);
-                            env->mBloom->SetThreshold(threshold);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                            ImGui::PopStyleColor();
-                        }
-
+                        int iteration = env->mBloom->GetIteration();
+                        ImGui::DragInt("##quality", &iteration, 1.0f, 0, 4);
+                        env->mBloom->SetIteration(iteration);
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Bloom Quality");
-                            ImGui::TableNextColumn();
 
-                            int iteration = env->mBloom->GetIteration();
-                            ImGui::DragInt("##quality", &iteration, 1.0f, 0, 4);
-                            env->mBloom->SetIteration(iteration);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
-                            if (ImGui::Button(resetQuality.c_str())) env->mBloom->SetIteration(3);
-                            ImGui::PopStyleColor();
-                        }
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
+                        if (ImGui::Button(resetQuality.c_str())) env->mBloom->SetIteration(3);
+                        ImGui::PopStyleColor();
                     }
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(VOLUMETRIC)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
 
                     ImGui::TableNextColumn();
                     {
@@ -748,49 +651,149 @@ namespace Nuake {
                         if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
                         ImGui::PopStyleColor();
                     }
-                    
-                    if (env->VolumetricEnabled)
+
+                    ImGui::TableNextColumn();
                     {
+                        // Title
+                        ImGui::Text("Volumetric Scattering");
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Volumetric Scattering");
-                            ImGui::TableNextColumn();
 
-                            float fogAmount = env->mVolumetric->GetFogAmount();
-                            ImGui::DragFloat("##Volumetric Scattering", &fogAmount, .001f, 0.f, 1.0f);
-                            env->mVolumetric->SetFogAmount(fogAmount);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                            ImGui::PopStyleColor();
-                        }
-
+                        float fogAmount = env->mVolumetric->GetFogAmount();
+                        ImGui::DragFloat("##Volumetric Scattering", &fogAmount, .001f, 0.f, 1.0f);
+                        env->mVolumetric->SetFogAmount(fogAmount);
                         ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Step count");
-                            ImGui::TableNextColumn();
 
-                            int stepCount = env->mVolumetric->GetStepCount();
-                            ImGui::DragInt("##Volumetric Step Count", &stepCount, 1.f, 0.0f);
-                            env->mVolumetric->SetStepCount(stepCount);
-
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
-                            if (ImGui::Button(resetQuality.c_str())) env->VolumetricStepCount = 50.f;
-                            ImGui::PopStyleColor();
-                        }
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
+                        ImGui::PopStyleColor();
                     }
 
-                    SSR* ssr = scene->mSceneRenderer->mSSR.get();
                     ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Step count");
+                        ImGui::TableNextColumn();
+
+                        int stepCount = env->mVolumetric->GetStepCount();
+                        ImGui::DragInt("##Volumetric Step Count", &stepCount, 1.f, 0.0f);
+                        env->mVolumetric->SetStepCount(stepCount);
+
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
+                        if (ImGui::Button(resetQuality.c_str())) env->VolumetricStepCount = 50.f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(SSAO)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSAO Strength");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.1f, 0.0f, 10.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetRadius = ICON_FA_UNDO + std::string("##resetStrength");
+                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Strength = 2.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSAO Radius");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.001f, 0.0f, 1.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetRadius = ICON_FA_UNDO + std::string("##resetRadius");
+                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 0.5f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSAO Bias");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.0f, 0.5f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOBias");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias = 0.025f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSAO Area");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##SSAOArea", &env->mSSAO->Area, 0.0001f, 0.0f, 0.5f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOArea");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Area = 0.0075f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("SSAO Falloff");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##SSAOFalloff", &env->mSSAO->Falloff, 0.0001f, 0.0f, 0.5f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOFalloff");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Falloff = 0.0022f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(SSR)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    ImGui::TableNextColumn();
+
+                    SSR* ssr = scene->mSceneRenderer->mSSR.get();
                     {
                         // Title
                         ImGui::Text("SSR RayStep");
@@ -943,49 +946,9 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
-                    if (env->VolumetricEnabled)
-                    {
-                        ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Volumetric Scattering");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##Volumetric Scattering", &env->VolumetricFog, .01f, 0.0f, 1.0f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
-                            if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {
-                            // Title
-                            ImGui::Text("Step count");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##Volumetric Step Count", &env->VolumetricStepCount, 1.f, 0.0f);
-                            ImGui::TableNextColumn();
-
-                            // Reset button
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
-                            if (ImGui::Button(resetQuality.c_str())) env->VolumetricStepCount = 50.f;
-                            ImGui::PopStyleColor();
-                        }
-                    }
-
+                    ImGui::EndTable();
                 }
-                ImGui::EndTable();
             END_COLLAPSE_HEADER()
-
-            if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                ImGui::DragFloat("Exposure", &Engine::GetCurrentScene()->m_EditorCamera->Exposure, .01f, 0.0f, 5.0f);
-            }
         }
         ImGui::End();
 
