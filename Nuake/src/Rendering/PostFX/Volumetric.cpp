@@ -59,6 +59,7 @@ namespace Nuake {
 				volumetricShader->SetUniformVec3(u_light + "direction", light.GetDirection());
 
 				volumetricShader->SetUniformTex(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 5 + i);
+				volumetricShader->SetUniform1f(u_light + "strength", light.Strength);
 			}
 
 

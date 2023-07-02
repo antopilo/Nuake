@@ -38,6 +38,7 @@ struct Light {
     vec3 color;
     vec3 direction;
     sampler2D shadowmap;
+    float strength;
 };
 
 uniform Light u_Lights[MAX_LIGHT];
@@ -86,7 +87,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         if (closestDepth > currentDepth && closestDepth < 999)
         {
             //accumFog = vec3(light.color);
-            accumFog += (ComputeScattering(dot(rayDirection, light.direction)).xxx * light.color * 10.0);
+            accumFog += (ComputeScattering(dot(rayDirection, light.direction)).xxx * light.color );
             //accumFog = vec3(projCoords.x, projCoords.y, 1.0);
             
         }
@@ -95,7 +96,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     }
     accumFog /= u_StepCount;
 
-    return accumFog;
+    return accumFog * 5.0;
 }
 
 // Converts depth to World space coords.
