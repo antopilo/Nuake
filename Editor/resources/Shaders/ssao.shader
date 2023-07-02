@@ -93,7 +93,7 @@ void main()
 {
     float depth = texture(u_Depth, UV).r ;
     vec3 fragPos = ViewPosFromDepth(depth);
-    
+    float normalizedRadius = u_Radius;
     if(depth > 0.9999999f)
     {
         FragColor = vec4(0, 0, 0, 0);
@@ -106,34 +106,31 @@ void main()
     normal = normalT.xyz;
     normal = normalize(normal);
     normal = goodNormal;
-    normal = normalT.xyz;
     vec3 randomVec = texture(u_Noise, UV * u_NoiseScale).xyz;  
-    float radius_depth = u_Radius/depth;
+    float radius_depth = normalizedRadius / depth;
     float occlusion = 0.0;
     vec3 position = vec3(UV, depth);
-
+    
     int skipped = 0;
+    float rangeCheckC = 0.0f;
     for(int i=0; i < 64; i++) 
     {
-        vec3 ray = radius_depth * reflect(u_Samples[i], randomVec);
-
-        /*
-        if(dot(normal, normalize(ray)) < u_Falloff)
-        {
-            skipped++;
-            continue;
-        }*/
-
+        vec3 ray = u_Radius * reflect(u_Samples[i], randomVec);
         vec3 hemi_ray = position + sign(dot(ray, normal)) * ray;
         
-        float occ_depth = texture(u_Depth, hemi_ray.xy).r;
-        float difference = depth - occ_depth + u_Bias;
-        float rangeCheck = smoothstep(0.0, 1.0, u_Radius * 10.0 / abs(depth - occ_depth));
-        //float rangeCheck = abs(depth - occ_depth) < u_Radius  ? 1.0 : 0.0;
-        occlusion += ( occ_depth <= hemi_ray.z - u_Bias ? 1.0 : 0.0) * rangeCheck;
+        float sampleDepth = texture(u_Depth, hemi_ray.xy).r;
+        float rangeCheck = smoothstep(0.0, 1.0, u_Radius * 0.8 / abs(depth - sampleDepth));
+        float ao = hemi_ray.z >= sampleDepth + u_Bias ? 1.0 : 0.0;
+        occlusion += ao * rangeCheck;
+        rangeCheckC += rangeCheck;
     }
   
-    float ao = 1.0 - u_Strength * occlusion * (1.0 / (64 ));
+    float ao = 1.0 - (occlusion / 64.0);
+    rangeCheckC /= 64.0;
 
-    FragColor = vec4(ao, ao, ao , 1.0);
+    float finalAO = pow(ao, u_Strength);
+    FragColor = vec4(finalAO, finalAO, finalAO, 1.0);
+    //FragColor = vec4(rangeCheckC, rangeCheckC, rangeCheckC, 1.0);
+
+    //FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

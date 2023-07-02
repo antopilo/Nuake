@@ -46,8 +46,7 @@ namespace Nuake {
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
 
-		auto& sceneEnv = scene.GetEnvironment();
-
+		const auto& sceneEnv = scene.GetEnvironment();
 		Texture* finalOutput = mShadingBuffer->GetTexture().get();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
@@ -57,9 +56,10 @@ namespace Nuake {
 
 			finalOutput = scene.GetEnvironment()->mBloom->GetOutput().get();
 		}
+		
 
-		auto view = scene.m_Registry.view<LightComponent>();
-		std::vector<LightComponent> lightList = std::vector<LightComponent>();
+		const auto view = scene.m_Registry.view<LightComponent>();
+		auto lightList = std::vector<LightComponent>();
 		for (auto l : view)
 		{
 			auto& lc = view.get<LightComponent>(l);
@@ -241,6 +241,8 @@ namespace Nuake {
 			Ref<Environment> environment = scene.GetEnvironment();
 			if (environment->CurrentSkyType == SkyType::ProceduralSky)
 			{
+				RenderCommand::Clear();
+				RenderCommand::SetClearColor(Color(0, 0, 0, 1));
 				environment->ProceduralSkybox->Draw(mProjection, mView);
 			}
 			else if (environment->CurrentSkyType == SkyType::ClearColor)
