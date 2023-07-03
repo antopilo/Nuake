@@ -84,7 +84,7 @@ namespace Nuake {
 			}
 		}
 
-		assert("Not found");
+		assert("Entity not found");
 	}
 
 	bool Scene::OnInit()
