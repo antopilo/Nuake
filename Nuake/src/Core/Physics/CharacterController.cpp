@@ -6,14 +6,21 @@ namespace Nuake
 {
 	namespace Physics
 	{
-		CharacterController::CharacterController(float height, float radius, float mass, Vector3 position)
+		CharacterController::CharacterController(const Ref<PhysicShape>& shape, float friction, float maxSlopeAngle)
 		{
-
+			Shape = shape;
+			Friction = friction;
+			MaxSlopeAngle = maxSlopeAngle;
 		}
 
 		void CharacterController::SetEntity(Entity& ent)
 		{
-			
+			Owner = ent;
+		}
+
+		Entity CharacterController::GetEntity() const
+		{
+			return Owner;
 		}
 
 		void CharacterController::MoveAndSlide(glm::vec3 velocity)

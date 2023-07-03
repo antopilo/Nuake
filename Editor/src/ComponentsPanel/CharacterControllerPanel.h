@@ -17,30 +17,21 @@ public:
         BeginComponentTable(CHARACTER CONTROLLER, Nuake::CharacterControllerComponent);
         {
             {
-                ImGui::Text("Height");
+                ImGui::Text("Friction");
                 ImGui::TableNextColumn();
 
-                ImGui::DragFloat("##Height", &component.Height, 0.01f, 0.1f, 100.0f);
+                ImGui::DragFloat("##Friction", &component.Friction, 0.01f, 0.1f, 100.0f);
                 ImGui::TableNextColumn();
-                ComponentTableReset(component.Height, 1.0f)
+                ComponentTableReset(component.Friction, 0.5f)
             }
             ImGui::TableNextColumn();
             {
-                ImGui::Text("Radius");
+                ImGui::Text("Max Slope Angle");
                 ImGui::TableNextColumn();
 
-                ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.1f, 10.0f);
+                ImGui::DragFloat("##MaxSlopeAngle", &component.MaxSlopeAngle, 0.01f, 0.1f, 90.0f);
 				ImGui::TableNextColumn();
-                ComponentTableReset(component.Radius, 0.25f)
-            }
-            ImGui::TableNextColumn();
-            {
-                ImGui::Text("Mass");
-                ImGui::TableNextColumn();
-
-                ImGui::DragFloat("##Mass", &component.Mass, 0.001f, 0.00001f, 10.0f);
-                ImGui::TableNextColumn();
-                ComponentTableReset(component.Mass, 0.001f)
+                ComponentTableReset(component.MaxSlopeAngle, 0.45f)
             }
         }
         EndComponentTable()

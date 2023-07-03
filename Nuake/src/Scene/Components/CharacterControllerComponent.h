@@ -7,28 +7,36 @@ namespace Nuake {
 	public:
 		Ref<Physics::CharacterController>  CharacterController;
 
-		float Height = 1.0f;
-		float Radius = 0.2f;
-		float Mass = 25.0f;
+		float Friction = 0.5f;
+		float MaxSlopeAngle = 0.45f;
 
 		CharacterControllerComponent()
 		{
 
 		}
 
-		json Serialize() {
+		json Serialize() 
+		{
 			BEGIN_SERIALIZE();
-			SERIALIZE_VAL(Height);
-			SERIALIZE_VAL(Radius);
-			SERIALIZE_VAL(Mass);
+			SERIALIZE_VAL(Friction);
+			SERIALIZE_VAL(MaxSlopeAngle);
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string str) {
+		bool Deserialize(const std::string str) 
+		{
 			BEGIN_DESERIALIZE();
-			Height = j["Height"];
-			Radius = j["Radius"];
-			Mass = j["Mass"];
+
+			if (j.contains("Friction"))
+			{
+				Friction = j["Friction"];
+			}
+			
+			if (j.contains("MaxSlopeAngle"))
+			{
+				MaxSlopeAngle = j["MaxSlopeAngle"];
+			}
+
 			return true;
 		}
 	};

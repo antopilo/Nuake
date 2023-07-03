@@ -29,25 +29,26 @@ namespace Nuake {
 			Meshes = std::vector<Ref<Mesh>>();
 			Materials = std::vector<Ref<Material>>();
 			Rigidbody = std::vector<Ref<Physics::RigidBody>>();
+			Hulls = std::vector<std::vector<Vector3>>();
 		}
 
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
 
-			//for (uint32_t i = 0; i < Hulls.size() - 1; i++)
-			//{
-			//	json hullPointsJson;
+			for (uint32_t i = 0; i < Hulls.size(); i++)
+			{
+				json hullPointsJson;
 
-			//	size_t hullSize = Hulls[i].size();
-			//	for (uint32_t j = 0; j < hullSize; j++)
-			//	{
-			//		hullPointsJson[j]["x"] = Hulls[i][j].x;
-			//		hullPointsJson[j]["y"] = Hulls[i][j].y;
-			//		hullPointsJson[j]["z"] = Hulls[i][j].z;
-			//	}
-			//	j["Hulls"][i] = hullPointsJson;
-			//}
+				size_t hullSize = Hulls[i].size();
+				for (uint32_t j = 0; j < hullSize; j++)
+				{
+					hullPointsJson[j]["x"] = Hulls[i][j].x;
+					hullPointsJson[j]["y"] = Hulls[i][j].y;
+					hullPointsJson[j]["z"] = Hulls[i][j].z;
+				}
+				j["Hulls"][i] = hullPointsJson;
+			}
 
 			j["IsSolid"] = IsSolid;
 			END_SERIALIZE();

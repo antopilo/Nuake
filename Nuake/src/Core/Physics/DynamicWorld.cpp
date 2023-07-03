@@ -1,11 +1,11 @@
 #include "DynamicWorld.h"
 #include "Rigibody.h"
-#include "../Core/Core.h"
-#include <src/Vendors/glm/ext/quaternion_common.hpp>
-#include <src/Core/Logger.h>
 
+#include "src/Core/Core.h"
+#include "src/Core/Logger.h"
 #include <src/Core/Physics/PhysicsShapes.h>
 
+#include <src/Vendors/glm/ext/quaternion_common.hpp>
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 
 #include <Jolt/Jolt.h>
@@ -241,103 +241,21 @@ namespace Nuake
 		void DynamicWorld::AddRigidbody(Ref<RigidBody> rb)
 		{
 			JPH::BodyInterface& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
-
-			JPH::ShapeSettings::ShapeResult shapeResult;
-			auto rbShape = rb->GetShape();
-			switch (rbShape->GetType())
-			{
-			case RigidbodyShapes::BOX:
-			{
-				Box* box = (Box*)rbShape.get();
-				const Vector3& boxSize = box->GetSize();
-				JPH::BoxShapeSettings shapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
-				shapeResult = shapeSettings.Create();
-			}
-					break;
-			case RigidbodyShapes::SPHERE:
-			{
-				Sphere* sphere = (Sphere*)rbShape.get();
-				const float sphereRadius = sphere->GetRadius();
-				JPH::SphereShapeSettings shapeSettings(sphereRadius);
-				shapeResult = shapeSettings.Create();
-			}
-				break;
-			case RigidbodyShapes::CAPSULE:
-			{
-				Capsule* capsule = (Capsule*)rbShape.get();
-				const float radius = capsule->GetRadius();
-				const float height = capsule->GetHeight();
-				JPH::CapsuleShapeSettings shapeSettings(height / 2.0f, radius);
-				shapeResult = shapeSettings.Create();
-			}
-				break;
-			case RigidbodyShapes::CYLINDER:
-			{
-				Cylinder* capsule = (Cylinder*)rbShape.get();
-				const float radius = capsule->GetRadius();
-				const float height = capsule->GetHeight();
-				JPH::CylinderShapeSettings shapeSettings(height / 2.0f, radius);
-				shapeResult = shapeSettings.Create();
-			}
-			break;
-			case RigidbodyShapes::MESH:
-			{
-				MeshShape* meshShape = (MeshShape*)rbShape.get();
-				const auto& mesh = meshShape->GetMesh();
-				const auto& vertices = mesh->GetVertices();
-				const auto& indices = mesh->GetIndices();
-				
-				JPH::TriangleList triangles;
-				triangles.reserve(indices.size());
-				Matrix4 transform = rb->_transform;
-				transform[3] = Vector4(0, 0, 0, 1.0f);
-				for (int i = 0; i < indices.size() - 3; i += 3)
-				{
-					const Vector3& p1 = vertices[indices[i]].position;
-					const Vector3& p2 = vertices[indices[i + 1]].position;
-					const Vector3& p3 = vertices[indices[i + 2]].position;
-
-					const Vector4& tp1 = transform * Vector4(p1, 1.0f);
-					const Vector4& tp2 = transform * Vector4(p2, 1.0f);
-					const Vector4& tp3 = transform * Vector4(p3, 1.0f);
-					triangles.push_back(JPH::Triangle(JPH::Float3(tp1.x, tp1.y, tp1.z), JPH::Float3(tp2.x, tp2.y, tp2.z), JPH::Float3(tp3.x, tp3.y, tp3.z)));
-				}
-
-				JPH::MeshShapeSettings shapeSettings(std::move(triangles));
-				
-				shapeResult = shapeSettings.Create();
-			}
-			break;
-			case CONVEX_HULL:
-			{
-				ConvexHullShape* shape = (ConvexHullShape*)rbShape.get();
-
-				const auto& hullPoints = shape->GetPoints();
-				JPH::Array<JPH::Vec3> points;
-				points.reserve(std::size(hullPoints));
-				for (const auto& p : hullPoints)
-				{
-					points.push_back(JPH::Vec3(p.x, p.y, p.z));
-				}
-
-				JPH::ConvexHullShapeSettings shapeSettings(points);
-				shapeResult = shapeSettings.Create();
-			}
-			break;
-			}
-
+			
+			const float mass = rb->_mass;
 			JPH::EMotionType motionType = JPH::EMotionType::Static;
-
-			float mass = rb->_mass;
+			
 			// According to jolt documentation, Mesh shapes should only be static.
-			if (mass > 0.0f && rb->GetShape()->GetType() != MESH)
+			const bool isMeshShape = rb->GetShape()->GetType() == MESH;
+			if (mass > 0.0f && !isMeshShape)
 			{
 				motionType = JPH::EMotionType::Dynamic;
 			}
 
 			const auto& startPos = rb->GetPosition();
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
-			JPH::BodyCreationSettings bodySettings(shapeResult.Get(), joltPos, JPH::Quat::sIdentity(), motionType, Layers::MOVING);
+			auto joltShape = GetJoltShape(rb->GetShape());
+			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, JPH::Quat::sIdentity(), motionType, Layers::MOVING);
 
 			if (mass > 0.0f)
 			{
@@ -358,12 +276,16 @@ namespace Nuake
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 		{
-			auto settings = new JPH::CharacterSettings();
+			JPH::Ref<JPH::CharacterSettings> settings = new JPH::CharacterSettings();
 			settings->mMaxSlopeAngle = JPH::DegreesToRadians(45.0f);
 			settings->mLayer = Layers::MOVING;
 			settings->mFriction = 0.5f;
+			settings->mShape = GetJoltShape(cc->Shape);
 
-			// Shape here
+			auto& joltPos = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
+			JPH::Character* character = new JPH::Character(settings, joltPos, JPH::Quat::sIdentity(), cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
+
+			character->AddToPhysicsSystem(JPH::EActivation::Activate);
 		}
 
 		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
@@ -453,6 +375,95 @@ namespace Nuake
 			
 			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
 			_registeredBodies.clear();
+		}
+
+		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)
+		{
+			JPH::ShapeSettings::ShapeResult result;
+
+			switch (shape->GetType())
+			{
+			case RigidbodyShapes::BOX:
+			{
+				Box* box = (Box*)shape.get();
+				const Vector3& boxSize = box->GetSize();
+				JPH::BoxShapeSettings shapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
+				result = shapeSettings.Create();
+			}
+			break;
+			case RigidbodyShapes::SPHERE:
+			{
+				Sphere* sphere = (Sphere*)shape.get();
+				const float sphereRadius = sphere->GetRadius();
+				JPH::SphereShapeSettings shapeSettings(sphereRadius);
+				result = shapeSettings.Create();
+			}
+			break;
+			case RigidbodyShapes::CAPSULE:
+			{
+				Capsule* capsule = (Capsule*)shape.get();
+				const float radius = capsule->GetRadius();
+				const float height = capsule->GetHeight();
+				JPH::CapsuleShapeSettings shapeSettings(height / 2.0f, radius);
+				result = shapeSettings.Create();
+			}
+			break;
+			case RigidbodyShapes::CYLINDER:
+			{
+				Cylinder* capsule = (Cylinder*)shape.get();
+				const float radius = capsule->GetRadius();
+				const float height = capsule->GetHeight();
+				JPH::CylinderShapeSettings shapeSettings(height / 2.0f, radius);
+				result = shapeSettings.Create();
+			}
+			break;
+			case RigidbodyShapes::MESH:
+			{
+				MeshShape* meshShape = (MeshShape*)shape.get();
+				const auto& mesh = meshShape->GetMesh();
+				const auto& vertices = mesh->GetVertices();
+				const auto& indices = mesh->GetIndices();
+
+				JPH::TriangleList triangles;
+				triangles.reserve(indices.size());
+				Matrix4 transform; //rb->_transform;
+				transform[3] = Vector4(0, 0, 0, 1.0f);
+				for (int i = 0; i < indices.size() - 3; i += 3)
+				{
+					const Vector3& p1 = vertices[indices[i]].position;
+					const Vector3& p2 = vertices[indices[i + 1]].position;
+					const Vector3& p3 = vertices[indices[i + 2]].position;
+
+					const Vector4& tp1 = transform * Vector4(p1, 1.0f);
+					const Vector4& tp2 = transform * Vector4(p2, 1.0f);
+					const Vector4& tp3 = transform * Vector4(p3, 1.0f);
+					triangles.push_back(JPH::Triangle(JPH::Float3(tp1.x, tp1.y, tp1.z), JPH::Float3(tp2.x, tp2.y, tp2.z), JPH::Float3(tp3.x, tp3.y, tp3.z)));
+				}
+
+				JPH::MeshShapeSettings shapeSettings(std::move(triangles));
+
+				result = shapeSettings.Create();
+			}
+			break;
+			case CONVEX_HULL:
+			{
+				auto* convexHullShape = (Physics::ConvexHullShape*)shape.get();
+
+				const auto& hullPoints = convexHullShape->GetPoints();
+				JPH::Array<JPH::Vec3> points;
+				points.reserve(std::size(hullPoints));
+				for (const auto& p : hullPoints)
+				{
+					points.push_back(JPH::Vec3(p.x, p.y, p.z));
+				}
+
+				JPH::ConvexHullShapeSettings shapeSettings(points);
+				result = shapeSettings.Create();
+			}
+			break;
+			}
+
+			return result.Get();
 		}
 	}
 }
