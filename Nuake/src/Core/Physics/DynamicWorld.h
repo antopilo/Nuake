@@ -10,6 +10,7 @@
 #include "CharacterController.h"
 
 #include <Jolt/Jolt.h>
+#include "src/Core/Core.h"
 namespace JPH
 {
 	class PhysicsSystem;
@@ -17,7 +18,12 @@ namespace JPH
 	class ContactListener;
 	class BodyActivationListener;
 	class BodyInterface;
+	class Shape;
+
+	template<class T>
+	class Ref;
 }
+
 
 namespace Nuake
 {
@@ -26,7 +32,8 @@ namespace Nuake
 	class MyBodyActivationListener;
 
 	namespace Physics {
-		class DynamicWorld {
+		class DynamicWorld 
+		{
 		private:
 			uint32_t _stepCount;
 
@@ -38,6 +45,7 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
+			std::vector<uint32_t> _registeredCharacters;
 		public:
 			DynamicWorld();
 
@@ -54,7 +62,7 @@ namespace Nuake
 			void Clear();
 
 		private:
-
+			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 		};
 	}
 }

@@ -39,7 +39,7 @@ namespace Nuake
 
 		void RigidBody::SetEntityID(Entity ent)
 		{
-			
+			_entity = ent;
 		}
 	}
 }

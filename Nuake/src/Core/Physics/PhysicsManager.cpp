@@ -58,8 +58,6 @@ namespace Nuake
 		JPH::Factory::sInstance = new JPH::Factory();
 		JPH::RegisterTypes();
 
-		// This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
-		// Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
 		m_World = new Physics::DynamicWorld();
 		m_World->SetGravity(glm::vec3(0, -3, 0));
 

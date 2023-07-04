@@ -8,6 +8,7 @@ namespace Nuake {
 	public:
 		int SubMesh = 0;
 		bool IsTrigger;
+		Ref<Physics::MeshShape> Shape;
 
 		json Serialize()
 		{
