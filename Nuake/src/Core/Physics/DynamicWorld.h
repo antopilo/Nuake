@@ -19,6 +19,7 @@ namespace JPH
 	class BodyActivationListener;
 	class BodyInterface;
 	class Shape;
+	class Character;
 
 	template<class T>
 	class Ref;
@@ -45,7 +46,7 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::vector<uint32_t> _registeredCharacters;
+			std::map<uint32_t, JPH::Character*> _registeredCharacters;
 		public:
 			DynamicWorld();
 
@@ -57,13 +58,18 @@ namespace Nuake
 			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 
+			// This is going to be ugly. TODO: Find a better way that passing itself as a parameter
+			void MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity);
+
+			const Matrix4& GetCharacterControllerSimulatedTransform(const Entity& entity);
 			RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
 			void StepSimulation(Timestep ts);
 			void Clear();
 
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
+			void SyncEntitiesTranforms();
+			void SyncCharactersTransforms();
 		};
 	}
 }
-

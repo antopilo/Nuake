@@ -2,6 +2,8 @@
 #include "src/Core/Physics/PhysicsManager.h"
 #include "src/Core/Physics/RaycastResult.h"
 
+#include "src/Core/Physics/PhysicsManager.h"
+
 namespace Nuake
 {
 	namespace Physics
@@ -23,12 +25,9 @@ namespace Nuake
 			return Owner;
 		}
 
-		void CharacterController::MoveAndSlide(glm::vec3 velocity)
+		void CharacterController::MoveAndSlide(const Vector3& velocity)
 		{
-			IsOnGround = false;
-			ParseGhostContacts();
-			UpdatePosition();
-			UpdateVelocity();
+			PhysicsManager::Get().GetWorld()->MoveAndSlideCharacterController(Owner, velocity);
 		}
 
 		void CharacterController::ParseGhostContacts()
@@ -44,8 +43,6 @@ namespace Nuake
 
 		void CharacterController::UpdateVelocity()
 		{
-			
-
 			// Decelerate
 			//m_manualVelocity -= m_manualVelocity * m_deceleration * m_pPhysicsWorld->GetScene()->m_frameTimer.GetTimeMultiplier();
 

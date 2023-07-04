@@ -17,7 +17,7 @@ namespace Nuake
 
 		void AddChild(Entity ent);
 
-		int GetHandle() { return (int)m_EntityHandle; }
+		int GetHandle() const { return (int)m_EntityHandle; }
 		int GetID() { return GetComponent<NameComponent>().ID; }
 
 		template<typename T>

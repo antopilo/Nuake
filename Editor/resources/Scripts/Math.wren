@@ -108,10 +108,14 @@ class Vector3 {
 
 	Normalize() {
 		var length = this.Length()
-		var x = _x / length
-		var y = _y / length
-		var z = _z / length
-		return Vector3.new(x, y, z)
+		if(length > 0.0) {
+			var x = _x / length
+			var y = _y / length
+			var z = _z / length
+			return Vector3.new(x, y, z)
+		}
+		
+		return Vector3.new(0, 0, 0)
 	}
 
 	Angle(vec) {

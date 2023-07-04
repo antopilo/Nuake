@@ -37,7 +37,7 @@ namespace Nuake
 
 			void SetEntity(Entity& ent);
 			Entity GetEntity() const;
-			void MoveAndSlide(glm::vec3 velocity);
+			void MoveAndSlide(const Vector3& velocity);
 
 			bool IsOnFloor()
 			{

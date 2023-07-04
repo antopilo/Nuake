@@ -77,7 +77,6 @@ namespace Nuake {
 				if (name == "Transform")	result = ent.HasComponent<TransformComponent>();
 				if (name == "Light")		result = ent.HasComponent<LightComponent>();
 				if (name == "QuakeMap")		result = ent.HasComponent<QuakeMapComponent>();
-					
 				if (name == "CharacterController")
 				{
 					result = ent.HasComponent<CharacterControllerComponent>();

@@ -20,7 +20,6 @@ namespace Nuake
 	void PhysicsManager::RegisterGhostBody(Ref<GhostObject> rb)
 	{
 		m_World->AddGhostbody(rb);
-
 	}
 
 	void PhysicsManager::RegisterCharacterController(Ref<Physics::CharacterController> cc) 

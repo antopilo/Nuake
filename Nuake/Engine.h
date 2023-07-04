@@ -11,6 +11,7 @@
 *	Scripting API for editing UI maybe
 *	Launch game standalone
 *	Fix physics system
+*	--play argument rendering in framebuffer
 */
 
 // Welcome to the Nuake source code.

@@ -4,6 +4,8 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include <src/Core/Physics/PhysicsShapes.h>
+#include "src/Scene/Components/TransformComponent.h"
+#include "src/Scene/Components/CharacterControllerComponent.h"
 
 #include <src/Vendors/glm/ext/quaternion_common.hpp>
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"
@@ -198,6 +200,9 @@ namespace Nuake
 	{
 		DynamicWorld::DynamicWorld() : _stepCount(0)
 		{
+			_registeredCharacters = std::map<uint32_t, JPH::Character*>();
+
+			// Initialize Jolt Physics
 			const uint32_t MaxBodies = 1024;
 			const uint32_t NumBodyMutexes = 0;
 			const uint32_t MaxBodyPairs = 1024;
@@ -265,8 +270,8 @@ namespace Nuake
 			
 			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
-			JPH::BodyID floor = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			_registeredBodies.push_back((uint32_t)floor.GetIndexAndSequenceNumber());
+			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+			_registeredBodies.push_back((uint32_t)body.GetIndexAndSequenceNumber());
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -286,6 +291,9 @@ namespace Nuake
 			JPH::Character* character = new JPH::Character(settings, joltPos, JPH::Quat::sIdentity(), cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
 
 			character->AddToPhysicsSystem(JPH::EActivation::Activate);
+			
+			// To get the jolt character control from a scene entity.
+			_registeredCharacters[cc->Owner.GetHandle()] = character;
 		}
 
 		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
@@ -304,12 +312,9 @@ namespace Nuake
 			return result;
 		}
 
-		void DynamicWorld::StepSimulation(Timestep ts)
+		void DynamicWorld::SyncEntitiesTranforms()
 		{
-			// Next step
-			++_stepCount;
 			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
-
 			for (const auto& body : _registeredBodies)
 			{
 				auto bodyId = static_cast<JPH::BodyID>(body);
@@ -339,14 +344,52 @@ namespace Nuake
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				transformComponent.SetLocalTransform(transform);
 				transformComponent.Dirty = false;
-
-				/* Logging
-				const std::string& name = entity.GetComponent<NameComponent>().Name;
-				const std::string& posStr = "(" + std::to_string(pos.x) + ", " + std::to_string(pos.y) + ", " + std::to_string(pos.z) + ")";
-				const std::string& logMsg = "Physics pos: " + name + " at " + posStr;
-				Logger::Log(logMsg);
-				*/
 			}
+		}
+
+		void DynamicWorld::SyncCharactersTransforms()
+		{
+			// TODO(ANTO): Finish this to connect updated jolt transforms back to the entity.
+			// The problem was that I dont know yet how to go from jolt body ptr to the entity
+			// Combinations of find and iterators etc. I do not have the brain power rn zzz.
+			// const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+
+			for (const auto& e : _registeredCharacters)
+			{
+				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};
+
+				JPH::Character* characterController = e.second;
+				JPH::Mat44 joltTransform = characterController->GetWorldTransform();
+				const auto bodyRotation = characterController->GetRotation();
+
+				Matrix4 transform = glm::mat4(
+					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
+					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
+					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
+					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
+				);
+
+				Vector3 scale = Vector3();
+				Quat rotation = Quat();
+				Vector3 pos = Vector3();
+				Vector3 skew = Vector3();
+				Vector4 pesp = Vector4();
+				glm::decompose(transform, scale, rotation, pos, skew, pesp);
+
+				auto& transformComponent = entity.GetComponent<TransformComponent>();
+				transformComponent.SetLocalPosition(pos);
+				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
+				transformComponent.SetLocalTransform(transform);
+				transformComponent.Dirty = false;
+			}
+		}
+
+		void DynamicWorld::StepSimulation(Timestep ts)
+		{
+			// Next step
+			++_stepCount;
+			SyncEntitiesTranforms();
+			SyncCharactersTransforms();
 
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable.
 			// Do 1 collision step per 1 / 60th of a second (round up).
@@ -364,6 +407,7 @@ namespace Nuake
 			_JoltPhysicsSystem->Update(ts, collisionSteps, subSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
 		}
 
+
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
@@ -375,6 +419,54 @@ namespace Nuake
 			
 			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
 			_registeredBodies.clear();
+		}
+
+		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle];
+				characterController->SetLinearVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
+			}
+		}
+
+		const Matrix4& DynamicWorld::GetCharacterControllerSimulatedTransform(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle];
+
+				JPH::Mat44 joltTransform = characterController->GetWorldTransform();
+				const auto bodyRotation = characterController->GetRotation();
+
+				Matrix4 transform = glm::mat4(
+					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
+					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
+					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
+					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
+				);
+
+
+				return transform;
+
+				//Vector3 scale = Vector3();
+				//Quat rotation = Quat();
+				//Vector3 pos = Vector3();
+				//Vector3 skew = Vector3();
+				//Vector4 pesp = Vector4();
+				//glm::decompose(transform, scale, rotation, pos, skew, pesp);
+
+				//auto& transformComponent = entity.GetComponent<TransformComponent>();
+				//transformComponent.SetLocalPosition(pos);
+				//transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
+				//transformComponent.SetLocalTransform(transform);
+				//transformComponent.Dirty = false;
+			}
+
+			assert("Shouldn't have reached here!");
+			return Matrix4(1.0);
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)
@@ -426,8 +518,8 @@ namespace Nuake
 
 				JPH::TriangleList triangles;
 				triangles.reserve(indices.size());
-				Matrix4 transform; //rb->_transform;
-				transform[3] = Vector4(0, 0, 0, 1.0f);
+				auto transform = Matrix4(1.0f);
+				transform[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
 				for (int i = 0; i < indices.size() - 3; i += 3)
 				{
 					const Vector3& p1 = vertices[indices[i]].position;
@@ -448,7 +540,6 @@ namespace Nuake
 			case CONVEX_HULL:
 			{
 				auto* convexHullShape = (Physics::ConvexHullShape*)shape.get();
-
 				const auto& hullPoints = convexHullShape->GetPoints();
 				JPH::Array<JPH::Vec3> points;
 				points.reserve(std::size(hullPoints));

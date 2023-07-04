@@ -9,11 +9,12 @@ namespace Nuake {
 		std::string Script;
 
 		unsigned int mModule = 0;
-		Ref<WrenScript> mWrenScript;
+		Ref<WrenScript> mWrenScript = nullptr;
 
 		void LoadScript(const std::string& path)
 		{
-			Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(Script);
+			Script = path;
+			Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(path);
 			mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
 			auto modules = mWrenScript->GetModules();
 			if (modules.size() > 0)
