@@ -120,7 +120,7 @@ namespace Nuake {
 
 	void WrenScript::CallExit()
 	{
-		if (!CompiledSuccesfully)
+		if (!CompiledSuccesfully || !m_Instance)
 			return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();

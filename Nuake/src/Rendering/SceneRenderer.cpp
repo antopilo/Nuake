@@ -93,6 +93,18 @@ namespace Nuake {
 			}
 			framebuffer.Unbind();
 		}
+		else
+		{
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				Renderer::DrawQuad();
+			}
+		}
 
 		finalOutput = framebuffer.GetTexture();
 

@@ -91,8 +91,10 @@ namespace Nuake {
 	{
 		for (auto& system : m_Systems)
 		{
+			Logger::Log("Init system");
 			if (!system->Init())
 			{
+				
 				return false;
 			}
 		}

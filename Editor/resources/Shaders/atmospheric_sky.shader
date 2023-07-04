@@ -155,5 +155,5 @@ void main()
 	float L = escape(O, D, AtmosphereRadius);
 	col = scatter(O, D, L, col);
 
-	FragColor = vec4(sqrt(col), 1.);
+	FragColor = vec4(sqrt(col * 4.0), 1.);
 }

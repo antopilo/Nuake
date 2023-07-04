@@ -11,7 +11,7 @@ namespace Nuake
 		_soloud = CreateRef<SoLoud::Soloud>();
 		_soloud->init();
 
-		_audioThreadRunning = true;
+		_audioThreadRunning = false;
 		_audioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 	}
 

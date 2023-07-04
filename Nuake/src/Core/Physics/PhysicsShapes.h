@@ -23,13 +23,13 @@ namespace Nuake
 		class Box : public PhysicShape 
 		{
 		private:
-			glm::vec3 Size;
+			Vector3 Size;
 		public:
 			Box();
 			Box(glm::vec3 size);
 			Box(float x, float y, float z);
 
-			glm::vec3 GetSize() const { return Size; }
+			Vector3 GetSize() const { return Size; }
 		};
 
 		class Sphere : public PhysicShape 

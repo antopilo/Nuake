@@ -158,7 +158,7 @@ namespace Nuake
 		// See: ContactListener
 		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::CollideShapeResult& inCollisionResult) override
 		{
-			std::cout << "Contact validate callback" << std::endl;
+			//std::cout << "Contact validate callback" << std::endl;
 
 			// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
 			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
@@ -166,17 +166,17 @@ namespace Nuake
 
 		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			std::cout << "A contact was added" << std::endl;
+			//std::cout << "A contact was added" << std::endl;
 		}
 
 		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			std::cout << "A contact was persisted" << std::endl;
+			//std::cout << "A contact was persisted" << std::endl;
 		}
 
 		virtual void OnContactRemoved(const JPH::SubShapeIDPair& inSubShapePair) override
 		{
-			std::cout << "A contact was removed" << std::endl;
+			//std::cout << "A contact was removed" << std::endl;
 		}
 	};
 
@@ -282,10 +282,11 @@ namespace Nuake
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 		{
 			JPH::Ref<JPH::CharacterSettings> settings = new JPH::CharacterSettings();
-			settings->mMaxSlopeAngle = JPH::DegreesToRadians(45.0f);
+			settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
 			settings->mLayer = Layers::MOVING;
-			settings->mFriction = 0.5f;
+			settings->mFriction = cc->Friction;
 			settings->mShape = GetJoltShape(cc->Shape);
+			settings->mGravityFactor = 0.0f;
 
 			auto& joltPos = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
 			JPH::Character* character = new JPH::Character(settings, joltPos, JPH::Quat::sIdentity(), cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
@@ -419,6 +420,17 @@ namespace Nuake
 			
 			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
 			_registeredBodies.clear();
+
+			if (_registeredCharacters.empty())
+			{
+				return;
+			}
+
+			for (auto& character : _registeredCharacters)
+			{
+				character.second->RemoveFromPhysicsSystem();
+			}
+			_registeredCharacters.clear();
 		}
 
 		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)

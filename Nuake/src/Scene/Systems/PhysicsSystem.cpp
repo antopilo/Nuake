@@ -211,6 +211,7 @@ namespace Nuake
 			auto [transform, rigidBodyComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
 			Entity ent = Entity({ e, m_Scene });
 			Ref<Physics::RigidBody> rigidBody;
+
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
 				float mass = rigidBodyComponent.Mass;
