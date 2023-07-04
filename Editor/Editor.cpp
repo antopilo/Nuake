@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
         editor.BuildFonts();
 
         Ref<Nuake::Project> project = Nuake::Project::New();
-        FileSystem::SetRootDirectory(projectPath );
+        FileSystem::SetRootDirectory(projectPath + "/../");
 
         project->FullPath = projectPath;
         project->Deserialize(FileSystem::ReadFile(projectPath, true));
