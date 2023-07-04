@@ -4,6 +4,7 @@
 #include <src/Scene/Components/LightComponent.h>
 #include <src/Scene/Components/CameraComponent.h>
 #include <src/Scene/Components/SphereCollider.h>
+#include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/BoxCollider.h>
 
 #include <src/Resource/ModelLoader.h>
@@ -35,6 +36,7 @@ GizmoDrawer::GizmoDrawer()
 	_gizmos = std::map<std::string, Ref<Model>>();
 	_gizmos["cam"] = loader.LoadModel("resources/Models/Camera.gltf");
 	_gizmos["light"] = loader.LoadModel("resources/Models/Light.gltf");
+	_gizmos["player"] = loader.LoadModel("resources/Models/Player.gltf");
 }
 
 void GizmoDrawer::GenerateSphereGizmo()
@@ -178,7 +180,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 {
 	using namespace Nuake;
 	//RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+	//RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 	// Draw Axis lignes.
 	{
 		mLineShader->Bind();
@@ -224,6 +226,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	glCullFace(GL_BACK);
 
 	RenderList renderList;
+
+	// Camera
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
@@ -233,6 +237,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	}
 	renderList.Flush(flatShader, true);
 
+	// Lights
 	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
@@ -242,8 +247,24 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		renderList.AddToRenderList(_gizmos["light"]->GetMeshes()[0], transform.GetGlobalTransform());
 		renderList.Flush(flatShader, true);
 	}
+	renderList.Flush(flatShader, true);
+
+
+	// Player
+	auto characterControllerView = scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
+	for (auto e : characterControllerView)
+	{
+		auto [transformComponent, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
+
+		flatShader->SetUniformVec4("u_Color", Vector4(0.0f, 1.0f, 0.4f, 1.0f));
+
+		const auto scaledTransform = glm::scale(transformComponent.GetGlobalTransform(), Vector3(0.25f, 0.25f, 0.25f));
+		renderList.AddToRenderList(_gizmos["player"]->GetMeshes()[0], scaledTransform);
+		renderList.Flush(flatShader, true);
+	}
 
 	renderList.Flush(flatShader, true);
 
+	RenderCommand::Disable(RendererEnum::FACE_CULL);
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 }

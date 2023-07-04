@@ -7,21 +7,20 @@
 namespace Nuake {
 	void SceneRenderer::Init()
 	{
-		mGBuffer = CreateScope<FrameBuffer>(false, Vector2(1920, 1080));
-		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
-		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
-		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT1);
-		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT2);
-		mGBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT3);
+		const auto defaultResolution = Vector2(1920, 1080);
+		mGBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT2);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT3);
 
-		mShadingBuffer = CreateScope<FrameBuffer>(true, Vector2(1920, 1080));
-		Ref<Texture> shadedTexture = CreateRef<Texture>(Vector2(1920, 1080), GL_RGB, GL_RGB16F, GL_FLOAT);
-		mShadingBuffer->SetTexture(shadedTexture);
+		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
+		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
 
 		mSSR = CreateScope<SSR>();
-
-		mToneMapBuffer = CreateScope<FrameBuffer>(false, Vector2(1920, 1080));
-		mToneMapBuffer->SetTexture(CreateRef<Texture>(Vector2(1920, 1080), GL_RGB), GL_COLOR_ATTACHMENT0);
+		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 	}
 
 	void SceneRenderer::Cleanup()
@@ -36,8 +35,14 @@ namespace Nuake {
 		mCamPos = camPos;
 	}
 
+	/// <summary>
+	/// Renders a scene to a framebuffer. The size of the framebuffer will be used.
+	/// </summary>
+	/// <param name="scene">Scene to render</param>
+	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
 	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer) 
 	{
+		// Renders all shadow maps
 		ShadowPass(scene);
 
 		mGBuffer->QueueResize(framebuffer.GetSize());
@@ -47,14 +52,14 @@ namespace Nuake {
 		ShadingPass(scene);
 
 		const auto& sceneEnv = scene.GetEnvironment();
-		Texture* finalOutput = mShadingBuffer->GetTexture().get();
+		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
 			sceneEnv->mBloom->SetSource(mShadingBuffer->GetTexture());
 			sceneEnv->mBloom->Resize(framebuffer.GetSize());
 			sceneEnv->mBloom->Draw();
 
-			finalOutput = scene.GetEnvironment()->mBloom->GetOutput().get();
+			finalOutput = scene.GetEnvironment()->mBloom->GetOutput();
 		}
 		
 
@@ -82,14 +87,15 @@ namespace Nuake {
 				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
 				shader->Bind();
 
-				shader->SetUniformTex("u_Source", finalOutput, 0);
+				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
 				shader->SetUniformTex("u_Source2", sceneEnv->mVolumetric->GetFinalOutput().get(), 1);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
 		}
 
-		finalOutput = framebuffer.GetTexture().get();
+		finalOutput = framebuffer.GetTexture();
+
 		// SSAO
 		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
 		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
@@ -104,12 +110,10 @@ namespace Nuake {
 
 			shader->SetUniform1f("u_Exposure", scene.GetEnvironment()->Exposure);
 			shader->SetUniform1f("u_Gamma", scene.GetEnvironment()->Gamma);
-			shader->SetUniformTex("u_Source", finalOutput);
+			shader->SetUniformTex("u_Source", finalOutput.get());
 			Renderer::DrawQuad();
 		}
 		mToneMapBuffer->Unbind();
-
-		
 
 		mSSR->Resize(framebuffer.GetSize());
 		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());

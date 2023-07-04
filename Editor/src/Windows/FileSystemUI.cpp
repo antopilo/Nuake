@@ -84,10 +84,12 @@ namespace Nuake {
     void FileSystemUI::DrawDirectory(Ref<Directory> directory)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
-        std::string id = directory->name;
-
+        const char* icon = ICON_FA_FOLDER;
+        const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
+        {
             m_CurrentDirectory = directory;
+        }
 
         ImGui::Text(directory->name.c_str());
         ImGui::PopFont();
