@@ -14,7 +14,7 @@ namespace Nuake
 		{
 		public:
 			
-			Vector3 Position;
+			Vector3 Position = Vector3(0, 0, 0);
 			Entity Owner;
 
 			bool IsOnGround = false;

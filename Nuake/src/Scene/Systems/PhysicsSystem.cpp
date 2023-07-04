@@ -22,6 +22,9 @@ namespace Nuake
 
 	bool PhysicsSystem::Init()
 	{
+		// We need to initialize shapes first, then bodies...
+		InitializeShapes();
+
 		InitializeRigidbodies();
 		InitializeCharacterControllers();
 		InitializeQuakeMap();
@@ -153,14 +156,14 @@ namespace Nuake
 		const auto boxView = m_Scene->m_Registry.view<BoxColliderComponent>();
 		for (auto entity : boxView)
 		{
-			auto boxComponent = boxView.get<BoxColliderComponent>(entity);
+			auto& boxComponent = boxView.get<BoxColliderComponent>(entity);
 			boxComponent.Box = CreateRef<Physics::Box>(boxComponent.Size);
 		}
 
 		const auto capsuleView = m_Scene->m_Registry.view<CapsuleColliderComponent>();
 		for (auto entity : capsuleView)
 		{
-			auto capsuleComponent = capsuleView.get<CapsuleColliderComponent>(entity);
+			auto& capsuleComponent = capsuleView.get<CapsuleColliderComponent>(entity);
 			float radius = capsuleComponent.Radius;
 			float height = capsuleComponent.Height;
 			capsuleComponent.Capsule = CreateRef<Physics::Capsule>(radius, height);
@@ -169,7 +172,7 @@ namespace Nuake
 		const auto sphereView = m_Scene->m_Registry.view<SphereColliderComponent>();
 		for (auto entity : sphereView)
 		{
-			auto sphereComponent = sphereView.get<SphereColliderComponent>(entity);
+			auto& sphereComponent = sphereView.get<SphereColliderComponent>(entity);
 			sphereComponent.Sphere = CreateRef<Physics::Sphere>(sphereComponent.Radius);
 		}
 
@@ -283,6 +286,8 @@ namespace Nuake
 				float friction = characterControllerComponent.Friction;
 				float maxSlopeAngle = characterControllerComponent.MaxSlopeAngle;
 				auto characterController = CreateRef<Physics::CharacterController>(capsule, friction, maxSlopeAngle);
+				characterController->SetEntity(entity); // Used to link back to the entity
+
 				characterControllerComponent.CharacterController = characterController;
 				PhysicsManager::Get().RegisterCharacterController(characterControllerComponent.CharacterController);
 			}
