@@ -10,11 +10,13 @@ namespace Nuake {
 	{
 	private:
 		uint32_t mStepCount = 50;
-		float mRenderRatio = 1.0f;
+		float mRenderRatio = 0.75f;
 		float mFogAmount = 0.4f;
 
 		Vector2 mSize;
 		Texture* mDepth;
+
+		Scope<FrameBuffer> mVolumetricFramebuffer;
 		Scope<FrameBuffer> mFinalFramebuffer;
 
 	public:

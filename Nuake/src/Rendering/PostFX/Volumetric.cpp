@@ -20,6 +20,9 @@ namespace Nuake {
 	{
 		mFinalFramebuffer = CreateScope<FrameBuffer>(true, mSize);
 		mFinalFramebuffer->SetTexture(CreateRef<Texture>(mSize, GL_RGBA, GL_RGBA16F, GL_FLOAT));
+
+		mVolumetricFramebuffer = CreateScope<FrameBuffer>(true, mSize);
+		mVolumetricFramebuffer->SetTexture(CreateRef<Texture>(mSize, GL_RGBA, GL_RGBA16F, GL_FLOAT));
 	}
 
 	void Volumetric::Resize(Vector2 size)
@@ -28,14 +31,15 @@ namespace Nuake {
 			return;
 
 		mSize = size * mRenderRatio;
-		mFinalFramebuffer->QueueResize(mSize);
+		mVolumetricFramebuffer->QueueResize(mSize);
+		mVolumetricFramebuffer->QueueResize(mSize);
 	}
 
 	void Volumetric::Draw(Matrix4 projection, Matrix4 view, const Vector3& camPos, std::vector<LightComponent>& lights)
 	{
-		mFinalFramebuffer->Bind();
-
-			mFinalFramebuffer->Clear();
+		mVolumetricFramebuffer->Bind();
+		{
+			mVolumetricFramebuffer->Clear();
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 			auto cameraPosition = Vector3(view[3]);
@@ -62,17 +66,30 @@ namespace Nuake {
 				volumetricShader->SetUniform1f(u_light + "strength", light.Strength);
 			}
 
+			Renderer::DrawQuad();
+		}
+		mVolumetricFramebuffer->Unbind();
+
+		// Blur
+		mFinalFramebuffer->Bind();
+		{
+			mFinalFramebuffer->Clear();
+			Shader* blurShader = ShaderManager::GetShader("resources/Shaders/blur.shader");
+			blurShader->Bind();
+			//blurShader->SetUniformTex("u_Depth", mDepth, 1);
+			blurShader->SetUniformTex("u_Input", mVolumetricFramebuffer->GetTexture().get());
 
 			Renderer::DrawQuad();
-
+		}
 		mFinalFramebuffer->Unbind();
 
-		/*
 		if (ImGui::Begin("Volumetric debug"))
 		{
 			ImGui::Image((void*)(uintptr_t)(mFinalFramebuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 		}
 		ImGui::End();
+
+		/*
 		if (ImGui::Begin("Volumetric debug depth"))
 		{
 			ImGui::Image((void*)(uintptr_t)(mDepth->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));

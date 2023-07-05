@@ -22,6 +22,11 @@ void main()
 #shader fragment
 #version 460 core
 
+float ditherPattern[4][4] = { { 0.0f, 0.5f, 0.125f, 0.625f},
+{ 0.75f, 0.22f, 0.875f, 0.375f},
+{ 0.1875f, 0.6875f, 0.0625f, 0.5625},
+{ 0.9375f, 0.4375f, 0.8125f, 0.3125} };
+
 in mat4 InvView;
 in mat4 InvProjection;
 
@@ -52,7 +57,7 @@ const float PI = 3.141592653589793f;
 // Mie scaterring approximated with Henyey-Greenstein phase function.
 float ComputeScattering(float lightDotView)
 {
-    float result = 1.0f - u_FogAmount * u_FogAmount;
+    float result = 1.0f - u_FogAmount ;
     result /= (4.0f * PI * pow(1.0f + u_FogAmount * u_FogAmount - (2.0f * u_FogAmount) * lightDotView, 1.5f));
     return result;
 }
@@ -64,7 +69,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
 
     float rayLength = length(rayVector);            // Length of the raymarched
     //if(rayLength > 1000.0)
-    //    return vec3(0.0, 0.0, 0.0);
+    //    return vec3(1.0, 1.0, 1.0);
     float stepLength = rayLength / u_StepCount;        // Step length
     vec3 rayDirection = rayVector / rayLength;
     vec3 step = rayDirection * stepLength;          // Normalized to step length direction
@@ -91,12 +96,12 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
             //accumFog = vec3(projCoords.x, projCoords.y, 1.0);
             
         }
-        currentPosition += step; //* ditherPattern[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
+        currentPosition += step * ditherPattern[int(gl_FragCoord.x) % 4][int(gl_FragCoord.y) % 4];
         //accumFog = vec3(projCoords);
     }
     accumFog /= u_StepCount;
 
-    return accumFog * 5.0;
+    return accumFog * 4.0;
 }
 
 // Converts depth to World space coords.
@@ -125,7 +130,7 @@ void main()
         fog += ComputeVolumetric(globalFragmentPosition, u_Lights[i]);
     }
 
-    FragColor = vec4(fog, 1.0f);
+    FragColor = vec4(fog, 1.0);
     //FragColor = vec4(mix(fog, ComputeVolumetric(globalFragmentPosition, u_Lights[0]), 0.9f), 0.01);
     //FragColor = vec4(globalFragmentPosition * 10.0, 1.0f);
     //FragColor = vec4(globalFragmentPosition.xyz * 100.0, 1.0f);
