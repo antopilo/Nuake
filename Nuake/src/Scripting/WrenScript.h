@@ -19,7 +19,7 @@ namespace Nuake {
 		Ref<File> mFile;
 
 		std::map <std::string, WrenHandle*> methods;
-		WrenHandle* m_Instance;
+		WrenHandle* m_Instance = nullptr;
 		WrenHandle* m_OnInitHandle;
 		WrenHandle* m_OnUpdateHandle;
 		WrenHandle* m_OnFixedUpdateHandle;

@@ -19,6 +19,7 @@ namespace Nuake {
         const char* module, const int line,
         const char* msg)
     {
+        Logger::Log("YO");
         switch (errorType)
         {
         case WREN_ERROR_COMPILE:
@@ -37,6 +38,12 @@ namespace Nuake {
             std::string t = "Script Runtime Error: " + std::string(msg);
             Logger::Log(t, WARNING);
         } break;
+        default:
+        {
+            std::string t = "Script Runtime Error: " + std::string(msg);
+            Logger::Log(t, CRITICAL);
+        }
+            break;
         }
     }
 
@@ -143,6 +150,7 @@ namespace Nuake {
 
     void ScriptingEngine::Init()
     {
+        Logger::Log("Initializing Scripting Engine");
         m_Scripts = std::map<std::string, Ref<WrenScript>>();
         m_LoadedScripts.clear();
 
@@ -156,6 +164,7 @@ namespace Nuake {
 
         m_WrenVM = wrenNewVM(&config);
 
+        Logger::Log("Registing Scripting Modules");
         Ref<ScriptAPI::EngineModule> engineModule = CreateRef<ScriptAPI::EngineModule>();
         RegisterModule(engineModule);
         Ref<ScriptAPI::SceneModule> sceneModule = CreateRef<ScriptAPI::SceneModule>();
@@ -166,6 +175,8 @@ namespace Nuake {
         RegisterModule(inputModule);
         Ref<ScriptAPI::PhysicsModule> physicsModule = CreateRef<ScriptAPI::PhysicsModule>();
         RegisterModule(physicsModule);
+        Logger::Log("Scripting Modules Registered");
+        Logger::Log("Scripting Engine initialized successfully");
     }
 
     void ScriptingEngine::Close()

@@ -22,6 +22,8 @@ namespace Nuake
 
 	bool PhysicsSystem::Init()
 	{
+		Logger::Log("Initializing the physic system");
+
 		// We need to initialize shapes first, then bodies...
 		InitializeShapes();
 
@@ -42,7 +44,7 @@ namespace Nuake
 
 		//	PhysicsManager::Get()->RegisterGhostBody(ghostBody);
 		//}
-
+		Logger::Log("Physic system initialized successfully");
 		return true;
 	}
 

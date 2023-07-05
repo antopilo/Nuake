@@ -1,4 +1,6 @@
 #include "WrenScript.h"
+
+#include "src/Core/Logger.h"
 #include "src/Core/String.h"
 
 #include <src/Vendors/wren/src/include/wren.h>
@@ -48,19 +50,27 @@ namespace Nuake {
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
 
 		std::string relativePath = mFile->GetRelativePath();
+
 		// Can't import twice the same script, otherwise gives a compile error.
 		if (!ScriptingEngine::IsScriptImported(relativePath))
 		{
 			std::string source = "import \"" + relativePath + "\" for " + GetModules()[moduleId];
 			WrenInterpretResult result = wrenInterpret(vm, "main", source.c_str());
 
-			if (result != WREN_RESULT_SUCCESS)
+
+			Logger::Log("Wren result: " + std::to_string(result));
+			if (result == WREN_RESULT_SUCCESS)
+			{
+				Logger::Log("Wren result success: " + std::to_string(result));
+				CompiledSuccesfully = true;
+				ScriptingEngine::ImportScript(relativePath);
+			}
+			else
+			{
+				Logger::Log("Wren result failed: " + std::to_string(result));
 				CompiledSuccesfully = false;
-
-			if (!CompiledSuccesfully)
 				return;
-
-			ScriptingEngine::ImportScript(relativePath);
+			}
 		}
 
 		// Get handle to class

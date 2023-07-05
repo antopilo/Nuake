@@ -13,6 +13,8 @@ namespace Nuake {
 	{
 		ScriptingEngine::Init();
 
+		Logger::Log("Initializing ScriptingSystem");
+
 		auto& entities = m_Scene->m_Registry.view<WrenScriptComponent>();
 		for (auto& e : entities)
 		{
@@ -24,7 +26,10 @@ namespace Nuake {
 			wren.mWrenScript->Build(wren.mModule, true);
 			
 			if (!wren.mWrenScript->HasCompiledSuccesfully())
+			{
+				Logger::Log("ScriptingSystem failed");
 				return false;
+			}
 
 			wren.mWrenScript->SetScriptableEntityID((int)e);
 			wren.mWrenScript->CallInit();
@@ -69,8 +74,15 @@ namespace Nuake {
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
 
-			if (wren.mWrenScript != nullptr)
-				wren.mWrenScript->CallExit();
+			try
+			{
+				if (wren.mWrenScript != nullptr)
+					wren.mWrenScript->CallExit();
+			}
+			catch (std::exception* e)
+			{
+			}
+			
 		}
 
 		ScriptingEngine::Close();
