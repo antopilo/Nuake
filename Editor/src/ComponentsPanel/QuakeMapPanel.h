@@ -51,6 +51,15 @@ public:
             }
             ImGui::TableNextColumn();
             {
+                ImGui::Text("Auto Rebuild");
+                ImGui::TableNextColumn();
+
+                ImGui::Checkbox("##AutoRebuild", &component.AutoRebuild);
+                ImGui::TableNextColumn();
+                ComponentTableReset(component.AutoRebuild, false);
+            }
+            ImGui::TableNextColumn();
+            {
                 ImGui::Text("Build");
                 ImGui::TableNextColumn();
 
