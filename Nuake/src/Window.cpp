@@ -183,6 +183,9 @@ namespace Nuake {
             s.FramePadding = ImVec2(8, 4);
             s.ItemSpacing = ImVec2(8, 4);
             s.ItemInnerSpacing = ImVec2(4, 4);
+            s.TabRounding = 4.0f;
+            s.WindowBorderSize = 0.0f;
+            s.ChildBorderSize = 0.0f;
 
             ImVec4* colors = ImGui::GetStyle().Colors;
             colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -240,7 +243,7 @@ namespace Nuake {
             colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
             colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
             colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-
+            
 
             ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
             ImGui_ImplOpenGL3_Init("#version 330");
