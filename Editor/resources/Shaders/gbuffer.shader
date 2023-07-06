@@ -40,6 +40,7 @@ void main()
 layout(location = 0) out vec4 gAlbedo;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gMaterial;
+layout(location = 3) out int gEntityID;
 
 in vec3 FragPos;
 in vec2 UV;
@@ -102,4 +103,6 @@ void main()
     gMaterial.r = finalMetalness;
     gMaterial.g = finalAO;
     gMaterial.b = finalRoughness;
+
+    gEntityID = int(gAlbedo.r * 255.0);
 }
