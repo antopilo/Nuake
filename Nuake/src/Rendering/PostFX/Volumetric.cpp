@@ -83,11 +83,12 @@ namespace Nuake {
 		}
 		mFinalFramebuffer->Unbind();
 
-		if (ImGui::Begin("Volumetric debug"))
-		{
-			ImGui::Image((void*)(uintptr_t)(mFinalFramebuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
+
+		//if (ImGui::Begin("Volumetric debug"))
+		//{
+		//	ImGui::Image((void*)(uintptr_t)(mFinalFramebuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		//}
+		//ImGui::End();
 
 		/*
 		if (ImGui::Begin("Volumetric debug depth"))
