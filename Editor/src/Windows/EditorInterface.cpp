@@ -83,7 +83,6 @@ namespace Nuake {
         {
             ImGui::PopStyleVar();
 
-
             Overlay();
             ImGuizmo::BeginFrame();
 
@@ -93,9 +92,8 @@ namespace Nuake {
             float used = windowWidth - availWidth;
             float half = windowWidth / 2.0;
             float needed = half - used;
-            //ImGui::Dummy(ImVec2(needed, 10));
-            //ImGui::SameLine();
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 8));
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
             if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
             {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
@@ -113,7 +111,11 @@ namespace Nuake {
             }
 
             ImGui::SameLine();
-            
+
+            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvailWidth() - 120, 30));
+
+            ImGui::SameLine();
+
             const auto& io = ImGui::GetIO();
             float frameTime = 1000.0f / io.Framerate;
             int fps = (int) io.Framerate;
@@ -121,9 +123,10 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1, 0.1, 0.1, 1));
             ImGui::BeginChild("FPS", ImVec2(60, 30), false);
 
-            std::string text = std::to_string(fps) + "fps";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize(text.c_str()).x
+            std::string text = std::to_string(fps) + " fps";
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
 
             ImGui::EndChild();
@@ -132,9 +135,10 @@ namespace Nuake {
             std::ostringstream out;
             out.precision(2);
             out << std::fixed << frameTime;
-            text = out.str() + "ms";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() - ImGui::CalcTextSize(text.c_str()).x
+            text = out.str() + " ms";
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
 
             ImGui::EndChild();
@@ -164,7 +168,7 @@ namespace Nuake {
 
             ImGuizmo::SetDrawlist();
             ImGuizmo::AllowAxisFlip(true);
-            ImGuizmo::SetRect(imagePos.x, imagePos.y * 3.0, viewportPanelSize.x, viewportPanelSize.y);
+            ImGuizmo::SetRect(imagePos.x + 8.0, imagePos.y + 30.0, viewportPanelSize.x, viewportPanelSize.y);
 
             if (m_DrawGrid && !Engine::IsPlayMode)
             {
@@ -960,7 +964,7 @@ namespace Nuake {
             if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvailWidth(), 30), false))
             {
                 // Add entity.
-                if (ImGui::Button(ICON_FA_PLUS))
+                if (ImGui::Button(ICON_FA_PLUS, ImVec2(30, 30)))
                     Engine::GetCurrentScene()->CreateEntity("Entity");
 
                //// Remove Entity
@@ -975,7 +979,6 @@ namespace Nuake {
 				
             }
             ImGui::EndChild();
-            ImGui::Separator();
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
@@ -1185,11 +1188,11 @@ namespace Nuake {
         ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
         ImVec2 window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
         ImVec2 window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
-        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+        ImGui::SetNextWindowPos(window_pos + ImVec2(0, 30), ImGuiCond_Always, window_pos_pivot);
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
-        ImGui::SetNextWindowSize(ImVec2(25, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0));
+        ImGui::SetNextWindowSize(ImVec2(25, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 30.0));
         if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
         {
             const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
@@ -1199,12 +1202,11 @@ namespace Nuake {
             const float minSpeed = 0.1f;
             const float normalizedSpeed = camSpeed / maxSpeed;
 
-            ImVec2 start = ImGui::GetWindowPos();
-            ImVec2 end = start + ImGui::GetWindowSize();
+            ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 15.0) ;
+            ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 10.0);
+            ImVec2 startOffset = ImVec2(start.x , end.y - (normalizedSpeed * (ImGui::GetWindowHeight() -10.0)));
 
-            ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * ImGui::GetWindowHeight()));
-
-            ImGui::GetWindowDrawList()->AddRectFilled(startOffset, end, IM_COL32(255, 255, 255, 180), 200.0f);
+            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 15.0), IM_COL32(255, 255, 255, 180), 32.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
             ImGui::PopStyleVar();
         }
