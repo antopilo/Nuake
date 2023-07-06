@@ -12,7 +12,7 @@ namespace Nuake
 	{
 		Ref<Mesh> Mesh;
 		Matrix4 transform;
-		uint32_t entityId;
+		int32_t entityId;
 	};
 
 	class RenderList
@@ -23,7 +23,7 @@ namespace Nuake
 			this->m_RenderList = std::map<Ref<Material>, std::vector<RenderMesh>>();
 		}
 
-		void AddToRenderList(Ref<Mesh> mesh, Matrix4 transform, const uint32_t entityId = -1)
+		void AddToRenderList(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId = -1)
 		{
 			Ref<Material> material = mesh->GetMaterial();
 
@@ -44,7 +44,7 @@ namespace Nuake
 				for (auto& m : i.second)
 				{
 					shader->SetUniformMat4f("u_Model", m.transform);
-					shader->SetUniform1i("u_EntityID", m.entityId);
+					shader->SetUniform1i("u_EntityID", m.entityId + 1);
 					m.Mesh->Draw(shader, false);
 				}
 			}

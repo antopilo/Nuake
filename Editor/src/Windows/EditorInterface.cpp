@@ -241,9 +241,13 @@ namespace Nuake {
 
                 gbuffer.Bind();
 
-                if (const int result = gbuffer.ReadPixel(3, pixelPos); result >= 0)
+                if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
                 {
-                    Selection = EditorSelection(Entity{ (entt::entity)result, Engine::GetCurrentScene().get() });
+                    Selection = EditorSelection(Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get()});
+                }
+                else
+                {
+                    Selection = EditorSelection(); // None
                 }
 
                 gbuffer.Unbind();
