@@ -34,8 +34,8 @@ namespace Nuake
 			if (!previous && controlled)
 			{
 				firstMouse = true;
-				//mouseLastX = x;
-				//mouseLastY = y;
+				mouseLastX = x;
+				mouseLastY = y;
 			}
 		}
 		else
