@@ -157,11 +157,13 @@ namespace Nuake {
 
             Ref<Texture> texture = framebuffer->GetTexture();
             ImVec2 imagePos = ImGui::GetCursorPos();
+
+            m_ViewportPos = { imagePos.x, imagePos.y };
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 
             const Vector2& mousePos = Input::GetMousePosition();
-            const ImVec2& windowPos = ImGui::GetWindowPos();
-            const ImVec2& windowSize = ImGui::GetWindowSize();
+            const ImVec2& windowPos = ImGui::GetWindowPos() + ImVec2(0, 30.0);
+            const ImVec2& windowSize = ImGui::GetWindowSize() - ImVec2(0, 30.0);
             const bool isInsideWidth = mousePos.x > windowPos.x && mousePos.x < windowPos.x + windowSize.x;
             const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
             m_IsHoveringViewport = isInsideWidth && isInsideHeight;
@@ -975,8 +977,6 @@ namespace Nuake {
                //    // Unselect delted entity.
                //    m_SelectedEntity = scene->GetAllEntities().at(0);
                //}
-
-				
             }
             ImGui::EndChild();
             // Draw a tree of entities.
@@ -1101,9 +1101,9 @@ namespace Nuake {
             if (ImGui::BeginTable("LogTable", 3, flags))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableSetupColumn("Severity");
-                ImGui::TableSetupColumn("Time");
-                ImGui::TableSetupColumn("Message");
+                ImGui::TableSetupColumn("Severity", 0, 0.15f);
+                ImGui::TableSetupColumn("Time", 0.15f);
+                ImGui::TableSetupColumn("Message", 0.7f);
                 ImGui::TableHeadersRow();
                 ImGui::TableNextColumn();
                 for (auto& l : Logger::GetLogs())
@@ -1114,7 +1114,16 @@ namespace Nuake {
                         continue;
                     if (l.type == LOG_TYPE::CRITICAL && !LogErrors)
                         continue;
-                    ImGui::Text("-");
+
+                    std::string severityText = "";
+                    if (l.type == LOG_TYPE::VERBOSE)
+                        severityText = "Verbose";
+                    else if (l.type == LOG_TYPE::WARNING)
+                        severityText = "Warning";
+                    else
+                        severityText = "Critical";
+
+                    ImGui::Text(severityText.c_str());
                     ImGui::TableNextColumn();
                     ImGui::Text(l.time.c_str());
                     ImGui::TableNextColumn();
@@ -1346,7 +1355,6 @@ namespace Nuake {
             }
             if (ImGui::BeginMenu("View"))
             {
-                if (ImGui::MenuItem("Lighting", NULL, true)) {}
                 if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
                     m_DrawGrid = !m_DrawGrid;
                 if (ImGui::MenuItem("Draw Axis", NULL, m_DrawAxis))
@@ -1443,36 +1451,6 @@ namespace Nuake {
 
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
-
-        /*
-        if (ImGui::Begin("Toolbar", 0, ImGuiWindowFlags_NoScrollbar | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiWindowFlags_NoDecoration))
-        {
-            float availWidth = ImGui::GetContentRegionAvailWidth();
-            float windowWidth = ImGui::GetWindowWidth();
-
-            float used = windowWidth - availWidth;
-            float half = windowWidth / 2.0;
-            float needed = half - used;
-            ImGui::Dummy(ImVec2(needed, 10));
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_PLAY))
-            {
-                SceneSnapshot = Engine::GetCurrentScene()->Copy();
-                Engine::EnterPlayMode();
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button(ICON_FA_STOP) || Input::IsKeyPressed(297))
-            {
-                Engine::ExitPlayMode();
-
-                Engine::LoadScene(SceneSnapshot);
-                Selection = EditorSelection();
-            }
-        }
-        ImGui::End();
-        */
     }
 
     void EditorInterface::Update(float ts)

@@ -26,6 +26,8 @@ namespace Nuake
 		bool m_DebugCollisions = false;
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
+		Vector2 m_ViewportPos = {0, 0};
+		Vector2 m_ViewportSize = {};
 
 		ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
