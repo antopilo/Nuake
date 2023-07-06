@@ -53,6 +53,7 @@ uniform sampler2D m_Roughness;
 uniform sampler2D m_AO;
 uniform sampler2D m_Normal;
 uniform sampler2D m_Displacement;
+uniform int u_EntityID;
 
 layout(std140, binding = 32) uniform u_MaterialUniform
 {
@@ -104,5 +105,5 @@ void main()
     gMaterial.g = finalAO;
     gMaterial.b = finalRoughness;
 
-    gEntityID = int(gAlbedo.r * 255.0);
+    gEntityID = int(u_EntityID);
 }

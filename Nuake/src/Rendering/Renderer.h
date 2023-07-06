@@ -60,7 +60,7 @@ namespace Nuake
 		static void LoadShaders();
 
 		static void BeginScene();
-		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform);
+		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const uint32_t entityId = -1);
 		static void SubmitCube(Matrix4 transform);
 		static void Flush(Shader* shader, bool depthOnly = false);
 

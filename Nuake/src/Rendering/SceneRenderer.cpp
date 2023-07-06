@@ -223,7 +223,9 @@ namespace Nuake {
 				if (mesh.ModelResource && visibility.Visible)
 				{
 					for (auto& m : mesh.ModelResource->GetMeshes())
-						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+					{
+						Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e);
+					}
 				}
 			}
 
@@ -240,7 +242,9 @@ namespace Nuake {
 					continue;
 
 				for (auto& b : model.Meshes)
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
+				{
+					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
+				}
 			}
 			Renderer::Flush(gBufferShader, false);
 		}
