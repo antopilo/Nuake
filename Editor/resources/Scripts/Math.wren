@@ -14,6 +14,10 @@ class Math {
 		return this.Dot_(vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z)
 	}
 
+	static Lerp(a, b, t) {
+		return a + t * (b - a)
+	}
+
 	foreign static Dot_(x, y, z, x1, y2, z2)
 	foreign static Cross_(x, y, z, x1, y2, z2)
 	foreign static Length_(x, y, z)
