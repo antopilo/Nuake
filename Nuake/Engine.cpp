@@ -69,11 +69,11 @@ namespace Nuake
 				m_FixedUpdateDifference += m_TimeStep;
 
 				// Fixed update
-				if (m_FixedUpdateDifference >= m_FixedUpdateRate) 
+				while (m_FixedUpdateDifference >= m_FixedUpdateRate) 
 				{
 					CurrentWindow->FixedUpdate(m_FixedUpdateDifference);
 
-					m_FixedUpdateDifference = 0.0f;
+					m_FixedUpdateDifference -= m_FixedUpdateRate;
 				}
 			}
 			else
