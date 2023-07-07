@@ -1,5 +1,8 @@
 #include "TrenchbroomSystem.h"
 
+#include "src/Scene/Scene.h"
+#include "src/Scene/Components/QuakeMap.h"
+
 namespace Nuake
 {
 	TrenchbroomSystem::TrenchbroomSystem(Scene* scene)
@@ -20,6 +23,16 @@ namespace Nuake
 	void TrenchbroomSystem::FixedUpdate(Timestep ts)
 	{
 
+	}
+
+	void TrenchbroomSystem::EditorUpdate()
+	{
+		auto quakeMapView = m_Scene->m_Registry.view<QuakeMapComponent>();
+		for (auto e : quakeMapView)
+		{
+			const auto& quakeMapComponent = quakeMapView.get<QuakeMapComponent>(e);
+
+		}
 	}
 
 	void TrenchbroomSystem::Exit()

@@ -2,10 +2,15 @@
 #include "wren.h"
 #include <string>
 #include <src/Core/Logger.h>
+
 #include "ScriptModule.h"
+
 #include <iostream>
 #include <wren.h>
 #include "Engine.h"
+
+#include "src/Core/Physics/PhysicsManager.h"
+
 #include "../Scene/Entities/Entity.h"
 #include <src/Scene/Components/TransformComponent.h>
 #include <src/Scene/Components/LightComponent.h>
@@ -194,7 +199,7 @@ namespace Nuake {
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
-				bool result = characterController.CharacterController->IsOnGround;
+				bool result = PhysicsManager::Get().GetWorld()->IsCharacterGrounded(ent);
 				wrenSetSlotBool(vm, 0, result);
 			}
 
