@@ -297,6 +297,19 @@ namespace Nuake
 			_registeredCharacters[cc->Owner.GetHandle()] = character;
 		}
 
+		bool DynamicWorld::IsCharacterGrounded(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle];
+				const auto groundState = characterController->GetGroundState();
+				return groundState == JPH::CharacterBase::EGroundState::OnGround;
+			}
+
+			assert("Entity doesn't have a character controller component.");
+		}
+
 		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
 		{
 			Vector3 localNorm = glm::vec3(0,0,0);
@@ -389,13 +402,12 @@ namespace Nuake
 		{
 			// Next step
 			++_stepCount;
-			SyncEntitiesTranforms();
-			SyncCharactersTransforms();
+
 
 			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable.
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
-			constexpr float minStepDuration = 1.0f / 60.0f;
+			constexpr float minStepDuration = 1.0f / 90.0f;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
@@ -406,6 +418,14 @@ namespace Nuake
 
 			// Step the world
 			_JoltPhysicsSystem->Update(ts, collisionSteps, subSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+
+			for (auto& c : _registeredCharacters)
+			{
+				c.second->PostSimulation(0.01);
+			}
+
+			SyncEntitiesTranforms();
+			SyncCharactersTransforms();
 		}
 
 
