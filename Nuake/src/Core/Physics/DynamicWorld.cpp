@@ -443,44 +443,6 @@ namespace Nuake
 			}
 		}
 
-		const Matrix4& DynamicWorld::GetCharacterControllerSimulatedTransform(const Entity& entity)
-		{
-			const uint32_t entityHandle = entity.GetHandle();
-			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
-			{
-				auto& characterController = _registeredCharacters[entityHandle];
-
-				JPH::Mat44 joltTransform = characterController->GetWorldTransform();
-				const auto bodyRotation = characterController->GetRotation();
-
-				Matrix4 transform = glm::mat4(
-					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
-					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
-					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
-					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
-				);
-
-
-				return transform;
-
-				//Vector3 scale = Vector3();
-				//Quat rotation = Quat();
-				//Vector3 pos = Vector3();
-				//Vector3 skew = Vector3();
-				//Vector4 pesp = Vector4();
-				//glm::decompose(transform, scale, rotation, pos, skew, pesp);
-
-				//auto& transformComponent = entity.GetComponent<TransformComponent>();
-				//transformComponent.SetLocalPosition(pos);
-				//transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
-				//transformComponent.SetLocalTransform(transform);
-				//transformComponent.Dirty = false;
-			}
-
-			assert("Shouldn't have reached here!");
-			return Matrix4(1.0);
-		}
-
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)
 		{
 			JPH::ShapeSettings::ShapeResult result;
