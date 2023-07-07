@@ -128,7 +128,9 @@ namespace Nuake {
             stbi_image_free(images[0].pixels);
 
             glfwMakeContextCurrent(m_Window);
-            glfwSwapInterval(0);
+
+            glfwSwapInterval(1);
+
             Logger::Log((char*)glGetString(GL_VERSION));
 
             if (glewInit() != GLEW_OK)

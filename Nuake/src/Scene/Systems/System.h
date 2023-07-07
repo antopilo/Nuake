@@ -15,7 +15,7 @@ namespace Nuake
 
 		virtual void Update(Timestep ts) = 0;
 		virtual void FixedUpdate(Timestep ts) = 0;
-
+		virtual void EditorUpdate() {}
 		virtual void Exit() = 0;
 	};
 }
