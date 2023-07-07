@@ -231,7 +231,8 @@ namespace Nuake
 			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 			// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
 			//_JoltPhysicsSystem->OptimizeBroadPhase();
-			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
+			const uint32_t availableThreads = std::thread::hardware_concurrency() - 1;
+			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, availableThreads);
 		}
 
 		void DynamicWorld::DrawDebug()
@@ -308,6 +309,7 @@ namespace Nuake
 			}
 
 			assert("Entity doesn't have a character controller component.");
+			return false;
 		}
 
 		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
@@ -408,10 +410,14 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
+			constexpr int maxStepCount = 4;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
 			}
+
+			// Prevents having too many steps and running out of jobs
+			collisionSteps = std::min(collisionSteps, maxStepCount);
 
 			// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
 			constexpr int subSteps = 1;
