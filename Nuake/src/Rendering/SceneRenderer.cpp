@@ -48,9 +48,6 @@ namespace Nuake {
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
 
-		mShadingBuffer->QueueResize(framebuffer.GetSize());
-		ShadingPass(scene);
-
 		const auto& sceneEnv = scene.GetEnvironment();
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
@@ -61,7 +58,6 @@ namespace Nuake {
 
 			finalOutput = scene.GetEnvironment()->mBloom->GetOutput();
 		}
-		
 
 		const auto view = scene.m_Registry.view<LightComponent>();
 		auto lightList = std::vector<LightComponent>();
@@ -142,6 +138,10 @@ namespace Nuake {
 		}
 		framebuffer.Unbind();
 
+
+
+		mShadingBuffer->QueueResize(framebuffer.GetSize());
+		ShadingPass(scene);
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
