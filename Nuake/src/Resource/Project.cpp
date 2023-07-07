@@ -55,8 +55,7 @@ namespace Nuake
 
 	bool Project::FileExist()
 	{
-		struct stat buffer{};   
-		return (stat (this->FullPath.c_str(), &buffer) == 0);
+		return std::filesystem::exists(this->FullPath.c_str());
 	}
 
 	Ref<Project> Project::New(const std::string& Name, const std::string& Description, const std::string& FullPath)
