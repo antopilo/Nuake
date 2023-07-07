@@ -1248,7 +1248,7 @@ namespace Nuake {
 
     void NewProject()
     {
-        if (Engine::GetProject() && Engine::GetProject()->Exist())
+        if (Engine::GetProject() && Engine::GetProject()->FileExist())
             Engine::GetProject()->Save();
         
         std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");

@@ -26,7 +26,7 @@ namespace Nuake
 
 		void Save();
 		void SaveAs(const std::string& FullPath);
-		bool Exist();
+		bool FileExist();
 
 		static Ref<Project> New(const std::string& Name, const std::string& Description, const std::string& FullPath);
 		static Ref<Project> New();

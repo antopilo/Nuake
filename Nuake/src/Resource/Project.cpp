@@ -53,7 +53,7 @@ namespace Nuake
 		projectFile.close();
 	}
 
-	bool Project::Exist()
+	bool Project::FileExist()
 	{
 		struct stat buffer{};   
 		return (stat (this->FullPath.c_str(), &buffer) == 0);
