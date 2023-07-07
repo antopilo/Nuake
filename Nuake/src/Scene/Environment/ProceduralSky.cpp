@@ -102,17 +102,29 @@ namespace Nuake
 	json ProceduralSky::Serialize()
 	{
 		BEGIN_SERIALIZE()
-			SERIALIZE_VAL(SurfaceRadius);
+		SERIALIZE_VAL(SurfaceRadius);
 		SERIALIZE_VAL(AtmosphereRadius);
 		SERIALIZE_VEC3(RayleighScattering);
 		SERIALIZE_VEC3(MieScattering);
 		SERIALIZE_VAL(SunIntensity);
 		SERIALIZE_VEC3(SunDirection);
+		SERIALIZE_VEC3(CenterPoint);
 		END_SERIALIZE();
 	}
 
 	bool ProceduralSky::Deserialize(const std::string& str)
 	{
-		return false;
+		BEGIN_DESERIALIZE()
+		DESERIALIZE_VEC3(j["SunDirection"], SunDirection)
+		DESERIALIZE_VEC3(j["RayleighScattering"], RayleighScattering)
+		DESERIALIZE_VEC3(j["MieScattering"], MieScattering)
+		if (j.contains("CenterPoint"))
+		{
+			DESERIALIZE_VEC3(j["CenterPoint"], CenterPoint)
+		}
+		SurfaceRadius = j["SurfaceRadius"];
+		AtmosphereRadius = j["AtmosphereRadius"];
+		SunIntensity = j["SunIntensity"];
+		return true;
 	}
 }
