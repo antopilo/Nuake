@@ -166,28 +166,31 @@ namespace Nuake
 				if (ImGui::Button("New Project", buttonSize))
 				{
 					std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-
+					
 					if (!selectedProject.empty())
 					{
+						if(!String::EndsWith(selectedProject, ".project"))
+							selectedProject += ".project";
+						
 						auto backslashSplits = String::Split(selectedProject, '\\');
 						auto fileName = backslashSplits[backslashSplits.size() - 1];
 
-						std::string finalPath = selectedProject;
+						std::string finalPath = String::Split(selectedProject, '.')[0];
 
 						if (String::EndsWith(fileName, ".project"))
 						{
 							// We need to create a folder
-							if (const auto& dirPath = selectedProject;
-								std::filesystem::create_directory(dirPath))
+							if (const auto& dirPath = finalPath;
+								!std::filesystem::create_directory(dirPath))
 							{
 								// Should we continue?
 								Logger::Log("Failed creating project directory: " + dirPath);
 							}
 
-							finalPath += "\\" + fileName + ".project";
+							finalPath += "\\" + fileName;
 						}
 
-						auto project = Project::New(fileName, "no description", finalPath);
+						auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
 						Engine::LoadProject(project);
 						Engine::LoadScene(Scene::New());
 						project->Save();

@@ -1248,14 +1248,18 @@ namespace Nuake {
 
     void NewProject()
     {
-        if (Engine::GetProject())
+        if (Engine::GetProject() && Engine::GetProject()->FileExist())
             Engine::GetProject()->Save();
-
+        
         std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-        if (selectedProject == "") // Hit cancel
+        
+        if(!String::EndsWith(selectedProject, ".project"))
+            selectedProject += ".project";
+        
+        if (selectedProject.empty()) // Hit cancel
             return;
-
-        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject + ".project");
+        
+        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
         Engine::LoadProject(project);
         Engine::LoadScene(Scene::New());
     }
