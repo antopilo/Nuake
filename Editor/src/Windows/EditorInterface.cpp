@@ -1477,7 +1477,7 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
-        if (!Engine::GetCurrentScene())
+        if (!Engine::GetCurrentScene() || Engine::IsPlayMode)
         {
             return;
         }
