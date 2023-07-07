@@ -94,7 +94,7 @@ namespace Nuake {
             float needed = half - used;
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
+            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode))
             {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
                 Engine::EnterPlayMode();
@@ -102,7 +102,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(297))
+            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8))
             {
                 Engine::ExitPlayMode();
 
