@@ -20,7 +20,7 @@ public:
                 ImGui::Text("Friction");
                 ImGui::TableNextColumn();
 
-                ImGui::DragFloat("##Friction", &component.Friction, 0.01f, 0.1f, 100.0f);
+                ImGui::DragFloat("##Friction", &component.Friction, 0.00f, 0.1f, 100.0f);
                 ImGui::TableNextColumn();
                 ComponentTableReset(component.Friction, 0.5f)
             }
