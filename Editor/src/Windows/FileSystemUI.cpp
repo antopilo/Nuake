@@ -322,7 +322,6 @@ namespace Nuake {
                             ImGui::TableNextColumn();
                             if (ImGui::Button("..", ImVec2(100, 100)))
                                 m_CurrentDirectory = m_CurrentDirectory->Parent;
-                            ImGui::TableNextColumn();
                             i++;
                         }
 
@@ -330,13 +329,12 @@ namespace Nuake {
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                DrawDirectory(d);
 
                                 if (i + 1 % amount != 0)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
-
+                                DrawDirectory(d);
                                 i++;
                             }
                         }
@@ -345,12 +343,11 @@ namespace Nuake {
                         {
                             for (auto f : m_CurrentDirectory->Files)
                             {
-                                DrawFile(f);
-
-                                if (i - 1 % amount != 0)
+                                if (i - 1 % amount != 0 || i == 1)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
+                                DrawFile(f);
                                 i++;
                             }
                         }
