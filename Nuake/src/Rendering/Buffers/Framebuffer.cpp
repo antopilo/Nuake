@@ -126,6 +126,14 @@ namespace Nuake
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
+	int FrameBuffer::ReadPixel(uint32_t attachment, const Vector2 coords)
+	{
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+		int pixelData;
+		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		return pixelData;
+	}
+
 	void FrameBuffer::SetDrawBuffer(GLenum draw)
 	{
 		Bind();

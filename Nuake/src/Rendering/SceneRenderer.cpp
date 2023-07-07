@@ -13,7 +13,7 @@ namespace Nuake {
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1);
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT2);
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT3);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT3);
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -223,7 +223,9 @@ namespace Nuake {
 				if (mesh.ModelResource && visibility.Visible)
 				{
 					for (auto& m : mesh.ModelResource->GetMeshes())
-						Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+					{
+						Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e);
+					}
 				}
 			}
 
@@ -240,7 +242,9 @@ namespace Nuake {
 					continue;
 
 				for (auto& b : model.Meshes)
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform());
+				{
+					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
+				}
 			}
 			Renderer::Flush(gBufferShader, false);
 		}

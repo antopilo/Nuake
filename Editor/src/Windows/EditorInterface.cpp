@@ -231,11 +231,33 @@ namespace Nuake {
                     tc.SetGlobalTransform(transform);
                 }
             }
+
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
+            {
+                const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
+                auto& gbuffer = Engine::GetCurrentScene()->mSceneRenderer->GetGBuffer();
+                auto pixelPos = Input::GetMousePosition() - windowPosNuake;
+                pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
+
+                gbuffer.Bind();
+
+                if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
+                {
+                    Selection = EditorSelection(Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get()});
+                }
+                else
+                {
+                    Selection = EditorSelection(); // None
+                }
+
+                gbuffer.Unbind();
+            }
         }
         else
         {
             ImGui::PopStyleVar();
         }
+
         ImGui::End();
     }
 

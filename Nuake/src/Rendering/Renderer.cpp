@@ -108,14 +108,14 @@ namespace Nuake
     {
     }
 
-    void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform)
+    void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId)
     {
-        m_RenderList.AddToRenderList(mesh, transform);
+        m_RenderList.AddToRenderList(mesh, transform, entityId);
     }
 
     void Renderer::SubmitCube(Matrix4 transform)
     {
-        m_RenderList.AddToRenderList(CubeMesh, transform);
+        m_RenderList.AddToRenderList(CubeMesh, transform, -1);
     }
 
     void Renderer::Flush(Shader* shader, bool depthOnly)

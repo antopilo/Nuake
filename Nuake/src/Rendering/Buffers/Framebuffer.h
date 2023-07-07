@@ -38,6 +38,8 @@ namespace Nuake
 		void SetSize(const Vector2& size) { m_Size = size; }
 		void UpdateSize(Vector2 size);
 
+
+		int ReadPixel(uint32_t attachment, const Vector2 coords);
 		void SetDrawBuffer(GLenum draw);
 		void SetReadBuffer(GLenum read);
 	};

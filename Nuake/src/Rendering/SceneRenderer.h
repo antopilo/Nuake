@@ -18,6 +18,12 @@ namespace Nuake {
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
 
 		Scope<SSR> mSSR;
+
+		FrameBuffer& GetGBuffer() const
+		{
+			return *mGBuffer;
+		}
+
 	private:
 		Matrix4 mProjection, mView;
 		Vector3 mCamPos;

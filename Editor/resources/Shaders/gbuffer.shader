@@ -40,6 +40,7 @@ void main()
 layout(location = 0) out vec4 gAlbedo;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gMaterial;
+layout(location = 3) out int gEntityID;
 
 in vec3 FragPos;
 in vec2 UV;
@@ -52,6 +53,7 @@ uniform sampler2D m_Roughness;
 uniform sampler2D m_AO;
 uniform sampler2D m_Normal;
 uniform sampler2D m_Displacement;
+uniform int u_EntityID;
 
 layout(std140, binding = 32) uniform u_MaterialUniform
 {
@@ -102,4 +104,6 @@ void main()
     gMaterial.r = finalMetalness;
     gMaterial.g = finalAO;
     gMaterial.b = finalRoughness;
+
+    gEntityID = int(u_EntityID);
 }
