@@ -53,6 +53,12 @@ namespace Nuake
 		projectFile.close();
 	}
 
+	bool Project::Exist()
+	{
+		struct stat buffer{};   
+		return (stat (this->FullPath.c_str(), &buffer) == 0);
+	}
+
 	Ref<Project> Project::New(const std::string& Name, const std::string& Description, const std::string& FullPath)
 	{
 		return CreateRef<Project>(Name, Description, FullPath);
