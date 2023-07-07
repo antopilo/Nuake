@@ -329,11 +329,11 @@ namespace Nuake {
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-
                                 if (i + 1 % amount != 0)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
+
                                 DrawDirectory(d);
                                 i++;
                             }
@@ -347,6 +347,7 @@ namespace Nuake {
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
+                                
                                 DrawFile(f);
                                 i++;
                             }
