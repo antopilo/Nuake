@@ -1277,6 +1277,8 @@ namespace Nuake {
         Ref<Project> project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
         Engine::LoadProject(project);
         Engine::LoadScene(Scene::New());
+
+        Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name); 
     }
 
 
