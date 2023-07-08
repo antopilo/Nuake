@@ -9,35 +9,34 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
-const std::string TEMPLATE_SCRIPT_BEGIN = "import \"Nuake:Engine\" for Engine \
-import \"Nuake:ScriptableEntity\" for ScriptableEntity \
-import \"Nuake:Input\" for Input \
-import \"Nuake:Scene\" for Scene \
-\
-class ";
+const std::string TEMPLATE_SCRIPT = R"(import "Nuake:Engine" for Engine 
+import "Nuake:ScriptableEntity" for ScriptableEntity 
+import "Nuake:Input" for Input 
+import "Nuake:Math" for Vector3, Math 
+import "Nuake:Scene" for Scene 
 
-const std::string TEMPLATE_SCRIPT_END = " is ScriptableEntity {\
-construct new(){\
-	_ReloadSpeed = 0.1\
-	_Intensity = 0.0\
-}\
-\
-init() {\
-}\
-\
-// Updates every frame\
-update(ts) {\
-\
-}\
-\
-// Updates every tick\
-fixedUpdate(ts) {\
-	\
-}\
-\
-exit() {\
-}\
-}";
+class MyEntityScript is ScriptableEntity { 
+        construct new() { 
+        } 
+
+        // Called when the scene gets initialized 
+        init() { 
+            // Engine.Log("Hello World!") 
+        } 
+ 
+        // Called every update 
+        update(ts) { 
+        } 
+ 
+        // Called 90 times per second 
+        fixedUpdate(ts) { 
+        }  
+         
+        // Called on shutdown 
+        exit() { 
+        } 
+} 
+)";
 
 #include <src/Rendering/Textures/Material.h>
 
@@ -214,6 +213,23 @@ namespace Nuake {
 						FileSystem::EndWriteFile();
 					}
 				}
+
+			    if (ImGui::MenuItem("Wren Script"))
+			    {
+			        std::string path = FileDialog::SaveFile("*.wren");
+			        if (!String::EndsWith(path, ".wren"))
+			        {
+			            path += ".wren";
+			        }
+
+			        if (!path.empty())
+			        {
+			            
+			            FileSystem::BeginWriteFile(path);
+			            FileSystem::WriteLine(TEMPLATE_SCRIPT);
+			            FileSystem::EndWriteFile();
+			        }
+			    }
 
 				ImGui::EndMenu();
 			}
