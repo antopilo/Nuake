@@ -1258,8 +1258,23 @@ namespace Nuake {
         
         if (selectedProject.empty()) // Hit cancel
             return;
+
+        auto backslashSplits = String::Split(selectedProject, '\\');
+        auto fileName = backslashSplits[backslashSplits.size() - 1];
+
+        std::string finalPath = String::Split(selectedProject, '.')[0];
         
-        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject);
+        // We need to create a folder
+        if (const auto& dirPath = finalPath;
+            !std::filesystem::create_directory(dirPath))
+        {
+            // Should we continue?
+            Logger::Log("Failed creating project directory: " + dirPath);
+        }
+
+        finalPath += "\\" + fileName;
+        
+        Ref<Project> project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
         Engine::LoadProject(project);
         Engine::LoadScene(Scene::New());
     }
