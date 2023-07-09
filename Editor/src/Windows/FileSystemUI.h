@@ -26,5 +26,6 @@ namespace Nuake {
 		void DrawFile(Ref<File> file);
 		void DrawDirectoryExplorer();
 		void DrawContextMenu();
+		void RefreshFileBrowser();
 	};
 }

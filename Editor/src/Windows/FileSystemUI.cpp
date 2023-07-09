@@ -211,6 +211,8 @@ namespace Nuake {
 						FileSystem::BeginWriteFile(path);
 						FileSystem::WriteLine(jsonData.dump(4));
 						FileSystem::EndWriteFile();
+					    
+					    RefreshFileBrowser();
 					}
 				}
 
@@ -224,10 +226,11 @@ namespace Nuake {
 
 			        if (!path.empty())
 			        {
-			            
 			            FileSystem::BeginWriteFile(path);
 			            FileSystem::WriteLine(TEMPLATE_SCRIPT);
 			            FileSystem::EndWriteFile();
+			            
+			            RefreshFileBrowser();
 			        }
 			    }
 
@@ -237,6 +240,12 @@ namespace Nuake {
 			ImGui::EndPopup();
 		}
 
+    }
+
+    void FileSystemUI::RefreshFileBrowser()
+    {
+        FileSystem::Scan();
+        m_CurrentDirectory = FileSystem::RootDirectory;
     }
 
     float h = 200;
@@ -301,8 +310,7 @@ namespace Nuake {
                 {
                     if (ImGui::Button("Refresh"))
                     {
-                        FileSystem::Scan();
-                        m_CurrentDirectory = FileSystem::RootDirectory;
+                        RefreshFileBrowser();
                     }
 
                     ImGui::SameLine();
