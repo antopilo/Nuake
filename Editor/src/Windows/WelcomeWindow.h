@@ -49,6 +49,10 @@ namespace Nuake
 		void Draw();
 
 	private:
+		void DrawRecentProjectsSection();
+		void DrawProjectItem(const uint32_t projectPreview);
+		void DrawRightControls();
+
 		void ParseRecentFile();
 		void SaveRecentFile();
 	};
