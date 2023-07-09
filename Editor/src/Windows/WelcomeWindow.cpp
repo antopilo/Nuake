@@ -3,19 +3,20 @@
 #include <src/Vendors/imgui/imgui.h>
 #include "../Misc/InterfaceFonts.h"
 
+#include <Engine.h>
 #include <src/Core/FileSystem.h>
 #include <src/Resource/Project.h>
-#include <Engine.h>
 #include <src/Core/Logger.h>
+#include <src/Rendering/Textures/TextureManager.h>
+#include <src/Rendering/Textures/Texture.h>
 
 #include <json/json.hpp>
+
 #include <string>
 #include <vector>
+
 #include "EditorInterface.h"
-
 #include "FileSystemUI.h"
-
-#include <future>
 
 namespace Nuake
 {
@@ -33,6 +34,16 @@ namespace Nuake
 			nlohmann::json projectJson = nlohmann::json::parse(projectFile);
 			Name = projectJson["Name"];
 			Description = projectJson["Description"];
+
+			const std::string projectIconPath = Path + "/../icon.png";
+			if (FileSystem::FileExists(projectIconPath, true))
+			{
+				ProjectIcon = TextureManager::Get()->GetTexture(projectIconPath);
+			}
+			else
+			{
+				ProjectIcon = TextureManager::Get()->GetTexture("resources/Images/nuake-logo.png");
+			}
 		}
 		else
 		{
@@ -65,6 +76,9 @@ namespace Nuake
 		_Projects = std::vector<ProjectPreview>();
 
 		ParseRecentFile();
+
+		// Load Nuake logo
+		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
 	void WelcomeWindow::Draw()
@@ -79,32 +93,21 @@ namespace Nuake
 		ImGui::Begin("Welcome Screen", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
 		{
 			{
-				UIFont boldfont = UIFont(Fonts::Title);
-
-				std::string text = "Nuake Engine";
-				auto windowWidth = ImGui::GetWindowSize().x;
-				auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-
-				ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-				ImGui::Text(text.c_str());
+				const Vector2 logoSize = _NuakeLogo->GetSize();
+				const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
+				ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
 			}
-			{
-				UIFont boldfont = UIFont(Fonts::SubTitle);
-				std::string text = "An IdTech inspired game engine";
-				auto windowWidth = ImGui::GetWindowSize().x;
-				auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
 
-				ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-				ImGui::Text(text.c_str());
-			}
 			ImGui::Separator();
+			ImGui::Dummy(ImVec2(10, 25));
+
 			{
 				UIFont boldfont = UIFont(Fonts::SubTitle);
-				ImGui::Text("Projects recently opened");
+				ImGui::Text("Open recent");
 			}
 
 			ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
-			projectsWindowSize.x *= 0.6f;
+			projectsWindowSize.x *= 0.8f;
 
 			ImGui::BeginChild("Projects", projectsWindowSize, true);
 			{
@@ -112,8 +115,10 @@ namespace Nuake
 
 				for (uint32_t i = 0; i < std::size(_Projects); i++)
 				{
+
 					ProjectPreview& project = _Projects[i];
 
+					
 					float cursorYStart = ImGui::GetCursorPosY();
 
 					std::string selectableName = "##" + std::to_string(i);
@@ -123,13 +128,24 @@ namespace Nuake
 						SelectedProject = i;
 					}
 
-					ImGui::SetCursorPosY(cursorYStart);
+					const ImVec2 padding = ImVec2(25.0f, 20.0f);
+					const ImVec2 iconSize = ImVec2(100, 100);
+					ImGui::SetCursorPos(padding / 2.0 + ImVec2(0, cursorYStart));
+
+					ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+					ImGui::SameLine();
+					ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+
+					ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+					ImGui::SetCursorPosY(cursorYStart + padding.y);
 					{
 						UIFont boldfont = UIFont(Fonts::LargeBold);
 						ImGui::Text(project.Name.c_str());
 					}
 
+					ImGui::SetCursorPosY(cursorYStart + padding.y + 35.f);
 					{
+						ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
 						UIFont boldfont = UIFont(Fonts::Bold);
 						ImGui::Text(project.Description.c_str());
 					}
@@ -160,10 +176,11 @@ namespace Nuake
 
 			ImGui::SameLine();
 
-			if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), true))
+			ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+			if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), false))
 			{
 				ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvailWidth(), 58);
-				if (ImGui::Button("New Project", buttonSize))
+				if (ImGui::Button("Create a new project", buttonSize))
 				{
 					std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
 					
@@ -207,7 +224,7 @@ namespace Nuake
 
 				if (SelectedProject != -1)
 				{
-					if (ImGui::Button("Load Project", buttonSize))
+					if (ImGui::Button("Open an existing Project", buttonSize))
 					{
 						assert(SelectedProject < std::size(_Projects));
 
@@ -237,15 +254,11 @@ namespace Nuake
 						
 						Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
 					}
-
-					if (ImGui::Button("Remove Project"))
-					{
-						_Projects.erase(_Projects.begin() + SelectedProject);
-					}
 				}
 			}
 
 			ImGui::EndChild();
+			ImGui::PopStyleColor();
 		}
 
 		ImGui::End();

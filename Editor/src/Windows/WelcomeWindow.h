@@ -1,10 +1,13 @@
 #pragma once
 #include <src/Resource/Serializable.h>
+#include <src/Core/Core.h>
+
 #include <string>
 #include <vector>
 
 namespace Nuake
 {
+	class Texture;
 	class ProjectPreview : ISerializable
 	{
 	public:
@@ -12,6 +15,7 @@ namespace Nuake
 		std::string Path;
 		std::string Description;
 
+		Ref<Texture> ProjectIcon;
 
 		ProjectPreview(const std::string& path);
 		ProjectPreview() = default;
@@ -19,6 +23,7 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const std::string& data) override;
+
 	private:
 		void ReadProjectFile();
 	};
@@ -27,13 +32,17 @@ namespace Nuake
 	class WelcomeWindow
 	{
 	private:
+		const std::string NUAKE_LOGO_PATH = "resources/Images/logo_white.png";
+		Ref<Texture> _NuakeLogo;
+		EditorInterface* _Editor;
+
 		const std::string _RecentProjectFilePath = "recent.json";
 		const std::string _RecentProjectFileDefaultContent = "{ \"Projects\": [ ] }";
-		std::vector<ProjectPreview> _Projects;
+		
 		uint32_t SelectedProject = 0;
-		EditorInterface* _Editor;
-	public:
+		std::vector<ProjectPreview> _Projects;
 
+	public:
 		WelcomeWindow(Nuake::EditorInterface* editor);
 		~WelcomeWindow() = default;
 
