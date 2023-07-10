@@ -286,10 +286,12 @@ namespace Nuake
 				const auto& capsuleColliderComponent = entity.GetComponent<CapsuleColliderComponent>();
 				auto& capsule = capsuleColliderComponent.Capsule;
 
-				float friction = characterControllerComponent.Friction;
-				float maxSlopeAngle = characterControllerComponent.MaxSlopeAngle;
+				const float friction = characterControllerComponent.Friction;
+				const float maxSlopeAngle = characterControllerComponent.MaxSlopeAngle;
 				auto characterController = CreateRef<Physics::CharacterController>(capsule, friction, maxSlopeAngle);
 				characterController->SetEntity(entity); // Used to link back to the entity
+				characterController->Position = transformComponent.GetGlobalPosition();
+				characterController->Rotation = transformComponent.GetGlobalRotation();
 
 				characterControllerComponent.CharacterController = characterController;
 				PhysicsManager::Get().RegisterCharacterController(characterControllerComponent.CharacterController);

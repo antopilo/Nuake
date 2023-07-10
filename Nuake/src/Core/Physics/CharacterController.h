@@ -13,8 +13,9 @@ namespace Nuake
 		class CharacterController
 		{
 		public:
-			
 			Vector3 Position = Vector3(0, 0, 0);
+			Quat Rotation = Quat(1, 0, 0, 0);
+
 			Entity Owner;
 
 			bool IsOnGround = false;
@@ -24,8 +25,6 @@ namespace Nuake
 			float MaxSlopeAngle = 45.0f;
 			float Friction = 0.5f;
 			Ref<PhysicShape> Shape;
-
-			//bool m_onJumpableGround; // A bit lower contact than just onGround
 
 			float m_bottomYOffset;
 			float m_bottomRoundedRegionYOffset;
