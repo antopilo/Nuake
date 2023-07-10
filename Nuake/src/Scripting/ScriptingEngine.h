@@ -1,15 +1,18 @@
 #pragma once
+#include "src/Core/Core.h"
+#include "src/Core/Timestep.h"
+
 #include <string>
 #include <vector>
 #include <map>
-#include "src/Core/Core.h"
+
 #include "src/Vendors/wren/src/include/wren.hpp"
-#include "src/Core/Timestep.h"
 
 namespace Nuake
 {
 	class WrenScript;
 	class ScriptModule;
+
 	class ScriptingEngine
 	{
 	private:
@@ -18,7 +21,12 @@ namespace Nuake
 		static std::vector<std::string> m_LoadedScripts;
 		static std::map<std::string, Ref<WrenScript>> m_Scripts;
 		static std::map<std::string, Ref<ScriptModule>> Modules;
+
 	public:
+		static void Init();
+		static void RunCode(const std::string& code);
+		static void Close();
+
 		static Ref<WrenScript> RegisterScript(const std::string& path, const std::string& mod);
 		static bool IsScriptImported(const std::string& path);
 		static void ImportScript(const std::string& path);
@@ -26,11 +34,6 @@ namespace Nuake
 		static void InitScript(Ref<WrenScript> script);
 		static void UpdateScript(Ref<WrenScript> script, Timestep timestep);
 		static void ExitScript(Ref<WrenScript> script);
-		static void Init();
-		static void RunCode(const std::string& code);
-		static void Close();
-
-
 
 		static WrenForeignMethodFn bindForeignMethod(
 			WrenVM* vm,

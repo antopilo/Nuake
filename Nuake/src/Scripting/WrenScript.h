@@ -1,13 +1,14 @@
 #pragma once
 #include "ScriptingEngine.h"
 
-#include "src/Core/FileSystem.h"
 #include <map>
 #include <string>
 
 struct WrenHandle;
 
-namespace Nuake {
+namespace Nuake 
+{
+	class File;
 	class WrenScript
 	{
 	private:

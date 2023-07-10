@@ -2,10 +2,12 @@
 
 #include "src/Core/Logger.h"
 #include "src/Core/String.h"
+#include "src/Core/FileSystem.h"
 
 #include <src/Vendors/wren/src/include/wren.h>
 
-namespace Nuake {
+namespace Nuake 
+{
 	WrenScript::WrenScript(Ref<File> file, bool isEntity)
 	{
 		mFile = file;
