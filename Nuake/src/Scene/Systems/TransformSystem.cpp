@@ -1,13 +1,14 @@
 #include "TransformSystem.h"
 
 #include "src/Core/Maths.h"
-
 #include "src/Scene/Scene.h"
-#include <src/Scene/Components/TransformComponent.h>
-#include <src/Scene/Components/CameraComponent.h>
-#include <src/Scene/Components/ParentComponent.h>
-#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
-namespace Nuake {
+#include "src/Scene/Components/TransformComponent.h"
+#include "src/Scene/Components/CameraComponent.h"
+#include "src/Scene/Components/ParentComponent.h"
+
+
+namespace Nuake 
+{
 	TransformSystem::TransformSystem(Scene* scene)
 	{
 		m_Scene = scene;
@@ -43,6 +44,9 @@ namespace Nuake {
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
 
 			camera.CameraInstance->Translation = transform.GlobalTranslation;
+
+			// We need to invert forward direction since its -1.0f in nuake.
+			camera.CameraInstance->SetDirection(QuatToDirection(transform.GetGlobalRotation()));
 		}
 
 		// Calculate all local transforms

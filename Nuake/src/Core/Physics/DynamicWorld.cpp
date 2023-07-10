@@ -289,8 +289,16 @@ namespace Nuake
 			settings->mShape = GetJoltShape(cc->Shape);
 			settings->mGravityFactor = 0.0f;
 
-			auto& joltPos = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
-			JPH::Character* character = new JPH::Character(settings, joltPos, JPH::Quat::sIdentity(), cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
+			auto& joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
+
+			Quat& bodyRotation = cc->Rotation;
+
+			// We need to add 180 degrees because our forward is -Z.
+			const auto& yOffset = Vector3(0.0f, Rad(180.0), 0.0f);
+			bodyRotation = glm::normalize(bodyRotation * Quat(yOffset));
+
+			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
+			JPH::Character* character = new JPH::Character(settings, joltPosition, joltRotation, cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
 
 			character->AddToPhysicsSystem(JPH::EActivation::Activate);
 			

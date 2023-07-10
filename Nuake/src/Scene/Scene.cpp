@@ -142,13 +142,6 @@ namespace Nuake {
 			{
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
-
-				cam->Translation = transform.GetGlobalPosition();
-
-				const Vector3& forward = QuatToDirection(transform.GetGlobalRotation());
-				cam->SetDirection(forward);
-
-				camTransform = transform.GetGlobalTransform();
 				break;
 			}
 		}
