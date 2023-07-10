@@ -3,19 +3,20 @@
 #include <src/Vendors/imgui/imgui.h>
 #include "../Misc/InterfaceFonts.h"
 
+#include <Engine.h>
 #include <src/Core/FileSystem.h>
 #include <src/Resource/Project.h>
-#include <Engine.h>
 #include <src/Core/Logger.h>
+#include <src/Rendering/Textures/TextureManager.h>
+#include <src/Rendering/Textures/Texture.h>
 
 #include <json/json.hpp>
+
 #include <string>
 #include <vector>
+
 #include "EditorInterface.h"
-
 #include "FileSystemUI.h"
-
-#include <future>
 
 namespace Nuake
 {
@@ -33,6 +34,16 @@ namespace Nuake
 			nlohmann::json projectJson = nlohmann::json::parse(projectFile);
 			Name = projectJson["Name"];
 			Description = projectJson["Description"];
+
+			const std::string projectIconPath = Path + "/../icon.png";
+			if (FileSystem::FileExists(projectIconPath, true))
+			{
+				ProjectIcon = TextureManager::Get()->GetTexture(projectIconPath);
+			}
+			else
+			{
+				ProjectIcon = TextureManager::Get()->GetTexture("resources/Images/nuake-logo.png");
+			}
 		}
 		else
 		{
@@ -65,10 +76,14 @@ namespace Nuake
 		_Projects = std::vector<ProjectPreview>();
 
 		ParseRecentFile();
+
+		// Load Nuake logo
+		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
 	void WelcomeWindow::Draw()
 	{
+		// Make viewport fullscreen
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->GetWorkPos());
 		ImGui::SetNextWindowSize(viewport->GetWorkSize());
@@ -78,176 +93,193 @@ namespace Nuake
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(32.0f, 32.0f));
 		ImGui::Begin("Welcome Screen", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
 		{
+			// Draw Nuake logo
 			{
-				UIFont boldfont = UIFont(Fonts::Title);
-
-				std::string text = "Nuake Engine";
-				auto windowWidth = ImGui::GetWindowSize().x;
-				auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
-
-				ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-				ImGui::Text(text.c_str());
+				const Vector2 logoSize = _NuakeLogo->GetSize();
+				const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
+				ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
 			}
-			{
-				UIFont boldfont = UIFont(Fonts::SubTitle);
-				std::string text = "An IdTech inspired game engine";
-				auto windowWidth = ImGui::GetWindowSize().x;
-				auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
 
-				ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-				ImGui::Text(text.c_str());
-			}
-			ImGui::Separator();
+			// Add padding under logo
+			ImGui::Dummy(ImVec2(10, 25));
 			{
 				UIFont boldfont = UIFont(Fonts::SubTitle);
-				ImGui::Text("Projects recently opened");
+				ImGui::Text("Open recent");
 			}
 
-			ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
-			projectsWindowSize.x *= 0.6f;
-
-			ImGui::BeginChild("Projects", projectsWindowSize, true);
-			{
-				const uint32_t itemHeight = 120;
-
-				for (uint32_t i = 0; i < std::size(_Projects); i++)
-				{
-					ProjectPreview& project = _Projects[i];
-
-					float cursorYStart = ImGui::GetCursorPosY();
-
-					std::string selectableName = "##" + std::to_string(i);
-					bool isSelected = SelectedProject == i;
-					if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
-					{
-						SelectedProject = i;
-					}
-
-					ImGui::SetCursorPosY(cursorYStart);
-					{
-						UIFont boldfont = UIFont(Fonts::LargeBold);
-						ImGui::Text(project.Name.c_str());
-					}
-
-					{
-						UIFont boldfont = UIFont(Fonts::Bold);
-						ImGui::Text(project.Description.c_str());
-					}
-
-					ImGui::SetCursorPosY(cursorYStart + itemHeight);
-				}
-
-				if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
-				{
-					std::string path = FileDialog::OpenFile("*.project");
-					if (path != "")
-					{
-						bool alreadyContainsProject = false;
-						for (auto& p : _Projects)
-						{
-							if (p.Path == path)
-								alreadyContainsProject = true;
-						}
-
-						if (!alreadyContainsProject)
-						{
-							_Projects.push_back(ProjectPreview(path));
-						}
-					}
-				}
-			}
-			ImGui::EndChild();
-
+			DrawRecentProjectsSection();
 			ImGui::SameLine();
-
-			if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), true))
-			{
-				ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvailWidth(), 58);
-				if (ImGui::Button("New Project", buttonSize))
-				{
-					std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-
-					if (!selectedProject.empty())
-					{
-						auto backslashSplits = String::Split(selectedProject, '\\');
-						auto fileName = backslashSplits[backslashSplits.size() - 1];
-
-						std::string finalPath = selectedProject;
-
-						if (String::EndsWith(fileName, ".project"))
-						{
-							// We need to create a folder
-							if (const auto& dirPath = selectedProject;
-								std::filesystem::create_directory(dirPath))
-							{
-								// Should we continue?
-								Logger::Log("Failed creating project directory: " + dirPath);
-							}
-
-							finalPath += "\\" + fileName + ".project";
-						}
-
-						auto project = Project::New(fileName, "no description", finalPath);
-						Engine::LoadProject(project);
-						Engine::LoadScene(Scene::New());
-						project->Save();
-
-						auto projectPreview = ProjectPreview();
-						projectPreview.Name = project->Name;
-						projectPreview.Description = project->Description;
-						projectPreview.Path = project->FullPath;
-
-						_Projects.push_back(projectPreview);
-					}
-				}
-				ImGui::Separator();
-
-				if (SelectedProject != -1)
-				{
-					if (ImGui::Button("Load Project", buttonSize))
-					{
-						assert(SelectedProject < std::size(_Projects));
-
-						using namespace Nuake;
-
-						SaveRecentFile();
-
-						std::string projectPath = _Projects[SelectedProject].Path;
-						FileSystem::SetRootDirectory(projectPath + "/../");
-
-						auto project = Project::New();
-						auto projectFileData = FileSystem::ReadFile(projectPath, true);
-						try 
-						{
-							project->Deserialize(projectFileData);
-							project->FullPath = projectPath;
-
-							Engine::LoadProject(project);
-
-							_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-						}
-						catch (std::exception exception)
-						{
-							Logger::Log("Error loading project: " + projectPath, CRITICAL);
-							Logger::Log(exception.what());
-						}
-						
-						Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
-					}
-
-					if (ImGui::Button("Remove Project"))
-					{
-						_Projects.erase(_Projects.begin() + SelectedProject);
-					}
-				}
-			}
-
-			ImGui::EndChild();
+			DrawRightControls();
 		}
 
 		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGui::PopStyleVar();
+	}
+
+	void WelcomeWindow::DrawRecentProjectsSection()
+	{
+		// Recent projects section takes up 80% of the width
+		ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
+		projectsWindowSize.x *= 0.8f;
+
+		ImGui::BeginChild("Projects", projectsWindowSize, true);
+		{
+			for (uint32_t i = 0; i < std::size(_Projects); i++)
+			{
+				DrawProjectItem(i);
+			}
+
+			const float itemHeight = 120.0f;
+			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+			{
+				const std::string path = FileDialog::OpenFile("Project file |*.project");
+				if (path != "" && String::EndsWith(path, ".project"))
+				{
+					// Prevent importing the same project twice in the list
+					bool alreadyContainsProject = false;
+					for (auto& p : _Projects)
+					{
+						if (p.Path == path)
+						{
+							alreadyContainsProject = true;
+						}
+					}
+
+					if (!alreadyContainsProject)
+					{
+						_Projects.push_back(ProjectPreview(path));
+					}
+				}
+			}
+		}
+		ImGui::EndChild();
+	}
+
+	void WelcomeWindow::DrawProjectItem(const uint32_t itemIndex)
+	{
+		const ProjectPreview& project = _Projects[itemIndex];
+		const uint32_t itemHeight = 120;
+		const float cursorYStart = ImGui::GetCursorPosY();
+
+		const std::string selectableName = "##" + std::to_string(itemIndex);
+		const bool isSelected = SelectedProject == itemIndex;
+		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+		{
+			SelectedProject = itemIndex;
+		}
+
+		const ImVec2 padding = ImVec2(25.0f, 20.0f);
+		const ImVec2 iconSize = ImVec2(100, 100);
+		ImGui::SetCursorPos(padding / 2.0 + ImVec2(0, cursorYStart));
+
+		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+
+		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+		ImGui::SetCursorPosY(cursorYStart + padding.y);
+		{
+			UIFont boldfont = UIFont(Fonts::LargeBold);
+			ImGui::Text(project.Name.c_str());
+		}
+
+		ImGui::SetCursorPosY(cursorYStart + padding.y + 35.f);
+		{
+			ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+			UIFont boldfont = UIFont(Fonts::Bold);
+			ImGui::Text(project.Description.c_str());
+		}
+
+		ImGui::SetCursorPosY(cursorYStart + itemHeight);
+	}
+
+	void WelcomeWindow::DrawRightControls()
+	{
+		const float buttonHeight = 58.0f;
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+		if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), false))
+		{
+			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvailWidth(), buttonHeight);
+			if (ImGui::Button("Create a new project", buttonSize))
+			{
+				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
+					
+				if (!selectedProject.empty())
+				{
+					if(!String::EndsWith(selectedProject, ".project"))
+						selectedProject += ".project";
+						
+					auto backslashSplits = String::Split(selectedProject, '\\');
+					auto fileName = backslashSplits[backslashSplits.size() - 1];
+
+					std::string finalPath = String::Split(selectedProject, '.')[0];
+
+					if (String::EndsWith(fileName, ".project"))
+					{
+						// We need to create a folder
+						if (const auto& dirPath = finalPath;
+							!std::filesystem::create_directory(dirPath))
+						{
+							// Should we continue?
+							Logger::Log("Failed creating project directory: " + dirPath);
+						}
+
+						finalPath += "\\" + fileName;
+					}
+
+					auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
+					Engine::LoadProject(project);
+					Engine::LoadScene(Scene::New());
+					project->Save();
+
+					auto projectPreview = ProjectPreview();
+					projectPreview.Name = project->Name;
+					projectPreview.Description = project->Description;
+					projectPreview.Path = project->FullPath;
+
+					_Projects.push_back(projectPreview);
+				}
+			}
+			ImGui::Separator();
+
+			if (SelectedProject != -1)
+			{
+				if (ImGui::Button("Open an existing Project", buttonSize))
+				{
+					assert(SelectedProject < std::size(_Projects));
+
+					using namespace Nuake;
+
+					SaveRecentFile();
+
+					std::string projectPath = _Projects[SelectedProject].Path;
+					FileSystem::SetRootDirectory(projectPath + "/../");
+
+					auto project = Project::New();
+					auto projectFileData = FileSystem::ReadFile(projectPath, true);
+					try 
+					{
+						project->Deserialize(projectFileData);
+						project->FullPath = projectPath;
+
+						Engine::LoadProject(project);
+
+						_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+					}
+					catch (std::exception exception)
+					{
+						Logger::Log("Error loading project: " + projectPath, CRITICAL);
+						Logger::Log(exception.what());
+					}
+						
+					Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
+				}
+			}
+		}
+
+		ImGui::EndChild();
+		ImGui::PopStyleColor();
 	}
 
 	void WelcomeWindow::ParseRecentFile()

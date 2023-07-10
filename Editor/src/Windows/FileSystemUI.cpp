@@ -9,35 +9,34 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
-const std::string TEMPLATE_SCRIPT_BEGIN = "import \"Nuake:Engine\" for Engine \
-import \"Nuake:ScriptableEntity\" for ScriptableEntity \
-import \"Nuake:Input\" for Input \
-import \"Nuake:Scene\" for Scene \
-\
-class ";
+const std::string TEMPLATE_SCRIPT = R"(import "Nuake:Engine" for Engine 
+import "Nuake:ScriptableEntity" for ScriptableEntity 
+import "Nuake:Input" for Input 
+import "Nuake:Math" for Vector3, Math 
+import "Nuake:Scene" for Scene 
 
-const std::string TEMPLATE_SCRIPT_END = " is ScriptableEntity {\
-construct new(){\
-	_ReloadSpeed = 0.1\
-	_Intensity = 0.0\
-}\
-\
-init() {\
-}\
-\
-// Updates every frame\
-update(ts) {\
-\
-}\
-\
-// Updates every tick\
-fixedUpdate(ts) {\
-	\
-}\
-\
-exit() {\
-}\
-}";
+class MyEntityScript is ScriptableEntity { 
+        construct new() { 
+        } 
+
+        // Called when the scene gets initialized 
+        init() { 
+            // Engine.Log("Hello World!") 
+        } 
+ 
+        // Called every update 
+        update(ts) { 
+        } 
+ 
+        // Called 90 times per second 
+        fixedUpdate(ts) { 
+        }  
+         
+        // Called on shutdown 
+        exit() { 
+        } 
+} 
+)";
 
 #include <src/Rendering/Textures/Material.h>
 
@@ -212,8 +211,28 @@ namespace Nuake {
 						FileSystem::BeginWriteFile(path);
 						FileSystem::WriteLine(jsonData.dump(4));
 						FileSystem::EndWriteFile();
+					    
+					    RefreshFileBrowser();
 					}
 				}
+
+			    if (ImGui::MenuItem("Wren Script"))
+			    {
+			        std::string path = FileDialog::SaveFile("*.wren");
+			        if (!String::EndsWith(path, ".wren"))
+			        {
+			            path += ".wren";
+			        }
+
+			        if (!path.empty())
+			        {
+			            FileSystem::BeginWriteFile(path);
+			            FileSystem::WriteLine(TEMPLATE_SCRIPT);
+			            FileSystem::EndWriteFile();
+			            
+			            RefreshFileBrowser();
+			        }
+			    }
 
 				ImGui::EndMenu();
 			}
@@ -221,6 +240,12 @@ namespace Nuake {
 			ImGui::EndPopup();
 		}
 
+    }
+
+    void FileSystemUI::RefreshFileBrowser()
+    {
+        FileSystem::Scan();
+        m_CurrentDirectory = FileSystem::RootDirectory;
     }
 
     float h = 200;
@@ -285,8 +310,7 @@ namespace Nuake {
                 {
                     if (ImGui::Button("Refresh"))
                     {
-                        FileSystem::Scan();
-                        m_CurrentDirectory = FileSystem::RootDirectory;
+                        RefreshFileBrowser();
                     }
 
                     ImGui::SameLine();
@@ -322,7 +346,6 @@ namespace Nuake {
                             ImGui::TableNextColumn();
                             if (ImGui::Button("..", ImVec2(100, 100)))
                                 m_CurrentDirectory = m_CurrentDirectory->Parent;
-                            ImGui::TableNextColumn();
                             i++;
                         }
 
@@ -330,13 +353,12 @@ namespace Nuake {
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                DrawDirectory(d);
-
                                 if (i + 1 % amount != 0)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
 
+                                DrawDirectory(d);
                                 i++;
                             }
                         }
@@ -345,12 +367,12 @@ namespace Nuake {
                         {
                             for (auto f : m_CurrentDirectory->Files)
                             {
-                                DrawFile(f);
-
-                                if (i - 1 % amount != 0)
+                                if (i - 1 % amount != 0 || i == 1)
                                     ImGui::TableNextColumn();
                                 else
                                     ImGui::TableNextRow();
+                                
+                                DrawFile(f);
                                 i++;
                             }
                         }

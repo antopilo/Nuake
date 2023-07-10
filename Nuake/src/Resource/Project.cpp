@@ -53,6 +53,11 @@ namespace Nuake
 		projectFile.close();
 	}
 
+	bool Project::FileExist()
+	{
+		return std::filesystem::exists(this->FullPath.c_str());
+	}
+
 	Ref<Project> Project::New(const std::string& Name, const std::string& Description, const std::string& FullPath)
 	{
 		return CreateRef<Project>(Name, Description, FullPath);

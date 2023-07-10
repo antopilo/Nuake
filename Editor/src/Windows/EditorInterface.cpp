@@ -94,7 +94,7 @@ namespace Nuake {
             float needed = half - used;
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
+            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode))
             {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
                 Engine::EnterPlayMode();
@@ -102,7 +102,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(297))
+            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8))
             {
                 Engine::ExitPlayMode();
 
@@ -1248,16 +1248,37 @@ namespace Nuake {
 
     void NewProject()
     {
-        if (Engine::GetProject())
+        if (Engine::GetProject() && Engine::GetProject()->FileExist())
             Engine::GetProject()->Save();
-
+        
         std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-        if (selectedProject == "") // Hit cancel
+        
+        if(!String::EndsWith(selectedProject, ".project"))
+            selectedProject += ".project";
+        
+        if (selectedProject.empty()) // Hit cancel
             return;
 
-        Ref<Project> project = Project::New("Unnamed project", "no description", selectedProject + ".project");
+        auto backslashSplits = String::Split(selectedProject, '\\');
+        auto fileName = backslashSplits[backslashSplits.size() - 1];
+
+        std::string finalPath = String::Split(selectedProject, '.')[0];
+        
+        // We need to create a folder
+        if (const auto& dirPath = finalPath;
+            !std::filesystem::create_directory(dirPath))
+        {
+            // Should we continue?
+            Logger::Log("Failed creating project directory: " + dirPath);
+        }
+
+        finalPath += "\\" + fileName;
+        
+        Ref<Project> project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
         Engine::LoadProject(project);
         Engine::LoadScene(Scene::New());
+
+        Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name); 
     }
 
 

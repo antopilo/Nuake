@@ -68,6 +68,11 @@ namespace Nuake {
 			VolumetricFog = j["VolumetricFog"];
 		if (j.contains("VolumetricStepCount"))
 			VolumetricStepCount = j["VolumetricStepCount"];
+		if (j.contains("ProceduralSkybox"))
+		{
+			ProceduralSkybox->Deserialize(j["ProceduralSkybox"].dump());
+		}
+			
 		return false;
 	}
 }
