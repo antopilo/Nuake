@@ -16,6 +16,7 @@
 #include <GL/glew.h>
 
 #include "Engine.h"
+#include "src/Core/Maths.h"
 #include "src/Core/FileSystem.h"
 #include "src/Scene/Components/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
@@ -141,10 +142,13 @@ namespace Nuake {
 			{
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
-				cam->Translation = transform.GetGlobalPosition();
-				cam->SetDirection(glm::rotate(glm::inverse(transform.GetGlobalRotation()), glm::vec3(1.0, 0.0, 0.0)));
-				camTransform = transform.GetGlobalTransform();
 
+				cam->Translation = transform.GetGlobalPosition();
+
+				const Vector3& forward = QuatToDirection(transform.GetGlobalRotation());
+				cam->SetDirection(forward);
+
+				camTransform = transform.GetGlobalTransform();
 				break;
 			}
 		}
