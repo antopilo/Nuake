@@ -445,29 +445,24 @@ namespace Nuake
 			SyncCharactersTransforms();
 		}
 
-
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
 
-			if (_registeredBodies.empty())
+			if (!_registeredBodies.empty())
 			{
-				return;
+				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
+				_registeredBodies.clear();
 			}
 			
-			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
-			_registeredBodies.clear();
-
-			if (_registeredCharacters.empty())
+			if (!_registeredCharacters.empty())
 			{
-				return;
+				for (auto& character : _registeredCharacters)
+				{
+					character.second->RemoveFromPhysicsSystem();
+				}
+				_registeredCharacters.clear();
 			}
-
-			for (auto& character : _registeredCharacters)
-			{
-				character.second->RemoveFromPhysicsSystem();
-			}
-			_registeredCharacters.clear();
 		}
 
 		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)

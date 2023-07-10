@@ -142,6 +142,13 @@ namespace Nuake {
 			{
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
+
+				cam->Translation = transform.GetGlobalPosition();
+
+				//const Vector3& forward = QuatToDirection(transform.GetGlobalRotation());
+				//cam->SetDirection(forward);
+
+				//camTransform = transform.GetGlobalTransform();
 				break;
 			}
 		}
@@ -151,6 +158,10 @@ namespace Nuake {
 			return;
 		}
 
+		float x = cam->GetDirection().x;
+		float y = cam->GetDirection().y;
+		float z = cam->GetDirection().z;
+		Logger::Log("DIRECTION: (" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")");
 		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
 		mSceneRenderer->RenderScene(*this, framebuffer);
 	}
@@ -237,7 +248,7 @@ namespace Nuake {
 
 	Ref<Camera> Scene::GetCurrentCamera()
 	{
-		if (Engine::IsPlayMode)
+		if (Engine::IsPlayMode())
 		{
 			Ref<Camera> cam = nullptr;
 			{

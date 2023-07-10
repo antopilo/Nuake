@@ -2,10 +2,9 @@
 
 #include "src/Core/Maths.h"
 #include "src/Scene/Scene.h"
-#include "src/Scene/Components/TransformComponent.h"
-#include "src/Scene/Components/CameraComponent.h"
-#include "src/Scene/Components/ParentComponent.h"
-
+#include <src/Scene/Components/TransformComponent.h>
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Scene/Components/ParentComponent.h>
 
 namespace Nuake 
 {
@@ -37,18 +36,6 @@ namespace Nuake
 
 	void TransformSystem::UpdateTransform()
 	{
-		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto e : camView)
-		{
-			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
-			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
-
-			camera.CameraInstance->Translation = transform.GlobalTranslation;
-
-			// We need to invert forward direction since its -1.0f in nuake.
-			camera.CameraInstance->SetDirection(QuatToDirection(transform.GetGlobalRotation()));
-		}
-
 		// Calculate all local transforms
 		auto localTransformView = m_Scene->m_Registry.view<TransformComponent>();
 		for (auto tv : localTransformView)
@@ -113,6 +100,18 @@ namespace Nuake
 			transform.SetGlobalRotation(globalOrientation);
 			transform.SetGlobalScale(globalScale);
 			transform.SetGlobalTransform(globalTransform);
+		}
+
+		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto& e : camView)
+		{
+			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
+			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+			camera.CameraInstance->Translation = transform.GlobalTranslation;
+
+			const auto& globalRotation = transform.GetGlobalRotation();
+			const auto& forward = QuatToDirection(globalRotation);
+			camera.CameraInstance->SetDirection(forward);
 		}
 	}
 }
