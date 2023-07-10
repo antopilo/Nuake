@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 
@@ -15,9 +14,9 @@
 #include "src/Scene/Systems/System.h"
 
 #include "src/Resource/UUID.h"
-#include "src/Resource/Resource.h"
 
-namespace Nuake {
+namespace Nuake 
+{
 	class Entity;
 	class SceneRenderer;
 

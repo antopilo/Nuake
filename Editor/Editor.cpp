@@ -1,6 +1,5 @@
 #include <Engine.h>
 
-#include <src/Core/Maths.h>
 #include <src/Core/Input.h>
 #include <src/Scene/Scene.h>
 #include <src/Scene/Entities/Entity.h>
@@ -27,6 +26,8 @@
 #include "src/Actions/EditorSelection.h"
 #include "src/Misc/GizmoDrawer.h"
 #include "src/Windows/FileSystemUI.h"
+
+#include <src/Core/Maths.h>
 
 const std::string WindowTitle = "Nuake Editor";
 
@@ -183,7 +184,7 @@ int main(int argc, char* argv[])
                     camera = currentScene->m_EditorCamera;
                 }
 
-                if (currentScene && !Nuake::Engine::IsPlayMode && editor.ShouldDrawAxis())
+                if (currentScene && !Nuake::Engine::IsPlayMode() && editor.ShouldDrawAxis())
                 {
                     gizmoDrawer.DrawGizmos(currentScene);
                 }

@@ -1,4 +1,5 @@
 #include "Logger.h"
+
 #include <iostream>
 #include <chrono>
 #include <string>
@@ -6,7 +7,7 @@
 
 namespace Nuake
 {
-	std::vector<LogEntry>  Logger::m_Logs = std::vector<LogEntry>();
+	std::vector<LogEntry> Logger::m_Logs = std::vector<LogEntry>();
 
 	void Logger::Log(const std::string& log, LOG_TYPE type)
 	{

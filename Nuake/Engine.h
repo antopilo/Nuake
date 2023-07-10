@@ -17,20 +17,22 @@
 // Welcome to the Nuake source code.
 namespace Nuake
 {
-	class Engine {
+	class Engine 
+	{
 	private:
-		static Ref<Window> CurrentWindow;
-		static Ref<Project> CurrentProject;
-		static Ref<Scene> CurrentScene;
+		static Ref<Window> s_CurrentWindow;
+		static Ref<Project> s_CurrentProject;
+		static Ref<Scene> s_CurrentScene;
 
-		static float m_LastFrameTime;
-		static float m_FixedUpdateRate;
-		static float m_FixedUpdateDifference;
-		static float m_Time;
-		static Timestep m_TimeStep;
+		static bool s_IsPlayMode; 
+
+		static float s_LastFrameTime;
+		static float s_FixedUpdateRate;
+		static float s_FixedUpdateDifference;
+		static float s_Time;
+		static Timestep s_TimeStep;
+
 	public:
-		static bool IsPlayMode; // Is currently in runtime..
-
 		static void Init();  // Initialize the engine.
 		static void Tick();  // Updates everything, called everyframe.
 		static void Close(); // Shutdown the engine.
@@ -41,8 +43,12 @@ namespace Nuake
 		// Custom drawing should happen in between these two
 		static void Draw();    // Start new frame
 		static void EndDraw(); // Swap buffer
-		static inline float GetTime() { return m_Time; }
-		static inline Timestep GetTimestep() { return m_TimeStep; }
+
+		static bool IsPlayMode() { return s_IsPlayMode; }
+
+		static inline float GetTime() { return s_Time; }
+		static inline Timestep GetTimestep() { return s_TimeStep; } 
+
 		static Ref<Window> GetCurrentWindow();
 
 		static bool LoadScene(Ref<Scene> scene);

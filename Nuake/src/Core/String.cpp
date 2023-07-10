@@ -2,11 +2,14 @@
 #include <iostream>
 #include <sstream>
 
-namespace Nuake {
+namespace Nuake 
+{
 	bool String::BeginsWith(const std::string& string, const std::string& begin)
 	{
 		if (string.rfind(begin, 0) == 0)
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -14,9 +17,11 @@ namespace Nuake {
 	bool String::EndsWith(const std::string& string, const std::string& end)
 	{
 		if (string.length() >= end.length())
+		{
 			return (0 == string.compare(string.length() - end.length(), end.length(), end));
-		else
-			return false;
+		}
+
+		return false;
 	}
 
 	bool String::IsDigit(const char& character)

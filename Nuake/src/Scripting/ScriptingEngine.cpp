@@ -1,12 +1,13 @@
 #include "ScriptingEngine.h"
 #include "WrenScript.h"
-#include "../Core/FileSystem.h"
-#include <src/Scripting/Modules/ScriptModule.h>
-#include <src/Scripting/Modules/EngineModule.h>
-#include <src/Scripting/Modules/SceneModule.h>
-#include <src/Scripting/Modules/MathModule.h>
-#include <src/Scripting/Modules/InputModule.h>
-#include <src/Scripting/Modules/PhysicsModule.h>
+#include "src/Core/FileSystem.h"
+
+#include "src/Scripting/Modules/ScriptModule.h"
+#include "src/Scripting/Modules/EngineModule.h"
+#include "src/Scripting/Modules/SceneModule.h"
+#include "src/Scripting/Modules/MathModule.h"
+#include "src/Scripting/Modules/InputModule.h"
+#include "src/Scripting/Modules/PhysicsModule.h"
 
 namespace Nuake {
     WrenVM* ScriptingEngine::m_WrenVM;
@@ -161,7 +162,6 @@ namespace Nuake {
         config.errorFn = &errorFn;
         config.writeFn = &writeFn;
         config.bindForeignMethodFn = &bindForeignMethod;
-
         m_WrenVM = wrenNewVM(&config);
 
         Logger::Log("Registing Scripting Modules");

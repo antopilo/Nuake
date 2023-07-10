@@ -40,7 +40,7 @@ namespace Nuake {
 
 	void ScriptingSystem::Update(Timestep ts)
 	{
-		if (!Engine::IsPlayMode)
+		if (!Engine::IsPlayMode())
 			return;
 
 		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
