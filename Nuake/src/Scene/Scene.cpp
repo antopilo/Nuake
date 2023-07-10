@@ -142,7 +142,7 @@ namespace Nuake {
 				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
 				cam = camera.CameraInstance;
 				cam->Translation = transform.GetGlobalPosition();
-				cam->SetDirection(Vector3(Vector4(0, 0, -1, 0) * transform.GetGlobalTransform()));
+				cam->SetDirection(glm::rotate(glm::inverse(transform.GetGlobalRotation()), glm::vec3(1.0, 0.0, 0.0)));
 				camTransform = transform.GetGlobalTransform();
 
 				break;

@@ -17,6 +17,6 @@ namespace Nuake
 	using Color = glm::vec4;
 	using Matrix4 = glm::mat4;
 	using Matrix3 = glm::mat3;
-
+#define Rad(degrees) glm::radians(degrees)
 	Quat QuatFromEuler(float x, float y, float z);
 }
