@@ -40,7 +40,8 @@ class MyEntityScript is ScriptableEntity {
 
 #include <src/Rendering/Textures/Material.h>
 
-namespace Nuake {
+namespace Nuake
+{
     
     // TODO: add filetree in same panel
     void FileSystemUI::Draw()
@@ -170,11 +171,12 @@ namespace Nuake {
             ImGui::OpenPopup(hoverMenuId.c_str());
             m_hasClickedOnFile = true;
         }
+        
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
             if (ImGui::MenuItem("Delete"))
             {
-                if(FileSystem::RemoveFile(file->GetAbsolutePath().c_str()) != 0)
+                if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
                 {
                     Logger::Log("Failed to remove file: " + file->GetAbsolutePath(), CRITICAL);
                 }
@@ -202,7 +204,10 @@ namespace Nuake {
     void FileSystemUI::DrawContextMenu()
     {
         if (!m_hasClickedOnFile && ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered())
+        {
             ImGui::OpenPopup("window_hover_menu");
+        }
+        
         if (ImGui::BeginPopup("window_hover_menu"))
 		{
 			if (ImGui::MenuItem("New folder"))
@@ -401,6 +406,7 @@ namespace Nuake {
 
                         DrawContextMenu();
                         m_hasClickedOnFile = false;
+                        
                         ImGui::EndTable();
                     }
 
