@@ -141,11 +141,12 @@ namespace Nuake
 			for (const auto& hull : brushComponent.Hulls)
 			{
 				const auto entity = Entity({ e, m_Scene });
-				const Vector3 startPosition = transformComponent.GetGlobalPosition();
-				const Matrix4 startTransform = transformComponent.GetGlobalTransform();
+				const Vector3& startPosition = transformComponent.GetGlobalPosition();
+				const Matrix4& startTransform = transformComponent.GetGlobalTransform();
+				const Quat& startRotation = transformComponent.GetGlobalRotation();
 				const auto collisionShape = CreateRef<Physics::ConvexHullShape>(hull);
 
-				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startTransform, collisionShape, entity);
+				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity);
 				brushComponent.Rigidbody.push_back(rigidBody);
 
 				PhysicsManager::Get().RegisterBody(rigidBody);
@@ -220,8 +221,7 @@ namespace Nuake
 
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
 				Ref<Physics::Box> boxShape = CreateRef<Physics::Box>(boxComponent.Size);
-
-				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), boxShape, ent);
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), boxShape, ent);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 
@@ -232,7 +232,7 @@ namespace Nuake
 				float height = capsuleComponent.Height;
 				auto capsuleShape = CreateRef<Physics::Capsule>(radius, height);
 
-				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), capsuleShape, ent);
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), capsuleShape, ent);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 
@@ -243,7 +243,7 @@ namespace Nuake
 				const auto& component = ent.GetComponent<SphereColliderComponent>();
 				auto shape = CreateRef<Physics::Sphere>(component.Radius);
 
-				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), shape, ent);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 
@@ -266,7 +266,7 @@ namespace Nuake
 					}
 					Ref<Mesh> mesh = submeshes[subMeshId];
 					auto shape = CreateRef<Physics::MeshShape>(mesh);
-					rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalTransform(), shape, ent);
+					rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), shape, ent);
 					PhysicsManager::Get().RegisterBody(rigidBody);
 				}
 			}
