@@ -1,10 +1,11 @@
 #pragma once
+#include "Core.h"
+#include "String.h"
+
 #include <string>
 #include <filesystem>
-#include "Core.h"
 #include <iostream>
 #include <fstream>
-#include "String.h"
 
 namespace Nuake
 {
@@ -31,6 +32,7 @@ namespace Nuake
 		static std::string AbsoluteToRelative(const std::string& path);
 		static Ref<Directory> GetFileTree();
 		static Ref<File> GetFile(const std::string& path);
+		static std::string GetFileNameFromPath(const std::string& path);
 		static void ScanDirectory(Ref<Directory> directory);
 		static void GetDirectories();
 

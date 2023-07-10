@@ -2,23 +2,24 @@
 #include <cstdint>
 #include <xhash>
 
-namespace Nuake {
-
+namespace Nuake 
+{
 	class UUID 
 	{
+	private:
+		uint64_t m_UUID;
+
 	public:
 		UUID();
 		UUID(uint64_t uuid);
 		UUID(const UUID&) = default;
 
 		operator uint64_t() const { return m_UUID; }
-	private:
-		uint64_t m_UUID;
 	};
 }
 
-
-namespace std {
+namespace std 
+{
 	template<>
 	struct hash<Nuake::UUID>
 	{

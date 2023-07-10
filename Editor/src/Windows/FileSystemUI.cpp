@@ -9,13 +9,15 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
-const std::string TEMPLATE_SCRIPT = R"(import "Nuake:Engine" for Engine 
+const std::string TEMPLATE_SCRIPT_FIRST = R"(import "Nuake:Engine" for Engine 
 import "Nuake:ScriptableEntity" for ScriptableEntity 
 import "Nuake:Input" for Input 
 import "Nuake:Math" for Vector3, Math 
 import "Nuake:Scene" for Scene 
 
-class MyEntityScript is ScriptableEntity { 
+class )";
+
+const std::string TEMPLATE_SCRIPT_SECOND = R"( is ScriptableEntity { 
         construct new() { 
         } 
 
@@ -246,6 +248,7 @@ namespace Nuake
 			    if (ImGui::MenuItem("Wren Script"))
 			    {
 			        std::string path = FileDialog::SaveFile("*.wren");
+			        
 			        if (!String::EndsWith(path, ".wren"))
 			        {
 			            path += ".wren";
@@ -253,11 +256,22 @@ namespace Nuake
 
 			        if (!path.empty())
 			        {
-			            FileSystem::BeginWriteFile(path);
-			            FileSystem::WriteLine(TEMPLATE_SCRIPT);
-			            FileSystem::EndWriteFile();
+                        std::string fileName = String::ToUpper(FileSystem::GetFileNameFromPath(path));
+			            fileName = String::RemoveWhiteSpace(fileName);
 			            
-			            RefreshFileBrowser();
+			            if(!String::IsDigit(fileName[0]))
+			            {
+			                
+                            FileSystem::BeginWriteFile(path);
+                            FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
+                            FileSystem::EndWriteFile();
+			            
+                            RefreshFileBrowser();
+                        }
+			            else
+			            {
+			                Logger::Log("[FileSystem] Cannot create script files that starts with a number.", CRITICAL);
+			            }
 			        }
 			    }
 

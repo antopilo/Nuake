@@ -210,4 +210,11 @@ namespace Nuake
 
 		return nullptr;
 	}
+
+	std::string FileSystem::GetFileNameFromPath(const std::string& path)
+	{
+		const auto split = String::Split(path, '\\');
+		return String::Split(split[split.size() - 1], '.')[0];
+	}
+	
 }
