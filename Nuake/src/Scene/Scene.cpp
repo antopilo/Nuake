@@ -244,7 +244,7 @@ namespace Nuake {
 
 	Ref<Camera> Scene::GetCurrentCamera()
 	{
-		if (Engine::IsPlayMode)
+		if (Engine::IsPlayMode())
 		{
 			Ref<Camera> cam = nullptr;
 			{

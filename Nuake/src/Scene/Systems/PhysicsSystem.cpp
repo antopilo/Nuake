@@ -50,8 +50,10 @@ namespace Nuake
 
 	void PhysicsSystem::Update(Timestep ts)
 	{
-		if (!Engine::IsPlayMode)
+		if (!Engine::IsPlayMode())
+		{
 			return;
+		}
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
 		for (auto e : brushes)
@@ -114,7 +116,7 @@ namespace Nuake
 
 	void PhysicsSystem::FixedUpdate(Timestep ts)
 	{
-		if (!Engine::IsPlayMode)
+		if (!Engine::IsPlayMode())
 			return;
 
 		PhysicsManager::Get().Step(ts);

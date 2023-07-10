@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
                     camera = currentScene->m_EditorCamera;
                 }
 
-                if (currentScene && !Nuake::Engine::IsPlayMode && editor.ShouldDrawAxis())
+                if (currentScene && !Nuake::Engine::IsPlayMode() && editor.ShouldDrawAxis())
                 {
                     gizmoDrawer.DrawGizmos(currentScene);
                 }

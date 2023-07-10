@@ -94,7 +94,7 @@ namespace Nuake {
             float needed = half - used;
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode))
+            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
             {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
                 Engine::EnterPlayMode();
@@ -172,14 +172,14 @@ namespace Nuake {
             ImGuizmo::AllowAxisFlip(true);
             ImGuizmo::SetRect(imagePos.x + 8.0, imagePos.y + 30.0, viewportPanelSize.x, viewportPanelSize.y);
 
-            if (m_DrawGrid && !Engine::IsPlayMode)
+            if (m_DrawGrid && !Engine::IsPlayMode())
             {
                 ImGuizmo::DrawGrid(glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
                     glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetPerspective()),
                     glm::value_ptr(glm::identity<glm::mat4>()), 100.f);
             }
 
-            if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode)
+            if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode())
             {
                 TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
                 ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
@@ -1498,7 +1498,7 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
-        if (!Engine::GetCurrentScene() || Engine::IsPlayMode)
+        if (!Engine::GetCurrentScene() || Engine::IsPlayMode())
         {
             return;
         }
