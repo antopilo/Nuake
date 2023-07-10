@@ -43,6 +43,7 @@ namespace Nuake
 		static bool BeginWriteFile(const std::string path);
 		static bool WriteLine(const std::string line);
 		static void EndWriteFile();
+		static int RemoveFile(char const* path);
 	};
 
 	class File

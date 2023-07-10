@@ -166,6 +166,11 @@ namespace Nuake
 		fileWriter.close();
 	}
 
+	int FileSystem::RemoveFile(char const* path)
+	{
+		return std::remove(path);
+	}
+
 	Ref<Directory> FileSystem::GetFileTree()
 	{
 		return RootDirectory;

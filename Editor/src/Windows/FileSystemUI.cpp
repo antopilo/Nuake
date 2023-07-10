@@ -41,6 +41,7 @@ class MyEntityScript is ScriptableEntity {
 #include <src/Rendering/Textures/Material.h>
 
 namespace Nuake {
+    
     // TODO: add filetree in same panel
     void FileSystemUI::Draw()
     {
@@ -114,7 +115,7 @@ namespace Nuake {
         return true;
     }
 
-    void FileSystemUI::DrawFile(Ref<File> file)
+    void FileSystemUI::DrawFile(Ref<File> file, uint32_t drawId)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
         std::string fileExtension = file->GetExtension();
@@ -163,6 +164,25 @@ namespace Nuake {
             }
         }
 
+        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
+        {
+            ImGui::OpenPopup(hoverMenuId.c_str());
+            m_hasClickedOnFile = true;
+        }
+        if (ImGui::BeginPopup(hoverMenuId.c_str()))
+        {
+            if (ImGui::MenuItem("Delete"))
+            {
+                if(FileSystem::RemoveFile(file->GetAbsolutePath().c_str()) != 0)
+                {
+                    Logger::Log("Failed to remove file: " + file->GetAbsolutePath(), CRITICAL);
+                }
+            }
+            ImGui::EndPopup();
+            RefreshFileBrowser();
+        }
+
         ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
     }
@@ -181,7 +201,9 @@ namespace Nuake {
 
     void FileSystemUI::DrawContextMenu()
     {
-		if (ImGui::BeginPopupContextWindow())
+        if (!m_hasClickedOnFile && ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered())
+            ImGui::OpenPopup("window_hover_menu");
+        if (ImGui::BeginPopup("window_hover_menu"))
 		{
 			if (ImGui::MenuItem("New folder"))
 			{
@@ -372,12 +394,13 @@ namespace Nuake {
                                 else
                                     ImGui::TableNextRow();
                                 
-                                DrawFile(f);
+                                DrawFile(f, i);
                                 i++;
                             }
                         }
 
                         DrawContextMenu();
+                        m_hasClickedOnFile = false;
                         ImGui::EndTable();
                     }
 
