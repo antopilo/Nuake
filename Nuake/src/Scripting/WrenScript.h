@@ -12,11 +12,10 @@ namespace Nuake
 	class WrenScript
 	{
 	private:
-		bool CompiledSuccesfully;
-		bool IsEntity = false;
-		std::vector<std::string> mModules;
+		bool m_HasCompiledSuccesfully;
+		bool m_IsEntityScript = false;
+		std::vector<std::string> m_Modules;
 
-	public:
 		Ref<File> mFile;
 
 		std::map <std::string, WrenHandle*> methods;
@@ -27,12 +26,11 @@ namespace Nuake
 		WrenHandle* m_OnExitHandle;
 		WrenHandle* m_SetEntityIDHandle;
 
-		// Building
-		WrenScript(Ref<File> file, bool isEntity);
-
+	public:
+		WrenScript(Ref<File> file, bool isEntityScript);
 		void ParseModules();
-		std::vector<std::string> GetModules();
-		void Build(unsigned int moduleId, bool isEntity = false);
+
+		void Build(unsigned int moduleId, bool isEntityScript = false);
 
 		// Method calls
 		void CallInit();
@@ -44,7 +42,10 @@ namespace Nuake
 		void CallMethod(const std::string& signature);
 
 		void SetScriptableEntityID(int id);
+		bool HasCompiledSuccesfully() const { return m_HasCompiledSuccesfully; }
 
-		bool HasCompiledSuccesfully() { return CompiledSuccesfully; }
+		std::vector<std::string> GetModules() const;
+
+		WrenHandle* GetWrenInstanceHandle() const { return m_Instance; }
 	};
 }

@@ -115,7 +115,7 @@ namespace Nuake {
 
 				if (ent.HasComponent<WrenScriptComponent>())
 				{
-					wrenSetSlotHandle(vm, 0, ent.GetComponent<WrenScriptComponent>().mWrenScript->m_Instance);
+					wrenSetSlotHandle(vm, 0, ent.GetComponent<WrenScriptComponent>().mWrenScript->GetWrenInstanceHandle());
 				}
 			}
 

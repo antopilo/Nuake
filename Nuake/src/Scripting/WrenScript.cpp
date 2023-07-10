@@ -8,10 +8,10 @@
 
 namespace Nuake 
 {
-	WrenScript::WrenScript(Ref<File> file, bool isEntity)
+	WrenScript::WrenScript(Ref<File> file, bool isEntityScript)
 	{
 		mFile = file;
-		IsEntity = isEntity;
+		m_IsEntityScript = isEntityScript;
 
 		ParseModules();
 	}
@@ -32,45 +32,42 @@ namespace Nuake
 				if (s == "class" && i + 1 < splits.size() && !hasFoundModule)
 				{
 					std::string moduleFound = splits[i + 1];
-					mModules.push_back(moduleFound);
+					m_Modules.push_back(moduleFound);
 					hasFoundModule = true;
 				}
 			}
 		}
 
-		// Close the file
 		MyReadFile.close();
 	}
 
-	std::vector<std::string> WrenScript::GetModules()
+	std::vector<std::string> WrenScript::GetModules() const
 	{
-		return mModules;
+		return m_Modules;
 	}
 
 	void WrenScript::Build(unsigned int moduleId, bool isEntity)
 	{
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
 
-		std::string relativePath = mFile->GetRelativePath();
+		const std::string& relativePath = mFile->GetRelativePath();
 
 		// Can't import twice the same script, otherwise gives a compile error.
 		if (!ScriptingEngine::IsScriptImported(relativePath))
 		{
-			std::string source = "import \"" + relativePath + "\" for " + GetModules()[moduleId];
+			const std::string& source = "import \"" + relativePath + "\" for " + GetModules()[moduleId];
 			WrenInterpretResult result = wrenInterpret(vm, "main", source.c_str());
 
-
-			Logger::Log("Wren result: " + std::to_string(result));
 			if (result == WREN_RESULT_SUCCESS)
 			{
-				Logger::Log("Wren result success: " + std::to_string(result));
-				CompiledSuccesfully = true;
+				Logger::Log("[ScriptingEngine] Compiled succesfully: " + std::to_string(result));
+				m_HasCompiledSuccesfully = true;
 				ScriptingEngine::ImportScript(relativePath);
 			}
 			else
 			{
-				Logger::Log("Wren result failed: " + std::to_string(result));
-				CompiledSuccesfully = false;
+				Logger::Log("[ScriptingEngine] Compiled failed: " + std::to_string(result));
+				m_HasCompiledSuccesfully = false;
 				return;
 			}
 		}
@@ -96,12 +93,12 @@ namespace Nuake
 		if (isEntity)
 			this->m_SetEntityIDHandle = wrenMakeCallHandle(vm, "SetEntityId(_)");
 
-		CompiledSuccesfully = true;
+		m_HasCompiledSuccesfully = true;
 	}
 
 	void WrenScript::CallInit()
 	{
-		if (!CompiledSuccesfully) return;
+		if (!m_HasCompiledSuccesfully) return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
 		wrenSetSlotHandle(vm, 0, this->m_Instance);
@@ -110,7 +107,7 @@ namespace Nuake
 
 	void WrenScript::CallUpdate(float timestep)
 	{
-		if (!CompiledSuccesfully) return;
+		if (!m_HasCompiledSuccesfully) return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
 		wrenEnsureSlots(vm, 2);
@@ -121,7 +118,7 @@ namespace Nuake
 
 	void WrenScript::CallFixedUpdate(float timestep)
 	{
-		if (!CompiledSuccesfully) return;
+		if (!m_HasCompiledSuccesfully) return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
 		wrenEnsureSlots(vm, 2);
@@ -132,7 +129,7 @@ namespace Nuake
 
 	void WrenScript::CallExit()
 	{
-		if (!CompiledSuccesfully || !m_Instance)
+		if (!m_HasCompiledSuccesfully || !m_Instance)
 			return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
@@ -143,7 +140,7 @@ namespace Nuake
 
 	void WrenScript::RegisterMethod(const std::string& signature)
 	{
-		if (!CompiledSuccesfully)
+		if (!m_HasCompiledSuccesfully)
 			return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
@@ -153,7 +150,7 @@ namespace Nuake
 
 	void WrenScript::CallMethod(const std::string& signature)
 	{
-		if (!CompiledSuccesfully)
+		if (!m_HasCompiledSuccesfully)
 			return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();
@@ -169,7 +166,7 @@ namespace Nuake
 
 	void WrenScript::SetScriptableEntityID(int id)
 	{
-		if (!CompiledSuccesfully)
+		if (!m_HasCompiledSuccesfully)
 			return;
 
 		WrenVM* vm = ScriptingEngine::GetWrenVM();

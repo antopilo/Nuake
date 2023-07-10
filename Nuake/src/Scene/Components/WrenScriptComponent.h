@@ -1,8 +1,10 @@
 #pragma once
 #include "src/Scripting/WrenScript.h"
 #include "src/Resource/Serializable.h"
+#include "src/Core/FileSystem.h"
 
-namespace Nuake {
+namespace Nuake 
+{
 	class WrenScriptComponent
 	{
 	public:
