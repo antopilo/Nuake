@@ -11,8 +11,11 @@ namespace Nuake {
 	public:
 		static bool BeginsWith(const std::string& string, const std::string& begin);
 		static bool EndsWith(const std::string& string, const std::string& end);
+		static bool IsDigit(const char& character);
+		static std::string RemoveWhiteSpace(const std::string& string);
 		static std::vector<std::string> Split(const std::string& string, char delimiter);
 
 		static float ToFloat(const std::string& string);
+		static std::string ToUpper(const std::string& string);
 	};
 }
