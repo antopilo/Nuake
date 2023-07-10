@@ -2,7 +2,8 @@
 
 namespace Nuake
 {
-	class Timestep {
+	class Timestep 
+	{
 	private:
 		float m_Time;
 
