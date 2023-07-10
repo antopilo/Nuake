@@ -3,6 +3,7 @@
 
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
+#include "src/Core/Maths.h"
 #include <src/Core/Physics/PhysicsShapes.h>
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/CharacterControllerComponent.h"
@@ -259,9 +260,11 @@ namespace Nuake
 			}
 
 			const auto& startPos = rb->GetPosition();
+			const Quat& bodyRotation = rb->GetRotation();
+			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
 			auto joltShape = GetJoltShape(rb->GetShape());
-			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, JPH::Quat::sIdentity(), motionType, Layers::MOVING);
+			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, Layers::MOVING);
 
 			if (mass > 0.0f)
 			{
@@ -410,7 +413,7 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 4;
+			constexpr int maxStepCount = 32;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
@@ -427,7 +430,7 @@ namespace Nuake
 
 			for (auto& c : _registeredCharacters)
 			{
-				c.second->PostSimulation(0.01);
+				c.second->PostSimulation(0.001);
 			}
 
 			SyncEntitiesTranforms();
