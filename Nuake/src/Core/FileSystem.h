@@ -1,10 +1,11 @@
 #pragma once
+#include "Core.h"
+#include "String.h"
+
 #include <string>
 #include <filesystem>
-#include "Core.h"
 #include <iostream>
 #include <fstream>
-#include "String.h"
 
 namespace Nuake
 {

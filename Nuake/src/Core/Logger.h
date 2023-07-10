@@ -20,11 +20,12 @@ namespace Nuake
 
 	class Logger
 	{
-	public:
-		static void Log(const std::string& log, LOG_TYPE type = VERBOSE);
-		static std::vector<LogEntry> GetLogs();
 	private:
 		static const int MAX_LOG = 64;
 		static std::vector<LogEntry> m_Logs;
+
+	public:
+		static void Log(const std::string& log, LOG_TYPE type = VERBOSE);
+		static std::vector<LogEntry> GetLogs();
 	};
 }

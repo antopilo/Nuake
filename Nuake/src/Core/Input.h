@@ -1,7 +1,8 @@
 #pragma once
-#include <utility>
-#include "../Core/Maths.h"
+#include "src/Core/Maths.h"
+
 #include <map>
+#include <utility>
 
 struct GLFWwindow;
 
