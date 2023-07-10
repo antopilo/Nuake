@@ -262,7 +262,7 @@ namespace Nuake
 			            if(!String::IsDigit(fileName[0]))
 			            {
 			                
-			                FileSystem::BeginWriteFile(path);
+                            FileSystem::BeginWriteFile(path);
                             FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
                             FileSystem::EndWriteFile();
 			            
