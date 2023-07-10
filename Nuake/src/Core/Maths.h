@@ -5,6 +5,7 @@
 #include <glm/ext/quaternion_float.hpp>
 #include <src/Vendors/glm/ext/vector_float2.hpp>
 #include <src/Vendors/glm/ext/matrix_float4x4.hpp>
+#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 #include <glm/gtx/quaternion.hpp>
 
 namespace Nuake
