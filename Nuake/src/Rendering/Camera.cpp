@@ -52,7 +52,7 @@ namespace Nuake
 		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
 		Direction = glm::normalize(direction);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
-		//Up = glm::normalize(glm::cross(Direction, Right))
+		//Up = glm::normalize(glm::cross(Direction, Right));
 	}
 
 	Vector3 Camera::GetTranslation() {

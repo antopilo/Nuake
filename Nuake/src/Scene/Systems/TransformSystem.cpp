@@ -110,7 +110,8 @@ namespace Nuake
 			camera.CameraInstance->Translation = transform.GlobalTranslation;
 
 			const auto& globalRotation = transform.GetGlobalRotation();
-			const auto& forward = QuatToDirection(globalRotation);
+			auto& forward = QuatToDirection(globalRotation);
+			//forward *= -1.0;
 			camera.CameraInstance->SetDirection(forward);
 		}
 	}
