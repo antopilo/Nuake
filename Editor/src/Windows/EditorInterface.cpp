@@ -182,48 +182,48 @@ namespace Nuake {
             if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode())
             {
                 TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
-                ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                 Matrix4 transform = tc.GetGlobalTransform();
-                
-                auto editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
+                const auto& editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
                 Matrix4 cameraView = editorCam->GetTransform();
                 Matrix4 cameraProjection = editorCam->GetPerspective();
 
+                // Imguizmo calculates the delta from the gizmo,
                 ImGuizmo::Manipulate(
                     glm::value_ptr(cameraView),
                     glm::value_ptr(cameraProjection),
                     CurrentOperation, CurrentMode, 
                     glm::value_ptr(transform)
                 );
-                Matrix4 oldTransform = transform;
+
                 if (ImGuizmo::IsUsing())
                 {
-                    Vector3 globalPos = Vector3();
-                    Entity currentParent = Selection.Entity;
+                    // Since imguizmo returns a transform in global space and we want the local transform,
+                    // we need to multiply by the inverse of the parent's global transform in order to revert
+                    // the changes from the parent transform.
+                    Matrix4 localTransform = transform;
+                    ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                     if (parent.HasParent)
                     {
                         Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GetGlobalTransform());
-                        oldTransform *= inverseParent;
+                        localTransform = inverseParent * localTransform;
                     }
 
+                    // Decompose local transform
                     Vector3 scale = Vector3();
                     Quat rotation = Quat();
                     Vector3 pos = Vector3();
-                    Vector3 skew = Vector3();
-                    Vector4 pesp = Vector4();
-                    glm::decompose(oldTransform, scale, rotation, pos, skew, pesp);
-                    
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), glm::value_ptr(pos), glm::value_ptr(rotation), glm::value_ptr(scale));
+ 
                     tc.Translation = pos;
-                    tc.Rotation = rotation;
+                    //tc.Rotation = rotation;
                     tc.Scale = scale;
-                    tc.LocalTransform = oldTransform;
+                    tc.LocalTransform = localTransform;
                     
+                    // Decompose global trasnform
                     Vector3 gscale = Vector3();
                     Quat grotation = Quat();
                     Vector3 gpos = Vector3();
-                    Vector3 gskew = Vector3();
-                    Vector4 gpesp = Vector4();
-                    glm::decompose(transform, gscale, grotation, gpos, skew, pesp);
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(gpos), glm::value_ptr(grotation), glm::value_ptr(gscale));
                     
                     tc.SetGlobalPosition(gpos);
                     tc.SetGlobalRotation(grotation);

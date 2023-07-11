@@ -135,22 +135,14 @@ namespace Nuake {
 	void Scene::Draw(FrameBuffer& framebuffer)
 	{
 		Ref<Camera> cam = nullptr;
-		Matrix4 camTransform = Matrix4();
+		const auto& view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
+		for (const auto& e : view)
 		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
-			for (auto e : view) 
-			{
-				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
-				cam = camera.CameraInstance;
+			auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
+			cam = camera.CameraInstance;
 
-				cam->Translation = transform.GetGlobalPosition();
-
-				//const Vector3& forward = QuatToDirection(transform.GetGlobalRotation());
-				//cam->SetDirection(forward);
-
-				//camTransform = transform.GetGlobalTransform();
-				break;
-			}
+			cam->Translation = transform.GetGlobalPosition();
+			break;
 		}
 
 		if (!cam)
@@ -158,10 +150,6 @@ namespace Nuake {
 			return;
 		}
 
-		float x = cam->GetDirection().x;
-		float y = cam->GetDirection().y;
-		float z = cam->GetDirection().z;
-		Logger::Log("DIRECTION: (" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")");
 		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
 		mSceneRenderer->RenderScene(*this, framebuffer);
 	}

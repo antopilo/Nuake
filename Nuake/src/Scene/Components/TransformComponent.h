@@ -73,6 +73,7 @@ namespace Nuake
 
 			LocalTransform = Matrix4(1);
 			GlobalTransform = Matrix4(1);
+			this->Dirty = true;
 			return true;
 		}
 	};
