@@ -40,6 +40,8 @@ namespace Nuake {
 				RegisterMethod("SetTranslation_(_,_,_,_)", (void*)SetTranslation);
 				RegisterMethod("GetRotation_(_)", (void*)GetRotation);
 				RegisterMethod("SetRotation_(_,_,_,_)", (void*)SetRotation);
+				RegisterMethod("SetLookAt_(_,_,_,_)", (void*)SetLookAt);
+
 				RegisterMethod("SetLightIntensity_(_,_)", (void*)SetLightIntensity);
 				RegisterMethod("GetLightIntensity_(_)", (void*)GetLightIntensity);
 
@@ -261,6 +263,20 @@ namespace Nuake {
 				float z = (float)wrenGetSlotDouble(vm, 4);
 
 				transform.SetLocalRotation(QuatFromEuler(x, y, z));
+			}
+
+			static void SetLookAt(WrenVM* vm)
+			{
+				double handle = wrenGetSlotDouble(vm, 1);
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+				auto& transform = ent.GetComponent<TransformComponent>();
+				// set the slots
+				float x = (float)wrenGetSlotDouble(vm, 2);
+				float y = (float)wrenGetSlotDouble(vm, 3);
+				float z = (float)wrenGetSlotDouble(vm, 4);
+				Vector3 targetPosition = Vector3(x, y, z);
+				Quat rotation = LookAt(transform.GetGlobalPosition(), transform.GetGlobalPosition() + targetPosition);
+				transform.SetLocalRotation(rotation);
 			}
 
 			static void SetTranslation(WrenVM* vm)
