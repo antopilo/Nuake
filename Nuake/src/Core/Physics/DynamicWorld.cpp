@@ -370,17 +370,16 @@ namespace Nuake
 				transformComponent.SetLocalPosition(pos);
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				transformComponent.SetLocalTransform(transform);
-				transformComponent.Dirty = false;
+				transformComponent.Dirty = true;
 			}
 		}
-
+		
 		void DynamicWorld::SyncCharactersTransforms()
 		{
 			// TODO(ANTO): Finish this to connect updated jolt transforms back to the entity.
 			// The problem was that I dont know yet how to go from jolt body ptr to the entity
 			// Combinations of find and iterators etc. I do not have the brain power rn zzz.
 			// const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
-
 			for (const auto& e : _registeredCharacters)
 			{
 				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};
@@ -407,7 +406,7 @@ namespace Nuake
 				transformComponent.SetLocalPosition(pos);
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				transformComponent.SetLocalTransform(transform);
-				transformComponent.Dirty = false;
+				transformComponent.Dirty = true;
 			}
 		}
 

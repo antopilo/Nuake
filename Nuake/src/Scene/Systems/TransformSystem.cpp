@@ -109,10 +109,13 @@ namespace Nuake
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
 			camera.CameraInstance->Translation = transform.GlobalTranslation;
 
-			const auto& globalRotation = transform.GetGlobalRotation();
-			auto& forward = QuatToDirection(globalRotation);
+			const auto& globalTransform = transform.GetGlobalTransform();
+			const auto& forwardTransform = Vector3(globalTransform[0][2], globalTransform[1][2], globalTransform[2][2]);
+			//const auto& globalRotation = transform.GetGlobalRotation();
+			//auto& forward = QuatToDirection(globalRotation);
 			//forward *= -1.0;
-			camera.CameraInstance->SetDirection(forward);
+			//f/orward.z *= -1.0f;
+			camera.CameraInstance->SetDirection(forwardTransform);
 		}
 	}
 }

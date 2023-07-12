@@ -215,7 +215,7 @@ namespace Nuake {
                     ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), glm::value_ptr(pos), glm::value_ptr(rotation), glm::value_ptr(scale));
  
                     tc.Translation = pos;
-                    //tc.Rotation = rotation;
+                    tc.Rotation = rotation;
                     tc.Scale = scale;
                     tc.LocalTransform = localTransform;
                     

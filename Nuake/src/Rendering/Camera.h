@@ -44,6 +44,7 @@ namespace Nuake
 		void OnWindowResize(float x, float y);
 
 		void SetDirection(Vector3 direction);
+		void SetDirection(const Quat& direction);
 
 		Vector3 GetTranslation();
 		Vector3 GetDirection();

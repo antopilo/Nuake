@@ -55,6 +55,20 @@ namespace Nuake
 		//Up = glm::normalize(glm::cross(Direction, Right));
 	}
 
+	void Camera::SetDirection(const Quat& direction)
+	{
+		//cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		//cam->cameraDirection.y = sin(glm::radians(Pitch));
+		//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		//cam->cameraFront = glm::normalize(cam->cameraDirection);
+		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
+
+		//glm::quatLookAt();
+		//Direction = glm::normalize(direction);
+		//Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
+		//Up = glm::normalize(glm::cross(Direction, Right));
+	}
+
 	Vector3 Camera::GetTranslation() {
 		return Translation;
 	}
@@ -72,7 +86,7 @@ namespace Nuake
 
 	Matrix4 Camera::GetTransform()
 	{
-		glm::mat4 tr = lookAt(Translation, Translation + Direction, Vector3(0, 1, 0));
+		glm::mat4 tr = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
 		return tr;
 	}
 
@@ -98,6 +112,8 @@ namespace Nuake
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(m_Type);
 		SERIALIZE_VAL(AspectRatio);
+		SERIALIZE_VEC3(Translation)
+		SERIALIZE_VEC3(Direction)
 		SERIALIZE_VAL(Fov);
 		SERIALIZE_VAL(Exposure);
 		SERIALIZE_VAL(Speed);
@@ -109,6 +125,12 @@ namespace Nuake
 		BEGIN_DESERIALIZE();
 		j = j["CameraInstance"];
 		this->m_Type = (CAMERA_TYPE)j["m_Type"];
+		if(j.contains("Translation"))
+			DESERIALIZE_VEC3(j["Translation"], Translation);
+
+		if (j.contains("Direction"))
+			DESERIALIZE_VEC3(j["Direction"], Direction);
+
 		this->AspectRatio = j["AspectRatio"];
 		this->Fov = j["Fov"];
 		this->Exposure = j["Exposure"];
