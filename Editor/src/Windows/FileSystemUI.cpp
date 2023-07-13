@@ -176,15 +176,23 @@ namespace Nuake
         
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
+            if (ImGui::MenuItem("Show in File Explorer"))
+            {
+                OS::ShowInFileExplorer(file->GetAbsolutePath());
+            }
+            
+            ImGui::Separator();
+            
             if (ImGui::MenuItem("Delete"))
             {
                 if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
                 {
-                    Logger::Log("Failed to remove file: " + file->GetAbsolutePath(), CRITICAL);
+                    Logger::Log("Failed to remove file: " + file->GetRelativePath(), CRITICAL);
                 }
+                RefreshFileBrowser();
             }
+            
             ImGui::EndPopup();
-            RefreshFileBrowser();
         }
 
         ImGui::Text(file->GetName().c_str());
