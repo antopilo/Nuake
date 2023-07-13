@@ -56,11 +56,10 @@ namespace Nuake {
 				auto& localTranslate = transform.GetLocalPosition();
 				auto& localRot = transform.GetLocalRotation();
 				auto& localScale = transform.GetLocalScale();
-
+				localRot.w *= -1.0;
 				localTransform = glm::translate(localTransform, localTranslate);
 				localTransform = localTransform * glm::toMat4(localRot);
 				localTransform = glm::scale(localTransform, localScale);
-
 				transform.SetLocalTransform(localTransform);
 				transform.Dirty = false;
 			}
@@ -94,10 +93,10 @@ namespace Nuake {
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 
+				globalPosition = transformComponent.GetLocalPosition() + (transformComponent.GetLocalRotation() * globalPosition);
 				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
 
-				globalPosition += transformComponent.GetLocalPosition();
-				globalOrientation *= transformComponent.GetLocalRotation();
+				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
 				globalScale *= transformComponent.GetLocalScale();
 		
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
