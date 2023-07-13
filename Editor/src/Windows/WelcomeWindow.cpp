@@ -254,7 +254,7 @@ namespace Nuake
 					SaveRecentFile();
 
 					std::string projectPath = _Projects[SelectedProject].Path;
-					FileSystem::SetRootDirectory(projectPath + "/../");
+					FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
 
 					auto project = Project::New();
 					auto projectFileData = FileSystem::ReadFile(projectPath, true);

@@ -124,6 +124,12 @@ namespace Nuake
 		return fs::relative(absolutePath, rootPath).generic_string();
 	}
 
+	std::string FileSystem::GetParentPath(const std::string& fullPath)
+	{
+		std::filesystem::path pathObj(fullPath);
+		return pathObj.parent_path().string();
+	}
+
 	std::string FileSystem::ReadFile(const std::string& path, bool absolute)
 	{
 		std::string finalPath = path;

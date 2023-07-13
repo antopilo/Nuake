@@ -1,13 +1,13 @@
-#pragma once
+﻿#pragma once
+
+#include <string>
 
 namespace Nuake
 {
 	class OS 
 	{
 	public:
-		static int GetTime() 
-		{
-			return static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
-		}
+		static int GetTime();
+		static void ShowInFileExplorer(const std::string& filePath);
 	};
 }
