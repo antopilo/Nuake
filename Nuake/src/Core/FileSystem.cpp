@@ -124,7 +124,7 @@ namespace Nuake
 		return fs::relative(absolutePath, rootPath).generic_string();
 	}
 
-	std::string FileSystem::RemoveFileFromPath(const std::string& fullPath)
+	std::string FileSystem::GetParentPath(const std::string& fullPath)
 	{
 		std::filesystem::path pathObj(fullPath);
 		return pathObj.parent_path().string();

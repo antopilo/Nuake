@@ -41,7 +41,7 @@ namespace Nuake
 		{
 			// Parse the project and load it.
 			std::string projectPath = FileDialog::OpenFile(".project");
-			FileSystem::SetRootDirectory(FileSystem::RemoveFileFromPath(projectPath));
+			FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
 			Ref<Project> project = Project::New();
 			if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
 			{

@@ -178,7 +178,7 @@ namespace Nuake
         {
             if (ImGui::MenuItem("Show in File Explorer"))
             {
-                OS::OpenInFileExplorer(file->GetAbsolutePath());
+                OS::ShowInFileExplorer(file->GetAbsolutePath());
             }
             
             ImGui::Separator();
