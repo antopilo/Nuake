@@ -204,8 +204,9 @@ namespace Nuake {
                     ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                     if (parent.HasParent)
                     {
-                        Matrix4 inverseParent = glm::inverse(parent.Parent.GetComponent<TransformComponent>().GetGlobalTransform());
-                        localTransform = inverseParent * localTransform;
+                        const auto& parentTransformComponent = parent.Parent.GetComponent<TransformComponent>();
+                        const Matrix4& parentTransform = parentTransformComponent.GetGlobalTransform();
+                        localTransform = glm::inverse(parentTransform) * localTransform;
                     }
 
                     // Decompose local transform
@@ -217,20 +218,17 @@ namespace Nuake {
                     glm::decompose(localTransform, scale, rotation, pos, skew, pesp);
                     
                     tc.Translation = pos;
+
+                    rotation.w *= -1.0f;
                     tc.Rotation = rotation;
                     tc.Scale = scale;
                     tc.LocalTransform = localTransform;
-                    tc.Dirty = true;
+                    //tc.Dirty = true;
 
                     const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
                     const Matrix4& rotationMatrix = glm::mat4_cast(rotation);
                     const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), scale);
                     const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
-
-                    //tc.SetLocalPosition(pos);
-                    //tc.SetLocalRotation(-rotationQuaternion);
-                    //tc.SetLocalScale(scale);
-                    //tc.SetLocalTransform(localTransform);
                     
                     // Decompose global trasnform
                     Vector3 gscale = Vector3();

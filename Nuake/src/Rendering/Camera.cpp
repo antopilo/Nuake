@@ -89,6 +89,7 @@ namespace Nuake
 	void Camera::SetTransform(const Matrix4& transform)
 	{
 		m_View = transform;
+		
 	}
 
 	Matrix4 Camera::GetTransform()

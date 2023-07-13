@@ -48,7 +48,7 @@ namespace Nuake
 				auto& localScale = transform.GetLocalScale();
 
 				const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
-				localRot.w *= -1.0f;
+				//localRot.w *= -1.0f;
 				const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
 				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
 				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
@@ -116,7 +116,14 @@ namespace Nuake
 			auto globalRotation = transform.GetGlobalRotation();
 			auto& trnaslationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
 			const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-			camera.CameraInstance->SetTransform(glm::inverse(trnaslationMatrix * rotationMatrix));
+			Vector4 forward = Vector4(0, 0, -1, 1);
+			const auto globalForward = rotationMatrix * forward;
+
+			Vector4 right = Vector4(1, 0, 0, 1);
+			const auto globalRight = rotationMatrix * right;
+			camera.CameraInstance->Direction = globalForward;
+			camera.CameraInstance->Right = globalRight;
+;			camera.CameraInstance->SetTransform(glm::inverse(trnaslationMatrix * rotationMatrix));
 		}
 	}
 }

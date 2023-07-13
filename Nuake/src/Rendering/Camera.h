@@ -24,7 +24,6 @@ namespace Nuake
 		Vector3 Rotation = { 0.0f, 0.0f, 0.0f };
 		Vector3 Scale = { 1.0f, 1.0f, 1.0f };
 		Vector3 Up = Vector3(0, 1, 0);
-		Vector3 Right = Vector3(1, 0, 0);
 		Matrix4 m_Perspective;
 		Matrix4 m_View;
 
@@ -32,6 +31,8 @@ namespace Nuake
 		float AspectRatio = 16.0f / 9.0f;
 		
 		Vector3 Direction = Vector3(0, 0, 1);
+		Vector3 Right = Vector3(1, 0, 0);
+
 		Vector3 Translation = { 0.0f, 0.0f, 0.0f };
 		float Fov = 88.0f;
 		float Exposure = 1.0f;
