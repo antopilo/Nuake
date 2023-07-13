@@ -1291,7 +1291,7 @@ namespace Nuake {
         if (projectPath == "") // Hit cancel.
             return;
 
-        FileSystem::SetRootDirectory(projectPath + "/../");
+        FileSystem::SetRootDirectory(FileSystem::RemoveFileFromPath(projectPath));
         Ref<Project> project = Project::New();
         if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
         {

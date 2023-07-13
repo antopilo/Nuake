@@ -163,7 +163,7 @@ namespace Nuake
 			return false;
 		}
 
-		FileSystem::SetRootDirectory(project->FullPath + "/../");
+		FileSystem::SetRootDirectory(FileSystem::RemoveFileFromPath(project->FullPath));
 		return true;
 	}
 
