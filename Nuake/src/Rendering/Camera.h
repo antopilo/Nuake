@@ -26,6 +26,7 @@ namespace Nuake
 		Vector3 Up = Vector3(0, 1, 0);
 		Vector3 Right = Vector3(1, 0, 0);
 		Matrix4 m_Perspective;
+		Matrix4 m_View;
 
 	public:
 		float AspectRatio = 16.0f / 9.0f;
@@ -51,6 +52,7 @@ namespace Nuake
 		Matrix4 GetPerspective();
 		Matrix4 GetTransform();
 		Matrix4 GetTransformRotation();
+		void SetTransform(const Matrix4& transform);
 		inline Vector3 GetRight() const { return Right; }
 		inline Vector3 GetUp() const { return glm::cross(Direction, Right); }
 		bool BoxFrustumCheck(const AABB& aabb);

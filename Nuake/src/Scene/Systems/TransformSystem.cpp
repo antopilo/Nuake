@@ -43,15 +43,20 @@ namespace Nuake
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
 			if (transform.Dirty)
 			{
-				Matrix4 localTransform = Matrix4(1.0f);
 				auto& localTranslate = transform.GetLocalPosition();
 				auto& localRot = transform.GetLocalRotation();
 				auto& localScale = transform.GetLocalScale();
-				localRot.w *= -1.0;
-				localTransform = glm::translate(localTransform, localTranslate);
-				localTransform = localTransform * glm::toMat4(localRot);
-				localTransform = glm::scale(localTransform, localScale);
-				transform.SetLocalTransform(localTransform);
+
+				const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
+				localRot.w *= -1.0f;
+				const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
+				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
+				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
+
+				//if(localRot.y != 0)
+				//	assert(newLocalTransform == transform.GetLocalTransform());
+
+				transform.SetLocalTransform(newLocalTransform);
 				transform.Dirty = false;
 			}
 		}
@@ -63,7 +68,7 @@ namespace Nuake
 			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
 
 			if (!parent.HasParent)
-			{
+			{ 
 				// If no parents, then globalTransform is local transform.
 				transform.SetGlobalTransform(transform.GetLocalTransform());
 				transform.SetGlobalPosition(transform.GetLocalPosition());
@@ -84,14 +89,13 @@ namespace Nuake
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 
-				globalPosition = transformComponent.GetLocalPosition() + (transformComponent.GetLocalRotation() * globalPosition);
+				globalPosition = transformComponent.GetLocalPosition() + (globalPosition);
+
+				globalScale *= transformComponent.GetLocalScale();
+				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
 				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
 
-				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
-				globalScale *= transformComponent.GetLocalScale();
-		
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
-
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
 				
@@ -106,15 +110,13 @@ namespace Nuake
 		{
 			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
 			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+
 			camera.CameraInstance->Translation = transform.GlobalTranslation;
 
-			const auto& globalTransform = transform.GetGlobalTransform();
-			const auto& forwardTransform = Vector3(globalTransform[0][2], globalTransform[1][2], globalTransform[2][2]);
-			//const auto& globalRotation = transform.GetGlobalRotation();
-			//auto& forward = QuatToDirection(globalRotation);
-			//forward *= -1.0;
-			//f/orward.z *= -1.0f;
-			camera.CameraInstance->SetDirection(forwardTransform);
+			auto globalRotation = transform.GetGlobalRotation();
+			auto& trnaslationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
+			const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+			camera.CameraInstance->SetTransform(glm::inverse(trnaslationMatrix * rotationMatrix));
 		}
 	}
 }

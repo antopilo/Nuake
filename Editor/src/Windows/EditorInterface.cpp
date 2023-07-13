@@ -212,23 +212,39 @@ namespace Nuake {
                     Vector3 scale = Vector3();
                     Quat rotation = Quat();
                     Vector3 pos = Vector3();
-                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), glm::value_ptr(pos), glm::value_ptr(rotation), glm::value_ptr(scale));
- 
+                    Vector3 skew = Vector3();
+                    Vector4 pesp = Vector4();
+                    glm::decompose(localTransform, scale, rotation, pos, skew, pesp);
+                    
                     tc.Translation = pos;
                     tc.Rotation = rotation;
                     tc.Scale = scale;
                     tc.LocalTransform = localTransform;
+                    tc.Dirty = true;
+
+                    const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
+                    const Matrix4& rotationMatrix = glm::mat4_cast(rotation);
+                    const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), scale);
+                    const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
+
+                    //tc.SetLocalPosition(pos);
+                    //tc.SetLocalRotation(-rotationQuaternion);
+                    //tc.SetLocalScale(scale);
+                    //tc.SetLocalTransform(localTransform);
                     
                     // Decompose global trasnform
                     Vector3 gscale = Vector3();
                     Quat grotation = Quat();
                     Vector3 gpos = Vector3();
-                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform), glm::value_ptr(gpos), glm::value_ptr(grotation), glm::value_ptr(gscale));
-                    
+                    Vector3 gskew = Vector3();
+                    Vector4 gpesp = Vector4();
+                    glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
+
+                    //glm::quat rotationQuaternionG = glm::quat_cast(transform);
                     tc.SetGlobalPosition(gpos);
                     tc.SetGlobalRotation(grotation);
                     tc.SetGlobalScale(gscale);
-                    tc.SetGlobalTransform(transform);
+                    tc.SetGlobalTransform(localTransform);
                 }
             }
 

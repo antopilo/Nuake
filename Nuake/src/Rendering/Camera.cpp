@@ -52,6 +52,8 @@ namespace Nuake
 		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
 		Direction = glm::normalize(direction);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
+		m_View = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
+
 		//Up = glm::normalize(glm::cross(Direction, Right));
 	}
 
@@ -84,8 +86,14 @@ namespace Nuake
 		return m_Perspective;
 	}
 
+	void Camera::SetTransform(const Matrix4& transform)
+	{
+		m_View = transform;
+	}
+
 	Matrix4 Camera::GetTransform()
 	{
+		return m_View;
 		glm::mat4 tr = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
 		return tr;
 	}
@@ -94,7 +102,7 @@ namespace Nuake
 	{
 		return lookAt(glm::vec3(), Direction, Up);
 	}
-	
+
 	bool Camera::BoxFrustumCheck(const AABB& aabb)
 	{
 		m_Frustum = Frustum(GetPerspective() * GetTransform());
@@ -128,8 +136,8 @@ namespace Nuake
 		if(j.contains("Translation"))
 			DESERIALIZE_VEC3(j["Translation"], Translation);
 
-		if (j.contains("Direction"))
-			DESERIALIZE_VEC3(j["Direction"], Direction);
+		//if (j.contains("Direction"))
+		//	DESERIALIZE_VEC3(j["Direction"], Direction);
 
 		this->AspectRatio = j["AspectRatio"];
 		this->Fov = j["Fov"];
