@@ -37,6 +37,8 @@ Quat Nuake::CreateFromAxisAngle(Vector3 axis, float angle)
 
 Quat Nuake::QuatFromEuler(float x, float y, float z)
 {
+    return Quat(Vector3(Rad(z), Rad(y), Rad(x)));
+
     Quat q;
 
     float cr = cos(x * 0.5);
@@ -56,5 +58,5 @@ Quat Nuake::QuatFromEuler(float x, float y, float z)
 Vector3 Nuake::QuatToDirection(const Quat& quat)
 {
 	//return quat * Vector3(0, 0, -1);
-	return glm::rotate(glm::inverse(quat), glm::vec3(0.0, 0.0, 1.0));
+	return glm::rotate(glm::inverse(quat), glm::vec3(-1.0, 0.0, 0.0));
 }
