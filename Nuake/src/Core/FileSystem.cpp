@@ -127,7 +127,8 @@ namespace Nuake
 	std::string FileSystem::GetParentPath(const std::string& fullPath)
 	{
 		std::filesystem::path pathObj(fullPath);
-		return pathObj.parent_path().string();
+		auto returnvalue = pathObj.parent_path().string();
+		return returnvalue + "\\";
 	}
 
 	std::string FileSystem::ReadFile(const std::string& path, bool absolute)
