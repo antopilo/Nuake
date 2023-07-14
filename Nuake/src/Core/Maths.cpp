@@ -65,7 +65,6 @@ Quat Nuake::QuatFromEuler(float x, float y, float z)
 Vector3 Nuake::QuatToDirection(const Quat& quat)
 {
 	return glm::normalize(quat * Vector3(0, 0, -1));
-	//return glm::normalize(glm::rotate(glm::inverse(quat), glm::vec3(-1.0, 0.0, 0.0)));
 }
 
 void Nuake::Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale)

@@ -372,6 +372,7 @@ namespace Nuake {
                 {
                     Ref<EditorCamera> editorCam = Engine::GetCurrentScene()->m_EditorCamera;
                     Vector3 camDirection = entity.GetComponent<CameraComponent>().CameraInstance->GetDirection();
+                    camDirection.z *= -1.0f;
                     editorCam->SetTransform(glm::inverse(entity.GetComponent<TransformComponent>().GetGlobalTransform()));
                 }
                 ImGui::Separator();

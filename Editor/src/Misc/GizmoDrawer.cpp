@@ -259,7 +259,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		flatShader->SetUniformVec4("u_Color", Vector4(0.0f, 1.0f, 0.4f, 1.0f));
 
 		const auto scaledTransform = glm::scale(transformComponent.GetGlobalTransform(), Vector3(0.25f, 0.25f, 0.25f));
-		//renderList.AddToRenderList(_gizmos["player"]->GetMeshes()[0], scaledTransform);
+		renderList.AddToRenderList(_gizmos["player"]->GetMeshes()[0], scaledTransform);
 		renderList.Flush(flatShader, true);
 	}
 

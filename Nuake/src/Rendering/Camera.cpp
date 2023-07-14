@@ -45,30 +45,15 @@ namespace Nuake
 
 	void Camera::SetDirection(Vector3 direction)
 	{
-		//cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraDirection.y = sin(glm::radians(Pitch));
-		//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraFront = glm::normalize(cam->cameraDirection);
-		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
 		Direction = glm::normalize(direction);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
 		m_View = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
-
-		//Up = glm::normalize(glm::cross(Direction, Right));
 	}
 
 	void Camera::SetDirection(const Quat& direction)
 	{
-		//cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraDirection.y = sin(glm::radians(Pitch));
-		//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraFront = glm::normalize(cam->cameraDirection);
-		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
-
-		//glm::quatLookAt();
-		//Direction = glm::normalize(direction);
-		//Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
-		//Up = glm::normalize(glm::cross(Direction, Right));
+		// TODO: Calculate forward and Right from quaternion.
+		assert("Not implemented!");
 	}
 
 	Vector3 Camera::GetTranslation() {
@@ -89,14 +74,11 @@ namespace Nuake
 	void Camera::SetTransform(const Matrix4& transform)
 	{
 		m_View = transform;
-		
 	}
 
 	Matrix4 Camera::GetTransform()
 	{
 		return m_View;
-		glm::mat4 tr = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
-		return tr;
 	}
 
 	Matrix4 Camera::GetTransformRotation()
