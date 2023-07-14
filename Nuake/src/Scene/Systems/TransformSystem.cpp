@@ -47,14 +47,11 @@ namespace Nuake
 				auto& localRot = glm::normalize(transform.GetLocalRotation());
 				auto& localScale = transform.GetLocalScale();
 				const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
-
 				const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
 				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
 				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
-
-
-				//localRot *= -1.0f;
-				//if(localRot.y != 0)
+				// localRot *= -1.0f;
+				// if(localRot.y != 0)
 				//	assert(newLocalTransform == transform.GetLocalTransform());
 
 				transform.SetLocalTransform(newLocalTransform);
@@ -67,7 +64,6 @@ namespace Nuake
 		for (auto e : transformView) 
 		{
 			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
-
 			if (!parent.HasParent)
 			{ 
 				// If no parents, then globalTransform is local transform.
@@ -99,7 +95,7 @@ namespace Nuake
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
-				
+
 			transform.SetGlobalPosition(globalPosition);
 			transform.SetGlobalRotation(globalOrientation);
 			transform.SetGlobalScale(globalScale);

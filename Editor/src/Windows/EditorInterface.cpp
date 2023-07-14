@@ -204,7 +204,7 @@ namespace Nuake {
                     // Since imguizmo returns a transform in global space and we want the local transform,
                     // we need to multiply by the inverse of the parent's global transform in order to revert
                     // the changes from the parent transform.
-                    Matrix4 localTransform = transform;
+                    Matrix4 localTransform = Matrix4(transform);
                     ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                     if (parent.HasParent)
                     {
@@ -221,43 +221,41 @@ namespace Nuake {
                     Vector4 pesp = Vector4();
                     glm::decompose(localTransform, scale, rotation, pos, skew, pesp);
                     
-
                     float newScale[3];
                     float newRot[3];
                     float rotates[3];
                     float newPos[3];
                     ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), newPos, newRot, newScale);
-                    rotates[0] = -newRot[0];
-                    rotates[1] = -newRot[1];
+                    rotates[0] = newRot[0];
+                    rotates[1] = newRot[1];
                     rotates[2] = newRot[2];
+                    
+                    auto newnewScale = Vector3(newScale[0], newScale[1], newScale[2]);
+                    glm::mat3 rotationMatrix2 = glm::mat3(localTransform);
+                    glm::quat rotationQuaternion = glm::normalize(glm::quat(rotationMatrix2));
 
                     auto rott = QuatFromEuler(rotates[0], rotates[1], rotates[2]);
-
-
-                    
-                    const Matrix4& rotationMatrix = glm::mat4_cast(glm::conjugate(rott));
-                    const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), scale);
+                    const Matrix4& rotationMatrix = glm::mat4_cast(rott);
+                    const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), newnewScale);
                     const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
                     const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
 
                     //assert(newLocalTransform == localTransform);
                     tc.Translation = pos;
-                    tc.Rotation = glm::normalize(glm::conjugate(rotation));
-                    tc.Scale = scale;
+                    tc.Rotation = rotationQuaternion;
+                    tc.Scale = newnewScale;
                     tc.LocalTransform = newLocalTransform;
                     tc.Dirty = true;
-
-
                     
                     // Decompose global trasnform
-                    //Vector3 gscale = Vector3();
-                    //Quat grotation = Quat();
-                    //Vector3 gpos = Vector3();
-                    //Vector3 gskew = Vector3();
-                    //Vector4 gpesp = Vector4();
-                    //glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
-                    //
-                    ////glm::quat rotationQuaternionG = glm::quat_cast(transform);
+                    Vector3 gscale = Vector3();
+                    Quat grotation = Quat();
+                    Vector3 gpos = Vector3();
+                    Vector3 gskew = Vector3();
+                    Vector4 gpesp = Vector4();
+                    glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
+                    
+                    //glm::quat rotationQuaternionG = glm::quat_cast(transform);
                     //tc.SetGlobalPosition(gpos);
                     //tc.SetGlobalRotation(glm::conjugate(grotation));
                     //tc.SetGlobalScale(gscale);

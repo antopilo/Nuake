@@ -37,12 +37,12 @@ Quat Nuake::CreateFromAxisAngle(Vector3 axis, float angle)
 
 Quat Nuake::QuatFromEuler(float x, float y, float z)
 {
-   glm::quat yawQuat = glm::angleAxis(Rad(y), glm::vec3(0.0f, 1.0f, 0.0f));
-   glm::quat rollQuat = glm::angleAxis(Rad(z), glm::vec3(0.0f, 0.0f, 1.0f));
-   glm::quat pitchQuat = glm::angleAxis(Rad(x), glm::vec3(1.0f, 0.0f, 0.0f));
-   glm::quat orientation = yawQuat * pitchQuat * rollQuat;
+    glm::quat pitchQuat = glm::angleAxis(Rad(x), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::quat yawQuat = glm::angleAxis(Rad(y), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat rollQuat = glm::angleAxis(Rad(z), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::quat orientation = yawQuat * pitchQuat * rollQuat;
    
-   return glm::normalize(orientation);
+    return glm::normalize(orientation);
 
     return Quat(Vector3(Rad(x), Rad(y), Rad(z)));
 
