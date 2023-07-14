@@ -43,16 +43,13 @@ namespace Nuake
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
 			if (transform.Dirty)
 			{
-				auto& localTranslate = transform.GetLocalPosition();
-				auto& localRot = glm::normalize(transform.GetLocalRotation());
-				auto& localScale = transform.GetLocalScale();
+				const Vector3& localTranslate = transform.GetLocalPosition();
+				const Quat& localRot = glm::normalize(transform.GetLocalRotation());
+				const Vector3& localScale = transform.GetLocalScale();
 				const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
 				const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
 				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
 				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
-				// localRot *= -1.0f;
-				// if(localRot.y != 0)
-				//	assert(newLocalTransform == transform.GetLocalTransform());
 
 				transform.SetLocalTransform(newLocalTransform);
 				transform.Dirty = false;

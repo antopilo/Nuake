@@ -197,10 +197,6 @@ namespace Nuake {
 
                 if (ImGuizmo::IsUsing())
                 {
-                    // TODO: CALCAULATE DELTA BETWEEN THE GLOBAL TRANSFORMS, CALCULATE ROTAION, SCALe DELTAS
-                    // AND add Them to each component.
-                    // 
-                    // const Matrix4& transformDelta =
                     // Since imguizmo returns a transform in global space and we want the local transform,
                     // we need to multiply by the inverse of the parent's global transform in order to revert
                     // the changes from the parent transform.
@@ -214,52 +210,35 @@ namespace Nuake {
                     }
 
                     // Decompose local transform
-                    Vector3 scale = Vector3();
-                    Quat rotation = Quat();
-                    Vector3 pos = Vector3();
-                    Vector3 skew = Vector3();
-                    Vector4 pesp = Vector4();
-                    glm::decompose(localTransform, scale, rotation, pos, skew, pesp);
+                    float decomposedPosition[3];
+                    float decomposedEuler[3];
+                    float decomposedScale[3];
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), decomposedPosition, decomposedEuler, decomposedScale);
                     
-                    float newScale[3];
-                    float newRot[3];
-                    float rotates[3];
-                    float newPos[3];
-                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), newPos, newRot, newScale);
-                    rotates[0] = newRot[0];
-                    rotates[1] = newRot[1];
-                    rotates[2] = newRot[2];
-                    
-                    auto newnewScale = Vector3(newScale[0], newScale[1], newScale[2]);
-                    glm::mat3 rotationMatrix2 = glm::mat3(localTransform);
-                    glm::quat rotationQuaternion = glm::normalize(glm::quat(rotationMatrix2));
+                    const auto& localPosition = Vector3(decomposedPosition[0], decomposedPosition[1], decomposedPosition[2]);
+                    const auto& localScale = Vector3(decomposedScale[0], decomposedScale[1], decomposedScale[2]);
 
-                    auto rott = QuatFromEuler(rotates[0], rotates[1], rotates[2]);
-                    const Matrix4& rotationMatrix = glm::mat4_cast(rott);
-                    const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), newnewScale);
-                    const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
-                    const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
+                    localTransform[0] /= localScale.x;
+                    localTransform[1] /= localScale.y;
+                    localTransform[2] /= localScale.z;
+                    const auto& rotationMatrix = Matrix3(localTransform);
+                    const Quat& localRotation = glm::normalize(Quat(rotationMatrix));
 
-                    //assert(newLocalTransform == localTransform);
-                    tc.Translation = pos;
-                    tc.Rotation = rotationQuaternion;
-                    tc.Scale = newnewScale;
+                    const Matrix4& rotationMatrix4 = glm::mat4_cast(localRotation);
+                    const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
+                    const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localPosition);
+                    const Matrix4& newLocalTransform = translationMatrix * rotationMatrix4 * scaleMatrix;
+
+                    tc.Translation = localPosition;
+
+                    if (CurrentOperation != ImGuizmo::SCALE)
+                    {
+                        tc.Rotation = localRotation;
+                    }
+
+                    tc.Scale = localScale;
                     tc.LocalTransform = newLocalTransform;
                     tc.Dirty = true;
-                    
-                    // Decompose global trasnform
-                    Vector3 gscale = Vector3();
-                    Quat grotation = Quat();
-                    Vector3 gpos = Vector3();
-                    Vector3 gskew = Vector3();
-                    Vector4 gpesp = Vector4();
-                    glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
-                    
-                    //glm::quat rotationQuaternionG = glm::quat_cast(transform);
-                    //tc.SetGlobalPosition(gpos);
-                    //tc.SetGlobalRotation(glm::conjugate(grotation));
-                    //tc.SetGlobalScale(gscale);
-                    //tc.SetGlobalTransform(localTransform);
                 }
             }
 
