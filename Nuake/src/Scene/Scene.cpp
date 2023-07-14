@@ -135,22 +135,14 @@ namespace Nuake {
 	void Scene::Draw(FrameBuffer& framebuffer)
 	{
 		Ref<Camera> cam = nullptr;
-		Matrix4 camTransform = Matrix4();
+		const auto& view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
+		for (const auto& e : view)
 		{
-			auto view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
-			for (auto e : view) 
-			{
-				auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
-				cam = camera.CameraInstance;
+			auto [transform, camera, parent] = view.get<TransformComponent, CameraComponent, ParentComponent>(e);
+			cam = camera.CameraInstance;
 
-				cam->Translation = transform.GetGlobalPosition();
-
-				const Vector3& forward = QuatToDirection(transform.GetGlobalRotation());
-				cam->SetDirection(forward);
-
-				camTransform = transform.GetGlobalTransform();
-				break;
-			}
+			cam->Translation = transform.GetGlobalPosition();
+			break;
 		}
 
 		if (!cam)

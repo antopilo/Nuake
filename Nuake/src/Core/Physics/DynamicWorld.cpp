@@ -292,8 +292,16 @@ namespace Nuake
 			settings->mShape = GetJoltShape(cc->Shape);
 			settings->mGravityFactor = 0.0f;
 
-			auto& joltPos = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
-			JPH::Character* character = new JPH::Character(settings, joltPos, JPH::Quat::sIdentity(), cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
+			auto& joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
+
+			Quat& bodyRotation = cc->Rotation;
+
+			// We need to add 180 degrees because our forward is -Z.
+			const auto& yOffset = Vector3(0.0f, Rad(180.0), 0.0f);
+			bodyRotation = glm::normalize(bodyRotation * Quat(yOffset));
+
+			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
+			JPH::Character* character = new JPH::Character(settings, joltPosition, joltRotation, cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
 
 			character->AddToPhysicsSystem(JPH::EActivation::Activate);
 			
@@ -362,17 +370,16 @@ namespace Nuake
 				transformComponent.SetLocalPosition(pos);
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				transformComponent.SetLocalTransform(transform);
-				transformComponent.Dirty = false;
+				transformComponent.Dirty = true;
 			}
 		}
-
+		
 		void DynamicWorld::SyncCharactersTransforms()
 		{
 			// TODO(ANTO): Finish this to connect updated jolt transforms back to the entity.
 			// The problem was that I dont know yet how to go from jolt body ptr to the entity
 			// Combinations of find and iterators etc. I do not have the brain power rn zzz.
 			// const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
-
 			for (const auto& e : _registeredCharacters)
 			{
 				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};
@@ -399,7 +406,7 @@ namespace Nuake
 				transformComponent.SetLocalPosition(pos);
 				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
 				transformComponent.SetLocalTransform(transform);
-				transformComponent.Dirty = false;
+				transformComponent.Dirty = true;
 			}
 		}
 
@@ -437,29 +444,24 @@ namespace Nuake
 			SyncCharactersTransforms();
 		}
 
-
 		void DynamicWorld::Clear()
 		{
 			_stepCount = 0;
 
-			if (_registeredBodies.empty())
+			if (!_registeredBodies.empty())
 			{
-				return;
+				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
+				_registeredBodies.clear();
 			}
 			
-			_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
-			_registeredBodies.clear();
-
-			if (_registeredCharacters.empty())
+			if (!_registeredCharacters.empty())
 			{
-				return;
+				for (auto& character : _registeredCharacters)
+				{
+					character.second->RemoveFromPhysicsSystem();
+				}
+				_registeredCharacters.clear();
 			}
-
-			for (auto& character : _registeredCharacters)
-			{
-				character.second->RemoveFromPhysicsSystem();
-			}
-			_registeredCharacters.clear();
 		}
 
 		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)

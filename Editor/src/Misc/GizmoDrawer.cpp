@@ -36,7 +36,7 @@ GizmoDrawer::GizmoDrawer()
 	_gizmos = std::map<std::string, Ref<Model>>();
 	_gizmos["cam"] = loader.LoadModel("resources/Models/Camera.gltf");
 	_gizmos["light"] = loader.LoadModel("resources/Models/Light.gltf");
-	_gizmos["player"] = loader.LoadModel("resources/Models/Player.gltf");
+	_gizmos["player"] = loader.LoadModel("resources/Models/Camera.gltf");
 }
 
 void GizmoDrawer::GenerateSphereGizmo()

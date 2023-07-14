@@ -20,6 +20,9 @@ namespace Nuake
 	using Matrix3 = glm::mat3;
 #define Rad(degrees) glm::radians(degrees)
 
+	Quat LookAt(Vector3 sourcePoint, Vector3 destPoint);
+	Quat CreateFromAxisAngle(Vector3 axis, float angle);
 	Quat QuatFromEuler(float x, float y, float z);
 	Vector3 QuatToDirection(const Quat& quat);
+	void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale);
 }

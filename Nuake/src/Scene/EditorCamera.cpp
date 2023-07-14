@@ -148,7 +148,8 @@ namespace Nuake
 				Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 				Direction.y = sin(glm::radians(Pitch));
 				Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-				Direction = glm::normalize(Direction);
+
+				SetDirection(glm::normalize(Direction));
 				Right = glm::normalize(glm::cross(Up, Direction));
 			}
 			else if (Input::IsMouseButtonDown(2))

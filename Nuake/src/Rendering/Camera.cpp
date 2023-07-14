@@ -45,14 +45,15 @@ namespace Nuake
 
 	void Camera::SetDirection(Vector3 direction)
 	{
-		//cam->cameraDirection.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraDirection.y = sin(glm::radians(Pitch));
-		//cam->cameraDirection.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		//cam->cameraFront = glm::normalize(cam->cameraDirection);
-		//cam->cameraRight = glm::normalize(glm::cross(cam->up, cam->cameraFront));
 		Direction = glm::normalize(direction);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
-		//Up = glm::normalize(glm::cross(Direction, Right))
+		m_View = lookAt(Translation, Translation + glm::normalize(Direction), Vector3(0, 1, 0));
+	}
+
+	void Camera::SetDirection(const Quat& direction)
+	{
+		// TODO: Calculate forward and Right from quaternion.
+		assert("Not implemented!");
 	}
 
 	Vector3 Camera::GetTranslation() {
@@ -70,17 +71,21 @@ namespace Nuake
 		return m_Perspective;
 	}
 
+	void Camera::SetTransform(const Matrix4& transform)
+	{
+		m_View = transform;
+	}
+
 	Matrix4 Camera::GetTransform()
 	{
-		glm::mat4 tr = lookAt(Translation, Translation + Direction, Vector3(0, 1, 0));
-		return tr;
+		return m_View;
 	}
 
 	Matrix4 Camera::GetTransformRotation()
 	{
 		return lookAt(glm::vec3(), Direction, Up);
 	}
-	
+
 	bool Camera::BoxFrustumCheck(const AABB& aabb)
 	{
 		m_Frustum = Frustum(GetPerspective() * GetTransform());
@@ -98,6 +103,8 @@ namespace Nuake
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(m_Type);
 		SERIALIZE_VAL(AspectRatio);
+		SERIALIZE_VEC3(Translation)
+		SERIALIZE_VEC3(Direction)
 		SERIALIZE_VAL(Fov);
 		SERIALIZE_VAL(Exposure);
 		SERIALIZE_VAL(Speed);
@@ -109,6 +116,12 @@ namespace Nuake
 		BEGIN_DESERIALIZE();
 		j = j["CameraInstance"];
 		this->m_Type = (CAMERA_TYPE)j["m_Type"];
+		if(j.contains("Translation"))
+			DESERIALIZE_VEC3(j["Translation"], Translation);
+
+		//if (j.contains("Direction"))
+		//	DESERIALIZE_VEC3(j["Direction"], Direction);
+
 		this->AspectRatio = j["AspectRatio"];
 		this->Fov = j["Fov"];
 		this->Exposure = j["Exposure"];

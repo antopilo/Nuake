@@ -1,13 +1,13 @@
 #include "TransformSystem.h"
 
 #include "src/Core/Maths.h"
-
 #include "src/Scene/Scene.h"
 #include <src/Scene/Components/TransformComponent.h>
 #include <src/Scene/Components/CameraComponent.h>
 #include <src/Scene/Components/ParentComponent.h>
-#include "src/Vendors/glm/gtx/matrix_decompose.hpp"
-namespace Nuake {
+
+namespace Nuake 
+{
 	TransformSystem::TransformSystem(Scene* scene)
 	{
 		m_Scene = scene;
@@ -36,15 +36,6 @@ namespace Nuake {
 
 	void TransformSystem::UpdateTransform()
 	{
-		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
-		for (auto e : camView)
-		{
-			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
-			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
-
-			camera.CameraInstance->Translation = transform.GlobalTranslation;
-		}
-
 		// Calculate all local transforms
 		auto localTransformView = m_Scene->m_Registry.view<TransformComponent>();
 		for (auto tv : localTransformView)
@@ -52,15 +43,15 @@ namespace Nuake {
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
 			if (transform.Dirty)
 			{
-				Matrix4 localTransform = Matrix4(1.0f);
-				auto& localTranslate = transform.GetLocalPosition();
-				auto& localRot = transform.GetLocalRotation();
-				auto& localScale = transform.GetLocalScale();
-				localRot.w *= -1.0;
-				localTransform = glm::translate(localTransform, localTranslate);
-				localTransform = localTransform * glm::toMat4(localRot);
-				localTransform = glm::scale(localTransform, localScale);
-				transform.SetLocalTransform(localTransform);
+				const Vector3& localTranslate = transform.GetLocalPosition();
+				const Quat& localRot = glm::normalize(transform.GetLocalRotation());
+				const Vector3& localScale = transform.GetLocalScale();
+				const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
+				const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
+				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
+				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
+
+				transform.SetLocalTransform(newLocalTransform);
 				transform.Dirty = false;
 			}
 		}
@@ -70,9 +61,8 @@ namespace Nuake {
 		for (auto e : transformView) 
 		{
 			auto [parent, transform] = transformView.get<ParentComponent, TransformComponent>(e);
-
 			if (!parent.HasParent)
-			{
+			{ 
 				// If no parents, then globalTransform is local transform.
 				transform.SetGlobalTransform(transform.GetLocalTransform());
 				transform.SetGlobalPosition(transform.GetLocalPosition());
@@ -93,21 +83,41 @@ namespace Nuake {
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 
-				globalPosition = transformComponent.GetLocalPosition() + (transformComponent.GetLocalRotation() * globalPosition);
+				globalPosition = transformComponent.GetLocalPosition() + (globalPosition);
+
+				globalScale *= transformComponent.GetLocalScale();
+				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
 				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
 
-				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
-				globalScale *= transformComponent.GetLocalScale();
-		
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
-
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
-				
+
 			transform.SetGlobalPosition(globalPosition);
 			transform.SetGlobalRotation(globalOrientation);
 			transform.SetGlobalScale(globalScale);
 			transform.SetGlobalTransform(globalTransform);
+		}
+
+		auto camView = m_Scene->m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto& e : camView)
+		{
+			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
+			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+
+			camera.CameraInstance->Translation = transform.GlobalTranslation;
+
+			auto globalRotation = transform.GetGlobalRotation();
+			auto& translationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
+			const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+			Vector4 forward = Vector4(0, 0, -1, 1);
+			const auto globalForward = rotationMatrix * forward;
+
+			Vector4 right = Vector4(1, 0, 0, 1);
+			const auto globalRight = rotationMatrix * right;
+			camera.CameraInstance->Direction = globalForward;
+			camera.CameraInstance->Right = globalRight;
+;			camera.CameraInstance->SetTransform(glm::inverse(translationMatrix * rotationMatrix));
 		}
 	}
 }

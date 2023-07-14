@@ -44,6 +44,7 @@ class Scene {
 	foreign static GetTranslation_(e)
 	foreign static SetTranslation_(e, x, y, z)
 	foreign static SetRotation_(e, x, y, z)
+	foreign static SetLookAt_(e, x, y, z)
 	foreign static GetRotation_(e)
 	//foreign static SetScale_(e, x, y, z)
 
@@ -111,6 +112,9 @@ class TransformComponent {
 		Scene.SetRotation_(_entityId, t.x, t.y, t.z)
 	}
 
+	SetLookAt(t) {
+		Scene.SetLookAt_(_entityId, t.x, t.y, t.z)
+	}
 }
 
 class Light {
