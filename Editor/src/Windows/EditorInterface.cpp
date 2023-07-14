@@ -197,6 +197,10 @@ namespace Nuake {
 
                 if (ImGuizmo::IsUsing())
                 {
+                    // TODO: CALCAULATE DELTA BETWEEN THE GLOBAL TRANSFORMS, CALCULATE ROTAION, SCALe DELTAS
+                    // AND add Them to each component.
+                    // 
+                    // const Matrix4& transformDelta =
                     // Since imguizmo returns a transform in global space and we want the local transform,
                     // we need to multiply by the inverse of the parent's global transform in order to revert
                     // the changes from the parent transform.
@@ -217,32 +221,47 @@ namespace Nuake {
                     Vector4 pesp = Vector4();
                     glm::decompose(localTransform, scale, rotation, pos, skew, pesp);
                     
-                    tc.Translation = pos;
 
-                    rotation.w *= -1.0f;
-                    tc.Rotation = rotation;
-                    tc.Scale = scale;
-                    tc.LocalTransform = localTransform;
-                    //tc.Dirty = true;
+                    float newScale[3];
+                    float newRot[3];
+                    float rotates[3];
+                    float newPos[3];
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), newPos, newRot, newScale);
+                    rotates[0] = -newRot[0];
+                    rotates[1] = -newRot[1];
+                    rotates[2] = newRot[2];
 
-                    const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
-                    const Matrix4& rotationMatrix = glm::mat4_cast(rotation);
+                    auto rott = QuatFromEuler(rotates[0], rotates[1], rotates[2]);
+
+
+                    
+                    const Matrix4& rotationMatrix = glm::mat4_cast(glm::conjugate(rott));
                     const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), scale);
+                    const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), pos);
                     const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
+
+                    //assert(newLocalTransform == localTransform);
+                    tc.Translation = pos;
+                    tc.Rotation = glm::normalize(glm::conjugate(rotation));
+                    tc.Scale = scale;
+                    tc.LocalTransform = newLocalTransform;
+                    tc.Dirty = true;
+
+
                     
                     // Decompose global trasnform
-                    Vector3 gscale = Vector3();
-                    Quat grotation = Quat();
-                    Vector3 gpos = Vector3();
-                    Vector3 gskew = Vector3();
-                    Vector4 gpesp = Vector4();
-                    glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
-
-                    //glm::quat rotationQuaternionG = glm::quat_cast(transform);
-                    tc.SetGlobalPosition(gpos);
-                    tc.SetGlobalRotation(grotation);
-                    tc.SetGlobalScale(gscale);
-                    tc.SetGlobalTransform(localTransform);
+                    //Vector3 gscale = Vector3();
+                    //Quat grotation = Quat();
+                    //Vector3 gpos = Vector3();
+                    //Vector3 gskew = Vector3();
+                    //Vector4 gpesp = Vector4();
+                    //glm::decompose(transform, gscale, grotation, gpos, gskew, gpesp);
+                    //
+                    ////glm::quat rotationQuaternionG = glm::quat_cast(transform);
+                    //tc.SetGlobalPosition(gpos);
+                    //tc.SetGlobalRotation(glm::conjugate(grotation));
+                    //tc.SetGlobalScale(gscale);
+                    //tc.SetGlobalTransform(localTransform);
                 }
             }
 
@@ -375,9 +394,8 @@ namespace Nuake {
                 if (ImGui::Selectable("Focus camera"))
                 {
                     Ref<EditorCamera> editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-                    editorCam->Translation = entity.GetComponent<TransformComponent>().GetGlobalPosition();
                     Vector3 camDirection = entity.GetComponent<CameraComponent>().CameraInstance->GetDirection();
-                    editorCam->SetDirection(camDirection);
+                    editorCam->SetTransform(glm::inverse(entity.GetComponent<TransformComponent>().GetGlobalTransform()));
                 }
                 ImGui::Separator();
             }

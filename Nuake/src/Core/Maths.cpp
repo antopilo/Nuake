@@ -67,3 +67,15 @@ Vector3 Nuake::QuatToDirection(const Quat& quat)
 	return glm::normalize(quat * Vector3(0, 0, -1));
 	//return glm::normalize(glm::rotate(glm::inverse(quat), glm::vec3(-1.0, 0.0, 0.0)));
 }
+
+void Nuake::Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale)
+{
+    pos = m[3];
+    for (int i = 0; i < 3; i++)
+        scale[i] = glm::length(Vector3(m[i]));
+    const glm::mat3 rotMtx(
+        glm::vec3(m[0]) / scale[0],
+        glm::vec3(m[1]) / scale[1],
+        glm::vec3(m[2]) / scale[2]);
+    rot = glm::quat_cast(rotMtx);
+}

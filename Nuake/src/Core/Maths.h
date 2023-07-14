@@ -24,4 +24,5 @@ namespace Nuake
 	Quat CreateFromAxisAngle(Vector3 axis, float angle);
 	Quat QuatFromEuler(float x, float y, float z);
 	Vector3 QuatToDirection(const Quat& quat);
+	void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale);
 }
