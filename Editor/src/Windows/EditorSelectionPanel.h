@@ -14,6 +14,7 @@
 #include "../ComponentsPanel/RigidbodyPanel.h"
 #include "../ComponentsPanel/BoxColliderPanel.h"
 #include "../ComponentsPanel/CapsuleColliderPanel.h"
+#include "../ComponentsPanel/CylinderColliderPanel.h"
 #include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
@@ -31,6 +32,7 @@ private:
 	SphereColliderPanel mSphereColliderPanel;
 	MeshColliderPanel mMeshColliderPanel;
 	CapsuleColliderPanel mCapsuleColliderPanel;
+	CylinderColliderPanel mCylinderColliderPanel;
 
 	CharacterControllerPanel mCharacterControllerPanel;
 

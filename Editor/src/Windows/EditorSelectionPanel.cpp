@@ -102,6 +102,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mBoxColliderPanel.Draw(entity);
     mSphereColliderPanel.Draw(entity);
 	mCapsuleColliderPanel.Draw(entity);
+	mCylinderColliderPanel.Draw(entity);
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
 }
@@ -126,8 +127,10 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			ImGui::Separator();
 			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)
+			ImGui::Separator();
             MenuItemComponent("Box collider", Nuake::BoxColliderComponent)
 			MenuItemComponent("Capsule collider", Nuake::CapsuleColliderComponent)
+			MenuItemComponent("Cylinder collider", Nuake::CylinderColliderComponent)
             MenuItemComponent("Sphere collider", Nuake::SphereColliderComponent)
             MenuItemComponent("Mesh collider", Nuake::MeshColliderComponent)
 			ImGui::Separator();
@@ -138,7 +141,6 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
     }
     
 }
-
 
 void EditorSelectionPanel::DrawFile(Nuake::File* file)
 {

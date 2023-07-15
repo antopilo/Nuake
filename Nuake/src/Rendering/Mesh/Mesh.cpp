@@ -91,6 +91,11 @@ namespace Nuake
         m_VertexArray->Unbind();
     }
 
+    void Mesh::Bind() const
+    {
+        m_VertexArray->Bind();
+    }
+
     void Mesh::Draw(Shader* shader, bool bindMaterial)
     {
         if (bindMaterial)

@@ -12,6 +12,7 @@
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/TriggerZone.h>
+#include <src/Scene/Components/CylinderColliderComponent.h>
 
 namespace Nuake
 {
@@ -174,6 +175,15 @@ namespace Nuake
 			capsuleComponent.Capsule = CreateRef<Physics::Capsule>(radius, height);
 		}
 
+		const auto cylinderView = m_Scene->m_Registry.view<CylinderColliderComponent>();
+		for (auto entity : cylinderView)
+		{
+			auto& cylinderComponent = cylinderView.get<CylinderColliderComponent>(entity);
+			float radius = cylinderComponent.Radius;
+			float height = cylinderComponent.Height;
+			cylinderComponent.Cylinder = CreateRef<Physics::Cylinder>(radius, height);
+		}
+
 		const auto sphereView = m_Scene->m_Registry.view<SphereColliderComponent>();
 		for (auto entity : sphereView)
 		{
@@ -235,6 +245,17 @@ namespace Nuake
 				auto capsuleShape = CreateRef<Physics::Capsule>(radius, height);
 
 				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), capsuleShape, ent);
+				PhysicsManager::Get().RegisterBody(rigidBody);
+			}
+
+			if (ent.HasComponent<CylinderColliderComponent>())
+			{
+				auto& cylinderComponent = ent.GetComponent<CylinderColliderComponent>();
+				float radius = cylinderComponent.Radius;
+				float height = cylinderComponent.Height;
+				auto cylinderShape = CreateRef<Physics::Cylinder>(radius, height);
+
+				rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), cylinderShape, ent);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 

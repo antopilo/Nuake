@@ -8,11 +8,15 @@
 #include "CameraComponent.h"
 #include "ModelComponent.h"
 #include "QuakeMap.h"
+
 #include "RigidbodyComponent.h"
+#include "CharacterControllerComponent.h"
+
 #include "SphereCollider.h"
 #include "MeshCollider.h"
+#include "CylinderColliderComponent.h"
 #include "NativeScriptComponent.h"
-#include "CharacterControllerComponent.h"
+
 #include "ParentComponent.h"
 #include "NameComponent.h"
 #include "BoxCollider.h"

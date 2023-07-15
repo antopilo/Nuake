@@ -6,6 +6,10 @@
 #include <src/Rendering/Vertex.h>
 #include <src/Scene/Scene.h>
 #include <src/Resource/Model.h>
+#include <src/Core/Physics/PhysicsShapes.h>
+
+#include "Gizmos/CapsuleGizmo.h"
+#include "Gizmos/CylinderGizmo.h"
 
 using namespace Nuake;
 
@@ -13,6 +17,9 @@ class GizmoDrawer
 {
 private:
 	std::map<std::string, Ref<Model>> _gizmos;
+
+	std::map<uint32_t, Scope<CapsuleGizmo>> _CapsuleEntity;
+	std::map<uint32_t, Scope<CylinderGizmo>> _CylinderEntity;
 
 	const std::vector<LineVertex> vertices
 	{
@@ -27,9 +34,9 @@ private:
 	Ref<VertexArray> mCircleBuffer;
 	Ref<VertexBuffer> mCircleVertexBuffer;
 
-	std::vector<LineVertex> capsuleVertices;
-	Ref<VertexArray> mCapsuleBuffer;
-	Ref<VertexBuffer> mCapsuleVertexBuffer;
+	std::vector<LineVertex> mBoxVertices;
+	Ref<VertexArray> mBoxBuffer;
+	Ref<VertexBuffer> mBoxVertexBuffer;
 
 	Ref<VertexArray> mAxisLineBuffer;
 	Ref<VertexBuffer> mAxisLineVertexBuffer;
@@ -37,7 +44,6 @@ private:
 	Shader* mLineShader;
 
 	void GenerateSphereGizmo();
-	void GenerateCapsuleGizmo();
 public:
 	GizmoDrawer();
 	~GizmoDrawer() = default;

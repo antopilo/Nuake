@@ -25,6 +25,7 @@ namespace Nuake
 		Ref<Material> GetMaterial() inline const;
 		void SetMaterial(Ref<Material> material);
 
+		void Bind() const;
 		void Draw(Shader* shader, bool bindMaterial = true);
 		void DebugDraw();
 

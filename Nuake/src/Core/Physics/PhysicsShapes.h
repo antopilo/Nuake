@@ -49,6 +49,7 @@ namespace Nuake
 			float Radius;
 			float Height;
 		public:
+			Capsule() = default;
 			Capsule(float radius, float height) :
 				Radius(radius),
 				Height(height)
