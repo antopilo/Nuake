@@ -23,7 +23,8 @@ public:
 			{
 				ImGui::Text("Radius");
 				ImGui::TableNextColumn();
-				ImGui::DragFloat("##Radius", &Radius);
+				ImGui::DragFloat("##Radius", &Radius, 0.01f, 0.001f);
+				Radius = std::max(Radius, 0.001f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(Radius, 0.5f)
 			}
@@ -31,8 +32,8 @@ public:
 			{
 				ImGui::Text("Height");
 				ImGui::TableNextColumn();
-
-				ImGui::DragFloat("##Height", &Height);
+				ImGui::DragFloat("##Height", &Height, 0.01f, 0.001f);
+				Height = std::max(Height, 0.001f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(Height, 1.0f)
 			}
