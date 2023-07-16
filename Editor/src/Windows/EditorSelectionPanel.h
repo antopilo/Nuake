@@ -48,11 +48,12 @@ public:
 	void DrawEntity(Nuake::Entity entity);
 	void DrawAddComponentMenu(Nuake::Entity entity);
 
-	void DrawFile(Nuake::File* file);
+	void DrawFile(Ref<Nuake::File> file);
 	void DrawResource(Nuake::Resource resource);
 
 private:
 	void ResolveFile(Ref<Nuake::File> file);
 	void DrawMaterialPanel(Ref<Nuake::Material> material);
 	void DrawProjectPanel(Ref<Nuake::Project> project);
+	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
 };

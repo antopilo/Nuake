@@ -40,6 +40,7 @@ namespace Nuake
 
 		void RegisterMethod(const std::string& signature);
 		void CallMethod(const std::string& signature);
+		Ref<File> GetFile() const;
 
 		void SetScriptableEntityID(int id);
 		bool HasCompiledSuccesfully() const { return m_HasCompiledSuccesfully; }
