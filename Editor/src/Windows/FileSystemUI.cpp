@@ -180,16 +180,19 @@ namespace Nuake
             {
                 OS::ShowInFileExplorer(file->GetAbsolutePath());
             }
-            
-            ImGui::Separator();
-            
-            if (ImGui::MenuItem("Delete"))
+
+            if(file->GetExtension() != ".project")
             {
-                if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                ImGui::Separator();
+            
+                if (ImGui::MenuItem("Delete"))
                 {
-                    Logger::Log("Failed to remove file: " + file->GetRelativePath(), CRITICAL);
+                    if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                    {
+                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), CRITICAL);
+                    }
+                    RefreshFileBrowser();
                 }
-                RefreshFileBrowser();
             }
             
             ImGui::EndPopup();
