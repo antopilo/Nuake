@@ -429,7 +429,7 @@ void EditorSelectionPanel::DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile)
 	
 	ImGui::Text("Content");
 	ImGui::SameLine(ImGui::GetWindowWidth()-90);
-	if(ImGui::Button("Open In..."))
+	if(ImGui::Button("Open..."))
 	{
 		Nuake::OS::OpenIn(filePath);
 	}

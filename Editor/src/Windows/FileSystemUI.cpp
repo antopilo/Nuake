@@ -185,7 +185,7 @@ namespace Nuake
             {
                 ImGui::Separator();
 
-                if(ImGui::MenuItem("Open In..."))
+                if(ImGui::MenuItem("Open..."))
                 {
                     OS::OpenIn(file->GetAbsolutePath());
                 }
