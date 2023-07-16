@@ -20,7 +20,8 @@ public:
 				ImGui::Text("Mass");
 				ImGui::TableNextColumn();
 
-				ImGui::DragFloat("##Mass", &component.Mass, 0.1f, 0.1f);
+				ImGui::DragFloat("##Mass", &component.Mass, 0.01f, 0.1f);
+				component.Mass = std::max(component.Mass, 0.0f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.Mass, 0.0f);
 			}

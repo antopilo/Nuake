@@ -6,7 +6,7 @@ namespace Nuake {
 	class MeshColliderComponent
 	{
 	public:
-		int SubMesh = 0;
+		uint32_t SubMesh = 0;
 		bool IsTrigger;
 		Ref<Physics::MeshShape> Shape;
 

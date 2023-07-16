@@ -19,7 +19,9 @@ public:
 			{
 				ImGui::Text("Size");
 				ImGui::TableNextColumn();
-				ImGui::DragFloat("##Radius", &component.Radius);
+				ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.001f);
+
+				component.Radius = std::max(component.Radius, 0.001f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.Radius, 0.5f);
 			}

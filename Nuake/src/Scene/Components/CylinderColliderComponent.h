@@ -4,10 +4,10 @@
 
 namespace Nuake
 {
-	class CapsuleColliderComponent
+	class CylinderColliderComponent
 	{
 	public:
-		Ref<Physics::Capsule> Capsule;
+		Ref<Physics::Cylinder> Cylinder;
 
 		float Radius = 0.5f;
 		float Height = 1.0f;
