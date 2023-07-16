@@ -164,6 +164,11 @@ namespace Nuake
 		WrenInterpretResult result = wrenCall(vm, handle);
 	}
 
+	Ref<File> WrenScript::GetFile() const
+	{
+		return mFile;
+	}
+
 	void WrenScript::SetScriptableEntityID(int id)
 	{
 		if (!m_HasCompiledSuccesfully)
