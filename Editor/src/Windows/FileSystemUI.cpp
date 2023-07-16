@@ -181,6 +181,16 @@ namespace Nuake
                 OS::ShowInFileExplorer(file->GetAbsolutePath());
             }
 
+            if(file->GetExtension() == ".wren")
+            {
+                ImGui::Separator();
+
+                if(ImGui::MenuItem("Open..."))
+                {
+                    OS::OpenIn(file->GetAbsolutePath());
+                }
+            }
+
             if(file->GetExtension() != ".project")
             {
                 ImGui::Separator();

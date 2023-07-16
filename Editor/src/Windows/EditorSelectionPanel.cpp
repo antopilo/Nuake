@@ -426,9 +426,16 @@ void EditorSelectionPanel::DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile)
 {
 	auto filePath = wrenFile->GetFile()->GetAbsolutePath();
 	std::string fileContent = Nuake::FileSystem::ReadFile(filePath, true);
-
+	
 	ImGui::Text("Content");
+	ImGui::SameLine(ImGui::GetWindowWidth()-90);
+	if(ImGui::Button("Open..."))
+	{
+		Nuake::OS::OpenIn(filePath);
+	}
+	
 	ImGui::Separator();
+	
 	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetWindowWidth());
 	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
 	
