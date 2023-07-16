@@ -8,6 +8,7 @@ namespace Nuake
 	{
 	public:
 		static int GetTime();
+		static void OpenIn(const std::string& filePath);
 		static void ShowInFileExplorer(const std::string& filePath);
 	};
 }
