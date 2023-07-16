@@ -109,6 +109,7 @@ void GizmoDrawer::GenerateSphereGizmo()
 			vert1 = Vector3(x, 0, z);
 			vert2 = Vector3(x2, 0, z2);
 		}
+
 		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 1.0) });
 		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 1.0) });
 	}
@@ -123,7 +124,6 @@ void GizmoDrawer::GenerateSphereGizmo()
 
 	mCircleBuffer->AddBuffer(*mCircleVertexBuffer, *vblayout);
 }
-
 
 void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 {
@@ -140,14 +140,17 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
 
-
 	glLineWidth(2.0f);
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
 	for (auto e : boxColliderView)
 	{
 		auto [transform, box] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
+
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation), box.Size));
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix, box.Size));
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		mBoxBuffer->Bind();
@@ -176,10 +179,14 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		{
 			_CapsuleEntity[entityId] = CreateScope<CapsuleGizmo>();
 		}
+
 		_CapsuleEntity[entityId]->UpdateShape(capsule.Radius, capsule.Height);
 
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation));
+		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		_CapsuleEntity[entityId]->Bind();
@@ -196,10 +203,14 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		{
 			_CylinderEntity[entityId] = CreateScope<CylinderGizmo>();
 		}
+
 		_CylinderEntity[entityId]->UpdateShape(cylinder.Radius, cylinder.Height);
 
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation));
+		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		_CylinderEntity[entityId]->Bind();
@@ -219,26 +230,21 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 
 		auto& resource = model.ModelResource;
 
-		auto meshes = resource->GetMeshes();
-
+		const auto& meshes = resource->GetMeshes();
 		if (mesh.SubMesh >= meshes.size())
 		{
 			continue;
 		}
 
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
 		mLineShader->Bind();
-
-		const Vector3& localTranslate = transform.GetGlobalPosition();
-		const Quat& localRot = glm::normalize(transform.GetGlobalRotation());
-		const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localTranslate);
-		const Matrix4& rotationMatrix = glm::mat4_cast(localRot);
-		const Matrix4& newLocalTransform = translationMatrix * rotationMatrix;
-
 		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
-		meshes[mesh.SubMesh]->Bind();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		meshes[mesh.SubMesh]->Bind();
 		meshes[mesh.SubMesh]->Draw(nullptr, false);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
