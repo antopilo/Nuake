@@ -31,7 +31,7 @@ namespace Nuake
 
 		template<typename T>
 		T& AddComponent() {
-			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle);
+			T& component = m_Scene->m_Registry.emplace_or_replace <T>(m_EntityHandle);
 			return component;
 		}
 
