@@ -1,24 +1,24 @@
 #pragma once
 #include "ComponentPanel.h"
 
-#include <src/Scene/Components/CapsuleColliderComponent.h>
+#include <src/Scene/Components/CylinderColliderComponent.h>
 
-class CapsuleColliderPanel : ComponentPanel
+class CylinderColliderPanel : ComponentPanel
 {
 public:
-	CapsuleColliderPanel() = default;
+	CylinderColliderPanel() = default;
 
 	void Draw(Nuake::Entity entity) override
 	{
 		using namespace Nuake;
 
-		if (!entity.HasComponent<CapsuleColliderComponent>())
+		if (!entity.HasComponent<CylinderColliderComponent>())
 		{
 			return;
 		}
 
-		auto& [Capsule, Radius, Height, IsTrigger] = entity.GetComponent<CapsuleColliderComponent>();
-		BeginComponentTable(CAPSULE COLLIDER, CapsuleColliderComponent)
+		auto& [Cylinder, Radius, Height, IsTrigger] = entity.GetComponent<CylinderColliderComponent>();
+		BeginComponentTable(CYLINDER COLLIDER, CylinderColliderComponent)
 		{
 			{
 				ImGui::Text("Radius");
@@ -32,7 +32,7 @@ public:
 			{
 				ImGui::Text("Height");
 				ImGui::TableNextColumn();
-				ImGui::DragFloat("##Height", &Height, 0.01f, 0.001f);
+				ImGui::DragFloat("##Height", &Height, 0.01f, 0.0001f);
 				Height = std::max(Height, 0.001f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(Height, 1.0f)

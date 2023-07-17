@@ -5,6 +5,7 @@
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>
 #include <src/Resource/FontAwesome5.h>
+#include <src/Scripting/WrenScript.h>
 #include <Engine.h>
 
 EditorSelectionPanel::EditorSelectionPanel()
@@ -60,7 +61,7 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
                     ResolveFile(selection.File);
                 }
 
-                DrawFile(selection.File.get());
+                DrawFile(selection.File);
                 break;
             }
             case EditorSelectionType::Resource:
@@ -102,6 +103,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mBoxColliderPanel.Draw(entity);
     mSphereColliderPanel.Draw(entity);
 	mCapsuleColliderPanel.Draw(entity);
+	mCylinderColliderPanel.Draw(entity);
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
 }
@@ -126,8 +128,10 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			ImGui::Separator();
 			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)
+			ImGui::Separator();
             MenuItemComponent("Box collider", Nuake::BoxColliderComponent)
 			MenuItemComponent("Capsule collider", Nuake::CapsuleColliderComponent)
+			MenuItemComponent("Cylinder collider", Nuake::CylinderColliderComponent)
             MenuItemComponent("Sphere collider", Nuake::SphereColliderComponent)
             MenuItemComponent("Mesh collider", Nuake::MeshColliderComponent)
 			ImGui::Separator();
@@ -139,8 +143,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
     
 }
 
-
-void EditorSelectionPanel::DrawFile(Nuake::File* file)
+void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 {
     using namespace Nuake;
     if (file->GetExtension() == ".material")
@@ -151,6 +154,10 @@ void EditorSelectionPanel::DrawFile(Nuake::File* file)
     {
         DrawProjectPanel(Nuake::Engine::GetProject());
     }
+	if (file->GetExtension() == ".wren")
+	{
+		DrawWrenScriptPanel(CreateRef<WrenScript>(file, true));
+	}
 }
 
 void EditorSelectionPanel::DrawResource(Nuake::Resource resource)
@@ -413,5 +420,25 @@ void EditorSelectionPanel::DrawProjectPanel(Ref<Nuake::Project> project)
     }
     ImGui::SameLine();
     ImGui::InputText("Trenchbroom Path", &project->TrenchbroomPath);
+}
+
+void EditorSelectionPanel::DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile)
+{
+	auto filePath = wrenFile->GetFile()->GetAbsolutePath();
+	std::string fileContent = Nuake::FileSystem::ReadFile(filePath, true);
+	
+	ImGui::Text("Content");
+	ImGui::SameLine(ImGui::GetWindowWidth()-90);
+	if(ImGui::Button("Open..."))
+	{
+		Nuake::OS::OpenIn(filePath);
+	}
+	
+	ImGui::Separator();
+	
+	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetWindowWidth());
+	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
+	
+	ImGui::PopTextWrapPos();
 }
 

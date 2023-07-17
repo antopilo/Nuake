@@ -1219,7 +1219,6 @@ namespace Nuake {
         }
         ImGui::PopStyleVar();
         ImGui::End();
-
         
         int corner2 = 1;
 

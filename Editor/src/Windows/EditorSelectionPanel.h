@@ -14,6 +14,7 @@
 #include "../ComponentsPanel/RigidbodyPanel.h"
 #include "../ComponentsPanel/BoxColliderPanel.h"
 #include "../ComponentsPanel/CapsuleColliderPanel.h"
+#include "../ComponentsPanel/CylinderColliderPanel.h"
 #include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
@@ -31,6 +32,7 @@ private:
 	SphereColliderPanel mSphereColliderPanel;
 	MeshColliderPanel mMeshColliderPanel;
 	CapsuleColliderPanel mCapsuleColliderPanel;
+	CylinderColliderPanel mCylinderColliderPanel;
 
 	CharacterControllerPanel mCharacterControllerPanel;
 
@@ -46,11 +48,12 @@ public:
 	void DrawEntity(Nuake::Entity entity);
 	void DrawAddComponentMenu(Nuake::Entity entity);
 
-	void DrawFile(Nuake::File* file);
+	void DrawFile(Ref<Nuake::File> file);
 	void DrawResource(Nuake::Resource resource);
 
 private:
 	void ResolveFile(Ref<Nuake::File> file);
 	void DrawMaterialPanel(Ref<Nuake::Material> material);
 	void DrawProjectPanel(Ref<Nuake::Project> project);
+	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
 };

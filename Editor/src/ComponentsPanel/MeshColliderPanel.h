@@ -31,7 +31,10 @@ public:
             ImGui::Text("Model");
             ImGui::TableNextColumn();
 
-            ImGui::DragInt("##Submesh", &component.SubMesh, 0, 255);
+            int editorValue = component.SubMesh;
+            ImGui::DragInt("##Submesh", &editorValue, 0.1f, 0, 255);
+            component.SubMesh = editorValue;
+
             ImGui::TableNextColumn();
             ComponentTableReset(component.SubMesh, 0);
         }

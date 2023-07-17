@@ -23,7 +23,7 @@ namespace Nuake
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;
-		bool m_DebugCollisions = false;
+		bool m_DebugCollisions = true;
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
 		Vector2 m_ViewportPos = {0, 0};
@@ -59,5 +59,6 @@ namespace Nuake
 		void Overlay();
 
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
+		bool ShouldDrawCollision() const { return m_DebugCollisions; }
 	};
 }

@@ -95,7 +95,6 @@ namespace Nuake {
 			Logger::Log("Init system");
 			if (!system->Init())
 			{
-				
 				return false;
 			}
 		}
