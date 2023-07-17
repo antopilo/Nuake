@@ -21,6 +21,7 @@
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Scene/Components/TriggerZone.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
+#include <src/Scene/Components/PrefabComponent.h>
 
 namespace Nuake {
 	namespace ScriptAPI {
@@ -33,6 +34,8 @@ namespace Nuake {
 
 			void RegisterModule(WrenVM* vm) override
 			{
+				RegisterMethod("CreateEntity(_)", (void*)CreateEntity);
+				RegisterMethod("AddPrefab(_)", (void*)AddPrefab);
 				RegisterMethod("GetEntityID(_)", (void*)GetEntity);
 				RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
 
@@ -61,11 +64,50 @@ namespace Nuake {
 				RegisterMethod("BrushGetTargetsCount_(_)", (void*)BrushGetTargetsCount);
 			}
 
+			static void CreateEntity(WrenVM* vm)
+			{
+				const std::string name = wrenGetSlotString(vm, 1);
+				const int entity = Engine::GetCurrentScene()->CreateEntity(name).GetHandle();
+				wrenSetSlotDouble(vm, 0, entity);
+			}
+
 			static void GetEntity(WrenVM* vm)
 			{
 				std::string name = wrenGetSlotString(vm, 1);
 				int handle = Engine::GetCurrentScene()->GetEntity(name).GetHandle();
 				wrenSetSlotDouble(vm, 0, handle);
+			}
+
+			static void AddPrefab(WrenVM* vm)
+			{
+				const std::string& prefabPath = wrenGetSlotString(vm, 1);
+				if (prefabPath.empty())
+				{
+					Logger::Log("[Scripting] Cannot add prefab with an empty path.", CRITICAL);
+					wrenSetSlotDouble(vm, 0, -1); // -1 is an empty entity.
+					return;
+				}
+
+				const std::string& prefabName = wrenGetSlotString(vm, 1);
+				if (prefabName.empty())
+				{
+					Logger::Log("[Scripting] Cannot add prefab with an empty name.", CRITICAL);
+					wrenSetSlotDouble(vm, 0, -1); // -1 is an empty entity.
+					return;
+				}
+
+				if (!FileSystem::FileExists(prefabPath))
+				{
+					Logger::Log("[Scripting] Cannot add prefab. File not found: " + prefabPath, CRITICAL);
+					return;
+				}
+
+				Entity& newEntity = Engine::GetCurrentScene()->CreateEntity(prefabName);
+				auto& prefabComponent = newEntity.AddComponent<PrefabComponent>();
+				prefabComponent.PrefabInstance = Prefab::New(prefabPath);
+
+				wrenSetSlotDouble(vm, 0, newEntity.GetHandle());
+				return;
 			}
 
 			static void EntityHasComponent(WrenVM* vm)

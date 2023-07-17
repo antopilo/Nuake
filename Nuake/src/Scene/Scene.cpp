@@ -197,16 +197,50 @@ namespace Nuake {
 
 	Entity Scene::CreateEntity(const std::string& name, int id)
 	{
+		if (name.empty())
+		{
+			Logger::Log("[Scene] Failed to create entity. Entity name cannot be empty.");
+			return Entity();
+		}
+
+		std::string entityName;
+		if (GetEntity(name) != Entity())
+		{
+			entityName = name;
+		}
+		else
+		{
+			// Try to generate a unique name
+			for (uint32_t i = 1; i < 2048; i++)
+			{
+				const std::string& entityEnumName = name + std::to_string(i);
+				const auto& entityId = GetEntity(entityEnumName).GetHandle();
+				if (entityId != -1)
+				{
+					entityName = entityEnumName;
+					break;
+				}
+			}
+
+			if (entityName.empty()) // We ran out of names!!!
+			{
+				Logger::Log("[Scene] Failed to create entity. Limit reached with name: " + name, CRITICAL);
+				return Entity();
+			}
+		}
+
 		Entity entity = { m_Registry.create(), this };
+
+		// Add all mandatory component. An entity cannot exist without these.
 		entity.AddComponent<TransformComponent>();
 		entity.AddComponent<ParentComponent>();
 		entity.AddComponent<VisibilityComponent>();
 
 		NameComponent& nameComponent = entity.AddComponent<NameComponent>();
-		nameComponent.Name = name;
+		nameComponent.Name = entityName;
 		nameComponent.ID = id;
 
-		Logger::Log("Created entity: " + nameComponent.Name, LOG_TYPE::VERBOSE);
+		Logger::Log("[Scene] Entity created with name: " + nameComponent.Name, LOG_TYPE::VERBOSE);
 		return entity;
 	}
 
