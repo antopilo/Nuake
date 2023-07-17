@@ -179,12 +179,14 @@ namespace Nuake {
 	Entity Scene::GetEntity(const std::string& name)
 	{
 		std::vector<Entity> allEntities;
-		auto view = m_Registry.view<TransformComponent, NameComponent>();
+		const auto& view = m_Registry.view<NameComponent>();
 		for (auto e : view) 
 		{
-			auto [transform, namec] = view.get<TransformComponent, NameComponent>(e);
+			const auto& namec = view.get<NameComponent>(e);
 			if (namec.Name == name)
+			{
 				return Entity{ e, this };
+			}
 		}
 
 		return Entity();
