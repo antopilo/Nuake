@@ -76,6 +76,7 @@ namespace Nuake {
 					this->AddEntity(entity);
 				}
 
+				// Set reference to the parent entity to children
 				for (auto& e : Entities)
 				{
 					auto parentC = e.GetComponent<ParentComponent>();
