@@ -275,6 +275,8 @@ namespace Nuake
 			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+			
+			_JoltBodyInterface->AddForce(body, JPH::Vec3(10, 1, 0));
 			_registeredBodies.push_back((uint32_t)body.GetIndexAndSequenceNumber());
 		}
 
