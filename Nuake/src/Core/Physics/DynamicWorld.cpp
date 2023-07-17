@@ -420,7 +420,7 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 32;
+			constexpr int maxStepCount = 16;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
