@@ -1,3 +1,5 @@
+#include <dependencies/GLEW/include/GL/glew.h>
+
 #include <Engine.h>
 
 #include <src/Core/Input.h>
@@ -28,6 +30,9 @@
 #include "src/Windows/FileSystemUI.h"
 
 #include <src/Core/Maths.h>
+#include <src/Rendering/SceneRenderer.h>
+
+
 
 const std::string WindowTitle = "Nuake Editor";
 
@@ -184,9 +189,19 @@ int main(int argc, char* argv[])
                     camera = currentScene->m_EditorCamera;
                 }
 
-                if (currentScene && !Nuake::Engine::IsPlayMode() && editor.ShouldDrawAxis())
+                if (currentScene && !Nuake::Engine::IsPlayMode())
                 {
-                    gizmoDrawer.DrawGizmos(currentScene);
+                    glEnable(GL_LINE_SMOOTH);
+
+                    if (editor.ShouldDrawAxis())
+                    {
+                        //gizmoDrawer.DrawAxis(currentScene);
+                    }
+
+                    if (editor.ShouldDrawCollision())
+                    {
+                        gizmoDrawer.DrawGizmos(currentScene);
+                    }
                 }
             }
             sceneFramebuffer->Unbind();
