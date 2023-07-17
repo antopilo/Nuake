@@ -120,6 +120,8 @@ namespace Nuake
 		if (!Engine::IsPlayMode())
 			return;
 
+		InitializeRigidbodies();
+
 		PhysicsManager::Get().Step(ts);
 	}
 
@@ -227,6 +229,11 @@ namespace Nuake
 			Entity ent = Entity({ e, m_Scene });
 			Ref<Physics::RigidBody> rigidBody;
 
+			if (rigidBodyComponent.GetRigidBody())
+			{
+				continue;
+			}
+
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
 				float mass = rigidBodyComponent.Mass;
@@ -276,6 +283,7 @@ namespace Nuake
 				{
 					Logger::Log("Cannot use mesh collider without model component", WARNING);
 				}
+
 				const auto& modelComponent = ent.GetComponent<ModelComponent>();
 				const auto& component = ent.GetComponent<MeshColliderComponent>();
 
@@ -293,6 +301,8 @@ namespace Nuake
 					PhysicsManager::Get().RegisterBody(rigidBody);
 				}
 			}
+
+			rigidBodyComponent.Rigidbody = rigidBody;
 		}
 	}
 

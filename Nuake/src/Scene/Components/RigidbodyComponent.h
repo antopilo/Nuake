@@ -13,7 +13,7 @@ namespace Nuake {
 	{
 	public:
 		float Mass;
-		Ref<Physics::RigidBody> m_Rigidbody;
+		Ref<Physics::RigidBody> Rigidbody;
 
 		RigidBodyComponent();
 		Ref<Physics::RigidBody> GetRigidBody() const;

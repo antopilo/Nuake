@@ -13,18 +13,18 @@ namespace Nuake {
 
 	Ref<Physics::RigidBody> RigidBodyComponent::GetRigidBody() const
 	{
-		return m_Rigidbody;
+		return Rigidbody;
 	}
 
 	void RigidBodyComponent::SyncTransformComponent(TransformComponent* tc)
 	{
-		if (!m_Rigidbody)
+		if (!GetRigidBody())
 			return;
 	}
 
 	void RigidBodyComponent::SyncWithTransform(TransformComponent* tc)
 	{
-		if (!m_Rigidbody)
+		if (!GetRigidBody())
 			return;
 	}
 
