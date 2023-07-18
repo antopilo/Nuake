@@ -57,6 +57,8 @@ namespace Nuake {
 				RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
 				RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
 
+				RegisterMethod("AddForce_(_,_,_,_)", (void*)AddForce);
+
 				RegisterMethod("TriggerGetOverlappingBodyCount_(_)", (void*)TriggerGetOverlappingBodyCount);
 				RegisterMethod("TriggerGetOverlappingBodies_(_)", (void*)TriggerGetOverlappingBodies);
 
@@ -126,6 +128,7 @@ namespace Nuake {
 				if (name == "Transform")	result = ent.HasComponent<TransformComponent>();
 				if (name == "Light")		result = ent.HasComponent<LightComponent>();
 				if (name == "QuakeMap")		result = ent.HasComponent<QuakeMapComponent>();
+				if (name == "RigidBody")	result = ent.HasComponent<RigidBodyComponent>();
 				if (name == "CharacterController")
 				{
 					result = ent.HasComponent<CharacterControllerComponent>();
@@ -257,6 +260,18 @@ namespace Nuake {
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
 				characterController.CharacterController->MoveAndSlide(Vector3(x, y, z));
+			}
+
+			static void AddForce(WrenVM* vm)
+			{
+				double handle = wrenGetSlotDouble(vm, 1);
+				double x = wrenGetSlotDouble(vm, 2);
+				double y = wrenGetSlotDouble(vm, 3);
+				double z = wrenGetSlotDouble(vm, 4);
+
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+				auto& rigidBodyComponent = ent.GetComponent<RigidBodyComponent>();
+				rigidBodyComponent.Rigidbody->AddForce(Vector3(x, y, z));
 			}
 
 			static void GetTranslation(WrenVM* vm)

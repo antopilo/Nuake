@@ -275,8 +275,6 @@ namespace Nuake
 			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			
-			_JoltBodyInterface->AddForce(body, JPH::Vec3(10, 1, 0));
 			_registeredBodies.push_back((uint32_t)body.GetIndexAndSequenceNumber());
 		}
 
@@ -452,9 +450,10 @@ namespace Nuake
 
 			if (!_registeredBodies.empty())
 			{
-				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
-				_registeredBodies.clear();
+				_JoltBodyInterface->DestroyBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
 			}
+
+			_registeredBodies.clear();
 			
 			if (!_registeredCharacters.empty())
 			{
@@ -466,7 +465,7 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)
+		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
 			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
@@ -474,6 +473,23 @@ namespace Nuake
 				auto& characterController = _registeredCharacters[entityHandle];
 				characterController->SetLinearVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
 			}
+		}
+
+		void DynamicWorld::AddForceToRigidBody(const Entity& entity, const Vector3& force)
+		{
+			auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+			for (const auto& body : _registeredBodies)
+			{
+				auto bodyId = static_cast<JPH::BodyID>(body);
+				auto entityId = static_cast<uint32_t>(bodyInterface.GetUserData(bodyId));
+				if (entityId == entity.GetHandle())
+				{
+					bodyInterface.AddForce(bodyId, JPH::Vec3(force.x, force.y, force.z));
+					return;
+				}
+			}
+
+			Logger::Log("[PhysicsSystem] - Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()));
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)

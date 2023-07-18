@@ -1,6 +1,8 @@
 #include "PhysicsShapes.h"
 #include "Rigibody.h"
-#include "../Core.h"
+#include "src/Core/Core.h"
+#include "src/Core/Physics/PhysicsManager.h"
+
 #include <glm/trigonometric.hpp>
 #include <src/Scene/Entities/Entity.h>
 
@@ -41,6 +43,11 @@ namespace Nuake
 		void RigidBody::SetEntityID(Entity ent)
 		{
 			_entity = ent;
+		}
+
+		void RigidBody::AddForce(const Vector3& force)
+		{
+			PhysicsManager::Get().GetWorld()->AddForceToRigidBody(_entity, force);
 		}
 	}
 }

@@ -24,6 +24,8 @@ class Scene {
 			return Light.new(id)
 		} else if (component == "CharacterController") {
 			return CharacterController.new(id)
+		} else if (component == "RigidBody") {
+			return RigidBody.new(id)
 		} else if (component == "Camera") {
 			return Camera.new(id)
 		} else if (component == "Transform") {
@@ -70,6 +72,9 @@ class Scene {
 	foreign static IsCharacterControllerOnGround_(e)
 	//foreign static IsOnGround_(e)
 	
+	// RigidBody
+	foreign static AddForce_(e, x, y, z)
+
 	foreign static TriggerGetOverlappingBodyCount_(e)
 	foreign static TriggerGetOverlappingBodies_(e)
 
@@ -156,6 +161,16 @@ class CharacterController {
 
 	IsOnGround() {
 		return Scene.IsCharacterControllerOnGround_(_entityId)
+	}
+}
+
+class RigidBody {
+	construct new(id) {
+		_entityId = id
+	}
+
+	AddForce(force) {
+		Scene.AddForce_(_entityId, force.x, force,y, force.z)
 	}
 }
 

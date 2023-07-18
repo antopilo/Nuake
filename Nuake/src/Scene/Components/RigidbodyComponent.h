@@ -24,6 +24,7 @@ namespace Nuake {
 		void DrawShape(TransformComponent* tc);
 		void DrawEditor();
 
+
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
