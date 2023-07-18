@@ -27,7 +27,7 @@ public:
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
                     {
                         char* file = (char*)payload->Data;
-                        
+
                         std::string fullPath = std::string(file, 512);
                         path = Nuake::FileSystem::AbsoluteToRelative(std::move(fullPath));
 
