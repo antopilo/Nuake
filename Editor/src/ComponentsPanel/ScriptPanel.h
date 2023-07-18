@@ -37,6 +37,16 @@ public:
                 }
 
                 component.Script = path;
+
+                // Double click on file
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                {
+                    if(!component.Script.empty())
+                    {
+                        Nuake::OS::OpenIn(component.mWrenScript->GetFile()->GetAbsolutePath());
+                    }
+                }
+                
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.Script, "");
