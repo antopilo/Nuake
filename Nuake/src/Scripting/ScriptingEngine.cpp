@@ -20,7 +20,6 @@ namespace Nuake {
         const char* module, const int line,
         const char* msg)
     {
-        Logger::Log("YO");
         switch (errorType)
         {
         case WREN_ERROR_COMPILE:

@@ -4,7 +4,9 @@ import "Nuake:Math" for Vector3
 class Scene {
 	foreign static GetEntityID(name)
 
-
+	foreign static AddEntity(name)
+	foreign static AddPrefab(prefabPath)
+	
 	static GetEntity(name) {
 		var entId = Scene.GetEntityID(name)
 		var ent = Entity.new(entId)
