@@ -27,7 +27,7 @@ public:
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
                     {
                         char* file = (char*)payload->Data;
-
+                        
                         std::string fullPath = std::string(file, 512);
                         path = Nuake::FileSystem::AbsoluteToRelative(std::move(fullPath));
 
@@ -37,6 +37,16 @@ public:
                 }
 
                 component.Script = path;
+
+                // Double click on file
+                if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+                {
+                    if(!component.Script.empty())
+                    {
+                        Nuake::OS::OpenIn(component.mWrenScript->GetFile()->GetAbsolutePath());
+                    }
+                }
+                
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.Script, "");

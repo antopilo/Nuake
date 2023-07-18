@@ -39,7 +39,10 @@ namespace Nuake
 			if (j.contains("Script"))
 			{
 				Script = j["Script"];
-				LoadScript(Script);
+				if(!Script.empty())
+				{
+					LoadScript(Script);
+				}
 			}
 
 			if (j.contains("mModule"))
