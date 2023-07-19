@@ -164,6 +164,8 @@ namespace Nuake
 				mouseLastX = x;
 				mouseLastY = y;
 				controlled = true;
+
+				SetDirection(glm::normalize(Direction));
 			}
 			else if (Input::YScroll != 0)
 			{
@@ -171,6 +173,7 @@ namespace Nuake
 				Input::YScroll = 0.0f;
 			}
 
+			SetDirection(glm::normalize(Direction));
 			mouseLastX = x;
 			mouseLastY = y;
 		}
@@ -192,7 +195,8 @@ namespace Nuake
 		Direction.y = sin(glm::radians(Pitch));
 		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 		Direction = glm::normalize(Direction);
-		Right = glm::normalize(glm::cross(Up, Direction));
+		SetDirection(Direction);
+
 	}
 
 	void EditorCamera::SetYaw(float yaw)
