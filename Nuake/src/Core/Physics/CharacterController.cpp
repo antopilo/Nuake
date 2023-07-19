@@ -29,38 +29,6 @@ namespace Nuake
 		{
 			PhysicsManager::Get().GetWorld()->MoveAndSlideCharacterController(Owner, velocity);
 		}
-
-		void CharacterController::ParseGhostContacts()
-		{
-			
-		}
-
-		void CharacterController::UpdatePosition()
-		{
-			
-
-		}
-
-		void CharacterController::UpdateVelocity()
-		{
-			// Decelerate
-			//m_manualVelocity -= m_manualVelocity * m_deceleration * m_pPhysicsWorld->GetScene()->m_frameTimer.GetTimeMultiplier();
-
-			if (m_hittingWall)
-			{
-				for (size_t i = 0, size = m_surfaceHitNormals.size(); i < size; i++)
-				{
-					// Cancel velocity across normal
-					glm::vec3 velInNormalDir(glm::reflect(m_manualVelocity, m_surfaceHitNormals[i]));
-
-					// Apply correction
-					m_manualVelocity -= velInNormalDir * 1.05f;
-				}
-
-				// Do not adjust rigid body velocity manually (so bodies can still be pushed by character)
-				return;
-			}
-		}
 	}
 }
 

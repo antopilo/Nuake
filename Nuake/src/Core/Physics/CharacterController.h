@@ -42,11 +42,6 @@ namespace Nuake
 			{
 				return IsOnGround;
 			}
-
-		private:
-			void ParseGhostContacts();
-			void UpdatePosition();
-			void UpdateVelocity();
 		};
 	}
 }
