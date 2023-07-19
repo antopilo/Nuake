@@ -79,6 +79,7 @@ namespace Nuake {
     {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
+
         if (ImGui::Begin(name.c_str()))
         {
             ImGui::PopStyleVar();
@@ -242,8 +243,11 @@ namespace Nuake {
                 }
             }
 
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
+            m_IsViewportFocused = ImGui::IsWindowFocused();
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2) && !ImGuizmo::IsUsing())
             {
+                ImGui::FocusWindow(ImGui::GetCurrentWindow());
+
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 auto& gbuffer = Engine::GetCurrentScene()->mSceneRenderer->GetGBuffer();
                 auto pixelPos = Input::GetMousePosition() - windowPosNuake;
@@ -1513,7 +1517,11 @@ namespace Nuake {
         }
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-        editorCam->Update(ts, m_IsHoveringViewport);
+
+        if (m_IsViewportFocused)
+        {
+            editorCam->Update(ts, m_IsHoveringViewport);
+        }
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
         if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))

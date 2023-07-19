@@ -26,6 +26,8 @@ namespace Nuake
 		bool m_DebugCollisions = true;
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
+		bool m_IsViewportFocused = false;
+
 		Vector2 m_ViewportPos = {0, 0};
 		Vector2 m_ViewportSize = {};
 
