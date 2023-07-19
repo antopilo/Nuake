@@ -209,7 +209,7 @@ namespace Nuake
         RenderCommand::DrawLines(0, 2);
     }
 
-    void Renderer::DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color) 
+    void Renderer::DrawDebugLine(Vector3 start, Vector3 end, Vector3 color)
     {
         //m_DebugShader->Bind();
         //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);

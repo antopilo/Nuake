@@ -37,7 +37,7 @@ namespace Nuake
 		m_World->Clear();
 	}
 
-	RaycastResult PhysicsManager::Raycast(glm::vec3 from, glm::vec3 to)
+	RaycastResult PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
 	{
 		return m_World->Raycast(from, to);
 	}
@@ -58,7 +58,7 @@ namespace Nuake
 		JPH::RegisterTypes();
 
 		m_World = new Physics::DynamicWorld();
-		m_World->SetGravity(glm::vec3(0, -3, 0));
+		m_World->SetGravity(Vector3(0, -3, 0));
 
 		m_IsRunning = false;
 	}

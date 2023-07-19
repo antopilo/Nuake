@@ -16,10 +16,6 @@ namespace Nuake
 	};
 
 	const int MAX_LIGHT = 64;
-	//struct LightDataArray
-	//{
-	//	LightData Lights[MAX_LIGHT];
-	//};
 
 	struct LightData
 	{
@@ -59,7 +55,6 @@ namespace Nuake
 		static void Init();
 		static void LoadShaders();
 
-		static void BeginScene();
 		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId = -1);
 		static void SubmitCube(Matrix4 transform);
 		static void Flush(Shader* shader, bool depthOnly = false);
@@ -75,7 +70,7 @@ namespace Nuake
 
 		// Debug
 		static void DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform = Matrix4());
-		static void DrawDebugLine(glm::vec3 start, glm::vec3 end, glm::vec4 color);
+		static void DrawDebugLine(Vector3 start, Vector3 end, Vector3 color);
 		static void DrawCube(TransformComponent transform, glm::vec4 color);
 		static void DrawSphere(TransformComponent transform, glm::vec4 color);
 		static void DrawQuad(Matrix4 transform = Matrix4());

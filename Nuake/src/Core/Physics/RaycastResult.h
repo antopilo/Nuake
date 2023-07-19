@@ -13,8 +13,8 @@ namespace Nuake
 
 	// result object from raycast.
 	struct RaycastResult {
-		glm::vec3 WorldPoint;
-		glm::vec3 LocalPoint;
-		glm::vec3 Normal;
+		Vector3 WorldPoint;
+		Vector3 LocalPoint;
+		Vector3 Normal;
 	};
 }

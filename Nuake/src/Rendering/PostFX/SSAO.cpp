@@ -44,10 +44,10 @@ namespace Nuake
 	{
 		std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]
 		std::default_random_engine generator;
-		std::vector<glm::vec3> ssaoKernel;
+		std::vector<Vector3> ssaoKernel;
 		for (unsigned int i = 0; i < 64; ++i)
 		{
-			glm::vec3 sample(
+			Vector3 sample(
 				randomFloats(generator) * 2.0 - 1.0,
 				randomFloats(generator) * 2.0 - 1.0,
 				randomFloats(generator)
@@ -70,7 +70,7 @@ namespace Nuake
 
 		for (unsigned int i = 0; i < 16; i++)
 		{
-			glm::vec3 noise(
+			Vector3 noise(
 				randomFloats(generator) * 2.0 - 1.0,
 				randomFloats(generator) * 2.0 - 1.0,
 				0.0f);

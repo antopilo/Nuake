@@ -124,7 +124,7 @@ namespace Nuake {
 	template<Frustum::Planes a, Frustum::Planes b, Frustum::Planes c>
 	inline Vector3 Frustum::intersection(const Vector3* crosses) const
 	{
-		float D = glm::dot(glm::vec3(m_planes[a]), crosses[ij2k<b, c>::k]);
+		float D = glm::dot(Vector3(m_planes[a]), crosses[ij2k<b, c>::k]);
 		Vector3 res = glm::mat3(crosses[ij2k<b, c>::k], -crosses[ij2k<a, c>::k], crosses[ij2k<a, b>::k]) *
 			Vector3(m_planes[a].w, m_planes[b].w, m_planes[c].w);
 		return res * (-1.0f / D);

@@ -52,7 +52,7 @@ namespace Nuake
 
 			void DrawDebug();
 
-			void SetGravity(glm::vec3 g);
+			void SetGravity(const Vector3& g);
 			void AddRigidbody(Ref<RigidBody> rb);
 
 			void AddGhostbody(Ref<GhostObject> gb);
@@ -62,7 +62,7 @@ namespace Nuake
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity);
 			
 
-			RaycastResult Raycast(glm::vec3 from, glm::vec3 to);
+			RaycastResult Raycast(const Vector3& from, const Vector3& to);
 			void StepSimulation(Timestep ts);
 			void Clear();
 

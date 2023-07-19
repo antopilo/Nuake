@@ -21,41 +21,28 @@ namespace Nuake
     {
     public:
         LightType Type = Point;
-        glm::vec3 Direction = glm::vec3(0, -1, 0);
-        glm::vec3 Color;
+        Vector3 Direction;
+        Vector3 Color;
+
         bool IsVolumetric = false;
         float Strength;
-        bool SyncDirectionWithSky = false;
-        Ref<FrameBuffer> m_Framebuffer;
 
+        bool SyncDirectionWithSky = false;
         bool CastShadows = false;
 
         Ref<FrameBuffer> m_Framebuffers[CSM_AMOUNT];
-        glm::mat4 mViewProjections[CSM_AMOUNT];
+        Matrix4 mViewProjections[CSM_AMOUNT];
         float mCascadeSplitDepth[CSM_AMOUNT];
+        float mCascadeSplits[CSM_AMOUNT];
 
+    public:
         LightComponent();
+        ~LightComponent() = default;
 
         void SetCastShadows(bool toggle);
 
-        glm::mat4 GetProjection();
-
-        glm::mat4 GetLightTransform();
-        void SetDirection(glm::vec3 dir);
-        glm::vec3 GetDirection();
-
-        void BeginDrawShadow();
-
-        void EndDrawShadow();
-        void DrawShadow();
-
-        void Draw(TransformComponent transformComponent, Ref<Camera> cam);
-        void DrawDeferred(TransformComponent transformComponent, Camera* cam);
-        void DrawEditor();
-
-        void SetType(LightType type);
-
-        float mCascadeSplits[CSM_AMOUNT];
+        Matrix4 GetProjection();
+        Vector3 GetDirection();
 
         void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
         {

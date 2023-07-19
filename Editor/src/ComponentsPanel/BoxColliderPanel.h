@@ -28,7 +28,7 @@ public:
 				component.Size.z = std::max(component.Size.z, 0.0001f);
 
 				ImGui::TableNextColumn();
-				ComponentTableReset(component.Size, glm::vec3(0.5f, 0.5f, 0.5f));
+				ComponentTableReset(component.Size, Vector3(0.5f, 0.5f, 0.5f));
 			}
 			ImGui::TableNextColumn();
 			{

@@ -50,7 +50,7 @@ namespace Nuake {
         }
     }
 
-    glm::mat4 LightComponent::GetProjection()
+    Matrix4 LightComponent::GetProjection()
     {
         return glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
     }

@@ -37,29 +37,12 @@ Quat Nuake::CreateFromAxisAngle(Vector3 axis, float angle)
 
 Quat Nuake::QuatFromEuler(float x, float y, float z)
 {
-    glm::quat pitchQuat = glm::angleAxis(Rad(x), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::quat yawQuat = glm::angleAxis(Rad(y), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::quat rollQuat = glm::angleAxis(Rad(z), glm::vec3(0.0f, 0.0f, -1.0f));
-    glm::quat orientation = yawQuat * pitchQuat * rollQuat;
+    Quat pitchQuat = glm::angleAxis(Rad(x), Vector3(1.0f, 0.0f, 0.0f));
+    Quat yawQuat = glm::angleAxis(Rad(y), Vector3(0.0f, 1.0f, 0.0f));
+    Quat rollQuat = glm::angleAxis(Rad(z), Vector3(0.0f, 0.0f, -1.0f));
+    Quat orientation = yawQuat * pitchQuat * rollQuat;
    
     return glm::normalize(orientation);
-
-    return Quat(Vector3(Rad(x), Rad(y), Rad(z)));
-
-    Quat q;
-
-    float cr = cos(x * 0.5);
-    float sr = sin(x * 0.5);
-    float cp = cos(y * 0.5);
-    float sp = sin(y * 0.5);
-    float cy = cos(z * 0.5);
-    float sy = sin(z * 0.5);
-
-    q.w = cr * cp * cy + sr * sp * sy;
-    q.x = sr * cp * cy - cr * sp * sy;
-    q.y = cr * sp * cy + sr * cp * sy;
-    q.z = cr * cp * sy - sr * sp * cy;
-    return q;
 }
 
 Vector3 Nuake::QuatToDirection(const Quat& quat)
@@ -72,9 +55,9 @@ void Nuake::Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale)
     pos = m[3];
     for (int i = 0; i < 3; i++)
         scale[i] = glm::length(Vector3(m[i]));
-    const glm::mat3 rotMtx(
-        glm::vec3(m[0]) / scale[0],
-        glm::vec3(m[1]) / scale[1],
-        glm::vec3(m[2]) / scale[2]);
+    const Matrix3 rotMtx(
+        Vector3(m[0]) / scale[0],
+        Vector3(m[1]) / scale[1],
+        Vector3(m[2]) / scale[2]);
     rot = glm::quat_cast(rotMtx);
 }
