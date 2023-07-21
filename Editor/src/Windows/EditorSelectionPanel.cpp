@@ -8,6 +8,8 @@
 #include <src/Scripting/WrenScript.h>
 #include <Engine.h>
 
+#include "src/Scene/Components/WrenScriptComponent.h"
+
 EditorSelectionPanel::EditorSelectionPanel()
 {
     mTransformPanel = TransformPanel();

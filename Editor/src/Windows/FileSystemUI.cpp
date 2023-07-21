@@ -13,6 +13,7 @@
 
 namespace Nuake
 {
+    Ref<Directory> FileSystemUI::m_CurrentDirectory;
     
     // TODO: add filetree in same panel
     void FileSystemUI::Draw()
