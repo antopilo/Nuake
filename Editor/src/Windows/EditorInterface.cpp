@@ -50,7 +50,7 @@ namespace Nuake {
     ImFont* normalFont;
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
-
+    
     EditorInterface::EditorInterface()
     {
         filesystem = new FileSystemUI(this);
