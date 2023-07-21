@@ -236,6 +236,7 @@ namespace Nuake
         ImGui::StyleColorsDark();
 
         ImGuiStyle& s = ImGui::GetStyle();
+        s.WindowMenuButtonPosition = ImGuiDir_None;
         s.FrameRounding = 2.0f;
         s.GrabRounding = 2.0f;
         s.CellPadding = ImVec2(8, 8);
