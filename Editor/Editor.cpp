@@ -191,16 +191,8 @@ int main(int argc, char* argv[])
 
                 if (currentScene && !Nuake::Engine::IsPlayMode())
                 {
-                    auto& gBuffer = currentScene->mSceneRenderer->GetGBuffer();
-                    auto& depthTexture = gBuffer.GetTexture(GL_DEPTH_ATTACHMENT);
-
-                    float nearZ = 0.1f;
-                    float farZ = 1000.0f;
-                    //gizmoDrawer.GetLineShader().SetUniformTex("u_Depth", depthTexture.get(), 3);
-                    //gizmoDrawer.GetLineShader().SetUniformVec2("u_Resolution", depthTexture->GetSize());
                     glEnable(GL_LINE_SMOOTH);
-                    glEnable(GL_BLEND);
-                    glDepthRange(0.1f, 1000.0f);
+
                     if (editor.ShouldDrawAxis())
                     {
                         //gizmoDrawer.DrawAxis(currentScene);

@@ -109,7 +109,6 @@ namespace Nuake {
 				prefabComponent.PrefabInstance = Prefab::New(prefabPath);
 
 				wrenSetSlotDouble(vm, 0, newEntity.GetHandle());
-				return;
 			}
 
 			static void EntityHasComponent(WrenVM* vm)

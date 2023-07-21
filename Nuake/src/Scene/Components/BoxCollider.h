@@ -7,7 +7,7 @@ namespace Nuake {
 	{
 	public:
 		Ref<Physics::PhysicShape> Box;
-		glm::vec3 Size = glm::vec3(0.5f, 0.5f, 0.5f);
+		Vector3 Size = Vector3(0.5f, 0.5f, 0.5f);
 		bool IsTrigger = false;
 
 		json Serialize();

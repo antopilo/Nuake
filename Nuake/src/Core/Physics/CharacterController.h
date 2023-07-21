@@ -29,8 +29,8 @@ namespace Nuake
 			float m_bottomYOffset;
 			float m_bottomRoundedRegionYOffset;
 
-			glm::vec3 m_manualVelocity;
-			std::vector<glm::vec3> m_surfaceHitNormals;
+			Vector3 m_manualVelocity;
+			std::vector<Vector3> m_surfaceHitNormals;
 
 			CharacterController(const Ref<PhysicShape>& shape, float friction, float maxSlopeAngle);
 
@@ -42,11 +42,6 @@ namespace Nuake
 			{
 				return IsOnGround;
 			}
-
-		private:
-			void ParseGhostContacts();
-			void UpdatePosition();
-			void UpdateVelocity();
 		};
 	}
 }

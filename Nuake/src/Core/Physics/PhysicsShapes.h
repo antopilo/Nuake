@@ -26,7 +26,7 @@ namespace Nuake
 			Vector3 Size;
 		public:
 			Box();
-			Box(glm::vec3 size);
+			Box(Vector3 size);
 			Box(float x, float y, float z);
 
 			Vector3 GetSize() const { return Size; }

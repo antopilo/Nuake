@@ -236,11 +236,14 @@ namespace Nuake
         ImGui::StyleColorsDark();
 
         ImGuiStyle& s = ImGui::GetStyle();
+        s.WindowMenuButtonPosition = ImGuiDir_None;
         s.FrameRounding = 2.0f;
         s.GrabRounding = 2.0f;
         s.CellPadding = ImVec2(8, 8);
-        s.WindowPadding = ImVec2(8, 8);
+        s.WindowPadding = ImVec2(2, 2);
         s.ScrollbarRounding = 9.0f;
+        s.ScrollbarSize = 15.0f;
+        s.GrabMinSize = 32.0f;
         s.TabRounding = 0;
         s.WindowRounding = 0;
         s.ChildRounding = 0;
@@ -251,6 +254,7 @@ namespace Nuake
         s.ItemInnerSpacing = ImVec2(4, 4);
         s.TabRounding = 4.0f;
         s.WindowBorderSize = 0.0f;
+        s.IndentSpacing = 12.0f;
         s.ChildBorderSize = 0.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
@@ -268,7 +272,7 @@ namespace Nuake
         colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
         colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
         colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
-        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+        colors[ImGuiCol_ScrollbarBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.00f);
         colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 1.00f);
         colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.29f, 0.29f, 0.29f, 1.00f);
         colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);

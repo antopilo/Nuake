@@ -241,7 +241,7 @@ namespace Nuake
 
 		}
 
-		void DynamicWorld::SetGravity(glm::vec3 g)
+		void DynamicWorld::SetGravity(const Vector3& gravity)
 		{
 		}
 
@@ -323,16 +323,16 @@ namespace Nuake
 			return false;
 		}
 
-		RaycastResult DynamicWorld::Raycast(glm::vec3 from, glm::vec3 to)
+		RaycastResult DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
 		{
-			Vector3 localNorm = glm::vec3(0,0,0);
+			Vector3 localNorm = Vector3(0,0,0);
 
 			//Logger::Log("normal: x:" + std::to_string(localNorm.x) + " y:" + std::to_string(localNorm.y )+ "z: " + std::to_string(localNorm.z));
 			
 			// Map bullet result to dto.
 			RaycastResult result{
-				glm::vec3(0,0,0),
-				glm::vec3(0,0,0),
+				Vector3(0,0,0),
+				Vector3(0,0,0),
 				localNorm
 			};
 

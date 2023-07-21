@@ -26,7 +26,7 @@ namespace Nuake
 
 			RigidBody();
 			RigidBody(Vector3 position, Entity handle);
-			RigidBody(float mass, Vector3 position, Quat rotation, Matrix4 transform, Ref<PhysicShape> shape, Entity entity, glm::vec3 initialVel = glm::vec3(0, 0, 0));
+			RigidBody(float mass, Vector3 position, Quat rotation, Matrix4 transform, Ref<PhysicShape> shape, Entity entity, Vector3 initialVel = Vector3(0, 0, 0));
 
 			void UpdateTransform();
 

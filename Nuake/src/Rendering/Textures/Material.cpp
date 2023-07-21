@@ -56,7 +56,7 @@ namespace Nuake
 		InitDefaultTextures();
 	}
 
-	Material::Material(const glm::vec3 albedoColor)
+	Material::Material(const Vector3 albedoColor)
 	{
 		InitDefaultTextures();
 		InitUniformBuffer();

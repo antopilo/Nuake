@@ -1,10 +1,13 @@
 #pragma once
 #include "ComponentPanel.h"
-#include <src/Scene/Components/BoxCollider.h>
+
 #include <src/Core/FileSystem.h>
+#include <src/Core/Maths.h>
+#include <src/Scene/Components/BoxCollider.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
 
-class BoxColliderPanel : ComponentPanel {
+class BoxColliderPanel : ComponentPanel 
+{
 public:
 	BoxColliderPanel() {}
 
@@ -28,7 +31,7 @@ public:
 				component.Size.z = std::max(component.Size.z, 0.0001f);
 
 				ImGui::TableNextColumn();
-				ComponentTableReset(component.Size, glm::vec3(0.5f, 0.5f, 0.5f));
+				ComponentTableReset(component.Size, Nuake::Vector3(0.5f, 0.5f, 0.5f));
 			}
 			ImGui::TableNextColumn();
 			{

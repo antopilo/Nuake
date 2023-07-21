@@ -4,7 +4,8 @@
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <GL\glew.h>
 
-namespace Nuake {
+namespace Nuake 
+{
 	void SceneRenderer::Init()
 	{
 		const auto defaultResolution = Vector2(1920, 1080);

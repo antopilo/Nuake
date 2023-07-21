@@ -1,5 +1,4 @@
 #include "PhysicsShapes.h"
-#include "src/Rendering/Vertex.h"
 
 namespace Nuake
 {
@@ -7,12 +6,11 @@ namespace Nuake
 	{
 		Box::Box()
 		{
-			Size = glm::vec3(1);
+			Size = Vector3(1);
 			m_Type = BOX;
 		}
 
-		// Sphere
-		Box::Box(glm::vec3 size) 
+		Box::Box(Vector3 size)
 		{
 			Size = size;
 			m_Type = BOX;
@@ -20,11 +18,10 @@ namespace Nuake
 
 		Box::Box(float x, float y, float z) 
 		{
-			Size = glm::vec3(x, y, z);
+			Size = Vector3(x, y, z);
 			m_Type = BOX;
 		}
 
-		// Sphere
 		Sphere::Sphere(float radius) 
 		{
 			Radius = radius;

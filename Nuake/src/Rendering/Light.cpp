@@ -87,17 +87,17 @@ namespace Nuake
             float radius = 0.0f;
             for (int i = 0; i < 8; i++)
             {
-                float distance = glm::length(glm::vec3(frustumCorners[i]) - frustumCenter);
+                float distance = glm::length(Vector3(frustumCorners[i]) - frustumCenter);
                 radius = glm::max(radius, distance);
             }
 
             radius = std::ceil(radius * 16.0f) / 16.0f;
-            Vector3 maxExtents = glm::vec3(radius);
+            Vector3 maxExtents = Vector3(radius);
             Vector3 minExtents = -maxExtents;
 
             // Calculate the view and projection matrix
             Vector3 lightDir = -this->Direction;
-            Matrix4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
+            Matrix4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, Vector3(0.0f, 0.0f, 1.0f));
             Matrix4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
 
             // Offset to texel space to avoid shimmering ->(https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering)

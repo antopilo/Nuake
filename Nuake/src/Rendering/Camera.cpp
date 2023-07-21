@@ -10,7 +10,7 @@
 
 namespace Nuake
 {
-	Camera::Camera(CAMERA_TYPE type, glm::vec3 position) 
+	Camera::Camera(CAMERA_TYPE type, Vector3 position)
 	{
 		m_Type = PERSPECTIVE;
 		Translation = position;
@@ -25,7 +25,7 @@ namespace Nuake
 	Camera::Camera() 
 	{
 		m_Type = PERSPECTIVE;
-		Translation = glm::vec3(0, 0, 0);
+		Translation = Vector3(0, 0, 0);
 		Direction = Vector3(0, 0, 1);
 		Right = glm::normalize(glm::cross(Vector3(0, 1, 0), Direction));
 		Up = glm::cross(Direction, Right);
@@ -83,7 +83,7 @@ namespace Nuake
 
 	Matrix4 Camera::GetTransformRotation()
 	{
-		return lookAt(glm::vec3(), Direction, Up);
+		return lookAt(Vector3(), Direction, Up);
 	}
 
 	bool Camera::BoxFrustumCheck(const AABB& aabb)
