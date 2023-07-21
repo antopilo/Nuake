@@ -103,7 +103,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            if (ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8))
+            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
             {
                 Engine::ExitPlayMode();
 
