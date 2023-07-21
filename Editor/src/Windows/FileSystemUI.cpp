@@ -44,8 +44,6 @@ const std::string TEMPLATE_SCRIPT_SECOND = R"( is ScriptableEntity {
 
 namespace Nuake
 {
-    
-    // TODO: add filetree in same panel
     void FileSystemUI::Draw()
     {
 
@@ -336,11 +334,13 @@ namespace Nuake
                     base_flags |= ImGuiTreeNodeFlags_Selected;
 
                 std::string icon = ICON_FA_FOLDER;
-                bool open = ImGui::TreeNodeEx((icon + "  Project files").c_str(), base_flags);
+                ImGui::PushFont(FontManager::GetFont(Bold));
+                bool open = ImGui::TreeNodeEx("PROJECT", base_flags);
                 if (ImGui::IsItemClicked())
                 {
                     m_CurrentDirectory = FileSystem::RootDirectory;
                 }
+                ImGui::PopFont();
 
                 if (open)
                 {
@@ -377,7 +377,7 @@ namespace Nuake
                 {
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
-                    const auto buttonSize = ImVec2(24, 24);
+                    const auto buttonSize = ImVec2(26, 26);
                     std::string refreshIcon = ICON_FA_SYNC_ALT;
                     if (ImGui::Button((refreshIcon).c_str(), buttonSize))
                     {
@@ -386,6 +386,7 @@ namespace Nuake
 
                     ImGui::SameLine();
 
+                    const auto cursorStart = ImGui::GetCursorPosX();
                     if (ImGui::Button((std::string(ICON_FA_ANGLE_LEFT)).c_str(), buttonSize))
                     {
                         if (m_CurrentDirectory != FileSystem::RootDirectory)
@@ -396,17 +397,20 @@ namespace Nuake
 
                     ImGui::SameLine();
 
+                    const auto cursorEnd = ImGui::GetCursorPosX();
+                    const auto buttonWidth = cursorEnd - cursorStart;
                     if (ImGui::Button((std::string(ICON_FA_ANGLE_RIGHT)).c_str(), buttonSize))
                     {
-
+                        // TODO
                     }
                    
+                    const uint32_t numButtonAfterPathBrowser = 2;
                     ImGui::SameLine();
 
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
                     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvailWidth(), 24));
+                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvailWidth() - (numButtonAfterPathBrowser * buttonWidth) - 4.0, 24));
                     for (int i = paths.size() - 1; i > 0; i--) 
                     {
                         if (i != paths.size())
@@ -435,7 +439,22 @@ namespace Nuake
                     ImGui::PopStyleVar();
                     ImGui::PopStyleVar();
                     ImGui::PopStyleColor();
-                    ImGui::PopStyleColor();
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button((std::string(ICON_FA_FOLDER_OPEN)).c_str(), buttonSize))
+                    {
+                        OS::ShowInFileExplorer(m_CurrentDirectory->fullPath);
+                    }
+
+                    ImGui::SameLine();
+
+                    if (ImGui::Button((std::string(ICON_FA_ELLIPSIS_V)).c_str(), buttonSize))
+                    {
+                        // TODO
+                    }
+
+                    ImGui::PopStyleColor(); // Button color
                 }
 
                 ImGui::EndChild();
