@@ -3,6 +3,38 @@
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Core/FileSystem.h>
 
+const std::string TEMPLATE_SCRIPT_FIRST = R"(import "Nuake:Engine" for Engine 
+import "Nuake:ScriptableEntity" for ScriptableEntity 
+import "Nuake:Input" for Input 
+import "Nuake:Math" for Vector3, Math 
+import "Nuake:Scene" for Scene 
+
+class )";
+
+const std::string TEMPLATE_SCRIPT_SECOND = R"( is ScriptableEntity { 
+        construct new() { 
+        } 
+
+        // Called when the scene gets initialized 
+        init() { 
+            // Engine.Log("Hello World!") 
+        } 
+ 
+        // Called every update 
+        update(ts) { 
+        } 
+ 
+        // Called 90 times per second 
+        fixedUpdate(ts) { 
+        }  
+         
+        // Called on shutdown 
+        exit() { 
+        } 
+} 
+)";
+
+
 class ScriptPanel : ComponentPanel {
 
 public:
@@ -21,7 +53,7 @@ public:
                 ImGui::TableNextColumn();
 
                 std::string path = component.Script;
-                ImGui::Button(component.Script.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+                ImGui::Button( path.empty() ? "Create New" : component.Script.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
                 if (ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
@@ -44,6 +76,41 @@ public:
                     if(!component.Script.empty())
                     {
                         Nuake::OS::OpenIn(component.mWrenScript->GetFile()->GetAbsolutePath());
+                    }
+                    else
+                    {
+                        // TODO: Turn into command (Undo/Redo)
+                        
+                        std::string pathCreation = Nuake::FileDialog::SaveFile("*.wren");
+                        
+                        if (!pathCreation.empty())
+                        {
+                            if (!Nuake::String::EndsWith(pathCreation, ".wren"))
+                            {
+                                pathCreation += ".wren";
+                            }
+                            
+                            std::string fileName = Nuake::String::ToUpper(Nuake::FileSystem::GetFileNameFromPath(pathCreation));
+                            fileName = Nuake::String::RemoveWhiteSpace(fileName);
+			            
+                            if(!Nuake::String::IsDigit(fileName[0]))
+                            {
+                                Nuake::FileSystem::BeginWriteFile(pathCreation);
+                                Nuake::FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
+                                Nuake::FileSystem::EndWriteFile();
+
+                                path = Nuake::FileSystem::AbsoluteToRelative(pathCreation);
+                                Nuake::FileSystem::Scan();
+
+                                component.LoadScript(path);
+                                component.Script = path;
+                            }
+                            else
+                            {
+                                Nuake::Logger::Log("[FileSystem] Cannot create script files that starts with a number.", Nuake::CRITICAL);
+                            }
+                        }
+                        
                     }
                 }
                 
