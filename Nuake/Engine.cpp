@@ -112,9 +112,9 @@ namespace Nuake
 		Nuake::RenderCommand::Clear();
 
 		// Start imgui frame
-		//ImGui_ImplOpenGL3_NewFrame();
-		//ImGui_ImplGlfw_NewFrame();
-		//ImGui::NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		// Draw scene
 		Window::Get()->Draw();

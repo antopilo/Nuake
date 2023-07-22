@@ -163,8 +163,9 @@ project "Editor"
 
     files
     {
-        "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp",
+        "%{prj.name}/Editor.cpp",
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/**.h",
         "%{prj.name}/resources/*.rc",
         "%{prj.name}/resources/**.ico"
     }
