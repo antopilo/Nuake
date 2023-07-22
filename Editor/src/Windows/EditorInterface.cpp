@@ -402,8 +402,18 @@ namespace Nuake {
             {
                 Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(Selection.Entity);
                 std::string savePath = FileDialog::SaveFile("*.prefab");
-                newPrefab->SaveAs(savePath);
-                Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+                if (!String::EndsWith(savePath, ".prefab"))
+                {
+                    savePath += ".prefab";
+                }
+
+                if (!savePath.empty()) 
+                {
+                    newPrefab->SaveAs(savePath);
+                    Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+                    FileSystem::Scan();
+                    FileSystemUI::m_CurrentDirectory = FileSystem::RootDirectory;
+                }
             }
             ImGui::EndPopup();
         }
