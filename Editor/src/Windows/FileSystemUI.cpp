@@ -144,28 +144,32 @@ namespace Nuake
             ImGui::OpenPopup(hoverMenuId.c_str());
             m_hasClickedOnFile = true;
         }
-        
+
+        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
+        bool shouldOpenScene = false;
+
+
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
-            if (ImGui::MenuItem("Show in File Explorer"))
+            if (file->GetExtension() != ".scene") 
             {
-                OS::ShowInFileExplorer(file->GetAbsolutePath());
-            }
-
-            if(file->GetExtension() == ".wren")
-            {
-                ImGui::Separator();
-
-                if(ImGui::MenuItem("Open..."))
+                if (ImGui::MenuItem("Open in Editor"))
                 {
                     OS::OpenIn(file->GetAbsolutePath());
                 }
             }
+            else
+            {
+                if (ImGui::MenuItem("Load Scene"))
+                {
+                    shouldOpenScene = true;
+                }
+            }
+
+            ImGui::Separator();
 
             if (ImGui::BeginMenu("Copy"))
             {
-                ImGui::Separator();
-
                 if (ImGui::MenuItem("Full Path"))
                 {
                     OS::CopyToClipboard(file->GetAbsolutePath());
@@ -179,26 +183,49 @@ namespace Nuake
                 ImGui::EndPopup();
             }
 
-            if(file->GetExtension() != ".project")
+            if (file->GetExtension() != ".project")
             {
-                ImGui::Separator();
-            
-                // TODO: Add to a 'Edit' menu with File Rename, etc.
-
                 if (ImGui::MenuItem("Delete"))
                 {
-                    if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+
+                    if (FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
                     {
                         Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
                     }
                     RefreshFileBrowser();
                 }
             }
+            else 
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
+                ImGui::MenuItem("Delete");
+                ImGui::PopStyleColor();
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                    ImGui::TextUnformatted("The file you're trying to delete is currently loaded by the game engine.");
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
+            }
+            
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
+            if (ImGui::MenuItem("Rename"))
+            {
+                
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Show in File Explorer"))
+            {
+                OS::ShowInFileExplorer(file->GetAbsolutePath());
+            }
             
             ImGui::EndPopup();
         }
-
-        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
         {
@@ -208,7 +235,12 @@ namespace Nuake
             }
         }
 
-        if (PopupHelper::DefineDialog(openScene, "Open the scene? \n Changes will not be saved."))
+        if (shouldOpenScene)
+        {
+            PopupHelper::Confirmation(openScene);
+        }
+
+        if (PopupHelper::DefineDialog(openScene, " Open the scene? \n Changes will not be saved."))
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();

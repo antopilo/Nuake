@@ -43,7 +43,7 @@ namespace Nuake
 	void Project::SaveAs(const std::string& FullPath)
 	{
 		json j = Serialize();
-		std::string serialized_string = j.dump();
+		std::string serialized_string = j.dump(4);
 
 		// TODO: Use file interface here...
 		// Write to file.
