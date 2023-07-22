@@ -70,7 +70,7 @@ void ScriptPanel::Draw(Nuake::Entity entity)
                         }
                         else
                         {
-                            Nuake::Logger::Log("[FileSystem] Cannot create script files that starts with a number.", Nuake::CRITICAL);
+                            Nuake::Logger::Log("Cannot create script files that starts with a number.","fileSystem", Nuake::CRITICAL);
                         }
                     }
                     

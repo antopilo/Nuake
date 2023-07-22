@@ -195,7 +195,7 @@ namespace Nuake
             const std::string projectPath = file->GetAbsolutePath();
             if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
             {
-                Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
+                Logger::Log("Failed loading scene: " + projectPath,"editor", CRITICAL);
                 return;
             }
 
