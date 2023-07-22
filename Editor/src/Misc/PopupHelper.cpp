@@ -4,7 +4,7 @@
 
 void PopupHelper::Confirmation(const std::string& id)
 {
-    ImGui::TextWrapped("Test");
+    ImGui::TextWrapped(id.c_str());
 
     ImGui::OpenPopup(id.c_str());
 }
