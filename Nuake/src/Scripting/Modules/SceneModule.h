@@ -83,7 +83,7 @@ namespace Nuake {
 				const std::string& prefabPath = wrenGetSlotString(vm, 1);
 				if (prefabPath.empty())
 				{
-					Logger::Log("[Scripting] Cannot add prefab with an empty path.", CRITICAL);
+					Logger::Log("Cannot add prefab with an empty path.", "script", CRITICAL);
 					wrenSetSlotDouble(vm, 0, -1); // -1 is an empty entity.
 					return;
 				}
@@ -91,14 +91,14 @@ namespace Nuake {
 				const std::string& prefabName = wrenGetSlotString(vm, 1);
 				if (prefabName.empty())
 				{
-					Logger::Log("[Scripting] Cannot add prefab with an empty name.", CRITICAL);
+					Logger::Log("Cannot add prefab with an empty name.", "script", CRITICAL);
 					wrenSetSlotDouble(vm, 0, -1); // -1 is an empty entity.
 					return;
 				}
 
 				if (!FileSystem::FileExists(prefabPath))
 				{
-					Logger::Log("[Scripting] Cannot add prefab. File not found: " + prefabPath, CRITICAL);
+					Logger::Log("Cannot add prefab. File not found: " + prefabPath, "script", CRITICAL);
 					return;
 				}
 

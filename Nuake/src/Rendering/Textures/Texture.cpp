@@ -31,9 +31,14 @@ namespace Nuake
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		if (m_LocalBuffer)
+		{
 			stbi_image_free(m_LocalBuffer);
+		}
 		else
-			std::cout << "Error: failed to load texture: " << path << std::endl;
+		{
+			const std::string& msg = "Failed to load texture: " + path;
+			Logger::Log(msg, "texture", WARNING);
+		}
 	}
 
 	Texture::Texture(glm::vec2 size, GLenum format, GLenum format2, GLenum format3, void* data)
@@ -83,9 +88,14 @@ namespace Nuake
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		if (m_LocalBuffer)
+		{
 			stbi_image_free(m_LocalBuffer);
+		}
 		else
-			std::cout << "Error: failed to load texture buffer " << std::endl;
+		{
+			const std::string msg = "failed to load texture buffer";
+			Logger::Log(msg, "texture", WARNING);
+		}
 	}
 
 	Texture::Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t)

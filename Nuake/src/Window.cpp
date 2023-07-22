@@ -53,29 +53,32 @@ namespace Nuake
     {
         if (!glfwInit())
         {
-            Logger::Log("glfw initialization failed.", CRITICAL);
+            Logger::Log("GLFW initialization failed", "window", CRITICAL);
             return -1;
         }
 
         m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), NULL, NULL);
         if (!m_Window)
         {
-            Logger::Log("Window creation failed.", CRITICAL);
+            Logger::Log("Window creation failed", "window", CRITICAL);
             return -1;
         }
 
         SetWindowIcon("resources/Images/nuake-logo.png");
 
         glfwMakeContextCurrent(m_Window);
-        SetVSync(0);
+        //SetVSync(true)
 
-        Logger::Log((char*)glGetString(GL_VERSION));
+        Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
 
         if (glewInit() != GLEW_OK)
         {
-            Logger::Log("GLEW initialization failed!", CRITICAL);
+            Logger::Log("GLEW initialization failed!", "window", CRITICAL);
             return -1;
         }
+
+        if (glfwRawMouseMotionSupported())
+            glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
         // TODO: Move this to renderer init. The window shouldnt have to do gl calls.
         glfwWindowHint(GLFW_SAMPLES, 4);

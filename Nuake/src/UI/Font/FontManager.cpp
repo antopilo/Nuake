@@ -16,7 +16,7 @@ namespace Nuake {
 		if (newFont)
 			return newFont;
 
-		Logger::Log("Error: failed to load font " + font, CRITICAL);
+		Logger::Log("Error: failed to load font " + font, "font", CRITICAL);
 		return nullptr;
 	}
 }

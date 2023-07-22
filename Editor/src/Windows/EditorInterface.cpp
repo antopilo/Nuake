@@ -77,9 +77,8 @@ namespace Nuake {
     ImVec2 LastSize = ImVec2();
     void EditorInterface::DrawViewport()
     {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        std::string name = ICON_FA_GAMEPAD + std::string(" Scene");
-
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+        std::string name = ICON_FA_GAMEPAD + std::string("  Scene");
         if (ImGui::Begin(name.c_str()))
         {
             ImGui::PopStyleVar();
@@ -94,7 +93,7 @@ namespace Nuake {
             float half = windowWidth / 2.0;
             float needed = half - used;
 
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
             if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
             {
                 SceneSnapshot = Engine::GetCurrentScene()->Copy();
@@ -159,8 +158,10 @@ namespace Nuake {
             Ref<Texture> texture = framebuffer->GetTexture();
             ImVec2 imagePos = ImGui::GetCursorPos();
 
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::PopStyleVar();
 
             const Vector2& mousePos = Input::GetMousePosition();
             const ImVec2& windowPos = ImGui::GetWindowPos() + ImVec2(0, 30.0);
@@ -1118,6 +1119,7 @@ namespace Nuake {
     bool LogErrors = true;
     bool LogWarnings = true;
     bool LogDebug = true;
+    bool AutoScroll = true;
     void EditorInterface::DrawLogger()
     {
         if (ImGui::Begin("Logger"))
@@ -1127,21 +1129,20 @@ namespace Nuake {
             ImGui::Checkbox("Warning", &LogWarnings);
             ImGui::SameLine();
             ImGui::Checkbox("Debug", &LogDebug);
-
+            ImGui::SameLine();
+            ImGui::Checkbox("Autoscroll", &AutoScroll);
             //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             //if (ImGui::BeginChild("Log window", ImGui::GetContentRegionAvail(), false))
             //{
                 //ImGui::PopStyleVar();
-            ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
-
+            ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Hideable;
             if (ImGui::BeginTable("LogTable", 3, flags))
             {
-                ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableSetupColumn("Severity", 0, 0.15f);
-                ImGui::TableSetupColumn("Time", 0.15f);
-                ImGui::TableSetupColumn("Message", 0.7f);
-                ImGui::TableHeadersRow();
+                ImGui::TableSetupColumn("Severity", ImGuiTableColumnFlags_WidthFixed, 64.0f);
+                ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthFixed, 64.0f);
+                ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                 ImGui::TableNextColumn();
+                ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 4));
                 for (auto& l : Logger::GetLogs())
                 {
                     if (l.type == LOG_TYPE::VERBOSE && !LogDebug)
@@ -1153,31 +1154,46 @@ namespace Nuake {
 
                     std::string severityText = "";
                     if (l.type == LOG_TYPE::VERBOSE)
-                        severityText = "Verbose";
+                        severityText = "verbose";
                     else if (l.type == LOG_TYPE::WARNING)
-                        severityText = "Warning";
+                        severityText = "warning";
                     else
-                        severityText = "Critical";
+                        severityText = "critical";
 
-                    ImGui::Text(severityText.c_str());
+                    ImVec4 colorGreen = ImVec4(0.59, 0.76, 0.47, 1.0);
+                    ImGui::PushStyleColor(ImGuiCol_Text, colorGreen);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.59, 0.76, 0.47, 0.2)), -1);
+                    const std::string timeString = " [" + l.time + "]";
+                    ImGui::Text(timeString.c_str());
+                    ImGui::PopStyleColor();
+
                     ImGui::TableNextColumn();
-                    ImGui::Text(l.time.c_str());
+
+                    ImVec4 colorBlue = ImVec4(98 / 255.0, 174 / 255.0, 239 / 255.0, 1.);
+                    ImGui::PushStyleColor(ImGuiCol_Text, colorBlue);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(98 / 255.0, 174 / 255.0, 239 / 255.0, 0.2)), -1);
+                    ImGui::Text(l.logger.c_str());
+                    ImGui::PopStyleColor();
+
                     ImGui::TableNextColumn();
+
+                    ImVec4 color = ImVec4(1, 1, 1, 1.0);
+                    ImGui::PushStyleColor(ImGuiCol_Text, color);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
                     ImGui::TextWrapped(l.message.c_str());
+                    ImGui::PopStyleColor();
 
                     ImGui::TableNextColumn();
                 }
-				if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-					ImGui::SetScrollHereY(1.0f);
+                ImGui::PopStyleVar();
+
+                if (AutoScroll)
+                {
+                    ImGui::SetScrollY(ImGui::GetScrollMaxY());
+                }
 
                 ImGui::EndTable();
             }
-
-
-            //ImGui::EndChild();
-        //}
-
-
         }
         ImGui::End();
     }
@@ -1308,7 +1324,7 @@ namespace Nuake {
         Ref<Project> project = Project::New();
         if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
         {
-            Logger::Log("Error loading project: " + projectPath, CRITICAL);
+            Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
             return;
         }
 
@@ -1328,7 +1344,7 @@ namespace Nuake {
         Ref<Scene> scene = Scene::New();
         if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) 
         {
-            Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
+            Logger::Log("Error failed loading scene: " + projectPath, "editor", CRITICAL);
             return;
         }
 

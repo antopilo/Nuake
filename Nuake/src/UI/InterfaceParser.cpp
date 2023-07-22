@@ -12,7 +12,7 @@ namespace Nuake
 		std::string name = doc.first_child().name();
 		if (name != "Canvas")
 		{
-			Logger::Log("InterfaceParser error: First child should be a canvas - " + path, CRITICAL);
+			Logger::Log("InterfaceParser error: First child should be a canvas - " + path, "ui", CRITICAL);
 			return nullptr;
 		}
 

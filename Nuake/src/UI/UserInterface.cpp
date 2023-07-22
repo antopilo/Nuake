@@ -19,7 +19,7 @@ namespace Nuake {
 
 			if (!Root)
 			{
-				Logger::Log("Failed to generate interface structure", CRITICAL);
+				Logger::Log("Failed to generate interface structure", "ui", CRITICAL);
 			}
 
 			yoga_config = YGConfigNew();
@@ -40,7 +40,7 @@ namespace Nuake {
 			Root = InterfaceParser::Parse(FileSystem::Root + this->m_Path);
 			if (!Root)
 			{
-				Logger::Log("Failed to generate interface structure", CRITICAL);
+				Logger::Log("Failed to generate interface structure", "ui", CRITICAL);
 			}
 
 			yoga_config = YGConfigNew();

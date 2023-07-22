@@ -25,14 +25,14 @@ namespace Nuake
 			const std::string MATERIAL_EXT = ".material";
 			if (!FileSystem::FileExists(path))
 			{
-				Logger::Log(FILE_NOT_FOUND + path, LOG_TYPE::WARNING);
+				Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
 				return nullptr;
 			}
 
 			if (!String::EndsWith(path, MATERIAL_EXT))
 			{
 				std::string message = WRONG_EXTENSION + MATERIAL_EXT + " actual: " + path;
-				Logger::Log(message, LOG_TYPE::WARNING);
+				Logger::Log(message, "resource", LOG_TYPE::WARNING);
 			}
 
 			std::string content = FileSystem::ReadFile(path);

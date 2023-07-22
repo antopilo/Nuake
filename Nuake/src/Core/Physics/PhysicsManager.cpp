@@ -50,10 +50,8 @@ namespace Nuake
 
 	void PhysicsManager::Init() 
 	{
-		Logger::Log("Initializing Jolt physics.");
 		JPH::RegisterDefaultAllocator();
 
-		Logger::Log("Creating factory & registering types.");
 		JPH::Factory::sInstance = new JPH::Factory();
 		JPH::RegisterTypes();
 

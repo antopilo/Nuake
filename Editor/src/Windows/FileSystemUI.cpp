@@ -197,7 +197,7 @@ namespace Nuake
                 {
                     if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
                     {
-                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), CRITICAL);
+                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
                     }
                     RefreshFileBrowser();
                 }
@@ -289,7 +289,7 @@ namespace Nuake
                         }
 			            else
 			            {
-			                Logger::Log("[FileSystem] Cannot create script files that starts with a number.", CRITICAL);
+			                Logger::Log("[FileSystem] Cannot create script files that starts with a number.", "editor", CRITICAL);
 			            }
 			        }
 			    }
@@ -437,6 +437,8 @@ namespace Nuake
 
                     ImGui::EndChild();
                     ImGui::PopStyleVar();
+
+
                     ImGui::PopStyleVar();
                     ImGui::PopStyleColor();
 
@@ -444,7 +446,7 @@ namespace Nuake
 
                     if (ImGui::Button((std::string(ICON_FA_FOLDER_OPEN)).c_str(), buttonSize))
                     {
-                        OS::ShowInFileExplorer(m_CurrentDirectory->fullPath);
+                        OS::OpenIn(m_CurrentDirectory->fullPath);
                     }
 
                     ImGui::SameLine();

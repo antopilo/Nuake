@@ -91,7 +91,7 @@ namespace Nuake
 
 			// Load file
 			if (!font->load(path.c_str()))
-				Logger::Log("Failed to load font", CRITICAL);
+				Logger::Log("Failed to load font", "font", CRITICAL);
 
 			// Load charset ASCII
 			std::vector<msdf_atlas::GlyphGeometry> glyphs;
@@ -107,7 +107,7 @@ namespace Nuake
 			fonts.push_back(fontGeometry);
 
 			if (glyphs.empty())
-				Logger::Log("No glyphs loaded.", CRITICAL);
+				Logger::Log("No glyphs loaded.", "font", CRITICAL);
 
 			// Create atlas params
 			msdf_atlas::TightAtlasPacker::DimensionsConstraint atlasSizeConstraint = msdf_atlas::TightAtlasPacker::DimensionsConstraint::MULTIPLE_OF_FOUR_SQUARE;
@@ -124,7 +124,7 @@ namespace Nuake
 			{
 				if (remaining < 0) 
 				{
-					Logger::Log("Failed to pack atlas.", CRITICAL);
+					Logger::Log("Failed to pack atlas.", "font", CRITICAL);
 				}
 				else 
 				{
