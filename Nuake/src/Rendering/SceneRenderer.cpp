@@ -49,6 +49,9 @@ namespace Nuake
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
 
+		mShadingBuffer->QueueResize(framebuffer.GetSize());
+		ShadingPass(scene);
+
 		const auto& sceneEnv = scene.GetEnvironment();
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
@@ -141,9 +144,6 @@ namespace Nuake
 
 
 
-		mShadingBuffer->QueueResize(framebuffer.GetSize());
-		ShadingPass(scene);
-
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
 	}
@@ -199,8 +199,6 @@ namespace Nuake
 					}
 					Renderer::Flush(shader, true);
 				}
-
-				light.m_Framebuffers[i]->Unbind();
 			}
 		}
 	}
@@ -249,7 +247,6 @@ namespace Nuake
 			}
 			Renderer::Flush(gBufferShader, false);
 		}
-		mGBuffer->Unbind();
 	}
 
 	void SceneRenderer::ShadingPass(Scene& scene)
@@ -308,7 +305,6 @@ namespace Nuake
 
 			Renderer::DrawQuad(Matrix4());
 		}
-		mShadingBuffer->Unbind();
 	}
 
 	void SceneRenderer::PostProcessPass(const Scene& scene)

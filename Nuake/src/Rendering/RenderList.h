@@ -36,15 +36,19 @@ namespace Nuake
 		void Flush(Shader* shader, bool depthOnly = false)
 		{
 			shader->Bind();
+			const uint32_t entityIdUniformLocation = shader->FindUniformLocation("u_EntityID");
+			const uint32_t modelMatrixUniformLocation = shader->FindUniformLocation("u_Model");
 			for (auto& i : m_RenderList)
 			{
-				if(!depthOnly)
+				if (!depthOnly)
+				{
 					i.first->Bind(shader);
+				}
 
 				for (auto& m : i.second)
 				{
-					shader->SetUniformMat4f("u_Model", m.transform);
-					shader->SetUniform1i("u_EntityID", m.entityId + 1);
+					shader->SetUniformMat4f(modelMatrixUniformLocation, m.transform);
+					shader->SetUniform1i(entityIdUniformLocation, m.entityId + 1);
 					m.Mesh->Draw(shader, false);
 				}
 			}
