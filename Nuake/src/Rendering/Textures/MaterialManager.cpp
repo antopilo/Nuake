@@ -57,9 +57,6 @@ namespace Nuake
 		std::string matName;
 		if (!j.contains("name")) 
 		{
-			std::string msg = "Error: Cannot load material file: " + materialPath +
-				" - Material file must have a name. \n";
-			printf(msg.c_str());
 			return nullptr;
 		}
 		else 

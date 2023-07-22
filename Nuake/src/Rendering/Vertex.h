@@ -3,8 +3,9 @@
 
 namespace Nuake
 {
-	struct Vertex
+	class Vertex
 	{
+	public:
 		Vector3 position;
 		Vector2 uv;
 		Vector3 normal;

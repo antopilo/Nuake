@@ -157,12 +157,11 @@ namespace Nuake
         m_Material = CreateRef<Material>();
         m_Material->Deserialize(j["Material"].dump());
 
-        std::vector<uint32_t> indices;
+        m_Indices.reserve(j["Indices"].size());
         for (auto& i : j["Indices"])
         {
-            indices.push_back(i);
+            m_Indices.push_back(i);
         }
-        m_Indices = indices;
 
         std::vector<Vertex> vertices;
         for (auto& v : j["Vertices"])

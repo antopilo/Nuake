@@ -22,7 +22,7 @@ namespace Nuake
 		{
 			if (!s.second->Rebuild())
 			{
-				Logger::Log("Failed to rebuild shader: " + s.first, Nuake::CRITICAL);
+				Logger::Log("Failed to rebuild shader: " + s.first, "shader", Nuake::CRITICAL);
 			}
 		}
 	}

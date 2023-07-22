@@ -142,11 +142,11 @@ namespace Nuake
 		std::string sceneContent = FileSystem::ReadFile(scenePath, false);
 		if (!DefaultScene->Deserialize(sceneContent))
 		{
-			Logger::Log("Error loading scene: " + scenePath, CRITICAL);
+			Logger::Log("Error loading scene: " + scenePath, "project", CRITICAL);
 		}
 
 		DefaultScene->Path = scenePath;
-		Logger::Log("Successfully loaded scene: " + scenePath);
+		Logger::Log("Loaded scene: " + scenePath);
 
 		return true; // Success
 	}

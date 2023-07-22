@@ -34,7 +34,7 @@ namespace Nuake
 		{
 			std::string assimpErrorMsg = std::string(import.GetErrorString());
 			std::string logMsg = "[Failed to load model] - " + assimpErrorMsg;
-			Logger::Log(logMsg, WARNING);
+			Logger::Log(logMsg, "model", WARNING);
 
 			return model;
 		}
@@ -219,7 +219,7 @@ namespace Nuake
 		if (!FileSystem::FileExists(texturePath, true))
 		{
 			std::string textureNotFoundmsg = "Texture file couldn't be found: " + texturePath;
-			Logger::Log(textureNotFoundmsg, Nuake::LOG_TYPE::WARNING);
+			Logger::Log(textureNotFoundmsg, "model", Nuake::LOG_TYPE::WARNING);
 
 			texturePath = "resources/Textures/default/Default.png";
 		}

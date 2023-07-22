@@ -9,7 +9,7 @@ namespace Nuake
 {
 	std::vector<LogEntry> Logger::m_Logs = std::vector<LogEntry>();
 
-	void Logger::Log(const std::string& log, LOG_TYPE type)
+	void Logger::Log(const std::string& log, const std::string& logger ,LOG_TYPE type)
 	{
 		char buff[100];
 		time_t now = time(0);
@@ -20,10 +20,24 @@ namespace Nuake
 		LogEntry newLog = {
 			type,
 			buff,
-			log
+			log,
+			logger
 		};
 
-		std::string msg = "[" + std::string(buff) + "]" + std::string(" - ") + log;
+		switch (type)
+		{
+		case WARNING:
+			// TODO: Add color
+			break;
+		case CRITICAL:
+
+			break;
+		case VERBOSE:
+
+			break;
+		}
+
+		std::string msg = "[" + std::string(buff) + "] " + logger + " - " + log;
 		std::cout << msg << std::endl;
 
 		if (m_Logs.size() >= MAX_LOG)

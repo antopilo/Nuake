@@ -269,7 +269,7 @@ namespace Nuake
 					}
 					catch (std::exception exception)
 					{
-						Logger::Log("Error loading project: " + projectPath, CRITICAL);
+						Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
 						Logger::Log(exception.what());
 					}
 						

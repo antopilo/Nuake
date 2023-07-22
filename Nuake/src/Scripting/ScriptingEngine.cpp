@@ -25,23 +25,23 @@ namespace Nuake {
         case WREN_ERROR_COMPILE:
         {
             std::string t = std::string(module) + " line " + std::to_string(line) + ": " + msg;
-            Logger::Log(t, CRITICAL);
+            Logger::Log(t, "script", CRITICAL);
             Engine::ExitPlayMode();
         } break;
         case WREN_ERROR_STACK_TRACE:
         {
             std::string t = "Stack trace: " + std::string(module) + " line " + std::to_string(line) + ": " + msg;
-            Logger::Log(t, CRITICAL);
+            Logger::Log(t, "script", CRITICAL);
         } break;
         case WREN_ERROR_RUNTIME:
         {
             std::string t = "Script Runtime Error: " + std::string(msg);
-            Logger::Log(t, WARNING);
+            Logger::Log(t, "script", WARNING);
         } break;
         default:
         {
             std::string t = "Script Runtime Error: " + std::string(msg);
-            Logger::Log(t, CRITICAL);
+            Logger::Log(t, "script", CRITICAL);
         }
             break;
         }

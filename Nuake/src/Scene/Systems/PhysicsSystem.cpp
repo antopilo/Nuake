@@ -197,7 +197,7 @@ namespace Nuake
 			Entity entity { e, m_Scene };
 			if (!entity.HasComponent<ModelComponent>())
 			{
-				Logger::Log("Cannot use mesh collider without model component", WARNING);
+				Logger::Log("Cannot use mesh collider without model component", "physics", WARNING);
 			}
 
 			auto meshColliderComponent = meshColliderView.get<MeshColliderComponent>(e);
@@ -209,7 +209,7 @@ namespace Nuake
 				const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
 				if (subMeshId >= submeshes.size())
 				{
-					Logger::Log("Cannot create mesh collider, invalid submesh ID", WARNING);
+					Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
 				}
 
 				Ref<Mesh> mesh = submeshes[subMeshId];
@@ -274,7 +274,7 @@ namespace Nuake
 			{
 				if (!ent.HasComponent<ModelComponent>())
 				{
-					Logger::Log("Cannot use mesh collider without model component", WARNING);
+					Logger::Log("Cannot use mesh collider without model component", "physics", WARNING);
 				}
 				const auto& modelComponent = ent.GetComponent<ModelComponent>();
 				const auto& component = ent.GetComponent<MeshColliderComponent>();
@@ -285,7 +285,7 @@ namespace Nuake
 					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
 					if (subMeshId >= submeshes.size())
 					{
-						Logger::Log("Cannot create mesh collider, invalid submesh ID", WARNING);
+						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
 					}
 					Ref<Mesh> mesh = submeshes[subMeshId];
 					auto shape = CreateRef<Physics::MeshShape>(mesh);

@@ -45,7 +45,7 @@ namespace Nuake
 			Ref<Project> project = Project::New();
 			if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
 			{
-				Logger::Log("Error loading project: " + projectPath, CRITICAL);
+				Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
 				return;
 			}
 

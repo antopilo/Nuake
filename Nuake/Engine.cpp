@@ -28,26 +28,15 @@ namespace Nuake
 
 	void Engine::Init()
 	{
-		Logger::Log("Nuake initializing");
-
 		AudioManager::Get().Initialize();
-		Logger::Log("Audio engine initialized");
-
-		AudioManager::Get().PlayTTS("Nuake Engine debug");
-
 		PhysicsManager::Get().Init();
-		Logger::Log("Physics initialized");
 
 		// Creates the window
 		s_CurrentWindow = Window::Get();
-		Logger::Log("Window initialized");
 
 		Input::Init();
-
 		Renderer2D::Init();
-		Logger::Log("2D renderer initialized");
-
-		Logger::Log("Engine initialized successfully!");
+		Logger::Log("Engine initialized");
 	}
 
 	void Engine::Tick()
@@ -56,7 +45,7 @@ namespace Nuake
 		s_TimeStep = s_Time - s_LastFrameTime;
 		s_LastFrameTime = s_Time;
 
-		s_TimeStep = std::min((float)s_TimeStep, 0.5f);
+		//s_TimeStep = std::min((float)s_TimeStep, 0f);
 
 		// Dont update if no scene is loaded.
 		if (s_CurrentWindow->GetScene()) 
@@ -92,7 +81,7 @@ namespace Nuake
 		// Dont trigger init if already in player mode.
 		if (IsPlayMode())
 		{
-			Logger::Log("Cannot enter play mode if is already in play mode.", WARNING);
+			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
 			return;
 		}
 
@@ -102,7 +91,7 @@ namespace Nuake
 		}
 		else
 		{
-			Logger::Log("Cannot enter play mode. Scene OnInit failed", CRITICAL);
+			Logger::Log("Cannot enter play mode. Scene OnInit failed", "engine", CRITICAL);
 			GetCurrentScene()->OnExit();
 		}
 	}

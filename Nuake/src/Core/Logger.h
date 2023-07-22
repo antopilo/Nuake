@@ -16,6 +16,7 @@ namespace Nuake
 		LOG_TYPE type;
 		std::string time;
 		std::string message;
+		std::string logger;
 	};
 
 	class Logger
@@ -25,7 +26,7 @@ namespace Nuake
 		static std::vector<LogEntry> m_Logs;
 
 	public:
-		static void Log(const std::string& log, LOG_TYPE type = VERBOSE);
+		static void Log(const std::string& log, const std::string& logger = "main", LOG_TYPE type = VERBOSE);
 		static std::vector<LogEntry> GetLogs();
 	};
 }

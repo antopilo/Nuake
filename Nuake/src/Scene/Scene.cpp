@@ -201,7 +201,7 @@ namespace Nuake {
 	{
 		if (name.empty())
 		{
-			Logger::Log("[Scene] Failed to create entity. Entity name cannot be empty.");
+			Logger::Log("Failed to create entity. Entity name cannot be empty.");
 			return Entity();
 		}
 
@@ -213,7 +213,7 @@ namespace Nuake {
 		else
 		{
 			// Try to generate a unique name
-			for (uint32_t i = 1; i < 2048; i++)
+			for (uint32_t i = 1; i < 4096; i++)
 			{
 				const std::string& entityEnumName = name + std::to_string(i);
 				const auto& entityId = GetEntity(entityEnumName).GetHandle();
@@ -226,7 +226,7 @@ namespace Nuake {
 
 			if (entityName.empty()) // We ran out of names!!!
 			{
-				Logger::Log("[Scene] Failed to create entity. Limit reached with name: " + name, CRITICAL);
+				Logger::Log("Failed to create entity. Limit reached with name: " + name, "scene", CRITICAL);
 				return Entity();
 			}
 		}
@@ -242,7 +242,7 @@ namespace Nuake {
 		nameComponent.Name = entityName;
 		nameComponent.ID = id;
 
-		Logger::Log("[Scene] Entity created with name: " + nameComponent.Name, LOG_TYPE::VERBOSE);
+		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
 	}
 
