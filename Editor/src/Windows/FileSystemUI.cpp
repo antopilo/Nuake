@@ -245,7 +245,7 @@ namespace Nuake
                 if (ImGui::MenuItem("Delete"))
                 {
 
-                    if (FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                    if (FileSystem::DeleteFileFromPath(file->GetAbsolutePath()) != 0)
                     {
                         Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
                     }

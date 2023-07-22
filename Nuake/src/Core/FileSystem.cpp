@@ -173,7 +173,7 @@ namespace Nuake
 		fileWriter.close();
 	}
 
-	int FileSystem::RemoveFile(const std::string& path)
+	int FileSystem::DeleteFileFromPath(const std::string& path)
 	{
 		return std::remove(path.c_str());
 	}
