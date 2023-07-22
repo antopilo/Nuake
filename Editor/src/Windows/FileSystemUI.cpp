@@ -179,7 +179,7 @@ namespace Nuake
             ImGui::EndPopup();
         }
 
-        std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
+        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
         {
@@ -192,7 +192,7 @@ namespace Nuake
         if (PopupHelper::DefineDialog(openScene, "Open the scene? \n Changes will not be saved."))
         {
             Ref<Scene> scene = Scene::New();
-            std::string projectPath = file->GetAbsolutePath();
+            const std::string projectPath = file->GetAbsolutePath();
             if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
             {
                 Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
