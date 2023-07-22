@@ -9,41 +9,14 @@
 #include "src/Rendering/Textures/TextureManager.h"
 #include "EditorInterface.h"
 
-const std::string TEMPLATE_SCRIPT_FIRST = R"(import "Nuake:Engine" for Engine 
-import "Nuake:ScriptableEntity" for ScriptableEntity 
-import "Nuake:Input" for Input 
-import "Nuake:Math" for Vector3, Math 
-import "Nuake:Scene" for Scene 
-
-class )";
-
-const std::string TEMPLATE_SCRIPT_SECOND = R"( is ScriptableEntity { 
-        construct new() { 
-        } 
-
-        // Called when the scene gets initialized 
-        init() { 
-            // Engine.Log("Hello World!") 
-        } 
- 
-        // Called every update 
-        update(ts) { 
-        } 
- 
-        // Called 90 times per second 
-        fixedUpdate(ts) { 
-        }  
-         
-        // Called on shutdown 
-        exit() { 
-        } 
-} 
-)";
-
 #include <src/Rendering/Textures/Material.h>
+#include "../Misc/PopupHelper.h"
 
 namespace Nuake
 {
+    Ref<Directory> FileSystemUI::m_CurrentDirectory;
+    
+    // TODO: add filetree in same panel
     void FileSystemUI::Draw()
     {
 
@@ -204,6 +177,30 @@ namespace Nuake
             }
             
             ImGui::EndPopup();
+        }
+
+        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
+        {
+            if (file->GetExtension() == ".scene")
+            {
+                PopupHelper::Confirmation(openScene);
+            }
+        }
+
+        if (PopupHelper::DefineDialog(openScene, "Open the scene? \n Changes will not be saved."))
+        {
+            Ref<Scene> scene = Scene::New();
+            const std::string projectPath = file->GetAbsolutePath();
+            if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
+            {
+                Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
+                return;
+            }
+
+            scene->Path = FileSystem::AbsoluteToRelative(projectPath);
+            Engine::LoadScene(scene);
         }
 
         ImGui::Text(file->GetName().c_str());

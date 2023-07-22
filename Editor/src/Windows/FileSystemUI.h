@@ -10,7 +10,7 @@ namespace Nuake {
 		EditorInterface* Editor;
 
 	public:
-		Ref<Directory> m_CurrentDirectory;
+		static Ref<Directory> m_CurrentDirectory;
 		bool m_hasClickedOnFile;
 
 		FileSystemUI(EditorInterface* editor)
