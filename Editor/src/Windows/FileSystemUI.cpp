@@ -183,19 +183,39 @@ namespace Nuake
                 ImGui::EndPopup();
             }
 
-            if (ImGui::MenuItem("Delete"))
+            if (file->GetExtension() != ".project")
             {
-                if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                if (ImGui::MenuItem("Delete"))
                 {
-                    Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
-                }
-                RefreshFileBrowser();
-            }
 
+                    if (FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                    {
+                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
+                    }
+                    RefreshFileBrowser();
+                }
+            }
+            else 
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
+                ImGui::MenuItem("Delete");
+                ImGui::PopStyleColor();
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                    ImGui::TextUnformatted("The file you're trying to delete is currently loaded by the game engine.");
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
+            }
+            
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
             if (ImGui::MenuItem("Rename"))
             {
                 
             }
+            ImGui::PopStyleColor();
 
             ImGui::Separator();
 
