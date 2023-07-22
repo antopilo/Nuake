@@ -55,7 +55,7 @@ namespace Nuake
         }
     }
 
-    void FileSystemUI::DrawDirectory(Ref<Directory> directory)
+    void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
         ImGui::PushFont(FontManager::GetFont(Icons));
         const char* icon = ICON_FA_FOLDER;
@@ -63,6 +63,63 @@ namespace Nuake
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
         {
             m_CurrentDirectory = directory;
+        }
+
+        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
+        {
+            ImGui::OpenPopup(hoverMenuId.c_str());
+            m_hasClickedOnFile = true;
+        }
+
+        if (ImGui::BeginPopup(hoverMenuId.c_str()))
+        {
+            if (ImGui::MenuItem("Open"))
+            {
+                m_CurrentDirectory = directory;
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Copy"))
+            {
+                if (ImGui::MenuItem("Full Path"))
+                {
+                    OS::CopyToClipboard(directory->fullPath);
+                }
+
+                if (ImGui::MenuItem("Directory Name"))
+                {
+                    OS::CopyToClipboard(String::Split(directory->name, '/')[0]);
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if (ImGui::MenuItem("Delete"))
+            {
+                if (FileSystem::DeleteFolder(directory->fullPath) != 0)
+                {
+                    Logger::Log("Failed to remove directory: " + directory->name, "editor", CRITICAL);
+                }
+                RefreshFileBrowser();
+            }
+
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
+            if (ImGui::MenuItem("Rename"))
+            {
+
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Show in File Explorer"))
+            {
+                OS::OpenIn(directory->fullPath);
+            }
+
+            ImGui::EndPopup();
         }
 
         ImGui::Text(directory->name.c_str());
@@ -188,7 +245,7 @@ namespace Nuake
                 if (ImGui::MenuItem("Delete"))
                 {
 
-                    if (FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
+                    if (FileSystem::DeleteFileFromPath(file->GetAbsolutePath()) != 0)
                     {
                         Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
                     }
@@ -229,10 +286,7 @@ namespace Nuake
 
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
         {
-            if (file->GetExtension() == ".scene")
-            {
-                PopupHelper::Confirmation(openScene);
-            }
+            shouldOpenScene = file->GetExtension() == ".scene";
         }
 
         if (shouldOpenScene)
@@ -545,7 +599,7 @@ namespace Nuake
                                 else
                                     ImGui::TableNextRow();
 
-                                DrawDirectory(d);
+                                DrawDirectory(d, i);
                                 i++;
                             }
                         }
