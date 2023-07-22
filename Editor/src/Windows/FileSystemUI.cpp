@@ -162,10 +162,29 @@ namespace Nuake
                 }
             }
 
+            if (ImGui::BeginMenu("Copy"))
+            {
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Full Path"))
+                {
+                    OS::CopyToClipboard(file->GetAbsolutePath());
+                }
+
+                if (ImGui::MenuItem("File Name"))
+                {
+                    OS::CopyToClipboard(file->GetName());
+                }
+
+                ImGui::EndPopup();
+            }
+
             if(file->GetExtension() != ".project")
             {
                 ImGui::Separator();
             
+                // TODO: Add to a 'Edit' menu with File Rename, etc.
+
                 if (ImGui::MenuItem("Delete"))
                 {
                     if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
