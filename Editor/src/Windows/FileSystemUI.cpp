@@ -10,6 +10,7 @@
 #include "EditorInterface.h"
 
 #include <src/Rendering/Textures/Material.h>
+#include "../Misc/PopupHelper.h"
 
 namespace Nuake
 {
@@ -176,6 +177,30 @@ namespace Nuake
             }
             
             ImGui::EndPopup();
+        }
+
+        std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
+
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
+        {
+            if (file->GetExtension() == ".scene")
+            {
+                PopupHelper::Confirmation(openScene);
+            }
+        }
+
+        if (PopupHelper::DefineDialog(openScene, "Open the scene? \n Changes will not be saved."))
+        {
+            Ref<Scene> scene = Scene::New();
+            std::string projectPath = file->GetAbsolutePath();
+            if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
+            {
+                Logger::Log("Error failed loading scene: " + projectPath, CRITICAL);
+                return;
+            }
+
+            scene->Path = FileSystem::AbsoluteToRelative(projectPath);
+            Engine::LoadScene(scene);
         }
 
         ImGui::Text(file->GetName().c_str());
