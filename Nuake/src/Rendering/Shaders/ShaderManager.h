@@ -7,8 +7,8 @@
 
 namespace Nuake
 {
-
-	class ShaderManager {
+	class ShaderManager 
+	{
 	private:
 		static std::map<std::string, Scope<Shader>> m_Shaders;
 
