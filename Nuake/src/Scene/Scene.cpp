@@ -75,15 +75,24 @@ namespace Nuake {
 
 	Entity Scene::GetEntityByID(int id)
 	{
+		if (_EntitiesIDMap.find(id) != _EntitiesIDMap.end())
+		{
+			return _EntitiesIDMap[id];
+		}
+
 		auto idView = m_Registry.view<NameComponent>();
 		for (auto e : idView) 
 		{
 			NameComponent& nameC = idView.get<NameComponent>(e);
 			if (nameC.ID == id)
 			{
-				return Entity{ e, this };
+				auto newEntity = Entity{ e, this };
+				_EntitiesIDMap[id] = newEntity;
+				return newEntity;
 			}
 		}
+
+		Logger::Log("Entity not found with id: " + std::to_string(id), "scene", CRITICAL);
 
 		assert("Entity not found");
 	}
@@ -206,7 +215,7 @@ namespace Nuake {
 		}
 
 		std::string entityName;
-		if (GetEntity(name) != Entity())
+		if (GetEntity(name) == Entity())
 		{
 			entityName = name;
 		}
@@ -217,7 +226,7 @@ namespace Nuake {
 			{
 				const std::string& entityEnumName = name + std::to_string(i);
 				const auto& entityId = GetEntity(entityEnumName).GetHandle();
-				if (entityId != -1)
+				if (entityId == -1)
 				{
 					entityName = entityEnumName;
 					break;
@@ -241,6 +250,8 @@ namespace Nuake {
 		NameComponent& nameComponent = entity.AddComponent<NameComponent>();
 		nameComponent.Name = entityName;
 		nameComponent.ID = id;
+
+		_EntitiesIDMap[id] = entity;
 
 		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;

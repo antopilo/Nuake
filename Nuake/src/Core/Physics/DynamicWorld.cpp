@@ -419,7 +419,7 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 32;
+			constexpr int maxStepCount = 16;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
@@ -461,6 +461,8 @@ namespace Nuake
 
 				_registeredBodies.clear();
 			}
+
+			_registeredBodies.clear();
 			
 			if (!_registeredCharacters.empty())
 			{
@@ -473,7 +475,7 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)
+		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
 			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
@@ -497,7 +499,7 @@ namespace Nuake
 				}
 			}
 
-			//Logger::Log("Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()), "physics", WARNING);
+			Logger::Log("Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()), "physics", WARNING);
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)

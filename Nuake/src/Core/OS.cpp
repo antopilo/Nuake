@@ -1,11 +1,40 @@
 ﻿#include "OS.h"
+#include "src/Window.h"
 
-#include <chrono>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
+
 #include <Windows.h>
+#include <chrono>
 
 using namespace Nuake;
 
-int OS::GetTime() 
+void OS::CopyToClipboard(const std::string& value)
+{
+	auto glob = GlobalAlloc(GMEM_FIXED, 512);
+	memcpy(glob, value.data(), value.size());
+	OpenClipboard(glfwGetWin32Window(Window::Get()->GetHandle()));
+	EmptyClipboard();
+	SetClipboardData(CF_TEXT, glob);
+	CloseClipboard();
+}
+
+std::string OS::GetFromClipboard()
+{
+	OpenClipboard(nullptr);
+	HANDLE hData = GetClipboardData(CF_TEXT);
+
+	char* pszText = static_cast<char*>(GlobalLock(hData));
+	std::string text(pszText);
+
+	GlobalUnlock(hData);
+	CloseClipboard();
+
+	return text;
+}
+
+int OS::GetTime()
 {
 	return static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 }

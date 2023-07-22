@@ -8,8 +8,10 @@
 #include <wren.h>
 #include "../Core/Physics/PhysicsManager.h"
 
-namespace Nuake {
-	namespace ScriptAPI {
+namespace Nuake 
+{
+	namespace ScriptAPI 
+	{
 		class PhysicsModule : public ScriptModule
 		{
 			std::string ModuleName = "Engine";

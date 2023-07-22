@@ -71,11 +71,17 @@ namespace Nuake {
 			{
 				for (json e : j["Entities"])
 				{
-					Entity entity = Entity { Engine::GetCurrentScene()->m_Registry.create(), Engine::GetCurrentScene().get() };
+					Entity entity = Engine::GetCurrentScene()->CreateEntity("-");
+					auto& nameComponent = entity.GetComponent<NameComponent>();
+
+					int entityId = nameComponent.ID;
 					entity.Deserialize(e.dump());
+					nameComponent.ID = entityId;
+
 					this->AddEntity(entity);
 				}
 
+				// Set reference to the parent entity to children
 				for (auto& e : Entities)
 				{
 					auto parentC = e.GetComponent<ParentComponent>();
