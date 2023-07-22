@@ -87,6 +87,8 @@ namespace Nuake
 
 	void Engine::EnterPlayMode()
 	{
+		s_LastFrameTime = (float)glfwGetTime();; // Reset timestep timer.
+
 		// Dont trigger init if already in player mode.
 		if (IsPlayMode())
 		{
