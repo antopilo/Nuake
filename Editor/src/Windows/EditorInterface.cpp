@@ -56,7 +56,6 @@ namespace Nuake {
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
-        m_EntitySelectionFramebuffer = CreateRef<FrameBuffer>(false, Vector2(1280, 720));
     }
 
     void EditorInterface::Init()
