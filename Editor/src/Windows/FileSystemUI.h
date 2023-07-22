@@ -24,7 +24,7 @@ namespace Nuake {
 		void DrawDirectoryContent();
 		void DrawFiletree();
 		void EditorInterfaceDrawFiletree(Ref<Directory> dir);
-		void DrawDirectory(Ref<Directory> directory);
+		void DrawDirectory(Ref<Directory> directory, uint32_t drawId);
 		bool EntityContainsItself(Entity source, Entity target);
 		void DrawFile(Ref<File> file, uint32_t drawId);
 		void DrawDirectoryExplorer();

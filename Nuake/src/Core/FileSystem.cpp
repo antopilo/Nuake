@@ -178,6 +178,11 @@ namespace Nuake
 		return std::remove(path.c_str());
 	}
 
+	int FileSystem::DeleteFolder(const std::string& path)
+	{
+		return std::filesystem::remove_all(path.c_str());
+	}
+
 	Ref<Directory> FileSystem::GetFileTree()
 	{
 		return RootDirectory;
