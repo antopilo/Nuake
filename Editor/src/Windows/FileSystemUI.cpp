@@ -247,7 +247,7 @@ namespace Nuake
 						path += ".material";
 					}
 
-					if (path != "")
+					if (!path.empty())
 					{
 						Ref<Material> material = CreateRef<Material>();
 						material->IsEmbedded = false;
