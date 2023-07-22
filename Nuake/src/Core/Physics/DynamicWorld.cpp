@@ -187,12 +187,12 @@ namespace Nuake
 	public:
 		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			std::cout << "A body got activated" << std::endl;
+			//std::cout << "A body got activated" << std::endl;
 		}
 
 		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			std::cout << "A body went to sleep" << std::endl;
+			//std::cout << "A body went to sleep" << std::endl;
 		}
 	};
 
@@ -420,7 +420,7 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 32;
+			constexpr int maxStepCount = 16;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
@@ -450,9 +450,10 @@ namespace Nuake
 
 			if (!_registeredBodies.empty())
 			{
-				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
-				_registeredBodies.clear();
+				_JoltBodyInterface->DestroyBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
 			}
+
+			_registeredBodies.clear();
 			
 			if (!_registeredCharacters.empty())
 			{
@@ -464,7 +465,7 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3 velocity)
+		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
 			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
@@ -472,6 +473,23 @@ namespace Nuake
 				auto& characterController = _registeredCharacters[entityHandle];
 				characterController->SetLinearVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
 			}
+		}
+
+		void DynamicWorld::AddForceToRigidBody(const Entity& entity, const Vector3& force)
+		{
+			auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+			for (const auto& body : _registeredBodies)
+			{
+				auto bodyId = static_cast<JPH::BodyID>(body);
+				auto entityId = static_cast<uint32_t>(bodyInterface.GetUserData(bodyId));
+				if (entityId == entity.GetHandle())
+				{
+					bodyInterface.AddForce(bodyId, JPH::Vec3(force.x, force.y, force.z));
+					return;
+				}
+			}
+
+			Logger::Log("[PhysicsSystem] - Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()));
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)

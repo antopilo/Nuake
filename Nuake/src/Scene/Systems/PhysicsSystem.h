@@ -14,7 +14,6 @@ namespace Nuake
 		void Exit() override;
 
 	private:
-
 		void InitializeShapes();
 		void InitializeQuakeMap();
 		void InitializeRigidbodies();

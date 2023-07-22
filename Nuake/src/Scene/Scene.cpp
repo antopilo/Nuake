@@ -215,7 +215,7 @@ namespace Nuake {
 		}
 
 		std::string entityName;
-		if (GetEntity(name) != Entity())
+		if (GetEntity(name) == Entity())
 		{
 			entityName = name;
 		}
@@ -226,7 +226,7 @@ namespace Nuake {
 			{
 				const std::string& entityEnumName = name + std::to_string(i);
 				const auto& entityId = GetEntity(entityEnumName).GetHandle();
-				if (entityId != -1)
+				if (entityId == -1)
 				{
 					entityName = entityEnumName;
 					break;
