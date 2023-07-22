@@ -9,7 +9,7 @@ void PopupHelper::Confirmation(const std::string& id)
     ImGui::OpenPopup(id.c_str());
 }
 
-bool PopupHelper::DefineDialog(std::string id, std::string text)
+bool PopupHelper::DefineDialog(std::string& id, std::string& text)
 {
     bool result = false;
 
