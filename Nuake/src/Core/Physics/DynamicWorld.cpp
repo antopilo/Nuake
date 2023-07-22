@@ -187,12 +187,12 @@ namespace Nuake
 	public:
 		virtual void OnBodyActivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			std::cout << "A body got activated" << std::endl;
+			//std::cout << "A body got activated" << std::endl;
 		}
 
 		virtual void OnBodyDeactivated(const JPH::BodyID& inBodyID, JPH::uint64 inBodyUserData) override
 		{
-			std::cout << "A body went to sleep" << std::endl;
+			//std::cout << "A body went to sleep" << std::endl;
 		}
 	};
 
@@ -211,7 +211,6 @@ namespace Nuake
 
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
-
 			// A body activation listener gets notified when bodies activate and go to sleep
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
 			// Registering one is entirely optional.
@@ -231,7 +230,7 @@ namespace Nuake
 			// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
 			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 			// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-			//_JoltPhysicsSystem->OptimizeBroadPhase();
+			_JoltPhysicsSystem->OptimizeBroadPhase();
 			const uint32_t availableThreads = std::thread::hardware_concurrency() - 1;
 			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, availableThreads);
 		}
@@ -427,18 +426,26 @@ namespace Nuake
 			}
 
 			// Prevents having too many steps and running out of jobs
-			collisionSteps = std::min(collisionSteps, maxStepCount);
+			//collisionSteps = std::min(collisionSteps, maxStepCount);
 
 			// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
 			constexpr int subSteps = 1;
 
 			// Step the world
-			_JoltPhysicsSystem->Update(ts, collisionSteps, subSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
-
-			for (auto& c : _registeredCharacters)
+			try
 			{
-				c.second->PostSimulation(0.001);
+				_JoltPhysicsSystem->Update(ts, collisionSteps, subSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+
+				for (auto& c : _registeredCharacters)
+				{
+					c.second->PostSimulation(0.001);
+				}
 			}
+			catch (...)
+			{
+				Logger::Log("Failed to run simulation update", "physics", CRITICAL);
+			}
+
 
 			SyncEntitiesTranforms();
 			SyncCharactersTransforms();
@@ -451,6 +458,7 @@ namespace Nuake
 			if (!_registeredBodies.empty())
 			{
 				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
+
 				_registeredBodies.clear();
 			}
 			
@@ -460,6 +468,7 @@ namespace Nuake
 				{
 					character.second->RemoveFromPhysicsSystem();
 				}
+
 				_registeredCharacters.clear();
 			}
 		}
@@ -472,6 +481,23 @@ namespace Nuake
 				auto& characterController = _registeredCharacters[entityHandle];
 				characterController->SetLinearVelocity(JPH::Vec3(velocity.x, velocity.y, velocity.z));
 			}
+		}
+
+		void DynamicWorld::AddForceToRigidBody(const Entity& entity, const Vector3& force)
+		{
+			auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+			for (const auto& body : _registeredBodies)
+			{
+				auto bodyId = static_cast<JPH::BodyID>(body);
+				auto entityId = static_cast<uint32_t>(bodyInterface.GetUserData(bodyId));
+				if (entityId == entity.GetHandle())
+				{
+					bodyInterface.AddForce(bodyId, JPH::Vec3(force.x, force.y, force.z));
+					return;
+				}
+			}
+
+			//Logger::Log("Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()), "physics", WARNING);
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)
