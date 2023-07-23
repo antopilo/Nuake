@@ -1,3 +1,4 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "WelcomeWindow.h"
 
 #include <src/Vendors/imgui/imgui.h>
@@ -85,8 +86,8 @@ namespace Nuake
 	{
 		// Make viewport fullscreen
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->GetWorkPos());
-		ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -131,7 +132,7 @@ namespace Nuake
 			}
 
 			const float itemHeight = 120.0f;
-			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 			{
 				const std::string path = FileDialog::OpenFile("Project file |*.project");
 				if (path != "" && String::EndsWith(path, ".project"))
@@ -164,14 +165,14 @@ namespace Nuake
 
 		const std::string selectableName = "##" + std::to_string(itemIndex);
 		const bool isSelected = SelectedProject == itemIndex;
-		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 		{
 			SelectedProject = itemIndex;
 		}
 
 		const ImVec2 padding = ImVec2(25.0f, 20.0f);
 		const ImVec2 iconSize = ImVec2(100, 100);
-		ImGui::SetCursorPos(padding / 2.0 + ImVec2(0, cursorYStart));
+		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(0, cursorYStart));
 
 		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::SameLine();
@@ -200,7 +201,7 @@ namespace Nuake
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 		if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), false))
 		{
-			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvailWidth(), buttonHeight);
+			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			if (ImGui::Button("Create a new project", buttonSize))
 			{
 				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");

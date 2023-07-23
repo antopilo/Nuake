@@ -1,3 +1,5 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include "EditorSelectionPanel.h"
 #include "../Misc/ImGuiTextHelper.h"
 #include <src/Scene/Components/Components.h>
@@ -243,7 +245,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
 				if (texture != "")
@@ -281,7 +283,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
 				if (texture != "")
@@ -316,7 +318,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
 				if (texture != "")
@@ -351,7 +353,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
 				if (texture != "")
@@ -389,7 +391,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec2(2, 2), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
 				if (texture != "")

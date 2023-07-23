@@ -36,7 +36,7 @@
     {                                                                                   \
         delete boldFont;                                                                \
         ImGui::PopStyleVar();                                                           \
-        if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_BordersInner))                  \
+        if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))                  \
         {                                                                               \
             ImGui::TableSetupColumn("name", 0, 0.25f);                                   \
             ImGui::TableSetupColumn("set", 0, 0.65f);                                    \

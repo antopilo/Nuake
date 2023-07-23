@@ -1,3 +1,4 @@
+
 #include "FileSystemUI.h"
 
 #include <src/Vendors/imgui/imgui.h>
@@ -512,7 +513,7 @@ namespace Nuake
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
                     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvailWidth() - (numButtonAfterPathBrowser * buttonWidth) - 4.0, 24));
+                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth) - 4.0, 24));
                     for (int i = paths.size() - 1; i > 0; i--) 
                     {
                         if (i != paths.size())
@@ -564,7 +565,7 @@ namespace Nuake
                 ImGui::EndChild();
 
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
-                ImGui::GetWindowDrawList()->AddLine(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY()), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetCursorPosY()), IM_COL32(255, 0, 0, 255), 1.0f);
+                ImGui::GetWindowDrawList()->AddLine(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY()), ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetCursorPosY()), IM_COL32(255, 0, 0, 255), 1.0f);
 
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
                 avail = ImGui::GetContentRegionAvail();
