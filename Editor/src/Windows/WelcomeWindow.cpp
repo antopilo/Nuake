@@ -82,6 +82,30 @@ namespace Nuake
 		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
+	void WelcomeWindow::LoadQueuedProject()
+	{
+		auto project = Project::New();
+		auto projectFileData = FileSystem::ReadFile(queuedProjectPath, true);
+		try
+		{
+			project->Deserialize(projectFileData);
+			project->FullPath = queuedProjectPath;
+
+			Engine::LoadProject(project);
+
+			_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+		}
+		catch (std::exception exception)
+		{
+			Logger::Log("Error loading project: " + queuedProjectPath, "editor", CRITICAL);
+			Logger::Log(exception.what());
+			return;
+		}
+
+		queuedProjectPath = "";
+		Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
+	}
+
 	void WelcomeWindow::Draw()
 	{
 		// Make viewport fullscreen
@@ -257,24 +281,7 @@ namespace Nuake
 					std::string projectPath = _Projects[SelectedProject].Path;
 					FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
 
-					auto project = Project::New();
-					auto projectFileData = FileSystem::ReadFile(projectPath, true);
-					try 
-					{
-						project->Deserialize(projectFileData);
-						project->FullPath = projectPath;
-
-						Engine::LoadProject(project);
-
-						_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-					}
-					catch (std::exception exception)
-					{
-						Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
-						Logger::Log(exception.what());
-					}
-						
-					Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
+					queuedProjectPath = projectPath;
 				}
 			}
 		}

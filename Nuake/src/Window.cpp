@@ -180,6 +180,12 @@ namespace Nuake
         glfwSetWindowSize(m_Window, size.x, size.y);
     }
 
+    void Window::SetPosition(const Vector2& position)
+    {
+        m_Position = position;
+        glfwSetWindowPos(m_Window, position.x, position.y);
+    }
+
     void Window::SetMonitor(int monitorIdx)
     {
         int monitorCount;
@@ -191,6 +197,23 @@ namespace Nuake
             const GLFWvidmode* mode = glfwGetVideoMode(monitor);
             glfwSetWindowMonitor(m_Window, monitor, 0, 0, m_Width, m_Height, mode->refreshRate);
         }
+    }
+
+    void Window::Center()
+    {
+        const int windowWidth = 640;
+        const int windowHeight = 360;
+
+        // Get the primary monitor's video mode
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+        // Calculate the position to center the window
+        const int xPos = (mode->width - m_Width) / 2;
+        const int yPos = (mode->height - m_Height) / 2;
+
+        // Set the window's position
+        Nuake::Window::Get()->SetSize({ m_Width, m_Height });
+        Nuake::Window::Get()->SetPosition({ xPos, yPos });
     }
 
     Ref<Scene> Window::GetScene()
@@ -226,6 +249,11 @@ namespace Nuake
     void Window::SetVSync(bool enabled)
     {
         glfwSwapInterval(enabled ? 0 : 1);
+    }
+
+    void Window::SetDecorated(bool enabled)
+    {
+        glfwSetWindowAttrib(m_Window, GLFW_DECORATED, enabled);
     }
 
     void Window::InitImgui()
