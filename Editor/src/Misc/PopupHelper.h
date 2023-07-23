@@ -4,6 +4,7 @@
 class PopupHelper
 {
 public:
-    static void Confirmation(const std::string& id);
-    static bool DefineDialog(const std::string& id, const std::string& text);
+    static void OpenPopup(const std::string& id);
+    static bool DefineConfirmationDialog(const std::string& id, const std::string& text);
+    static bool PopupHelper::DefineTextDialog(const std::string& id, std::string& currentText);
 };
