@@ -30,6 +30,9 @@ namespace Nuake
     {
     }
 
+
+    std::string renameTempValue = "";
+
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
@@ -72,6 +75,9 @@ namespace Nuake
             m_hasClickedOnFile = true;
         }
 
+        const std::string rename = "Rename" + std::string("##") + hoverMenuId;
+        bool shouldRename = false;
+
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
             if (ImGui::MenuItem("Open"))
@@ -105,12 +111,10 @@ namespace Nuake
                 RefreshFileBrowser();
             }
 
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
             if (ImGui::MenuItem("Rename"))
             {
-
+                shouldRename = true;
             }
-            ImGui::PopStyleColor();
 
             ImGui::Separator();
 
@@ -120,6 +124,22 @@ namespace Nuake
             }
 
             ImGui::EndPopup();
+        }
+
+        if (shouldRename)
+        {
+            renameTempValue = directory->name;
+            PopupHelper::OpenPopup(rename);
+        }
+
+        if (PopupHelper::DefineTextDialog(rename, renameTempValue))
+        {
+            if (OS::RenameDirectory(directory, renameTempValue) != 0)
+            {
+                Logger::Log("Cannot rename directory: " + renameTempValue, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+            renameTempValue = "";
         }
 
         ImGui::Text(directory->name.c_str());
@@ -205,6 +225,8 @@ namespace Nuake
         const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
         bool shouldOpenScene = false;
 
+        const std::string rename = "Rename" + std::string("##") + hoverMenuId;
+        bool shouldRename = false;
 
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
@@ -267,12 +289,10 @@ namespace Nuake
                 }
             }
             
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
             if (ImGui::MenuItem("Rename"))
             {
-                
+                shouldRename = true;
             }
-            ImGui::PopStyleColor();
 
             ImGui::Separator();
 
@@ -289,12 +309,14 @@ namespace Nuake
             shouldOpenScene = file->GetExtension() == ".scene";
         }
 
+        // Open Scene Popup
+
         if (shouldOpenScene)
         {
-            PopupHelper::Confirmation(openScene);
+            PopupHelper::OpenPopup(openScene);
         }
 
-        if (PopupHelper::DefineDialog(openScene, " Open the scene? \n Changes will not be saved."))
+        if (PopupHelper::DefineConfirmationDialog(openScene, " Open the scene? \n Changes will not be saved."))
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();
@@ -307,6 +329,25 @@ namespace Nuake
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
             Engine::LoadScene(scene);
         }
+
+        // Rename Popup
+
+        if (shouldRename)
+        {
+            renameTempValue = file->GetName();
+            PopupHelper::OpenPopup(rename);
+        }
+
+        if (PopupHelper::DefineTextDialog(rename, renameTempValue))
+        {
+            if(OS::RenameFile(file, renameTempValue) != 0)
+            {
+                Logger::Log("Cannot rename file: " + renameTempValue, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+            renameTempValue = "";
+        }
+
 
         ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
