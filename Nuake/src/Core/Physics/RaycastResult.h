@@ -7,14 +7,11 @@ namespace Nuake
 {
 	namespace Physics
 	{
-		
+		// result object from raycast.
+		struct RaycastResult
+		{
+			Vector3 WorldPosition;
+			float Fraction;
+		};
 	}
-
-
-	// result object from raycast.
-	struct RaycastResult {
-		Vector3 WorldPoint;
-		Vector3 LocalPoint;
-		Vector3 Normal;
-	};
 }
