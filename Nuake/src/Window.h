@@ -22,7 +22,8 @@ namespace Nuake
 		std::string m_Title;
 		uint32_t m_Width;
 		uint32_t m_Height;
-		
+		Vector2 m_Position;
+
 		Ref<FrameBuffer> m_Framebuffer;
 		Ref<Scene> m_Scene;
 	
@@ -48,7 +49,11 @@ namespace Nuake
 		Vector2 GetSize() const;
 		void SetSize(const Vector2& size);
 
+		void SetPosition(const Vector2& position);
+
 		void SetMonitor(int monitor);
+
+		void Center();
 
 		Ref<Scene> GetScene();
 		bool SetScene(Ref<Scene> scene);
@@ -59,6 +64,7 @@ namespace Nuake
 		void SetWindowIcon(const std::string& path);
 		void SetVSync(bool enabled);
 
+		void SetDecorated(bool enabled);
 	private:
 		void InitImgui();
 	};

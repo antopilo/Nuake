@@ -41,6 +41,8 @@
 #include "../Misc/InterfaceFonts.h"
 
 #include "WelcomeWindow.h"
+#include "LoadingSplash.h"
+
 #include "src/Rendering/SceneRenderer.h"
 #include <dependencies/glfw/include/GLFW/glfw3.h>
 #include <src/Rendering/Buffers/Framebuffer.h>
@@ -1505,9 +1507,40 @@ namespace Nuake {
         }
     }
 
+    bool isLoadingProject = false;
+    bool isLoadingProjectQueue = false;
+
+    int frameCount = 2;
     void EditorInterface::Draw()
     {
         Init();
+
+        if (isLoadingProjectQueue)
+        {
+            _WelcomeWindow->LoadQueuedProject();
+            isLoadingProjectQueue = false;
+
+            auto& window = Window::Get();
+            window->SetDecorated(true);
+            window->SetSize({ 1900, 1000 });
+            window->Center();
+            frameCount = 0;
+            return;
+        }
+
+        if (_WelcomeWindow->IsProjectQueued() && frameCount > 0)
+        {
+            // draw splash
+            LoadingSplash::Get().Draw();
+
+            frameCount--;
+            if (frameCount == 0)
+            {
+                isLoadingProjectQueue = true;
+            }
+
+            return;
+        }
 
         if (!Engine::GetProject())
         {
