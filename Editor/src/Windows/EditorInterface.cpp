@@ -63,8 +63,8 @@ namespace Nuake {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-        ImGui::SetNextWindowSize(viewport->GetWorkSize());
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
 
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
@@ -85,7 +85,7 @@ namespace Nuake {
             Overlay();
             ImGuizmo::BeginFrame();
 
-            float availWidth = ImGui::GetContentRegionAvailWidth();
+            float availWidth = ImGui::GetContentRegionAvail().x;
             float windowWidth = ImGui::GetWindowWidth();
 
             float used = windowWidth - availWidth;
@@ -111,7 +111,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvailWidth() - 120, 30));
+            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - 120, 30));
 
             ImGui::SameLine();
 
@@ -123,7 +123,7 @@ namespace Nuake {
             ImGui::BeginChild("FPS", ImVec2(60, 30), false);
 
             std::string text = std::to_string(fps) + " fps";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
@@ -135,7 +135,7 @@ namespace Nuake {
             out.precision(2);
             out << std::fixed << frameTime;
             text = out.str() + " ms";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
@@ -1009,7 +1009,7 @@ namespace Nuake {
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
-            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvailWidth(), 30), false))
+            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvail().x, 30), false))
             {
                 // Add entity.
                 if (ImGui::Button(ICON_FA_PLUS, ImVec2(30, 30)))

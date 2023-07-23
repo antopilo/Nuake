@@ -20,7 +20,7 @@ public:
                 ImGui::Text("Color");
 
                 ImGui::TableNextColumn();
-                ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
+                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
                 ImGui::ColorEdit3("##lightcolor", &component.Color.r, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
                 ImGui::PopItemWidth();
 
