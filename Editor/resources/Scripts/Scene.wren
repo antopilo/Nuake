@@ -75,6 +75,20 @@ class Scene {
 	// RigidBody
 	foreign static AddForce_(e, x, y, z)
 
+	// Physics
+	static RayCast(from, to) {
+		var results = Scene.RayCast_(from.x, from.y, from.z, to.x, to.y, to.z)
+
+		var points = []
+		for(r in results.count / 3) {
+			points.add(Vector3.new(points[r], points[r + 1], points[r + 2]))
+		}
+
+		return points
+	}
+
+	foreign static RayCast_(fromX, fromY, fromZ, toX, toY, toZ)
+
 	foreign static TriggerGetOverlappingBodyCount_(e)
 	foreign static TriggerGetOverlappingBodies_(e)
 

@@ -84,6 +84,7 @@ namespace Nuake
 
 	void WelcomeWindow::LoadQueuedProject()
 	{
+		FileSystem::SetRootDirectory(FileSystem::GetParentPath(queuedProjectPath));
 		auto project = Project::New();
 		auto projectFileData = FileSystem::ReadFile(queuedProjectPath, true);
 		try
@@ -274,14 +275,9 @@ namespace Nuake
 				{
 					assert(SelectedProject < std::size(_Projects));
 
-					using namespace Nuake;
-
 					SaveRecentFile();
 
-					std::string projectPath = _Projects[SelectedProject].Path;
-					FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
-
-					queuedProjectPath = projectPath;
+					queuedProjectPath = _Projects[SelectedProject].Path;;
 				}
 			}
 		}
