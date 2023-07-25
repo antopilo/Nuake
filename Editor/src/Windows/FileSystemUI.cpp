@@ -76,8 +76,11 @@ namespace Nuake
             m_hasClickedOnFile = true;
         }
 
-        const std::string rename = "Rename" + std::string("##") + hoverMenuId;
+        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
         bool shouldRename = false;
+
+        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
+        bool shouldDelete = false;
 
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
@@ -105,11 +108,7 @@ namespace Nuake
 
             if (ImGui::MenuItem("Delete"))
             {
-                if (FileSystem::DeleteFolder(directory->fullPath) != 0)
-                {
-                    Logger::Log("Failed to remove directory: " + directory->name, "editor", CRITICAL);
-                }
-                RefreshFileBrowser();
+                shouldDelete = true;
             }
 
             if (ImGui::MenuItem("Rename"))
@@ -127,13 +126,15 @@ namespace Nuake
             ImGui::EndPopup();
         }
 
+        // Rename Popup
+        
         if (shouldRename)
         {
             renameTempValue = directory->name;
-            PopupHelper::OpenPopup(rename);
+            PopupHelper::OpenPopup(renameId);
         }
-
-        if (PopupHelper::DefineTextDialog(rename, renameTempValue))
+        
+        if (PopupHelper::DefineTextDialog(renameId, renameTempValue))
         {
             if (OS::RenameDirectory(directory, renameTempValue) != 0)
             {
@@ -142,6 +143,23 @@ namespace Nuake
             RefreshFileBrowser();
             renameTempValue = "";
         }
+
+        // Delete Popup
+
+        if(shouldDelete)
+        {
+            PopupHelper::OpenPopup(deleteId);
+        }
+
+        if(PopupHelper::DefineConfirmationDialog(deleteId, " Are you sure you want to delete the folder and all its children?\n This action cannot be undone, and all data within the folder \n will be permanently lost."))
+        {
+            if (FileSystem::DeleteFolder(directory->fullPath) != 0)
+            {
+                Logger::Log("Failed to remove directory: " + directory->name, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+        }
+
 
         ImGui::Text(directory->name.c_str());
         ImGui::PopFont();
@@ -223,11 +241,14 @@ namespace Nuake
             m_hasClickedOnFile = true;
         }
 
-        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
+        const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
         bool shouldOpenScene = false;
 
-        const std::string rename = "Rename" + std::string("##") + hoverMenuId;
+        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
         bool shouldRename = false;
+
+        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
+        bool shouldDelete = false;
 
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
@@ -267,12 +288,7 @@ namespace Nuake
             {
                 if (ImGui::MenuItem("Delete"))
                 {
-
-                    if (FileSystem::DeleteFileFromPath(file->GetAbsolutePath()) != 0)
-                    {
-                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
-                    }
-                    RefreshFileBrowser();
+                    shouldDelete = true;
                 }
             }
             else 
@@ -314,10 +330,10 @@ namespace Nuake
 
         if (shouldOpenScene)
         {
-            PopupHelper::OpenPopup(openScene);
+            PopupHelper::OpenPopup(openSceneId);
         }
 
-        if (PopupHelper::DefineConfirmationDialog(openScene, " Open the scene? \n Changes will not be saved."))
+        if (PopupHelper::DefineConfirmationDialog(openSceneId, " Open the scene? \n Changes will not be saved."))
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();
@@ -336,10 +352,10 @@ namespace Nuake
         if (shouldRename)
         {
             renameTempValue = file->GetName();
-            PopupHelper::OpenPopup(rename);
+            PopupHelper::OpenPopup(renameId);
         }
 
-        if (PopupHelper::DefineTextDialog(rename, renameTempValue))
+        if (PopupHelper::DefineTextDialog(renameId, renameTempValue))
         {
             if(OS::RenameFile(file, renameTempValue) != 0)
             {
@@ -347,6 +363,22 @@ namespace Nuake
             }
             RefreshFileBrowser();
             renameTempValue = "";
+        }
+
+        // Delete Popup
+
+        if(shouldDelete)
+        {
+            PopupHelper::OpenPopup(deleteId);
+        }
+
+        if(PopupHelper::DefineConfirmationDialog(deleteId, " Are you sure you want to delete the file?\n This action cannot be undone, and all data \n will be permanently lost."))
+        {
+            if (FileSystem::DeleteFileFromPath(file->GetAbsolutePath()) != 0)
+            {
+                Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
         }
 
 
