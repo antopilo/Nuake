@@ -85,7 +85,6 @@ namespace Nuake
         bufferLayout.Push<float>(3); // Normal
         bufferLayout.Push<float>(3); // Tangent
         bufferLayout.Push<float>(3); // Bitangent
-        bufferLayout.Push<float>(1); // Texture
 
         m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
         m_VertexArray->Unbind();

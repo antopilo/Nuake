@@ -6,10 +6,12 @@
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
-#include <src/Rendering/PostFX/SSR.h>
+#include "src/Rendering/PostFX/SSR.h"
 
-namespace Nuake {
-	class SceneRenderer {
+namespace Nuake 
+{
+	class SceneRenderer 
+	{
 	public:
 		void Init();
 		void Cleanup();
@@ -32,7 +34,7 @@ namespace Nuake {
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
 		
-
+	private:
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);

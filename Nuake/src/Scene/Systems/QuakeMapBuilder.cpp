@@ -83,7 +83,7 @@ namespace Nuake {
                     Vector2(0,0),
                     vertexNormal,
                     vertexTangent,
-                    glm::vec3(0.0, 1.0, 0.0), 0.0f
+                    glm::vec3(0.0, 1.0, 0.0)
                     });
             }
 
@@ -162,7 +162,7 @@ namespace Nuake {
                     vertexUV,
                     vertexNormal,
                     vertexTangent,
-                    glm::vec3(0.0, 1.0, 0.0), 0.0f
+                    glm::vec3(0.0, 1.0, 0.0)
                 });
             }
 
@@ -296,8 +296,7 @@ namespace Nuake {
                         vertexUV,
                         vertexNormal,
                         vertexTangent,
-                        glm::vec3(0.0, 1.0, 0.0),
-                        0.0f
+                        glm::vec3(0.0, 1.0, 0.0)
                     }
                 );
             }
@@ -564,12 +563,11 @@ namespace Nuake {
                             Vector3 vertexBitangent = glm::cross(vertexNormal, vertexTangent) * (float)vertex.tangent.w;
 
                             vertices.push_back(Vertex {
-                                vertexPos * (1.0f/64.0f),
+                                vertexPos * (1.0f / 64.0f),
                                 vertexUV,
                                 vertexNormal,
                                 vertexTangent,
-                                vertexBitangent,
-                                0.0f
+                                vertexBitangent
                             });
                         }
 

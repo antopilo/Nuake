@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Core.h"
-#include "Core/Timestep.h"
 #include "Core/Maths.h"
+#include "Core/Timestep.h"
 
 struct GLFWwindow;
 
@@ -12,21 +12,6 @@ namespace Nuake
 
 	class Window
 	{
-	private:
-		const std::string DEFAULT_TITLE = "Untitled Window";
-		const uint32_t DEFAULT_WIDTH = 1280;
-		const uint32_t DEFAULT_HEIGHT = 720;
-
-		GLFWwindow* m_Window;
-
-		std::string m_Title;
-		uint32_t m_Width;
-		uint32_t m_Height;
-		Vector2 m_Position;
-
-		Ref<FrameBuffer> m_Framebuffer;
-		Ref<Scene> m_Scene;
-	
 	public:
 		Window();
 		~Window() = default;
@@ -37,10 +22,8 @@ namespace Nuake
 		bool ShouldClose();
 
 		int Init();
-
 		void Update(Timestep ts);
 		void FixedUpdate(Timestep ts);
-
 		void Draw();
 		void EndDraw();
 
@@ -65,7 +48,22 @@ namespace Nuake
 		void SetVSync(bool enabled);
 
 		void SetDecorated(bool enabled);
+
 	private:
+		const std::string DEFAULT_TITLE = "Untitled Window";
+		const uint32_t DEFAULT_WIDTH = 1280;
+		const uint32_t DEFAULT_HEIGHT = 720;
+
+		GLFWwindow* m_Window;
+
+		std::string m_Title;
+		uint32_t m_Width;
+		uint32_t m_Height;
+		Vector2 m_Position;
+
+		Ref<FrameBuffer> m_Framebuffer;
+		Ref<Scene> m_Scene;
+
 		void InitImgui();
 	};
 }
