@@ -251,7 +251,7 @@ namespace Nuake {
                 ImGui::FocusWindow(ImGui::GetCurrentWindow());
 
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
-                auto& gbuffer = Engine::GetCurrentScene()->mSceneRenderer->GetGBuffer();
+                auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
                 auto pixelPos = Input::GetMousePosition() - windowPosNuake;
                 pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
 
@@ -847,7 +847,7 @@ namespace Nuake {
 
                     ImGui::TableNextColumn();
 
-                    SSR* ssr = scene->mSceneRenderer->mSSR.get();
+                    SSR* ssr = scene->m_SceneRenderer->mSSR.get();
                     {
                         // Title
                         ImGui::Text("SSR RayStep");

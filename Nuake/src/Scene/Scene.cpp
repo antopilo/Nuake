@@ -46,8 +46,8 @@ namespace Nuake {
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 
-		mSceneRenderer = new SceneRenderer();
-		mSceneRenderer->Init();
+		m_SceneRenderer = new SceneRenderer();
+		m_SceneRenderer->Init();
 	}
 
 	Scene::~Scene() 
@@ -75,9 +75,9 @@ namespace Nuake {
 
 	Entity Scene::GetEntityByID(int id)
 	{
-		if (_EntitiesIDMap.find(id) != _EntitiesIDMap.end())
+		if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
 		{
-			return _EntitiesIDMap[id];
+			return m_EntitiesIDMap[id];
 		}
 
 		auto idView = m_Registry.view<NameComponent>();
@@ -87,7 +87,7 @@ namespace Nuake {
 			if (nameC.ID == id)
 			{
 				auto newEntity = Entity{ e, this };
-				_EntitiesIDMap[id] = newEntity;
+				m_EntitiesIDMap[id] = newEntity;
 				return newEntity;
 			}
 		}
@@ -158,14 +158,14 @@ namespace Nuake {
 			return;
 		}
 
-		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
-		mSceneRenderer->RenderScene(*this, framebuffer);
+		m_SceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
+		m_SceneRenderer->RenderScene(*this, framebuffer);
 	}
 
 	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
-		mSceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
-		mSceneRenderer->RenderScene(*this, framebuffer);
+		m_SceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
+		m_SceneRenderer->RenderScene(*this, framebuffer);
 	}
 	
 	std::vector<Entity> Scene::GetAllEntities() 
@@ -251,7 +251,7 @@ namespace Nuake {
 		nameComponent.Name = entityName;
 		nameComponent.ID = id;
 
-		_EntitiesIDMap[id] = entity;
+		m_EntitiesIDMap[id] = entity;
 
 		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;

@@ -37,10 +37,10 @@ namespace Nuake
 	public:
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
-		std::map<uint32_t, Entity> _EntitiesIDMap;
+		std::map<uint32_t, Entity> m_EntitiesIDMap;
 		std::string Path = "";
 
-		SceneRenderer* mSceneRenderer;
+		SceneRenderer* m_SceneRenderer;
 
 		static Ref<Scene> New();
 		Scene();
