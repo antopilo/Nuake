@@ -23,8 +23,10 @@
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/PrefabComponent.h>
 
-namespace Nuake {
-	namespace ScriptAPI {
+namespace Nuake 
+{
+	namespace ScriptAPI 
+	{
 		class SceneModule : public ScriptModule
 		{
 			std::string GetModuleName() override
@@ -56,6 +58,7 @@ namespace Nuake {
 
 				RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
 				RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
+				RegisterMethod("RayCast_(_,_,_,_,_,_)", (void*)Raycast);
 
 				RegisterMethod("AddForce_(_,_,_,_)", (void*)AddForce);
 
@@ -191,6 +194,7 @@ namespace Nuake {
 				double x = wrenGetSlotDouble(vm, 2);
 				double y = wrenGetSlotDouble(vm, 3);
 				double z = wrenGetSlotDouble(vm, 4);
+
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& cam = ent.GetComponent<CameraComponent>();
 				cam.CameraInstance->SetDirection(Vector3(x, y, z));
@@ -247,6 +251,37 @@ namespace Nuake {
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
 				bool result = PhysicsManager::Get().GetWorld()->IsCharacterGrounded(ent);
 				wrenSetSlotBool(vm, 0, result);
+			}
+
+			static void Raycast(WrenVM* vm)
+			{
+				const double& fromX = wrenGetSlotDouble(vm, 1);
+				const double& fromY = wrenGetSlotDouble(vm, 2);
+				const double& fromZ = wrenGetSlotDouble(vm, 3);
+				const auto& from = Vector3(fromX, fromY, fromZ);
+
+				const double& toX = wrenGetSlotDouble(vm, 4);
+				const double& toY = wrenGetSlotDouble(vm, 5);
+				const double& toZ = wrenGetSlotDouble(vm, 6);
+				const auto& to = Vector3(toX, toY, toZ);
+
+				const auto& result = PhysicsManager::Get().GetWorld()->Raycast(from, to);
+
+				// We multiply by 3 since we have 3 floats per hit result: vector3.
+				wrenEnsureSlots(vm, static_cast<double>(result.size() * 3));
+				wrenSetSlotNewList(vm, 0);
+
+				uint32_t index = 1;
+				for (auto& r : result)
+				{
+					wrenSetSlotDouble(vm, index,	 r.WorldPosition.x);
+					wrenSetSlotDouble(vm, index + 1, r.WorldPosition.y);
+					wrenSetSlotDouble(vm, index + 2, r.WorldPosition.z);
+					wrenInsertInList(vm, 0, -1, index);
+					wrenInsertInList(vm, 0, -1, index + 1);
+					wrenInsertInList(vm, 0, -1, index + 2);
+					index += 3;
+				}
 			}
 
 			static void MoveAndSlide(WrenVM* vm)

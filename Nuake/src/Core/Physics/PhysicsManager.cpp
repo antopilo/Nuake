@@ -37,7 +37,7 @@ namespace Nuake
 		m_World->Clear();
 	}
 
-	RaycastResult PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
+	std::vector<RaycastResult> PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
 	{
 		return m_World->Raycast(from, to);
 	}

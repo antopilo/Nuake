@@ -1,8 +1,9 @@
 #pragma once
+#include "src/Core/Core.h"
+#include "src/Core/Timestep.h"
+
 #include <glm/ext/vector_float3.hpp>
 #include "Rigibody.h"
-#include "src/Core/Timestep.h"
-#include "src/Core/Core.h"
 #include <map>
 #include "RaycastResult.h"
 
@@ -10,7 +11,7 @@
 #include "CharacterController.h"
 
 #include <Jolt/Jolt.h>
-#include "src/Core/Core.h"
+
 namespace JPH
 {
 	class PhysicsSystem;
@@ -32,7 +33,8 @@ namespace Nuake
 	class MyContactListener;
 	class MyBodyActivationListener;
 
-	namespace Physics {
+	namespace Physics 
+	{
 		class DynamicWorld 
 		{
 		private:
@@ -47,6 +49,7 @@ namespace Nuake
 
 			std::vector<uint32_t> _registeredBodies;
 			std::map<uint32_t, JPH::Character*> _registeredCharacters;
+
 		public:
 			DynamicWorld();
 
@@ -62,7 +65,7 @@ namespace Nuake
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(const Entity& entity, const Vector3& force);
 
-			RaycastResult Raycast(const Vector3& from, const Vector3& to);
+			std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
 			void StepSimulation(Timestep ts);
 			void Clear();
 
