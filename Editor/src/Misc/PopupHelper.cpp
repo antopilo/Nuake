@@ -45,7 +45,7 @@ bool PopupHelper::DefineTextDialog(const std::string& id, std::string& currentTe
         char buffer[256];
         memset(buffer, 0, sizeof(buffer));
         std::strncpy(buffer, currentText.c_str(), sizeof(buffer));
-        if (ImGui::InputText("", buffer, sizeof(buffer)))
+        if (ImGui::InputText("##label", buffer, sizeof(buffer)))
         {
             currentText = std::string(buffer);
         }
