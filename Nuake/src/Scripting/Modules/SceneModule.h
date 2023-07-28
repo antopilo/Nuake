@@ -194,6 +194,7 @@ namespace Nuake
 				double x = wrenGetSlotDouble(vm, 2);
 				double y = wrenGetSlotDouble(vm, 3);
 				double z = wrenGetSlotDouble(vm, 4);
+
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& cam = ent.GetComponent<CameraComponent>();
 				cam.CameraInstance->SetDirection(Vector3(x, y, z));

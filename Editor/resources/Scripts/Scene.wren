@@ -77,11 +77,19 @@ class Scene {
 
 	// Physics
 	static RayCast(from, to) {
+		// Fetch results from physics manager, returns a list of floats
+		// that we need to unpack into vector3
 		var results = Scene.RayCast_(from.x, from.y, from.z, to.x, to.y, to.z)
 
-		var points = []
-		for(r in results.count / 3) {
-			points.add(Vector3.new(points[r], points[r + 1], points[r + 2]))
+		var points = [] // Result array of vec3
+
+		var size = results.count / 3
+		var i = 0
+		while(i < size) {
+			// size is base 1 while array is base 0, offset by 1
+			var listIndex = i - 1
+			points.add(Vector3.new(results[listIndex], results[listIndex + 1], results[listIndex + 2]))
+			i = i + 1
 		}
 
 		return points
