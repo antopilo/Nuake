@@ -1375,7 +1375,7 @@ namespace Nuake {
 
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Open...", "CTRL+O"))
+                if (ImGui::MenuItem("Open..."))
                 {
                     OpenProject();
 
@@ -1406,7 +1406,7 @@ namespace Nuake {
                     Engine::LoadScene(Scene::New());
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Open scene...", "CTRL+SHIFT+O"))
+                if (ImGui::MenuItem("Open scene...", "CTRL+O"))
                 {
                     OpenScene();
                     Selection = EditorSelection();
@@ -1540,7 +1540,7 @@ namespace Nuake {
             }
             else if(ImGui::IsKeyPressed(ImGuiKey_O))
             {
-                OpenProject();
+                OpenScene();
                 
                 Selection = EditorSelection();
             }
