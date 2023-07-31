@@ -28,6 +28,10 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 #include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
+
+#include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
 namespace Nuake
 {
@@ -211,6 +215,7 @@ namespace Nuake
 
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, MyBroadPhaseCanCollide, MyObjectCanCollide);
+
 			// A body activation listener gets notified when bodies activate and go to sleep
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
 			// Registering one is entirely optional.
@@ -322,20 +327,36 @@ namespace Nuake
 			return false;
 		}
 
-		RaycastResult DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
+		std::vector<RaycastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
 		{
-			Vector3 localNorm = Vector3(0,0,0);
+			// Create jolt ray
+			const auto& fromJolt = JPH::Vec3(from.x, from.y, from.z);
+			const auto& toJolt = JPH::Vec3(to.x, to.y, to.z);
+			JPH::RayCast ray { fromJolt, toJolt - fromJolt };
+			JPH::AllHitCollisionCollector<JPH::RayCastBodyCollector> collector;
+			_JoltPhysicsSystem->GetBroadPhaseQuery().CastRay(ray, collector);
 
-			//Logger::Log("normal: x:" + std::to_string(localNorm.x) + " y:" + std::to_string(localNorm.y )+ "z: " + std::to_string(localNorm.z));
-			
-			// Map bullet result to dto.
-			RaycastResult result{
-				Vector3(0,0,0),
-				Vector3(0,0,0),
-				localNorm
-			};
+			// Fetch results
+			int num_hits = (int)collector.mHits.size();
+			JPH::BroadPhaseCastResult* results = collector.mHits.data();
 
-			return result;
+			// Format result
+			std::vector<RaycastResult> raycastResults;
+			for (int i = 0; i < num_hits; ++i)
+			{
+				const float hitFraction = results[i].mFraction;
+				const JPH::Vec3& hitPosition = ray.GetPointOnRay(results[i].mFraction);
+
+				RaycastResult result
+				{
+					Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
+					hitFraction
+				};
+
+				raycastResults.push_back(std::move(result));
+			}
+
+			return raycastResults;
 		}
 
 		void DynamicWorld::SyncEntitiesTranforms()
