@@ -419,14 +419,14 @@ namespace Nuake
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
 			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 16;
+			constexpr int maxStepCount = 32;
 			if(ts > minStepDuration)
 			{
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
 			}
 
 			// Prevents having too many steps and running out of jobs
-			//collisionSteps = std::min(collisionSteps, maxStepCount);
+			collisionSteps = std::min(collisionSteps, maxStepCount);
 
 			// If you want more accurate step results you can do multiple sub steps within a collision step. Usually you would set this to 1.
 			constexpr int subSteps = 1;
