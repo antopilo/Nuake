@@ -228,5 +228,15 @@ namespace Nuake
 		const auto& split = String::Split(path, '\\');
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
+
+	void FileSystem::SearchFilesWithKeyword(const std::string& keyword, const std::string& directory) {
+		const std::string& sanitizedKeyword = String::Sanitize(keyword);
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
+			if (entry.is_regular_file() && entry.path().filename().string().find(sanitizedKeyword) != std::string::npos) {
+				std::cout << entry.path() << std::endl;
+			}
+		}
+	}
+
 	
 }

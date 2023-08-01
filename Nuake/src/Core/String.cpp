@@ -1,5 +1,6 @@
 #include "String.h"
 #include <iostream>
+#include <regex>
 #include <sstream>
 
 namespace Nuake 
@@ -34,6 +35,18 @@ namespace Nuake
 		std::string result = string;
 		result.erase(remove_if(result.begin(), result.end(), isspace), result.end());
 		return result;
+	}
+
+	std::string String::Sanitize(const std::string& keyword) {
+		std::string sanitizedKeyword = keyword;
+
+		// Remove spaces, underscores, and hyphens using regex
+		sanitizedKeyword = std::regex_replace(sanitizedKeyword, std::regex("[ _-]+"), "");
+
+		// Convert to lowercase
+		std::transform(sanitizedKeyword.begin(), sanitizedKeyword.end(), sanitizedKeyword.begin(), ::tolower);
+
+		return sanitizedKeyword;
 	}
 
 	std::vector<std::string> String::Split(const std::string& string, char delimiter)
