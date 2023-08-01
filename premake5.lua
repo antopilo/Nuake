@@ -90,10 +90,16 @@ project "Editor"
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")
 
+    defines 
+    {
+        
+    }
+
     files
     {
-        "%{prj.name}/**.h",
-        "%{prj.name}/**.cpp",
+        "%{prj.name}/Editor.cpp",
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/**.h",
         "%{prj.name}/resources/*.rc",
         "%{prj.name}/resources/**.ico"
     }

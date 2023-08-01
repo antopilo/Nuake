@@ -35,7 +35,7 @@ GizmoDrawer::GizmoDrawer()
 	GenerateSphereGizmo();
 
 	// Box
-	const Color cubeColor = Color(1, 0, 0, 1);
+	const Color cubeColor = Color(1, 0, 0, 0.5f);
 	std::vector<LineVertex> mBoxVertices = 
 	{
 		LineVertex{Vector3(-1.f, -1.f, -1.f), cubeColor},
@@ -110,8 +110,8 @@ void GizmoDrawer::GenerateSphereGizmo()
 			vert2 = Vector3(x2, 0, z2);
 		}
 
-		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 1.0) });
-		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 1.0) });
+		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 0.5) });
+		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 0.5) });
 	}
 
 	mCircleBuffer = CreateRef<Nuake::VertexArray>();
