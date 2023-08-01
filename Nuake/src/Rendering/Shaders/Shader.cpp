@@ -26,6 +26,8 @@ namespace Nuake
 
 		Source = newSource;
 		ProgramId = newProgramId;
+
+		return true;
 	}
 
 	// Bind the shader
