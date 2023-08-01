@@ -62,21 +62,21 @@ void CylinderGizmo::CreateMesh()
 			vert2 = Vector3(x2, bottomCircleHeight, z2);
 		}
 
-		_CylinderVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 1.0) });
-		_CylinderVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 1.0) });
+		_CylinderVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 0.5) });
+		_CylinderVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 0.5) });
 	}
 
-	_CylinderVertices.push_back(LineVertex{ Vector3(radius, bottomCircleHeight, 0), Color(1.0, 0, 0.0, 1.0) });
-	_CylinderVertices.push_back(LineVertex{ Vector3(radius, topCircleHeight, 0), Color(1.0, 0, 0.0, 1.0) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(radius, bottomCircleHeight, 0), Color(1.0, 0, 0.0, 0.5) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(radius, topCircleHeight, 0), Color(1.0, 0, 0.0, 0.5) });
 
-	_CylinderVertices.push_back(LineVertex{ Vector3(-radius, bottomCircleHeight, 0), Color(1.0, 0, 0.0, 1.0) });
-	_CylinderVertices.push_back(LineVertex{ Vector3(-radius, topCircleHeight, 0), Color(1.0, 0, 0.0, 1.0) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(-radius, bottomCircleHeight, 0), Color(1.0, 0, 0.0, 0.5) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(-radius, topCircleHeight, 0), Color(1.0, 0, 0.0, 0.5) });
 
-	_CylinderVertices.push_back(LineVertex{ Vector3(0, bottomCircleHeight, radius), Color(1.0, 0, 0.0, 1.0) });
-	_CylinderVertices.push_back(LineVertex{ Vector3(0, topCircleHeight, radius), Color(1.0, 0, 0.0, 1.0) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(0, bottomCircleHeight, radius), Color(1.0, 0, 0.0, 0.5) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(0, topCircleHeight, radius), Color(1.0, 0, 0.0, 0.5) });
 
-	_CylinderVertices.push_back(LineVertex{ Vector3(0, bottomCircleHeight, -radius), Color(1.0, 0, 0.0, 1.0) });
-	_CylinderVertices.push_back(LineVertex{ Vector3(0, topCircleHeight, -radius), Color(1.0, 0, 0.0, 1.0) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(0, bottomCircleHeight, -radius), Color(1.0, 0, 0.0, 0.5) });
+	_CylinderVertices.push_back(LineVertex{ Vector3(0, topCircleHeight, -radius), Color(1.0, 0, 0.0, 0.5) });
 
 	_CylinderBuffer = CreateRef<Nuake::VertexArray>();
 	_CylinderBuffer->Bind();

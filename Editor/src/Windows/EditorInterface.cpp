@@ -246,7 +246,7 @@ namespace Nuake {
             }
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2) && !ImGuizmo::IsUsing())
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
             {
                 ImGui::FocusWindow(ImGui::GetCurrentWindow());
 
