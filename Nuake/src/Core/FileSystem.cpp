@@ -57,7 +57,6 @@ namespace Nuake
 	std::string FileSystem::Root = "";
 
 	Ref<Directory> FileSystem::RootDirectory;
-	std::vector<std::filesystem::path> FileSystem::FilteredDirectories;
 
 	void FileSystem::ScanDirectory(Ref<Directory> directory)
 	{
@@ -71,20 +70,16 @@ namespace Nuake
 
 				newDir->Parent = directory;
 				ScanDirectory(newDir);
-
 				directory->Directories.push_back(newDir);
 			}
 			else if (entry.is_regular_file())
 			{
 				std::filesystem::path currentPath = entry.path();
-				if (FilteredDirectories.empty() || std::find(FilteredDirectories.begin(), FilteredDirectories.end(), currentPath) != FilteredDirectories.end())
-				{
-					std::string absolutePath = currentPath.string();
-					std::string name = currentPath.filename().string();
-					std::string extension = currentPath.extension().string();
-					Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
-					directory->Files.push_back(newFile);
-				}
+				std::string absolutePath = currentPath.string();
+				std::string name = currentPath.filename().string();
+				std::string extension = currentPath.extension().string();
+				Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
+				directory->Files.push_back(newFile);
 			}
 		}
 	}
@@ -229,17 +224,5 @@ namespace Nuake
 		const auto& split = String::Split(path, '\\');
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
-
-	std::vector<std::filesystem::path> FileSystem::SearchFilesWithKeyword(const std::string& keyword, const std::string& directory) {
-		std::vector<std::filesystem::path> result;
-		const std::string& sanitizedKeyword = String::Sanitize(keyword);
-		for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
-			if (entry.is_regular_file() && entry.path().filename().string().find(sanitizedKeyword) != std::string::npos) {
-				result.push_back(entry.path());
-			}
-		}
-		return result;
-	}
-
 	
 }
