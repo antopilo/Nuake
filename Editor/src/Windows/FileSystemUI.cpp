@@ -626,12 +626,6 @@ namespace Nuake
                     if (ImGui::InputTextEx("##Search", "Asset search & filter ..", buffer, sizeof(buffer), ImVec2(ImGui::GetContentRegionAvail().x, 24), ImGuiInputTextFlags_EscapeClearsAll))
                     {
                         m_searchKeyWord = std::string(buffer);
-                        // FileSystem::FilteredFiles = FileSystem::SearchFilesWithKeyword(m_searchKeyWord, FileSystem::RootDirectory->fullPath);
-                        // if(m_searchKeyWord.empty())
-                        // {
-                        //     FileSystem::FilteredFiles.clear();
-                        // }
-                        //RefreshFileBrowser();
                     }
                     ImGui::EndChild();
 
