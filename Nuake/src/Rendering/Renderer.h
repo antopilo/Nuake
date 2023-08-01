@@ -51,6 +51,7 @@ namespace Nuake
 		static Ref<UniformBuffer> m_LightsUniformBuffer;
 
 		static Ref<Mesh> CubeMesh;
+		static Ref<Mesh> QuadMesh;
 
 		static void Init();
 		static void LoadShaders();
