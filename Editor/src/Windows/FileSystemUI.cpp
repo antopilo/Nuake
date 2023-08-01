@@ -583,6 +583,22 @@ namespace Nuake
                     const uint32_t numButtonAfterPathBrowser = 2;
                     ImGui::SameLine();
 
+                    char buffer[256];
+                    memset(buffer, 0, sizeof(buffer));
+                    std::strncpy(buffer, m_searchKeyWord.c_str(), sizeof(buffer));
+                    
+                    if (ImGui::InputTextWithHint("##Search", "Asset search & filter ..", buffer, sizeof(buffer)))
+                    {
+                        m_searchKeyWord = std::string(buffer);
+                        FileSystem::FilteredDirectories = FileSystem::SearchFilesWithKeyword(m_searchKeyWord, FileSystem::RootDirectory->fullPath);
+                        RefreshFileBrowser();
+
+                        // TODO: Fix when creating a new file
+                    }
+                    
+
+                    ImGui::SameLine();
+
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
                     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));

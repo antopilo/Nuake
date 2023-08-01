@@ -25,6 +25,7 @@ namespace Nuake
 		static std::string Root;
 
 		static Ref<Directory> RootDirectory;
+		static std::vector<std::filesystem::path> FilteredDirectories;
 
 		static void SetRootDirectory(const std::string path);
 
@@ -34,7 +35,7 @@ namespace Nuake
 		static Ref<Directory> GetFileTree();
 		static Ref<File> GetFile(const std::string& path);
 		static std::string GetFileNameFromPath(const std::string& path);
-		static void FileSystem::SearchFilesWithKeyword(const std::string& keyword, const std::string& directory);
+		static std::vector<std::filesystem::path> FileSystem::SearchFilesWithKeyword(const std::string& keyword, const std::string& directory);
 		static void ScanDirectory(Ref<Directory> directory);
 		static void GetDirectories();
 
