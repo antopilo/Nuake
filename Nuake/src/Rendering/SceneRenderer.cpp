@@ -258,27 +258,30 @@ namespace Nuake
 			{
 				auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
 
-				if (!visibility.Visible)
+				if (!visibility.Visible || !sprite.SpriteMesh)
 					continue;
 
-				auto finalQuadTransform = transform.GetGlobalTransform();
+				auto& finalQuadTransform = transform.GetGlobalTransform();
 				if (sprite.Billboard)
 				{
-					Matrix4 finalMatrix;
 					finalQuadTransform = glm::inverse(mView);
 
 					if (sprite.LockYRotation)
 					{
+						// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
 						finalQuadTransform[1] = Vector4(0, 1, 0, 0);
 						finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
 						finalQuadTransform = finalQuadTransform;
-						//finalQuadTransform[1] = Vector4(0, 1, 0, 1);
 					}
 
+					// Translation
 					finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+
+					// Scale
+					finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
 				}
 
-				Renderer::SubmitMesh(Renderer::QuadMesh, finalQuadTransform, (uint32_t)e);
+				Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
 			}
 			Renderer::Flush(gBufferShader, false);
 		}

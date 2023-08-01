@@ -2,6 +2,7 @@
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Textures/Texture.h"
+#include "src/Rendering/Mesh/Mesh.h"
 
 namespace Nuake 
 {
@@ -11,7 +12,7 @@ namespace Nuake
 		bool Billboard;
 		bool LockYRotation;
 		std::string SpritePath;
-		Ref<Texture> Sprite;
+		Ref<Mesh> SpriteMesh;
 
 		SpriteComponent();
 
