@@ -29,7 +29,6 @@ namespace Nuake
 
 		void LoadMaterials();
 
-
 		void RegisterMaterial(Ref<Material> material);
 
 		Ref<Material> LoadMaterial(std::string path);

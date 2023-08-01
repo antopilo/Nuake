@@ -33,6 +33,7 @@ namespace Nuake
 	{
 	private:
 		static RenderList m_RenderList;
+
 	public:
 		static VertexArray* QuadVertexArray;
 		static VertexBuffer* QuadVertexBuffer;
@@ -66,7 +67,6 @@ namespace Nuake
 
 		// Lights
 		static std::vector<Light> m_Lights;
-		static void RegisterLight(TransformComponent transform, LightComponent light);
 		static void RegisterDeferredLight(TransformComponent transform, LightComponent light);
 
 		// Debug
