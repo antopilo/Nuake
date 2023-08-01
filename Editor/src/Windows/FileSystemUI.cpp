@@ -593,7 +593,10 @@ namespace Nuake
                         FileSystem::FilteredDirectories = FileSystem::SearchFilesWithKeyword(m_searchKeyWord, FileSystem::RootDirectory->fullPath);
                         RefreshFileBrowser();
 
-                        // TODO: Fix when creating a new file
+                        if(m_searchKeyWord.empty())
+                        {
+                            FileSystem::FilteredDirectories.clear();
+                        }
                     }
                     
 
