@@ -248,7 +248,7 @@ namespace Nuake
 
     void Window::SetVSync(bool enabled)
     {
-        glfwSwapInterval(enabled ? 1: 0);
+        glfwSwapInterval(enabled ? 1 : 0);
     }
 
     void Window::SetDecorated(bool enabled)

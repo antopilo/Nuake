@@ -37,7 +37,8 @@ namespace Nuake
 		return result;
 	}
 
-	std::string String::Sanitize(const std::string& keyword) {
+	std::string String::Sanitize(const std::string& keyword)
+	{
 		std::string sanitizedKeyword = keyword;
 
 		// Remove spaces, underscores, and hyphens using regex
