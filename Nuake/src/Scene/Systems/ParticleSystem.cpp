@@ -28,10 +28,12 @@ namespace Nuake
 			// Copy emitter settings from component to real emitter
 			auto& emitter = emitterComponent.Emitter;
 			emitter.Amount = emitterComponent.Amount;
+			emitter.ParticleColor = emitterComponent.ParticleColor;
 			emitter.Gravity = emitterComponent.Gravity;
 			emitter.GravityRandom = emitterComponent.GravityRandom;
-			emitter.Radius = emitterComponent.Radius;
+			emitter.SetRadius(emitterComponent.Radius);
 			emitter.Life = emitterComponent.Life;
+			emitter.Rate = emitterComponent.Rate;
 
 			// Spawn particle if possible
 			emitterComponent.Emitter.SpawnParticle();

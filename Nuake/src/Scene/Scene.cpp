@@ -77,10 +77,10 @@ namespace Nuake {
 
 	Entity Scene::GetEntityByID(int id)
 	{
-		if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
-		{
-			return m_EntitiesIDMap[id];
-		}
+		//if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
+		//{
+		//	return m_EntitiesIDMap[id];
+		//}
 
 		auto idView = m_Registry.view<NameComponent>();
 		for (auto e : idView) 

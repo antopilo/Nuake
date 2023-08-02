@@ -17,10 +17,15 @@ namespace Nuake
 		Vector3 Gravity = Vector3(0, 0, 0);
 		float GravityRandom = 0.0f;
 		float Radius = 1.0f;
+		float Rate = 0.0f;
+		Color ParticleColor;
 
 	private:
+		float RateTimer = 0.0f;
 		std::mt19937 m_MT;
 		std::uniform_real_distribution<float> m_Random;
+
+		void RecreateRandom();
 
 	public:
 		ParticleEmitter();
@@ -29,6 +34,7 @@ namespace Nuake
 		void SpawnParticle();
 		void Update(Timestep ts);
 
+		void SetRadius(float radius);
 		std::vector<Particle> Particles;
 	};
 }

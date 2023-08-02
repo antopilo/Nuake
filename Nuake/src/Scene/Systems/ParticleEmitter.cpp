@@ -5,7 +5,12 @@ namespace Nuake
 	ParticleEmitter::ParticleEmitter()
 	{
 		m_MT = std::mt19937(std::random_device()());
-		m_Random = std::uniform_real_distribution<float>(-Radius, Radius);
+		SetRadius(1.0f);
+	}
+
+	void ParticleEmitter::RecreateRandom()
+	{
+
 	}
 
 	void ParticleEmitter::SpawnParticle()
@@ -16,21 +21,31 @@ namespace Nuake
 			return;
 		}
 
-		const auto initialPosition = Vector3(m_Random(m_MT), m_Random(m_MT), m_Random(m_MT));
-		const auto initialVelocity = Vector3();
-		const auto initialColor = Color(1, 0, 0, 1); // TODO: Use color.
-		const float initialLife = Life;
+		if (Rate == 0.0f || RateTimer > Rate)
+		{
+			const auto initialPosition = Vector3(m_Random(m_MT), m_Random(m_MT), m_Random(m_MT));
+			const auto initialVelocity = Vector3();
+			const auto initialColor = ParticleColor;
+			const float initialLife = Life;
 
-		Particles.push_back({
-			initialPosition,
-			initialVelocity,
-			initialColor,
-			initialLife
-		});
+			Particles.push_back({
+				initialPosition,
+				initialVelocity,
+				initialColor,
+				initialLife
+			});
+
+			RateTimer = 0.0f;
+		}
 	}
 
 	void ParticleEmitter::Update(Timestep ts)
 	{
+		if (Rate != 0.0f)
+		{
+			RateTimer += ts;
+		}
+
 		std::vector<uint32_t> deletionQueue;
 		int i = 0;
 		for (auto& p : Particles)
@@ -58,6 +73,15 @@ namespace Nuake
 		{
 			p.Velocity += Gravity * static_cast<float>(ts);
 			p.Position += p.Velocity * static_cast<float>(ts);
+		}
+	}
+
+	void ParticleEmitter::SetRadius(float radius)
+	{
+		if (Radius != radius)
+		{
+			Radius = radius;
+			m_Random = std::uniform_real_distribution<float>(-Radius, Radius);
 		}
 	}
 }

@@ -16,7 +16,8 @@ namespace Nuake
 
 		Color ParticleColor;
 		float Amount;
-		float Life;
+		float Life = 1.0f;
+		float Rate = 0.0f;
 
 		Vector3 Gravity;
 		float GravityRandom;

@@ -16,6 +16,7 @@
 #include <src/Scene/Components/CylinderColliderComponent.h>
 #include <src/Scene/Components/MeshCollider.h>
 #include <src/Scene/Components/ModelComponent.h>
+#include <src/Scene/Components/ParticleEmitterComponent.h>
 
 
 GizmoDrawer::GizmoDrawer()
@@ -215,6 +216,18 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 
 		_CylinderEntity[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
+	}
+
+	auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
+	for (auto e : particleView)
+	{
+		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
+		mLineShader->Bind();
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation), Vector3(particle.Radius)));
+		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		mCircleBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
 	auto meshColliderView = scene->m_Registry.view<TransformComponent, MeshColliderComponent, ModelComponent>();

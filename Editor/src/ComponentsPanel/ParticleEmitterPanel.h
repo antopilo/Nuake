@@ -41,6 +41,15 @@ public:
 			}
 			ImGui::TableNextColumn();
 			{
+				ImGui::Text("Rate");
+				ImGui::TableNextColumn();
+
+				ImGui::DragFloat("##ParticleRate", &component.Rate, 0.1f, 0.0f, 10.0f);
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.Rate, 0.0f);
+			}
+			ImGui::TableNextColumn();
+			{
 				ImGui::Text("Life");
 				ImGui::TableNextColumn();
 
