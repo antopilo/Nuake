@@ -211,28 +211,42 @@ namespace Nuake
             {
                 Editor->Selection = EditorSelection(file);
             }
+        }
 
-            if (ImGui::BeginDragDropSource())
+        if (ImGui::BeginDragDropSource())
             {
                 char pathBuffer[256];
                 std::strncpy(pathBuffer, file->GetAbsolutePath().c_str(), sizeof(pathBuffer));
                 std::string dragType;
                 if (fileExtension == ".wren")
+                {
                     dragType = "_Script";
+                }
                 else if (fileExtension == ".map")
+                {
                     dragType = "_Map";
+                }
                 else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx")
+                {
                     dragType = "_Model";
+                }
                 else if (fileExtension == ".interface")
+                {
                     dragType = "_Interface";
+                }
                 else if (fileExtension == ".prefab")
+                {
                     dragType = "_Prefab";
+                }
+                else if (fileExtension == ".png" || fileExtension == ".jpg")
+                {
+                    dragType = "_Image";
+                }
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
                 ImGui::Text(file->GetName().c_str());
                 ImGui::EndDragDropSource();
             }
-        }
 
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))

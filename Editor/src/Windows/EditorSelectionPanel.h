@@ -18,6 +18,8 @@
 #include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
+#include "../ComponentsPanel/SpritePanel.h"
+
 
 class EditorSelectionPanel {
 private:
@@ -33,7 +35,7 @@ private:
 	MeshColliderPanel mMeshColliderPanel;
 	CapsuleColliderPanel mCapsuleColliderPanel;
 	CylinderColliderPanel mCylinderColliderPanel;
-
+	SpritePanel mSpritePanel;
 	CharacterControllerPanel mCharacterControllerPanel;
 
 	Ref<Nuake::File> currentFile;
