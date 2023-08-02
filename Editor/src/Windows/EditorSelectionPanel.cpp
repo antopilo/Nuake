@@ -87,6 +87,11 @@ void EditorSelectionPanel::DrawNone()
 
 void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 {
+	if (!entity.IsValid())
+	{
+		return;
+	}
+
     DrawAddComponentMenu(entity);
 
     // Draw each component properties panels.
