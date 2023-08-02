@@ -532,8 +532,6 @@ namespace Nuake
             ImGui::EndChild();
             ImGui::SameLine();
 
-            avail = ImGui::GetContentRegionAvail();
-
             std::vector<Ref<Directory>> paths = std::vector<Ref<Directory>>();
 
             Ref<Directory> currentParent = m_CurrentDirectory;
@@ -581,12 +579,13 @@ namespace Nuake
                     }
                    
                     const uint32_t numButtonAfterPathBrowser = 2;
+                    const uint32_t searchBarSize = 6; 
                     ImGui::SameLine();
 
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
                     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth) - 4.0, 24));
+                    ImGui::BeginChild("pathBrowser", ImVec2((ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth * searchBarSize)) - 4.0, 24));
                     for (int i = paths.size() - 1; i > 0; i--) 
                     {
                         if (i != paths.size())
@@ -610,13 +609,23 @@ namespace Nuake
                         ImGui::SameLine();
                         ImGui::Text("/");
                     }
-
                     ImGui::EndChild();
                     ImGui::PopStyleVar();
 
-
                     ImGui::PopStyleVar();
                     ImGui::PopStyleColor();
+                    
+                    ImGui::SameLine();
+
+                    ImGui::BeginChild("searchBar", ImVec2(ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth), 24));
+                    char buffer[256];
+                    memset(buffer, 0, sizeof(buffer));
+                    std::strncpy(buffer, m_searchKeyWord.c_str(), sizeof(buffer));
+                    if (ImGui::InputTextEx("##Search", "Asset search & filter ..", buffer, sizeof(buffer), ImVec2(ImGui::GetContentRegionAvail().x, 24), ImGuiInputTextFlags_EscapeClearsAll))
+                    {
+                        m_searchKeyWord = std::string(buffer);
+                    }
+                    ImGui::EndChild();
 
                     ImGui::SameLine();
 
@@ -633,8 +642,9 @@ namespace Nuake
                     }
 
                     ImGui::PopStyleColor(); // Button color
+                    
+                    ImGui::SameLine();
                 }
-
                 ImGui::EndChild();
 
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -668,13 +678,16 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                if (i + 1 % amount != 0)
-                                    ImGui::TableNextColumn();
-                                else
-                                    ImGui::TableNextRow();
+                                if(String::Sanitize(d->name).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                {
+                                    if (i + 1 % amount != 0)
+                                        ImGui::TableNextColumn();
+                                    else
+                                        ImGui::TableNextRow();
 
-                                DrawDirectory(d, i);
-                                i++;
+                                    DrawDirectory(d, i);
+                                    i++;
+                                }
                             }
                         }
 
@@ -682,13 +695,16 @@ namespace Nuake
                         {
                             for (auto f : m_CurrentDirectory->Files)
                             {
-                                if (i - 1 % amount != 0 || i == 1)
-                                    ImGui::TableNextColumn();
-                                else
-                                    ImGui::TableNextRow();
+                                if(String::Sanitize(f->GetName()).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                {
+                                    if (i - 1 % amount != 0 || i == 1)
+                                        ImGui::TableNextColumn();
+                                    else
+                                        ImGui::TableNextRow();
                                 
-                                DrawFile(f, i);
-                                i++;
+                                    DrawFile(f, i);
+                                    i++;
+                                }
                             }
                         }
 

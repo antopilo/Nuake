@@ -15,6 +15,7 @@ namespace Nuake
 		static bool EndsWith(const std::string& string, const std::string& end);
 		static bool IsDigit(const char& character);
 		static std::string RemoveWhiteSpace(const std::string& string);
+		static std::string Sanitize(const std::string& keyword);
 		static std::vector<std::string> Split(const std::string& string, char delimiter);
 
 		static float ToFloat(const std::string& string);

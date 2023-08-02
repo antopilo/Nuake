@@ -67,7 +67,7 @@ namespace Nuake
         SetWindowIcon("resources/Images/nuake-logo.png");
 
         glfwMakeContextCurrent(m_Window);
-        //SetVSync(true)
+        SetVSync(true);
 
         Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
 
@@ -248,7 +248,7 @@ namespace Nuake
 
     void Window::SetVSync(bool enabled)
     {
-        glfwSwapInterval(enabled ? 0 : 1);
+        glfwSwapInterval(enabled ? 1 : 0);
     }
 
     void Window::SetDecorated(bool enabled)

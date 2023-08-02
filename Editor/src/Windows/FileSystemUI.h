@@ -12,6 +12,7 @@ namespace Nuake {
 	public:
 		static Ref<Directory> m_CurrentDirectory;
 		bool m_hasClickedOnFile;
+		std::string m_searchKeyWord;
 
 		FileSystemUI(EditorInterface* editor)
 		{
