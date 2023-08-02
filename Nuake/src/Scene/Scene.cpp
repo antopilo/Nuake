@@ -77,10 +77,10 @@ namespace Nuake {
 
 	Entity Scene::GetEntityByID(int id)
 	{
-		//if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
-		//{
-		//	return m_EntitiesIDMap[id];
-		//}
+		if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
+		{
+			return m_EntitiesIDMap[id];
+		}
 
 		auto idView = m_Registry.view<NameComponent>();
 		for (auto e : idView) 
@@ -273,11 +273,15 @@ namespace Nuake {
 
 		for (auto& c : copyChildrens) 
 		{
-			Logger::Log("Deleting entity " + std::to_string(c.GetHandle()));
 			DestroyEntity(c);
 		}
 
-		Logger::Log("Deleted entity" + std::to_string(entity.GetHandle()) + " - " + entity.GetComponent<NameComponent>().Name);
+		// Remove from ID to Entity cache
+		if (m_EntitiesIDMap.find(entity.GetComponent<NameComponent>().ID) != m_EntitiesIDMap.end())
+		{
+			m_EntitiesIDMap.erase(entity.GetComponent<NameComponent>().ID);
+		}
+
 		entity.Destroy();
 		m_Registry.shrink_to_fit();
 	}
