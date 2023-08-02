@@ -331,7 +331,7 @@ namespace Nuake
 		{
 			// Create jolt ray
 			const auto& fromJolt = JPH::Vec3(from.x, from.y, from.z);
-			const auto& toJolt = JPH::Vec3(to.x , to.y, to.z);
+			const auto& toJolt = JPH::Vec3(to.x, to.y, to.z);
 			JPH::RayCast ray { fromJolt, toJolt - fromJolt };
 			JPH::AllHitCollisionCollector<JPH::RayCastBodyCollector> collector;
 			_JoltPhysicsSystem->GetBroadPhaseQuery().CastRay(ray, collector);
