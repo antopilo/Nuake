@@ -3,6 +3,7 @@
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
+#include "src/Scene/Systems/ParticleSystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
@@ -45,6 +46,7 @@ namespace Nuake {
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
 		m_SceneRenderer = new SceneRenderer();
 		m_SceneRenderer->Init();
