@@ -1,5 +1,9 @@
 #pragma once
 #include <src/Scene/Systems/System.h>
+#include <src/Core/Maths.h>
+
+#include <random>
+
 
 namespace Nuake
 {
@@ -13,7 +17,5 @@ namespace Nuake
 		void EditorUpdate() override;
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
-
-	private:
 	};
 }

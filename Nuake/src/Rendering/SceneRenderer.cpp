@@ -3,8 +3,10 @@
 
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/SpriteComponent.h"
+#include "src/Scene/Components/ParticleEmitterComponent.h"
 
 #include <GL\glew.h>
+
 
 namespace Nuake 
 {
@@ -231,6 +233,7 @@ namespace Nuake
 
 						Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
 					}
+
 					Renderer::Flush(shader, true);
 				}
 			}
@@ -286,7 +289,7 @@ namespace Nuake
 
 			// Sprites
 			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
-			for (auto e : spriteView)
+			for (auto& e : spriteView)
 			{
 				auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
 
@@ -315,6 +318,34 @@ namespace Nuake
 
 				Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
 			}
+			Renderer::Flush(gBufferShader, false);
+
+			// Particles
+			auto particleEmitterView = scene.m_Registry.view<TransformComponent, ParticleEmitterComponent, VisibilityComponent>();
+			for (auto& e : particleEmitterView)
+			{
+				auto [transform, emitterComponent, visibility] = particleEmitterView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
+
+				if (!visibility.Visible)
+					continue;
+
+				auto initialTransform = transform.GetGlobalTransform();
+				for (auto& p : emitterComponent.Emitter.Particles)
+				{
+					Matrix4 particleTransform = initialTransform;
+					particleTransform = glm::inverse(mView);
+
+					// Translation
+					const Vector3& particleGlobalPosition = transform.GetGlobalPosition() + p.Position;
+					particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+					// Scale
+					particleTransform = glm::scale(particleTransform, transform.GetGlobalScale());
+
+					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
+				}
+			}
+
 			Renderer::Flush(gBufferShader, false);
 		}
 	}

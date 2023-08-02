@@ -1,7 +1,10 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 #include "src/Resource/Serializable.h"
-#include <src/Core/Maths.h>
+
+#include "src/Scene/Systems/ParticleEmitter.h"
+
 
 namespace Nuake
 {
@@ -20,6 +23,8 @@ namespace Nuake
 
 		// For now use a radius, later should use shape.
 		float Radius;
+
+		ParticleEmitter Emitter;
 
 	public:
 		json Serialize();

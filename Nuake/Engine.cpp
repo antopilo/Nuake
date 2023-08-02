@@ -53,21 +53,19 @@ namespace Nuake
 			s_CurrentWindow->Update(s_TimeStep);
 
 			// Play mode update all the entities, Editor does not.
-			if (Engine::IsPlayMode()) 
-			{
-				s_FixedUpdateDifference += s_TimeStep;
-
-				// Fixed update
-				while (s_FixedUpdateDifference >= s_FixedUpdateRate) 
-				{
-					s_CurrentWindow->FixedUpdate(s_FixedUpdateDifference);
-
-					s_FixedUpdateDifference -= s_FixedUpdateRate;
-				}
-			}
-			else
+			if (!Engine::IsPlayMode())
 			{
 				GetCurrentScene()->EditorUpdate(s_TimeStep);
+			}
+
+			s_FixedUpdateDifference += s_TimeStep;
+
+			// Fixed update
+			while (s_FixedUpdateDifference >= s_FixedUpdateRate) 
+			{
+				s_CurrentWindow->FixedUpdate(s_FixedUpdateDifference);
+
+				s_FixedUpdateDifference -= s_FixedUpdateRate;
 			}
 		}
 
