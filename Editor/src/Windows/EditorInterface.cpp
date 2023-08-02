@@ -457,7 +457,7 @@ namespace Nuake {
         if (ImGui::Begin("Environnement"))
         {
             BEGIN_COLLAPSE_HEADER(SKY);
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -622,7 +622,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(BLOOM)
-                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -684,7 +684,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(VOLUMETRIC)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -748,7 +748,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(SSAO)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -839,7 +839,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(SSR)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -1031,10 +1031,10 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody))
+                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp))
                 {
                     std::string icon = ICON_FA_EYE;
-                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 16);
+                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 32);
                     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
                     ImGui::TableHeadersRow();
                     ImGui::TableNextRow();
