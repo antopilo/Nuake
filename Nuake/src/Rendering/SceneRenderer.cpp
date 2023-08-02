@@ -329,6 +329,7 @@ namespace Nuake
 				if (!visibility.Visible)
 					continue;
 
+				Vector3 oldColor = Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor;
 				auto initialTransform = transform.GetGlobalTransform();
 				for (auto& p : emitterComponent.Emitter.Particles)
 				{
@@ -342,11 +343,14 @@ namespace Nuake
 					// Scale
 					particleTransform = glm::scale(particleTransform, transform.GetGlobalScale());
 
+					Renderer::QuadMesh->GetMaterial()->data.u_HasAlbedo = 0;
+					Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = p.Color;
 					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
 				}
-			}
 
-			Renderer::Flush(gBufferShader, false);
+				Renderer::Flush(gBufferShader, false);
+				Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = oldColor;
+			}
 		}
 	}
 

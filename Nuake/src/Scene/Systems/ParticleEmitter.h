@@ -5,6 +5,8 @@
 #include "src/Core/Maths.h"
 #include "src/Core/Timestep.h"
 
+#include "src/Rendering/Textures/Material.h"
+
 #include <random>
 
 namespace Nuake

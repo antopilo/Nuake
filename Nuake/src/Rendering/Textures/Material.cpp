@@ -68,9 +68,7 @@ namespace Nuake
 
 		data.m_AlbedoColor = Vector3{ albedoColor.r, albedoColor.g, albedoColor.b };
 
-		m_Name = "New material";
-
-		m_Albedo = m_DefaultAlbedo;
+		m_Name = "default";
 	}
 
 	Material::~Material() {}
