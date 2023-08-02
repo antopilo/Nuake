@@ -38,7 +38,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 	if (flagsHeaderOpened)
 	{
-		ImGui::BeginTable("##Flags", 3, ImGuiTableFlags_BordersInner);
+		ImGui::BeginTable("##Flags", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp);
 		{
 			ImGui::TableSetupColumn("name", 0, 0.3f);
 			ImGui::TableSetupColumn("set", 0, 0.6f);
