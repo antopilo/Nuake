@@ -93,6 +93,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mTransformPanel.Draw(entity);
     mLightPanel.Draw(entity);
     mScriptPanel.Draw(entity);
+	mParticleEmitterPanel.Draw(entity);
     mSpritePanel.Draw(entity);
     mMeshPanel.Draw(entity);
     mQuakeMapPanel.Draw(entity);
