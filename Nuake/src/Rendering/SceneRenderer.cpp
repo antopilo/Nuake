@@ -1,7 +1,9 @@
 #include "SceneRenderer.h"
 #include "src/Rendering/Shaders/ShaderManager.h"
 
-#include <src/Scene/Components/BSPBrushComponent.h>
+#include "src/Scene/Components/BSPBrushComponent.h"
+#include "src/Scene/Components/SpriteComponent.h"
+
 #include <GL\glew.h>
 
 namespace Nuake 
@@ -240,16 +242,18 @@ namespace Nuake
 		mGBuffer->Bind();
 		mGBuffer->Clear();
 		{
+			// Init
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 			Shader* gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
 			gBufferShader->Bind();
 			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferShader->SetUniformMat4f("u_View", mView);
 
-			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, ParentComponent, VisibilityComponent>();
+			// Models
+			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 			for (auto e : view)
 			{
-				auto [transform, mesh, parent, visibility] = view.get<TransformComponent, ModelComponent, ParentComponent, VisibilityComponent>(e);
+				auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
 				
 				if (mesh.ModelResource && visibility.Visible)
 				{
@@ -264,10 +268,11 @@ namespace Nuake
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			Renderer::Flush(gBufferShader, false);
 
-			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, ParentComponent, VisibilityComponent>();
+			// Quake BSPs
+			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
 			for (auto e : quakeView)
 			{
-				auto [transform, model, parent, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, ParentComponent, VisibilityComponent>(e);
+				auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
 
 				if (model.IsTransparent || !visibility.Visible)
 					continue;
@@ -276,6 +281,39 @@ namespace Nuake
 				{
 					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
 				}
+			}
+			Renderer::Flush(gBufferShader, false);
+
+			// Sprites
+			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
+			for (auto e : spriteView)
+			{
+				auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
+
+				if (!visibility.Visible || !sprite.SpriteMesh)
+					continue;
+
+				auto& finalQuadTransform = transform.GetGlobalTransform();
+				if (sprite.Billboard)
+				{
+					finalQuadTransform = glm::inverse(mView);
+
+					if (sprite.LockYRotation)
+					{
+						// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
+						finalQuadTransform[1] = Vector4(0, 1, 0, 0);
+						finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
+						finalQuadTransform = finalQuadTransform;
+					}
+
+					// Translation
+					finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+
+					// Scale
+					finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
+				}
+
+				Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
 			}
 			Renderer::Flush(gBufferShader, false);
 		}

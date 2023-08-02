@@ -14,13 +14,6 @@
 
 EditorSelectionPanel::EditorSelectionPanel()
 {
-    mTransformPanel = TransformPanel();
-    mLightPanel = LightPanel();
-    mScriptPanel = ScriptPanel();
-    mQuakeMapPanel = QuakeMapPanel();
-    mCameraPanel = CameraPanel();
-    mRigidbodyPanel = RigidbodyPanel();
-    mBoxColliderPanel = BoxColliderPanel();
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -100,6 +93,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mTransformPanel.Draw(entity);
     mLightPanel.Draw(entity);
     mScriptPanel.Draw(entity);
+    mSpritePanel.Draw(entity);
     mMeshPanel.Draw(entity);
     mQuakeMapPanel.Draw(entity);
     mCameraPanel.Draw(entity);
@@ -129,6 +123,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			MenuItemComponent("Camera", Nuake::CameraComponent)
 			MenuItemComponent("Light", Nuake::LightComponent)
 			MenuItemComponent("Model", Nuake::ModelComponent)
+			MenuItemComponent("Sprite", Nuake::SpriteComponent)
 			ImGui::Separator();
 			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)
