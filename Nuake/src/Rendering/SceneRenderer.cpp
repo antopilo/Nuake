@@ -144,8 +144,6 @@ namespace Nuake
 		}
 		framebuffer.Unbind();
 
-
-
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
 	}

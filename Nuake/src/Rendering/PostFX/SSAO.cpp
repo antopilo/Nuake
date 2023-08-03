@@ -130,13 +130,13 @@ namespace Nuake
 		}
 		_ssaoBlurFramebuffer->Unbind();
 
-		/*
+		
 		if (ImGui::Begin("SSAO debug"))
 		{
 			ImGui::Image((void*)(uintptr_t)(_ssaoFramebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 		}
 		ImGui::End();
-		*/
+		
 	}
 
 	Ref<FrameBuffer> SSAO::GetOuput() const
