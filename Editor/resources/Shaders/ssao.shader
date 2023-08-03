@@ -100,15 +100,19 @@ vec3 normal_from_depth(float depth, vec2 texcoords) {
 void main()
 {
     float depth = texture(u_Depth, UV).r;
-    if (depth > 0.9999999f )
+    if (depth > 0.9999999f)
     {
         FragColor = vec4(0, 0, 0, 0);
         return;
     }
 
-    const float SCALING_NEAR = 0.9;
-    float depthScaler = (depth - SCALING_NEAR) * 1.0 / (1.0 - SCALING_NEAR);
-    depthScaler = min(max(depthScaler, 0.0), 1.0);
+    const float SCALING_NEAR = 0.92;
+    float depthScaler = (depth - SCALING_NEAR) / (1.0 - SCALING_NEAR);
+
+    const float minRadius = 0.05f;
+    const float maxRadius = 1.2f;
+    const float scalerPow = 1.8f;
+    depthScaler = min(max(pow(depthScaler, scalerPow), minRadius), maxRadius);
     float scaledRadius = u_Radius * depthScaler;
 
     vec3 fragPos = ViewPosFromDepth(depth);
@@ -126,12 +130,12 @@ void main()
     mat3 TBN = mat3(tangent, bitangent, normal);
 
     float occlusion = 0.0;
-    for(int i= 0; i < 64; i++) 
+    for (int i = 0; i < 64; i++)
     {
         vec3 samplePos = TBN * u_Samples[i]; // generate a random point
         samplePos.z *= -1.0f;
         samplePos = fragPos + samplePos * scaledRadius;
-    
+
         vec4 offset = vec4(samplePos, 1.0); // make it a 4-vector
         offset = v_Projection * offset; // project on the near clipping plane
         offset.xyz /= offset.w; // perform perspective divide
@@ -145,5 +149,4 @@ void main()
 
     float finalAO = pow(ao, u_Strength * 100.0);
     FragColor = vec4(finalAO, finalAO, finalAO, 1.0);
-    //FragColor = vec4(samplePos.z, samplePos.z, samplePos.z, 1.0);
 }
