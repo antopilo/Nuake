@@ -19,6 +19,9 @@ using json = nlohmann::json;
 		SERIALIZE_VEC3(v) \
 		j[#v]["w"] = this->v.w;
 
+#define DESERIALIZE_VEC4(v, p) \
+	p = Vector4(v["x"], v["y"], v["z"], v["w"]);
+
 #define DESERIALIZE_VEC3(v, p) \
 	p = Vector3(v["x"], v["y"], v["z"]);
 

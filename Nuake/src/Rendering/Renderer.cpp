@@ -82,14 +82,17 @@ namespace Nuake
 
         m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
-        Ref<Material> material = MaterialManager::Get()->GetMaterial("default");
+        Ref<Material> defaultMaterial = CreateRef<Material>(Vector3{1, 1, 1});
+        defaultMaterial->SetName("white");
+        MaterialManager::Get()->RegisterMaterial(defaultMaterial);
+
         CubeMesh = CreateRef<Mesh>();
         CubeMesh->AddSurface(CubeVertices, CubeIndices);
-        CubeMesh->SetMaterial(material);
+        CubeMesh->SetMaterial(defaultMaterial);
 
         QuadMesh = CreateRef<Mesh>();
         QuadMesh->AddSurface(QuadVertices, { 0, 1, 2, 3, 4, 5 });
-        QuadMesh->SetMaterial(material);
+        QuadMesh->SetMaterial(defaultMaterial);
     }
 
     void Renderer::LoadShaders()

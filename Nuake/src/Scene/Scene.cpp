@@ -3,6 +3,7 @@
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
+#include "src/Scene/Systems/ParticleSystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
@@ -45,6 +46,7 @@ namespace Nuake {
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
 		m_SceneRenderer = new SceneRenderer();
 		m_SceneRenderer->Init();
@@ -271,11 +273,15 @@ namespace Nuake {
 
 		for (auto& c : copyChildrens) 
 		{
-			Logger::Log("Deleting entity " + std::to_string(c.GetHandle()));
 			DestroyEntity(c);
 		}
 
-		Logger::Log("Deleted entity" + std::to_string(entity.GetHandle()) + " - " + entity.GetComponent<NameComponent>().Name);
+		// Remove from ID to Entity cache
+		if (m_EntitiesIDMap.find(entity.GetComponent<NameComponent>().ID) != m_EntitiesIDMap.end())
+		{
+			m_EntitiesIDMap.erase(entity.GetComponent<NameComponent>().ID);
+		}
+
 		entity.Destroy();
 		m_Registry.shrink_to_fit();
 	}

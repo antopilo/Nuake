@@ -56,6 +56,9 @@ namespace Nuake {
 
 	void ScriptingSystem::FixedUpdate(Timestep ts)
 	{
+		if (!Engine::IsPlayMode())
+			return;
+
 		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
 		for (auto& e : entities)
 		{

@@ -19,9 +19,11 @@
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
 #include "../ComponentsPanel/SpritePanel.h"
+#include "../ComponentsPanel/ParticleEmitterPanel.h"
 
 
-class EditorSelectionPanel {
+class EditorSelectionPanel 
+{
 private:
 	TransformPanel mTransformPanel;
 	LightPanel mLightPanel;
@@ -37,6 +39,7 @@ private:
 	CylinderColliderPanel mCylinderColliderPanel;
 	SpritePanel mSpritePanel;
 	CharacterControllerPanel mCharacterControllerPanel;
+	ParticleEmitterPanel mParticleEmitterPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

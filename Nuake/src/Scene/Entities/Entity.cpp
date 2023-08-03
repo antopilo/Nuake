@@ -15,7 +15,7 @@
 #include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/CapsuleColliderComponent.h"
 #include "src/Scene/Components/SpriteComponent.h"
-
+#include "src/Scene/Components/ParticleEmitterComponent.h"
 
 namespace Nuake
 {
@@ -39,6 +39,8 @@ namespace Nuake
 		SERIALIZE_OBJECT_REF_LBL("VisibilityComponent", GetComponent<VisibilityComponent>())
 		if (HasComponent<CameraComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CameraComponent", GetComponent<CameraComponent>())
+		if (HasComponent<ParticleEmitterComponent>())
+			SERIALIZE_OBJECT_REF_LBL("ParticleEmitterComponent", GetComponent<ParticleEmitterComponent>())
 		if (HasComponent<SpriteComponent>())
 			SERIALIZE_OBJECT_REF_LBL("SpriteComponent", GetComponent<SpriteComponent>())
 		if (HasComponent<QuakeMapComponent>())
@@ -82,6 +84,7 @@ namespace Nuake
 		}
 		DESERIALIZE_COMPONENT(NameComponent)
 		DESERIALIZE_COMPONENT(ParentComponent)
+		DESERIALIZE_COMPONENT(ParticleEmitterComponent)
 		DESERIALIZE_COMPONENT(SpriteComponent)
 		DESERIALIZE_COMPONENT(CameraComponent)
 		DESERIALIZE_COMPONENT(QuakeMapComponent)

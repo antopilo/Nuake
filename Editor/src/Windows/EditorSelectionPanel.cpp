@@ -11,6 +11,8 @@
 #include <Engine.h>
 
 #include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Components/ParticleEmitterComponent.h"
+
 
 EditorSelectionPanel::EditorSelectionPanel()
 {
@@ -98,6 +100,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mTransformPanel.Draw(entity);
     mLightPanel.Draw(entity);
     mScriptPanel.Draw(entity);
+	mParticleEmitterPanel.Draw(entity);
     mSpritePanel.Draw(entity);
     mMeshPanel.Draw(entity);
     mQuakeMapPanel.Draw(entity);
@@ -129,6 +132,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			MenuItemComponent("Light", Nuake::LightComponent)
 			MenuItemComponent("Model", Nuake::ModelComponent)
 			MenuItemComponent("Sprite", Nuake::SpriteComponent)
+			MenuItemComponent("Particle Emitter", Nuake::ParticleEmitterComponent)
 			ImGui::Separator();
 			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
             MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)

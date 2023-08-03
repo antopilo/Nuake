@@ -11,8 +11,6 @@ namespace Nuake
 	class MaterialManager 
 	{
 	private:
-		const std::string DEFAULT_MATERIAL = "resources/Textures/default/Default.png";
-
 		static Ref<MaterialManager> s_Instance;
 
 		std::map<std::string, Ref<Material>> m_Materials;
@@ -24,6 +22,7 @@ namespace Nuake
 
 
 	public:
+		const std::string DEFAULT_MATERIAL = "resources/Textures/default/Default.png";
 		std::string CurrentlyBoundedMaterial = "";
 		MaterialManager();
 
