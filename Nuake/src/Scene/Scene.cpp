@@ -26,6 +26,7 @@
 #include "src/Scene/Components/InterfaceComponent.h"
 
 #include <fstream>
+#include <future>
 #include <streambuf>
 #include <chrono>
 #include "src/Core/OS.h"
@@ -379,7 +380,11 @@ namespace Nuake {
 		
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
-			entities.push_back(e.Serialize());
+		{
+			std::async(std::launch::async, [&]() {
+					entities.push_back(e.Serialize());
+			});
+		}
 		SERIALIZE_VAL_LBL("Entities", entities);
 
 		SERIALIZE_OBJECT(m_EditorCamera);

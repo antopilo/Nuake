@@ -10,6 +10,8 @@
 #include "src/Rendering/Buffers/VertexArray.h"
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 
+#include <future>
+
 namespace Nuake
 {
     Mesh::Mesh() {}
@@ -163,24 +165,26 @@ namespace Nuake
         }
 
         std::vector<Vertex> vertices;
-        for (auto& v : j["Vertices"])
-        {
-            Vertex vertex;
-
-            try {
-                DESERIALIZE_VEC2(v["UV"], vertex.uv)
+       
+        std::async(std::launch::async, [&]()
+            {
+                for (auto& v : j["Vertices"])
+                {
+                    Vertex vertex;
+                    try {
+                        DESERIALIZE_VEC2(v["UV"], vertex.uv)
+                    }
+                    catch (std::exception& e) {
+                        vertex.uv = { 0.0, 0.0 };
+                    }
+                    DESERIALIZE_VEC3(v["Position"], vertex.position)
+                    DESERIALIZE_VEC3(v["Normal"], vertex.normal)
+                    DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
+                    DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+                    vertices.push_back(vertex);
+                }
             }
-            catch(std::exception& e) {
-                vertex.uv = { 0.0, 0.0 };
-            }
-            DESERIALIZE_VEC3(v["Position"], vertex.position)
-			DESERIALIZE_VEC3(v["Normal"], vertex.normal)
-			
-			DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
-			DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
-
-            vertices.push_back(vertex);
-        }
+        );
 
         m_Vertices = vertices;
 
