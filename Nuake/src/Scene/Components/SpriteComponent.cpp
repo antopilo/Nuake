@@ -45,10 +45,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool SpriteComponent::Deserialize(const std::string& str)
+	bool SpriteComponent::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
-
 		if (j.contains("Billboard"))
 		{
 			Billboard = j["Billboard"];

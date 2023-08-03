@@ -27,16 +27,15 @@ namespace Nuake
             END_SERIALIZE();
         }
 
-        bool Deserialize(const std::string str) 
+        bool Deserialize(const json& j) 
         {
-            BEGIN_DESERIALIZE();
             ModelPath = j["ModelPath"];
             ModelResource = CreateRef<Model>();
 
             if (j.contains("ModelResource"))
             {
                 auto& res = j["ModelResource"];
-                ModelResource->Deserialize(res.dump());
+                ModelResource->Deserialize(res);
             }
 
             return true;

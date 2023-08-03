@@ -15,9 +15,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool ParticleEmitterComponent::Deserialize(const std::string& str)
+	bool ParticleEmitterComponent::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		DESERIALIZE_VEC4(j["ParticleColor"], ParticleColor);
 		Amount = j["Amount"];
 		Life = j["Life"];

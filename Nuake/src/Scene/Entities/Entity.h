@@ -64,7 +64,7 @@ namespace Nuake
 		}
 
 		json Serialize() override;
-		bool Deserialize(const std::string& str);
+		bool Deserialize(const json& str);
 
 		Scene* GetScene() {
 			return m_Scene;

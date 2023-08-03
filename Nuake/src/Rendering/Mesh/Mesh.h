@@ -32,7 +32,7 @@ namespace Nuake
 		inline AABB GetAABB() const { return m_AABB; }
 
 		json Serialize() override;
-		bool Deserialize(const std::string& str) override;
+		bool Deserialize(const json& j) override;
 	private:
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;

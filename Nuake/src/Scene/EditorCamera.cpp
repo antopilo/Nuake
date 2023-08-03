@@ -222,10 +222,8 @@ namespace Nuake
 		return j;
 	}
 
-	bool EditorCamera::Deserialize(const std::string& str)
+	bool EditorCamera::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
-
 		DESERIALIZE_VEC3(j["Translation"], Translation);
 		SetYaw(j["Yaw"]);
 		SetPitch(j["Pitch"]);

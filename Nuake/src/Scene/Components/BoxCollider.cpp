@@ -12,9 +12,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool BoxColliderComponent::Deserialize(const std::string& str)
+	bool BoxColliderComponent::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		this->IsTrigger = j["IsTrigger"];
 		this->Size = Vector3(j["Size"]["x"], j["Size"]["y"], j["Size"]["z"]);
 		return true;

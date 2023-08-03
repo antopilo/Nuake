@@ -73,9 +73,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Entity::Deserialize(const std::string& str)
+	bool Entity::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		DESERIALIZE_COMPONENT(TransformComponent)
 		DESERIALIZE_COMPONENT(VisibilityComponent)
 		else

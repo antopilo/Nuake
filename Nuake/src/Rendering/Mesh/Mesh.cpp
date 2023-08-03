@@ -151,12 +151,10 @@ namespace Nuake
         END_SERIALIZE();
     }
 
-    bool Mesh::Deserialize(const std::string& str)
-    {
-        BEGIN_DESERIALIZE();
-         
+    bool Mesh::Deserialize(const json& j)
+    {    
         m_Material = CreateRef<Material>();
-        m_Material->Deserialize(j["Material"].dump());
+        m_Material->Deserialize(j["Material"]);
 
         m_Indices.reserve(j["Indices"].size());
         for (auto& i : j["Indices"])

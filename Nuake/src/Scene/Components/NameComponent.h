@@ -18,9 +18,8 @@ namespace Nuake {
             END_SERIALIZE();
         }
 
-        bool Deserialize(const std::string& str)
+        bool Deserialize(const json& j)
         {
-            BEGIN_DESERIALIZE();
             Name = j["Name"];
 
             if (j.contains("ID"))

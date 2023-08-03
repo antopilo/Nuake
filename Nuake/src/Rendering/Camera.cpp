@@ -111,21 +111,20 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Camera::Deserialize(const std::string& str)
+	bool Camera::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
-		j = j["CameraInstance"];
-		this->m_Type = (CAMERA_TYPE)j["m_Type"];
-		if(j.contains("Translation"))
-			DESERIALIZE_VEC3(j["Translation"], Translation);
+		auto& camJson = j["CameraInstance"];
+		this->m_Type = (CAMERA_TYPE)camJson["m_Type"];
+		if(camJson.contains("Translation"))
+			DESERIALIZE_VEC3(camJson["Translation"], Translation);
 
 		//if (j.contains("Direction"))
 		//	DESERIALIZE_VEC3(j["Direction"], Direction);
 
-		this->AspectRatio = j["AspectRatio"];
-		this->Fov = j["Fov"];
-		this->Exposure = j["Exposure"];
-		this->Speed = j["Speed"];
+		this->AspectRatio = camJson["AspectRatio"];
+		this->Fov = camJson["Fov"];
+		this->Exposure = camJson["Exposure"];
+		this->Speed = camJson["Speed"];
 		return false;
 	}
 }

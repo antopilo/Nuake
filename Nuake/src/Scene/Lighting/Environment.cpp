@@ -59,9 +59,8 @@ namespace Nuake {
 		END_SERIALIZE();
 	}
 
-	bool Environment::Deserialize(const std::string& str)
+	bool Environment::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		if (j.contains("CurrentSkyType"))
 			CurrentSkyType = j["CurrentSkyType"];
 		if (j.contains("VolumetricFog"))
@@ -70,7 +69,7 @@ namespace Nuake {
 			VolumetricStepCount = j["VolumetricStepCount"];
 		if (j.contains("ProceduralSkybox"))
 		{
-			ProceduralSkybox->Deserialize(j["ProceduralSkybox"].dump());
+			ProceduralSkybox->Deserialize(j["ProceduralSkybox"]);
 		}
 			
 		return false;

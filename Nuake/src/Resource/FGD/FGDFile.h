@@ -39,15 +39,14 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string& str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			if (j.contains("BrushEntities"))
 			{
 				for (auto& brush : j["BrushEntities"])
 				{
 					FGDBrushEntity brushEntity = FGDBrushEntity();
-					brushEntity.Deserialize(brush.dump());
+					brushEntity.Deserialize(brush);
 					BrushEntities.push_back(brushEntity);
 				}
 			}
@@ -57,7 +56,7 @@ namespace Nuake {
 				for (auto& point : j["PointEntities"])
 				{
 					FGDPointEntity pointEntity = FGDPointEntity();
-					pointEntity.Deserialize(point.dump());
+					pointEntity.Deserialize(point);
 					PointEntities.push_back(pointEntity);
 				}
 			}

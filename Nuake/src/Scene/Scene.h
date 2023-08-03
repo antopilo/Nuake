@@ -86,6 +86,6 @@ namespace Nuake
 		Ref<Scene> Copy();
 
 		json Serialize() override;
-		bool Deserialize(const std::string& str) override;
+		bool Deserialize(const json& j) override;
 	};
 }

@@ -41,9 +41,8 @@ namespace Nuake
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			this->HasParent = j["HasParent"];
 			if (HasParent)
 			{

@@ -57,9 +57,8 @@ namespace Nuake
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			this->Translation = Vector3(j["Translation"]["x"], j["Translation"]["y"], j["Translation"]["z"]);
 			
 			if (j.contains("GlobalTranslation"))

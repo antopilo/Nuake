@@ -20,6 +20,6 @@ namespace Nuake
 		bool LoadSprite();
 
 		json Serialize();
-		bool Deserialize(const std::string& str);
+		bool Deserialize(const json& j);
 	};
 }

@@ -38,11 +38,11 @@ using json = nlohmann::json;
 #define BEGIN_DESERIALIZE() json j = json::parse(str);
 #define DESERIALIZE_COMPONENT(c) \
 		if(j.contains(#c)) \
-			AddComponent<c>().Deserialize(j[#c].dump());
+			AddComponent<c>().Deserialize(j[#c]);
 
 class ISerializable
 {
 public:
 	virtual json Serialize() = 0;
-	virtual bool Deserialize(const std::string& str) = 0;
+	virtual bool Deserialize(const json& j) = 0;
 };

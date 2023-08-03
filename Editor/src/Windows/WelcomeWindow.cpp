@@ -60,10 +60,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool ProjectPreview::Deserialize(const std::string& str) 
+	bool ProjectPreview::Deserialize(const json& j) 
 	{
-		BEGIN_DESERIALIZE(str);
-
 		if (!j.contains("Path"))
 			return false;
 
@@ -89,7 +87,7 @@ namespace Nuake
 		auto projectFileData = FileSystem::ReadFile(queuedProjectPath, true);
 		try
 		{
-			project->Deserialize(projectFileData);
+			project->Deserialize(nlohmann::json::parse(projectFileData));
 			project->FullPath = queuedProjectPath;
 
 			Engine::LoadProject(project);
@@ -302,7 +300,7 @@ namespace Nuake
 			for (auto& project : j["Projects"])
 			{
 				auto projectPreview = ProjectPreview();
-				projectPreview.Deserialize(project.dump());
+				projectPreview.Deserialize(project);
 				_Projects.push_back(projectPreview);
 			}
 		}

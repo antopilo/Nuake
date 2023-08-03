@@ -13,9 +13,8 @@ namespace Nuake
 		END_SERIALIZE()
 	}
 
-	bool CylinderColliderComponent::Deserialize(const std::string& str)
+	bool CylinderColliderComponent::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE()
 		this->IsTrigger = j["IsTrigger"];
 		this->Radius = j["Radius"];
 		this->Height = j["Height"];

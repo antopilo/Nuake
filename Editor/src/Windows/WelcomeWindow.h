@@ -22,7 +22,7 @@ namespace Nuake
 		~ProjectPreview() = default;
 
 		json Serialize() override;
-		bool Deserialize(const std::string& data) override;
+		bool Deserialize(const json& j) override;
 
 	private:
 		void ReadProjectFile();

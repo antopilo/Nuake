@@ -21,7 +21,7 @@ namespace Nuake
 		Ref<EditorCamera> Copy();
 
 		json Serialize();
-		bool Deserialize(const std::string& str);
+		bool Deserialize(const json& j);
 
 		void SetYaw(float yaw);
 		void SetPitch(float pitch);

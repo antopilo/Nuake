@@ -367,7 +367,7 @@ namespace Nuake {
 
 		json serializedScene = Serialize();
 
-		sceneCopy->Deserialize(serializedScene.dump());
+		sceneCopy->Deserialize(serializedScene);
 		return sceneCopy;
 	}
 
@@ -392,12 +392,11 @@ namespace Nuake {
 		END_SERIALIZE();
 	}
 
-	bool Scene::Deserialize(const std::string& str)
+	bool Scene::Deserialize(const json& j)
 	{
-		if (str == "")
+		if (j == "")
 			return false;
 
-		BEGIN_DESERIALIZE();
 		if (!j.contains("Name"))
 			return false;
 
@@ -413,8 +412,7 @@ namespace Nuake {
 		if (j.contains("m_Environement"))
 		{
 			m_Environement = CreateRef<Environment>();
-			std::string env = j["m_Environement"].dump();
-			m_Environement->Deserialize(env);
+			m_Environement->Deserialize(j["m_Environement"]);
 		}
 
 		// Parse entities
@@ -427,12 +425,12 @@ namespace Nuake {
 		{
 			std::string name = e["NameComponent"]["Name"];
 			Entity ent = { m_Registry.create(), this };
-			ent.Deserialize(e.dump());
+			ent.Deserialize(e);
 		}
 
 		if (j.contains("m_EditorCamera"))
 		{
-			m_EditorCamera->Deserialize(j["m_EditorCamera"].dump());
+			m_EditorCamera->Deserialize(j["m_EditorCamera"]);
 		}
 
 		auto view = m_Registry.view<ParentComponent>();
