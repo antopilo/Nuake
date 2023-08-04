@@ -53,10 +53,14 @@ namespace Nuake
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
 
+		// SSAO
+		const auto& sceneEnv = scene.GetEnvironment();
+		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
+		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
 
-		const auto& sceneEnv = scene.GetEnvironment();
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
@@ -112,9 +116,7 @@ namespace Nuake
 
 		finalOutput = framebuffer.GetTexture();
 
-		// SSAO
-		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
-		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+
 
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
@@ -131,8 +133,8 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
-		//mSSR->Resize(framebuffer.GetSize());
-		//mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+		mSSR->Resize(framebuffer.GetSize());
+		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 		framebuffer.Bind();
 		{
@@ -141,7 +143,7 @@ namespace Nuake
 			shader->Bind();
 
 			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mToneMapBuffer->GetTexture().get(), 1);
+			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
