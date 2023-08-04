@@ -131,8 +131,8 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
-		mSSR->Resize(framebuffer.GetSize());
-		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+		//mSSR->Resize(framebuffer.GetSize());
+		//mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 		framebuffer.Bind();
 		{
@@ -141,7 +141,7 @@ namespace Nuake
 			shader->Bind();
 
 			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+			shader->SetUniformTex("u_Source2", mToneMapBuffer->GetTexture().get(), 1);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
