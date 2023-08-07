@@ -53,10 +53,14 @@ namespace Nuake
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
 
+		// SSAO
+		const auto& sceneEnv = scene.GetEnvironment();
+		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
+		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
 
-		const auto& sceneEnv = scene.GetEnvironment();
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
@@ -112,9 +116,7 @@ namespace Nuake
 
 		finalOutput = framebuffer.GetTexture();
 
-		// SSAO
-		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
-		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+
 
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
