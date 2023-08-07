@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 
+/*
 void CheckError()
 {
     GLenum err;
@@ -38,4 +39,4 @@ void main(int argc, char* argv[])
         
         Nuake::Engine::EndDraw();
     }
-}
+}*/
