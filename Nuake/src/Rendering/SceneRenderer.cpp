@@ -53,9 +53,6 @@ namespace Nuake
 		mGBuffer->QueueResize(framebuffer.GetSize());
 		GBufferPass(scene);
 
-		mShadingBuffer->QueueResize(framebuffer.GetSize());
-		ShadingPass(scene);
-
 		// SSAO
 		const auto& sceneEnv = scene.GetEnvironment();
 		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
