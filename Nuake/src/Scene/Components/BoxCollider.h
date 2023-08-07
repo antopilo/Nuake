@@ -11,7 +11,7 @@ namespace Nuake {
 		bool IsTrigger = false;
 
 		json Serialize();
-		bool Deserialize(const std::string& str);
+		bool Deserialize(const json& j);
 	};
 }
  

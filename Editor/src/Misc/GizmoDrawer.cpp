@@ -16,6 +16,7 @@
 #include <src/Scene/Components/CylinderColliderComponent.h>
 #include <src/Scene/Components/MeshCollider.h>
 #include <src/Scene/Components/ModelComponent.h>
+#include <src/Scene/Components/ParticleEmitterComponent.h>
 
 
 GizmoDrawer::GizmoDrawer()
@@ -35,7 +36,7 @@ GizmoDrawer::GizmoDrawer()
 	GenerateSphereGizmo();
 
 	// Box
-	const Color cubeColor = Color(1, 0, 0, 1);
+	const Color cubeColor = Color(1, 0, 0, 0.5f);
 	std::vector<LineVertex> mBoxVertices = 
 	{
 		LineVertex{Vector3(-1.f, -1.f, -1.f), cubeColor},
@@ -110,8 +111,8 @@ void GizmoDrawer::GenerateSphereGizmo()
 			vert2 = Vector3(x2, 0, z2);
 		}
 
-		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 1.0) });
-		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 1.0) });
+		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 0.5) });
+		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 0.5) });
 	}
 
 	mCircleBuffer = CreateRef<Nuake::VertexArray>();
@@ -215,6 +216,18 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 
 		_CylinderEntity[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
+	}
+
+	auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
+	for (auto e : particleView)
+	{
+		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
+		mLineShader->Bind();
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation), Vector3(particle.Radius)));
+		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		mCircleBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
 	auto meshColliderView = scene->m_Registry.view<TransformComponent, MeshColliderComponent, ModelComponent>();

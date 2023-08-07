@@ -41,6 +41,8 @@
 #include "../Misc/InterfaceFonts.h"
 
 #include "WelcomeWindow.h"
+#include "LoadingSplash.h"
+
 #include "src/Rendering/SceneRenderer.h"
 #include <dependencies/glfw/include/GLFW/glfw3.h>
 #include <src/Rendering/Buffers/Framebuffer.h>
@@ -56,7 +58,6 @@ namespace Nuake {
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
-        m_EntitySelectionFramebuffer = CreateRef<FrameBuffer>(false, Vector2(1280, 720));
     }
 
     void EditorInterface::Init()
@@ -64,8 +65,8 @@ namespace Nuake {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
         ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-        ImGui::SetNextWindowSize(viewport->GetWorkSize());
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
 
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
@@ -86,7 +87,7 @@ namespace Nuake {
             Overlay();
             ImGuizmo::BeginFrame();
 
-            float availWidth = ImGui::GetContentRegionAvailWidth();
+            float availWidth = ImGui::GetContentRegionAvail().x;
             float windowWidth = ImGui::GetWindowWidth();
 
             float used = windowWidth - availWidth;
@@ -112,7 +113,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvailWidth() - 120, 30));
+            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - 120, 30));
 
             ImGui::SameLine();
 
@@ -124,7 +125,7 @@ namespace Nuake {
             ImGui::BeginChild("FPS", ImVec2(60, 30), false);
 
             std::string text = std::to_string(fps) + " fps";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
@@ -136,7 +137,7 @@ namespace Nuake {
             out.precision(2);
             out << std::fixed << frameTime;
             text = out.str() + " ms";
-            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvailWidth() / 1.25 - ImGui::CalcTextSize(text.c_str()).x
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
                 - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
             ImGui::Text(text.c_str());
@@ -244,13 +245,17 @@ namespace Nuake {
                 }
             }
 
-            m_IsViewportFocused = ImGui::IsWindowFocused();
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2) && !ImGuizmo::IsUsing())
+            if (m_IsHoveringViewport && !m_IsViewportFocused && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
             {
                 ImGui::FocusWindow(ImGui::GetCurrentWindow());
+            }
 
+            m_IsViewportFocused = ImGui::IsWindowFocused();
+
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
+            {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
-                auto& gbuffer = Engine::GetCurrentScene()->mSceneRenderer->GetGBuffer();
+                auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
                 auto pixelPos = Input::GetMousePosition() - windowPosNuake;
                 pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
 
@@ -258,7 +263,11 @@ namespace Nuake {
 
                 if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
                 {
-                    Selection = EditorSelection(Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get()});
+                    auto& ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
+                    if (ent.IsValid())
+                    {
+                        Selection = EditorSelection(ent);
+                    }
                 }
                 else
                 {
@@ -403,8 +412,18 @@ namespace Nuake {
             {
                 Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(Selection.Entity);
                 std::string savePath = FileDialog::SaveFile("*.prefab");
-                newPrefab->SaveAs(savePath);
-                Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+                if (!String::EndsWith(savePath, ".prefab"))
+                {
+                    savePath += ".prefab";
+                }
+
+                if (!savePath.empty()) 
+                {
+                    newPrefab->SaveAs(savePath);
+                    Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
+                    FileSystem::Scan();
+                    FileSystemUI::m_CurrentDirectory = FileSystem::RootDirectory;
+                }
             }
             ImGui::EndPopup();
         }
@@ -446,7 +465,7 @@ namespace Nuake {
         if (ImGui::Begin("Environnement"))
         {
             BEGIN_COLLAPSE_HEADER(SKY);
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -611,7 +630,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(BLOOM)
-                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -673,7 +692,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(VOLUMETRIC)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -737,7 +756,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(SSAO)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -828,7 +847,7 @@ namespace Nuake {
             END_COLLAPSE_HEADER()
 
             BEGIN_COLLAPSE_HEADER(SSR)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner))
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
@@ -836,7 +855,7 @@ namespace Nuake {
 
                     ImGui::TableNextColumn();
 
-                    SSR* ssr = scene->mSceneRenderer->mSSR.get();
+                    SSR* ssr = scene->m_SceneRenderer->mSSR.get();
                     {
                         // Title
                         ImGui::Text("SSR RayStep");
@@ -1000,7 +1019,7 @@ namespace Nuake {
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
-            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvailWidth(), 30), false))
+            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvail().x, 30), false))
             {
                 // Add entity.
                 if (ImGui::Button(ICON_FA_PLUS, ImVec2(30, 30)))
@@ -1020,10 +1039,10 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody))
+                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp))
                 {
                     std::string icon = ICON_FA_EYE;
-                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 16);
+                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 32);
                     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
                     ImGui::TableHeadersRow();
                     ImGui::TableNextRow();
@@ -1364,7 +1383,7 @@ namespace Nuake {
 
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Open...", "CTRL+O"))
+                if (ImGui::MenuItem("Open..."))
                 {
                     OpenProject();
 
@@ -1395,7 +1414,7 @@ namespace Nuake {
                     Engine::LoadScene(Scene::New());
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Open scene...", "CTRL+SHIFT+O"))
+                if (ImGui::MenuItem("Open scene...", "CTRL+O"))
                 {
                     OpenScene();
                     Selection = EditorSelection();
@@ -1496,9 +1515,65 @@ namespace Nuake {
         }
     }
 
+    bool isLoadingProject = false;
+    bool isLoadingProjectQueue = false;
+
+    int frameCount = 2;
     void EditorInterface::Draw()
     {
         Init();
+
+        if (isLoadingProjectQueue)
+        {
+            _WelcomeWindow->LoadQueuedProject();
+            isLoadingProjectQueue = false;
+
+            auto& window = Window::Get();
+            window->SetDecorated(true);
+            window->SetSize({ 1900, 1000 });
+            window->Center();
+            frameCount = 0;
+            return;
+        }
+
+        // Shortcuts
+        if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+        {
+            if(ImGui::IsKeyPressed(ImGuiKey_S))
+            {
+                Engine::GetProject()->Save();
+                Engine::GetCurrentScene()->Save();
+
+                Selection = EditorSelection();
+            }
+            else if(ImGui::IsKeyPressed(ImGuiKey_O))
+            {
+                OpenScene();
+                
+                Selection = EditorSelection();
+            }
+            else if(ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsKeyPressed(ImGuiKey_S))
+            {
+                std::string savePath = FileDialog::SaveFile("*.project");
+                Engine::GetProject()->SaveAs(savePath);
+
+                Selection = EditorSelection();
+            }
+        }
+
+        if (_WelcomeWindow->IsProjectQueued() && frameCount > 0)
+        {
+            // draw splash
+            LoadingSplash::Get().Draw();
+
+            frameCount--;
+            if (frameCount == 0)
+            {
+                isLoadingProjectQueue = true;
+            }
+
+            return;
+        }
 
         if (!Engine::GetProject())
         {

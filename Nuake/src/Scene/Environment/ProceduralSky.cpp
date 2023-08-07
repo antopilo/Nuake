@@ -112,9 +112,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool ProceduralSky::Deserialize(const std::string& str)
+	bool ProceduralSky::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE()
 		DESERIALIZE_VEC3(j["SunDirection"], SunDirection)
 		DESERIALIZE_VEC3(j["RayleighScattering"], RayleighScattering)
 		DESERIALIZE_VEC3(j["MieScattering"], MieScattering)

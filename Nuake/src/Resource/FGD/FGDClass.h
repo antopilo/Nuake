@@ -54,9 +54,8 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string& str) override
+		bool Deserialize(const json& j) override
 		{
-			BEGIN_DESERIALIZE();
 			Name = j["Name"];
 			Description = j["Description"];
 			Visible = j["Visible"];
@@ -101,9 +100,8 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string& str) override
+		bool Deserialize(const json& j) override
 		{
-			BEGIN_DESERIALIZE();
 			Name = j["Name"];
 			Description = j["Description"];
 			Prefab = j["Prefab"];

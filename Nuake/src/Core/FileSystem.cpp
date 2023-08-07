@@ -70,19 +70,15 @@ namespace Nuake
 
 				newDir->Parent = directory;
 				ScanDirectory(newDir);
-
 				directory->Directories.push_back(newDir);
 			}
 			else if (entry.is_regular_file())
 			{
-				std::string absolutePath = entry.path().string();
-				std::string name = entry.path().filename().string();
-				std::string extension = entry.path().extension().string();
+				std::filesystem::path currentPath = entry.path();
+				std::string absolutePath = currentPath.string();
+				std::string name = currentPath.filename().string();
+				std::string extension = currentPath.extension().string();
 				Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
-				//newFile->Type = entry.path().extension().string();
-				//newFile->name = entry.path().filename().string();
-				//newFile->Parent = directory;
-				//newFile->fullPath = entry.path().string();
 				directory->Files.push_back(newFile);
 			}
 		}
@@ -173,9 +169,14 @@ namespace Nuake
 		fileWriter.close();
 	}
 
-	int FileSystem::RemoveFile(const std::string& path)
+	int FileSystem::DeleteFileFromPath(const std::string& path)
 	{
 		return std::remove(path.c_str());
+	}
+
+	int FileSystem::DeleteFolder(const std::string& path)
+	{
+		return std::filesystem::remove_all(path.c_str());
 	}
 
 	Ref<Directory> FileSystem::GetFileTree()

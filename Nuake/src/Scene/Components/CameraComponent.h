@@ -23,11 +23,11 @@ namespace Nuake
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
 			CameraInstance = CreateRef<Camera>();
 
-			return CameraInstance->Deserialize(str);
+			return CameraInstance->Deserialize(j);
 		}
 	};
 }

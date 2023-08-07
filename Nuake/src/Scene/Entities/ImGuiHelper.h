@@ -4,6 +4,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_stdlib.h>
 #include <imgui/imgui_internal.h>
+#include <src/Vendors/imgui/imgui.h>
 
 class ImGuiHelper {
 public:
@@ -13,7 +14,7 @@ public:
 
 		ImGui::PushID(label.c_str());
 		
-		float availWidth = (ImGui::GetContentRegionAvailWidth() / 3.0f) - 9.0f;
+		float availWidth = (ImGui::GetContentRegionAvail().x / 3.0f) - 9.0f;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		
 		float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;

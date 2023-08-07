@@ -19,6 +19,9 @@ using json = nlohmann::json;
 		SERIALIZE_VEC3(v) \
 		j[#v]["w"] = this->v.w;
 
+#define DESERIALIZE_VEC4(v, p) \
+	p = Vector4(v["x"], v["y"], v["z"], v["w"]);
+
 #define DESERIALIZE_VEC3(v, p) \
 	p = Vector3(v["x"], v["y"], v["z"]);
 
@@ -35,11 +38,11 @@ using json = nlohmann::json;
 #define BEGIN_DESERIALIZE() json j = json::parse(str);
 #define DESERIALIZE_COMPONENT(c) \
 		if(j.contains(#c)) \
-			AddComponent<c>().Deserialize(j[#c].dump());
+			AddComponent<c>().Deserialize(j[#c]);
 
 class ISerializable
 {
 public:
 	virtual json Serialize() = 0;
-	virtual bool Deserialize(const std::string& str) = 0;
+	virtual bool Deserialize(const json& j) = 0;
 };

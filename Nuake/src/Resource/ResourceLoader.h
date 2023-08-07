@@ -49,7 +49,7 @@ namespace Nuake
 			Ref<Material> material = CreateRef<Material>();
 			material->ID = uuid;
 			material->Path = path;
-			material->Deserialize(j.dump());
+			material->Deserialize(j);
 			ResourceManager::RegisterResource(material);
 
 			return material;

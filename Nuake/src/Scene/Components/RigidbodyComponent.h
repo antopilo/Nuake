@@ -13,7 +13,7 @@ namespace Nuake {
 	{
 	public:
 		float Mass;
-		Ref<Physics::RigidBody> m_Rigidbody;
+		Ref<Physics::RigidBody> Rigidbody;
 
 		RigidBodyComponent();
 		Ref<Physics::RigidBody> GetRigidBody() const;
@@ -24,6 +24,7 @@ namespace Nuake {
 		void DrawShape(TransformComponent* tc);
 		void DrawEditor();
 
+
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
@@ -31,9 +32,8 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			Mass = j["Mass"];
 			return true;
 		}

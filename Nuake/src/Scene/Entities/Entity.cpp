@@ -1,19 +1,21 @@
-#include "../Components/ParentComponent.h"
 #include "Entity.h"
-#include "../Components/NameComponent.h"
-#include "../Components/TransformComponent.h"
-#include "../Components/CameraComponent.h"
-#include "../Components/QuakeMap.h"
-#include "../Components/LightComponent.h"
-#include "../Components/QuakeMap.h"
-#include "../Components/WrenScriptComponent.h"
-#include "../Components/CharacterControllerComponent.h"
-#include "../Components/RigidbodyComponent.h"
-#include "src/Scene/Components/BSPBrushComponent.h"
 
+#include "src/Scene/Components/ParentComponent.h"
+#include "src/Scene/Components/NameComponent.h"
+#include "src/Scene/Components/TransformComponent.h"
+#include "src/Scene/Components/CameraComponent.h"
+#include "src/Scene/Components/QuakeMap.h"
+#include "src/Scene/Components/LightComponent.h"
+#include "src/Scene/Components/QuakeMap.h"
+#include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Components/CharacterControllerComponent.h"
+#include "src/Scene/Components/RigidbodyComponent.h"
+#include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/Components.h"
-#include <src/Scene/Components/BoxCollider.h>
+#include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/CapsuleColliderComponent.h"
+#include "src/Scene/Components/SpriteComponent.h"
+#include "src/Scene/Components/ParticleEmitterComponent.h"
 
 namespace Nuake
 {
@@ -37,6 +39,10 @@ namespace Nuake
 		SERIALIZE_OBJECT_REF_LBL("VisibilityComponent", GetComponent<VisibilityComponent>())
 		if (HasComponent<CameraComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CameraComponent", GetComponent<CameraComponent>())
+		if (HasComponent<ParticleEmitterComponent>())
+			SERIALIZE_OBJECT_REF_LBL("ParticleEmitterComponent", GetComponent<ParticleEmitterComponent>())
+		if (HasComponent<SpriteComponent>())
+			SERIALIZE_OBJECT_REF_LBL("SpriteComponent", GetComponent<SpriteComponent>())
 		if (HasComponent<QuakeMapComponent>())
 			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>())
 		if (HasComponent<LightComponent>())
@@ -67,9 +73,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Entity::Deserialize(const std::string& str)
+	bool Entity::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		DESERIALIZE_COMPONENT(TransformComponent)
 		DESERIALIZE_COMPONENT(VisibilityComponent)
 		else
@@ -78,6 +83,8 @@ namespace Nuake
 		}
 		DESERIALIZE_COMPONENT(NameComponent)
 		DESERIALIZE_COMPONENT(ParentComponent)
+		DESERIALIZE_COMPONENT(ParticleEmitterComponent)
+		DESERIALIZE_COMPONENT(SpriteComponent)
 		DESERIALIZE_COMPONENT(CameraComponent)
 		DESERIALIZE_COMPONENT(QuakeMapComponent)
 		DESERIALIZE_COMPONENT(LightComponent)

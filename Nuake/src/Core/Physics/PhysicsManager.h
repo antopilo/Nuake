@@ -45,7 +45,7 @@ namespace Nuake
 
 		void Reset();
 
-		RaycastResult Raycast(const Vector3& from, const Vector3& to);
+		std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
 
 		void RegisterBody(Ref<Physics::RigidBody> rb);
 		void RegisterGhostBody(Ref<GhostObject> rb);

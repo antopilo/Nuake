@@ -82,7 +82,6 @@ namespace Nuake
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			Vertex vertex;
-			vertex.texture = 1.0f;
 
 			Vector3 current;
 

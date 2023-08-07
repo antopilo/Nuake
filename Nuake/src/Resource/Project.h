@@ -33,6 +33,6 @@ namespace Nuake
 		static Ref<Project> Load(std::string& path);
 
 		json Serialize() override;
-		bool Deserialize(const std::string& str) override;
+		bool Deserialize(const json& j) override;
 	};
 }

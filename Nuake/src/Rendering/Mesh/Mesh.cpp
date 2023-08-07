@@ -10,6 +10,8 @@
 #include "src/Rendering/Buffers/VertexArray.h"
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 
+#include <future>
+
 namespace Nuake
 {
     Mesh::Mesh() {}
@@ -85,7 +87,6 @@ namespace Nuake
         bufferLayout.Push<float>(3); // Normal
         bufferLayout.Push<float>(3); // Tangent
         bufferLayout.Push<float>(3); // Bitangent
-        bufferLayout.Push<float>(1); // Texture
 
         m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
         m_VertexArray->Unbind();
@@ -150,12 +151,10 @@ namespace Nuake
         END_SERIALIZE();
     }
 
-    bool Mesh::Deserialize(const std::string& str)
-    {
-        BEGIN_DESERIALIZE();
-         
+    bool Mesh::Deserialize(const json& j)
+    {    
         m_Material = CreateRef<Material>();
-        m_Material->Deserialize(j["Material"].dump());
+        m_Material->Deserialize(j["Material"]);
 
         m_Indices.reserve(j["Indices"].size());
         for (auto& i : j["Indices"])
@@ -164,24 +163,26 @@ namespace Nuake
         }
 
         std::vector<Vertex> vertices;
-        for (auto& v : j["Vertices"])
-        {
-            Vertex vertex;
-
-            try {
-                DESERIALIZE_VEC2(v["UV"], vertex.uv)
+       
+        std::async(std::launch::async, [&]()
+            {
+                for (auto& v : j["Vertices"])
+                {
+                    Vertex vertex;
+                    try {
+                        DESERIALIZE_VEC2(v["UV"], vertex.uv)
+                    }
+                    catch (std::exception& e) {
+                        vertex.uv = { 0.0, 0.0 };
+                    }
+                    DESERIALIZE_VEC3(v["Position"], vertex.position)
+                    DESERIALIZE_VEC3(v["Normal"], vertex.normal)
+                    DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
+                    DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+                    vertices.push_back(vertex);
+                }
             }
-            catch(std::exception& e) {
-                vertex.uv = { 0.0, 0.0 };
-            }
-            DESERIALIZE_VEC3(v["Position"], vertex.position)
-			DESERIALIZE_VEC3(v["Normal"], vertex.normal)
-			
-			DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
-			DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
-
-            vertices.push_back(vertex);
-        }
+        );
 
         m_Vertices = vertices;
 

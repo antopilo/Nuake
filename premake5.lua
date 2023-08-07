@@ -161,6 +161,11 @@ project "Editor"
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")
 
+    defines 
+    {
+        
+    }
+
     files
     {
         "%{prj.name}/Editor.cpp",

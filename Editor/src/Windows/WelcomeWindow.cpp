@@ -1,3 +1,4 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "WelcomeWindow.h"
 
 #include <src/Vendors/imgui/imgui.h>
@@ -59,10 +60,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool ProjectPreview::Deserialize(const std::string& str) 
+	bool ProjectPreview::Deserialize(const json& j) 
 	{
-		BEGIN_DESERIALIZE(str);
-
 		if (!j.contains("Path"))
 			return false;
 
@@ -81,12 +80,37 @@ namespace Nuake
 		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
+	void WelcomeWindow::LoadQueuedProject()
+	{
+		FileSystem::SetRootDirectory(FileSystem::GetParentPath(queuedProjectPath));
+		auto project = Project::New();
+		auto projectFileData = FileSystem::ReadFile(queuedProjectPath, true);
+		try
+		{
+			project->Deserialize(nlohmann::json::parse(projectFileData));
+			project->FullPath = queuedProjectPath;
+
+			Engine::LoadProject(project);
+
+			_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+		}
+		catch (std::exception exception)
+		{
+			Logger::Log("Error loading project: " + queuedProjectPath, "editor", CRITICAL);
+			Logger::Log(exception.what());
+			return;
+		}
+
+		queuedProjectPath = "";
+		Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
+	}
+
 	void WelcomeWindow::Draw()
 	{
 		// Make viewport fullscreen
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->GetWorkPos());
-		ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(viewport->Size);
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -131,7 +155,7 @@ namespace Nuake
 			}
 
 			const float itemHeight = 120.0f;
-			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 			{
 				const std::string path = FileDialog::OpenFile("Project file |*.project");
 				if (path != "" && String::EndsWith(path, ".project"))
@@ -164,14 +188,14 @@ namespace Nuake
 
 		const std::string selectableName = "##" + std::to_string(itemIndex);
 		const bool isSelected = SelectedProject == itemIndex;
-		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvailWidth(), itemHeight)))
+		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 		{
 			SelectedProject = itemIndex;
 		}
 
 		const ImVec2 padding = ImVec2(25.0f, 20.0f);
 		const ImVec2 iconSize = ImVec2(100, 100);
-		ImGui::SetCursorPos(padding / 2.0 + ImVec2(0, cursorYStart));
+		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(0, cursorYStart));
 
 		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::SameLine();
@@ -200,7 +224,7 @@ namespace Nuake
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 		if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), false))
 		{
-			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvailWidth(), buttonHeight);
+			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			if (ImGui::Button("Create a new project", buttonSize))
 			{
 				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
@@ -249,31 +273,9 @@ namespace Nuake
 				{
 					assert(SelectedProject < std::size(_Projects));
 
-					using namespace Nuake;
-
 					SaveRecentFile();
 
-					std::string projectPath = _Projects[SelectedProject].Path;
-					FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
-
-					auto project = Project::New();
-					auto projectFileData = FileSystem::ReadFile(projectPath, true);
-					try 
-					{
-						project->Deserialize(projectFileData);
-						project->FullPath = projectPath;
-
-						Engine::LoadProject(project);
-
-						_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-					}
-					catch (std::exception exception)
-					{
-						Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
-						Logger::Log(exception.what());
-					}
-						
-					Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
+					queuedProjectPath = _Projects[SelectedProject].Path;;
 				}
 			}
 		}
@@ -298,7 +300,7 @@ namespace Nuake
 			for (auto& project : j["Projects"])
 			{
 				auto projectPreview = ProjectPreview();
-				projectPreview.Deserialize(project.dump());
+				projectPreview.Deserialize(project);
 				_Projects.push_back(projectPreview);
 			}
 		}

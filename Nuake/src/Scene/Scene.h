@@ -37,9 +37,11 @@ namespace Nuake
 	public:
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
+		std::map<uint32_t, Entity> m_EntitiesIDMap;
 		std::string Path = "";
 
-		SceneRenderer* mSceneRenderer;
+		SceneRenderer* m_SceneRenderer;
+
 		static Ref<Scene> New();
 		Scene();
 		~Scene();
@@ -84,6 +86,6 @@ namespace Nuake
 		Ref<Scene> Copy();
 
 		json Serialize() override;
-		bool Deserialize(const std::string& str) override;
+		bool Deserialize(const json& j) override;
 	};
 }

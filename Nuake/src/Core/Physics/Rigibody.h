@@ -37,6 +37,7 @@ namespace Nuake
 			void SetShape(Ref<PhysicShape> shape);
 			Ref<PhysicShape> GetShape() const { return _collisionShape; }
 			Entity GetEntity() const { return _entity; }
+			void AddForce(const Vector3& force);
 		};
 	}
 }

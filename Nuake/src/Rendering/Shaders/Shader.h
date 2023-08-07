@@ -42,16 +42,20 @@ namespace Nuake
 		void SetUniform1b(const std::string& name, bool v0);
 		void SetUniformTex(const std::string& name, Texture* texture, unsigned int slot = 0);
 		void SetUniform1i(const std::string& name, int v0);
+		void SetUniform1i(uint32_t location, int v0);
 
 		void SetUniform1iv(const std::string& name, int size, int* value);
 		void SetUniform1fv(const std::string& name, int size, float* value);
 		void SetUniformMat3f(const std::string& name, Matrix3 mat);
-		void SetUniformMat4f(const std::string& name, Matrix4 mat);
+
+		void SetUniformMat4f(uint32_t name, const Matrix4& mat);
+		void SetUniformMat4f(const std::string& name, const Matrix4& mat);
+
+		int FindUniformLocation(std::string uniform);
 
 	private:
 		ShaderSource ParseShader(const std::string& filePath);
 		unsigned int CreateProgram(ShaderSource source);
 		unsigned int Compile(unsigned int type, ShaderSource source);
-		int FindUniformLocation(std::string uniform);
 	};
 }

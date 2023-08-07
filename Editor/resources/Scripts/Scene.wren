@@ -24,6 +24,8 @@ class Scene {
 			return Light.new(id)
 		} else if (component == "CharacterController") {
 			return CharacterController.new(id)
+		} else if (component == "RigidBody") {
+			return RigidBody.new(id)
 		} else if (component == "Camera") {
 			return Camera.new(id)
 		} else if (component == "Transform") {
@@ -70,6 +72,31 @@ class Scene {
 	foreign static IsCharacterControllerOnGround_(e)
 	//foreign static IsOnGround_(e)
 	
+	// RigidBody
+	foreign static AddForce_(e, x, y, z)
+
+	// Physics
+	static RayCast(from, to) {
+		// Fetch results from physics manager, returns a list of floats
+		// that we need to unpack into vector3
+		var results = Scene.RayCast_(from.x, from.y, from.z, to.x, to.y, to.z)
+
+		var points = [] // Result array of vec3
+
+		var size = results.count / 3
+		var i = 0
+		while(i < size) {
+			// size is base 1 while array is base 0, offset by 1
+			var listIndex = i - 1
+			points.add(Vector3.new(results[listIndex], results[listIndex + 1], results[listIndex + 2]))
+			i = i + 1
+		}
+
+		return points
+	}
+
+	foreign static RayCast_(fromX, fromY, fromZ, toX, toY, toZ)
+
 	foreign static TriggerGetOverlappingBodyCount_(e)
 	foreign static TriggerGetOverlappingBodies_(e)
 
@@ -156,6 +183,16 @@ class CharacterController {
 
 	IsOnGround() {
 		return Scene.IsCharacterControllerOnGround_(_entityId)
+	}
+}
+
+class RigidBody {
+	construct new(id) {
+		_entityId = id
+	}
+
+	AddForce(force) {
+		Scene.AddForce_(_entityId, force.x, force,y, force.z)
 	}
 }
 

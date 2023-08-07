@@ -17,10 +17,8 @@ namespace Nuake {
             END_SERIALIZE();
         }
 
-        bool Deserialize(const std::string& str)
+        bool Deserialize(const json& j)
         {
-            BEGIN_DESERIALIZE();
-
             if (j.contains("Interface"))
                 SetInterface(j["Interface"]);
 

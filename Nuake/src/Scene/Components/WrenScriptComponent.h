@@ -33,9 +33,8 @@ namespace Nuake
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			if (j.contains("Script"))
 			{
 				Script = j["Script"];

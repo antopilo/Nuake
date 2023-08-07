@@ -45,9 +45,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Model::Deserialize(const std::string& str)
+	bool Model::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
 		if (j.contains("Path"))
 		{
 			this->IsEmbedded = true;
@@ -63,7 +62,7 @@ namespace Nuake
 			for (auto& m : j["Meshes"])
 			{
 				Ref<Mesh> mesh = CreateRef<Mesh>();
-				mesh->Deserialize(m.dump());
+				mesh->Deserialize(m);
 
 				m_Meshes.push_back(mesh);
 			}

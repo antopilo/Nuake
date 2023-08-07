@@ -22,6 +22,7 @@ namespace Nuake
     unsigned int depthFBO;
 
     Ref<Mesh> Renderer::CubeMesh;
+    Ref<Mesh> Renderer::QuadMesh;
 
     Shader* Renderer::m_Shader;
     Shader* Renderer::m_SkyboxShader;
@@ -62,13 +63,14 @@ namespace Nuake
         4, 5, 0, 0, 5, 1
     };
 
-    float QuadVertices[] = {
-        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-        1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
-        -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,
-        1.0f,  -1.0f, 0.0f,   1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-        1.0f,   1.0f, 0.0f,   1.0f, 1.0f
+    std::vector<Vertex> QuadVertices
+    {
+        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0, 0), Vector3(0, 0, -1) },
+        { Vector3(1.0f,  1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, -1) },
+        { Vector3(-1.0f,  1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector3(0, 0, -1) },
+        { Vector3(1.0f,  -1.0f, 0.0f), Vector2(1.0f, 0.0f), Vector3(0, 0, -1) },
+        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0.0f, 0.0f), Vector3(0, 0, -1) },
+        { Vector3(1.0f,   1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, -1) }
     };
 
 
@@ -80,28 +82,17 @@ namespace Nuake
 
         m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
-        Ref<Material> material = MaterialManager::Get()->GetMaterial("default");
+        Ref<Material> defaultMaterial = CreateRef<Material>(Vector3{1, 1, 1});
+        defaultMaterial->SetName("white");
+        MaterialManager::Get()->RegisterMaterial(defaultMaterial);
+
         CubeMesh = CreateRef<Mesh>();
         CubeMesh->AddSurface(CubeVertices, CubeIndices);
-        CubeMesh->SetMaterial(material);
-        // Cube buffer
-        //CubeVertexArray = new VertexArray();
-        //CubeVertexArray->Bind();
-        //CubeVertexBuffer = new VertexBuffer(CubeVertices, sizeof(CubeVertices));
-        //
-        VertexBufferLayout vblayout = VertexBufferLayout();
-        vblayout.Push<float>(3);
-        //CubeVertexArray->AddBuffer(*CubeVertexBuffer, vblayout);
+        CubeMesh->SetMaterial(defaultMaterial);
 
-        // Quad buffer
-        QuadVertexArray = new VertexArray();
-        QuadVertexArray->Bind();
-        QuadVertexBuffer = new VertexBuffer(QuadVertices, sizeof(QuadVertices));
-
-        vblayout = VertexBufferLayout();
-        vblayout.Push<float>(3);
-        vblayout.Push<float>(2);
-        QuadVertexArray->AddBuffer(*QuadVertexBuffer, vblayout);
+        QuadMesh = CreateRef<Mesh>();
+        QuadMesh->AddSurface(QuadVertices, { 0, 1, 2, 3, 4, 5 });
+        QuadMesh->SetMaterial(defaultMaterial);
     }
 
     void Renderer::LoadShaders()
@@ -221,7 +212,7 @@ namespace Nuake
         m_DebugShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
         m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
 
-        CubeVertexArray->Bind();
+        CubeMesh->Bind();
         RenderCommand::DrawArrays(0, 36);
     }
 
@@ -233,7 +224,7 @@ namespace Nuake
 
     void Renderer::DrawQuad(Matrix4 transform)
     {
-        QuadVertexArray->Bind();
+        QuadMesh->Bind();
         RenderCommand::DrawArrays(0, 6);
     }
 }

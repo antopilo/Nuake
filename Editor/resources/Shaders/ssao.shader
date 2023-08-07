@@ -8,6 +8,7 @@ out flat vec2 UV;
 out mat4 v_InvView;
 out mat4 v_InvProjection;
 out mat4 v_View;
+out mat4 v_Projection;
 
 uniform mat4 u_View;
 uniform mat4 u_Projection;
@@ -15,6 +16,7 @@ uniform mat4 u_Projection;
 void main()
 {
     v_View = u_View;
+    v_Projection = u_Projection;
     v_InvView = inverse(u_View);
     v_InvProjection = inverse(u_Projection);
 
@@ -28,7 +30,6 @@ void main()
 uniform sampler2D u_Depth;
 uniform sampler2D u_Normal;
 uniform sampler2D u_Noise;
-
 uniform int u_KernelSize = 64;
 
 uniform vec3 u_Samples[64];
@@ -39,12 +40,19 @@ uniform float u_Bias = 0.025f;
 uniform float u_Falloff = 0.0022;
 uniform float u_Area = 0.0075;
 uniform float u_Strength = 2.0f;
+
 in vec2 UV;
 in mat4 v_View;
 in mat4 v_InvView;
 in mat4 v_InvProjection;
+in mat4 v_Projection;
 
 out vec4 FragColor;
+
+float linearize_depth(float d, float zNear, float zFar)
+{
+    return zNear * zFar / (zFar + d * (zNear - zFar));
+}
 
 vec3 WorldPosFromDepth(float depth) 
 {
@@ -91,46 +99,54 @@ vec3 normal_from_depth(float depth, vec2 texcoords) {
 
 void main()
 {
-    float depth = texture(u_Depth, UV).r ;
-    vec3 fragPos = ViewPosFromDepth(depth);
-    float normalizedRadius = u_Radius;
-    if(depth > 0.9999999f)
+    float depth = texture(u_Depth, UV).r;
+    if (depth > 0.9999999f)
     {
         FragColor = vec4(0, 0, 0, 0);
         return;
     }
-    vec3 goodNormal = normal_from_depth(depth, UV);
-    vec3 normal = texture(u_Normal, UV).rgb * 2.0 - 1.0;
-    vec4 normalT = v_View * vec4(normal, 1.0);
-    normalT *= -1.0f;
-    normal = normalT.xyz;
-    normal = normalize(normal);
-    normal = goodNormal;
-    vec3 randomVec = texture(u_Noise, UV * u_NoiseScale).xyz;  
-    float radius_depth = normalizedRadius / depth;
+
+    const float SCALING_NEAR = 0.92;
+    float depthScaler = (depth - SCALING_NEAR) / (1.0 - SCALING_NEAR);
+
+    const float minRadius = 0.05f;
+    const float maxRadius = 1.2f;
+    const float scalerPow = 1.8f;
+    depthScaler = min(max(pow(depthScaler, scalerPow), minRadius), maxRadius);
+    float scaledRadius = u_Radius * depthScaler;
+
+    vec3 fragPos = ViewPosFromDepth(depth);
+    vec3 normal = texture(u_Normal, UV).xyz * 2.0 - 1.0;//normal_from_depth(depth, UV);
+    normal.z *= -1.0f;
+    // Remove translation from view;
+    mat4 invView = v_InvView;
+    invView[3] = vec4(0, 0, 0, 1);
+
+    normal = (invView * vec4(normal, 1.0f)).xyz;
+    vec3 randomVec = texture(u_Noise, UV * u_NoiseScale).xyz;
+
+    vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
+    vec3 bitangent = cross(normal, tangent);
+    mat3 TBN = mat3(tangent, bitangent, normal);
+
     float occlusion = 0.0;
-    vec3 position = vec3(UV, depth);
-    
-    int skipped = 0;
-    float rangeCheckC = 0.0f;
-    for(int i=0; i < 64; i++) 
+    for (int i = 0; i < 64; i++)
     {
-        vec3 ray = u_Radius * reflect(u_Samples[i], randomVec);
-        vec3 hemi_ray = position + sign(dot(ray, normal)) * ray;
-        
-        float sampleDepth = texture(u_Depth, hemi_ray.xy).r;
-        float rangeCheck = smoothstep(0.0, 1.0, u_Radius * 0.8 / abs(depth - sampleDepth));
-        float ao = hemi_ray.z >= sampleDepth + u_Bias ? 1.0 : 0.0;
-        occlusion += ao * rangeCheck;
-        rangeCheckC += rangeCheck;
+        vec3 samplePos = TBN * u_Samples[i]; // generate a random point
+        samplePos.z *= -1.0f;
+        samplePos = fragPos + samplePos * scaledRadius;
+
+        vec4 offset = vec4(samplePos, 1.0); // make it a 4-vector
+        offset = v_Projection * offset; // project on the near clipping plane
+        offset.xyz /= offset.w; // perform perspective divide
+        offset.xyz = offset.xyz * 0.5 + 0.5; // transform to (0,1) range
+        float sampleDepth = texture(u_Depth, offset.xy).r;
+        float rangeCheck = smoothstep(0.0, 1.0, scaledRadius / abs((samplePos.z) - sampleDepth));
+        occlusion += (sampleDepth <= depth - u_Bias / 100.0 ? 1.0 : 0.0) * rangeCheck;
     }
-  
+
     float ao = 1.0 - (occlusion / 64.0);
-    rangeCheckC /= 64.0;
 
-    float finalAO = pow(ao, u_Strength);
+    float finalAO = pow(ao, u_Strength * 100.0);
     FragColor = vec4(finalAO, finalAO, finalAO, 1.0);
-    //FragColor = vec4(rangeCheckC, rangeCheckC, rangeCheckC, 1.0);
-
-    //FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

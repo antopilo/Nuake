@@ -26,6 +26,8 @@ namespace Nuake
 
 		Source = newSource;
 		ProgramId = newProgramId;
+
+		return true;
 	}
 
 	// Bind the shader
@@ -190,7 +192,7 @@ namespace Nuake
 			int addr = glGetUniformLocation(ProgramId, uniform.c_str());
 
 			if (addr == -1)
-				return addr;//std::cout << "Warning: uniform '" << uniform << "' doesn't exists!" << std::endl;
+				return addr;
 			else 
 				UniformCache[uniform] = addr;
 
@@ -250,7 +252,12 @@ namespace Nuake
 		//ASSERT(addr != -1);
 
 		if (addr != -1)
-			glUniform1i(addr, v0);
+			SetUniform1i(addr, v0);
+	}
+
+	void Shader::SetUniform1i(uint32_t location, int v0)
+	{
+		glUniform1i(location, v0);
 	}
 
 	void Shader::SetUniform1iv(const std::string& name, int size, int* value)
@@ -277,12 +284,19 @@ namespace Nuake
 			glUniformMatrix3fv(addr, 1, GL_FALSE, &mat[0][0]);
 	}
 
-	void Shader::SetUniformMat4f(const std::string& name, Matrix4 mat)
+	void Shader::SetUniformMat4f(uint32_t location, const Matrix4& mat)
+	{
+		glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
+	}
+
+	void Shader::SetUniformMat4f(const std::string& name, const Matrix4& mat)
 	{
 		int addr = FindUniformLocation(name);
 
 		if (addr != -1)
-			glUniformMatrix4fv(addr, 1, GL_FALSE, &mat[0][0]);
+		{
+			SetUniformMat4f(addr, std::move(mat));
+		}
 	}
 
 	void Shader::SetUniform1f(const std::string& name, float v0) 

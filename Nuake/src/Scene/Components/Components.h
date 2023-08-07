@@ -20,5 +20,4 @@
 #include "ParentComponent.h"
 #include "NameComponent.h"
 #include "BoxCollider.h"
-#include "ParticleEmitter.h"
 #include "../Entities/Entity.h"

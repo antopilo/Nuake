@@ -43,7 +43,7 @@ namespace Nuake
 	void Project::SaveAs(const std::string& FullPath)
 	{
 		json j = Serialize();
-		std::string serialized_string = j.dump();
+		std::string serialized_string = j.dump(4);
 
 		// TODO: Use file interface here...
 		// Write to file.
@@ -103,10 +103,8 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Project::Deserialize(const std::string& str)
+	bool Project::Deserialize(const json& j)
 	{
-		BEGIN_DESERIALIZE();
-
 		if (!j.contains("Name") || !j.contains("Description"))
 			return false;
 
@@ -118,7 +116,7 @@ namespace Nuake
 			std::string path = j["EntityDefinition"];
 			EntityDefinitionsFile = CreateRef<FGDFile>(path);
 			std::string content = FileSystem::ReadFile(path, false);
-			EntityDefinitionsFile->Deserialize(content);
+			EntityDefinitionsFile->Deserialize(nlohmann::json::parse(content));
 		}
 
 		if (j.contains("TrenchbroomPath"))
@@ -140,7 +138,7 @@ namespace Nuake
 			return true;
 
 		std::string sceneContent = FileSystem::ReadFile(scenePath, false);
-		if (!DefaultScene->Deserialize(sceneContent))
+		if (!DefaultScene->Deserialize(nlohmann::json::parse(sceneContent)))
 		{
 			Logger::Log("Error loading scene: " + scenePath, "project", CRITICAL);
 		}

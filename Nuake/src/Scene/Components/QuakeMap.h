@@ -30,9 +30,8 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(std::string str)
+		bool Deserialize(const json& j)
 		{
-			BEGIN_DESERIALIZE();
 			if (j.contains("AutoRebuild"))
 			{
 				this->AutoRebuild = j["AutoRebuild"];

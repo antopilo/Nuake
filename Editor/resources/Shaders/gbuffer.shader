@@ -23,7 +23,6 @@ void main()
     //T = normalize(T - dot(T, N) * N);
     //vec3 B = cross(N, T);
 
-
     vec3 T = normalize((u_Model * vec4(Tangent, 0.0f)).xyz);
     vec3 N = normalize((u_Model * vec4(Normal, 0.0f)).xyz);
     vec3 B = normalize((u_Model * vec4(Bitangent, 0.0f)).xyz);
@@ -83,10 +82,17 @@ void main()
     // Albedo
     gAlbedo = vec4(m_AlbedoColor, 1.0);
     if (u_HasAlbedo == 1)
-        gAlbedo.rgb = texture(m_Albedo, UV).rgb;
+    {
+        vec4 albedoSample = texture(m_Albedo, UV);
+        gAlbedo.rgb = albedoSample.rgb * m_AlbedoColor.rgb;
+        gAlbedo.a = albedoSample.a;
 
-    gAlbedo.rgb = texture(m_Albedo, UV).rgb * m_AlbedoColor.rgb;
-    
+        if (albedoSample.a < 0.1f)
+        {
+            discard;
+        }
+    }
+
     // Material
     float finalMetalness = u_MetalnessValue;
     if (u_HasMetalness == 1)

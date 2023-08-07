@@ -60,22 +60,28 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string& str)
+		bool Deserialize(const json& j)
 		{
-			if (str == "")
+			if (j == "")
 				return false;
 
-			BEGIN_DESERIALIZE();
 			Path = j["Path"];
 			if (j.contains("Entities"))
 			{
+				return true;
 				for (json e : j["Entities"])
 				{
-					Entity entity = Entity { Engine::GetCurrentScene()->m_Registry.create(), Engine::GetCurrentScene().get() };
-					entity.Deserialize(e.dump());
+					Entity entity = Engine::GetCurrentScene()->CreateEntity("-");
+					auto& nameComponent = entity.GetComponent<NameComponent>();
+
+					int entityId = nameComponent.ID;
+					entity.Deserialize(e);
+					nameComponent.ID = entityId;
+
 					this->AddEntity(entity);
 				}
 
+				// Set reference to the parent entity to children
 				for (auto& e : Entities)
 				{
 					auto parentC = e.GetComponent<ParentComponent>();

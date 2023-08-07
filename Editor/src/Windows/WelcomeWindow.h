@@ -22,7 +22,7 @@ namespace Nuake
 		~ProjectPreview() = default;
 
 		json Serialize() override;
-		bool Deserialize(const std::string& data) override;
+		bool Deserialize(const json& j) override;
 
 	private:
 		void ReadProjectFile();
@@ -41,13 +41,15 @@ namespace Nuake
 		
 		uint32_t SelectedProject = 0;
 		std::vector<ProjectPreview> _Projects;
-
+		std::string queuedProjectPath;
 	public:
 		WelcomeWindow(Nuake::EditorInterface* editor);
 		~WelcomeWindow() = default;
 
 		void Draw();
 
+		bool IsProjectQueued() const { return !queuedProjectPath.empty(); };
+		void LoadQueuedProject();
 	private:
 		void DrawRecentProjectsSection();
 		void DrawProjectItem(const uint32_t projectPreview);

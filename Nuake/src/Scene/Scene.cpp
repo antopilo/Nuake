@@ -3,6 +3,7 @@
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
+#include "src/Scene/Systems/ParticleSystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
@@ -25,6 +26,7 @@
 #include "src/Scene/Components/InterfaceComponent.h"
 
 #include <fstream>
+#include <future>
 #include <streambuf>
 #include <chrono>
 #include "src/Core/OS.h"
@@ -45,9 +47,10 @@ namespace Nuake {
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
-		mSceneRenderer = new SceneRenderer();
-		mSceneRenderer->Init();
+		m_SceneRenderer = new SceneRenderer();
+		m_SceneRenderer->Init();
 	}
 
 	Scene::~Scene() 
@@ -75,15 +78,24 @@ namespace Nuake {
 
 	Entity Scene::GetEntityByID(int id)
 	{
+		if (m_EntitiesIDMap.find(id) != m_EntitiesIDMap.end())
+		{
+			return m_EntitiesIDMap[id];
+		}
+
 		auto idView = m_Registry.view<NameComponent>();
 		for (auto e : idView) 
 		{
 			NameComponent& nameC = idView.get<NameComponent>(e);
 			if (nameC.ID == id)
 			{
-				return Entity{ e, this };
+				auto newEntity = Entity{ e, this };
+				m_EntitiesIDMap[id] = newEntity;
+				return newEntity;
 			}
 		}
+
+		Logger::Log("Entity not found with id: " + std::to_string(id), "scene", CRITICAL);
 
 		assert("Entity not found");
 	}
@@ -149,14 +161,14 @@ namespace Nuake {
 			return;
 		}
 
-		mSceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
-		mSceneRenderer->RenderScene(*this, framebuffer);
+		m_SceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
+		m_SceneRenderer->RenderScene(*this, framebuffer);
 	}
 
 	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
-		mSceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
-		mSceneRenderer->RenderScene(*this, framebuffer);
+		m_SceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
+		m_SceneRenderer->RenderScene(*this, framebuffer);
 	}
 	
 	std::vector<Entity> Scene::GetAllEntities() 
@@ -206,7 +218,7 @@ namespace Nuake {
 		}
 
 		std::string entityName;
-		if (GetEntity(name) != Entity())
+		if (GetEntity(name) == Entity())
 		{
 			entityName = name;
 		}
@@ -217,7 +229,7 @@ namespace Nuake {
 			{
 				const std::string& entityEnumName = name + std::to_string(i);
 				const auto& entityId = GetEntity(entityEnumName).GetHandle();
-				if (entityId != -1)
+				if (entityId == -1)
 				{
 					entityName = entityEnumName;
 					break;
@@ -242,6 +254,8 @@ namespace Nuake {
 		nameComponent.Name = entityName;
 		nameComponent.ID = id;
 
+		m_EntitiesIDMap[id] = entity;
+
 		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
 	}
@@ -260,11 +274,15 @@ namespace Nuake {
 
 		for (auto& c : copyChildrens) 
 		{
-			Logger::Log("Deleting entity " + std::to_string(c.GetHandle()));
 			DestroyEntity(c);
 		}
 
-		Logger::Log("Deleted entity" + std::to_string(entity.GetHandle()) + " - " + entity.GetComponent<NameComponent>().Name);
+		// Remove from ID to Entity cache
+		if (m_EntitiesIDMap.find(entity.GetComponent<NameComponent>().ID) != m_EntitiesIDMap.end())
+		{
+			m_EntitiesIDMap.erase(entity.GetComponent<NameComponent>().ID);
+		}
+
 		entity.Destroy();
 		m_Registry.shrink_to_fit();
 	}
@@ -349,7 +367,7 @@ namespace Nuake {
 
 		json serializedScene = Serialize();
 
-		sceneCopy->Deserialize(serializedScene.dump());
+		sceneCopy->Deserialize(serializedScene);
 		return sceneCopy;
 	}
 
@@ -362,7 +380,11 @@ namespace Nuake {
 		
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
-			entities.push_back(e.Serialize());
+		{
+			std::async(std::launch::async, [&]() {
+					entities.push_back(e.Serialize());
+			});
+		}
 		SERIALIZE_VAL_LBL("Entities", entities);
 
 		SERIALIZE_OBJECT(m_EditorCamera);
@@ -370,12 +392,11 @@ namespace Nuake {
 		END_SERIALIZE();
 	}
 
-	bool Scene::Deserialize(const std::string& str)
+	bool Scene::Deserialize(const json& j)
 	{
-		if (str == "")
+		if (j == "")
 			return false;
 
-		BEGIN_DESERIALIZE();
 		if (!j.contains("Name"))
 			return false;
 
@@ -391,8 +412,7 @@ namespace Nuake {
 		if (j.contains("m_Environement"))
 		{
 			m_Environement = CreateRef<Environment>();
-			std::string env = j["m_Environement"].dump();
-			m_Environement->Deserialize(env);
+			m_Environement->Deserialize(j["m_Environement"]);
 		}
 
 		// Parse entities
@@ -405,12 +425,12 @@ namespace Nuake {
 		{
 			std::string name = e["NameComponent"]["Name"];
 			Entity ent = { m_Registry.create(), this };
-			ent.Deserialize(e.dump());
+			ent.Deserialize(e);
 		}
 
 		if (j.contains("m_EditorCamera"))
 		{
-			m_EditorCamera->Deserialize(j["m_EditorCamera"].dump());
+			m_EditorCamera->Deserialize(j["m_EditorCamera"]);
 		}
 
 		auto view = m_Registry.view<ParentComponent>();

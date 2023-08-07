@@ -52,9 +52,8 @@ namespace Nuake
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const std::string& str) override
+		bool Deserialize(const json& j) override
 		{
-			BEGIN_DESERIALIZE();
 			if (j.contains("Path"))
 				return false;
 

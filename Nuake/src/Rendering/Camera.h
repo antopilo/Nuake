@@ -59,7 +59,7 @@ namespace Nuake
 		bool BoxFrustumCheck(const AABB& aabb);
 		Frustum GetFrustum();
 		json Serialize() override;
-		bool Deserialize(const std::string& str) override;
+		bool Deserialize(const json& j) override;
 
 		friend EditorCamera;
 	};

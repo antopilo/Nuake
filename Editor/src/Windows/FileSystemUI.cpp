@@ -1,3 +1,4 @@
+
 #include "FileSystemUI.h"
 
 #include <src/Vendors/imgui/imgui.h>
@@ -30,6 +31,9 @@ namespace Nuake
     {
     }
 
+
+    std::string renameTempValue = "";
+
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
@@ -55,7 +59,7 @@ namespace Nuake
         }
     }
 
-    void FileSystemUI::DrawDirectory(Ref<Directory> directory)
+    void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
         ImGui::PushFont(FontManager::GetFont(Icons));
         const char* icon = ICON_FA_FOLDER;
@@ -64,6 +68,98 @@ namespace Nuake
         {
             m_CurrentDirectory = directory;
         }
+
+        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
+        {
+            ImGui::OpenPopup(hoverMenuId.c_str());
+            m_hasClickedOnFile = true;
+        }
+
+        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
+        bool shouldRename = false;
+
+        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
+        bool shouldDelete = false;
+
+        if (ImGui::BeginPopup(hoverMenuId.c_str()))
+        {
+            if (ImGui::MenuItem("Open"))
+            {
+                m_CurrentDirectory = directory;
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Copy"))
+            {
+                if (ImGui::MenuItem("Full Path"))
+                {
+                    OS::CopyToClipboard(directory->fullPath);
+                }
+
+                if (ImGui::MenuItem("Directory Name"))
+                {
+                    OS::CopyToClipboard(String::Split(directory->name, '/')[0]);
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if (ImGui::MenuItem("Delete"))
+            {
+                shouldDelete = true;
+            }
+
+            if (ImGui::MenuItem("Rename"))
+            {
+                shouldRename = true;
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Show in File Explorer"))
+            {
+                OS::OpenIn(directory->fullPath);
+            }
+
+            ImGui::EndPopup();
+        }
+
+        // Rename Popup
+        
+        if (shouldRename)
+        {
+            renameTempValue = directory->name;
+            PopupHelper::OpenPopup(renameId);
+        }
+        
+        if (PopupHelper::DefineTextDialog(renameId, renameTempValue))
+        {
+            if (OS::RenameDirectory(directory, renameTempValue) != 0)
+            {
+                Logger::Log("Cannot rename directory: " + renameTempValue, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+            renameTempValue = "";
+        }
+
+        // Delete Popup
+
+        if(shouldDelete)
+        {
+            PopupHelper::OpenPopup(deleteId);
+        }
+
+        if(PopupHelper::DefineConfirmationDialog(deleteId, " Are you sure you want to delete the folder and all its children?\n This action cannot be undone, and all data within the folder \n will be permanently lost."))
+        {
+            if (FileSystem::DeleteFolder(directory->fullPath) != 0)
+            {
+                Logger::Log("Failed to remove directory: " + directory->name, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+        }
+
 
         ImGui::Text(directory->name.c_str());
         ImGui::PopFont();
@@ -115,28 +211,42 @@ namespace Nuake
             {
                 Editor->Selection = EditorSelection(file);
             }
+        }
 
-            if (ImGui::BeginDragDropSource())
+        if (ImGui::BeginDragDropSource())
             {
                 char pathBuffer[256];
                 std::strncpy(pathBuffer, file->GetAbsolutePath().c_str(), sizeof(pathBuffer));
                 std::string dragType;
                 if (fileExtension == ".wren")
+                {
                     dragType = "_Script";
+                }
                 else if (fileExtension == ".map")
+                {
                     dragType = "_Map";
+                }
                 else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx")
+                {
                     dragType = "_Model";
+                }
                 else if (fileExtension == ".interface")
+                {
                     dragType = "_Interface";
+                }
                 else if (fileExtension == ".prefab")
+                {
                     dragType = "_Prefab";
+                }
+                else if (fileExtension == ".png" || fileExtension == ".jpg")
+                {
+                    dragType = "_Image";
+                }
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
                 ImGui::Text(file->GetName().c_str());
                 ImGui::EndDragDropSource();
             }
-        }
 
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
@@ -144,52 +254,100 @@ namespace Nuake
             ImGui::OpenPopup(hoverMenuId.c_str());
             m_hasClickedOnFile = true;
         }
-        
+
+        const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
+        bool shouldOpenScene = false;
+
+        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
+        bool shouldRename = false;
+
+        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
+        bool shouldDelete = false;
+
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
-            if (ImGui::MenuItem("Show in File Explorer"))
+            if (file->GetExtension() != ".scene") 
             {
-                OS::ShowInFileExplorer(file->GetAbsolutePath());
-            }
-
-            if(file->GetExtension() == ".wren")
-            {
-                ImGui::Separator();
-
-                if(ImGui::MenuItem("Open..."))
+                if (ImGui::MenuItem("Open in Editor"))
                 {
                     OS::OpenIn(file->GetAbsolutePath());
                 }
             }
-
-            if(file->GetExtension() != ".project")
+            else
             {
-                ImGui::Separator();
-            
+                if (ImGui::MenuItem("Load Scene"))
+                {
+                    shouldOpenScene = true;
+                }
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Copy"))
+            {
+                if (ImGui::MenuItem("Full Path"))
+                {
+                    OS::CopyToClipboard(file->GetAbsolutePath());
+                }
+
+                if (ImGui::MenuItem("File Name"))
+                {
+                    OS::CopyToClipboard(file->GetName());
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if (file->GetExtension() != ".project")
+            {
                 if (ImGui::MenuItem("Delete"))
                 {
-                    if(FileSystem::RemoveFile(file->GetAbsolutePath()) != 0)
-                    {
-                        Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
-                    }
-                    RefreshFileBrowser();
+                    shouldDelete = true;
                 }
+            }
+            else 
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 0.2f));
+                ImGui::MenuItem("Delete");
+                ImGui::PopStyleColor();
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                    ImGui::TextUnformatted("The file you're trying to delete is currently loaded by the game engine.");
+                    ImGui::PopTextWrapPos();
+                    ImGui::EndTooltip();
+                }
+            }
+            
+            if (ImGui::MenuItem("Rename"))
+            {
+                shouldRename = true;
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Show in File Explorer"))
+            {
+                OS::ShowInFileExplorer(file->GetAbsolutePath());
             }
             
             ImGui::EndPopup();
         }
 
-        const std::string openScene = "Open Scene" + std::string("##") + hoverMenuId;
-
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
         {
-            if (file->GetExtension() == ".scene")
-            {
-                PopupHelper::Confirmation(openScene);
-            }
+            shouldOpenScene = file->GetExtension() == ".scene";
         }
 
-        if (PopupHelper::DefineDialog(openScene, "Open the scene? \n Changes will not be saved."))
+        // Open Scene Popup
+
+        if (shouldOpenScene)
+        {
+            PopupHelper::OpenPopup(openSceneId);
+        }
+
+        if (PopupHelper::DefineConfirmationDialog(openSceneId, " Open the scene? \n Changes will not be saved."))
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();
@@ -202,6 +360,41 @@ namespace Nuake
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
             Engine::LoadScene(scene);
         }
+
+        // Rename Popup
+
+        if (shouldRename)
+        {
+            renameTempValue = file->GetName();
+            PopupHelper::OpenPopup(renameId);
+        }
+
+        if (PopupHelper::DefineTextDialog(renameId, renameTempValue))
+        {
+            if(OS::RenameFile(file, renameTempValue) != 0)
+            {
+                Logger::Log("Cannot rename file: " + renameTempValue, "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+            renameTempValue = "";
+        }
+
+        // Delete Popup
+
+        if(shouldDelete)
+        {
+            PopupHelper::OpenPopup(deleteId);
+        }
+
+        if(PopupHelper::DefineConfirmationDialog(deleteId, " Are you sure you want to delete the file?\n This action cannot be undone, and all data \n will be permanently lost."))
+        {
+            if (FileSystem::DeleteFileFromPath(file->GetAbsolutePath()) != 0)
+            {
+                Logger::Log("Failed to remove file: " + file->GetRelativePath(), "editor", CRITICAL);
+            }
+            RefreshFileBrowser();
+        }
+
 
         ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
@@ -247,7 +440,7 @@ namespace Nuake
 						path += ".material";
 					}
 
-					if (path != "")
+					if (!path.empty())
 					{
 						Ref<Material> material = CreateRef<Material>();
 						material->IsEmbedded = false;
@@ -353,8 +546,6 @@ namespace Nuake
             ImGui::EndChild();
             ImGui::SameLine();
 
-            avail = ImGui::GetContentRegionAvail();
-
             std::vector<Ref<Directory>> paths = std::vector<Ref<Directory>>();
 
             Ref<Directory> currentParent = m_CurrentDirectory;
@@ -402,12 +593,13 @@ namespace Nuake
                     }
                    
                     const uint32_t numButtonAfterPathBrowser = 2;
+                    const uint32_t searchBarSize = 6; 
                     ImGui::SameLine();
 
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
                     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-                    ImGui::BeginChild("pathBrowser", ImVec2(ImGui::GetContentRegionAvailWidth() - (numButtonAfterPathBrowser * buttonWidth) - 4.0, 24));
+                    ImGui::BeginChild("pathBrowser", ImVec2((ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth * searchBarSize)) - 4.0, 24));
                     for (int i = paths.size() - 1; i > 0; i--) 
                     {
                         if (i != paths.size())
@@ -431,13 +623,23 @@ namespace Nuake
                         ImGui::SameLine();
                         ImGui::Text("/");
                     }
-
                     ImGui::EndChild();
                     ImGui::PopStyleVar();
 
-
                     ImGui::PopStyleVar();
                     ImGui::PopStyleColor();
+                    
+                    ImGui::SameLine();
+
+                    ImGui::BeginChild("searchBar", ImVec2(ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth), 24));
+                    char buffer[256];
+                    memset(buffer, 0, sizeof(buffer));
+                    std::strncpy(buffer, m_searchKeyWord.c_str(), sizeof(buffer));
+                    if (ImGui::InputTextEx("##Search", "Asset search & filter ..", buffer, sizeof(buffer), ImVec2(ImGui::GetContentRegionAvail().x, 24), ImGuiInputTextFlags_EscapeClearsAll))
+                    {
+                        m_searchKeyWord = std::string(buffer);
+                    }
+                    ImGui::EndChild();
 
                     ImGui::SameLine();
 
@@ -454,12 +656,13 @@ namespace Nuake
                     }
 
                     ImGui::PopStyleColor(); // Button color
+                    
+                    ImGui::SameLine();
                 }
-
                 ImGui::EndChild();
 
                 ImDrawList* drawList = ImGui::GetWindowDrawList();
-                ImGui::GetWindowDrawList()->AddLine(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY()), ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetCursorPosY()), IM_COL32(255, 0, 0, 255), 1.0f);
+                ImGui::GetWindowDrawList()->AddLine(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY()), ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetCursorPosY()), IM_COL32(255, 0, 0, 255), 1.0f);
 
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
                 avail = ImGui::GetContentRegionAvail();
@@ -489,13 +692,16 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                if (i + 1 % amount != 0)
-                                    ImGui::TableNextColumn();
-                                else
-                                    ImGui::TableNextRow();
+                                if(String::Sanitize(d->name).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                {
+                                    if (i + 1 % amount != 0)
+                                        ImGui::TableNextColumn();
+                                    else
+                                        ImGui::TableNextRow();
 
-                                DrawDirectory(d);
-                                i++;
+                                    DrawDirectory(d, i);
+                                    i++;
+                                }
                             }
                         }
 
@@ -503,13 +709,16 @@ namespace Nuake
                         {
                             for (auto f : m_CurrentDirectory->Files)
                             {
-                                if (i - 1 % amount != 0 || i == 1)
-                                    ImGui::TableNextColumn();
-                                else
-                                    ImGui::TableNextRow();
+                                if(String::Sanitize(f->GetName()).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                {
+                                    if (i - 1 % amount != 0 || i == 1)
+                                        ImGui::TableNextColumn();
+                                    else
+                                        ImGui::TableNextRow();
                                 
-                                DrawFile(f, i);
-                                i++;
+                                    DrawFile(f, i);
+                                    i++;
+                                }
                             }
                         }
 
