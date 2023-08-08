@@ -1,10 +1,13 @@
 #pragma once
 
-#include "stb_image/stb_image.h"
-#include <string>
 #include "src/Core/Maths.h"
-#include "msdfgen/core/BitmapRef.hpp"
 #include "src/Resource/Serializable.h"
+
+#include "stb_image/stb_image.h"
+#include "msdfgen/core/BitmapRef.hpp"
+
+#include <string>
+
 
 namespace Nuake
 {
@@ -45,19 +48,7 @@ namespace Nuake
 		inline int GetHeight() const { return m_Height; }
 		inline Vector2 GetSize() const { return Vector2(m_Width, m_Height); }
 
-		json Serialize() override
-		{
-			BEGIN_SERIALIZE();
-			j["Path"] = this->m_FilePath;
-			END_SERIALIZE();
-		}
-
-		bool Deserialize(const json& j) override
-		{
-			if (j.contains("Path"))
-				return false;
-
-
-		}
+		json Serialize() override;
+		bool Deserialize(const json& j) override;
 	};
 }

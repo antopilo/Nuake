@@ -33,7 +33,6 @@
 #include <src/Rendering/SceneRenderer.h>
 
 
-
 const std::string WindowTitle = "Nuake Editor";
 
 int main(int argc, char* argv[])

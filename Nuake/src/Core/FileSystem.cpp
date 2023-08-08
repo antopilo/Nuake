@@ -120,6 +120,11 @@ namespace Nuake
 		return fs::relative(absolutePath, rootPath).generic_string();
 	}
 
+	std::string FileSystem::RelativeToAbsolute(const std::string& path)
+	{
+		return Root + path;
+	}
+
 	std::string FileSystem::GetParentPath(const std::string& fullPath)
 	{
 		std::filesystem::path pathObj(fullPath);

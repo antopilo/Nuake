@@ -132,7 +132,7 @@ namespace Nuake
 		{
 			if (j.contains("Path"))
 			{
-				this->Path = j["Path"];
+				Path = FileSystem::RelativeToAbsolute(j["Path"]);
 				if (FileSystem::FileExists(Path))
 				{
 					std::string content = FileSystem::ReadFile(Path);
@@ -143,37 +143,44 @@ namespace Nuake
 			{
 				if (j.contains("Albedo"))
 				{
-					Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(j["Albedo"]["Path"]);
+					const auto& texturePath = j["Albedo"]["Path"];
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+					Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetAlbedo(albedoTexture);
 				}
 
 				if (j.contains("Normal"))
 				{
-					Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(j["Normal"]["Path"]);
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Normal"]["Path"]);
+					Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetMetalness(normalTexture);
 				}
 
 				if (j.contains("AO"))
 				{
-					Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(j["AO"]["Path"]);
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(j["AO"]["Path"]);
+					Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetAO(aoTexture);
 				}
 
 				if (j.contains("Metalness"))
 				{
-					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(j["Metalness"]["Path"]);
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Metalness"]["Path"]);
+					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetMetalness(metalTexture);
 				}
 
 				if (j.contains("Roughness"))
 				{
-					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(j["Roughness"]["Path"]);
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Roughness"]["Path"]);
+					Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetRoughness(metalTexture);
 				}
 
 				if (j.contains("Displacement"))
 				{
-					Ref<Texture> displacementTexture = TextureManager::Get()->GetTexture(j["Displacement"]["Path"]);
+					const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Normal"]["Path"]);
+					Ref<Texture> displacementTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetDisplacement(displacementTexture);
 				}
 			}
