@@ -155,4 +155,18 @@ namespace Nuake
 		glTextureParameteri(GL_TEXTURE_2D, param, value);
 		Unbind();
 	}
+
+	json Texture::Serialize()
+	{
+		BEGIN_SERIALIZE();
+		const std::string& relativePath = FileSystem::AbsoluteToRelative(m_FilePath);
+		j["Path"] = relativePath;
+		END_SERIALIZE();
+	}
+
+	bool Texture::Deserialize(const json& j)
+	{
+		if (j.contains("Path"))
+			return false;
+	}
 }

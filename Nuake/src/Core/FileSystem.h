@@ -30,6 +30,7 @@ namespace Nuake
 
 		static void Scan();
 		static std::string AbsoluteToRelative(const std::string& path);
+		static std::string RelativeToAbsolute(const std::string& path);
 		static std::string GetParentPath(const std::string& fullPath);
 		static Ref<Directory> GetFileTree();
 		static Ref<File> GetFile(const std::string& path);

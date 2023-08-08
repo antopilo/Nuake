@@ -82,7 +82,7 @@ project "Nuake"
         optimize "on"
 
 project "NuakeRuntime"
-    location "Editor"
+    location "Runtime"
     kind "ConsoleApp"
     language "C++"
     
@@ -92,7 +92,7 @@ project "NuakeRuntime"
 
     files
     {
-        "Editor/Runtime.cpp"
+        "Runtime/Runtime.cpp"
     }
 
     includedirs
