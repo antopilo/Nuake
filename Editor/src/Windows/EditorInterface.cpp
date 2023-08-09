@@ -1091,10 +1091,7 @@ namespace Nuake {
                     char* file = (char*)payload->Data;
                     std::string fullPath = std::string(file, 256);
                     std::string relPath = FileSystem::AbsoluteToRelative(fullPath);
-
-                    Entity newEntity = Engine::GetCurrentScene()->CreateEntity("New prefab Entity");
-                    PrefabComponent& prefabComponent = newEntity.AddComponent<PrefabComponent>();
-                    prefabComponent.PrefabInstance = Prefab::New(relPath);
+                    Prefab::New(relPath);
                 }
                 ImGui::EndDragDropTarget();
             }
