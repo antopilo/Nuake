@@ -32,15 +32,7 @@ void main(int argc, char* argv[])
         return;
     }
 
-    try
-    {
-        project->Deserialize(json::parse(projectfileContent));
-    }
-    catch(...)
-    {
-        Logger::Log("Failed to deserialize project", "runtime", CRITICAL);
-        return;
-    }
+    project->Deserialize(json::parse(projectfileContent));
 
     window->SetTitle(project->Name);
 
