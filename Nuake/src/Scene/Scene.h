@@ -60,6 +60,8 @@ namespace Nuake
 
 		Ref<Camera> GetCurrentCamera();
 
+		std::string GetUniqueEntityName(const std::string& name);
+
 		Entity CreateEntity(const std::string& name);
 		Entity CreateEntity(const std::string& name, int id);
 		void DestroyEntity(Entity entity);		

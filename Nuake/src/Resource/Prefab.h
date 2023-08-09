@@ -47,6 +47,7 @@ namespace Nuake {
 			for (Entity e : Entities)
 				entities.push_back(e.Serialize());
 
+			j["Root"] = Root.GetComponent<NameComponent>().ID;
 			SERIALIZE_VAL_LBL("Entities", entities);
 
 			// Manual correction to remove parent if we are prefabing a child. 
@@ -68,15 +69,27 @@ namespace Nuake {
 			Path = j["Path"];
 			if (j.contains("Entities"))
 			{
-				return true;
+				const auto& scene = Engine::GetCurrentScene();
+
 				for (json e : j["Entities"])
 				{
-					Entity entity = Engine::GetCurrentScene()->CreateEntity("-");
-					auto& nameComponent = entity.GetComponent<NameComponent>();
+					Entity entity = { scene->m_Registry.create(), scene.get() };
+					entity.Deserialize(e); // Id gets overriden by serialized id.
 
-					int entityId = nameComponent.ID;
-					entity.Deserialize(e);
-					nameComponent.ID = entityId;
+					auto& nameComponent = entity.GetComponent<NameComponent>();
+					bool isRoot = false;
+					if (nameComponent.ID == j["Root"])
+					{
+						isRoot = true; // We found the root entity of the prefab.
+					}
+
+					nameComponent.Name = scene->GetUniqueEntityName(nameComponent.Name);
+					nameComponent.ID = OS::GetTime();
+
+					if (isRoot)
+					{
+						Root = entity;
+					}
 
 					this->AddEntity(entity);
 				}

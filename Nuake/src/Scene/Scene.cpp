@@ -31,7 +31,8 @@
 #include <chrono>
 #include "src/Core/OS.h"
 
-namespace Nuake {
+namespace Nuake 
+{
 	Ref<Scene> Scene::New()
 	{
 		return CreateRef<Scene>();
@@ -209,6 +210,31 @@ namespace Nuake {
 		return CreateEntity(name, (int)OS::GetTime());
 	}
 
+	std::string Scene::GetUniqueEntityName(const std::string& name)
+	{
+		std::string entityName;
+		if (GetEntity(name) == Entity())
+		{
+			return name;
+		}
+
+		// Try to generate a unique name
+		for (uint32_t i = 1; i < 4096; i++)
+		{
+			const std::string& entityEnumName = name + std::to_string(i);
+			const auto& entityId = GetEntity(entityEnumName).GetHandle();
+			if (entityId == -1)
+			{
+				return entityEnumName;
+				break;
+			}
+		}
+
+		// We ran out of names
+		Logger::Log("Failed to create unique entity name. Limit reached with name: " + name, "scene", WARNING);
+		return name;
+	}
+
 	Entity Scene::CreateEntity(const std::string& name, int id)
 	{
 		if (name.empty())
@@ -217,32 +243,8 @@ namespace Nuake {
 			return Entity();
 		}
 
-		std::string entityName;
-		if (GetEntity(name) == Entity())
-		{
-			entityName = name;
-		}
-		else
-		{
-			// Try to generate a unique name
-			for (uint32_t i = 1; i < 4096; i++)
-			{
-				const std::string& entityEnumName = name + std::to_string(i);
-				const auto& entityId = GetEntity(entityEnumName).GetHandle();
-				if (entityId == -1)
-				{
-					entityName = entityEnumName;
-					break;
-				}
-			}
-
-			if (entityName.empty()) // We ran out of names!!!
-			{
-				Logger::Log("Failed to create entity. Limit reached with name: " + name, "scene", CRITICAL);
-				return Entity();
-			}
-		}
-
+		std::string entityName = GetUniqueEntityName(name);
+		
 		Entity entity = { m_Registry.create(), this };
 
 		// Add all mandatory component. An entity cannot exist without these.
