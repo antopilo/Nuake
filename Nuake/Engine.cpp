@@ -63,7 +63,7 @@ namespace Nuake
 			// Fixed update
 			while (s_FixedUpdateDifference >= s_FixedUpdateRate) 
 			{
-				s_CurrentWindow->FixedUpdate(s_FixedUpdateDifference);
+				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate);
 
 				s_FixedUpdateDifference -= s_FixedUpdateRate;
 			}
