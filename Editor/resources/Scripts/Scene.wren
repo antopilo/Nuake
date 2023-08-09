@@ -192,7 +192,7 @@ class RigidBody {
 	}
 
 	AddForce(force) {
-		Scene.AddForce_(_entityId, force.x, force,y, force.z)
+		Scene.AddForce_(_entityId, force.x, force.y, force.z)
 	}
 }
 

@@ -63,7 +63,7 @@ namespace Nuake
 			bool IsCharacterGrounded(const Entity& entity);
 			// This is going to be ugly. TODO: Find a better way that passing itself as a parameter
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
-			void AddForceToRigidBody(const Entity& entity, const Vector3& force);
+			void AddForceToRigidBody(Entity& entity, const Vector3& force);
 
 			std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
 			void StepSimulation(Timestep ts);

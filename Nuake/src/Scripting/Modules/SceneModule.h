@@ -305,7 +305,7 @@ namespace Nuake
 
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& rigidBodyComponent = ent.GetComponent<RigidBodyComponent>();
-				rigidBodyComponent.Rigidbody->AddForce(Vector3(x, y, z));
+				rigidBodyComponent.QueuedForce += Vector3(x, y, z);
 			}
 
 			static void GetTranslation(WrenVM* vm)

@@ -18,5 +18,7 @@ namespace Nuake
 		void InitializeQuakeMap();
 		void InitializeRigidbodies();
 		void InitializeCharacterControllers();
+
+		void ApplyForces();
 	};
 }

@@ -1,7 +1,8 @@
 #include "Prefab.h"
 #include "src/Scene/Components/ParentComponent.h"
 
-namespace Nuake {
+namespace Nuake 
+{
 	Ref<Prefab> Prefab::CreatePrefabFromEntity(Entity entity)
 	{
 		Ref<Prefab> prefab = CreateRef<Prefab>();

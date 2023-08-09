@@ -555,21 +555,21 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::AddForceToRigidBody(const Entity& entity, const Vector3& force)
+		void DynamicWorld::AddForceToRigidBody(Entity& entity, const Vector3& force)
 		{
 			auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
 			for (const auto& body : _registeredBodies)
 			{
 				auto bodyId = static_cast<JPH::BodyID>(body);
 				auto entityId = static_cast<uint32_t>(bodyInterface.GetUserData(bodyId));
-				if (entityId == entity.GetHandle())
+				if (entityId == entity.GetID())
 				{
 					bodyInterface.AddForce(bodyId, JPH::Vec3(force.x, force.y, force.z));
 					return;
 				}
 			}
 
-			Logger::Log("Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()), "physics", WARNING);
+			//Logger::Log("Failed to add force to rigidbody. Body not found with id: " + std::to_string(entity.GetHandle()), "physics", WARNING);
 		}
 
 		JPH::Ref<JPH::Shape> DynamicWorld::GetJoltShape(const Ref<PhysicShape> shape)

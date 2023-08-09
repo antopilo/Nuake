@@ -15,6 +15,8 @@ namespace Nuake {
 		float Mass;
 		Ref<Physics::RigidBody> Rigidbody;
 
+		Vector3 QueuedForce = Vector3();
+
 		RigidBodyComponent();
 		Ref<Physics::RigidBody> GetRigidBody() const;
 		

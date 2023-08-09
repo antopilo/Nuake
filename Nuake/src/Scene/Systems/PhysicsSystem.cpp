@@ -121,6 +121,7 @@ namespace Nuake
 			return;
 
 		InitializeRigidbodies();
+		ApplyForces();
 
 		PhysicsManager::Get().Step(ts);
 	}
@@ -331,6 +332,27 @@ namespace Nuake
 			}
 
 			// TODO: Other types of collider supported for character controller?
+		}
+	}
+
+	void PhysicsSystem::ApplyForces()
+	{
+		auto view = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
+		for (auto e : view)
+		{
+			auto [transform, rigidBodyComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
+			Entity ent = Entity({ e, m_Scene });
+			Ref<Physics::RigidBody> rigidBody;
+
+			// Not initialized yet.
+			if (!rigidBodyComponent.GetRigidBody() || rigidBodyComponent.QueuedForce == Vector3() || rigidBodyComponent.Mass == 0.0)
+			{
+				continue;
+			}
+
+			PhysicsManager::Get().GetWorld()->AddForceToRigidBody(ent, rigidBodyComponent.QueuedForce);
+
+			rigidBodyComponent.QueuedForce = Vector3();
 		}
 	}
 }
