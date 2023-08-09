@@ -71,7 +71,7 @@ namespace Nuake
                 mCascadeSplits[i] = (d - nearClip) / clipRange;
             }
 
-            //mCascadeSplits[0] = 0.2f;
+            mCascadeSplits[0] = 0.01f;
             //mCascadeSplits[1] = 0.45f;
             //mCascadeSplits[2] = 1.0f;
 

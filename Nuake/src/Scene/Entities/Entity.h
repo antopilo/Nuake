@@ -21,16 +21,19 @@ namespace Nuake
 		int GetID() { return GetComponent<NameComponent>().ID; }
 
 		template<typename T>
-		bool HasComponent() {
+		bool HasComponent() const
+		{
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
-		bool IsValid() {
+		bool IsValid() const
+		{
 			return m_Scene->m_Registry.valid((entt::entity)GetHandle());
 		}
 
 		template<typename T>
-		T& AddComponent() {
+		T& AddComponent() 
+		{
 			T& component = m_Scene->m_Registry.emplace_or_replace <T>(m_EntityHandle);
 			return component;
 		}
@@ -66,9 +69,11 @@ namespace Nuake
 		json Serialize() override;
 		bool Deserialize(const json& str);
 
-		Scene* GetScene() {
+		Scene* GetScene() const
+		{
 			return m_Scene;
 		}
+
 	private:
 		entt::entity m_EntityHandle;
 		Scene* m_Scene;

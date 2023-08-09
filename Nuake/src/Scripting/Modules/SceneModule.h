@@ -372,6 +372,7 @@ namespace Nuake
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
+
 				// set the slots
 				double x = wrenGetSlotDouble(vm, 2);
 				double y = wrenGetSlotDouble(vm, 3);
@@ -431,7 +432,8 @@ namespace Nuake
 				}
 			}
 
-			static void BrushGetTargetsCount(WrenVM* vm) {
+			static void BrushGetTargetsCount(WrenVM* vm) 
+			{
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
