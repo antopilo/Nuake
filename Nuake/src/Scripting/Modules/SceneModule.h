@@ -311,7 +311,7 @@ namespace Nuake
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
-				Vector3 position = transform.GetLocalPosition();
+				Vector3 position = transform.GetGlobalPosition();
 				wrenSetSlotDouble(vm, 1, position.x);
 				wrenSetSlotDouble(vm, 2, position.y);
 				wrenSetSlotDouble(vm, 3, position.z);
@@ -377,8 +377,7 @@ namespace Nuake
 				double x = wrenGetSlotDouble(vm, 2);
 				double y = wrenGetSlotDouble(vm, 3);
 				double z = wrenGetSlotDouble(vm, 4);
-
-				transform.SetGlobalPosition(Vector3(x, y, z));
+				transform.SetLocalPosition(Vector3(x, y, z));
 			}
 
 			static void TriggerGetOverlappingBodyCount(WrenVM* vm)
