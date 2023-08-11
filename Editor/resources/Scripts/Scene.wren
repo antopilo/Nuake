@@ -132,6 +132,10 @@ class TransformComponent {
 		Scene.SetTranslation_(_entityId, t.x, t.y, t.z)
 	}
 
+	SetTranslation(x, y, z) {
+		Scene.SetTranslation_(_entityId, x, y, z)
+	}
+
 	GetRotation() {
 		var result = Scene.GetRotation_(_entityId)
 		return Vector3.new(result[0], result[1], result[2])
