@@ -20,7 +20,7 @@ namespace JPH
 	class BodyActivationListener;
 	class BodyInterface;
 	class Shape;
-	class Character;
+	class CharacterVirtual;
 
 	template<class T>
 	class Ref;
@@ -48,7 +48,7 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::map<uint32_t, JPH::Character*> _registeredCharacters;
+			std::map<uint32_t, JPH::CharacterVirtual*> _registeredCharacters;
 
 		public:
 			DynamicWorld();

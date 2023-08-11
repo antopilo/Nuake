@@ -45,9 +45,9 @@ namespace Nuake
 		m_Environement = CreateRef<Environment>();
 
 		// Adding systems - Order is important
+		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
-		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
 		m_SceneRenderer = new SceneRenderer();
@@ -105,7 +105,6 @@ namespace Nuake
 	{
 		for (auto& system : m_Systems)
 		{
-			Logger::Log("Init system");
 			if (!system->Init())
 			{
 				return false;

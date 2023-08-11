@@ -27,9 +27,10 @@
 
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
-#include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/Character/CharacterVirtual.h>
 #include <Jolt/Physics/Collision/RayCast.h>
 #include <Jolt/Physics/Collision/CastResult.h>
+#include <Jolt/Core/TempAllocator.h>
 
 #include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
 
@@ -245,7 +246,7 @@ namespace Nuake
 	{
 		DynamicWorld::DynamicWorld() : _stepCount(0)
 		{
-			_registeredCharacters = std::map<uint32_t, JPH::Character*>();
+			_registeredCharacters = std::map<uint32_t, JPH::CharacterVirtual*>();
 
 			// Initialize Jolt Physics
 			const uint32_t MaxBodies = 2048;
@@ -329,13 +330,19 @@ namespace Nuake
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 		{
-			JPH::Ref<JPH::CharacterSettings> settings = new JPH::CharacterSettings();
-			settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
-			settings->mLayer = Layers::MOVING;
-			settings->mFriction = cc->Friction;
-			settings->mShape = GetJoltShape(cc->Shape);
-			settings->mGravityFactor = 0.0f;
+			JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
+			//settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
+			//settings->mLayer = Layers::MOVING;
+			//settings->mFriction = cc->Friction;
+			//settings->mShape = GetJoltShape(cc->Shape);
+			//settings->mGravityFactor = 0.0f;
 			settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -0.5f);
+			settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
+			settings->mMaxStrength = 10.0;
+			settings->mCharacterPadding = 0.01f;
+			settings->mPenetrationRecoverySpeed = 1.0f;
+			settings->mPredictiveContactDistance = 0.01f;
+			settings->mShape = GetJoltShape(cc->Shape);
 
 			auto& joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
 
@@ -346,9 +353,9 @@ namespace Nuake
 			//bodyRotation = glm::normalize(bodyRotation * Quat(yOffset));
 
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
-			JPH::Character* character = new JPH::Character(settings, joltPosition, joltRotation, cc->GetEntity().GetID() , _JoltPhysicsSystem.get());
+			JPH::CharacterVirtual* character = new JPH::CharacterVirtual(settings, joltPosition, joltRotation, _JoltPhysicsSystem.get());
 
-			character->AddToPhysicsSystem(JPH::EActivation::Activate);
+			//character->AddToPhysicsSystem(JPH::EActivation::Activate);
 			
 			// To get the jolt character control from a scene entity.
 			_registeredCharacters[cc->Owner.GetHandle()] = character;
@@ -452,7 +459,7 @@ namespace Nuake
 			{
 				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};
 
-				JPH::Character* characterController = e.second;
+				JPH::CharacterVirtual* characterController = e.second;
 				JPH::Mat44 joltTransform = characterController->GetWorldTransform();
 				const auto bodyRotation = characterController->GetRotation();
 
@@ -506,12 +513,30 @@ namespace Nuake
 			// Step the world
 			try
 			{
-				_JoltPhysicsSystem->Update(ts, collisionSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+				// TODO: Potential memory leak with new keyword.
+
+				JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
+				update_settings.mStickToFloorStepDown = -JPH::Vec3(0, 1, 0) * update_settings.mStickToFloorStepDown.Length();
+				update_settings.mWalkStairsStepUp = JPH::Vec3(0, 1, 0) * update_settings.mWalkStairsStepUp.Length();
+				update_settings.mWalkStairsMinStepForward = 0.10;
+				update_settings.mWalkStairsStepForwardTest = 0.15f;
 
 				for (auto& c : _registeredCharacters)
 				{
-					c.second->PostSimulation(0.05f);
+					//c.second->PostSimulation(0.05f);
+
+					c.second->ExtendedUpdate(ts,
+						-JPH::Vec3(0, 0, 0) * _JoltPhysicsSystem->GetGravity().Length(),
+						update_settings,
+						_JoltPhysicsSystem->GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+						_JoltPhysicsSystem->GetDefaultLayerFilter(Layers::MOVING),
+						{ },
+						{ },
+						*(new JPH::TempAllocatorMalloc()));
 				}
+
+				_JoltPhysicsSystem->Update(ts, collisionSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
+
 			}
 			catch (...)
 			{
@@ -538,7 +563,7 @@ namespace Nuake
 			{
 				for (auto& character : _registeredCharacters)
 				{
-					character.second->RemoveFromPhysicsSystem();
+					//character.second->RemoveFromPhysicsSystem();
 				}
 
 				_registeredCharacters.clear();
