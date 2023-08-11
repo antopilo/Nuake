@@ -483,10 +483,10 @@ namespace Nuake
 			// Next step
 			++_stepCount;
 
-			// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable.
+			// If you take larger steps than 1 / 90th of a second you need to do multiple collision steps in order to keep the simulation stable.
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
-			constexpr float minStepDuration = 1.0f / 30.0f;
+			constexpr float minStepDuration = 1.0f / 90.0f;
 			constexpr int maxStepCount = 32;
 
 			if(ts > minStepDuration)
