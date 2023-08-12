@@ -8,11 +8,17 @@ namespace Nuake
 {
 	namespace Physics
 	{
-		CharacterController::CharacterController(const Ref<PhysicShape>& shape, float friction, float maxSlopeAngle)
+		CharacterController::CharacterController(const CharacterControllerSettings& settings)
 		{
-			Shape = shape;
-			Friction = friction;
-			MaxSlopeAngle = maxSlopeAngle;
+			Shape = settings.Shape;
+			Friction = settings.Friction;
+			MaxSlopeAngle = settings.MaxSlopeAngle;
+			AutoStepping = settings.AutoStepping;
+			StepDown = settings.StepDown;
+			StepDownExtra = settings.StepDownExtra;
+			StepUp = settings.StepUp;
+			StepDistance = settings.StepDistance;
+			StepMinDistance = settings.StepMinDistance;
 		}
 
 		void CharacterController::SetEntity(Entity& ent)

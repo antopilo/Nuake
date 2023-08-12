@@ -315,23 +315,37 @@ namespace Nuake
 			Entity entity = Entity({ e, m_Scene });
 			auto [transformComponent, characterControllerComponent] = characterControllerView.get<TransformComponent, CharacterControllerComponent>(e);
 
+			Ref<Physics::PhysicShape> shape;
 			if (entity.HasComponent<CapsuleColliderComponent>())
 			{
 				const auto& capsuleColliderComponent = entity.GetComponent<CapsuleColliderComponent>();
-				auto& capsule = capsuleColliderComponent.Capsule;
-
-				const float friction = characterControllerComponent.Friction;
-				const float maxSlopeAngle = characterControllerComponent.MaxSlopeAngle;
-				auto characterController = CreateRef<Physics::CharacterController>(capsule, friction, maxSlopeAngle);
-				characterController->SetEntity(entity); // Used to link back to the entity
-				characterController->Position = transformComponent.GetGlobalPosition();
-				characterController->Rotation = transformComponent.GetGlobalRotation();
-
-				characterControllerComponent.CharacterController = characterController;
-				PhysicsManager::Get().RegisterCharacterController(characterControllerComponent.CharacterController);
+				shape = capsuleColliderComponent.Capsule;
+			}
+			else if (entity.HasComponent<BoxColliderComponent>())
+			{
+				const auto& capsuleColliderComponent = entity.GetComponent<BoxColliderComponent>();
+				shape = capsuleColliderComponent.Box;
 			}
 
-			// TODO: Other types of collider supported for character controller?
+			Physics::CharacterControllerSettings settings
+			{
+				shape,
+				characterControllerComponent.Friction,
+				characterControllerComponent.MaxSlopeAngle,
+				characterControllerComponent.AutoStepping,
+				characterControllerComponent.StickToFloorStepDown,
+				characterControllerComponent.StepDownExtra,
+				characterControllerComponent.SteppingStepUp,
+				characterControllerComponent.SteppingMinDistance,
+				characterControllerComponent.SteppingForwardDistance
+			};
+
+			auto characterController = CreateRef<Physics::CharacterController>(std::move(settings));
+			characterController->SetEntity(entity); // Used to link back to the entity
+			characterController->Position = transformComponent.GetGlobalPosition();
+			characterController->Rotation = transformComponent.GetGlobalRotation();
+			characterControllerComponent.SetCharacterController(characterController);
+			PhysicsManager::Get().RegisterCharacterController(characterController);
 		}
 	}
 
