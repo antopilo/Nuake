@@ -327,15 +327,25 @@ namespace Nuake
 				shape = capsuleColliderComponent.Box;
 			}
 
-			const float friction = characterControllerComponent.Friction;
-			const float maxSlopeAngle = characterControllerComponent.MaxSlopeAngle;
-			auto characterController = CreateRef<Physics::CharacterController>(shape, friction, maxSlopeAngle);
+			Physics::CharacterControllerSettings settings
+			{
+				shape,
+				characterControllerComponent.Friction,
+				characterControllerComponent.MaxSlopeAngle,
+				characterControllerComponent.AutoStepping,
+				characterControllerComponent.StickToFloorStepDown,
+				characterControllerComponent.StepDownExtra,
+				characterControllerComponent.SteppingStepUp,
+				characterControllerComponent.SteppingMinDistance,
+				characterControllerComponent.SteppingForwardDistance
+			};
+
+			auto characterController = CreateRef<Physics::CharacterController>(std::move(settings));
 			characterController->SetEntity(entity); // Used to link back to the entity
 			characterController->Position = transformComponent.GetGlobalPosition();
 			characterController->Rotation = transformComponent.GetGlobalRotation();
-
-			characterControllerComponent.CharacterController = characterController;
-			PhysicsManager::Get().RegisterCharacterController(characterControllerComponent.CharacterController);
+			characterControllerComponent.SetCharacterController(characterController);
+			PhysicsManager::Get().RegisterCharacterController(characterController);
 		}
 	}
 

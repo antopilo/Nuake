@@ -42,6 +42,7 @@ namespace Nuake
 				RegisterMethod("EntityHasComponent(_,_)", (void*)EntityHasComponent);
 
 				RegisterMethod("GetTranslation_(_)", (void*)GetTranslation);
+				RegisterMethod("GetLocalTranslation_(_)", (void*)GetLocalTranslation);
 				RegisterMethod("SetTranslation_(_,_,_,_)", (void*)SetTranslation);
 				RegisterMethod("GetRotation_(_)", (void*)GetRotation);
 				RegisterMethod("SetRotation_(_,_,_,_)", (void*)SetRotation);
@@ -290,7 +291,7 @@ namespace Nuake
 
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& characterController = ent.GetComponent<CharacterControllerComponent>();
-				characterController.CharacterController->MoveAndSlide(Vector3(x, y, z));
+				characterController.GetCharacterController()->MoveAndSlide(Vector3(x, y, z));
 			}
 
 			static void AddForce(WrenVM* vm)
@@ -312,6 +313,24 @@ namespace Nuake
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
 				Vector3 position = transform.GetGlobalPosition();
+				wrenSetSlotDouble(vm, 1, position.x);
+				wrenSetSlotDouble(vm, 2, position.y);
+				wrenSetSlotDouble(vm, 3, position.z);
+
+				// Fill the list
+				wrenSetSlotNewList(vm, 0);
+				wrenInsertInList(vm, 0, 0, 1);
+				wrenInsertInList(vm, 0, 1, 2);
+				wrenInsertInList(vm, 0, 2, 3);
+			}
+
+			static void GetLocalTranslation(WrenVM* vm)
+			{
+				double handle = wrenGetSlotDouble(vm, 1);
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+				auto& transform = ent.GetComponent<TransformComponent>();
+				// set the slots
+				Vector3 position = transform.GetLocalPosition();
 				wrenSetSlotDouble(vm, 1, position.x);
 				wrenSetSlotDouble(vm, 2, position.y);
 				wrenSetSlotDouble(vm, 3, position.z);

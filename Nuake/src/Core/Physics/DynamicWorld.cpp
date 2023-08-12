@@ -331,29 +331,18 @@ namespace Nuake
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
 		{
 			JPH::Ref<JPH::CharacterVirtualSettings> settings = new JPH::CharacterVirtualSettings();
-			//settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
-			//settings->mLayer = Layers::MOVING;
-			//settings->mFriction = cc->Friction;
-			//settings->mShape = GetJoltShape(cc->Shape);
-			//settings->mGravityFactor = 0.0f;
-			settings->mSupportingVolume = JPH::Plane(JPH::Vec3::sAxisY(), -0.5f);
 			settings->mMaxSlopeAngle = JPH::DegreesToRadians(cc->MaxSlopeAngle);
-			settings->mMaxStrength = 10.0;
-			settings->mCharacterPadding = 0.01f;
+			settings->mMaxStrength = 1.0f;
+			settings->mCharacterPadding = 0.05f;
 			settings->mPenetrationRecoverySpeed = 1.0f;
 			settings->mPredictiveContactDistance = 0.01f;
 			settings->mShape = GetJoltShape(cc->Shape);
 
 			auto& joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
 
-			Quat& bodyRotation = cc->Rotation;
-
-			// We need to add 180 degrees because our forward is -Z.
-			const auto& yOffset = Vector3(0.0f, Rad(180.0), 0.0f);
-			//bodyRotation = glm::normalize(bodyRotation * Quat(yOffset));
-
+			const Quat& bodyRotation = cc->Rotation;
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
-			JPH::CharacterVirtual* character = new JPH::CharacterVirtual(settings, joltPosition, joltRotation, _JoltPhysicsSystem.get());
+			auto character = new JPH::CharacterVirtual(settings, std::move(joltPosition), std::move(joltRotation), _JoltPhysicsSystem.get());
 
 			//character->AddToPhysicsSystem(JPH::EActivation::Activate);
 			
@@ -514,35 +503,48 @@ namespace Nuake
 			try
 			{
 				// TODO: Potential memory leak with new keyword.
+				auto joltTempAllocator = CreateRef<JPH::TempAllocatorMalloc>();
 
-				JPH::CharacterVirtual::ExtendedUpdateSettings update_settings;
-				update_settings.mStickToFloorStepDown = -JPH::Vec3(0, 1, 0) * update_settings.mStickToFloorStepDown.Length();
-				update_settings.mWalkStairsStepUp = JPH::Vec3(0, 1, 0) * update_settings.mWalkStairsStepUp.Length();
-				update_settings.mWalkStairsMinStepForward = 0.10;
-				update_settings.mWalkStairsStepForwardTest = 0.15f;
+				JPH::CharacterVirtual::ExtendedUpdateSettings joltUpdateSettings;
 
 				for (auto& c : _registeredCharacters)
 				{
 					//c.second->PostSimulation(0.05f);
+					Entity entity{ (entt::entity)c.first, Engine::GetCurrentScene().get() };
 
-					c.second->ExtendedUpdate(ts,
-						-JPH::Vec3(0, 0, 0) * _JoltPhysicsSystem->GetGravity().Length(),
-						update_settings,
-						_JoltPhysicsSystem->GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
-						_JoltPhysicsSystem->GetDefaultLayerFilter(Layers::MOVING),
-						{ },
-						{ },
-						*(new JPH::TempAllocatorMalloc()));
+					if (entity.HasComponent<CharacterControllerComponent>())
+					{
+						auto& characterControllerComponent = entity.GetComponent<CharacterControllerComponent>();
+						auto characterController = characterControllerComponent.GetCharacterController();
+
+						const auto& broadPhaseLayerFilter = _JoltPhysicsSystem->GetDefaultBroadPhaseLayerFilter(Layers::MOVING);
+						const auto& LayerFilter = _JoltPhysicsSystem->GetDefaultLayerFilter(Layers::MOVING);
+						const auto& joltGravity = _JoltPhysicsSystem->GetGravity();
+						auto& tempAllocatorPtr = *(joltTempAllocator);
+						if (characterController->AutoStepping)
+						{
+							// Create update settings from character controller
+							joltUpdateSettings.mStickToFloorStepDown = CreateJoltVec3(characterController->StepDown);
+							joltUpdateSettings.mWalkStairsStepDownExtra = CreateJoltVec3(characterController->StepDownExtra);
+							joltUpdateSettings.mWalkStairsStepUp = CreateJoltVec3(characterController->StepUp);
+							joltUpdateSettings.mWalkStairsStepForwardTest = characterController->StepDistance;
+							joltUpdateSettings.mWalkStairsMinStepForward = characterController->StepMinDistance;
+
+							c.second->ExtendedUpdate(ts, joltGravity, joltUpdateSettings, broadPhaseLayerFilter, LayerFilter, { }, { }, tempAllocatorPtr);
+						}
+						else
+						{
+							c.second->Update(ts, joltGravity, broadPhaseLayerFilter, LayerFilter, {}, {}, tempAllocatorPtr);
+						}
+					}
 				}
 
-				_JoltPhysicsSystem->Update(ts, collisionSteps, new JPH::TempAllocatorMalloc(), _JoltJobSystem);
-
+				_JoltPhysicsSystem->Update(ts, collisionSteps, joltTempAllocator.get(), _JoltJobSystem);
 			}
 			catch (...)
 			{
 				Logger::Log("Failed to run simulation update", "physics", CRITICAL);
 			}
-
 
 			SyncEntitiesTranforms();
 			SyncCharactersTransforms();
