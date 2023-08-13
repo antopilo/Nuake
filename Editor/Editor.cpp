@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 			auto projectFileData = FileSystem::ReadFile(projectPath, true);
 			try
 			{
-				project->Deserialize(projectFileData);
+				project->Deserialize(json::parse(projectFileData));
 				project->FullPath = projectPath;
 
 				Engine::LoadProject(project);
