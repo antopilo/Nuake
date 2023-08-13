@@ -9,7 +9,8 @@
 #include <src/Resource/ResourceLoader.h>
 #include <src/Core/String.h>
 
-class MeshPanel : ComponentPanel {
+class MeshPanel : ComponentPanel 
+{
 private:
     Scope<ModelResourceInspector> _modelInspector;
     bool _expanded = false;

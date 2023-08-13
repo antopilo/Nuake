@@ -6,12 +6,9 @@
 #include "src/Core/Logger.h"
 
 /* TODOS:
-* 
-* Engine:
-*	Scripting API for editing UI maybe
-*	Launch game standalone
-*	Fix physics system
-*	--play argument rendering in framebuffer
+[ ] - Parse the bones
+[ ] - Create SceneStructure Entities(with bone component)
+[ ] - Create SkinnedMesh resource(?)
 */
 
 // Welcome to the Nuake source code.

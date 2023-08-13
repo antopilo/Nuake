@@ -2,7 +2,6 @@
 #include "src/Core/FileSystem.h"
 #include "src/Core/Logger.h"
 #include "src/Rendering/Mesh/Mesh.h"
-
 #include "src/Resource/ModelLoader.h"
 
 namespace Nuake
