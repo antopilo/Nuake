@@ -6,6 +6,7 @@
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 
 #include <GL\glew.h>
+#include <src/Scene/Components/SkinnedModelComponent.h>
 
 
 namespace Nuake 
@@ -248,6 +249,8 @@ namespace Nuake
 			// Init
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 			Shader* gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+			Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("resources/Shaders/gbuffer_skinned.shader");
+
 			gBufferShader->Bind();
 			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferShader->SetUniformMat4f("u_View", mView);
@@ -267,8 +270,7 @@ namespace Nuake
 				}
 			}
 
-			glCullFace(GL_BACK);
-			RenderCommand::Disable(RendererEnum::FACE_CULL);
+			glCullFace(GL_FRONT);
 			Renderer::Flush(gBufferShader, false);
 
 			// Quake BSPs
@@ -350,6 +352,32 @@ namespace Nuake
 
 				Renderer::Flush(gBufferShader, false);
 				Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = oldColor;
+			}
+
+			// Skinned mesh at the end because we switch shader
+			gBufferSkinnedMeshShader->Bind();
+			gBufferSkinnedMeshShader->SetUniformMat4f("u_Projection", mProjection);
+			gBufferSkinnedMeshShader->SetUniformMat4f("u_View", mView);
+
+			// Skinned Models
+			auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
+			for (auto e : skinnedModelView)
+			{
+				auto [transform, mesh, visibility] = skinnedModelView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+
+				if (mesh.ModelResource && visibility.Visible)
+				{
+					for (auto& m : mesh.ModelResource->GetMeshes())
+					{
+						const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
+						const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
+						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
+							
+						gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, transform.GetGlobalTransform());
+						gBufferSkinnedMeshShader->SetUniform1i(entityIdUniformLocation, (uint32_t)e + 1);
+						m->Draw(gBufferSkinnedMeshShader, false);
+					}
+				}
 			}
 		}
 	}
