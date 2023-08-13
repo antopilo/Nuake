@@ -51,6 +51,13 @@ namespace Nuake {
 		}
 
 		template<>
+		void Push<int>(unsigned int count)
+		{
+			m_Elements.push_back({ RendererEnum::INT, count, false });
+			m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::INT) * count;
+		}
+
+		template<>
 		void Push<unsigned char>(unsigned int count)
 		{
 			m_Elements.push_back({ RendererEnum::UBYTE, count, true });

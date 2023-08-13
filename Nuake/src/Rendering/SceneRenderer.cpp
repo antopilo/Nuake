@@ -360,6 +360,9 @@ namespace Nuake
 			gBufferSkinnedMeshShader->SetUniformMat4f("u_View", mView);
 
 			// Skinned Models
+			const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
+			const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
+
 			auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
 			for (auto e : skinnedModelView)
 			{
@@ -369,13 +372,19 @@ namespace Nuake
 				{
 					for (auto& m : mesh.ModelResource->GetMeshes())
 					{
-						const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
-						const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
 						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
-							
+						
+						uint32_t boneId = 0;
+						for (auto& b : m->GetBones())
+						{
+							const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(boneId) + "]";
+							gBufferSkinnedMeshShader->SetUniformMat4f(boneMatrixUniformName, b.Offset);
+							boneId++;
+						}
+
 						gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, transform.GetGlobalTransform());
 						gBufferSkinnedMeshShader->SetUniform1i(entityIdUniformLocation, (uint32_t)e + 1);
-						m->Draw(gBufferSkinnedMeshShader, false);
+						m->Draw(gBufferSkinnedMeshShader, true);
 					}
 				}
 			}

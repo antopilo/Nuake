@@ -33,22 +33,23 @@ void main()
     vec4 totalPosition = vec4(0.0f);
     for (int i = 0; i < MAX_BONES_INFLUENCE; i++)
     {
-        if (BonesIDs[i] == -1)
+        if (BoneIDs[i] == -1)
         {
             continue;
         }
 
-        if (BonesIDs[i] >= MAX_BONES)
+        if (BoneIDs[i] >= MAX_BONES)
         {
             totalPosition = vec4(VertexPosition, 1.0f);
+            break;
         }
 
-        vec4 localPositon = u_FinalBonesMatrice[BoneIDs[i]] * vec4(VertexPosition, 1.0f);
+        vec4 localPosition =  vec4(VertexPosition, 1.0f);
         totalPosition += localPosition * Weights[i];
         // vec3 localNormal = mat3(u_FinalBonesMatrice[BoneIDs[i]]) * Normal;
     }
 
-    gl_Position = u_Projection * u_View * u_Model * vec4(totalPosition, 1.0f);
+    gl_Position = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
 }
 
 #shader fragment

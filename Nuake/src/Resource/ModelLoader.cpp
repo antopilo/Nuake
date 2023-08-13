@@ -116,10 +116,10 @@ namespace Nuake
 
 	Ref<SkinnedMesh> ModelLoader::ProcessSkinnedMesh(aiMesh* node, const aiScene* scene)
 	{
-		auto vertices = ProcessSkinnedVertices(node);
-		auto indices = ProcessIndices(node);
-		auto material = ProcessMaterials(scene, node);
-		auto bones = std::vector<Bone>();
+		auto& vertices = ProcessSkinnedVertices(node);
+		auto& indices = ProcessIndices(node);
+		auto& material = ProcessMaterials(scene, node);
+		auto& bones = std::vector<Bone>();
 		if (node->HasBones())
 		{
 			for (uint32_t i = 0; i < node->mNumBones; i++)
@@ -128,15 +128,28 @@ namespace Nuake
 				const std::string& boneName = bone->mName.C_Str();
 				const auto& boneMatrix = bone->mOffsetMatrix;
 
-				for (uint32_t j = 0; j < bone->mNumWeights; j++)
+				Bone newBone;
+				newBone.Name = boneName;
+				newBone.Offset = ConvertMatrixToGLMFormat(bone->mOffsetMatrix);
+
+				const uint32_t numWeight = bone->mNumWeights;
+				newBone.VertexWeights.reserve(numWeight);
+				for (uint32_t j = 0; j < numWeight; j++)
 				{
 					aiVertexWeight vertexWeight = bone->mWeights[j];
+					const uint32_t vertexWeightVertexId = vertexWeight.mVertexId;
+					vertices[vertexWeightVertexId].boneIDs[j] = i;
+					vertices[vertexWeightVertexId].weights[j] = vertexWeight.mWeight;
+					BoneVertexWeight boneVertexWeight
+					{
+						vertexWeightVertexId,
+						vertexWeight.mWeight
+					};
 
-					const float weigth = vertexWeight.mWeight;
-					uint32_t vertexId = vertexWeight.mVertexId;
-
-					vertices[vertexId].boneIDs[j] = i;
+					newBone.VertexWeights.push_back(std::move(boneVertexWeight));
 				}
+
+				bones.push_back(std::move(newBone));
 			}
 		}
 		else
@@ -145,8 +158,6 @@ namespace Nuake
 		}
 
 		// Fill in the bones in the vertices
-
-
 		Ref<SkinnedMesh> mesh = CreateRef<SkinnedMesh>();
 		mesh->AddSurface(vertices, indices, bones);
 		mesh->SetMaterial(material);
@@ -245,7 +256,12 @@ namespace Nuake
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			SkinnedVertex vertex;
-
+			for (int w = 0; w < MAX_BONE_INFLUENCE; w++)
+			{
+				vertex.boneIDs[w] = -1;
+				vertex.weights[w] = 0.0f;
+			}
+			
 			Vector3 current;
 
 			// Position

@@ -40,6 +40,11 @@ namespace Nuake
         return m_Indices;
     }
 
+    std::vector<Bone>& SkinnedMesh::GetBones()
+    {
+        return m_Bones;
+    }
+
     Ref<Material> SkinnedMesh::GetMaterial() inline const
     {
         return m_Material;
@@ -77,7 +82,7 @@ namespace Nuake
     {
         m_VertexArray = CreateScope<VertexArray>();
         m_VertexArray->Bind();
-        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
+        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(SkinnedVertex));
         m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
 
         VertexBufferLayout bufferLayout = VertexBufferLayout();
@@ -86,8 +91,8 @@ namespace Nuake
         bufferLayout.Push<float>(3); // Normal
         bufferLayout.Push<float>(3); // Tangent
         bufferLayout.Push<float>(3); // Bitangent
-        bufferLayout.Push<unsigned int>(4);   // BoneIds
-        bufferLayout.Push<float>(4); // Weights
+        bufferLayout.Push<int>(1);   // BoneIds
+        bufferLayout.Push<float>(1); // Weights
 
         m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
         m_VertexArray->Unbind();

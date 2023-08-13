@@ -70,7 +70,14 @@ namespace Nuake {
 	void OGLRendererAPI::VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer)
 	{
 		GLenum glType = GetType(type);
-		glVertexAttribPointer(index, size, glType, normalized, stride, pointer);
+		if (glType == GL_INT)
+		{
+			glVertexAttribIPointer(index, size, glType, stride, pointer);
+		}
+		else
+		{
+			glVertexAttribPointer(index, size, glType, normalized, stride, pointer);
+		}
 	}
 
 	void OGLRendererAPI::DrawMultiElements(const RendererEnum mode, const int count, const RendererEnum type, const void* const* indices, unsigned int drawCount)

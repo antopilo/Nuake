@@ -12,7 +12,7 @@ namespace Nuake
 		Vector3 bitangent;
 	};
 
-	const uint32_t MAX_BONE_INFLUENCE = 4;
+	const uint32_t MAX_BONE_INFLUENCE = 1;
 	struct SkinnedVertex
 	{
 		Vector3 position;
@@ -22,7 +22,6 @@ namespace Nuake
 		Vector3 bitangent;
 
 		int boneIDs[MAX_BONE_INFLUENCE];
-		//weights from each bone
 		float weights[MAX_BONE_INFLUENCE];
 	};
 
