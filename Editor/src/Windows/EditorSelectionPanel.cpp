@@ -103,6 +103,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 	mParticleEmitterPanel.Draw(entity);
     mSpritePanel.Draw(entity);
     mMeshPanel.Draw(entity);
+	mSkinnedModelPanel.Draw(entity);
     mQuakeMapPanel.Draw(entity);
     mCameraPanel.Draw(entity);
     mRigidbodyPanel.Draw(entity);
@@ -131,6 +132,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			MenuItemComponent("Camera", Nuake::CameraComponent)
 			MenuItemComponent("Light", Nuake::LightComponent)
 			MenuItemComponent("Model", Nuake::ModelComponent)
+			MenuItemComponent("Skinned Model", Nuake::SkinnedModelComponent)
 			MenuItemComponent("Sprite", Nuake::SpriteComponent)
 			MenuItemComponent("Particle Emitter", Nuake::ParticleEmitterComponent)
 			ImGui::Separator();

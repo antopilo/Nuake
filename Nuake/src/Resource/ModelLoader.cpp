@@ -5,6 +5,7 @@
 
 #include "src/Core/String.h"
 
+#include "src/Resource/SkinnedModel.h"
 #include "src/Resource/Model.h"
 
 
@@ -18,8 +19,8 @@ namespace Nuake
 		m_Meshes.clear();
 		Ref<Model> model = CreateRef<Model>(path);
 
-		Assimp::Importer import;
-		import.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
 
 		auto importFlags = 
 			aiProcess_Triangulate | 
@@ -29,10 +30,10 @@ namespace Nuake
 
 		modelDir = absolute ? path + "/../" : FileSystem::Root + path + "/../";
 		const std::string filePath = absolute ? path : FileSystem::Root + path;
-		const aiScene* scene = import.ReadFile(filePath, importFlags);
+		const aiScene* scene = importer.ReadFile(filePath, importFlags);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			std::string assimpErrorMsg = std::string(import.GetErrorString());
+			std::string assimpErrorMsg = std::string(importer.GetErrorString());
 			std::string logMsg = "[Failed to load model] - " + assimpErrorMsg;
 			Logger::Log(logMsg, "model", WARNING);
 
@@ -42,6 +43,42 @@ namespace Nuake
 		ProcessNode(scene->mRootNode, scene);
 
 		for (const auto& mesh : m_Meshes)
+		{
+			model->AddMesh(mesh);
+		}
+
+		return model;
+	}
+
+	Ref<SkinnedModel> ModelLoader::LoadSkinnedModel(const std::string& path, bool absolute)
+	{
+		m_Meshes.clear();
+		Ref<SkinnedModel> model = CreateRef<SkinnedModel>(path);
+
+		Assimp::Importer importer;
+		importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
+
+		auto importFlags =
+			aiProcess_Triangulate |
+			aiProcess_GenSmoothNormals |
+			aiProcess_FixInfacingNormals |
+			aiProcess_CalcTangentSpace;
+
+		modelDir = absolute ? path + "/../" : FileSystem::Root + path + "/../";
+		const std::string filePath = absolute ? path : FileSystem::Root + path;
+		const aiScene* scene = importer.ReadFile(filePath, importFlags);
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		{
+			std::string assimpErrorMsg = std::string(importer.GetErrorString());
+			std::string logMsg = "[Failed to load model] - " + assimpErrorMsg;
+			Logger::Log(logMsg, "model", WARNING);
+
+			return model;
+		}
+
+		ProcessNode(scene->mRootNode, scene);
+
+		for (const auto& mesh : m_SkinnedMeshes)
 		{
 			model->AddMesh(mesh);
 		}
@@ -63,11 +100,83 @@ namespace Nuake
 		}
 	}
 
+	void ModelLoader::ProcessSkinnedNode(aiNode* node, const aiScene* scene)
+	{
+		for (uint32_t i = 0; i < node->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+			m_SkinnedMeshes.push_back(ProcessSkinnedMesh(mesh, scene));
+		}
+
+		for (uint32_t i = 0; i < node->mNumChildren; i++)
+		{
+			ProcessSkinnedNode(node->mChildren[i], scene);
+		}
+	}
+
+	Ref<SkinnedMesh> ModelLoader::ProcessSkinnedMesh(aiMesh* node, const aiScene* scene)
+	{
+		auto vertices = ProcessSkinnedVertices(node);
+		auto indices = ProcessIndices(node);
+		auto material = ProcessMaterials(scene, node);
+		auto bones = std::vector<Bone>();
+		if (node->HasBones())
+		{
+			for (uint32_t i = 0; i < node->mNumBones; i++)
+			{
+				aiBone* bone = node->mBones[i];
+				const std::string& boneName = bone->mName.C_Str();
+				const auto& boneMatrix = bone->mOffsetMatrix;
+
+				for (uint32_t j = 0; j < bone->mNumWeights; j++)
+				{
+					aiVertexWeight vertexWeight = bone->mWeights[j];
+
+					const float weigth = vertexWeight.mWeight;
+					uint32_t vertexId = vertexWeight.mVertexId;
+
+					vertices[vertexId].boneIDs[j] = i;
+				}
+			}
+		}
+		else
+		{
+			Logger::Log("Using skinned mesh imported while the model has no bones!", "model loader", WARNING);
+		}
+
+		// Fill in the bones in the vertices
+
+
+		Ref<SkinnedMesh> mesh = CreateRef<SkinnedMesh>();
+		mesh->AddSurface(vertices, indices, bones);
+		mesh->SetMaterial(material);
+
+		return mesh;
+	}
+
 	Ref<Mesh> ModelLoader::ProcessMesh(aiMesh* node, const aiScene* scene)
 	{
 		auto vertices = ProcessVertices(node);
 		auto indices = ProcessIndices(node);
 		auto material = ProcessMaterials(scene, node);
+
+		if (node->HasBones())
+		{
+			for (uint32_t i = 0; i < node->mNumBones; i++)
+			{
+				aiBone* bone = node->mBones[i];
+				const std::string& boneName = bone->mName.C_Str();
+				const auto& boneMatrix = bone->mOffsetMatrix;
+
+				for (uint32_t j = 0; j < bone->mNumWeights; j++)
+				{
+					aiVertexWeight vertexWeight = bone->mWeights[j];
+
+					const float weigth = vertexWeight.mWeight;
+					uint32_t vertexId = vertexWeight.mVertexId;
+				}
+			}
+		}
 
 		Ref<Mesh> mesh = CreateRef<Mesh>();
 		mesh->AddSurface(vertices, indices);
@@ -123,6 +232,62 @@ namespace Nuake
 				float v = mesh->mTextureCoords[0][i].y;
 				vertex.uv = Vector2(u, v);
 			}
+
+			vertices.push_back(vertex);
+		}
+
+		return vertices;
+	}
+
+	std::vector<SkinnedVertex> ModelLoader::ProcessSkinnedVertices(aiMesh* mesh)
+	{
+		auto vertices = std::vector<SkinnedVertex>();
+		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
+		{
+			SkinnedVertex vertex;
+
+			Vector3 current;
+
+			// Position
+			current.x = mesh->mVertices[i].x;
+			current.y = mesh->mVertices[i].y;
+			current.z = mesh->mVertices[i].z;
+			vertex.position = current;
+
+			// Normals
+			current.x = mesh->mNormals[i].x;
+			current.y = mesh->mNormals[i].y;
+			current.z = mesh->mNormals[i].z;
+			vertex.normal = current;
+
+			// Tangents
+			if (mesh->mTangents)
+			{
+				current.x = mesh->mTangents[i].x;
+				current.y = mesh->mTangents[i].y;
+				current.z = mesh->mTangents[i].z;
+				vertex.tangent = current;
+			}
+
+			if (mesh->mBitangents)
+			{
+				current.x = mesh->mBitangents[i].x;
+				current.y = mesh->mBitangents[i].y;
+				current.z = mesh->mBitangents[i].z;
+				vertex.bitangent = current;
+			}
+
+			vertex.uv = glm::vec2(0.0f, 0.0f);
+
+			// Does it contain UVs?
+			if (mesh->mTextureCoords[0])
+			{
+				float u = mesh->mTextureCoords[0][i].x;
+				float v = mesh->mTextureCoords[0][i].y;
+				vertex.uv = Vector2(u, v);
+			}
+
+			// We are filling the bones later.
 
 			vertices.push_back(vertex);
 		}

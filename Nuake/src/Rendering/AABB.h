@@ -8,6 +8,15 @@ namespace Nuake {
 		Vector3 Min;
 		Vector3 Max;
 
+		AABB() = default;
+		~AABB() = default;
+
+		AABB(const Vector3& min, const Vector3& max)
+		{
+			Min = min;
+			Max = max;
+		}
+
 		// Transforms the bounding box and recalculate an axis aligned box
 		void Transform(Matrix4 transform)
 		{
