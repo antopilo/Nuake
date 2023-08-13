@@ -12,7 +12,7 @@ namespace Nuake
 		Vector3 bitangent;
 	};
 
-	const uint32_t MAX_BONE_INFLUENCE = 1;
+	const uint32_t MAX_BONE_INFLUENCE = 4;
 	struct SkinnedVertex
 	{
 		Vector3 position;

@@ -13,9 +13,10 @@ namespace Nuake {
 		{
 			switch (type)
 			{
-				case RendererEnum::FLOAT:  return 4;
-				case RendererEnum::UINT:   return 4;
-				case RendererEnum::UBYTE:  return 1;
+				case RendererEnum::FLOAT:	return 4;
+				case RendererEnum::INT:		return 4;
+				case RendererEnum::UINT:	return 4;
+				case RendererEnum::UBYTE:	return 1;
 			}
 			return 0;
 		}

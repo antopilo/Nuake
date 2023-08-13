@@ -91,8 +91,8 @@ namespace Nuake
         bufferLayout.Push<float>(3); // Normal
         bufferLayout.Push<float>(3); // Tangent
         bufferLayout.Push<float>(3); // Bitangent
-        bufferLayout.Push<int>(1);   // BoneIds
-        bufferLayout.Push<float>(1); // Weights
+        bufferLayout.Push<int>(4);   // BoneIds
+        bufferLayout.Push<float>(4); // Weights
 
         m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
         m_VertexArray->Unbind();
