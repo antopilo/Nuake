@@ -52,7 +52,7 @@ namespace Nuake
 
 	Ref<SkinnedModel> ModelLoader::LoadSkinnedModel(const std::string& path, bool absolute)
 	{
-		m_Meshes.clear();
+		m_SkinnedMeshes.clear();
 		Ref<SkinnedModel> model = CreateRef<SkinnedModel>(path);
 
 		Assimp::Importer importer;
@@ -76,7 +76,7 @@ namespace Nuake
 			return model;
 		}
 
-		ProcessNode(scene->mRootNode, scene);
+		ProcessSkinnedNode(scene->mRootNode, scene);
 
 		for (const auto& mesh : m_SkinnedMeshes)
 		{
