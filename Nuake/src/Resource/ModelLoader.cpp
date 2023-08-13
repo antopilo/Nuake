@@ -171,24 +171,6 @@ namespace Nuake
 		auto indices = ProcessIndices(node);
 		auto material = ProcessMaterials(scene, node);
 
-		if (node->HasBones())
-		{
-			for (uint32_t i = 0; i < node->mNumBones; i++)
-			{
-				aiBone* bone = node->mBones[i];
-				const std::string& boneName = bone->mName.C_Str();
-				const auto& boneMatrix = bone->mOffsetMatrix;
-
-				for (uint32_t j = 0; j < bone->mNumWeights; j++)
-				{
-					aiVertexWeight vertexWeight = bone->mWeights[j];
-
-					const float weigth = vertexWeight.mWeight;
-					uint32_t vertexId = vertexWeight.mVertexId;
-				}
-			}
-		}
-
 		Ref<Mesh> mesh = CreateRef<Mesh>();
 		mesh->AddSurface(vertices, indices);
 		mesh->SetMaterial(material);
@@ -302,8 +284,6 @@ namespace Nuake
 				float v = mesh->mTextureCoords[0][i].y;
 				vertex.uv = Vector2(u, v);
 			}
-
-			// We are filling the bones later.
 
 			vertices.push_back(vertex);
 		}
