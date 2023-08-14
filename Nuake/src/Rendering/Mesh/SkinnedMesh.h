@@ -3,7 +3,10 @@
 #include "src/Rendering/AABB.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
+
 #include "src/Rendering/Vertex.h"
+#include "src/Rendering/Mesh/Bone.h"
+
 
 namespace Nuake
 {
@@ -12,19 +15,6 @@ namespace Nuake
 	class Material;
 	struct Vertex;
 	class Shader;
-
-	struct BoneVertexWeight
-	{
-		uint32_t VertexID;
-		float Weight;
-	};
-
-	struct Bone
-	{
-		std::string Name;
-		Matrix4 Offset;
-		std::vector<BoneVertexWeight> VertexWeights;
-	};
 
 	class SkinnedMesh : ISerializable, Resource
 	{

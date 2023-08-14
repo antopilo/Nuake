@@ -23,9 +23,15 @@ out vec2 UV;
 
 void main()
 {
-    vec3 T = normalize((u_Model * vec4(Tangent, 0.0f)).xyz);
-    vec3 N = normalize((u_Model * vec4(Normal, 0.0f)).xyz);
-    vec3 B = normalize((u_Model * vec4(Bitangent, 0.0f)).xyz);
+    mat4 boneTransform = u_FinalBonesMatrice[BoneIDs.x] * Weights.x;
+    boneTransform += u_FinalBonesMatrice[BoneIDs.y] * Weights.y;
+    boneTransform += u_FinalBonesMatrice[BoneIDs.z] * Weights.z;
+    boneTransform += u_FinalBonesMatrice[BoneIDs.w] * Weights.w;
+
+    mat3 normalMatrix = transpose(inverse(mat3(boneTransform)));
+    vec3 T = normalize(normalMatrix * Tangent);
+    vec3 N = normalize(normalMatrix * Normal);
+    vec3 B = normalize(normalMatrix * Bitangent);
     TBN = mat3(T, B, N);
 
     UV = UVPosition;
@@ -37,19 +43,19 @@ void main()
         {
             continue;
         }
-
+        
         if (BoneIDs[i] >= MAX_BONES)
         {
             totalPosition = vec4(VertexPosition, 1.0f);
             break;
         }
 
-        vec4 localPosition =  vec4(VertexPosition, 1.0f);
+        vec4 localPosition = u_FinalBonesMatrice[BoneIDs[i]] * vec4(VertexPosition, 1.0f);
         totalPosition += localPosition * Weights[i];
         // vec3 localNormal = mat3(u_FinalBonesMatrice[BoneIDs[i]]) * Normal;
     }
 
-    gl_Position = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
+    gl_Position = u_Projection * u_View * u_Model * totalPosition;
 }
 
 #shader fragment

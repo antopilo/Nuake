@@ -120,36 +120,52 @@ namespace Nuake
 		auto& indices = ProcessIndices(node);
 		auto& material = ProcessMaterials(scene, node);
 		auto& bones = std::vector<Bone>();
+		auto& bonesMap = std::unordered_map<std::string, Bone>();
+
 		if (node->HasBones())
 		{
+			uint32_t boneCounter = 0;
 			for (uint32_t i = 0; i < node->mNumBones; i++)
 			{
 				aiBone* bone = node->mBones[i];
 				const std::string& boneName = bone->mName.C_Str();
-				const auto& boneMatrix = bone->mOffsetMatrix;
 
-				Bone newBone;
-				newBone.Name = boneName;
-				newBone.Offset = ConvertMatrixToGLMFormat(bone->mOffsetMatrix);
+				int32_t boneId = -1;
+				if (bonesMap.find(boneName) == bonesMap.end())
+				{
+					boneId = boneCounter;
+					boneCounter++;
+
+					Bone newBone = Bone(boneName, boneId);
+					newBone.Offset = ConvertMatrixToGLMFormat(bone->mOffsetMatrix);
+					bones.push_back(newBone);
+
+					bonesMap[boneName] = newBone;
+				}
+				else
+				{
+					boneId = bonesMap[boneName].Id;
+				}
+				
+				assert(boneId != -1);
 
 				const uint32_t numWeight = bone->mNumWeights;
-				newBone.VertexWeights.reserve(numWeight);
 				for (uint32_t j = 0; j < numWeight; j++)
 				{
 					aiVertexWeight vertexWeight = bone->mWeights[j];
 					const uint32_t vertexWeightVertexId = vertexWeight.mVertexId;
-					vertices[vertexWeightVertexId].boneIDs[j] = i;
-					vertices[vertexWeightVertexId].weights[j] = vertexWeight.mWeight;
-					BoneVertexWeight boneVertexWeight
-					{
-						vertexWeightVertexId,
-						vertexWeight.mWeight
-					};
 
-					newBone.VertexWeights.push_back(std::move(boneVertexWeight));
+					SetVertexBoneData(vertices[vertexWeightVertexId], boneId, vertexWeight.mWeight);
+					
+					//BoneVertexWeight boneVertexWeight
+					//{
+					//	vertexWeightVertexId,
+					//	vertexWeight.mWeight
+					//};
+					//
+					//Bone& newBone = bones[boneId];
+					//newBone.VertexWeights.push_back(std::move(boneVertexWeight));
 				}
-
-				bones.push_back(std::move(newBone));
 			}
 		}
 		else
@@ -189,30 +205,30 @@ namespace Nuake
 
 			// Position
 			current.x = mesh->mVertices[i].x;
-			current.y = mesh->mVertices[i].y;
-			current.z = mesh->mVertices[i].z;
+			current.y = mesh->mVertices[i].z;
+			current.z = mesh->mVertices[i].y;
 			vertex.position = current;
 
 			// Normals
 			current.x = mesh->mNormals[i].x;
-			current.y = mesh->mNormals[i].y;
-			current.z = mesh->mNormals[i].z;
+			current.y = mesh->mNormals[i].z;
+			current.z = mesh->mNormals[i].y;
 			vertex.normal = current;
 
 			// Tangents
 			if (mesh->mTangents)
 			{
 				current.x = mesh->mTangents[i].x;
-				current.y = mesh->mTangents[i].y;
-				current.z = mesh->mTangents[i].z;
+				current.y = mesh->mTangents[i].z;
+				current.z = mesh->mTangents[i].y;
 				vertex.tangent = current;
 			}
 
 			if (mesh->mBitangents)
 			{
 				current.x = mesh->mBitangents[i].x;
-				current.y = mesh->mBitangents[i].y;
-				current.z = mesh->mBitangents[i].z;
+				current.y = mesh->mBitangents[i].z;
+				current.z = mesh->mBitangents[i].y;
 				vertex.bitangent = current;
 			}
 
@@ -289,6 +305,19 @@ namespace Nuake
 		}
 
 		return vertices;
+	}
+
+	void ModelLoader::SetVertexBoneData(SkinnedVertex& vertex, int boneID, float weight)
+	{
+		for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+		{
+			if (vertex.boneIDs[i] < 0)
+			{
+				vertex.weights[i] = weight;
+				vertex.boneIDs[i] = boneID;
+				break;
+			}
+		}
 	}
 
 	std::vector<uint32_t> ModelLoader::ProcessIndices(aiMesh* mesh)
