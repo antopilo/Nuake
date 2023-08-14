@@ -4,9 +4,9 @@
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Mesh/Mesh.h"
+
 namespace Nuake
 {
-
 	class Model : public Resource, ISerializable
 	{
 	private:
@@ -21,6 +21,5 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
-
 	};
 }

@@ -12,6 +12,7 @@
 
 #include <Jolt/Jolt.h>
 
+
 namespace JPH
 {
 	class PhysicsSystem;
@@ -20,12 +21,11 @@ namespace JPH
 	class BodyActivationListener;
 	class BodyInterface;
 	class Shape;
-	class Character;
+	class CharacterVirtual;
 
 	template<class T>
 	class Ref;
 }
-
 
 namespace Nuake
 {
@@ -33,7 +33,7 @@ namespace Nuake
 	class MyContactListener;
 	class MyBodyActivationListener;
 
-	namespace Physics 
+	namespace Physics
 	{
 		class DynamicWorld 
 		{
@@ -48,7 +48,7 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::map<uint32_t, JPH::Character*> _registeredCharacters;
+			std::map<uint32_t, JPH::CharacterVirtual*> _registeredCharacters;
 
 		public:
 			DynamicWorld();
@@ -73,6 +73,11 @@ namespace Nuake
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();
 			void SyncCharactersTransforms();
+
+			JPH::Vec3 CreateJoltVec3(const Vector3& input) const
+			{
+				return JPH::Vec3(input.x, input.y, input.z);
+			}
 		};
 	}
 }

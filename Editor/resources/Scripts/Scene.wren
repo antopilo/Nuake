@@ -45,6 +45,7 @@ class Scene {
 	// Transform
 
 	foreign static GetScript_(e)
+	foreign static GetLocalTranslation_(e)
 	foreign static GetTranslation_(e)
 	foreign static SetTranslation_(e, x, y, z)
 	foreign static SetRotation_(e, x, y, z)
@@ -123,13 +124,23 @@ class TransformComponent {
 		_entityId = id
 	}
 
+	GetLocalTranslation() {
+		var result = Scene.GetLocalTranslation_(_entityId)
+		return Vector3.new(result[0], result[1], result[2])
+	}
+
 	GetTranslation() {
 		var result = Scene.GetTranslation_(_entityId)
 		return Vector3.new(result[0], result[1], result[2])
 	}
 
+
 	SetTranslation(t) {
 		Scene.SetTranslation_(_entityId, t.x, t.y, t.z)
+	}
+
+	SetTranslation(x, y, z) {
+		Scene.SetTranslation_(_entityId, x, y, z)
 	}
 
 	GetRotation() {

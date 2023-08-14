@@ -4,18 +4,19 @@
 #include "ModelResourceInspector.h"
 
 #include <src/Scene/Entities/ImGuiHelper.h>
-#include <src/Scene/Components/ModelComponent.h>
+#include <src/Scene/Components/SkinnedModelComponent.h>
 
 #include <src/Resource/ResourceLoader.h>
 #include <src/Core/String.h>
 
-class MeshPanel : ComponentPanel 
+class SkinnedModelPanel : ComponentPanel
 {
 private:
     Scope<ModelResourceInspector> _modelInspector;
     bool _expanded = false;
+
 public:
-    MeshPanel() 
+    SkinnedModelPanel()
     {
         CreateScope<ModelResourceInspector>();
     }
@@ -23,11 +24,11 @@ public:
     void Draw(Nuake::Entity entity) override
     {
         using namespace Nuake;
-        if (!entity.HasComponent<ModelComponent>())
+        if (!entity.HasComponent<SkinnedModelComponent>())
             return;
 
-        ModelComponent& component = entity.GetComponent<ModelComponent>();
-        BeginComponentTable(MESH, ModelComponent);
+        SkinnedModelComponent& component = entity.GetComponent<SkinnedModelComponent>();
+        BeginComponentTable(SKINNED MESH, SkinnedModelComponent);
         {
             ImGui::Text("Model");
             ImGui::TableNextColumn();
@@ -42,15 +43,6 @@ public:
 
             if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)))
             {
-                if (!isModelNone)
-                {
-                    if (!_expanded)
-                    {
-                        _modelInspector = CreateScope<ModelResourceInspector>(component.ModelResource);
-                    }
-
-                    _expanded = !_expanded;
-                }
             }
 
             if (_expanded)
@@ -65,7 +57,7 @@ public:
                     char* file = (char*)payload->Data;
                     std::string fullPath = std::string(file, 256);
                     fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
-                    
+
                     if (Nuake::String::EndsWith(fullPath, ".model"))
                     {
 

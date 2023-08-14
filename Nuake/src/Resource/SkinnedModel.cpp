@@ -1,32 +1,33 @@
-#include "src/Resource/Model.h"
+#include "src/Resource/ModelLoader.h"
+
+#include "src/Resource/SkinnedModel.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/Logger.h"
-#include "src/Rendering/Mesh/Mesh.h"
-#include "src/Resource/ModelLoader.h"
+
 
 namespace Nuake
 {
-	Model::Model(const std::string path) : m_Meshes(std::vector<Ref<Mesh>>())
+	SkinnedModel::SkinnedModel(const std::string path) : m_Meshes(std::vector<Ref<SkinnedMesh>>())
 	{
 		this->Path = path;
 	}
 
-	Model::Model() : m_Meshes(std::vector<Ref<Mesh>>())
+	SkinnedModel::SkinnedModel() : m_Meshes(std::vector<Ref<SkinnedMesh>>())
 	{}
 
-	Model::~Model() {}
+	SkinnedModel::~SkinnedModel() {}
 
-	void Model::AddMesh(Ref<Mesh> mesh)
+	void SkinnedModel::AddMesh(Ref<SkinnedMesh> mesh)
 	{
 		m_Meshes.push_back(mesh);
 	}
 
-	std::vector<Ref<Mesh>>& Model::GetMeshes()
+	std::vector<Ref<SkinnedMesh>>& SkinnedModel::GetMeshes()
 	{
 		return m_Meshes;
 	}
 
-	json Model::Serialize()
+	json SkinnedModel::Serialize()
 	{
 		BEGIN_SERIALIZE();
 
@@ -44,14 +45,14 @@ namespace Nuake
 		END_SERIALIZE();
 	}
 
-	bool Model::Deserialize(const json& j)
+	bool SkinnedModel::Deserialize(const json& j)
 	{
 		if (j.contains("Path"))
 		{
 			this->IsEmbedded = true;
 
 			ModelLoader loader;
-			auto otherModel = loader.LoadModel(j["Path"], false);
+			auto otherModel = loader.LoadSkinnedModel(j["Path"], false);
 			m_Meshes = otherModel->GetMeshes();
 
 			this->Path = j["Path"];
@@ -60,7 +61,7 @@ namespace Nuake
 		{
 			for (auto& m : j["Meshes"])
 			{
-				Ref<Mesh> mesh = CreateRef<Mesh>();
+				auto mesh = CreateRef<SkinnedMesh>();
 				mesh->Deserialize(m);
 
 				m_Meshes.push_back(mesh);

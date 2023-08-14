@@ -20,6 +20,7 @@
 #include "../ComponentsPanel/CharacterControllerPanel.h"
 #include "../ComponentsPanel/SpritePanel.h"
 #include "../ComponentsPanel/ParticleEmitterPanel.h"
+#include "../ComponentsPanel/SkinnedModelPanel.h"
 
 
 class EditorSelectionPanel 
@@ -29,6 +30,7 @@ private:
 	LightPanel mLightPanel;
 	ScriptPanel mScriptPanel;
 	MeshPanel mMeshPanel;
+	SkinnedModelPanel mSkinnedModelPanel;
 	QuakeMapPanel mQuakeMapPanel;
 	CameraPanel mCameraPanel;
 	RigidbodyPanel mRigidbodyPanel;

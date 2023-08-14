@@ -68,3 +68,8 @@ void OS::ShowInFileExplorer(const std::string& filePath)
 {
 	ShellExecuteA(nullptr, "open", "explorer.exe", ("/select," + std::string(filePath)).c_str(), nullptr, SW_SHOWDEFAULT);
 }
+
+void OS::OpenURL(const std::string& url)
+{
+	ShellExecute(nullptr, nullptr, std::wstring(url.begin(), url.end()).c_str(), 0, 0, SW_SHOW);
+}

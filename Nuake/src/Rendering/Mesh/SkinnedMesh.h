@@ -4,6 +4,10 @@
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 
+#include "src/Rendering/Vertex.h"
+#include "src/Rendering/Mesh/Bone.h"
+
+
 namespace Nuake
 {
 	class VertexBuffer;
@@ -12,15 +16,16 @@ namespace Nuake
 	struct Vertex;
 	class Shader;
 
-	class Mesh : ISerializable, Resource
+	class SkinnedMesh : ISerializable, Resource
 	{
 	public:
-		Mesh();
-		~Mesh();
+		SkinnedMesh() = default;
+		~SkinnedMesh() = default;
 
-		void AddSurface(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
-		std::vector<Vertex>& GetVertices();
+		void AddSurface(std::vector<SkinnedVertex> vertices, std::vector<uint32_t> indices, std::vector<Bone> bones);
+		std::vector<SkinnedVertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();
+		std::vector<Bone>& GetBones();
 
 		Ref<Material> GetMaterial() inline const;
 		void SetMaterial(Ref<Material> material);
@@ -37,7 +42,8 @@ namespace Nuake
 	private:
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
-		std::vector<Vertex> m_Vertices;
+		std::vector<SkinnedVertex> m_Vertices;
+		std::vector<Bone> m_Bones;
 
 		Scope<VertexBuffer> m_VertexBuffer;
 		Scope<VertexArray> m_VertexArray;
