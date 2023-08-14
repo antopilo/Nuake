@@ -157,7 +157,7 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize);
 
             Ref<Texture> texture = framebuffer->GetTexture();
-            ImVec2 imagePos = ImGui::GetCursorPos();
+            ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
@@ -173,7 +173,7 @@ namespace Nuake {
 
             ImGuizmo::SetDrawlist();
             ImGuizmo::AllowAxisFlip(true);
-            ImGuizmo::SetRect(imagePos.x + 8.0, imagePos.y + 30.0, viewportPanelSize.x, viewportPanelSize.y);
+            ImGuizmo::SetRect(imagePos.x, imagePos.y + 0.0f, viewportPanelSize.x, viewportPanelSize.y);
 
             if (m_DrawGrid && !Engine::IsPlayMode())
             {
@@ -298,23 +298,7 @@ namespace Nuake {
         if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
             base_flags |= ImGuiTreeNodeFlags_Selected;
 
-        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
-        {
-            ImGui::TableNextColumn();
-
-            bool& isVisible = e.GetComponent<VisibilityComponent>().Visible;
-            char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
-
-
-            ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
-            if (ImGui::Button(visibilityIcon, { 40, 40 }))
-            {
-                isVisible = !isVisible;
-            }
-            ImGui::PopStyleColor();
-        }
-
-        ImGui::PopStyleVar();
+        
 
         ImGui::TableNextColumn();
         
@@ -428,6 +412,23 @@ namespace Nuake {
             ImGui::EndPopup();
         }
         
+        ImGui::TableNextColumn();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
+        {
+            bool& isVisible = e.GetComponent<VisibilityComponent>().Visible;
+            char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
+
+            ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
+            if (ImGui::Button(visibilityIcon, { 40, 40 }))
+            {
+                isVisible = !isVisible;
+            }
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::PopStyleVar();
+
         if (open)
         {
             // Caching list to prevent deletion while iterating.
@@ -1041,9 +1042,9 @@ namespace Nuake {
             {
                 if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp))
                 {
+                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
                     std::string icon = ICON_FA_EYE;
                     ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 32);
-                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
                     ImGui::TableHeadersRow();
                     ImGui::TableNextRow();
 

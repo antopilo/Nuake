@@ -20,17 +20,19 @@ namespace Nuake
 	public:
 		RenderList()
 		{
-			this->m_RenderList = std::map<Ref<Material>, std::vector<RenderMesh>>();
+			this->m_RenderList = std::unordered_map<Ref<Material>, std::vector<RenderMesh>>();
 		}
 
-		void AddToRenderList(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId = -1)
+		void AddToRenderList(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId = -1)
 		{
 			Ref<Material> material = mesh->GetMaterial();
 
 			if (m_RenderList.find(material) == m_RenderList.end())
+			{
 				m_RenderList[material] = std::vector<RenderMesh>();
+			}
 
-			m_RenderList[material].push_back({mesh, transform, entityId});
+			m_RenderList[material].push_back({std::move(mesh), std::move(transform), entityId});
 		}
 
 		void Flush(Shader* shader, bool depthOnly = false)
@@ -57,6 +59,6 @@ namespace Nuake
 		}
 
 	private:
-		std::map<Ref<Material>, std::vector<RenderMesh>> m_RenderList;
+		std::unordered_map<Ref<Material>, std::vector<RenderMesh>> m_RenderList;
 	};
 }

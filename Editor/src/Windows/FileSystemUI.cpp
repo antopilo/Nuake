@@ -73,7 +73,7 @@ namespace Nuake
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
         {
             ImGui::OpenPopup(hoverMenuId.c_str());
-            m_hasClickedOnFile = true;
+            m_HasClickedOnFile = true;
         }
 
         const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
@@ -252,7 +252,7 @@ namespace Nuake
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
         {
             ImGui::OpenPopup(hoverMenuId.c_str());
-            m_hasClickedOnFile = true;
+            m_HasClickedOnFile = true;
         }
 
         const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
@@ -414,7 +414,7 @@ namespace Nuake
 
     void FileSystemUI::DrawContextMenu()
     {
-        if (!m_hasClickedOnFile && ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered())
+        if (!m_HasClickedOnFile && ImGui::IsMouseReleased(1) && ImGui::IsWindowHovered())
         {
             ImGui::OpenPopup("window_hover_menu");
         }
@@ -634,10 +634,10 @@ namespace Nuake
                     ImGui::BeginChild("searchBar", ImVec2(ImGui::GetContentRegionAvail().x - (numButtonAfterPathBrowser * buttonWidth), 24));
                     char buffer[256];
                     memset(buffer, 0, sizeof(buffer));
-                    std::strncpy(buffer, m_searchKeyWord.c_str(), sizeof(buffer));
+                    std::strncpy(buffer, m_SearchKeyword.c_str(), sizeof(buffer));
                     if (ImGui::InputTextEx("##Search", "Asset search & filter ..", buffer, sizeof(buffer), ImVec2(ImGui::GetContentRegionAvail().x, 24), ImGuiInputTextFlags_EscapeClearsAll))
                     {
-                        m_searchKeyWord = std::string(buffer);
+                        m_SearchKeyword = std::string(buffer);
                     }
                     ImGui::EndChild();
 
@@ -692,7 +692,7 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                if(String::Sanitize(d->name).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                if(String::Sanitize(d->name).find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
                                     if (i + 1 % amount != 0)
                                         ImGui::TableNextColumn();
@@ -707,14 +707,18 @@ namespace Nuake
 
                         if (m_CurrentDirectory && m_CurrentDirectory->Files.size() > 0)
                         {
-                            for (auto f : m_CurrentDirectory->Files)
+                            for (auto& f : m_CurrentDirectory->Files)
                             {
-                                if(String::Sanitize(f->GetName()).find(String::Sanitize(m_searchKeyWord)) != std::string::npos)
+                                if(m_SearchKeyword.empty() || f->GetName().find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
                                     if (i - 1 % amount != 0 || i == 1)
+                                    {
                                         ImGui::TableNextColumn();
+                                    }
                                     else
+                                    {
                                         ImGui::TableNextRow();
+                                    }
                                 
                                     DrawFile(f, i);
                                     i++;
@@ -723,7 +727,7 @@ namespace Nuake
                         }
 
                         DrawContextMenu();
-                        m_hasClickedOnFile = false;
+                        m_HasClickedOnFile = false;
                         
                         ImGui::EndTable();
                     }
