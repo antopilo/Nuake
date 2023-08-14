@@ -240,7 +240,7 @@ namespace Nuake
 		{
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.2f, 0.5f));
+			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.14f, 0.5f));
 			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + "  New Game Project...";
 			if (ImGui::Button(buttonLabel.c_str(), buttonSize))
 			{
@@ -288,7 +288,7 @@ namespace Nuake
 			if (SelectedProject != -1)
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-				ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.2f, 0.5f));
+				ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.16f, 0.5f));
 				const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + "  Load Selected Project";
 				if (ImGui::Button(buttonLabelOpen.c_str(), buttonSize) || ImGui::IsMouseDoubleClicked(0))
 				{
@@ -300,6 +300,16 @@ namespace Nuake
 				}
 				ImGui::PopStyleVar(2);
 			}
+			ImGui::Separator();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.09f, 0.5f));
+			const std::string buttonLabelDoc = std::string(ICON_FA_EXTERNAL_LINK_SQUARE_ALT) + "  Documentation";
+			if (ImGui::Button(buttonLabelDoc.c_str(), buttonSize))
+			{
+				OS::OpenURL("https://nuake.readthedocs.io/en/latest/index.html");
+			}
+			ImGui::PopStyleVar(2);
 		}
 
 		ImGui::EndChild();
