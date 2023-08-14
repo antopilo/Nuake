@@ -15,5 +15,6 @@ namespace Nuake
 		static int OS::RenameFile(const Ref<File>& file, const std::string& newName);
 		static int OS::RenameDirectory(const Ref<Directory>& dir, const std::string& newName);
 		static void ShowInFileExplorer(const std::string& filePath);
+		static void OpenURL(const std::string& url);
 	};
 }
