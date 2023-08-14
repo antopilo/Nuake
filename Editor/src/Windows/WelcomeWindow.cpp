@@ -125,15 +125,11 @@ namespace Nuake
 			}
 
 			// Add padding under logo
-			ImGui::Dummy(ImVec2(10, 25));
-			{
-				UIFont boldfont = UIFont(Fonts::SubTitle);
-				ImGui::Text("Open recent");
-			}
+			ImGui::Dummy(ImVec2(10, 16));
 
-			DrawRecentProjectsSection();
-			ImGui::SameLine();
 			DrawRightControls();
+			ImGui::SameLine();
+			DrawRecentProjectsSection();
 		}
 
 		ImGui::End();
@@ -145,7 +141,6 @@ namespace Nuake
 	{
 		// Recent projects section takes up 80% of the width
 		ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
-		projectsWindowSize.x *= 0.8f;
 
 		ImGui::BeginChild("Projects", projectsWindowSize, true);
 		{
@@ -188,10 +183,29 @@ namespace Nuake
 
 		const std::string selectableName = "##" + std::to_string(itemIndex);
 		const bool isSelected = SelectedProject == itemIndex;
-		if (ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
+		//ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(10.0f / 255.f, 182.0f / 255.f, 255.f / 255.f, 1.0f));
+
+		ImDrawList* draw_list = ImGui::GetWindowDrawList();
+		draw_list->ChannelsSplit(2);
+
+		// Channel number is like z-order. Widgets in higher channels are rendered above widgets in lower channels.
+		draw_list->ChannelsSetCurrent(1);
+
+		bool result = ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
+		if (isSelected)
+		{
+			ImVec2 p_min = ImGui::GetItemRectMin();
+			ImVec2 p_max = ImGui::GetItemRectMax();
+			ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, IM_COL32(10.0f, 182.0f, 255.f, 255.0f));
+		}
+		
+		draw_list->ChannelsMerge();
+
+		if (result)
 		{
 			SelectedProject = itemIndex;
 		}
+		//ImGui::PopStyleColor();
 
 		const ImVec2 padding = ImVec2(25.0f, 20.0f);
 		const ImVec2 iconSize = ImVec2(100, 100);
@@ -208,24 +222,27 @@ namespace Nuake
 			ImGui::Text(project.Name.c_str());
 		}
 
-		ImGui::SetCursorPosY(cursorYStart + padding.y + 35.f);
+		ImGui::SetCursorPosY(cursorYStart + padding.y + 34.f);
 		{
 			ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
 			UIFont boldfont = UIFont(Fonts::Bold);
 			ImGui::Text(project.Description.c_str());
 		}
 
-		ImGui::SetCursorPosY(cursorYStart + itemHeight);
+		ImGui::SetCursorPosY(cursorYStart + itemHeight + 4.0f);
 	}
 
 	void WelcomeWindow::DrawRightControls()
 	{
-		const float buttonHeight = 58.0f;
+		const float buttonHeight = 36.0f;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
-		if (ImGui::BeginChild("Controls", ImGui::GetContentRegionAvail(), false))
+		if (ImGui::BeginChild("Controls", ImVec2(200.0f, ImGui::GetContentRegionAvail().y), false))
 		{
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
-			if (ImGui::Button("Create a new project", buttonSize))
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.2f, 0.5f));
+			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + "  New Game Project...";
+			if (ImGui::Button(buttonLabel.c_str(), buttonSize))
 			{
 				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
 					
@@ -265,11 +282,15 @@ namespace Nuake
 					_Projects.push_back(projectPreview);
 				}
 			}
+			ImGui::PopStyleVar(2);
 			ImGui::Separator();
 
 			if (SelectedProject != -1)
 			{
-				if (ImGui::Button("Open an existing Project", buttonSize))
+				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+				ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.2f, 0.5f));
+				const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + "  Load Selected Project";
+				if (ImGui::Button(buttonLabelOpen.c_str(), buttonSize) || ImGui::IsMouseDoubleClicked(0))
 				{
 					assert(SelectedProject < std::size(_Projects));
 
@@ -277,6 +298,7 @@ namespace Nuake
 
 					queuedProjectPath = _Projects[SelectedProject].Path;;
 				}
+				ImGui::PopStyleVar(2);
 			}
 		}
 
