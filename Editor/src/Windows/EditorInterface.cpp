@@ -420,7 +420,7 @@ namespace Nuake {
             char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
 
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
-            if (ImGui::Button(visibilityIcon, { 40, 40 }))
+            if (ImGui::Button(visibilityIcon, { 40, 36 }))
             {
                 isVisible = !isVisible;
             }
@@ -446,7 +446,7 @@ namespace Nuake {
     UIFont* names##_boldFont = new UIFont(Fonts::Bold); \
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f)); \
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f)); \
-    bool names##_Opened = ImGui::CollapsingHeader(#names); \
+    bool names##_Opened = ImGui::CollapsingHeader((std::string("  ") + #names).c_str()); \
     ImGui::PopStyleVar(); \
     delete names##_boldFont; \
     if (names##_Opened) { \
@@ -1042,7 +1042,7 @@ namespace Nuake {
             {
                 if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
+                    ImGui::TableSetupColumn("    Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
                     std::string icon = ICON_FA_EYE;
                     ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 32);
                     ImGui::TableHeadersRow();
@@ -1066,8 +1066,10 @@ namespace Nuake {
                         // Draw all entity without parents.
                         if (!e.GetComponent<ParentComponent>().HasParent)
                         {
+                            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
                             // Recursively draw childrens.
                             DrawEntityTree(e);
+                            ImGui::PopStyleVar();
                         }
 
                         // Pop font.
