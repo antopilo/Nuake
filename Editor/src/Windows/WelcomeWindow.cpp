@@ -142,14 +142,17 @@ namespace Nuake
 		// Recent projects section takes up 80% of the width
 		ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
 
-		ImGui::BeginChild("Projects", projectsWindowSize, true);
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+		ImGui::BeginChild("Projects", projectsWindowSize, false);
 		{
+			ImGui::PopStyleColor();
 			for (uint32_t i = 0; i < std::size(_Projects); i++)
 			{
 				DrawProjectItem(i);
 			}
 
-			const float itemHeight = 120.0f;
+			const float itemHeight = 100.0f;
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 			{
 				const std::string path = FileDialog::OpenFile("Project file |*.project");
@@ -171,12 +174,14 @@ namespace Nuake
 					}
 				}
 			}
+			ImGui::PopStyleColor();
 		}
 		ImGui::EndChild();
 	}
 
 	void WelcomeWindow::DrawProjectItem(const uint32_t itemIndex)
 	{
+		
 		const ProjectPreview& project = _Projects[itemIndex];
 		const uint32_t itemHeight = 120;
 		const float cursorYStart = ImGui::GetCursorPosY();
@@ -191,13 +196,16 @@ namespace Nuake
 		// Channel number is like z-order. Widgets in higher channels are rendered above widgets in lower channels.
 		draw_list->ChannelsSetCurrent(1);
 
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
 		bool result = ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
 		if (isSelected)
 		{
 			ImVec2 p_min = ImGui::GetItemRectMin();
 			ImVec2 p_max = ImGui::GetItemRectMax();
-			ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, IM_COL32(10.0f, 182.0f, 255.f, 255.0f));
+			ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, IM_COL32(10.0f, 182.0f, 255.f, 255.0f), 8.0f);
 		}
+
+		ImGui::PopStyleColor();
 		
 		draw_list->ChannelsMerge();
 
@@ -212,6 +220,8 @@ namespace Nuake
 		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(0, cursorYStart));
 
 		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+
+
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
 
@@ -229,15 +239,17 @@ namespace Nuake
 			ImGui::Text(project.Description.c_str());
 		}
 
-		ImGui::SetCursorPosY(cursorYStart + itemHeight + 4.0f);
+		ImGui::SetCursorPosY(cursorYStart + itemHeight + 32.0f);
 	}
 
 	void WelcomeWindow::DrawRightControls()
 	{
 		const float buttonHeight = 36.0f;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 16.0f);
 		if (ImGui::BeginChild("Controls", ImVec2(200.0f, ImGui::GetContentRegionAvail().y), false))
 		{
+			ImGui::PopStyleVar();
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.14f, 0.5f));
