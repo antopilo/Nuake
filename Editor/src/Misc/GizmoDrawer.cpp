@@ -141,7 +141,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
 
-	glLineWidth(2.0f);
+	glLineWidth(1.0f);
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
 	for (auto e : boxColliderView)
 	{

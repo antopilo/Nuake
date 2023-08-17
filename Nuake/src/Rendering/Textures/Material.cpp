@@ -91,10 +91,12 @@ namespace Nuake
 
 	void Material::Bind(Shader* shader)
 	{
-		//if (MaterialManager::Get()->CurrentlyBoundedMaterial == m_Name)
-		//	return;
+		if (MaterialManager::Get()->CurrentlyBoundedMaterial == ID)
+		{
+			return;
+		}
 
-		MaterialManager::Get()->CurrentlyBoundedMaterial = m_Name;
+		MaterialManager::Get()->CurrentlyBoundedMaterial = ID;
 		
 
 		// Albedo

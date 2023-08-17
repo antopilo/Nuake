@@ -5,8 +5,10 @@
 
 #include <map>
 
-namespace Nuake {
-	class ResourceManager {
+namespace Nuake 
+{
+	class ResourceManager 
+	{
 	private:
 		static std::map<UUID, Ref<Resource>> m_Resources;
 

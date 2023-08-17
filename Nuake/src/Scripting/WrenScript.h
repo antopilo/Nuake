@@ -9,6 +9,7 @@ struct WrenHandle;
 namespace Nuake 
 {
 	class File;
+
 	class WrenScript
 	{
 	private:

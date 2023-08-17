@@ -103,18 +103,18 @@ namespace Nuake
 		for (auto& e : camView)
 		{
 			auto [transform, camera] = camView.get<TransformComponent, CameraComponent>(e);
-			Matrix4 cameraTransform = camera.CameraInstance->GetTransformRotation();
+			const Matrix4& cameraTransform = camera.CameraInstance->GetTransformRotation();
 
 			camera.CameraInstance->Translation = transform.GlobalTranslation;
 
-			auto globalRotation = transform.GetGlobalRotation();
-			auto& translationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
+			const Quat& globalRotation = transform.GetGlobalRotation();
+			const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
 			const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-			Vector4 forward = Vector4(0, 0, -1, 1);
-			const auto globalForward = rotationMatrix * forward;
+			const Vector4& forward = Vector4(0, 0, -1, 1);
+			const Vector4& globalForward = rotationMatrix * forward;
 
-			Vector4 right = Vector4(1, 0, 0, 1);
-			const auto globalRight = rotationMatrix * right;
+			const Vector4& right = Vector4(1, 0, 0, 1);
+			const Vector4& globalRight = rotationMatrix * right;
 			camera.CameraInstance->Direction = globalForward;
 			camera.CameraInstance->Right = globalRight;
 ;			camera.CameraInstance->SetTransform(glm::inverse(translationMatrix * rotationMatrix));

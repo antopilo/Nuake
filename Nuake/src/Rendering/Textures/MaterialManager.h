@@ -1,13 +1,15 @@
 #pragma once
+#include "src/Core/Core.h"
+#include "src/Resource/UUID.h"
+
 #include <map>
 #include <string>
-#include "src/Core/Core.h"
+
 
 namespace Nuake
 {
 	class Material;
 
-	// TODO: Should probably be static.
 	class MaterialManager 
 	{
 	private:
@@ -23,7 +25,7 @@ namespace Nuake
 
 	public:
 		const std::string DEFAULT_MATERIAL = "resources/Textures/default/Default.png";
-		std::string CurrentlyBoundedMaterial = "";
+		UUID CurrentlyBoundedMaterial;
 		MaterialManager();
 
 		void LoadMaterials();
