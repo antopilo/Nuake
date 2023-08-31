@@ -286,6 +286,7 @@ namespace Nuake
         s.WindowBorderSize = 0.0f;
         s.IndentSpacing = 12.0f;
         s.ChildBorderSize = 0.0f;
+        s.PopupRounding = 4.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
