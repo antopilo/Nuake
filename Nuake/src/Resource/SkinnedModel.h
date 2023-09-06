@@ -20,6 +20,7 @@ namespace Nuake
 		SkinnedModel(const std::string path);
 		~SkinnedModel();
 
+		SkeletonNode& GetSkeletonRootNode() { return m_SkeletonRoot; }
 		void SetSkeletonRootNode(SkeletonNode& root)
 		{
 			m_SkeletonRoot = std::move(root);

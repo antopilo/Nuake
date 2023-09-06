@@ -3,6 +3,7 @@
 #include "src/Rendering/AABB.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
+#include "src/Resource/SkeletalAnimation.h"
 
 #include "src/Rendering/Vertex.h"
 #include "src/Rendering/Mesh/Bone.h"
@@ -39,7 +40,12 @@ namespace Nuake
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 
+		void SetSkeletalAnimation(Ref<SkeletalAnimation> animation);
+		Ref<SkeletalAnimation> GetSkeletalAnimation() const { return m_SkeletalAnimation; }
+
 	private:
+		Ref<SkeletalAnimation> m_SkeletalAnimation;
+
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<SkinnedVertex> m_Vertices;

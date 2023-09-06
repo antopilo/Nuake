@@ -48,6 +48,7 @@ namespace Nuake
 		std::vector<SkinnedVertex> ProcessSkinnedVertices(aiMesh* mesh);
 		void SetVertexBoneData(SkinnedVertex& vertex, int boneId, float weight);
 		void ProcessAnimationNode(SkeletonNode& dest, const aiNode* src);
+		void ProcessSkeleton(SkeletonNode& des, const aiNode* src);
 
 		static inline Matrix4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
 		{

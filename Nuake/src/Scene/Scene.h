@@ -17,6 +17,7 @@
 
 namespace Nuake 
 {
+	class SkeletonNode;
 	class Entity;
 	class SceneRenderer;
 
@@ -93,5 +94,8 @@ namespace Nuake
 
 		// Component specific utilies
 		void CreateSkeleton(Entity& entity);
+
+	private:
+		void CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode);
 	};
 }

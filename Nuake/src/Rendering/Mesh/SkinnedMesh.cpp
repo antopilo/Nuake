@@ -11,6 +11,7 @@
 #include "src/Rendering/Buffers/VertexArray.h"
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 
+
 #include <future>
 
 namespace Nuake
@@ -198,5 +199,10 @@ namespace Nuake
 
         SetupMesh();
         return true;
+    }
+
+    void SkinnedMesh::SetSkeletalAnimation(Ref<SkeletalAnimation> skeletalAnimation)
+    {
+        m_SkeletalAnimation = skeletalAnimation;
     }
 }

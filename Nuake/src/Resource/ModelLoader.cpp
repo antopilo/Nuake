@@ -77,7 +77,6 @@ namespace Nuake
 		}
 
 		ProcessSkinnedNode(scene->mRootNode, scene);
-
 		if (scene->HasAnimations())
 		{
 			SkeletalAnimation animation;
@@ -350,6 +349,23 @@ namespace Nuake
 			SkeletonNode newNode;
 			ProcessAnimationNode(newNode, src->mChildren[i]);
 			dest.Children.push_back(std::move(newNode));
+		}
+	}
+
+	void ModelLoader::ProcessSkeleton(SkeletonNode& des, const aiNode* src)
+	{
+		// Create a Bone object for this node
+		SkeletonNode bone;
+		bone.Name = src->mName.C_Str();
+		bone.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
+
+		des.ChildrenCount++;
+		des.Children.push_back(bone);
+
+		// Recursively process child nodes (bones)
+		for (uint32_t i = 0; i < src->mNumChildren; i++)
+		{
+			ProcessSkeleton(bone, src->mChildren[i]);
 		}
 	}
 

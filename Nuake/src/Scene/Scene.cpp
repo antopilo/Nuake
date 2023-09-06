@@ -466,33 +466,25 @@ namespace Nuake
 			return;
 		}
 
-		SkinnedModelComponent& component = entity.GetComponent<SkinnedModelComponent>();
-		for (Ref<SkinnedMesh>& model : component.ModelResource->GetMeshes())
+		auto& component = entity.GetComponent<SkinnedModelComponent>();
+		auto& skeletonRoot = component.ModelResource->GetSkeletonRootNode();
+
+		Entity skeletonRootEntity = CreateEntity(skeletonRoot.Name);
+		skeletonRootEntity.AddComponent<BoneComponent>();
+		entity.AddChild(skeletonRootEntity);
+
+		CreateSkeletonTraverse(skeletonRootEntity, skeletonRoot);
+	}
+
+	void Scene::CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode)
+	{
+		for (auto& c : skeletonNode.Children)
 		{
-			for (auto& bone : model->GetBones())
-			{
-				auto& parentComponent = entity.GetComponent<ParentComponent>();
+			Entity boneEntity = CreateEntity(c.Name);
+			boneEntity.AddComponent<BoneComponent>();
+			entity.AddChild(boneEntity);
 
-				Logger::Log("bone found:" + bone.Name, "debug", VERBOSE);
-				if (EntityExists(bone.Name) == false)
-				{
-					Entity boneEntity = CreateEntity(bone.Name);
-					boneEntity.AddComponent<BoneComponent>();
-
-					Vector3 position;
-					Quat rotation;
-					Vector3 scale;
-					Decompose(bone.Offset, position, rotation, scale);
-
-					auto& transformComponent = entity.GetComponent<TransformComponent>();
-					transformComponent.SetLocalPosition(position);
-					transformComponent.SetLocalRotation(rotation);
-					transformComponent.SetLocalScale(scale);
-					transformComponent.SetLocalTransform(bone.Offset);
-
-					entity.AddChild(boneEntity);
-				}
-			}
+			CreateSkeletonTraverse(boneEntity, c);
 		}
 	}
 
