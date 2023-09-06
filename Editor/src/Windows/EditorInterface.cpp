@@ -1649,6 +1649,11 @@ namespace Nuake {
             entityTypeName = "Character Controller";
         }
 
+        if (entity.HasComponent<BoneComponent>())
+        {
+            entityTypeName = "Bone";
+        }
+
         if (entity.HasComponent<PrefabComponent>())
         {
             entityTypeName = "Prefab";
