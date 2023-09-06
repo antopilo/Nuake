@@ -84,20 +84,70 @@ namespace Nuake
 		ProcessSkinnedNode(scene->mRootNode, scene);
 		if (scene->HasAnimations())
 		{
-			SkeletalAnimation animation;
+			std::vector<Ref<SkeletalAnimation>> animations = std::vector<Ref<SkeletalAnimation>>();
 
+			// Parse animations
 			for (uint32_t i = 0; i < scene->mNumAnimations; i++)
 			{
 				aiAnimation* aiAnim = scene->mAnimations[i];
-				const float duration = aiAnim->mDuration;
-				const float ticksPerSecond = aiAnim->mTicksPerSecond;
 
-				// Read data
-				SkeletonNode rootSkeletonNode;
-				ProcessAnimationNode(rootSkeletonNode, scene->mRootNode);
+				const std::string animationName = aiAnim->mName.data;
+				const float animationDuration = aiAnim->mDuration;
+				const float animationTicksPerSecond = aiAnim->mTicksPerSecond;
+				auto animation = CreateRef<SkeletalAnimation>(animationName, animationDuration, animationTicksPerSecond);
 
-				model->SetSkeletonRootNode(rootSkeletonNode);
+				// Here we iterate over every channel(each channel represents a bone) and fill the SkeletalAnimation
+				// object with every keyframe. We essentially just convert every assimp vector, quat, string to our own types.
+				for (uint32_t j = 0; j < aiAnim->mNumChannels; j++)
+				{
+					aiNodeAnim* animChannel = aiAnim->mChannels[j];
+					const std::string channelName = animChannel->mNodeName.data; // this should be a bone name
+					
+					// Create the track
+					BoneTransformTrack& track = animation->GetTrack(channelName);
+
+					// Create every keyframe in the current channel
+					// Position
+					for (uint32_t p = 0; p < animChannel->mNumPositionKeys; p++)
+					{
+						aiVectorKey positionKey = animChannel->mPositionKeys[p];
+						const float keyTime = positionKey.mTime;
+						const aiVector3D assimpKeyValue = positionKey.mValue;
+						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushPositionKeyframe(keyTime, keyValue);
+					}
+
+					// Rotation
+					for (uint32_t r = 0; r < animChannel->mNumRotationKeys; r++)
+					{
+						aiQuatKey rotationKey = animChannel->mRotationKeys[r];
+						const float keyTime = rotationKey.mTime;
+						const aiQuaterniont assimpKeyValue = rotationKey.mValue;
+						const Quat keyValue = Quat(assimpKeyValue.w, assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushRotationKeyframe(keyTime, keyValue);
+					}
+
+					// Scaling
+					for (uint32_t s = 0; s < animChannel->mNumScalingKeys; s++)
+					{
+						aiVectorKey scaleKey = animChannel->mScalingKeys[s];
+						const float keyTime = scaleKey.mTime;
+						const aiVector3D assimpKeyValue = scaleKey.mValue;
+						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushScaleKeyframe(keyTime, keyValue);
+					}
+				}
+
+				animations.push_back(animation);
 			}
+
+			SkeletonNode rootSkeletonNode;
+			ProcessAnimationNode(rootSkeletonNode, scene->mRootNode);
+			model->SetSkeletonRootNode(std::move(rootSkeletonNode));
+			model->SetAnimations(std::move(animations));
 		}
 
 		for (const auto& mesh : m_SkinnedMeshes)

@@ -53,7 +53,7 @@ namespace Nuake
         { Vector3(-0.5f,  0.5f,  0.5f), Vector2(1, 1), Vector3(-1, 0, 0) }
     };
 
-    std::vector<unsigned int> CubeIndices
+    std::vector<uint32_t> CubeIndices
     {
         0, 1, 3, 3, 1, 2,
         1, 5, 2, 2, 5, 6,

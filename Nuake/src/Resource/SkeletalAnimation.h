@@ -12,32 +12,118 @@ namespace Nuake
 		Vector3 Scalings;
 	};
 
-	struct BoneTransformTrack
+	class BoneTransformTrack
 	{
-		std::vector<float> positionTimestamps = {};
-		std::vector<float> rotationTimestamps = {};
-		std::vector<float> scaleTimestamps = {};
+	private:
+		std::vector<float> m_PositionTimestamps = {};
+		std::vector<float> m_RotationTimestamps = {};
+		std::vector<float> m_ScaleTimestamps = {};
 
-		std::vector<Vector3> positions = {};
-		std::vector<Quat> rotations = {};
-		std::vector<Vector3> scales = {};
+		std::vector<Vector3> m_Positions = {};
+		std::vector<Quat> m_Rotations = {};
+		std::vector<Vector3> m_Scales = {};
+
+	public:
+		BoneTransformTrack();
+		~BoneTransformTrack() = default;
+
+		void PushPositionKeyframe(float timestamp, const Vector3& position)
+		{
+			m_PositionTimestamps.push_back(timestamp);
+			m_Positions.push_back(position);
+		}
+
+		void PushRotationKeyframe(float timestamp, const Quat& rotation)
+		{
+			m_RotationTimestamps.push_back(timestamp);
+			m_Rotations.push_back(rotation);
+		}
+
+		void PushScaleKeyframe(float timestamp, const Vector3& scale)
+		{
+			m_ScaleTimestamps.push_back(timestamp);
+			m_Scales.push_back(scale);
+		}
+
+		int GetPositionIndex(float animationTime)
+		{
+			if (m_Positions.size() == 0)
+			{
+				return 0;
+			}
+
+			for (int index = 0; index < m_Positions.size() - 1; index++)
+			{
+				if (animationTime < m_PositionTimestamps[index + 1])
+				{
+					return index;
+				}
+			}
+			assert(0);
+		}
+
+		/* Gets the current index on mKeyRotations to interpolate to based on the
+		current animation time*/
+		int GetRotationIndex(float animationTime)
+		{
+			for (int index = 0; index < m_Rotations.size() - 1; ++index)
+			{
+				if (animationTime < m_RotationTimestamps[index + 1])
+				{
+					return index;
+				}
+			}
+			assert(0);
+		}
+
+		/* Gets the current index on mKeyScalings to interpolate to based on the
+		current animation time */
+		int GetScaleIndex(float animationTime)
+		{
+			for (int index = 0; index < m_Scales.size() - 1; ++index)
+			{
+				if (animationTime < m_ScaleTimestamps[index + 1])
+				{
+					return index;
+				}
+			}
+			assert(0);
+		}
+
+		float GetScaleFactor(float lastTime, float nextTime, float animationTime);
+		Matrix4 InterpolatePosition(float time);
+		Matrix4 InterpolateRotation(float time);
+		Matrix4 InterpolateScale(float time);
 	};
 
 	class SkeletalAnimation
 	{
 	private:
-		float m_Duration;
-		int m_TicksPerSecond;
-
 		std::unordered_map<std::string, BoneTransformTrack> m_Tracks;
-		std::vector<Bone> m_Bones;
+		float m_CurrentTime;
+		float m_Duration;
+		float m_TicksPerSecond;
+		std::string m_Name;
+		bool m_Loop;
 
 	public:
 		SkeletalAnimation() = default;
+		SkeletalAnimation(const std::string& name, float duration, float ticksPerSecond);
+
 		~SkeletalAnimation() = default;
 
-		Bone& FindBone(const std::string& boneName);
+		void SetCurrentTime(float time) 
+		{
+			m_CurrentTime = fmod(time, m_Duration);
+		}
 
+		float GetCurrentTime() const { return m_CurrentTime; }
+		void SetDuration(float duration) { m_Duration = duration; }
+		float GetDuration() const { return m_Duration; }
 		float GetTicksPerSecond() const { return m_TicksPerSecond; }
+		void SetTicksPerSecond(float ticks) { m_TicksPerSecond = ticks; }
+
+		BoneTransformTrack& GetTrack(const std::string& name);
+		std::unordered_map<std::string, BoneTransformTrack>& GetTracks() { return m_Tracks; }
 	};
 }

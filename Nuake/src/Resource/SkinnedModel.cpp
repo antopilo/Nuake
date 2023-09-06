@@ -27,6 +27,43 @@ namespace Nuake
 		return m_Meshes;
 	}
 
+	void SkinnedModel::SetAnimations(const std::vector<Ref<SkeletalAnimation>> animations)
+	{
+		m_NumAnimation = static_cast<uint32_t>(animations.size());
+		m_CurrentAnimation = 0;
+		m_Animations = animations;
+	}
+
+	void SkinnedModel::AddAnimation(Ref<SkeletalAnimation> animation)
+	{
+		m_NumAnimation++;
+		m_Animations.push_back(std::move(animation));
+	}
+
+	Ref<Nuake::SkeletalAnimation> SkinnedModel::GetCurrentAnimation()
+	{
+		if (m_CurrentAnimation < m_NumAnimation)
+		{
+			return m_Animations[m_CurrentAnimation];
+		}
+
+		Logger::Log("Cannot get animation if no animation exists", "skinned model", WARNING);
+		return nullptr;
+	}
+
+	void SkinnedModel::PlayAnimation(uint32_t animationId)
+	{
+		if (animationId >= m_NumAnimation)
+		{
+			Logger::Log("Cannot play animation, index out of range", "skinned model", CRITICAL);
+			return;
+		}
+
+		GetCurrentAnimation()->SetCurrentTime(0.0f); // Reset previous animation
+
+		m_CurrentAnimation = animationId;
+	}
+
 	json SkinnedModel::Serialize()
 	{
 		BEGIN_SERIALIZE();

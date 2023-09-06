@@ -15,6 +15,10 @@ namespace Nuake
 
 		SkeletonNode m_SkeletonRoot;
 
+		uint32_t m_CurrentAnimation = 0;
+		uint32_t m_NumAnimation = 0;
+		std::vector<Ref<SkeletalAnimation>> m_Animations;
+
 	public:
 		SkinnedModel();
 		SkinnedModel(const std::string path);
@@ -28,6 +32,11 @@ namespace Nuake
 
 		void AddMesh(Ref<SkinnedMesh> mesh);
 		std::vector<Ref<SkinnedMesh>>& GetMeshes();
+
+		void SetAnimations(const std::vector<Ref<SkeletalAnimation>> animations);
+		void AddAnimation(Ref<SkeletalAnimation> animation);
+		Ref<SkeletalAnimation> GetCurrentAnimation();
+		void PlayAnimation(uint32_t animationId);
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;

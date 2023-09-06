@@ -4,6 +4,7 @@
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Systems/ParticleSystem.h"
+#include "src/Scene/Systems/AnimationSystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
@@ -49,6 +50,7 @@ namespace Nuake
 		// Adding systems - Order is important
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
+		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
@@ -473,6 +475,17 @@ namespace Nuake
 		skeletonRootEntity.AddComponent<BoneComponent>();
 		entity.AddChild(skeletonRootEntity);
 
+		Vector3 bonePosition;
+		Quat boneRotation;
+		Vector3 boneScale;
+		Decompose(skeletonRoot.Transform, bonePosition, boneRotation, boneScale);
+
+		auto& transformComponent = skeletonRootEntity.GetComponent<TransformComponent>();
+		transformComponent.SetLocalPosition(bonePosition);
+		transformComponent.SetLocalRotation(boneRotation);
+		transformComponent.SetLocalScale(boneScale);
+		transformComponent.SetLocalTransform(skeletonRoot.Transform);
+
 		CreateSkeletonTraverse(skeletonRootEntity, skeletonRoot);
 	}
 
@@ -483,6 +496,18 @@ namespace Nuake
 			Entity boneEntity = CreateEntity(c.Name);
 			boneEntity.AddComponent<BoneComponent>();
 			entity.AddChild(boneEntity);
+
+			Vector3 bonePosition;
+			Quat boneRotation;
+			Vector3 boneScale;
+			Decompose(c.Transform, bonePosition, boneRotation, boneScale);
+
+			auto& transformComponent = boneEntity.GetComponent<TransformComponent>();
+			transformComponent.SetLocalPosition(bonePosition);
+			transformComponent.SetLocalRotation(boneRotation);
+			transformComponent.SetLocalScale(boneScale);
+			transformComponent.SetLocalTransform(c.Transform);
+			transformComponent.Dirty = false;
 
 			CreateSkeletonTraverse(boneEntity, c);
 		}
