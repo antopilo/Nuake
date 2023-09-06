@@ -382,6 +382,18 @@ namespace Nuake
 	{
 		for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
 		{
+			if (vertex.boneIDs[i] == boneID) {
+				return;
+			}
+		}
+
+		if (weight == 0.0f)
+		{
+			return;
+		}
+
+		for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+		{
 			if (vertex.boneIDs[i] < 0)
 			{
 				vertex.weights[i] = weight;
