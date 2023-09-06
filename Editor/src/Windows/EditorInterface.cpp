@@ -252,7 +252,7 @@ namespace Nuake {
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
 
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
