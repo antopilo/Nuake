@@ -49,7 +49,6 @@ namespace Nuake
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<SkinnedVertex> m_Vertices;
-		std::vector<Bone> m_Bones;
 
 		Scope<VertexBuffer> m_VertexBuffer;
 		Scope<VertexArray> m_VertexArray;

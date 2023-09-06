@@ -20,7 +20,6 @@ namespace Nuake
     {
         m_Vertices = vertices;
         m_Indices = indices;
-        m_Bones = bones;
 
         SetupMesh();
         CalculateAABB();
@@ -39,11 +38,6 @@ namespace Nuake
     std::vector<uint32_t>& SkinnedMesh::GetIndices()
     {
         return m_Indices;
-    }
-
-    std::vector<Bone>& SkinnedMesh::GetBones()
-    {
-        return m_Bones;
     }
 
     Ref<Material> SkinnedMesh::GetMaterial() inline const
@@ -129,10 +123,6 @@ namespace Nuake
         j["Material"] = m_Material->Serialize();
         j["Indices"] = m_Indices;
 
-        for (uint32_t i = 0; i < m_Bones.size(); i++)
-        {
-            //j["Bones"][i] = m_Bones[i];
-        }
         json v;
         for (uint32_t i = 0; i < m_Vertices.size(); i++)
         {
