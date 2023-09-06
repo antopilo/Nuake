@@ -1,4 +1,5 @@
 #pragma once
+#include "src/Core/Core.h"
 #include <src/Rendering/Mesh/Bone.h>
 
 namespace Nuake
