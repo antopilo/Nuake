@@ -50,8 +50,13 @@ namespace Nuake
 		return model;
 	}
 
+
+	std::unordered_map<std::string, uint32_t> bonesNameIDMap;
 	Ref<SkinnedModel> ModelLoader::LoadSkinnedModel(const std::string& path, bool absolute)
 	{
+		bonesNameIDMap = std::unordered_map<std::string, uint32_t>();
+		m_BoneMap = std::unordered_map<std::string, Bone>();
+
 		m_SkinnedMeshes.clear();
 		Ref<SkinnedModel> model = CreateRef<SkinnedModel>(path);
 
@@ -137,7 +142,6 @@ namespace Nuake
 		auto& indices = ProcessIndices(node);
 		auto& material = ProcessMaterials(scene, node);
 		auto& bones = std::vector<Bone>();
-		auto& bonesMap = std::unordered_map<std::string, Bone>();
 
 		if (node->HasBones())
 		{
@@ -148,7 +152,7 @@ namespace Nuake
 				const std::string& boneName = bone->mName.C_Str();
 
 				int32_t boneId = -1;
-				if (bonesMap.find(boneName) == bonesMap.end())
+				if (m_BoneMap.find(boneName) == m_BoneMap.end())
 				{
 					boneId = boneCounter;
 					boneCounter++;
@@ -157,11 +161,12 @@ namespace Nuake
 					newBone.Offset = ConvertMatrixToGLMFormat(bone->mOffsetMatrix);
 					bones.push_back(newBone);
 
-					bonesMap[boneName] = newBone;
+					bonesNameIDMap[boneName] = boneId;
+					m_BoneMap[boneName] = newBone;
 				}
 				else
 				{
-					boneId = bonesMap[boneName].Id;
+					boneId = m_BoneMap[boneName].Id;
 				}
 				
 				assert(boneId != -1);
@@ -171,7 +176,7 @@ namespace Nuake
 				{
 					aiVertexWeight vertexWeight = bone->mWeights[j];
 					const uint32_t vertexWeightVertexId = vertexWeight.mVertexId;
-
+					
 					SetVertexBoneData(vertices[vertexWeightVertexId], boneId, vertexWeight.mWeight);
 					
 					//BoneVertexWeight boneVertexWeight
@@ -215,20 +220,20 @@ namespace Nuake
 		auto vertices = std::vector<Vertex>();
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			Vertex vertex;
+			Vertex vertex {};
 
 			Vector3 current;
 
 			// Position
 			current.x = mesh->mVertices[i].x;
-			current.y = mesh->mVertices[i].z;
-			current.z = mesh->mVertices[i].y;
+			current.y = mesh->mVertices[i].y;
+			current.z = mesh->mVertices[i].z;
 			vertex.position = current;
 
 			// Normals
 			current.x = mesh->mNormals[i].x;
-			current.y = mesh->mNormals[i].z;
-			current.z = mesh->mNormals[i].y;
+			current.y = mesh->mNormals[i].y;
+			current.z = mesh->mNormals[i].z;
 			vertex.normal = current;
 
 			// Tangents
@@ -343,6 +348,8 @@ namespace Nuake
 		dest.Name = src->mName.data;
 		dest.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
 		dest.ChildrenCount = src->mNumChildren;
+		dest.Id = bonesNameIDMap[dest.Name];
+		dest.Offset = m_BoneMap[dest.Name].Offset;
 
 		for (uint32_t i = 0; i < dest.ChildrenCount; i++)
 		{
@@ -358,6 +365,7 @@ namespace Nuake
 		SkeletonNode bone;
 		bone.Name = src->mName.C_Str();
 		bone.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
+		bone.Id = bonesNameIDMap[bone.Name];
 
 		des.ChildrenCount++;
 		des.Children.push_back(bone);

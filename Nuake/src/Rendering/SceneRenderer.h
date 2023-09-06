@@ -39,5 +39,7 @@ namespace Nuake
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);
 		void PostProcessPass(const Scene& scene);
+
+		void SetSkeletonBoneTransformRecursive(SkeletonNode& skeletonNode, Shader* shader);
 	};
 }

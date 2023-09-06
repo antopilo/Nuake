@@ -359,6 +359,8 @@ namespace Nuake
 			gBufferSkinnedMeshShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferSkinnedMeshShader->SetUniformMat4f("u_View", mView);
 
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
+
 			// Skinned Models
 			const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
 			const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
@@ -367,22 +369,19 @@ namespace Nuake
 			for (auto e : skinnedModelView)
 			{
 				auto [transform, mesh, visibility] = skinnedModelView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+				auto& meshResource = mesh.ModelResource;
 
-				if (mesh.ModelResource && visibility.Visible)
+				if (meshResource && visibility.Visible)
 				{
+					auto& rootBoneNode = meshResource->GetSkeletonRootNode();
+					
+					SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
+
 					for (auto& m : mesh.ModelResource->GetMeshes())
 					{
 						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
 						
-						uint32_t boneId = 0;
-						for (auto& b : m->GetBones())
-						{
-							const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(boneId) + "]";
-							gBufferSkinnedMeshShader->SetUniformMat4f(boneMatrixUniformName, b.Offset);
-							boneId++;
-						}
-
-						gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, transform.GetGlobalTransform());
+						gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
 						gBufferSkinnedMeshShader->SetUniform1i(entityIdUniformLocation, (uint32_t)e + 1);
 						m->Draw(gBufferSkinnedMeshShader, true);
 					}
@@ -452,4 +451,22 @@ namespace Nuake
 	void SceneRenderer::PostProcessPass(const Scene& scene)
 	{
 	}
+
+	void SceneRenderer::SetSkeletonBoneTransformRecursive(SkeletonNode& skeletonNode, Shader* shader)
+	{
+		auto scene = Engine::GetCurrentScene();
+		for (auto& child : skeletonNode.Children)
+		{
+			if (auto entity = scene->GetEntity(child.Name); entity.GetHandle() != -1)
+			{
+				const Matrix4& globalBoneTransform = entity.GetComponent<TransformComponent>().GetGlobalTransform();
+				const Matrix4 bonespaceTransform = globalBoneTransform * child.Offset;
+				const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(child.Id) + "]";
+				shader->SetUniformMat4f(boneMatrixUniformName, bonespaceTransform);
+			}
+
+			SetSkeletonBoneTransformRecursive(child, shader);
+		}
+	}
+
 }

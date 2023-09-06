@@ -33,6 +33,8 @@ namespace Nuake
 		std::string modelDir;
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::vector<Ref<SkinnedMesh>> m_SkinnedMeshes;
+		std::unordered_map<std::string, uint32_t> m_BoneIDMap;
+		std::unordered_map<std::string, Bone> m_BoneMap;
 
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		Ref<Mesh> ProcessMesh(aiMesh* node, const aiScene* scene);
@@ -52,27 +54,14 @@ namespace Nuake
 
 		static inline Matrix4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
 		{
-			Matrix4 result;
-			for (auto i = 0; i < 3; i++) 
-			{
-				for (auto j = 0; j < 3; j++) 
-				{
-					result[i][j] = from[i][j];
-				}
-			}
+			Matrix4 to;
 
-			// The rest would be zero, other than the 4,4.
-			result[0][3] = 0.0f;
-			result[1][3] = 0.0f;
-			result[2][3] = 0.0f;
+			to[0][0] = from.a1; to[0][1] = from.b1;  to[0][2] = from.c1; to[0][3] = from.d1;
+			to[1][0] = from.a2; to[1][1] = from.b2;  to[1][2] = from.c2; to[1][3] = from.d2;
+			to[2][0] = from.a3; to[2][1] = from.b3;  to[2][2] = from.c3; to[2][3] = from.d3;
+			to[3][0] = from.a4; to[3][1] = from.b4;  to[3][2] = from.c4; to[3][3] = from.d4;
 
-			result[3][0] = 0.0f;
-			result[3][1] = 0.0f;
-			result[3][2] = 0.0f;
-
-			result[3][3] = 1.0f;
-
-			return result;
+			return to;
 		}
 	};
 }
