@@ -102,6 +102,62 @@ public:
 
             ImGui::TableNextColumn();
             ComponentTableReset(component.ModelPath, "");
+
+            if (component.ModelResource)
+            {
+                auto& model = component.ModelResource;
+                ImGui::TableNextColumn();
+
+                {
+                    ImGui::Text("Playing");
+                    ImGui::TableNextColumn();
+
+                    ImGui::Checkbox("##playing", &model->IsPlaying);
+
+                    ImGui::TableNextColumn();
+                    ComponentTableReset(model->IsPlaying, true);
+                    ImGui::TableNextColumn();
+                }
+                
+                {
+                    ImGui::Text("Type");
+                    ImGui::TableNextColumn();
+
+                    uint32_t animIndex = model->GetCurrentAnimationIndex();
+                    uint32_t oldAnimIndex = animIndex;
+                    auto& animations = model->GetAnimations();
+                    if (ImGui::BeginCombo("Type", model->GetCurrentAnimation()->GetName().c_str()))
+                    {
+                        for (int n = 0; n < model->GetAnimationsCount(); n++)
+                        {
+                            bool is_selected = (animIndex == n);
+                            if (ImGui::Selectable(animations[n]->GetName().c_str(), is_selected))
+                            {
+                                animIndex = n;
+                            }
+
+                            if (is_selected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
+
+                    if (animIndex != oldAnimIndex)
+                    {
+                        model->PlayAnimation(animIndex);
+                    }
+
+                    ImGui::TableNextColumn();
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetAnimId";
+                    if (ImGui::Button(resetLabel.c_str()))
+                    {
+                        model->PlayAnimation(0);
+                    }
+                    ImGui::PopStyleColor();
+                }
+            }
+           
         }
         EndComponentTable();
     }

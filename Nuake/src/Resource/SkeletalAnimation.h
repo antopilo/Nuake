@@ -123,6 +123,7 @@ namespace Nuake
 		float GetTicksPerSecond() const { return m_TicksPerSecond; }
 		void SetTicksPerSecond(float ticks) { m_TicksPerSecond = ticks; }
 
+		const std::string& GetName() const { return m_Name; }
 		BoneTransformTrack& GetTrack(const std::string& name);
 		std::unordered_map<std::string, BoneTransformTrack>& GetTracks() { return m_Tracks; }
 	};

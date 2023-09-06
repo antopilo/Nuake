@@ -20,6 +20,8 @@ namespace Nuake
 		std::vector<Ref<SkeletalAnimation>> m_Animations;
 
 	public:
+		bool IsPlaying = true;
+
 		SkinnedModel();
 		SkinnedModel(const std::string path);
 		~SkinnedModel();
@@ -33,10 +35,14 @@ namespace Nuake
 		void AddMesh(Ref<SkinnedMesh> mesh);
 		std::vector<Ref<SkinnedMesh>>& GetMeshes();
 
+		std::vector<Ref<SkeletalAnimation>> GetAnimations() const { return m_Animations; }
 		void SetAnimations(const std::vector<Ref<SkeletalAnimation>> animations);
 		void AddAnimation(Ref<SkeletalAnimation> animation);
+
 		Ref<SkeletalAnimation> GetCurrentAnimation();
 		void PlayAnimation(uint32_t animationId);
+		uint32_t GetCurrentAnimationIndex() const { return m_CurrentAnimation; }
+		uint32_t GetAnimationsCount() const { return m_NumAnimation; }
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
