@@ -362,7 +362,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		// Translation
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
-		particleTransform = glm::scale(particleTransform, Vector3(0.25, 0.25, 0.25));
+		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 	}
