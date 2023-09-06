@@ -24,6 +24,7 @@
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/InterfaceComponent.h"
+#include "src/Scene/Components/SkinnedModelComponent.h"
 
 #include <fstream>
 #include <future>
@@ -447,5 +448,32 @@ namespace Nuake
 		}
 
 		return true;
+	}
+
+	void Scene::CreateSkeleton(Entity& entity)
+	{
+		// We cannot create a component if the entity doesn't have a skinned model
+		if (!entity.HasComponent<SkinnedModelComponent>())
+		{
+			const std::string msg = "Cannot create a skeleton on entity: " + std::to_string(entity.GetID());
+			Logger::Log(msg);
+			return;
+		}
+
+		SkinnedModelComponent& component = entity.GetComponent<SkinnedModelComponent>();
+		for (Ref<SkinnedMesh>& model : component.ModelResource->GetMeshes())
+		{
+			auto& bones = model->GetBones();
+			if (bones.size() > 0)
+			{
+				for (auto& bone : bones)
+				{
+					auto& parentComponent = entity.GetComponent<ParentComponent>();
+
+					Entity boneEntity = CreateEntity(bone.Name);
+					entity.AddChild(boneEntity);
+				}
+			}
+		}
 	}
 }

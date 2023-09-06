@@ -89,5 +89,8 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
+
+		// Component specific utilies
+		void CreateSkeleton(Entity& entity);
 	};
 }

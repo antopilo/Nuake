@@ -12,8 +12,9 @@
 class SkinnedModelPanel : ComponentPanel
 {
 private:
-    Scope<ModelResourceInspector> _modelInspector;
-    bool _expanded = false;
+    Scope<ModelResourceInspector> m_ModelInspector;
+    bool m_Expanded = false;
+    std::string m_QueuedModelPath;
 
 public:
     SkinnedModelPanel()
@@ -45,9 +46,9 @@ public:
             {
             }
 
-            if (_expanded)
+            if (m_Expanded)
             {
-                _modelInspector->Draw();
+                m_ModelInspector->Draw();
             }
 
             if (ImGui::BeginDragDropTarget())
@@ -64,11 +65,39 @@ public:
                     }
                     else
                     {
-                        component.ModelPath = fullPath;
-                        component.LoadModel();
+                        m_QueuedModelPath = fullPath;
+                        ImGui::OpenPopup("Create Skeleton");
                     }
                 }
                 ImGui::EndDragDropTarget();
+            }
+
+            if (ImGui::BeginPopupModal("Create Skeleton", NULL, ImGuiWindowFlags_AlwaysAutoResize)) 
+            {
+                ImGui::SetItemDefaultFocus();
+                ImGui::Text("Would you like to create the skeleton structure in the scene tree?");
+                ImGui::Separator();
+
+                if (ImGui::Button("OK", ImVec2(120, 0))) 
+                { 
+                    component.ModelPath = m_QueuedModelPath;
+                    component.LoadModel();
+
+                    Scene* scene = entity.GetScene();
+                    scene->CreateSkeleton(entity);
+
+                    ImGui::CloseCurrentPopup(); 
+                }
+
+                ImGui::SetItemDefaultFocus();
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) 
+                { 
+                    ImGui::CloseCurrentPopup(); 
+                }
+
+                ImGui::EndPopup();
             }
 
             ImGui::TableNextColumn();
