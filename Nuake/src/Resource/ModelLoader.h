@@ -7,6 +7,7 @@
 #include "src/Rendering/Textures/Texture.h"
 
 #include "src/Rendering/Vertex.h"
+#include "src/Resource/SkeletonNode.h"
 
 #include "assimp/Importer.hpp"
 #include <assimp/scene.h>
@@ -46,6 +47,7 @@ namespace Nuake
 		Ref<SkinnedMesh> ProcessSkinnedMesh(aiMesh* node, const aiScene* scene);
 		std::vector<SkinnedVertex> ProcessSkinnedVertices(aiMesh* mesh);
 		void SetVertexBoneData(SkinnedVertex& vertex, int boneId, float weight);
+		void ProcessAnimationNode(SkeletonNode& dest, const aiNode* src);
 
 		static inline Matrix4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
 		{

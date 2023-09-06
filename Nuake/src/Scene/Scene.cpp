@@ -31,6 +31,7 @@
 #include <streambuf>
 #include <chrono>
 #include "src/Core/OS.h"
+#include "Components/BoneComponent.h"
 
 namespace Nuake 
 {
@@ -213,7 +214,7 @@ namespace Nuake
 	std::string Scene::GetUniqueEntityName(const std::string& name)
 	{
 		std::string entityName;
-		if (GetEntity(name) == Entity())
+		if (!EntityExists(name))
 		{
 			return name;
 		}
@@ -287,6 +288,11 @@ namespace Nuake
 
 		entity.Destroy();
 		m_Registry.shrink_to_fit();
+	}
+
+	bool Scene::EntityExists(const std::string& name)
+	{
+		return GetEntity(name).GetHandle() != -1;
 	}
 
 	Ref<Camera> Scene::GetCurrentCamera()
@@ -463,17 +469,31 @@ namespace Nuake
 		SkinnedModelComponent& component = entity.GetComponent<SkinnedModelComponent>();
 		for (Ref<SkinnedMesh>& model : component.ModelResource->GetMeshes())
 		{
-			auto& bones = model->GetBones();
-			if (bones.size() > 0)
+			for (auto& bone : model->GetBones())
 			{
-				for (auto& bone : bones)
-				{
-					auto& parentComponent = entity.GetComponent<ParentComponent>();
+				auto& parentComponent = entity.GetComponent<ParentComponent>();
 
+				Logger::Log("bone found:" + bone.Name, "debug", VERBOSE);
+				if (EntityExists(bone.Name) == false)
+				{
 					Entity boneEntity = CreateEntity(bone.Name);
+					boneEntity.AddComponent<BoneComponent>();
+
+					Vector3 position;
+					Quat rotation;
+					Vector3 scale;
+					Decompose(bone.Offset, position, rotation, scale);
+
+					auto& transformComponent = entity.GetComponent<TransformComponent>();
+					transformComponent.SetLocalPosition(position);
+					transformComponent.SetLocalRotation(rotation);
+					transformComponent.SetLocalScale(scale);
+					transformComponent.SetLocalTransform(bone.Offset);
+
 					entity.AddChild(boneEntity);
 				}
 			}
 		}
 	}
+
 }

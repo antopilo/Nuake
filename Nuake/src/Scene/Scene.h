@@ -65,6 +65,7 @@ namespace Nuake
 		Entity CreateEntity(const std::string& name);
 		Entity CreateEntity(const std::string& name, int id);
 		void DestroyEntity(Entity entity);		
+		bool EntityExists(const std::string& name);
 
 		std::vector<Entity> GetAllEntities();
 		Entity GetEntity(const std::string& name);

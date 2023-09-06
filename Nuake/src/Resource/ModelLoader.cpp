@@ -7,7 +7,7 @@
 
 #include "src/Resource/SkinnedModel.h"
 #include "src/Resource/Model.h"
-
+#include "src/Resource/SkeletalAnimation.h"
 
 namespace Nuake
 {
@@ -70,13 +70,31 @@ namespace Nuake
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			std::string assimpErrorMsg = std::string(importer.GetErrorString());
-			std::string logMsg = "[Failed to load model] - " + assimpErrorMsg;
+			std::string logMsg = "Failed to load model: " + assimpErrorMsg;
 			Logger::Log(logMsg, "model", WARNING);
 
 			return model;
 		}
 
 		ProcessSkinnedNode(scene->mRootNode, scene);
+
+		if (scene->HasAnimations())
+		{
+			SkeletalAnimation animation;
+
+			for (uint32_t i = 0; i < scene->mNumAnimations; i++)
+			{
+				aiAnimation* aiAnim = scene->mAnimations[i];
+				const float duration = aiAnim->mDuration;
+				const float ticksPerSecond = aiAnim->mTicksPerSecond;
+
+				// Read data
+				SkeletonNode rootSkeletonNode;
+				ProcessAnimationNode(rootSkeletonNode, scene->mRootNode);
+
+				model->SetSkeletonRootNode(rootSkeletonNode);
+			}
+		}
 
 		for (const auto& mesh : m_SkinnedMeshes)
 		{
@@ -177,7 +195,6 @@ namespace Nuake
 		Ref<SkinnedMesh> mesh = CreateRef<SkinnedMesh>();
 		mesh->AddSurface(vertices, indices, bones);
 		mesh->SetMaterial(material);
-
 		return mesh;
 	}
 
@@ -317,6 +334,22 @@ namespace Nuake
 				vertex.boneIDs[i] = boneID;
 				break;
 			}
+		}
+	}
+
+	void ModelLoader::ProcessAnimationNode(SkeletonNode& dest, const aiNode* src)
+	{
+		assert(src);
+
+		dest.Name = src->mName.data;
+		dest.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
+		dest.ChildrenCount = src->mNumChildren;
+
+		for (uint32_t i = 0; i < dest.ChildrenCount; i++)
+		{
+			SkeletonNode newNode;
+			ProcessAnimationNode(newNode, src->mChildren[i]);
+			dest.Children.push_back(std::move(newNode));
 		}
 	}
 

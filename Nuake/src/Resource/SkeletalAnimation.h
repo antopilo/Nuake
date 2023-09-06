@@ -3,16 +3,25 @@
 
 namespace Nuake
 {
-	class Animation
+	struct SkeletonAnimationBoneAnimation
+	{
+		std::string Name;
+		Vector3 Positions;
+		Quat Rotations;
+		Vector3 Scalings;
+	};
+
+	class SkeletalAnimation
 	{
 	private:
 		float m_Duration;
 		int m_TicksPerSecond;
+
 		std::vector<Bone> m_Bones;
-		//std::map<std::string, BoneInfo> m_BoneInfoMap;
+
 	public:
-		Animation() = default;
-		Animation();
+		SkeletalAnimation() = default;
+		~SkeletalAnimation() = default;
 
 		Bone& FindBone(const std::string& boneName);
 
