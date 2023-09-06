@@ -228,7 +228,7 @@ namespace Nuake
                 {
                     dragType = "_Map";
                 }
-                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx")
+                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
                 {
                     dragType = "_Model";
                 }

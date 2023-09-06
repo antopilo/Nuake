@@ -41,5 +41,5 @@ void main()
     vec3 diffuse  = diff * lightDiffuse;
     scolor = scolor * diffuse;
 
-    FragColor = vec4(scolor, 1.0);
+    FragColor = vec4(u_Color.rgb, 1.0);
 }

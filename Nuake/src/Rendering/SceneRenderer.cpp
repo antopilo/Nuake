@@ -117,8 +117,6 @@ namespace Nuake
 
 		finalOutput = framebuffer.GetTexture();
 
-
-
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
 		mToneMapBuffer->Bind();
@@ -170,7 +168,9 @@ namespace Nuake
 		{
 			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
 			if (light.Type != LightType::Directional || !light.CastShadows || !visibility.Visible)
+			{
 				continue;
+			}
 
 			light.CalculateViewProjection(mView, mProjection);
 

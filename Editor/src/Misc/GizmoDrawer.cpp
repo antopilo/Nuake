@@ -9,6 +9,7 @@
 
 #include <src/Resource/ModelLoader.h>
 #include <src/Rendering/RenderList.h>
+#include <src/Rendering/Renderer.h>
 
 #include <dependencies/GLEW/include/GL/glew.h>
 
@@ -17,7 +18,7 @@
 #include <src/Scene/Components/MeshCollider.h>
 #include <src/Scene/Components/ModelComponent.h>
 #include <src/Scene/Components/ParticleEmitterComponent.h>
-
+#include <src/Scene/Components/BoneComponent.h>
 
 GizmoDrawer::GizmoDrawer()
 {
@@ -275,44 +276,99 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	glLineWidth(1.0f);
 	RenderList renderList;
 
+	auto gizmoShader = ShaderManager::GetShader("resources/Shaders/gizmo.shader");
+	gizmoShader->Bind();
+	gizmoShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
+	gizmoShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+	RenderCommand::Disable(RendererEnum::FACE_CULL);
+
 	// Camera
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
-		auto [transform, cam] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/camera.png").get());
+		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
-		renderList.AddToRenderList(_gizmos["cam"]->GetMeshes()[0], transform.GetGlobalTransform());
+		auto initialTransform = transform.GetGlobalTransform();
+		Matrix4 particleTransform = initialTransform;
+		particleTransform = glm::inverse(scene->m_EditorCamera->GetTransform());
+
+		// Translation
+		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
+		particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 	}
-	renderList.Flush(flatShader, true);
+	renderList.Flush(gizmoShader, true);
 
 	// Lights
 	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/light.png").get());
 		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
 
-		flatShader->SetUniformVec4("u_Color", Vector4(light.Color, 1.0f));
-		renderList.AddToRenderList(_gizmos["light"]->GetMeshes()[0], transform.GetGlobalTransform());
-		renderList.Flush(flatShader, true);
-	}
-	renderList.Flush(flatShader, true);
+		auto initialTransform = transform.GetGlobalTransform();
+		Matrix4 particleTransform = initialTransform;
+		particleTransform = glm::inverse(scene->m_EditorCamera->GetTransform());
 
+		// Translation
+		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
+		particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+	}
+
+	renderList.Flush(gizmoShader, true);
 
 	// Player
 	auto characterControllerView = scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 	for (auto e : characterControllerView)
 	{
-		auto [transformComponent, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/player.png").get());
+		auto [transform, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
 
-		flatShader->SetUniformVec4("u_Color", Vector4(0.0f, 1.0f, 0.4f, 1.0f));
+		auto initialTransform = transform.GetGlobalTransform();
+		Matrix4 particleTransform = initialTransform;
+		particleTransform = glm::inverse(scene->m_EditorCamera->GetTransform());
 
-		const auto scaledTransform = glm::scale(transformComponent.GetGlobalTransform(), Vector3(0.25f, 0.25f, 0.25f));
-		renderList.AddToRenderList(_gizmos["player"]->GetMeshes()[0], scaledTransform);
-		renderList.Flush(flatShader, true);
+		// Translation
+		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
+		particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 	}
 
-	renderList.Flush(flatShader, true);
+	renderList.Flush(gizmoShader, true);
 
-	RenderCommand::Disable(RendererEnum::FACE_CULL);
+	// Bones
+	auto boneView = scene->m_Registry.view<TransformComponent, BoneComponent>();
+	for (auto e : boneView)
+	{
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/bone.png").get());
+		auto [transform, boneComponent] = scene->m_Registry.get<TransformComponent, BoneComponent>(e);
+
+		auto initialTransform = transform.GetGlobalTransform();
+		Matrix4 particleTransform = initialTransform;
+		particleTransform = glm::inverse(scene->m_EditorCamera->GetTransform());
+
+		// Translation
+		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
+		particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+		particleTransform = glm::scale(particleTransform, Vector3(0.25, 0.25, 0.25));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+	}
+
+	renderList.Flush(gizmoShader, true);
+	
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 }

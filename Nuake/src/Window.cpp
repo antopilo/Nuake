@@ -67,7 +67,7 @@ namespace Nuake
         SetWindowIcon("resources/Images/nuake-logo.png");
 
         glfwMakeContextCurrent(m_Window);
-        SetVSync(true);
+        SetVSync(false);
 
         Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
 
@@ -267,7 +267,6 @@ namespace Nuake
 
         ImGuiStyle& s = ImGui::GetStyle();
         s.WindowMenuButtonPosition = ImGuiDir_None;
-        s.FrameRounding = 2.0f;
         s.GrabRounding = 2.0f;
         s.CellPadding = ImVec2(8, 8);
         s.WindowPadding = ImVec2(2, 2);
@@ -277,7 +276,7 @@ namespace Nuake
         s.TabRounding = 0;
         s.WindowRounding = 0;
         s.ChildRounding = 0;
-        s.FrameRounding = 0;
+        s.FrameRounding = 4.0f;
         s.GrabRounding = 0;
         s.FramePadding = ImVec2(8, 4);
         s.ItemSpacing = ImVec2(8, 4);
@@ -287,6 +286,7 @@ namespace Nuake
         s.IndentSpacing = 12.0f;
         s.ChildBorderSize = 0.0f;
         s.PopupRounding = 4.0f;
+        s.FrameBorderSize = 1.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
