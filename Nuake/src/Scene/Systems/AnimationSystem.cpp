@@ -67,6 +67,7 @@ namespace Nuake
 			transformComponent.SetLocalRotation(localRotation);
 			transformComponent.SetLocalScale(localScale);
 			transformComponent.SetLocalTransform(finalTransform);
+			transformComponent.Dirty = false;
 		}
 
 		for (auto& childBone : bone.Children)
