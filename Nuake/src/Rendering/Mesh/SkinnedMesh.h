@@ -26,7 +26,6 @@ namespace Nuake
 		void AddSurface(std::vector<SkinnedVertex> vertices, std::vector<uint32_t> indices, std::vector<Bone> bones);
 		std::vector<SkinnedVertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();
-		std::vector<Bone>& GetBones();
 
 		Ref<Material> GetMaterial() inline const;
 		void SetMaterial(Ref<Material> material);
@@ -40,12 +39,7 @@ namespace Nuake
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 
-		void SetSkeletalAnimation(Ref<SkeletalAnimation> animation);
-		Ref<SkeletalAnimation> GetSkeletalAnimation() const { return m_SkeletalAnimation; }
-
 	private:
-		Ref<SkeletalAnimation> m_SkeletalAnimation;
-
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<SkinnedVertex> m_Vertices;

@@ -119,8 +119,9 @@ public:
                     ImGui::TableNextColumn();
                 }
                 
+                if(model->GetCurrentAnimation())
                 {
-                    ImGui::Text("Type");
+                    ImGui::Text("Animation");
                     ImGui::TableNextColumn();
 
                     uint32_t animIndex = model->GetCurrentAnimationIndex();
@@ -131,7 +132,14 @@ public:
                         for (int n = 0; n < model->GetAnimationsCount(); n++)
                         {
                             bool is_selected = (animIndex == n);
-                            if (ImGui::Selectable(animations[n]->GetName().c_str(), is_selected))
+                            std::string animName = animations[n]->GetName();
+
+                            if (animName.empty())
+                            {
+                                animName = "Empty";
+                            }
+
+                            if (ImGui::Selectable(animName.c_str(), is_selected))
                             {
                                 animIndex = n;
                             }

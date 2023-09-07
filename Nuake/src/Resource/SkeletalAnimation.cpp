@@ -82,6 +82,47 @@ namespace Nuake
 		return glm::scale(glm::mat4(1.0f), finalScale);
 	}
 
+	json BoneTransformTrack::Serialize()
+	{
+		BEGIN_SERIALIZE();
+		for (uint32_t i = 0; i < m_PositionTimestamps.size(); i++)
+		{
+			j["m_PositionTimestamps"][i] = m_PositionTimestamps[i];
+		}
+
+		for (uint32_t i = 0; i < m_Positions.size(); i++)
+		{
+			j["m_Positions"][i] = SERIALIZE_VEC3(m_Positions[i]);
+		}
+
+		for (uint32_t i = 0; i < m_RotationTimestamps.size(); i++)
+		{
+			j["m_RotationTimestamps"][i] = m_RotationTimestamps[i];
+		}
+
+		for (uint32_t i = 0; i < m_Rotations.size(); i++)
+		{
+			j["m_Rotations"][i] = SERIALIZE_VEC4(m_Rotations[i]);
+		}
+
+		for (uint32_t i = 0; i < m_ScaleTimestamps.size(); i++)
+		{
+			j["m_ScaleTimestamps"][i] = m_ScaleTimestamps[i];
+		}
+
+		for (uint32_t i = 0; i < m_Scales.size(); i++)
+		{
+			j["m_Scales"][i] = SERIALIZE_VEC3(m_Scales[i]);
+		}
+		
+		END_SERIALIZE();
+	}
+
+	bool BoneTransformTrack::Deserialize(const json& j)
+	{
+		return true;
+	}
+
 	SkeletalAnimation::SkeletalAnimation(const std::string& name, float duration, float ticksPerSecond)
 	{
 		m_Name = name;
@@ -101,4 +142,39 @@ namespace Nuake
 		m_Tracks[name] = BoneTransformTrack();
 		return m_Tracks[name];
 	}
+
+	json SkeletalAnimation::Serialize()
+	{
+		BEGIN_SERIALIZE();
+		SERIALIZE_VAL(m_Name);
+		SERIALIZE_VAL(m_Duration);
+		SERIALIZE_VAL(m_TicksPerSecond);
+		SERIALIZE_VAL(m_CurrentTime);
+		SERIALIZE_VAL(m_Loop);
+
+		for (auto& t : m_Tracks)
+		{
+			j["Tracks"][t.first] = t.second.Serialize();
+		}
+
+		return json();
+	}
+
+	bool SkeletalAnimation::Deserialize(const json& j)
+	{
+		m_Name = j["m_Name"];
+		m_Duration = j["m_Duration"];
+		m_TicksPerSecond = j["m_TicksPerSecond"];
+		m_CurrentTime = j["m_CurrentTime"];
+		m_Loop = j["m_Loop"];
+
+		for (auto& [trackName, trackData]: j["Tracks"].items())
+		{
+			BoneTransformTrack track;
+			track.Deserialize(j["Tracks"][trackName]);
+			m_Tracks[trackName] = std::move(track);
+		}
+		return true;
+	}
+
 }

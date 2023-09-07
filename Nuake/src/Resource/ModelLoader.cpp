@@ -67,7 +67,8 @@ namespace Nuake
 			aiProcess_Triangulate |
 			aiProcess_GenSmoothNormals |
 			aiProcess_FixInfacingNormals |
-			aiProcess_CalcTangentSpace;
+			aiProcess_CalcTangentSpace | 
+			aiProcess_OptimizeGraph;
 
 		modelDir = absolute ? path + "/../" : FileSystem::Root + path + "/../";
 		const std::string filePath = absolute ? path : FileSystem::Root + path;

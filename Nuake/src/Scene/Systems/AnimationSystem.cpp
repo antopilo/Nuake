@@ -30,11 +30,14 @@ namespace Nuake
 			}
 
 			Ref<SkeletalAnimation> animation = model->GetCurrentAnimation();
-			float newAnimationTime = animation->GetCurrentTime() + (ts * animation->GetTicksPerSecond());
-			animation->SetCurrentTime(newAnimationTime);
+			if (animation && model->IsPlaying)
+			{
+				float newAnimationTime = animation->GetCurrentTime() + (ts * animation->GetTicksPerSecond());
+				animation->SetCurrentTime(newAnimationTime);
 
-			auto& rootBone = model->GetSkeletonRootNode();
-			UpdateBonePositionTraversal(rootBone, animation, animation->GetCurrentTime());
+				auto& rootBone = model->GetSkeletonRootNode();
+				UpdateBonePositionTraversal(rootBone, animation, animation->GetCurrentTime());
+			}
 		}
 	}
 

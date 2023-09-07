@@ -2,6 +2,9 @@
 #include "src/Core/Core.h"
 #include <src/Rendering/Mesh/Bone.h>
 
+#include "src/Resource/Serializable.h"
+#include "src/Resource/Resource.h"
+
 namespace Nuake
 {
 	struct SkeletonAnimationBoneAnimation
@@ -94,9 +97,12 @@ namespace Nuake
 		Matrix4 InterpolatePosition(float time);
 		Matrix4 InterpolateRotation(float time);
 		Matrix4 InterpolateScale(float time);
+
+		json Serialize();
+		bool Deserialize(const json& j);
 	};
 
-	class SkeletalAnimation
+	class SkeletalAnimation : public Resource, ISerializable
 	{
 	private:
 		std::unordered_map<std::string, BoneTransformTrack> m_Tracks;
@@ -104,7 +110,7 @@ namespace Nuake
 		float m_Duration;
 		float m_TicksPerSecond;
 		std::string m_Name;
-		bool m_Loop;
+		bool m_Loop = false;
 
 	public:
 		SkeletalAnimation() = default;
@@ -114,7 +120,14 @@ namespace Nuake
 
 		void SetCurrentTime(float time) 
 		{
-			m_CurrentTime = fmod(time, m_Duration);
+			if (m_Loop)
+			{
+				m_CurrentTime = fmod(time, m_Duration);
+			}
+			else
+			{
+				m_CurrentTime = time;
+			}
 		}
 
 		float GetCurrentTime() const { return m_CurrentTime; }
@@ -126,5 +139,8 @@ namespace Nuake
 		const std::string& GetName() const { return m_Name; }
 		BoneTransformTrack& GetTrack(const std::string& name);
 		std::unordered_map<std::string, BoneTransformTrack>& GetTracks() { return m_Tracks; }
+
+		json Serialize() override;
+		bool Deserialize(const json& j) override;
 	};
 }

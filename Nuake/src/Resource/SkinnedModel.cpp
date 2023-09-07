@@ -78,7 +78,19 @@ namespace Nuake
 			{
 				j["Meshes"][i] = m_Meshes[i]->Serialize();
 			}
+
+			j["m_CurrentAnimation"] = m_CurrentAnimation;
+			j["m_NumAnimation"] = m_NumAnimation;
+
+			uint32_t a = 0;
+			for (auto& animation : m_Animations)
+			{
+				j["m_Animations"][a] = animation->Serialize();
+			}
+
 		}
+
+		
 		END_SERIALIZE();
 	}
 
@@ -91,6 +103,10 @@ namespace Nuake
 			ModelLoader loader;
 			auto otherModel = loader.LoadSkinnedModel(j["Path"], false);
 			m_Meshes = otherModel->GetMeshes();
+			m_Animations = otherModel->GetAnimations();
+			m_SkeletonRoot = otherModel->GetSkeletonRootNode();
+			m_NumAnimation = m_Animations.size();
+			m_CurrentAnimation = 0;
 
 			this->Path = j["Path"];
 		}

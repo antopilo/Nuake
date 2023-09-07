@@ -145,6 +145,12 @@ namespace Nuake
             v["Bitangent"]["y"] = m_Vertices[i].bitangent.y;
             v["Bitangent"]["z"] = m_Vertices[i].bitangent.z;
 
+            for (uint32_t b = 0; b < MAX_BONE_INFLUENCE; b++)
+            {
+                v["Weight"][b] = m_Vertices[i].weights[b];
+                v["BoneIDs"][b] = m_Vertices[i].boneIDs[b];
+            }
+
             j["Vertices"][i] = v;
         }
 
@@ -177,10 +183,17 @@ namespace Nuake
                         vertex.uv = { 0.0, 0.0 };
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)
-                        DESERIALIZE_VEC3(v["Normal"], vertex.normal)
-                        DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
-                        DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
-                        vertices.push_back(vertex);
+                    DESERIALIZE_VEC3(v["Normal"], vertex.normal)
+                    DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
+                    DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+
+                    for (uint32_t i = 0; i < MAX_BONE_INFLUENCE; i++)
+                    {
+                        vertex.weights[i] = v["Weight"][i];
+                        vertex.boneIDs[i] = v["boneIDs"][i];
+                    }
+
+                    vertices.push_back(vertex);
                 }
             }
         );
@@ -189,10 +202,5 @@ namespace Nuake
 
         SetupMesh();
         return true;
-    }
-
-    void SkinnedMesh::SetSkeletalAnimation(Ref<SkeletalAnimation> skeletalAnimation)
-    {
-        m_SkeletalAnimation = skeletalAnimation;
     }
 }
