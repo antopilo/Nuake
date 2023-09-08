@@ -25,4 +25,6 @@ namespace Nuake
 	Quat QuatFromEuler(float x, float y, float z);
 	Vector3 QuatToDirection(const Quat& quat);
 	void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale);
+
+	const Matrix4& TransformToCameraTransform(const Matrix4& mat);
 }

@@ -279,10 +279,35 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
-		auto [transform, cam] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
+		auto& [transform, cam] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
 		renderList.AddToRenderList(_gizmos["cam"]->GetMeshes()[0], transform.GetGlobalTransform());
+
+		auto view = transform.GetGlobalTransform();
+		Frustum& frustum = cam.CameraInstance->GetFrustum();
+		auto& frustumCorners = frustum.GetPoints();
+
+		constexpr int frustumEdges[12][2] = {
+			{0, 1}, {1, 3}, {3, 2}, {2, 0}, // Near plane edges
+			{4, 5}, {5, 7}, {7, 6}, {6, 4}, // Far plane edges
+			{0, 4}, {1, 5}, {2, 6}, {3, 7}  // Connection lines
+		};
+
+		glBegin(GL_LINES);
+
+		for (int i = 0; i < 12; ++i) {
+			int startIdx = frustumEdges[i][0];
+			int endIdx = frustumEdges[i][1];
+			const Vector3& startCorner = view * Vector4(frustumCorners[startIdx], 1.0f);
+			const Vector3& endCorner = frustumCorners[endIdx];
+			glVertex3f(startCorner.x, startCorner.y, startCorner.z);
+			glVertex3f(endCorner.x, endCorner.y, endCorner.z);
+		}
+
+		glEnd();
+
 	}
+
 	renderList.Flush(flatShader, true);
 
 	// Lights

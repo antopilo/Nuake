@@ -64,10 +64,13 @@ namespace Nuake
         ImGui::PushFont(FontManager::GetFont(Icons));
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
         {
             m_CurrentDirectory = directory;
         }
+
+        ImGui::PopStyleVar();
 
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
@@ -669,11 +672,12 @@ namespace Nuake
 
                 bool child = ImGui::BeginChild("Content", avail);
                 ImGui::PopStyleVar();
+                ImGui::SameLine();
                 if (child)
                 {
                     int width = avail.x;
-                    ImVec2 buttonSize = ImVec2(80, 80);
-                    int amount = (int)(width / 100);
+                    ImVec2 buttonSize = ImVec2(110, 110);
+                    int amount = (int)(width / buttonSize.x);
                     if (amount <= 0) amount = 1;
 
                     int i = 1; // current amount of item per row.
@@ -683,7 +687,7 @@ namespace Nuake
                         if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
                         {
                             ImGui::TableNextColumn();
-                            if (ImGui::Button("..", ImVec2(100, 100)))
+                            if (ImGui::Button("..", buttonSize))
                                 m_CurrentDirectory = m_CurrentDirectory->Parent;
                             i++;
                         }
@@ -711,7 +715,7 @@ namespace Nuake
                             {
                                 if(m_SearchKeyword.empty() || f->GetName().find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
-                                    if (i - 1 % amount != 0 || i == 1)
+                                    if (i + 1 % amount != 0 || i == 1)
                                     {
                                         ImGui::TableNextColumn();
                                     }
