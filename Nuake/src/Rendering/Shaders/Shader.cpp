@@ -295,7 +295,7 @@ namespace Nuake
 
 		if (addr != -1)
 		{
-			SetUniformMat4f(addr, std::move(mat));
+			SetUniformMat4f(addr, mat);
 		}
 	}
 

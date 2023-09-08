@@ -3,6 +3,8 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
+#include <src/Scene/Components/BoneComponent.h>
+#include <future>
 
 namespace Nuake
 {
@@ -45,36 +47,39 @@ namespace Nuake
 	{
 		const std::string& boneName = bone.Name;
 		
+		auto& animationTrack = animation->GetTrack(boneName);
 
 		Entity& boneEntity = m_Scene->GetEntity(boneName);
 		if (boneEntity.GetHandle() != -1)
 		{
-			auto& animationTrack = animation->GetTrack(boneName);
 			auto& transformComponent = boneEntity.GetComponent<TransformComponent>();
+			bone.FinalTransform = transformComponent.GetGlobalTransform() * bone.Offset;
 
-			// Get Update transform
-			const Matrix4 newPosition = animationTrack.InterpolatePosition(time);
-			const Matrix4 newRotation = animationTrack.InterpolateRotation(time);
-			const Matrix4 newScale = animationTrack.InterpolateScale(time);
-			const Matrix4 finalTransform = newPosition * newRotation * newScale;
+			if (!animationTrack.IsEmpty())
+			{
+				// Get Update transform
+				animationTrack.Update(time);
 
-			Vector3 localPosition;
-			Quat localRotation;
-			Vector3 localScale;
-			Decompose(finalTransform, localPosition, localRotation, localScale);
+				const Matrix4& finalTransform = animationTrack.GetFinalTransform();
 
-			transformComponent.SetLocalPosition(localPosition);
-			transformComponent.SetLocalRotation(localRotation);
-			transformComponent.SetLocalScale(localScale);
-			transformComponent.SetLocalTransform(finalTransform);
-			transformComponent.Dirty = false;
+				Vector3 localPosition;
+				Quat localRotation;
+				Vector3 localScale;
+				Decompose(finalTransform, localPosition, localRotation, localScale);
+
+				transformComponent.SetLocalPosition(localPosition);
+				transformComponent.SetLocalRotation(localRotation);
+				transformComponent.SetLocalScale(localScale);
+				transformComponent.SetLocalTransform(finalTransform);
+				transformComponent.Dirty = false;
+			}
 		}
-
 		for (auto& childBone : bone.Children)
 		{
 			UpdateBonePositionTraversal(childBone, animation, time);
 		}
 	}
+
 
 	void AnimationSystem::FixedUpdate(Timestep ts)
 	{

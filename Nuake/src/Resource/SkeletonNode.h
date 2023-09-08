@@ -11,6 +11,7 @@ namespace Nuake
 		std::string Name;
 		int ChildrenCount;
 		std::vector<SkeletonNode> Children;
+		Matrix4 FinalTransform = Matrix4(1.0f);
 		int32_t Id = -1;
 	};
 }

@@ -194,14 +194,20 @@ namespace Nuake
 
 	Entity Scene::GetEntity(const std::string& name)
 	{
-		std::vector<Entity> allEntities;
-		const auto& view = m_Registry.view<NameComponent>();
+		if (m_EntitiesNameMap.find(name) != m_EntitiesNameMap.end())
+		{
+			return m_EntitiesNameMap[name];
+		}
+
+		const auto& view = m_Registry.view<const NameComponent>();
 		for (auto e : view) 
 		{
-			const auto& namec = view.get<NameComponent>(e);
+			const auto& [namec] = view.get(e);
 			if (namec.Name == name)
 			{
-				return Entity{ e, this };
+				auto entity = Entity{ e, this };
+				m_EntitiesNameMap[name] = entity;
+				return entity;
 			}
 		}
 
@@ -260,6 +266,7 @@ namespace Nuake
 		nameComponent.ID = id;
 
 		m_EntitiesIDMap[id] = entity;
+		m_EntitiesNameMap[entityName] = entity;
 
 		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
@@ -286,6 +293,11 @@ namespace Nuake
 		if (m_EntitiesIDMap.find(entity.GetComponent<NameComponent>().ID) != m_EntitiesIDMap.end())
 		{
 			m_EntitiesIDMap.erase(entity.GetComponent<NameComponent>().ID);
+		}
+
+		if (m_EntitiesNameMap.find(entity.GetComponent<NameComponent>().Name) != m_EntitiesNameMap.end())
+		{
+			m_EntitiesNameMap.erase(entity.GetComponent<NameComponent>().Name);
 		}
 
 		entity.Destroy();

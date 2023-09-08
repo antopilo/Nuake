@@ -26,24 +26,35 @@ namespace Nuake
 		std::vector<Quat> m_Rotations = {};
 		std::vector<Vector3> m_Scales = {};
 
+		Matrix4 m_PositionTransform;
+		Matrix4 m_RotationTransform;
+		Matrix4 m_ScaleTransform;
+		Matrix4 m_FinalTransform;
+
+		bool m_IsEmpty = true;
 	public:
 		BoneTransformTrack();
 		~BoneTransformTrack() = default;
 
+		bool IsEmpty() const { return m_IsEmpty; }
+
 		void PushPositionKeyframe(float timestamp, const Vector3& position)
 		{
+			m_IsEmpty = false;
 			m_PositionTimestamps.push_back(timestamp);
 			m_Positions.push_back(position);
 		}
 
 		void PushRotationKeyframe(float timestamp, const Quat& rotation)
 		{
+			m_IsEmpty = false;
 			m_RotationTimestamps.push_back(timestamp);
 			m_Rotations.push_back(rotation);
 		}
 
 		void PushScaleKeyframe(float timestamp, const Vector3& scale)
 		{
+			m_IsEmpty = false;
 			m_ScaleTimestamps.push_back(timestamp);
 			m_Scales.push_back(scale);
 		}
@@ -63,6 +74,27 @@ namespace Nuake
 				}
 			}
 			assert(0);
+		}
+
+		void Update(float time)
+		{
+			const Matrix4 previousPos = m_PositionTransform;
+			const Matrix4 previousRot = m_RotationTransform;
+			const Matrix4 previousSca = m_ScaleTransform;
+			m_PositionTransform = InterpolatePosition(time);
+			m_RotationTransform = InterpolateRotation(time);
+			m_ScaleTransform = InterpolateScale(time);
+
+			bool hasChanged = previousPos != m_PositionTransform || previousRot != m_RotationTransform || previousSca != m_ScaleTransform;
+			if (hasChanged)
+			{
+				m_FinalTransform = m_PositionTransform * m_RotationTransform * m_ScaleTransform;
+			}
+		}
+
+		const Matrix4& GetFinalTransform() const
+		{
+			return m_FinalTransform;
 		}
 
 		/* Gets the current index on mKeyRotations to interpolate to based on the
