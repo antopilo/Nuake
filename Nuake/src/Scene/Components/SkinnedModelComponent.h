@@ -24,7 +24,11 @@ namespace Nuake
         {
             BEGIN_SERIALIZE();
             SERIALIZE_VAL(ModelPath);
-            SERIALIZE_OBJECT(ModelResource);
+
+            if (ModelResource)
+            {
+                SERIALIZE_OBJECT(ModelResource);
+            }
             END_SERIALIZE();
         }
 

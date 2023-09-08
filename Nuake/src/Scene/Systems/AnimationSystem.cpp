@@ -50,12 +50,14 @@ namespace Nuake
 		auto& animationTrack = animation->GetTrack(boneName);
 
 		Entity& boneEntity = m_Scene->GetEntity(boneName);
-		if (boneEntity.GetHandle() != -1)
+		Entity& boneEnt = Entity{ (entt::entity)bone.EntityHandle, m_Scene };
+		///assert(boneEnt.GetHandle() == boneEntity.GetHandle());
+		if (boneEnt.GetHandle() != 0)
 		{
-			auto& transformComponent = boneEntity.GetComponent<TransformComponent>();
+			auto& transformComponent = boneEnt.GetComponent<TransformComponent>();
 			bone.FinalTransform = transformComponent.GetGlobalTransform() * bone.Offset;
 
-			if (!animationTrack.IsEmpty())
+			//if (!animationTrack.IsEmpty())
 			{
 				// Get Update transform
 				animationTrack.Update(time);
@@ -74,6 +76,7 @@ namespace Nuake
 				transformComponent.Dirty = false;
 			}
 		}
+		
 		for (auto& childBone : bone.Children)
 		{
 			UpdateBonePositionTraversal(childBone, animation, time);

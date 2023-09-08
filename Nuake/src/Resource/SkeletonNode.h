@@ -13,5 +13,6 @@ namespace Nuake
 		std::vector<SkeletonNode> Children;
 		Matrix4 FinalTransform = Matrix4(1.0f);
 		int32_t Id = -1;
+		int32_t EntityHandle = 0;
 	};
 }

@@ -484,8 +484,10 @@ namespace Nuake
 		auto& skeletonRoot = component.ModelResource->GetSkeletonRootNode();
 
 		Entity skeletonRootEntity = CreateEntity(skeletonRoot.Name);
-		skeletonRootEntity.AddComponent<BoneComponent>();
+		skeletonRootEntity.AddComponent<BoneComponent>().Name = skeletonRoot.Name;
+		skeletonRoot.EntityHandle = skeletonRootEntity.GetHandle();
 		entity.AddChild(skeletonRootEntity);
+
 
 		Vector3 bonePosition;
 		Quat boneRotation;
@@ -508,6 +510,8 @@ namespace Nuake
 			Entity boneEntity = CreateEntity(c.Name);
 			boneEntity.AddComponent<BoneComponent>();
 			entity.AddChild(boneEntity);
+
+			c.EntityHandle = boneEntity.GetHandle();
 
 			Vector3 bonePosition;
 			Quat boneRotation;
