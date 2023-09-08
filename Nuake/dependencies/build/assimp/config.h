@@ -547,6 +547,15 @@ enum aiComponent
 // Various stuff to fine-tune the behaviour of specific importer plugins.
 // ###########################################################################
 
+// ---------------------------------------------------------------------------
+/** @brief Importers which parse JSON may use this to obtain a pointer to a
+ * rapidjson::IRemoteSchemaDocumentProvider.
+ *
+ * The default value is nullptr
+ * Property type: void*
+ */
+#define AI_CONFIG_IMPORT_SCHEMA_DOCUMENT_PROVIDER \
+    "IMPORT_SCHEMA_DOCUMENT_PROVIDER"
 
 // ---------------------------------------------------------------------------
 /** @brief Set whether the fbx importer will merge all geometry layers present
@@ -681,6 +690,15 @@ enum aiComponent
  */
 #define AI_CONFIG_FBX_CONVERT_TO_M \
     "AI_CONFIG_FBX_CONVERT_TO_M"
+
+ // ---------------------------------------------------------------------------
+ /** @brief  Will enable the skeleton struct to store bone data.
+  *
+  *  This will decouple the bone coupling to the mesh. This feature is
+  *  experimental.
+  */
+#define AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER \
+    "AI_CONFIG_FBX_USE_SKELETON_BONE_CONTAINER"
 
 // ---------------------------------------------------------------------------
 /** @brief  Set the vertex animation keyframe to be imported
