@@ -11,6 +11,7 @@
 #include "src/Rendering/Buffers/VertexArray.h"
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 
+
 #include <future>
 
 namespace Nuake
@@ -19,7 +20,6 @@ namespace Nuake
     {
         m_Vertices = vertices;
         m_Indices = indices;
-        m_Bones = bones;
 
         SetupMesh();
         CalculateAABB();
@@ -38,11 +38,6 @@ namespace Nuake
     std::vector<uint32_t>& SkinnedMesh::GetIndices()
     {
         return m_Indices;
-    }
-
-    std::vector<Bone>& SkinnedMesh::GetBones()
-    {
-        return m_Bones;
     }
 
     Ref<Material> SkinnedMesh::GetMaterial() inline const
@@ -128,10 +123,6 @@ namespace Nuake
         j["Material"] = m_Material->Serialize();
         j["Indices"] = m_Indices;
 
-        for (uint32_t i = 0; i < m_Bones.size(); i++)
-        {
-            //j["Bones"][i] = m_Bones[i];
-        }
         json v;
         for (uint32_t i = 0; i < m_Vertices.size(); i++)
         {
@@ -153,6 +144,12 @@ namespace Nuake
             v["Bitangent"]["x"] = m_Vertices[i].bitangent.x;
             v["Bitangent"]["y"] = m_Vertices[i].bitangent.y;
             v["Bitangent"]["z"] = m_Vertices[i].bitangent.z;
+
+            for (uint32_t b = 0; b < MAX_BONE_INFLUENCE; b++)
+            {
+                v["Weight"][b] = m_Vertices[i].weights[b];
+                v["BoneIDs"][b] = m_Vertices[i].boneIDs[b];
+            }
 
             j["Vertices"][i] = v;
         }
@@ -186,10 +183,17 @@ namespace Nuake
                         vertex.uv = { 0.0, 0.0 };
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)
-                        DESERIALIZE_VEC3(v["Normal"], vertex.normal)
-                        DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
-                        DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
-                        vertices.push_back(vertex);
+                    DESERIALIZE_VEC3(v["Normal"], vertex.normal)
+                    DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
+                    DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+
+                    for (uint32_t i = 0; i < MAX_BONE_INFLUENCE; i++)
+                    {
+                        vertex.weights[i] = v["Weight"][i];
+                        vertex.boneIDs[i] = v["boneIDs"][i];
+                    }
+
+                    vertices.push_back(vertex);
                 }
             }
         );

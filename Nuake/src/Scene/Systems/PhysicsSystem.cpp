@@ -32,19 +32,6 @@ namespace Nuake
 		InitializeCharacterControllers();
 		InitializeQuakeMap();
 
-		// TODO: Triggers
-		
-		//auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		//for (auto e : bspTriggerView) 
-		//{
-		//	auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
-
-		//	Ref<Physics::MeshShape> meshShape = CreateRef<Physics::MeshShape>(brush.Meshes[0]);
-		//	Ref<GhostObject> ghostBody = CreateRef<GhostObject>(transform.GetGlobalPosition(), meshShape);
-		//	trigger.GhostObject = ghostBody;
-
-		//	PhysicsManager::Get()->RegisterGhostBody(ghostBody);
-		//}
 		Logger::Log("Physic system initialized successfully");
 		return true;
 	}
@@ -55,6 +42,10 @@ namespace Nuake
 		{
 			return;
 		}
+
+		ApplyForces();
+
+		PhysicsManager::Get().Step(ts);
 
 		auto brushes = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
 		for (auto e : brushes)
@@ -121,9 +112,7 @@ namespace Nuake
 			return;
 
 		InitializeRigidbodies();
-		ApplyForces();
-
-		PhysicsManager::Get().Step(ts);
+		
 	}
 
 	void PhysicsSystem::Exit()

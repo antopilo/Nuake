@@ -62,6 +62,7 @@ namespace Nuake
     void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
         ImGui::PushFont(FontManager::GetFont(Icons));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
@@ -69,9 +70,7 @@ namespace Nuake
         {
             m_CurrentDirectory = directory;
         }
-
         ImGui::PopStyleVar();
-
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
         {
@@ -191,6 +190,7 @@ namespace Nuake
     void FileSystemUI::DrawFile(Ref<File> file, uint32_t drawId)
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         std::string fileExtension = file->GetExtension();
         if (fileExtension == ".png" || fileExtension == ".jpg")
         {
@@ -215,7 +215,7 @@ namespace Nuake
                 Editor->Selection = EditorSelection(file);
             }
         }
-
+        ImGui::PopStyleVar();
         if (ImGui::BeginDragDropSource())
             {
                 char pathBuffer[256];
@@ -229,7 +229,7 @@ namespace Nuake
                 {
                     dragType = "_Map";
                 }
-                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx")
+                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
                 {
                     dragType = "_Model";
                 }
@@ -676,8 +676,8 @@ namespace Nuake
                 if (child)
                 {
                     int width = avail.x;
-                    ImVec2 buttonSize = ImVec2(110, 110);
-                    int amount = (int)(width / buttonSize.x);
+                    ImVec2 buttonSize = ImVec2(80, 80);
+                    int amount = (int)(width / 110);
                     if (amount <= 0) amount = 1;
 
                     int i = 1; // current amount of item per row.

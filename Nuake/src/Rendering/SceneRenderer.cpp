@@ -56,8 +56,15 @@ namespace Nuake
 
 		// SSAO
 		const auto& sceneEnv = scene.GetEnvironment();
-		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
-		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+		if (sceneEnv->SSAOEnabled)
+		{
+			sceneEnv->mSSAO->Resize(framebuffer.GetSize());
+			sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+		}
+		else
+		{
+			sceneEnv->mSSAO->Clear();
+		}
 
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
@@ -69,7 +76,7 @@ namespace Nuake
 			sceneEnv->mBloom->Resize(framebuffer.GetSize());
 			sceneEnv->mBloom->Draw();
 
-			finalOutput = scene.GetEnvironment()->mBloom->GetOutput();
+			finalOutput = sceneEnv->mBloom->GetOutput();
 		}
 
 		const auto view = scene.m_Registry.view<LightComponent>();
@@ -81,7 +88,7 @@ namespace Nuake
 				lightList.push_back(lc);
 		}
 		
-		if (scene.GetEnvironment()->VolumetricEnabled)
+		if (sceneEnv->VolumetricEnabled)
 		{
 			sceneEnv->mVolumetric->Resize(framebuffer.GetSize());
 			sceneEnv->mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
@@ -117,8 +124,6 @@ namespace Nuake
 
 		finalOutput = framebuffer.GetTexture();
 
-
-
 		// Copy final output to target framebuffer
 		mToneMapBuffer->QueueResize(framebuffer.GetSize());
 		mToneMapBuffer->Bind();
@@ -134,20 +139,36 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
-		mSSR->Resize(framebuffer.GetSize());
-		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
-
-		framebuffer.Bind();
+		if (sceneEnv->SSREnabled)
 		{
-			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
-			shader->Bind();
+			mSSR->Resize(framebuffer.GetSize());
+			mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
-			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
-			Renderer::DrawQuad();
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
 		}
-		framebuffer.Unbind();
+		else
+		{
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+		}
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
@@ -170,7 +191,9 @@ namespace Nuake
 		{
 			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
 			if (light.Type != LightType::Directional || !light.CastShadows || !visibility.Visible)
+			{
 				continue;
+			}
 
 			light.CalculateViewProjection(mView, mProjection);
 
@@ -359,30 +382,28 @@ namespace Nuake
 			gBufferSkinnedMeshShader->SetUniformMat4f("u_Projection", mProjection);
 			gBufferSkinnedMeshShader->SetUniformMat4f("u_View", mView);
 
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
+
 			// Skinned Models
 			const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
 			const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
-
+			gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
 			auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
 			for (auto e : skinnedModelView)
 			{
 				auto [transform, mesh, visibility] = skinnedModelView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+				auto& meshResource = mesh.ModelResource;
 
-				if (mesh.ModelResource && visibility.Visible)
+				if (meshResource && visibility.Visible)
 				{
+					auto& rootBoneNode = meshResource->GetSkeletonRootNode();
+					
+					SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
+
 					for (auto& m : mesh.ModelResource->GetMeshes())
 					{
 						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
 						
-						uint32_t boneId = 0;
-						for (auto& b : m->GetBones())
-						{
-							const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(boneId) + "]";
-							gBufferSkinnedMeshShader->SetUniformMat4f(boneMatrixUniformName, b.Offset);
-							boneId++;
-						}
-
-						gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, transform.GetGlobalTransform());
 						gBufferSkinnedMeshShader->SetUniform1i(entityIdUniformLocation, (uint32_t)e + 1);
 						m->Draw(gBufferSkinnedMeshShader, true);
 					}
@@ -452,4 +473,20 @@ namespace Nuake
 	void SceneRenderer::PostProcessPass(const Scene& scene)
 	{
 	}
+
+	void SceneRenderer::SetSkeletonBoneTransformRecursive(SkeletonNode& skeletonNode, Shader* shader)
+	{
+		auto scene = Engine::GetCurrentScene();
+		for (auto& child : skeletonNode.Children)
+		{
+			if (auto entity = scene->GetEntity(child.Name); entity.GetHandle() != -1)
+			{
+				const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(child.Id) + "]";
+				shader->SetUniformMat4f(boneMatrixUniformName, child.FinalTransform);
+			}
+
+			SetSkeletonBoneTransformRecursive(child, shader);
+		}
+	}
+
 }

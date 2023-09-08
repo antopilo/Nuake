@@ -42,6 +42,8 @@ namespace Nuake
 		bool SSAOEnabled = true;
 		Scope<SSAO> mSSAO;
 
+		bool SSREnabled = false;
+
 		Vector3 ClearColor;
 
 		glm::vec4 m_AmbientColor;

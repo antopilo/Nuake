@@ -4,6 +4,7 @@
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Systems/ParticleSystem.h"
+#include "src/Scene/Systems/AnimationSystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "Scene.h"
@@ -24,12 +25,14 @@
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/InterfaceComponent.h"
+#include "src/Scene/Components/SkinnedModelComponent.h"
 
 #include <fstream>
 #include <future>
 #include <streambuf>
 #include <chrono>
 #include "src/Core/OS.h"
+#include "Components/BoneComponent.h"
 
 namespace Nuake 
 {
@@ -47,6 +50,7 @@ namespace Nuake
 		// Adding systems - Order is important
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
+		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 
@@ -190,14 +194,20 @@ namespace Nuake
 
 	Entity Scene::GetEntity(const std::string& name)
 	{
-		std::vector<Entity> allEntities;
-		const auto& view = m_Registry.view<NameComponent>();
+		if (m_EntitiesNameMap.find(name) != m_EntitiesNameMap.end())
+		{
+			return m_EntitiesNameMap[name];
+		}
+
+		const auto& view = m_Registry.view<const NameComponent>();
 		for (auto e : view) 
 		{
-			const auto& namec = view.get<NameComponent>(e);
+			const auto& [namec] = view.get(e);
 			if (namec.Name == name)
 			{
-				return Entity{ e, this };
+				auto entity = Entity{ e, this };
+				m_EntitiesNameMap[name] = entity;
+				return entity;
 			}
 		}
 
@@ -212,7 +222,7 @@ namespace Nuake
 	std::string Scene::GetUniqueEntityName(const std::string& name)
 	{
 		std::string entityName;
-		if (GetEntity(name) == Entity())
+		if (!EntityExists(name))
 		{
 			return name;
 		}
@@ -256,6 +266,7 @@ namespace Nuake
 		nameComponent.ID = id;
 
 		m_EntitiesIDMap[id] = entity;
+		m_EntitiesNameMap[entityName] = entity;
 
 		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
@@ -284,8 +295,18 @@ namespace Nuake
 			m_EntitiesIDMap.erase(entity.GetComponent<NameComponent>().ID);
 		}
 
+		if (m_EntitiesNameMap.find(entity.GetComponent<NameComponent>().Name) != m_EntitiesNameMap.end())
+		{
+			m_EntitiesNameMap.erase(entity.GetComponent<NameComponent>().Name);
+		}
+
 		entity.Destroy();
 		m_Registry.shrink_to_fit();
+	}
+
+	bool Scene::EntityExists(const std::string& name)
+	{
+		return GetEntity(name).GetHandle() != -1;
 	}
 
 	Ref<Camera> Scene::GetCurrentCamera()
@@ -448,4 +469,64 @@ namespace Nuake
 
 		return true;
 	}
+
+	void Scene::CreateSkeleton(Entity& entity)
+	{
+		// We cannot create a component if the entity doesn't have a skinned model
+		if (!entity.HasComponent<SkinnedModelComponent>())
+		{
+			const std::string msg = "Cannot create a skeleton on entity: " + std::to_string(entity.GetID());
+			Logger::Log(msg);
+			return;
+		}
+
+		auto& component = entity.GetComponent<SkinnedModelComponent>();
+		auto& skeletonRoot = component.ModelResource->GetSkeletonRootNode();
+
+		Entity skeletonRootEntity = CreateEntity(skeletonRoot.Name);
+		skeletonRootEntity.AddComponent<BoneComponent>().Name = skeletonRoot.Name;
+		skeletonRoot.EntityHandle = skeletonRootEntity.GetHandle();
+		entity.AddChild(skeletonRootEntity);
+
+
+		Vector3 bonePosition;
+		Quat boneRotation;
+		Vector3 boneScale;
+		Decompose(skeletonRoot.Transform, bonePosition, boneRotation, boneScale);
+
+		auto& transformComponent = skeletonRootEntity.GetComponent<TransformComponent>();
+		transformComponent.SetLocalPosition(bonePosition);
+		transformComponent.SetLocalRotation(boneRotation);
+		transformComponent.SetLocalScale(boneScale);
+		transformComponent.SetLocalTransform(skeletonRoot.Transform);
+
+		CreateSkeletonTraverse(skeletonRootEntity, skeletonRoot);
+	}
+
+	void Scene::CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode)
+	{
+		for (auto& c : skeletonNode.Children)
+		{
+			Entity boneEntity = CreateEntity(c.Name);
+			boneEntity.AddComponent<BoneComponent>();
+			entity.AddChild(boneEntity);
+
+			c.EntityHandle = boneEntity.GetHandle();
+
+			Vector3 bonePosition;
+			Quat boneRotation;
+			Vector3 boneScale;
+			Decompose(c.Transform, bonePosition, boneRotation, boneScale);
+
+			auto& transformComponent = boneEntity.GetComponent<TransformComponent>();
+			transformComponent.SetLocalPosition(bonePosition);
+			transformComponent.SetLocalRotation(boneRotation);
+			transformComponent.SetLocalScale(boneScale);
+			transformComponent.SetLocalTransform(c.Transform);
+			transformComponent.Dirty = false;
+
+			CreateSkeletonTraverse(boneEntity, c);
+		}
+	}
+
 }

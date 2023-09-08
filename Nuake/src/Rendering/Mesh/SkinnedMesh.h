@@ -3,6 +3,7 @@
 #include "src/Rendering/AABB.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
+#include "src/Resource/SkeletalAnimation.h"
 
 #include "src/Rendering/Vertex.h"
 #include "src/Rendering/Mesh/Bone.h"
@@ -25,7 +26,6 @@ namespace Nuake
 		void AddSurface(std::vector<SkinnedVertex> vertices, std::vector<uint32_t> indices, std::vector<Bone> bones);
 		std::vector<SkinnedVertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();
-		std::vector<Bone>& GetBones();
 
 		Ref<Material> GetMaterial() inline const;
 		void SetMaterial(Ref<Material> material);
@@ -43,7 +43,6 @@ namespace Nuake
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<SkinnedVertex> m_Vertices;
-		std::vector<Bone> m_Bones;
 
 		Scope<VertexBuffer> m_VertexBuffer;
 		Scope<VertexArray> m_VertexArray;

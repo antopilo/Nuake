@@ -61,5 +61,8 @@ namespace Nuake
 
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
 		bool ShouldDrawCollision() const { return m_DebugCollisions; }
+
+	private:
+		std::string GetEntityTypeName(const Entity& entity) const;
 	};
 }

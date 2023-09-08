@@ -18,7 +18,7 @@ namespace Nuake
 		void AddChild(Entity ent);
 
 		int GetHandle() const { return (int)m_EntityHandle; }
-		int GetID() { return GetComponent<NameComponent>().ID; }
+		int GetID() const { return GetComponent<NameComponent>().ID; }
 
 		template<typename T>
 		bool HasComponent() const
@@ -48,6 +48,13 @@ namespace Nuake
 		T& GetComponent() 
 		{
 			T& component = m_Scene->m_Registry.get<T>(m_EntityHandle);
+			return component;
+		}
+
+		template<typename T>
+		T GetComponent() const
+		{
+			T component = m_Scene->m_Registry.get<T>(m_EntityHandle);
 			return component;
 		}
 

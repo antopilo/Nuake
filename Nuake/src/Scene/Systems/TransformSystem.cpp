@@ -78,20 +78,33 @@ namespace Nuake
 			Quat globalOrientation = transform.GetLocalRotation();
 			Vector3 globalScale = transform.GetLocalScale();
 
+#ifndef FRAME_PERFECT_TRANSFORM
 			ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
-			while (parentComponent.HasParent)
+			if (parentComponent.HasParent)
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 
-				globalPosition = transformComponent.GetLocalPosition() + (globalPosition);
+				globalPosition = transformComponent.GetGlobalPosition() + (globalPosition);
 
+				globalScale *= transformComponent.GetGlobalScale();
+				globalOrientation = transformComponent.GetGlobalRotation() * globalOrientation;
+				globalTransform = transformComponent.GetGlobalTransform() * globalTransform;
+			}
+#else
+			while (parentComponent.HasParent)
+			{
+				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
+			
+				globalPosition = transformComponent.GetLocalPosition() + (globalPosition);
+			
 				globalScale *= transformComponent.GetLocalScale();
 				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
 				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
-
+			
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
 			}
+#endif // FRAME_PERFECT_TRANSFORM
 
 			transform.SetGlobalPosition(globalPosition);
 			transform.SetGlobalRotation(globalOrientation);

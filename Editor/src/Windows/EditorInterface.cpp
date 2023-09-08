@@ -252,7 +252,7 @@ namespace Nuake {
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
 
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing())
+            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
@@ -289,7 +289,9 @@ namespace Nuake {
     Entity QueueDeletion;
     void EditorInterface::DrawEntityTree(Entity e)
     {
-        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
+
+        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
 
 		NameComponent& nameComponent = e.GetComponent<NameComponent>();
 		std::string name = nameComponent.Name;
@@ -297,8 +299,6 @@ namespace Nuake {
 
         if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
             base_flags |= ImGuiTreeNodeFlags_Selected;
-
-        
 
         ImGui::TableNextColumn();
         
@@ -315,10 +315,8 @@ namespace Nuake {
         {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         }
-
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 8));
+        
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
-        ImGui::PopStyleVar();
 
 		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
 			ImGui::PopStyleColor();
@@ -414,21 +412,20 @@ namespace Nuake {
         
         ImGui::TableNextColumn();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
+        ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1.0), GetEntityTypeName(e).c_str());
+
+        ImGui::TableNextColumn();
         {
             bool& isVisible = e.GetComponent<VisibilityComponent>().Visible;
             char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
-
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
-            if (ImGui::Button(visibilityIcon, { 40, 36 }))
+            if (ImGui::Button(visibilityIcon, { 40, 0 }))
             {
                 isVisible = !isVisible;
             }
             ImGui::PopStyleColor();
         }
-
-        ImGui::PopStyleVar();
-
+       
         if (open)
         {
             // Caching list to prevent deletion while iterating.
@@ -438,7 +435,8 @@ namespace Nuake {
 
             ImGui::TreePop();
         }
-         
+        
+        ImGui::PopStyleVar();
         ImGui::PopFont();
     }
 
@@ -766,6 +764,21 @@ namespace Nuake {
                     ImGui::TableNextColumn();
                     {
                         // Title
+                        ImGui::Text("SSAO");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##SSAOEnabled", &env->SSAOEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSAO = ICON_FA_UNDO + std::string("##resetSSAO");
+                        if (ImGui::Button(resetSSAO.c_str())) env->SSAOEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
                         ImGui::Text("SSAO Strength");
                         ImGui::TableNextColumn();
 
@@ -854,10 +867,25 @@ namespace Nuake {
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
 
-                    ImGui::TableNextColumn();
-
                     SSR* ssr = scene->m_SceneRenderer->mSSR.get();
                     {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("SSR");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##SSREnabled", &env->SSREnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetSSR");
+                        if (ImGui::Button(resetSSR.c_str())) env->SSREnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
                         // Title
                         ImGui::Text("SSR RayStep");
                         ImGui::TableNextColumn();
@@ -1017,6 +1045,7 @@ namespace Nuake {
 
         std::string title = ICON_FA_TREE + std::string(" Hierarchy");
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 0));
         if (ImGui::Begin(title.c_str()))
         {
             // Buttons to add and remove entity.
@@ -1038,16 +1067,18 @@ namespace Nuake {
             ImGui::EndChild();
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
+            
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                if (ImGui::BeginTable("entity_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_SizingStretchProp))
+                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("    Label", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentEnable);
-                    std::string icon = ICON_FA_EYE;
-                    ImGui::TableSetupColumn(("    " + icon).c_str(), ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed, 32);
+                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_IndentEnable);
+                    ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentEnable);
+                    ImGui::TableSetupColumn("Visibility", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableHeadersRow();
                     ImGui::TableNextRow();
 
+                    ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
                     std::vector<Entity> entities = scene->GetAllEntities();
                     for (Entity e : entities)
                     {
@@ -1060,16 +1091,11 @@ namespace Nuake {
                         // Write in normal font.
                         ImGui::PushFont(normalFont);
 
-                        // Small icons + name.
-                        std::string label = ICON_FA_CIRCLE + std::string(" ") + name;
-
                         // Draw all entity without parents.
                         if (!e.GetComponent<ParentComponent>().HasParent)
                         {
-                            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
                             // Recursively draw childrens.
                             DrawEntityTree(e);
-                            ImGui::PopStyleVar();
                         }
 
                         // Pop font.
@@ -1079,6 +1105,7 @@ namespace Nuake {
                         //if (ImGui::BeginPopupContextItem())
                         //    ImGui::EndPopup();
                     }
+                    ImGui::PopStyleVar();
                 }
 
 				ImGui::EndTable();
@@ -1110,8 +1137,8 @@ namespace Nuake {
                 QueueDeletion = Entity{ (entt::entity)-1, scene.get() };
             }
         }
-
         ImGui::End();
+        ImGui::PopStyleVar();
         ImGui::PopStyleVar();
     }
 
@@ -1631,5 +1658,37 @@ namespace Nuake {
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
         FontManager::LoadFonts();
+    }
+
+    std::string EditorInterface::GetEntityTypeName(const Entity& entity) const
+    {
+        std::string entityTypeName = "";
+        
+        if (entity.HasComponent<LightComponent>())
+        {
+            entityTypeName = "Light";
+        }
+
+        if (entity.HasComponent<RigidBodyComponent>())
+        {
+            entityTypeName = "Rigidbody";
+        }
+
+        if (entity.HasComponent<CharacterControllerComponent>())
+        {
+            entityTypeName = "Character Controller";
+        }
+
+        if (entity.HasComponent<BoneComponent>())
+        {
+            entityTypeName = "Bone";
+        }
+
+        if (entity.HasComponent<PrefabComponent>())
+        {
+            entityTypeName = "Prefab";
+        }
+
+        return entityTypeName;
     }
 }

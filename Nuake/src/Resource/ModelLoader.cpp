@@ -7,7 +7,7 @@
 
 #include "src/Resource/SkinnedModel.h"
 #include "src/Resource/Model.h"
-
+#include "src/Resource/SkeletalAnimation.h"
 
 namespace Nuake
 {
@@ -50,8 +50,13 @@ namespace Nuake
 		return model;
 	}
 
+
+	std::unordered_map<std::string, uint32_t> bonesNameIDMap;
 	Ref<SkinnedModel> ModelLoader::LoadSkinnedModel(const std::string& path, bool absolute)
 	{
+		bonesNameIDMap = std::unordered_map<std::string, uint32_t>();
+		m_BoneMap = std::unordered_map<std::string, Bone>();
+
 		m_SkinnedMeshes.clear();
 		Ref<SkinnedModel> model = CreateRef<SkinnedModel>(path);
 
@@ -62,7 +67,8 @@ namespace Nuake
 			aiProcess_Triangulate |
 			aiProcess_GenSmoothNormals |
 			aiProcess_FixInfacingNormals |
-			aiProcess_CalcTangentSpace;
+			aiProcess_CalcTangentSpace | 
+			aiProcess_OptimizeGraph;
 
 		modelDir = absolute ? path + "/../" : FileSystem::Root + path + "/../";
 		const std::string filePath = absolute ? path : FileSystem::Root + path;
@@ -70,13 +76,80 @@ namespace Nuake
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			std::string assimpErrorMsg = std::string(importer.GetErrorString());
-			std::string logMsg = "[Failed to load model] - " + assimpErrorMsg;
+			std::string logMsg = "Failed to load model: " + assimpErrorMsg;
 			Logger::Log(logMsg, "model", WARNING);
 
 			return model;
 		}
 
 		ProcessSkinnedNode(scene->mRootNode, scene);
+		if (scene->HasAnimations())
+		{
+			std::vector<Ref<SkeletalAnimation>> animations = std::vector<Ref<SkeletalAnimation>>();
+
+			// Parse animations
+			for (uint32_t i = 0; i < scene->mNumAnimations; i++)
+			{
+				aiAnimation* aiAnim = scene->mAnimations[i];
+
+				const std::string animationName = aiAnim->mName.data;
+				const float animationDuration = aiAnim->mDuration;
+				const float animationTicksPerSecond = aiAnim->mTicksPerSecond;
+				auto animation = CreateRef<SkeletalAnimation>(animationName, animationDuration, animationTicksPerSecond);
+
+				// Here we iterate over every channel(each channel represents a bone) and fill the SkeletalAnimation
+				// object with every keyframe. We essentially just convert every assimp vector, quat, string to our own types.
+				for (uint32_t j = 0; j < aiAnim->mNumChannels; j++)
+				{
+					aiNodeAnim* animChannel = aiAnim->mChannels[j];
+					const std::string channelName = animChannel->mNodeName.data; // this should be a bone name
+					
+					// Create the track
+					BoneTransformTrack& track = animation->GetTrack(channelName);
+
+					// Create every keyframe in the current channel
+					// Position
+					for (uint32_t p = 0; p < animChannel->mNumPositionKeys; p++)
+					{
+						aiVectorKey positionKey = animChannel->mPositionKeys[p];
+						const float keyTime = positionKey.mTime;
+						const aiVector3D assimpKeyValue = positionKey.mValue;
+						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushPositionKeyframe(keyTime, keyValue);
+					}
+
+					// Rotation
+					for (uint32_t r = 0; r < animChannel->mNumRotationKeys; r++)
+					{
+						aiQuatKey rotationKey = animChannel->mRotationKeys[r];
+						const float keyTime = rotationKey.mTime;
+						const aiQuaterniont assimpKeyValue = rotationKey.mValue;
+						const Quat keyValue = Quat(assimpKeyValue.w, assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushRotationKeyframe(keyTime, keyValue);
+					}
+
+					// Scaling
+					for (uint32_t s = 0; s < animChannel->mNumScalingKeys; s++)
+					{
+						aiVectorKey scaleKey = animChannel->mScalingKeys[s];
+						const float keyTime = scaleKey.mTime;
+						const aiVector3D assimpKeyValue = scaleKey.mValue;
+						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
+
+						track.PushScaleKeyframe(keyTime, keyValue);
+					}
+				}
+
+				animations.push_back(animation);
+			}
+
+			SkeletonNode rootSkeletonNode;
+			ProcessAnimationNode(rootSkeletonNode, scene->mRootNode);
+			model->SetSkeletonRootNode(std::move(rootSkeletonNode));
+			model->SetAnimations(std::move(animations));
+		}
 
 		for (const auto& mesh : m_SkinnedMeshes)
 		{
@@ -120,7 +193,6 @@ namespace Nuake
 		auto& indices = ProcessIndices(node);
 		auto& material = ProcessMaterials(scene, node);
 		auto& bones = std::vector<Bone>();
-		auto& bonesMap = std::unordered_map<std::string, Bone>();
 
 		if (node->HasBones())
 		{
@@ -131,7 +203,7 @@ namespace Nuake
 				const std::string& boneName = bone->mName.C_Str();
 
 				int32_t boneId = -1;
-				if (bonesMap.find(boneName) == bonesMap.end())
+				if (m_BoneMap.find(boneName) == m_BoneMap.end())
 				{
 					boneId = boneCounter;
 					boneCounter++;
@@ -140,11 +212,12 @@ namespace Nuake
 					newBone.Offset = ConvertMatrixToGLMFormat(bone->mOffsetMatrix);
 					bones.push_back(newBone);
 
-					bonesMap[boneName] = newBone;
+					bonesNameIDMap[boneName] = boneId;
+					m_BoneMap[boneName] = newBone;
 				}
 				else
 				{
-					boneId = bonesMap[boneName].Id;
+					boneId = m_BoneMap[boneName].Id;
 				}
 				
 				assert(boneId != -1);
@@ -154,7 +227,7 @@ namespace Nuake
 				{
 					aiVertexWeight vertexWeight = bone->mWeights[j];
 					const uint32_t vertexWeightVertexId = vertexWeight.mVertexId;
-
+					
 					SetVertexBoneData(vertices[vertexWeightVertexId], boneId, vertexWeight.mWeight);
 					
 					//BoneVertexWeight boneVertexWeight
@@ -177,7 +250,6 @@ namespace Nuake
 		Ref<SkinnedMesh> mesh = CreateRef<SkinnedMesh>();
 		mesh->AddSurface(vertices, indices, bones);
 		mesh->SetMaterial(material);
-
 		return mesh;
 	}
 
@@ -199,20 +271,20 @@ namespace Nuake
 		auto vertices = std::vector<Vertex>();
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
-			Vertex vertex;
+			Vertex vertex {};
 
 			Vector3 current;
 
 			// Position
 			current.x = mesh->mVertices[i].x;
-			current.y = mesh->mVertices[i].z;
-			current.z = mesh->mVertices[i].y;
+			current.y = mesh->mVertices[i].y;
+			current.z = mesh->mVertices[i].z;
 			vertex.position = current;
 
 			// Normals
 			current.x = mesh->mNormals[i].x;
-			current.y = mesh->mNormals[i].z;
-			current.z = mesh->mNormals[i].y;
+			current.y = mesh->mNormals[i].y;
+			current.z = mesh->mNormals[i].z;
 			vertex.normal = current;
 
 			// Tangents
@@ -311,12 +383,60 @@ namespace Nuake
 	{
 		for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
 		{
+			if (vertex.boneIDs[i] == boneID) {
+				return;
+			}
+		}
+
+		if (weight == 0.0f)
+		{
+			return;
+		}
+
+		for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+		{
 			if (vertex.boneIDs[i] < 0)
 			{
 				vertex.weights[i] = weight;
 				vertex.boneIDs[i] = boneID;
 				break;
 			}
+		}
+	}
+
+	void ModelLoader::ProcessAnimationNode(SkeletonNode& dest, const aiNode* src)
+	{
+		assert(src);
+
+		dest.Name = src->mName.data;
+		dest.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
+		dest.ChildrenCount = src->mNumChildren;
+		dest.Id = bonesNameIDMap[dest.Name];
+		dest.Offset = m_BoneMap[dest.Name].Offset;
+
+		for (uint32_t i = 0; i < dest.ChildrenCount; i++)
+		{
+			SkeletonNode newNode;
+			ProcessAnimationNode(newNode, src->mChildren[i]);
+			dest.Children.push_back(std::move(newNode));
+		}
+	}
+
+	void ModelLoader::ProcessSkeleton(SkeletonNode& des, const aiNode* src)
+	{
+		// Create a Bone object for this node
+		SkeletonNode bone;
+		bone.Name = src->mName.C_Str();
+		bone.Transform = ConvertMatrixToGLMFormat(src->mTransformation);
+		bone.Id = bonesNameIDMap[bone.Name];
+
+		des.ChildrenCount++;
+		des.Children.push_back(bone);
+
+		// Recursively process child nodes (bones)
+		for (uint32_t i = 0; i < src->mNumChildren; i++)
+		{
+			ProcessSkeleton(bone, src->mChildren[i]);
 		}
 	}
 
@@ -341,8 +461,11 @@ namespace Nuake
 			return nullptr;
 
 		aiMaterial* materialNode = scene->mMaterials[mesh->mMaterialIndex];
-
 		Ref<Material> material = CreateRef<Material>();
+		
+		aiString materialName;
+		materialNode->Get(AI_MATKEY_NAME, materialName);
+		material->SetName(std::string(materialName.C_Str()));
 
 		aiString str;
 		if (materialNode->GetTextureCount(aiTextureType_DIFFUSE) > 0)

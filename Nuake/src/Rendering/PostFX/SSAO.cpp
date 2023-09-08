@@ -40,6 +40,16 @@ namespace Nuake
 		_ssaoBlurFramebuffer->QueueResize(size);
 	}
 
+	void SSAO::Clear()
+	{
+		_ssaoBlurFramebuffer->Bind();
+		{
+			RenderCommand::SetClearColor({ 1, 1, 1, 1});
+			_ssaoBlurFramebuffer->Clear();
+		}
+		_ssaoBlurFramebuffer->Unbind();
+	}
+
 	void SSAO::GenerateKernel()
 	{
 		std::uniform_real_distribution<float> randomFloats(0.0, 1.0); // random floats between [0.0, 1.0]

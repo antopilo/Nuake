@@ -16,6 +16,8 @@
 #include "src/Scene/Components/CapsuleColliderComponent.h"
 #include "src/Scene/Components/SpriteComponent.h"
 #include "src/Scene/Components/ParticleEmitterComponent.h"
+#include "src/Scene/Components/BoneComponent.h"
+#include "src/Scene/Components/SkinnedModelComponent.h"
 
 namespace Nuake
 {
@@ -69,7 +71,10 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>())
 		if (HasComponent<RigidBodyComponent>())
 			SERIALIZE_OBJECT_REF_LBL("RigidBodyComponent", GetComponent<RigidBodyComponent>())
-		
+		if (HasComponent<SkinnedModelComponent>())
+			SERIALIZE_OBJECT_REF_LBL("SkinnedModelComponent", GetComponent<SkinnedModelComponent>())
+		if (HasComponent<BoneComponent>())
+			SERIALIZE_OBJECT_REF_LBL("BoneComponent", GetComponent<BoneComponent>())
 		END_SERIALIZE();
 	}
 
@@ -98,6 +103,8 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(SphereColliderComponent)
 		DESERIALIZE_COMPONENT(RigidBodyComponent)
 		DESERIALIZE_COMPONENT(BSPBrushComponent)
+		DESERIALIZE_COMPONENT(BoneComponent)
+		DESERIALIZE_COMPONENT(SkinnedModelComponent)
 		return true;
 	}
 

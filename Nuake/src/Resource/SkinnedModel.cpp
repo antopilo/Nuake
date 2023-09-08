@@ -27,6 +27,43 @@ namespace Nuake
 		return m_Meshes;
 	}
 
+	void SkinnedModel::SetAnimations(const std::vector<Ref<SkeletalAnimation>> animations)
+	{
+		m_NumAnimation = static_cast<uint32_t>(animations.size());
+		m_CurrentAnimation = 0;
+		m_Animations = animations;
+	}
+
+	void SkinnedModel::AddAnimation(Ref<SkeletalAnimation> animation)
+	{
+		m_NumAnimation++;
+		m_Animations.push_back(std::move(animation));
+	}
+
+	Ref<Nuake::SkeletalAnimation> SkinnedModel::GetCurrentAnimation()
+	{
+		if (m_CurrentAnimation < m_NumAnimation)
+		{
+			return m_Animations[m_CurrentAnimation];
+		}
+
+		Logger::Log("Cannot get animation if no animation exists", "skinned model", WARNING);
+		return nullptr;
+	}
+
+	void SkinnedModel::PlayAnimation(uint32_t animationId)
+	{
+		if (animationId >= m_NumAnimation)
+		{
+			Logger::Log("Cannot play animation, index out of range", "skinned model", CRITICAL);
+			return;
+		}
+
+		GetCurrentAnimation()->SetCurrentTime(0.0f); // Reset previous animation
+
+		m_CurrentAnimation = animationId;
+	}
+
 	json SkinnedModel::Serialize()
 	{
 		BEGIN_SERIALIZE();
@@ -41,7 +78,19 @@ namespace Nuake
 			{
 				j["Meshes"][i] = m_Meshes[i]->Serialize();
 			}
+
+			j["m_CurrentAnimation"] = m_CurrentAnimation;
+			j["m_NumAnimation"] = m_NumAnimation;
+
+			uint32_t a = 0;
+			for (auto& animation : m_Animations)
+			{
+				j["m_Animations"][a] = animation->Serialize();
+			}
+
 		}
+
+		
 		END_SERIALIZE();
 	}
 
@@ -54,6 +103,10 @@ namespace Nuake
 			ModelLoader loader;
 			auto otherModel = loader.LoadSkinnedModel(j["Path"], false);
 			m_Meshes = otherModel->GetMeshes();
+			m_Animations = otherModel->GetAnimations();
+			m_SkeletonRoot = otherModel->GetSkeletonRootNode();
+			m_NumAnimation = m_Animations.size();
+			m_CurrentAnimation = 0;
 
 			this->Path = j["Path"];
 		}

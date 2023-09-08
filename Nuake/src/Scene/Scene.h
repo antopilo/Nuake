@@ -17,6 +17,7 @@
 
 namespace Nuake 
 {
+	class SkeletonNode;
 	class Entity;
 	class SceneRenderer;
 
@@ -37,7 +38,8 @@ namespace Nuake
 	public:
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
-		std::map<uint32_t, Entity> m_EntitiesIDMap;
+		std::unordered_map<uint32_t, Entity> m_EntitiesIDMap;
+		std::unordered_map<std::string, Entity> m_EntitiesNameMap;
 		std::string Path = "";
 
 		SceneRenderer* m_SceneRenderer;
@@ -65,6 +67,7 @@ namespace Nuake
 		Entity CreateEntity(const std::string& name);
 		Entity CreateEntity(const std::string& name, int id);
 		void DestroyEntity(Entity entity);		
+		bool EntityExists(const std::string& name);
 
 		std::vector<Entity> GetAllEntities();
 		Entity GetEntity(const std::string& name);
@@ -89,5 +92,11 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
+
+		// Component specific utilies
+		void CreateSkeleton(Entity& entity);
+
+	private:
+		void CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode);
 	};
 }
