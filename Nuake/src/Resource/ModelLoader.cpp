@@ -461,8 +461,11 @@ namespace Nuake
 			return nullptr;
 
 		aiMaterial* materialNode = scene->mMaterials[mesh->mMaterialIndex];
-
 		Ref<Material> material = CreateRef<Material>();
+		
+		aiString materialName;
+		materialNode->Get(AI_MATKEY_NAME, materialName);
+		material->SetName(std::string(materialName.C_Str()));
 
 		aiString str;
 		if (materialNode->GetTextureCount(aiTextureType_DIFFUSE) > 0)
