@@ -764,6 +764,21 @@ namespace Nuake {
                     ImGui::TableNextColumn();
                     {
                         // Title
+                        ImGui::Text("SSAO");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##SSAOEnabled", &env->SSAOEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSAO = ICON_FA_UNDO + std::string("##resetSSAO");
+                        if (ImGui::Button(resetSSAO.c_str())) env->SSAOEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
                         ImGui::Text("SSAO Strength");
                         ImGui::TableNextColumn();
 

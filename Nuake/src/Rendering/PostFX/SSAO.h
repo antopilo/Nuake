@@ -33,6 +33,7 @@ namespace Nuake
 		float Falloff = 0.002f;
 		float Strength = 0.2f;
 		void Resize(const Vector2& size);
+		void Clear();
 		SSAO();
 		void Draw(FrameBuffer* gBuffer, const Matrix4& projection, const Matrix4& view);
 		Ref<FrameBuffer> GetOuput() const;

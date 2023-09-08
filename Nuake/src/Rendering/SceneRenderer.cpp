@@ -56,8 +56,15 @@ namespace Nuake
 
 		// SSAO
 		const auto& sceneEnv = scene.GetEnvironment();
-		sceneEnv->mSSAO->Resize(framebuffer.GetSize());
-		sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+		if (sceneEnv->SSAOEnabled)
+		{
+			sceneEnv->mSSAO->Resize(framebuffer.GetSize());
+			sceneEnv->mSSAO->Draw(mGBuffer.get(), mProjection, mView);
+		}
+		else
+		{
+			sceneEnv->mSSAO->Clear();
+		}
 
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
