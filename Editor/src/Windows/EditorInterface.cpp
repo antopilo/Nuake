@@ -867,10 +867,25 @@ namespace Nuake {
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
 
-                    ImGui::TableNextColumn();
-
                     SSR* ssr = scene->m_SceneRenderer->mSSR.get();
                     {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("SSR");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##SSREnabled", &env->SSREnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetSSR");
+                        if (ImGui::Button(resetSSR.c_str())) env->SSREnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
                         // Title
                         ImGui::Text("SSR RayStep");
                         ImGui::TableNextColumn();

@@ -76,7 +76,7 @@ namespace Nuake
 			sceneEnv->mBloom->Resize(framebuffer.GetSize());
 			sceneEnv->mBloom->Draw();
 
-			finalOutput = scene.GetEnvironment()->mBloom->GetOutput();
+			finalOutput = sceneEnv->mBloom->GetOutput();
 		}
 
 		const auto view = scene.m_Registry.view<LightComponent>();
@@ -88,7 +88,7 @@ namespace Nuake
 				lightList.push_back(lc);
 		}
 		
-		if (scene.GetEnvironment()->VolumetricEnabled)
+		if (sceneEnv->VolumetricEnabled)
 		{
 			sceneEnv->mVolumetric->Resize(framebuffer.GetSize());
 			sceneEnv->mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
@@ -139,20 +139,36 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
-		mSSR->Resize(framebuffer.GetSize());
-		mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
-
-		framebuffer.Bind();
+		if (sceneEnv->SSREnabled)
 		{
-			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
-			shader->Bind();
+			mSSR->Resize(framebuffer.GetSize());
+			mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
-			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
-			Renderer::DrawQuad();
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
 		}
-		framebuffer.Unbind();
+		else
+		{
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+		}
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
