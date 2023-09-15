@@ -741,7 +741,6 @@ namespace Nuake
                     }
 
                 }
-                ImGui::EndChild();
             }
             ImGui::EndChild();
         }
