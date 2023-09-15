@@ -62,7 +62,6 @@ namespace Nuake
     void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
         ImGui::PushFont(FontManager::GetFont(Icons));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
@@ -739,8 +738,8 @@ namespace Nuake
                         
                         ImGui::EndTable();
                     }
-
                 }
+                ImGui::EndChild();
             }
             ImGui::EndChild();
         }
