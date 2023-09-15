@@ -65,6 +65,7 @@ namespace Nuake
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
         {
             m_CurrentDirectory = directory;
@@ -675,6 +676,7 @@ namespace Nuake
 
                 bool child = ImGui::BeginChild("Content", avail);
                 ImGui::PopStyleVar();
+                ImGui::SameLine();
                 if (child)
                 {
                     int width = avail.x;
@@ -689,7 +691,7 @@ namespace Nuake
                         if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
                         {
                             ImGui::TableNextColumn();
-                            if (ImGui::Button("..", ImVec2(100, 100)))
+                            if (ImGui::Button("..", buttonSize))
                                 m_CurrentDirectory = m_CurrentDirectory->Parent;
                             i++;
                         }
@@ -717,7 +719,7 @@ namespace Nuake
                             {
                                 if(m_SearchKeyword.empty() || f->GetName().find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
-                                    if (i - 1 % amount != 0 || i == 1)
+                                    if (i + 1 % amount != 0 || i == 1)
                                     {
                                         ImGui::TableNextColumn();
                                     }
