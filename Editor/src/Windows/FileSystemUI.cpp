@@ -213,6 +213,10 @@ namespace Nuake
             {
                 Editor->Selection = EditorSelection(file);
             }
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+            {
+                OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+            }
         }
         ImGui::PopStyleVar();
         if (ImGui::BeginDragDropSource())

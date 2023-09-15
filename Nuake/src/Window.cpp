@@ -260,7 +260,7 @@ namespace Nuake
     {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 16.0);
+        io.Fonts->AddFontFromFileTTF("resources/Fonts/Poppins-Regular.ttf", 16.0);
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         ImGui::StyleColorsDark();

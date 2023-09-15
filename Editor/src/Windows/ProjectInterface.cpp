@@ -8,7 +8,6 @@ namespace Nuake {
     {
         if (ImGui::Begin("Project settings"))
         {
-
             char buffer[256];
             memset(buffer, 0, sizeof(buffer));
             std::strncpy(buffer, Engine::GetProject()->Name.c_str(), sizeof(buffer));

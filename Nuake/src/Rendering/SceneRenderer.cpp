@@ -279,6 +279,7 @@ namespace Nuake
 			gBufferShader->SetUniformMat4f("u_View", mView);
 
 			// Models
+			glCullFace(GL_FRONT);
 			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 			for (auto e : view)
 			{
@@ -292,8 +293,7 @@ namespace Nuake
 					}
 				}
 			}
-
-			glCullFace(GL_FRONT);
+			
 			Renderer::Flush(gBufferShader, false);
 
 			// Quake BSPs
