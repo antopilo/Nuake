@@ -101,8 +101,7 @@ namespace Nuake
 		}
 
 		Logger::Log("Entity not found with id: " + std::to_string(id), "scene", CRITICAL);
-
-		assert("Entity not found");
+		return Entity{ (entt::entity)0, this };
 	}
 
 	bool Scene::OnInit()
@@ -388,7 +387,6 @@ namespace Nuake
 		sceneCopy->Path = Path;
 
 		json serializedScene = Serialize();
-
 		sceneCopy->Deserialize(serializedScene);
 		return sceneCopy;
 	}
@@ -485,7 +483,7 @@ namespace Nuake
 
 		Entity skeletonRootEntity = CreateEntity(skeletonRoot.Name);
 		skeletonRootEntity.AddComponent<BoneComponent>().Name = skeletonRoot.Name;
-		skeletonRoot.EntityHandle = skeletonRootEntity.GetHandle();
+		skeletonRoot.EntityHandle = skeletonRootEntity.GetID();
 		entity.AddChild(skeletonRootEntity);
 
 		Vector3 bonePosition;
@@ -510,7 +508,7 @@ namespace Nuake
 			boneEntity.AddComponent<BoneComponent>();
 			entity.AddChild(boneEntity);
 
-			c.EntityHandle = boneEntity.GetHandle();
+			c.EntityHandle = boneEntity.GetID();
 
 			Vector3 bonePosition;
 			Quat boneRotation;

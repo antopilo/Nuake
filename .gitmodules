@@ -19,3 +19,6 @@
 [submodule "Nuake/dependencies/soloud"]
 	path = Nuake/dependencies/soloud
 	url = https://github.com/antopilo/soloud.git
+[submodule "Nuake/dependencies/optick"]
+	path = Nuake/dependencies/optick
+	url = https://github.com/bombomby/optick.git

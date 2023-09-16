@@ -430,8 +430,14 @@ void EditorSelectionPanel::DrawProjectPanel(Ref<Nuake::Project> project)
 
     if (ImGui::Button("Locate"))
     {
+		const std::string& locationPath = Nuake::FileDialog::OpenFile("TrenchBroom (.exe)\0TrenchBroom.exe\0");
 
+		if (!locationPath.empty())
+		{
+			project->TrenchbroomPath = locationPath;
+		}
     }
+
     ImGui::SameLine();
     ImGui::InputText("Trenchbroom Path", &project->TrenchbroomPath);
 }

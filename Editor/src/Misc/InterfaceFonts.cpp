@@ -12,10 +12,10 @@ void FontManager::LoadFonts()
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
 
 	mFonts[Normal] = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 11.0f, &icons_config, icons_ranges);
-	mFonts[Bold] = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Bold.ttf", 16.0);
-	mFonts[LargeBold] = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 32);
-	mFonts[Title] = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Bold.ttf", 50.0);
-	mFonts[SubTitle] = io.Fonts->AddFontFromFileTTF("resources/Fonts/OpenSans-Regular.ttf", 24.0);
+	mFonts[Bold] = io.Fonts->AddFontFromFileTTF("resources/Fonts/FiraMono-Bold.ttf", 16.0);
+	mFonts[LargeBold] = io.Fonts->AddFontFromFileTTF("resources/Fonts/FiraMono-Regular.ttf", 32);
+	mFonts[Title] = io.Fonts->AddFontFromFileTTF("resources/Fonts/FiraMono-Bold.ttf", 50.0);
+	mFonts[SubTitle] = io.Fonts->AddFontFromFileTTF("resources/Fonts/FiraMono-Regular.ttf", 24.0);
 	ImGui::GetIO().Fonts->AddFontDefault();
 	icons_config.MergeMode = true;
 	mFonts[BigIcon] = io.Fonts->AddFontFromFileTTF("resources/Fonts/fa-solid-900.ttf", 42.0f, &icons_config, icons_ranges);

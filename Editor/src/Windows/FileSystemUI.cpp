@@ -62,7 +62,6 @@ namespace Nuake
     void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
         ImGui::PushFont(FontManager::GetFont(Icons));
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
@@ -212,6 +211,10 @@ namespace Nuake
             if (ImGui::Button(fullName.c_str(), ImVec2(100, 100)))
             {
                 Editor->Selection = EditorSelection(file);
+            }
+            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+            {
+                OS::OpenTrenchbroomMap(file->GetAbsolutePath());
             }
         }
         ImGui::PopStyleVar();
@@ -734,7 +737,6 @@ namespace Nuake
                         
                         ImGui::EndTable();
                     }
-
                 }
                 ImGui::EndChild();
             }

@@ -1,5 +1,6 @@
 ﻿#include "OS.h"
 #include "src/Window.h"
+#include "Engine.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
@@ -67,6 +68,11 @@ int OS::RenameDirectory(const Ref<Directory>& dir, const std::string& newName)
 void OS::ShowInFileExplorer(const std::string& filePath)
 {
 	ShellExecuteA(nullptr, "open", "explorer.exe", ("/select," + std::string(filePath)).c_str(), nullptr, SW_SHOWDEFAULT);
+}
+
+void OS::OpenTrenchbroomMap(const std::string& filePath)
+{
+	ShellExecuteA(nullptr, nullptr, Engine::GetProject()->TrenchbroomPath.c_str(), filePath.c_str(), nullptr, SW_SHOW);
 }
 
 void OS::OpenURL(const std::string& url)
