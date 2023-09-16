@@ -50,9 +50,9 @@ namespace Nuake
 		auto& animationTrack = animation->GetTrack(boneName);
 
 		Entity& boneEntity = m_Scene->GetEntity(boneName);
-		Entity& boneEnt = Entity{ (entt::entity)bone.EntityHandle, m_Scene };
+		Entity& boneEnt = m_Scene->GetEntityByID(bone.EntityHandle);
 		///assert(boneEnt.GetHandle() == boneEntity.GetHandle());
-		if (boneEnt.GetHandle() != 0)
+		if (boneEnt.IsValid())
 		{
 			auto& transformComponent = boneEnt.GetComponent<TransformComponent>();
 			bone.FinalTransform = transformComponent.GetGlobalTransform() * bone.Offset;

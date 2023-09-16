@@ -52,6 +52,7 @@ namespace Nuake {
 	{
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(CurrentSkyType);
+		SERIALIZE_VEC4(AmbientColor);
 		SERIALIZE_VAL(VolumetricFog);
 		SERIALIZE_VAL(VolumetricStepCount);
 		SERIALIZE_VEC4(AmbientColor);
@@ -63,6 +64,8 @@ namespace Nuake {
 	{
 		if (j.contains("CurrentSkyType"))
 			CurrentSkyType = j["CurrentSkyType"];
+		if (j.contains("AmbientColor"))
+			DESERIALIZE_VEC4(j["AmbientColor"], AmbientColor);
 		if (j.contains("VolumetricFog"))
 			VolumetricFog = j["VolumetricFog"];
 		if (j.contains("VolumetricStepCount"))
