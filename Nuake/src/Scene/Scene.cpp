@@ -488,7 +488,6 @@ namespace Nuake
 		skeletonRoot.EntityHandle = skeletonRootEntity.GetHandle();
 		entity.AddChild(skeletonRootEntity);
 
-
 		Vector3 bonePosition;
 		Quat boneRotation;
 		Vector3 boneScale;

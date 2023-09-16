@@ -65,7 +65,6 @@ namespace Nuake
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
         const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
-        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
         {
             m_CurrentDirectory = directory;

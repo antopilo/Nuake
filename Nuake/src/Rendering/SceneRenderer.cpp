@@ -312,6 +312,7 @@ namespace Nuake
 			}
 			Renderer::Flush(gBufferShader, false);
 
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			// Sprites
 			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
 			for (auto& e : spriteView)
