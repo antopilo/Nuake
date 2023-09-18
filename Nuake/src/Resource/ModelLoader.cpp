@@ -522,9 +522,19 @@ namespace Nuake
 			uint32_t textureIndex = std::atoi(String::Split(path, '*')[1].c_str());
 			const aiTexture* aitexture = scene->GetEmbeddedTexture(path.c_str());
 
-			Vector2 textureSize = Vector2(aitexture->mWidth, aitexture->mHeight);
-			auto texture = CreateRef<Texture>(textureSize, (unsigned char*)aitexture->pcData, textureSize.x);
-			return texture;
+			Ref<Texture> nuakeTexture;
+			if (aitexture->mHeight == 0)
+			{
+				// We are using a compression like jpeg, where width is the size of the buffer in bytes.
+				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, aitexture->mWidth);
+			}
+			else
+			{
+				Vector2 textureSize = Vector2(aitexture->mWidth, aitexture->mHeight);
+				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, textureSize.x);
+			}
+			
+			return nuakeTexture;
 		}
 		
 		std::string texturePath = modelDir + path;
