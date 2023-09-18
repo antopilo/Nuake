@@ -462,7 +462,7 @@ namespace Nuake {
             return;
         const Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
 
-        if (ImGui::Begin("Environnement"))
+        if (ImGui::Begin((ICON_FA_MOUNTAIN + std::string("  Environment")).c_str()))
         {
             BEGIN_COLLAPSE_HEADER(SKY);
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
