@@ -205,7 +205,7 @@ namespace Nuake
                 icon = ICON_FA_BROOM;
             if (fileExtension == ".ogg" || fileExtension == ".mp3" || fileExtension == ".wav")
                 icon = ICON_FA_FILE_AUDIO;
-            if (fileExtension == ".md3" || fileExtension == ".obj")
+            if (fileExtension == ".gltf" || fileExtension == ".obj")
                 icon = ICON_FA_FILE_IMAGE;
 
             std::string fullName = icon + std::string("##") + file->GetAbsolutePath();
