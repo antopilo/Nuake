@@ -27,5 +27,5 @@ void main()
     vec4 a = texture(u_Source, UV);
     vec4 b = texture(u_Source2, UV);
 
-    FragColor = vec4(vec3(a.rgb + b.rgb / 2.0), a.a * b.a);
+    FragColor = vec4(vec3(a.rgb + (b.rgb) / 2.0), a.a);
 }

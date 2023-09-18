@@ -272,7 +272,7 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     /// ambient lighting (we now use IBL as the ambient term)
@@ -282,7 +282,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (kD * albedo) * (ao) * ssao;
+    vec3 ambient = (vec3(0.5) * albedo) * (ao)*ssao;
     vec3 color = (ambient) + Lo;
 
     // Display CSM splits..
