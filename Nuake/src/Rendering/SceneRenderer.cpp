@@ -262,6 +262,43 @@ namespace Nuake
 				}
 			}
 		}
+
+		Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("resources/Shaders/shadowMap_skinned.shader");
+		gBufferSkinnedMeshShader->Bind();
+		const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
+		gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
+		
+		auto skinnedView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
+		for (auto l : view)
+		{
+			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
+			if (light.Type != LightType::Directional || !light.CastShadows || !visibility.Visible)
+			{
+				continue;
+			}
+		
+			for (int i = 0; i < CSM_AMOUNT; i++)
+			{
+				light.m_Framebuffers[i]->Bind();
+				{
+					gBufferSkinnedMeshShader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+					for (auto e : skinnedView)
+					{
+						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+						if (mesh.ModelResource != nullptr && visibility.Visible)
+						{
+							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
+							SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
+
+							for (auto& m : mesh.ModelResource->GetMeshes())
+							{
+								m->Draw(gBufferSkinnedMeshShader, false);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	void SceneRenderer::GBufferPass(Scene& scene)
@@ -293,10 +330,8 @@ namespace Nuake
 					}
 				}
 			}
-			
 			Renderer::Flush(gBufferShader, false);
 
-			
 			// Quake BSPs
 			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
 			for (auto e : quakeView)
@@ -311,7 +346,6 @@ namespace Nuake
 					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
 				}
 			}
-			
 			Renderer::Flush(gBufferShader, false);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
@@ -400,7 +434,6 @@ namespace Nuake
 				if (meshResource && visibility.Visible)
 				{
 					auto& rootBoneNode = meshResource->GetSkeletonRootNode();
-					
 					SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
 
 					for (auto& m : mesh.ModelResource->GetMeshes())

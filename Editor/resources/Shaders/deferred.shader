@@ -180,7 +180,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
-    if (shadowmap <= 3)
+    if (shadowmap <= 4)
     {
         const float NUM_SAMPLES = 4.f;
         const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
