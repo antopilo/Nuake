@@ -71,6 +71,7 @@ namespace Nuake
 		if (this->Path != "")
 		{
 			j["Path"] = this->Path;
+			j["SkeletonNode"] = m_SkeletonRoot.Serialize();
 		}
 		else
 		{
@@ -86,10 +87,9 @@ namespace Nuake
 			for (auto& animation : m_Animations)
 			{
 				j["m_Animations"][a] = animation->Serialize();
+				a++;
 			}
-
 		}
-
 		
 		END_SERIALIZE();
 	}
@@ -107,6 +107,13 @@ namespace Nuake
 			m_SkeletonRoot = otherModel->GetSkeletonRootNode();
 			m_NumAnimation = m_Animations.size();
 			m_CurrentAnimation = 0;
+
+			if (j.contains("SkeletonNode"))
+			{
+				SkeletonNode skeletonNode;
+				skeletonNode.Deserialize(j["SkeletonNode"]);
+				m_SkeletonRoot = std::move(skeletonNode);
+			}
 
 			this->Path = j["Path"];
 		}

@@ -59,25 +59,11 @@ namespace Nuake
 			m_Scales.push_back(scale);
 		}
 
-		int GetPositionIndex(float animationTime)
-		{
-			if (m_Positions.size() == 0)
-			{
-				return 0;
-			}
-
-			for (int index = 0; index < m_Positions.size() - 1; index++)
-			{
-				if (animationTime < m_PositionTimestamps[index + 1])
-				{
-					return index;
-				}
-			}
-			assert(0);
-		}
-
 		void Update(float time)
 		{
+			// We cannot use const reference here because we would compare the reference to previous pos 
+			// to the m_PositionTransform and previous pos always equale.
+			// Making the hasChanged always false. We would end up comparing the same values always.
 			const Matrix4 previousPos = m_PositionTransform;
 			const Matrix4 previousRot = m_RotationTransform;
 			const Matrix4 previousSca = m_ScaleTransform;
@@ -97,6 +83,24 @@ namespace Nuake
 			return m_FinalTransform;
 		}
 
+		int GetPositionIndex(float animationTime)
+		{
+			if (m_Positions.size() == 0)
+			{
+				return 0;
+			}
+
+			for (int index = 0; index < m_Positions.size() - 1; index++)
+			{
+				if (animationTime < m_PositionTimestamps[index + 1])
+				{
+					return index;
+				}
+			}
+
+			return static_cast<int>(m_Positions.size()) - 1;
+		}
+
 		/* Gets the current index on mKeyRotations to interpolate to based on the
 		current animation time*/
 		int GetRotationIndex(float animationTime)
@@ -108,7 +112,8 @@ namespace Nuake
 					return index;
 				}
 			}
-			assert(0);
+
+			return static_cast<int>(m_Rotations.size()) - 1;
 		}
 
 		/* Gets the current index on mKeyScalings to interpolate to based on the
@@ -122,7 +127,8 @@ namespace Nuake
 					return index;
 				}
 			}
-			assert(0);
+
+			return static_cast<int>(m_Scales.size()) - 1;
 		}
 
 		float GetScaleFactor(float lastTime, float nextTime, float animationTime);
@@ -158,7 +164,7 @@ namespace Nuake
 			}
 			else
 			{
-				m_CurrentTime = time;
+				m_CurrentTime = std::max(time, m_Duration);
 			}
 		}
 

@@ -11,6 +11,11 @@ namespace Nuake
 		m_PositionTimestamps = std::vector<float>();
 		m_RotationTimestamps = std::vector<float>();
 		m_ScaleTimestamps = std::vector<float>();
+
+		m_PositionTransform = Matrix4(1.0f);
+		m_RotationTransform = Matrix4(1.0f);
+		m_ScaleTransform = Matrix4(1.0f);
+		m_FinalTransform = Matrix4(1.0f);
 	}
 
 	float BoneTransformTrack::GetScaleFactor(float lastTime, float nextTime, float animationTime)
@@ -22,7 +27,7 @@ namespace Nuake
 		return scaleFactor;
 	}
 
-	Nuake::Matrix4 BoneTransformTrack::InterpolatePosition(float time)
+	Matrix4 BoneTransformTrack::InterpolatePosition(float time)
 	{
 		if (m_Positions.size() == 0)
 		{
@@ -34,14 +39,20 @@ namespace Nuake
 			return glm::translate(Matrix4(1.0f), m_Positions[0]);
 		}
 
+		// This returns the last position when we are at the last keyframe
 		int p0Index = GetPositionIndex(time);
+		if (p0Index == m_Positions.size() - 1)
+		{
+			return glm::translate(Matrix4(1.0f), m_Positions[p0Index]);
+		}
+
 		int p1Index = p0Index + 1;
 		float scaleFactor = GetScaleFactor(m_PositionTimestamps[p0Index], m_PositionTimestamps[p1Index], time);
-		glm::vec3 finalPosition = glm::mix(m_Positions[p0Index], m_Positions[p1Index], scaleFactor);
+		Vector3 finalPosition = glm::mix(m_Positions[p0Index], m_Positions[p1Index], scaleFactor);
 		return glm::translate(Matrix4(1.0f), finalPosition);
 	}
 
-	Nuake::Matrix4 BoneTransformTrack::InterpolateRotation(float time)
+	Matrix4 BoneTransformTrack::InterpolateRotation(float time)
 	{
 		if (m_Rotations.size() == 0)
 		{
@@ -54,17 +65,21 @@ namespace Nuake
 			return glm::toMat4(rotation);
 		}
 
+		// This returns the last rotation when we are at the last keyframe
 		int p0Index = GetRotationIndex(time);
+		if (p0Index == m_Rotations.size() - 1)
+		{
+			return glm::toMat4(m_Rotations[p0Index]);
+		}
+
 		int p1Index = p0Index + 1;
-		float scaleFactor = GetScaleFactor(m_RotationTimestamps[p0Index],
-			m_RotationTimestamps[p1Index], time);
-		glm::quat finalRotation = glm::slerp(m_Rotations[p0Index],
-			m_Rotations[p1Index], scaleFactor);
+		float scaleFactor = GetScaleFactor(m_RotationTimestamps[p0Index], m_RotationTimestamps[p1Index], time);
+		Quat finalRotation = glm::slerp(m_Rotations[p0Index],m_Rotations[p1Index], scaleFactor);
 		finalRotation = glm::normalize(finalRotation);
 		return glm::toMat4(finalRotation);
 	}
 
-	Nuake::Matrix4 BoneTransformTrack::InterpolateScale(float time)
+	Matrix4 BoneTransformTrack::InterpolateScale(float time)
 	{
 		if (m_Scales.size() == 0)
 		{
@@ -72,14 +87,21 @@ namespace Nuake
 		}
 
 		if (1 == m_Scales.size())
+		{
 			return glm::scale(glm::mat4(1.0f), m_Scales[0]);
+		}
 
+		// This returns the last rotation when we are at the last keyframe
 		int p0Index = GetScaleIndex(time);
+		if (p0Index == m_Scales.size() - 1)
+		{
+			return glm::scale(Matrix4(1.0f), m_Scales[p0Index]);
+		}
+
 		int p1Index = p0Index + 1;
-		float scaleFactor = GetScaleFactor(m_ScaleTimestamps[p0Index],
-			m_ScaleTimestamps[p1Index], time);
-		glm::vec3 finalScale = glm::mix(m_Scales[p0Index], m_Scales[p1Index], scaleFactor);
-		return glm::scale(glm::mat4(1.0f), finalScale);
+		float scaleFactor = GetScaleFactor(m_ScaleTimestamps[p0Index], m_ScaleTimestamps[p1Index], time);
+		Vector3 finalScale = glm::mix(m_Scales[p0Index], m_Scales[p1Index], scaleFactor);
+		return glm::scale(Matrix4(1.0f), finalScale);
 	}
 
 	json BoneTransformTrack::Serialize()

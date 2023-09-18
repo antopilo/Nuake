@@ -47,17 +47,18 @@ namespace Nuake
 	{
 		const std::string& boneName = bone.Name;
 		
-		auto& animationTrack = animation->GetTrack(boneName);
+		auto animationTrack = animation->GetTrack(boneName);
 
 		Entity& boneEntity = m_Scene->GetEntity(boneName);
 		Entity& boneEnt = m_Scene->GetEntityByID(bone.EntityHandle);
 		///assert(boneEnt.GetHandle() == boneEntity.GetHandle());
+
 		if (boneEnt.IsValid())
 		{
 			auto& transformComponent = boneEnt.GetComponent<TransformComponent>();
 			bone.FinalTransform = transformComponent.GetGlobalTransform() * bone.Offset;
 
-			//if (!animationTrack.IsEmpty())
+			if (!animationTrack.IsEmpty())
 			{
 				// Get Update transform
 				animationTrack.Update(time);
@@ -76,7 +77,12 @@ namespace Nuake
 				transformComponent.Dirty = false;
 			}
 		}
-		
+		else
+		{
+			// Find bone
+
+		}
+
 		for (auto& childBone : bone.Children)
 		{
 			UpdateBonePositionTraversal(childBone, animation, time);

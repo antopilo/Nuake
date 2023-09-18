@@ -34,6 +34,27 @@ p = j[#p]; \
 #define DESERIALIZE_VEC2(v, p) \
 	p = Vector2(v["x"], v["y"]);
 
+#define SERIALIZE_MAT4(lbl, m) \
+{ \
+	int i = 0; \
+	for (int l = 0; l < 4; l++) { \
+		for (int k = 0; k < 4; k++) { \
+				j[lbl][i] = m[l][k]; \
+				i++; \
+		} \
+	} \
+}
+
+#define DESERIALIZE_MAT4(lbl, m) \
+{ \
+	int i = 0; \
+	for(int l = 0; l < 4; l++) { \
+		for(int k = 0; k < 4; k++) { \
+			m[l][k] = j[lbl][i];\
+			i++; \
+		} \
+	} \
+}
 
 #define SERIALIZE_OBJECT(v) j[#v] = v->Serialize();
 #define SERIALIZE_OBJECT_REF(v) j[#v] = v.Serialize();
