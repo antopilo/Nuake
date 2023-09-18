@@ -35,6 +35,7 @@ namespace Nuake
         bool Deserialize(const json& j)
         {
             ModelPath = j["ModelPath"];
+            
             ModelResource = CreateRef<SkinnedModel>();
 
             if (j.contains("ModelResource"))

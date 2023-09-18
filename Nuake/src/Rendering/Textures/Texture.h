@@ -28,10 +28,11 @@ namespace Nuake
 		int m_BPP; // byte per pixel.
 
 	public:
-		Texture(const std::string& path);
-		Texture(glm::vec2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t);
-		Texture(glm::vec2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0, void* data = NULL);
-		Texture(Vector2 size, unsigned char* data, int len);
+		Texture(const std::string& path); // Load texture from file
+		Texture(unsigned char* data, int len); // Used to load texture from a memory buffer
+
+		Texture(Vector2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0, void* data = 0); // Used to load texture from memeory with known size
+		Texture(Vector2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t); // Used internally for MSDF fonts
 		~Texture();
 
 		void Resize(glm::vec2 size);

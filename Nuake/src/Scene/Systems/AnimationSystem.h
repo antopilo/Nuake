@@ -19,6 +19,6 @@ namespace Nuake
 		void Exit() override;
 
 	private:
-		void UpdateBonePositionTraversal(SkeletonNode& bone, Ref<SkeletalAnimation> animation, float time);
+		void UpdateBonePositionTraversal(SkeletonNode& bone, Ref<SkeletalAnimation> animation, float time, bool isPlaying);
 	};
 }

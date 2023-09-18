@@ -174,12 +174,12 @@ namespace Nuake
 		fileWriter.close();
 	}
 
-	int FileSystem::DeleteFileFromPath(const std::string& path)
+	uintmax_t FileSystem::DeleteFileFromPath(const std::string& path)
 	{
 		return std::remove(path.c_str());
 	}
 
-	int FileSystem::DeleteFolder(const std::string& path)
+	uintmax_t FileSystem::DeleteFolder(const std::string& path)
 	{
 		return std::filesystem::remove_all(path.c_str());
 	}

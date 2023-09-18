@@ -46,6 +46,7 @@
 #include "src/Rendering/SceneRenderer.h"
 #include <dependencies/glfw/include/GLFW/glfw3.h>
 #include <src/Rendering/Buffers/Framebuffer.h>
+#include "UIDemoWindow.h"
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -1544,6 +1545,7 @@ namespace Nuake {
 
     bool isLoadingProject = false;
     bool isLoadingProjectQueue = false;
+    UIDemoWindow m_DemoWindow;
 
     int frameCount = 2;
     void EditorInterface::Draw()
@@ -1609,6 +1611,8 @@ namespace Nuake {
         }
 
         pInterface.m_CurrentProject = Engine::GetProject();
+
+        m_DemoWindow.Draw();
 
         _audioWindow->Draw();
 

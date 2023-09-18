@@ -180,7 +180,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
-    if (shadowmap <= 3)
+    if (shadowmap <= 4)
     {
         const float NUM_SAMPLES = 4.f;
         const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
@@ -272,7 +272,7 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     /// ambient lighting (we now use IBL as the ambient term)
@@ -282,7 +282,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (kD * albedo) * (ao) * ssao;
+    vec3 ambient = (vec3(0.5) * albedo) * (ao)*ssao;
     vec3 color = (ambient) + Lo;
 
     // Display CSM splits..
