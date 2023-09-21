@@ -47,6 +47,7 @@
 #include <dependencies/glfw/include/GLFW/glfw3.h>
 #include <src/Rendering/Buffers/Framebuffer.h>
 #include "UIDemoWindow.h"
+#include <src/Audio/AudioManager.h>
 
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
@@ -110,6 +111,13 @@ namespace Nuake {
 
                 Engine::LoadScene(SceneSnapshot);
                 Selection = EditorSelection();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button(ICON_FA_MUSIC, ImVec2(30, 30)))
+            {
+                Nuake::AudioManager::Get().QueueWavAudio("jump.wav");
             }
 
             ImGui::SameLine();
