@@ -112,7 +112,7 @@ int ApplicationMain(int argc, char* argv[])
     using namespace Nuake;
 
     // Parse launch arguments
-    const auto arguments = ParseArguments(argc, argv);
+    const auto& arguments = ParseArguments(argc, argv);
     LaunchSettings launchSettings = ParseLaunchSettings(arguments);
 
 #ifdef NK_DEBUG
@@ -133,29 +133,11 @@ int ApplicationMain(int argc, char* argv[])
 
     // Initialize Editor
     Nuake::EditorInterface editor;
-    editor.BuildFonts();
    
     // Load project in argument
     if (!launchSettings.projectPath.empty())
     {
-        FileSystem::SetRootDirectory(FileSystem::GetParentPath(launchSettings.projectPath));
-
-        auto project = Project::New();
-        auto projectFileData = FileSystem::ReadFile(launchSettings.projectPath, true);
-        try
-        {
-            project->Deserialize(json::parse(projectFileData));
-            project->FullPath = launchSettings.projectPath;
-
-            Engine::LoadProject(project);
-
-            editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-        }
-        catch (std::exception exception)
-        {
-            Logger::Log("Error loading project: " + launchSettings.projectPath, "editor", CRITICAL);
-            Logger::Log(exception.what());
-        }
+       editor.LoadProject(launchSettings.projectPath);
     }
 
     // Start application main loop

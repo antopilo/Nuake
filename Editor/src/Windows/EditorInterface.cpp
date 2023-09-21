@@ -61,6 +61,8 @@ namespace Nuake {
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
+
+        BuildFonts();
     }
 
     void EditorInterface::Init()
@@ -1675,4 +1677,30 @@ namespace Nuake {
 
         return entityTypeName;
     }
+
+	bool EditorInterface::LoadProject(const std::string& projectPath)
+	{
+        FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
+
+        auto project = Project::New();
+        auto projectFileData = FileSystem::ReadFile(projectPath, true);
+        try
+        {
+            project->Deserialize(json::parse(projectFileData));
+            project->FullPath = projectPath;
+
+            Engine::LoadProject(project);
+
+            filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+        }
+        catch (std::exception exception)
+        {
+            Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
+            Logger::Log(exception.what());
+            return false;
+        }
+
+        return true;
+	}
+
 }
