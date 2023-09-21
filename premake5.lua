@@ -268,7 +268,6 @@ project "Editor"
         }
         entrypoint "WinMainCRTStartup"
         flags { "WinMain" }
-        buildoptions { "-mwindows"}
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {

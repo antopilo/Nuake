@@ -61,31 +61,41 @@ LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
     size_t i = 0;
     for (const auto& arg : arguments)
     {
+        const size_t nextArgumentIndex = i + 1;
+        const bool containsAnotherArgument = nextArgumentIndex <= argumentSize;
         if (arg == "--project")
         {
-            if (i + 1 <= argumentSize)
+            if (!containsAnotherArgument)
             {
-                std::string projectPath = arguments[i + 1];
-                launchSettings.projectPath = projectPath;
+                continue;
             }
+
+            // Load project on start
+            std::string projectPath = arguments[i + 1];
+            launchSettings.projectPath = projectPath;
+            
         }
         else if (arg == "--resolution")
         {
-            if (i + 1 <= argumentSize)
+            if (!containsAnotherArgument)
             {
-                std::string resString = arguments[i + 1];
-                const auto& resSplits = String::Split(resString, 'x');
-                if (resSplits.size() == 2)
-                {
-                    int width = stoi(resSplits[0]);
-                    int height = stoi(resSplits[1]);
-                    launchSettings.resolution = Vector2(width, height);
-                }
+                continue;
+            }
+
+            // Set editor window resolution
+            std::string resString = arguments[i + 1];
+            const auto& resSplits = String::Split(resString, 'x');
+            if (resSplits.size() == 2)
+            {
+                int width = stoi(resSplits[0]);
+                int height = stoi(resSplits[1]);
+                launchSettings.resolution = Vector2(width, height);
             }
         }
         else if (arg == "--monitor")
         {
-            if (i + 1 <= argumentSize)
+            // Set editor window monitor
+            if (containsAnotherArgument)
             {
                 launchSettings.monitor = stoi(arguments[i + 1]);
             }
