@@ -68,10 +68,15 @@ project "Freetype"
 	
 	filter "configurations:Debug"
 		files { "freetype/src/base/ftdebug.c" }
-	runtime "Debug"
-	symbols "on"
+		runtime "Debug"
+		symbols "on"
 	
 	filter "configurations:Release"
 		files { "freetype/src/base/ftdebug.c" }
-	runtime "Release"
-	optimize "on"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		files { "freetype/src/base/ftdebug.c" }
+		runtime "Release"
+		optimize "on"

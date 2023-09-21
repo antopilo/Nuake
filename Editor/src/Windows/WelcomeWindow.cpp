@@ -131,10 +131,8 @@ namespace Nuake
 			ImGui::SameLine();
 			DrawRecentProjectsSection();
 		}
-
 		ImGui::End();
-		ImGui::PopStyleVar();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 	}
 
 	void WelcomeWindow::DrawRecentProjectsSection()

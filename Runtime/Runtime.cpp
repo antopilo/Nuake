@@ -5,7 +5,7 @@
 
 #include <string>
 
-void main(int argc, char* argv[])
+int ApplicationMain(int argc, char* argv[])
 {
     using namespace Nuake;
 
@@ -73,3 +73,26 @@ void main(int argc, char* argv[])
         Engine::EndDraw();
     }
 }
+
+#ifdef NK_DIST
+
+#include "windows.h"
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
+{
+    BOOL USE_DARK_MODE = true;
+    BOOL SET_IMMERSIVE_DARK_MODE_SUCCESS = SUCCEEDED(DwmSetWindowAttribute(
+        WINhWnd, DWMWINDOWATTRIBUTE::DWMWA_USE_IMMERSIVE_DARK_MODE,
+        &USE_DARK_MODE, sizeof(USE_DARK_MODE)));
+
+    return ApplicationMain(__argc, __argv);
+}
+
+#else
+
+void main(int argc, char* argv[])
+{
+    return ApplicationMain(argc, argv);
+}
+
+#endif

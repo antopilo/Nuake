@@ -39,3 +39,8 @@ project 'JoltPhysics'
 		cppdialect "C++17"
 		runtime "Release"
 		optimize "on"
+
+	filter "configurations:Dist"
+		cppdialect "C++17"
+		runtime "Release"
+		optimize "on"
