@@ -81,11 +81,10 @@ namespace Nuake {
 			// Check if we have audio queued
 			while (!m_AudioQueue.empty())
 			{
-				auto& first = m_AudioQueue.front();
-				const std::string& audioFilePath = first.audioFile;
+				auto& currentAudio = m_AudioQueue.front();
 
 				// If file exists, play it
-				m_Soloud->play(*&m_WavSamples[audioFilePath]);
+				m_Soloud->play(m_WavSamples[currentAudio.audioFile]);
 
 				// Remove item from queue.
 				m_AudioQueue.pop();
