@@ -221,7 +221,6 @@ namespace Nuake
 
 		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 
-
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
 
