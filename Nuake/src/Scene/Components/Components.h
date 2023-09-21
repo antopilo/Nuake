@@ -17,7 +17,11 @@
 #include "CylinderColliderComponent.h"
 #include "NativeScriptComponent.h"
 
+#include "ParticleEmitterComponent.h"
+
 #include "ParentComponent.h"
 #include "NameComponent.h"
 #include "BoxCollider.h"
+#include "AudioEmitterComponent.h"
+#include "WrenScriptComponent.h"
 #include "../Entities/Entity.h"

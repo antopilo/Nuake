@@ -8,11 +8,8 @@
 #include <src/Resource/ResourceLoader.h>
 #include <src/Resource/FontAwesome5.h>
 #include <src/Scripting/WrenScript.h>
+
 #include <Engine.h>
-
-#include "src/Scene/Components/WrenScriptComponent.h"
-#include "src/Scene/Components/ParticleEmitterComponent.h"
-
 
 EditorSelectionPanel::EditorSelectionPanel()
 {
@@ -150,7 +147,9 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
             MenuItemComponent("Sphere collider", SphereColliderComponent)
             MenuItemComponent("Mesh collider", MeshColliderComponent)
 			ImGui::Separator();
-            MenuItemComponent("Quake map", QuakeMapComponent)
+			MenuItemComponent("Quake map", QuakeMapComponent);
+			ImGui::Separator();
+			MenuItemComponent("Audio Emitter", AudioEmitterComponent);
             ImGui::EndPopup();
         }
         ImGui::Separator();

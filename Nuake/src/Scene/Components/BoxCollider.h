@@ -3,6 +3,7 @@
 #include "src/Core/Core.h"
 
 namespace Nuake {
+
 	class BoxColliderComponent
 	{
 	public:
