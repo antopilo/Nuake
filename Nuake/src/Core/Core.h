@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <queue>
 
 #define ASSERT(x) if (!(x)) assert(false)
 

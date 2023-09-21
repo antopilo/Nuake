@@ -118,9 +118,10 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
 void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 {
-    if (entity.HasComponent<Nuake::NameComponent>())
+	using namespace Nuake;
+    if (entity.HasComponent<NameComponent>())
     {
-        auto& entityName = entity.GetComponent<Nuake::NameComponent>().Name;
+        auto& entityName = entity.GetComponent<NameComponent>().Name;
         ImGuiTextSTD("##Name", entityName);
         ImGui::SameLine();
 
@@ -129,27 +130,27 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 
         if (ImGui::BeginPopup("ComponentPopup"))
         {
-			MenuItemComponent("Wren Script", Nuake::WrenScriptComponent)
-			MenuItemComponent("Camera", Nuake::CameraComponent)
-			MenuItemComponent("Light", Nuake::LightComponent)
+			MenuItemComponent("Wren Script", WrenScriptComponent);
+			MenuItemComponent("Camera", CameraComponent);
+			MenuItemComponent("Light", LightComponent);
 			ImGui::Separator();
-			MenuItemComponent("Model", Nuake::ModelComponent)
-			MenuItemComponent("Skinned Model", Nuake::SkinnedModelComponent)
-			MenuItemComponent("Bone", Nuake::BoneComponent)
+			MenuItemComponent("Model", ModelComponent);
+			MenuItemComponent("Skinned Model", SkinnedModelComponent);
+			MenuItemComponent("Bone", BoneComponent)
 			ImGui::Separator();
-			MenuItemComponent("Sprite", Nuake::SpriteComponent)
-			MenuItemComponent("Particle Emitter", Nuake::ParticleEmitterComponent)
+			MenuItemComponent("Sprite", SpriteComponent)
+			MenuItemComponent("Particle Emitter", ParticleEmitterComponent)
 			ImGui::Separator();
-			MenuItemComponent("Character Controller", Nuake::CharacterControllerComponent)
-            MenuItemComponent("Rigid body", Nuake::RigidBodyComponent)
+			MenuItemComponent("Character Controller", CharacterControllerComponent)
+            MenuItemComponent("Rigid body", RigidBodyComponent)
 			ImGui::Separator();
-            MenuItemComponent("Box collider", Nuake::BoxColliderComponent)
-			MenuItemComponent("Capsule collider", Nuake::CapsuleColliderComponent)
-			MenuItemComponent("Cylinder collider", Nuake::CylinderColliderComponent)
-            MenuItemComponent("Sphere collider", Nuake::SphereColliderComponent)
-            MenuItemComponent("Mesh collider", Nuake::MeshColliderComponent)
+            MenuItemComponent("Box collider", BoxColliderComponent)
+			MenuItemComponent("Capsule collider", CapsuleColliderComponent)
+			MenuItemComponent("Cylinder collider", CylinderColliderComponent)
+            MenuItemComponent("Sphere collider", SphereColliderComponent)
+            MenuItemComponent("Mesh collider", MeshColliderComponent)
 			ImGui::Separator();
-            MenuItemComponent("Quake map", Nuake::QuakeMapComponent)
+            MenuItemComponent("Quake map", QuakeMapComponent)
             ImGui::EndPopup();
         }
         ImGui::Separator();

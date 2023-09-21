@@ -10,21 +10,36 @@ namespace SoLoud
 	class AudioSource;
 }
 
+// Temp code
+struct audioQueueRequest
+{
+	std::string audioFile;
+};
+
+namespace SoLoud
+{
+	class Wav;
+}
+
 namespace Nuake
 {
 	// This is a singleton that manages everything for audio.
 	class AudioManager
 	{
 	private:
-		Ref<SoLoud::Soloud> _soloud;
-
-		bool _audioThreadRunning;
-		std::thread _audioThread;
-		std::mutex _audioMutex;
-
 		const int MAX_VOICE_COUNT = 32;
+
+		Ref<SoLoud::Soloud> m_Soloud;
+
+		bool m_AudioThreadRunning;
+		std::thread m_AudioThread;
+		std::mutex m_AudioQueueMutex;
+		std::atomic<bool> m_AudioQueued = { false };
+		std::queue<audioQueueRequest> m_AudioQueue;
+
+		std::unordered_map<std::string, SoLoud::Wav> m_WavSamples;
 	public:
-		AudioManager() = default;
+		AudioManager();
 		~AudioManager();
 
 		static AudioManager& Get()
@@ -42,6 +57,9 @@ namespace Nuake
 
 		void PlayTTS(const std::string& text);
 
+		void QueueWavAudio(const std::string& filePath);
+		bool IsWavLoaded(const std::string& filePath) const;
+		void LoadWavAudio(const std::string& filePath);
 	private:
 		void AudioThreadLoop();
 	};
