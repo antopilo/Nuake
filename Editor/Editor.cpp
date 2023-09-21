@@ -34,11 +34,12 @@
 
 #include "src/Misc/WindowTheming.h"
 
-const std::string WindowTitle = "Nuake Editor";
+std::string WindowTitle = "Nuake Editor ";
 
 int ApplicationMain(int argc, char* argv[])
 {
-    bool playMode = false;
+    using namespace Nuake;
+
     std::string projectPath = "";
 
     Vector2 editorResolution = Vector2(1280, 720);
@@ -47,15 +48,6 @@ int ApplicationMain(int argc, char* argv[])
     {
         char* arg = argv[i];
         std::string args = std::string(arg);
-
-        if (args == "--play")
-        {
-            if (argc > 2)
-            {
-                projectPath = std::string(argv[i + 1]);
-            }
-            playMode = true;
-        }
 
         if (args == "--resolution")
         {
@@ -84,7 +76,7 @@ int ApplicationMain(int argc, char* argv[])
     }
 
     bool shouldLoadProject = false;
-    if (!playMode && argc > 1)
+    if (argc > 1)
     {
         shouldLoadProject = true;
         projectPath = std::string(argv[1]);
@@ -136,8 +128,8 @@ int ApplicationMain(int argc, char* argv[])
 
         WindowTheming::SetWindowDarkMode(window);
 
-        Nuake::EditorInterface editor;
-        editor.BuildFonts();
+    Nuake::EditorInterface editor;
+    editor.BuildFonts();
 
         if (monitorIdx != -1)
         {
@@ -173,45 +165,45 @@ int ApplicationMain(int argc, char* argv[])
             Nuake::Engine::Tick();
             Nuake::Engine::Draw();
 
-            Timestep ts = Nuake::Engine::GetTimestep();
+        Timestep ts = Nuake::Engine::GetTimestep();
 
-            Nuake::Vector2 WindowSize = window->GetSize();
-            glViewport(0, 0, WindowSize.x, WindowSize.y);
-            Nuake::Renderer2D::BeginDraw(WindowSize);
+        Nuake::Vector2 WindowSize = window->GetSize();
+        glViewport(0, 0, WindowSize.x, WindowSize.y);
+        Nuake::Renderer2D::BeginDraw(WindowSize);
 
-            auto sceneFramebuffer = window->GetFrameBuffer();
-            sceneFramebuffer->Bind();
+        auto sceneFramebuffer = window->GetFrameBuffer();
+        sceneFramebuffer->Bind();
+        {
+            Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+            Ref<EditorCamera> camera;
+            if (currentScene)
             {
-                Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
-                Ref<EditorCamera> camera;
-                if (currentScene)
+                camera = currentScene->m_EditorCamera;
+            }
+
+            if (currentScene && !Nuake::Engine::IsPlayMode())
+            {
+                glEnable(GL_LINE_SMOOTH);
+
+                if (editor.ShouldDrawAxis())
                 {
-                    camera = currentScene->m_EditorCamera;
+                    //gizmoDrawer.DrawAxis(currentScene);
                 }
 
-                if (currentScene && !Nuake::Engine::IsPlayMode())
+                if (editor.ShouldDrawCollision())
                 {
-                    glEnable(GL_LINE_SMOOTH);
-
-                    if (editor.ShouldDrawAxis())
-                    {
-                        //gizmoDrawer.DrawAxis(currentScene);
-                    }
-
-                    if (editor.ShouldDrawCollision())
-                    {
-                        gizmoDrawer.DrawGizmos(currentScene);
-                    }
+                    gizmoDrawer.DrawGizmos(currentScene);
                 }
             }
-            sceneFramebuffer->Unbind();
-
-            editor.Update(ts);
-            editor.Draw();
-
-            Nuake::Engine::EndDraw();
         }
+        sceneFramebuffer->Unbind();
+
+        editor.Update(ts);
+        editor.Draw();
+
+        Nuake::Engine::EndDraw();
     }
+    
 
     Nuake::Engine::Close();
 

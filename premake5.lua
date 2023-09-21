@@ -4,7 +4,8 @@ workspace "Nuake"
     configurations
     {
         "Debug",
-        "Release"
+        "Release",
+        "Dist"
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -14,6 +15,7 @@ include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
 include "Nuake/dependencies/jolt_p5.lua"
 include "Nuake/dependencies/soloud_p5.lua"
+include "Nuake/dependencies/optick_p5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -25,6 +27,7 @@ project "Nuake"
         "GLEW_STATIC",
         "_MBCS"
     }
+
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -72,14 +75,29 @@ project "Nuake"
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
+        defines {
+            "NK_WIN"
+        }
 
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+        defines 
+        {
+            "NK_DEBUG"
+        }
 
     filter "configurations:Release"
         runtime "Release"
         optimize "on"
+
+    filter "configurations:Dist"
+        runtime "Release"
+        optimize "on"
+        defines 
+        {
+            "NK_DIST"
+        }
 
 project "NuakeRuntime"
     location "Runtime"
@@ -138,14 +156,28 @@ project "NuakeRuntime"
     filter "system:windows"
         cppdialect "C++17"
         staticruntime "On"
+        defines {
+            "NK_WIN"
+        }
 
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+        defines {
+            "NK_DEBUG"
+        }
 
     filter "configurations:Release"
+        kind "WindowedApp"
         runtime "Release"
         optimize "on"
+        defines {
+            "NK_DIST",
+            "WIN32_LEAN_AND_MEAN"
+        }
+        entrypoint "WinMainCRTStartup"
+        flags { "WinMain" }
+        buildoptions { "-mwindows"}
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {
@@ -160,11 +192,6 @@ project "Editor"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")
-
-    defines 
-    {
-        
-    }
 
     files
     {
@@ -226,6 +253,18 @@ project "Editor"
     filter "configurations:Release"
         runtime "Release"
         optimize "on"
+
+    filter "configurations:Dist"
+        kind "WindowedApp"
+        runtime "Release"
+        optimize "on"
+        defines {
+            "NK_DIST",
+            "WIN32_LEAN_AND_MEAN"
+        }
+        entrypoint "WinMainCRTStartup"
+        flags { "WinMain" }
+        buildoptions { "-mwindows"}
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {

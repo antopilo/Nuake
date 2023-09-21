@@ -19,6 +19,7 @@
 #include <src/Scene/Components/ModelComponent.h>
 #include <src/Scene/Components/ParticleEmitterComponent.h>
 #include <src/Scene/Components/BoneComponent.h>
+#include <src/Scene/Components/AudioEmitterComponent.h>
 
 GizmoDrawer::GizmoDrawer()
 {
@@ -365,6 +366,26 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+	}
+
+	renderList.Flush(gizmoShader, true);
+
+	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
+	for (auto e : audioView)
+	{
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/speaker.png").get());
+		auto [transformComponent, audioEmitterComponent] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
+
+		auto initialTransform = transformComponent.GetGlobalTransform();
+		Matrix4 transform = initialTransform;
+		transform = glm::inverse(scene->m_EditorCamera->GetTransform());
+
+		// Translation
+		const Vector3& globalPosition = transformComponent.GetGlobalPosition();
+		transform[3] = initialTransform[3];
+		transform = glm::scale(transform, Vector3(0.5f, 0.5f, 0.5f));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, transform);
 	}
 
 	renderList.Flush(gizmoShader, true);
