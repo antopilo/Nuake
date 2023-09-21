@@ -32,10 +32,11 @@
 #include <src/Core/Maths.h>
 #include <src/Rendering/SceneRenderer.h>
 
+#include "src/Misc/WindowTheming.h"
 
 const std::string WindowTitle = "Nuake Editor";
 
-int main(int argc, char* argv[])
+int ApplicationMain(int argc, char* argv[])
 {
     bool playMode = false;
     std::string projectPath = "";
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
             {
                 std::string monitorIdxString = std::string(argv[i + 1]);
                 monitorIdx = stoi(monitorIdxString);
-               
+
             }
         }
     }
@@ -128,45 +129,45 @@ int main(int argc, char* argv[])
     else
     {
         Nuake::Engine::Init();
-        Engine::GetCurrentWindow()->SetSize(editorResolution);
+
+        auto& window = Engine::GetCurrentWindow();
+        window->SetSize(editorResolution);
+        window->SetTitle(WindowTitle);
+
+        WindowTheming::SetWindowDarkMode(window);
 
         Nuake::EditorInterface editor;
         editor.BuildFonts();
-
-        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
-        window->SetTitle(WindowTitle);
 
         if (monitorIdx != -1)
         {
             window->SetMonitor(monitorIdx);
         }
 
-        using namespace Nuake;
-
         GizmoDrawer gizmoDrawer = GizmoDrawer();
 
         if (shouldLoadProject)
         {
-			FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
+            FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
 
-			auto project = Project::New();
-			auto projectFileData = FileSystem::ReadFile(projectPath, true);
-			try
-			{
-				project->Deserialize(json::parse(projectFileData));
-				project->FullPath = projectPath;
+            auto project = Project::New();
+            auto projectFileData = FileSystem::ReadFile(projectPath, true);
+            try
+            {
+                project->Deserialize(json::parse(projectFileData));
+                project->FullPath = projectPath;
 
-				Engine::LoadProject(project);
+                Engine::LoadProject(project);
 
-				editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-			}
-			catch (std::exception exception)
-			{
-				Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
-				Logger::Log(exception.what());
-			}
+                editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
+            }
+            catch (std::exception exception)
+            {
+                Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
+                Logger::Log(exception.what());
+            }
         }
-        
+
         while (!window->ShouldClose())
         {
             Nuake::Engine::Tick();
@@ -213,4 +214,24 @@ int main(int argc, char* argv[])
     }
 
     Nuake::Engine::Close();
+
+    return 0;
 }
+
+#ifdef NK_DIST
+
+#include "windows.h"
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
+{
+    return ApplicationMain(__argc, __argv);
+}
+
+#else
+
+int main(int argc, char* argv[])
+{
+    return ApplicationMain(argc, argv);
+}
+
+#endif
