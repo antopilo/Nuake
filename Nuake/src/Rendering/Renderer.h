@@ -33,6 +33,7 @@ namespace Nuake
 	{
 	private:
 		static RenderList m_RenderList;
+		static uint32_t MAX_LIGHT;
 
 	public:
 		static VertexArray* QuadVertexArray;

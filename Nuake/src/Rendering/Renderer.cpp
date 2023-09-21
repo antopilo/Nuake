@@ -18,6 +18,8 @@
 
 namespace Nuake
 {
+    uint32_t Renderer::MAX_LIGHT = 32;
+
     unsigned int depthTexture;
     unsigned int depthFBO;
 
@@ -137,8 +139,10 @@ namespace Nuake
 
     void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light)
     {
-        if (m_Lights.size() == 20)
+        if (m_Lights.size() == MAX_LIGHT)
+        {
             return;
+        }
 
         Shader* deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         deferredShader->Bind();
@@ -173,7 +177,6 @@ namespace Nuake
        deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
 
        m_LightsUniformBuffer->Bind();
-       //m_LightsUniformBuffer->UpdateData()
     }
 
     void Renderer::DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform)

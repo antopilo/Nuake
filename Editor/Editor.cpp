@@ -34,143 +34,133 @@
 
 #include "src/Misc/WindowTheming.h"
 
-std::string WindowTitle = "Nuake Editor ";
 
-int ApplicationMain(int argc, char* argv[])
+struct LaunchSettings
 {
-    using namespace Nuake;
+    int32_t monitor = -1;
+    Vector2 resolution = { 1920, 1080 };
+    std::string windowTitle = "Nuake Editor ";
+    std::string projectPath;
+};
 
-    std::string projectPath = "";
-
-    Vector2 editorResolution = Vector2(1280, 720);
-    int monitorIdx = -1;
+std::vector<std::string> ParseArguments(int argc, char* argv[])
+{
+    std::vector<std::string> args;
     for (uint32_t i = 0; i < argc; i++)
     {
-        char* arg = argv[i];
-        std::string args = std::string(arg);
+        args.push_back(std::string(argv[i]));
+    }
+    return args;
+}
 
-        if (args == "--resolution")
+LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
+{
+    LaunchSettings launchSettings;
+
+    const auto argumentSize = arguments.size();
+    size_t i = 0;
+    for (const auto& arg : arguments)
+    {
+        if (arg == "--project")
         {
-            if (argc >= i + 1)
+            if (i + 1 <= argumentSize)
             {
-                std::string resString = std::string(argv[i + 1]);
+                std::string projectPath = arguments[i + 1];
+                launchSettings.projectPath = projectPath;
+            }
+        }
+        else if (arg == "--resolution")
+        {
+            if (i + 1 <= argumentSize)
+            {
+                std::string resString = arguments[i + 1];
                 const auto& resSplits = String::Split(resString, 'x');
                 if (resSplits.size() == 2)
                 {
                     int width = stoi(resSplits[0]);
                     int height = stoi(resSplits[1]);
-                    editorResolution = Vector2(width, height);
+                    launchSettings.resolution = Vector2(width, height);
                 }
             }
         }
-
-        if (args == "--monitor")
+        else if (arg == "--monitor")
         {
-            if (argc >= i + 1)
+            if (i + 1 <= argumentSize)
             {
-                std::string monitorIdxString = std::string(argv[i + 1]);
-                monitorIdx = stoi(monitorIdxString);
-
+                launchSettings.monitor = stoi(arguments[i + 1]);
             }
         }
+
+        i++;
     }
 
-    bool shouldLoadProject = false;
-    if (argc > 1)
+    return launchSettings;
+}
+
+int ApplicationMain(int argc, char* argv[])
+{
+    using namespace Nuake;
+
+    // Parse launch arguments
+    const auto arguments = ParseArguments(argc, argv);
+    LaunchSettings launchSettings = ParseLaunchSettings(arguments);
+
+#ifdef NK_DEBUG
+    launchSettings.windowTitle += "(DEBUG BUILD)";
+#endif // NK_DEBUG
+
+    // Initialize Engine & Window
+    Engine::Init();
+    auto& window = Engine::GetCurrentWindow();
+    window->SetSize(launchSettings.resolution);
+    window->SetTitle(launchSettings.windowTitle);
+
+    if (launchSettings.monitor >= 0)
     {
-        shouldLoadProject = true;
-        projectPath = std::string(argv[1]);
+        window->SetMonitor(launchSettings.monitor);
     }
+    WindowTheming::SetWindowDarkMode(window);
 
-    if (playMode)
-    {
-        Nuake::Engine::Init();
-        Nuake::EditorInterface editor;
-        editor.BuildFonts();
-
-        Ref<Nuake::Project> project = Nuake::Project::New();
-        FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
-
-        project->FullPath = projectPath;
-        project->Deserialize(FileSystem::ReadFile(projectPath, true));
-
-        Ref<Nuake::Window> window = Nuake::Engine::GetCurrentWindow();
-        window->SetTitle(project->Name);
-
-        Nuake::Engine::LoadProject(project);
-
-        Nuake::Engine::EnterPlayMode();
-        auto shader = Nuake::ShaderManager::GetShader("resources/Shaders/copy.shader");
-        while (!window->ShouldClose())
-        {
-            Nuake::Vector2 WindowSize = window->GetSize();
-            glViewport(0, 0, WindowSize.x, WindowSize.y);
-            Nuake::Renderer2D::BeginDraw(WindowSize);
-            Nuake::Engine::Tick();
-            Nuake::Engine::Draw();
-
-            shader->Bind();
-
-            window->GetFrameBuffer()->GetTexture()->Bind(0);
-            shader->SetUniform1i("u_Source", 0);
-            Nuake::Renderer::DrawQuad(Nuake::Matrix4(1));
-
-            Nuake::Engine::EndDraw();
-        }
-    }
-    else
-    {
-        Nuake::Engine::Init();
-
-        auto& window = Engine::GetCurrentWindow();
-        window->SetSize(editorResolution);
-        window->SetTitle(WindowTitle);
-
-        WindowTheming::SetWindowDarkMode(window);
-
+    // Initialize Editor
     Nuake::EditorInterface editor;
     editor.BuildFonts();
+   
+    // Load project in argument
+    if (!launchSettings.projectPath.empty())
+    {
+        FileSystem::SetRootDirectory(FileSystem::GetParentPath(launchSettings.projectPath));
 
-        if (monitorIdx != -1)
+        auto project = Project::New();
+        auto projectFileData = FileSystem::ReadFile(launchSettings.projectPath, true);
+        try
         {
-            window->SetMonitor(monitorIdx);
+            project->Deserialize(json::parse(projectFileData));
+            project->FullPath = launchSettings.projectPath;
+
+            Engine::LoadProject(project);
+
+            editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
         }
-
-        GizmoDrawer gizmoDrawer = GizmoDrawer();
-
-        if (shouldLoadProject)
+        catch (std::exception exception)
         {
-            FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
-
-            auto project = Project::New();
-            auto projectFileData = FileSystem::ReadFile(projectPath, true);
-            try
-            {
-                project->Deserialize(json::parse(projectFileData));
-                project->FullPath = projectPath;
-
-                Engine::LoadProject(project);
-
-                editor.filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-            }
-            catch (std::exception exception)
-            {
-                Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
-                Logger::Log(exception.what());
-            }
+            Logger::Log("Error loading project: " + launchSettings.projectPath, "editor", CRITICAL);
+            Logger::Log(exception.what());
         }
+    }
 
-        while (!window->ShouldClose())
-        {
-            Nuake::Engine::Tick();
-            Nuake::Engine::Draw();
-
-        Timestep ts = Nuake::Engine::GetTimestep();
-
+    // Start application main loop
+    GizmoDrawer gizmoDrawer = GizmoDrawer();
+    while (!window->ShouldClose())
+    {
+        Nuake::Engine::Tick(); // Update
+        Nuake::Engine::Draw(); // Render
+       
+        // Render editor
         Nuake::Vector2 WindowSize = window->GetSize();
         glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
 
+        // Draw gizmos
         auto sceneFramebuffer = window->GetFrameBuffer();
         sceneFramebuffer->Bind();
         {
@@ -198,15 +188,15 @@ int ApplicationMain(int argc, char* argv[])
         }
         sceneFramebuffer->Unbind();
 
-        editor.Update(ts);
+        // Update & Draw editor
+        editor.Update(Nuake::Engine::GetTimestep());
         editor.Draw();
 
         Nuake::Engine::EndDraw();
     }
-    
 
+    // Shutdown
     Nuake::Engine::Close();
-
     return 0;
 }
 
@@ -221,7 +211,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmds
 
 #else
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) 
 {
     return ApplicationMain(argc, argv);
 }

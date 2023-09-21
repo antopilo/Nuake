@@ -48,6 +48,8 @@
 #include <src/Rendering/Buffers/Framebuffer.h>
 #include "UIDemoWindow.h"
 
+#include <src/UI/ImUI.h>
+
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
@@ -1045,39 +1047,19 @@ namespace Nuake {
         ImGui::End();
 
         std::string title = ICON_FA_TREE + std::string(" Hierarchy");
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 0));
         if (ImGui::Begin(title.c_str()))
         {
-            // Buttons to add and remove entity.
-            if(ImGui::BeginChild("Buttons", ImVec2(ImGui::GetContentRegionAvail().x, 30), false))
-            {
-                // Add entity.
-                if (ImGui::Button(ICON_FA_PLUS, ImVec2(30, 30)))
-                    Engine::GetCurrentScene()->CreateEntity("Entity");
-
-               //// Remove Entity
-               //if (ImGui::Button("Remove"))
-               //{
-               //    scene->DestroyEntity(m_SelectedEntity);
-               //
-               //    // Unselect delted entity.
-               //    m_SelectedEntity = scene->GetAllEntities().at(0);
-               //}
-            }
-            ImGui::EndChild();
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
-            
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp))
+                ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 8, 4 });
+                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX))
                 {
                     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_IndentEnable);
                     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentEnable);
                     ImGui::TableSetupColumn("Visibility", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableHeadersRow();
-                    ImGui::TableNextRow();
 
                     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
                     std::vector<Entity> entities = scene->GetAllEntities();
@@ -1108,8 +1090,8 @@ namespace Nuake {
                     }
                     ImGui::PopStyleVar();
                 }
-
 				ImGui::EndTable();
+                ImGui::PopStyleVar();
 				
             }
             ImGui::EndChild();
@@ -1139,8 +1121,6 @@ namespace Nuake {
             }
         }
         ImGui::End();
-        ImGui::PopStyleVar();
-        ImGui::PopStyleVar();
     }
 
     bool EditorInterface::EntityContainsItself(Entity source, Entity target)

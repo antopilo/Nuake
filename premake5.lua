@@ -249,6 +249,10 @@ project "Editor"
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+        defines {
+            "NK_DEBUG",
+            "WIN32_LEAN_AND_MEAN"
+        }
 
     filter "configurations:Release"
         runtime "Release"
