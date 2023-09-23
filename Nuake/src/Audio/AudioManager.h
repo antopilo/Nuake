@@ -38,6 +38,7 @@ namespace Nuake
 	{
 	private:
 		const int MAX_VOICE_COUNT = 32;
+		float m_GlobalVolume = 1.0f;
 
 		Ref<SoLoud::Soloud> m_Soloud;
 
@@ -75,9 +76,12 @@ namespace Nuake
 
 		void PlayTTS(const std::string& text);
 
+		float GetGlobalVolume() const { return m_GlobalVolume; }
+
 		void QueueWavAudio(const AudioRequest& request);
 		void UpdateVoice(const AudioRequest & request);
 		void StopVoice(const std::string& filePath);
+		void StopAll() const;
 		bool IsWavLoaded(const std::string& filePath) const;
 		bool IsVoiceActive(const std::string & voice) const;
 		void LoadWavAudio(const std::string& filePath);

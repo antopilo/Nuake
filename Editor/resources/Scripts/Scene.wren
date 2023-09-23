@@ -36,6 +36,8 @@ class Scene {
 			return Trigger.new(id)
 		} else if (component == "Brush") {
 			return Brush.new(id)
+		} else if (component == "AudioEmitter") {
+			return AudioEmitter.new(id)
 		}
 	}
 
@@ -67,6 +69,9 @@ class Scene {
 	foreign static GetCameraRight_(e)     // returns a list x,y,z
 	//foreign static SetcameraFov(e, fov)
 	//foreign static GetCameraFov(e)        // returns a float
+
+	// Audio Emitter
+	foreign static SetAudioEmitterPlaying_(e, playing)
 
 	// Character controller
 	foreign static MoveAndSlide_(e, x, y, z)
@@ -225,7 +230,16 @@ class Camera {
 		var dir = Scene.GetCameraRight_(_entityId)
 		return Vector3.new(dir[0], dir[1], dir[2])
 	}
+}
 
+class AudioEmitter {
+	construct new(id) {
+		_entityId = id
+	}
+
+	SetPlaying(playing) {
+		Scene.SetAudioEmitterPlaying_(_entityId, playing)
+	}
 }
 
 class Trigger {

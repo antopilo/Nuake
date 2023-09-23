@@ -22,6 +22,7 @@
 #include <src/Scene/Components/TriggerZone.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/PrefabComponent.h>
+#include <src/Scene/Components/AudioEmitterComponent.h>
 
 namespace Nuake 
 {
@@ -56,6 +57,8 @@ namespace Nuake
 				RegisterMethod("SetCameraDirection_(_,_,_,_)", (void*)SetCameraDirection);
 				RegisterMethod("GetCameraDirection_(_)", (void*)GetCameraDirection);
 				RegisterMethod("GetCameraRight_(_)", (void*)GetCameraRight);
+
+				RegisterMethod("SetAudioEmitterPlaying_(_,_)", (void*)SetAudioEmitterPlaying);
 
 				RegisterMethod("MoveAndSlide_(_,_,_,_)", (void*)MoveAndSlide);
 				RegisterMethod("IsCharacterControllerOnGround_(_)", (void*)IsCharacterControllerOnGround);
@@ -151,6 +154,9 @@ namespace Nuake
 				if (name == "Brush") {
 					result = ent.HasComponent<BSPBrushComponent>();
 				}
+				if (name == "AudioEmitter") {
+					result = ent.HasComponent<AudioEmitterComponent>();
+				}
 
 				wrenSetSlotBool(vm, 0, result);
 			}
@@ -240,6 +246,17 @@ namespace Nuake
 				wrenInsertInList(vm, 0, 0, 1);
 				wrenInsertInList(vm, 0, 1, 2);
 				wrenInsertInList(vm, 0, 2, 3);
+			}
+
+			static void SetAudioEmitterPlaying(WrenVM* vm)
+			{
+				double handle = wrenGetSlotDouble(vm, 1);
+				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
+
+				auto& audioEmitter = ent.GetComponent<AudioEmitterComponent>();
+
+				bool isPlaying = wrenGetSlotBool(vm, 2);
+				audioEmitter.IsPlaying = isPlaying;
 			}
 
 			static void IsCharacterControllerOnGround(WrenVM* vm)

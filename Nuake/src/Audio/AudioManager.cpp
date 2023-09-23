@@ -44,8 +44,6 @@ namespace Nuake {
 
 	void AudioManager::SetListenerPosition(const Vector3& position, const Vector3& direction, const Vector3& up)
 	{
-		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
-		
 		if (position != m_ListenerPosition || direction != m_ListenerDirection || up != m_ListenerUp)
 		{
 			m_ListenerPosition = position;
@@ -96,13 +94,20 @@ namespace Nuake {
 		}
 
 		SoLoud::handle& voice = m_ActiveClips[request.audioFile];
-		m_Soloud->set3dSourcePosition(voice, request.position.x, request.position.y, request.position.z);
+
+		if (request.spatialized)
+		{
+			m_Soloud->set3dSourcePosition(voice, request.position.x, request.position.y, request.position.z);
+			m_Soloud->set3dSourceMinMaxDistance(voice, request.MinDistance, request.MaxDistance);
+			m_Soloud->set3dSourceAttenuation(voice, 1, request.AttenuationFactor);
+			m_Soloud->update3dAudio();
+		}
+		else
+		{
+			m_Soloud->setPan(voice, request.pan);
+		}
 		m_Soloud->setLooping(voice, request.Loop);
-		m_Soloud->set3dSourceMinMaxDistance(voice, request.MinDistance, request.MaxDistance);
-		m_Soloud->set3dSourceAttenuation(voice, 1, request.AttenuationFactor);
 		m_Soloud->setRelativePlaySpeed(voice, request.speed);
-		m_Soloud->setPan(voice, request.pan);
-		m_Soloud->update3dAudio();
 	}
 
 	void AudioManager::StopVoice(const std::string& filePath)
@@ -111,11 +116,17 @@ namespace Nuake {
 
 		if (!IsVoiceActive(filePath))
 		{
+			// We can't stop a voice that isn't active.
 			return;
 		}
 
 		SoLoud::handle& voice = m_ActiveClips[filePath];
 		m_Soloud->stop(voice);
+	}
+
+	void AudioManager::StopAll() const
+	{
+		m_Soloud->stopAll();
 	}
 
 	bool AudioManager::IsWavLoaded(const std::string& filePath) const
@@ -136,14 +147,10 @@ namespace Nuake {
 
 	void AudioManager::AudioThreadLoop()
 	{
-		
-
 		while(m_AudioThreadRunning)
 		{
 			// Acquire mutex lock
 			const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
-
-			//CleanupInactiveVoices();
 
 			// Check if we have audio queued
 			while (!m_AudioQueue.empty())
@@ -157,18 +164,18 @@ namespace Nuake {
 					soloudHandle = m_Soloud->play(audio);
 					m_Soloud->setVolume(soloudHandle, audioRequest.volume);
 					m_Soloud->setPan(soloudHandle, audioRequest.pan);
-					m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
-					m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
 				}
 				else
 				{
 					const Vector3& position = audioRequest.position;
 					soloudHandle = m_Soloud->play3d(audio, position.x, position.y, position.z);
 					m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
-					m_Soloud->set3dSourceAttenuation(soloudHandle, 1, audioRequest.AttenuationFactor);
-					m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+					m_Soloud->set3dSourceAttenuation(soloudHandle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
 				}
 				
+				m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
+				m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+
 				m_ActiveClips[audioRequest.audioFile] = soloudHandle;
 
 				// Remove item from queue.

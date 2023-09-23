@@ -19,6 +19,8 @@ namespace Nuake
 
 	bool AudioSystem::Init()
 	{
+		AudioManager::Get().StopAll();
+
 		return true;
 	}
 
@@ -76,7 +78,8 @@ namespace Nuake
 					audioManager.UpdateVoice(audioRequest);
 				}
 			}
-			else if (isPlaying)
+
+			if (isPlaying)
 			{
 				// Reset the play status to false since the audio has been fired
 				if (!audioEmitterComponent.Loop)
@@ -104,6 +107,6 @@ namespace Nuake
 
 	void AudioSystem::Exit()
 	{
-
+		AudioManager::Get().StopAll();
 	}
 }
