@@ -60,7 +60,7 @@ public:
                 ImGui::Text("Volume");
                 ImGui::TableNextColumn();
 
-                ImGui::DragFloat("##Volume", &component.Volume, 0.00f, 1.0f);
+                ImGui::DragFloat("##Volume", &component.Volume, 0.001f, 0.0f, 2.0f);
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.Volume, 1.0f);

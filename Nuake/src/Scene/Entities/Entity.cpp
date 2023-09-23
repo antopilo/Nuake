@@ -75,36 +75,39 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("SkinnedModelComponent", GetComponent<SkinnedModelComponent>())
 		if (HasComponent<BoneComponent>())
 			SERIALIZE_OBJECT_REF_LBL("BoneComponent", GetComponent<BoneComponent>())
+		if (HasComponent<AudioEmitterComponent>())
+			SERIALIZE_OBJECT_REF_LBL("AudioEmitterComponent", GetComponent<AudioEmitterComponent>())
 		END_SERIALIZE();
 	}
 
 	bool Entity::Deserialize(const json& j)
 	{
-		DESERIALIZE_COMPONENT(TransformComponent)
+		DESERIALIZE_COMPONENT(TransformComponent);
 		DESERIALIZE_COMPONENT(VisibilityComponent)
 		else
 		{
 			AddComponent<VisibilityComponent>();
 		}
-		DESERIALIZE_COMPONENT(NameComponent)
-		DESERIALIZE_COMPONENT(ParentComponent)
-		DESERIALIZE_COMPONENT(ParticleEmitterComponent)
-		DESERIALIZE_COMPONENT(SpriteComponent)
-		DESERIALIZE_COMPONENT(CameraComponent)
-		DESERIALIZE_COMPONENT(QuakeMapComponent)
-		DESERIALIZE_COMPONENT(LightComponent)
-		DESERIALIZE_COMPONENT(ModelComponent)
-		DESERIALIZE_COMPONENT(WrenScriptComponent)
-		DESERIALIZE_COMPONENT(CharacterControllerComponent)
-		DESERIALIZE_COMPONENT(BoxColliderComponent)
-		DESERIALIZE_COMPONENT(CapsuleColliderComponent)
-		DESERIALIZE_COMPONENT(CylinderColliderComponent)
-		DESERIALIZE_COMPONENT(MeshColliderComponent)
-		DESERIALIZE_COMPONENT(SphereColliderComponent)
-		DESERIALIZE_COMPONENT(RigidBodyComponent)
-		DESERIALIZE_COMPONENT(BSPBrushComponent)
-		DESERIALIZE_COMPONENT(BoneComponent)
-		DESERIALIZE_COMPONENT(SkinnedModelComponent)
+		DESERIALIZE_COMPONENT(NameComponent);
+		DESERIALIZE_COMPONENT(ParentComponent);
+		DESERIALIZE_COMPONENT(ParticleEmitterComponent);
+		DESERIALIZE_COMPONENT(SpriteComponent);
+		DESERIALIZE_COMPONENT(CameraComponent);
+		DESERIALIZE_COMPONENT(QuakeMapComponent);
+		DESERIALIZE_COMPONENT(LightComponent);
+		DESERIALIZE_COMPONENT(ModelComponent);
+		DESERIALIZE_COMPONENT(WrenScriptComponent);
+		DESERIALIZE_COMPONENT(CharacterControllerComponent);
+		DESERIALIZE_COMPONENT(BoxColliderComponent);
+		DESERIALIZE_COMPONENT(CapsuleColliderComponent);
+		DESERIALIZE_COMPONENT(CylinderColliderComponent);
+		DESERIALIZE_COMPONENT(MeshColliderComponent);
+		DESERIALIZE_COMPONENT(SphereColliderComponent);
+		DESERIALIZE_COMPONENT(RigidBodyComponent);
+		DESERIALIZE_COMPONENT(BSPBrushComponent);
+		DESERIALIZE_COMPONENT(BoneComponent);
+		DESERIALIZE_COMPONENT(SkinnedModelComponent);
+		DESERIALIZE_COMPONENT(AudioEmitterComponent);
 		return true;
 	}
 

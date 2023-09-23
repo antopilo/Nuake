@@ -1,19 +1,22 @@
 #pragma once
+#include "Scene.h"
+#include "Entities/Entity.h"
+
+#include "src/Core/Core.h"
+#include "src/Core/OS.h"
+#include "src/Core/Physics/PhysicsManager.h"
+
 #include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Systems/ParticleSystem.h"
 #include "src/Scene/Systems/AnimationSystem.h"
+#include <src/Scene/Systems/AudioSystem.h>
 
 #include "src/Rendering/SceneRenderer.h"
-#include "Scene.h"
-#include "Entities/Entity.h"
-
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/MaterialManager.h"
-#include "src/Core/Physics/PhysicsManager.h"
-#include "src/Core/Core.h"
 
 #include <GL/glew.h>
 
@@ -26,13 +29,13 @@
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/InterfaceComponent.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
+#include "src/Scene/Components/BoneComponent.h"
 
 #include <fstream>
 #include <future>
 #include <streambuf>
 #include <chrono>
-#include "src/Core/OS.h"
-#include "Components/BoneComponent.h"
+
 
 namespace Nuake 
 {
@@ -53,6 +56,7 @@ namespace Nuake
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
+		m_Systems.push_back(CreateRef<AudioSystem>(this));
 
 		m_SceneRenderer = new SceneRenderer();
 		m_SceneRenderer->Init();

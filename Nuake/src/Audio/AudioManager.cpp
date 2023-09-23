@@ -45,19 +45,19 @@ namespace Nuake {
 
 	}
 
-	void AudioManager::QueueWavAudio(const std::string& filePath)
+	void AudioManager::QueueWavAudio(const AudioRequest& request)
 	{
 		// Acquire mutex lock and push to queue
 		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
 
 		// Check if file exists and load
-		const bool fileExists = FileSystem::FileExists(filePath, true);
-		if (fileExists && !IsWavLoaded(filePath))
+		const bool fileExists = FileSystem::FileExists(request.audioFile, true);
+		if (fileExists && !IsWavLoaded(request.audioFile))
 		{
-			LoadWavAudio(filePath);
+			LoadWavAudio(request.audioFile);
 		}
 
-		m_AudioQueue.push({ filePath });
+		m_AudioQueue.push(request);
 	}
 
 	bool AudioManager::IsWavLoaded(const std::string& filePath) const
@@ -81,10 +81,12 @@ namespace Nuake {
 			// Check if we have audio queued
 			while (!m_AudioQueue.empty())
 			{
-				auto& currentAudio = m_AudioQueue.front();
+				AudioRequest& currentAudio = m_AudioQueue.front();
 
-				// If file exists, play it
-				m_Soloud->play(m_WavSamples[currentAudio.audioFile]);
+				SoLoud::handle soloudHandle = m_Soloud->play(m_WavSamples[currentAudio.audioFile]);
+				m_Soloud->setVolume(soloudHandle, currentAudio.volume);
+				m_Soloud->setPan(soloudHandle, currentAudio.pan);
+				m_Soloud->setRelativePlaySpeed(soloudHandle, currentAudio.speed);
 
 				// Remove item from queue.
 				m_AudioQueue.pop();

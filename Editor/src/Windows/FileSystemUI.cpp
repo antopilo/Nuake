@@ -248,6 +248,10 @@ namespace Nuake
                 {
                     dragType = "_Image";
                 }
+                else if (fileExtension == ".wav" || fileExtension == ".ogg")
+                {
+                    dragType = "_AudioFile";
+                }
 
                 ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
                 ImGui::Text(file->GetName().c_str());

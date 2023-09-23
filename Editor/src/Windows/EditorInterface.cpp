@@ -119,13 +119,6 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            if (ImGui::Button(ICON_FA_MUSIC, ImVec2(30, 30)))
-            {
-                Nuake::AudioManager::Get().QueueWavAudio("jump.wav");
-            }
-
-            ImGui::SameLine();
-
             ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - 120, 30));
 
             ImGui::SameLine();

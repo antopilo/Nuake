@@ -11,9 +11,13 @@ namespace SoLoud
 }
 
 // Temp code
-struct audioQueueRequest
+struct AudioRequest
 {
 	std::string audioFile;
+	float volume = 1.0f;
+	float pan = 0.0f;
+	float speed = 1.0f;
+
 };
 
 namespace SoLoud
@@ -35,7 +39,7 @@ namespace Nuake
 		std::thread m_AudioThread;
 		std::mutex m_AudioQueueMutex;
 		std::atomic<bool> m_AudioQueued = { false };
-		std::queue<audioQueueRequest> m_AudioQueue;
+		std::queue<AudioRequest> m_AudioQueue;
 
 		std::unordered_map<std::string, SoLoud::Wav> m_WavSamples;
 	public:
@@ -57,7 +61,7 @@ namespace Nuake
 
 		void PlayTTS(const std::string& text);
 
-		void QueueWavAudio(const std::string& filePath);
+		void QueueWavAudio(const AudioRequest& request);
 		bool IsWavLoaded(const std::string& filePath) const;
 		void LoadWavAudio(const std::string& filePath);
 	private:
