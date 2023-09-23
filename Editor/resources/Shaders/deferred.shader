@@ -40,15 +40,18 @@ uniform sampler2D m_Normal;
 uniform sampler2D m_SSAO;
 
 // Lights
-const int MaxLight = 29;
+const int MaxLight = 32;
 uniform int LightCount = 0;
 
 struct Light {
-    int Type; // 0 = directional, 1 = point
+    vec3 Color;
+    vec3 Position;
+};
+
+struct DirectionalLight
+{
     vec3 Direction;
     vec3 Color;
-    float Strength;
-    vec3 Position;
     int ShadowMapsIDs[4];
     float CascadeDepth[4];
     mat4 LightTransforms[4];
@@ -58,6 +61,7 @@ struct Light {
 uniform sampler2D ShadowMaps[4];
 
 uniform Light Lights[MaxLight];
+uniform DirectionalLight u_DirectionalLight;
 
 // Converts depth to World space coords.
 vec3 WorldPosFromDepth(float depth) {
@@ -118,13 +122,13 @@ vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
     return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 
-int GetCSMDepth(float depth, Light light)
+int GetCSMDepth(float depth)
 {
     int shadowmap = -1;
     // Get CSM depth
     for (int i = 0; i < 4; i++)
     {
-        float CSMDepth = light.CascadeDepth[i];
+        float CSMDepth = u_DirectionalLight.CascadeDepth[i];
 
         if (depth < CSMDepth + 0.0001f)
         {
@@ -158,15 +162,15 @@ float SampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec
     return mix(mixA, mixB, fracPart.x);
 }
 
-float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
+float ShadowCalculation(vec3 FragPos, vec3 normal)
 {
     // Get Depth
     float depth = length(FragPos - u_EyePosition);
-    int shadowmap = GetCSMDepth(depth, light);
+    int shadowmap = GetCSMDepth(depth);
     if (shadowmap == -1)
         return 1.0;
 
-    vec4 fragPosLightSpace = light.LightTransforms[shadowmap] * vec4(FragPos, 1.0f);
+    vec4 fragPosLightSpace = u_DirectionalLight.LightTransforms[shadowmap] * vec4(FragPos, 1.0f);
 
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -177,7 +181,7 @@ float ShadowCalculation(Light light, vec3 FragPos, vec3 normal)
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
     float shadow = 0.0;
-    float bias = max(0.005 * (1.0 - dot(normal, light.Direction)), 0.0005);
+    float bias = max(0.005 * (1.0 - dot(normal, u_DirectionalLight.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
     if (shadowmap <= 4)
@@ -235,6 +239,37 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 fog = vec3(0.0);
     float shadow = 0.0f;
+
+    if (true)
+    {
+        vec3 L = normalize(u_DirectionalLight.Direction);
+
+        float attenuation = 1.0f;
+
+        L = normalize(u_DirectionalLight.Direction);
+        shadow += ShadowCalculation(worldPos, N);
+
+        vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;
+
+        vec3 H = normalize(V + L);
+        float NDF = DistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
+        vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+        vec3 nominator = NDF * G * F;
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        vec3 specular = nominator / denominator;
+
+        // kS is equal to Fresnel
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        // scale light by NdotL
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }
+
     for (int i = 0; i < LightCount; i++)
     {
         vec3 L = normalize(Lights[i].Position - worldPos);
@@ -242,18 +277,7 @@ void main()
         float distance = length(Lights[i].Position - worldPos);
         float attenuation = 1.0 / (distance * distance);
 
-        if (Lights[i].Type == 0) 
-        {
-            L = normalize(Lights[i].Direction);
-            attenuation = 1.0f;
-            shadow += ShadowCalculation(Lights[i], worldPos, N);
-        }
-
         vec3 radiance = Lights[i].Color * attenuation ;
-        if (Lights[i].Type == 0) 
-        {
-            radiance *= shadow;
-        }
 
         // Cook-Torrance BRDF
         vec3 H = normalize(V + L);
@@ -282,7 +306,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (vec3(0.5) * albedo) * (ao)*ssao;
+    vec3 ambient = (vec3(0.5) * albedo) * ao * ssao;
     vec3 color = (ambient) + Lo;
 
     // Display CSM splits..

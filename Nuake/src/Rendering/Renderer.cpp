@@ -139,11 +139,6 @@ namespace Nuake
 
     void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light)
     {
-        if (m_Lights.size() == MAX_LIGHT)
-        {
-            return;
-        }
-
         Shader* deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
         deferredShader->Bind();
         m_Lights.push_back({ transform , light });
@@ -156,25 +151,36 @@ namespace Nuake
         //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
 
         int shadowmapAmount = 0;
-        if (light.CastShadows && light.Type == Directional)
+        if (light.Type == Directional)
         {
-            for (unsigned int i = 0; i < CSM_AMOUNT; i++)
+            if (light.CastShadows)
             {
-                light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
-                deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowmapAmount + i) + "]", 17 + i);
-                deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].ShadowMapsIDs[" + std::to_string(i) + "]", shadowmapAmount + i);
-                deferredShader->SetUniform1f("Lights[" + std::to_string(idx - 1) + "].CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
-                deferredShader->SetUniformMat4f("Lights[" + std::to_string(idx - 1) + "].LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+                for (unsigned int i = 0; i < CSM_AMOUNT; i++)
+                {
+                    light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
+                    const uint32_t shadowMapId = shadowmapAmount + i;
+                    deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
+                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
+                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
+                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+                }
             }
+
+            deferredShader->SetUniform3f("u_DirectionalLight.Direction", direction.x, direction.y, direction.z);
+            deferredShader->SetUniform1i("u_DirectionalLight.Volumetric", light.IsVolumetric);
+            deferredShader->SetUniform3f("u_DirectionalLight.Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+
             shadowmapAmount += CSM_AMOUNT;
         }
 
+        if (m_Lights.size() == MAX_LIGHT)
+        {
+            return;
+        }
+
        deferredShader->SetUniform1i("LightCount", (int)idx);
-       deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Type", light.Type);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", pos.x, pos.y, pos.z);
-       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Direction", direction.x, direction.y, direction.z);
        deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
-       deferredShader->SetUniform1i("Lights[" + std::to_string(idx - 1) + "].Volumetric", light.IsVolumetric);
 
        m_LightsUniformBuffer->Bind();
     }
