@@ -43,7 +43,7 @@ uniform float samplingCoefficient = 0.001f;
 
 vec3 ReflectedVector;
 float Metallic;
-const float reflectionSpecularFalloffExponent = 3.0;
+const float reflectionSpecularFalloffExponent = 5.0;
 float random(vec2 uv) {
 	return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453123); //simple random function
 }
@@ -86,7 +86,7 @@ vec3 SSR(vec3 position, vec3 reflection) {
 				screenEdgefactor *
 				-ReflectedVector.z;
 			
-			return texture(textureFrame, screenPosition).xyz * color * clamp(ReflectionMultiplier, 0.0, 0.9);
+			return texture(textureFrame, screenPosition).xyz * color * clamp(ReflectionMultiplier, 0.0, 1.0);
 		}
 		if (isBinarySearchEnabled && delta > 0) {
 			break;
@@ -126,7 +126,7 @@ vec3 SSR(vec3 position, vec3 reflection) {
 		}
 	}
 
-	return vec3(0.0);
+	return vec3(0, 0, 0);
 }
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
@@ -160,21 +160,13 @@ void main() {
 				vec2 coeffs = vec2(random(UV + vec2(0, i)) + random(UV + vec2(i, 0))) * samplingCoefficient;
 				vec3 reflectionDirectionRandomized = reflectionDirection + firstBasis * coeffs.x + secondBasis * coeffs.y;
 				vec3 tempColor = SSR(position, normalize(reflectionDirectionRandomized));
-
-				if(tempColor != vec3(0))
-					resultingColor += vec4(tempColor, 1.0f);
+				
+				resultingColor += vec4(tempColor, 1.0f);
 			}
 
-			if(resultingColor.w != 0)
-				resultingColor /= resultingColor.w;
-
-			if (resultingColor.xyz == vec3(0.0f))
-			{
-				outColor = vec4(1, 0, 0, 0);
-
-				return;
-			}
 			
+			if (resultingColor.w != 0)
+				resultingColor /= resultingColor.w;
 
 			outColor = vec4(resultingColor.xyz * Fresnel, 1.0) ;
 			
