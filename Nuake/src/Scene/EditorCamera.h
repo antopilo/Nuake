@@ -33,8 +33,10 @@ namespace Nuake
 		float mouseLastX;
 		float mouseLastY;
 
-		float Yaw = -135.f;
-		float Pitch = -45.f;
+		float Yaw = -0.f;
+		float Pitch = 0.f;
+		float TargetYaw = -135.f;
+		float TargetPitch = -45.f;
 		void UpdateDirection();
 	};
 }

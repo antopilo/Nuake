@@ -47,6 +47,9 @@ namespace Nuake
 			}
 		}
 
+		Yaw = glm::mix(Yaw, TargetYaw, ts * 20.f);
+		Pitch = glm::mix(Pitch, TargetPitch, ts * 20.f);
+
 		if (!controlled)
 		{
 			Input::ShowMouse();
@@ -64,119 +67,121 @@ namespace Nuake
 				Fov = glm::max(Fov, 5.0f);
 				Input::YScroll = 0.0f;
 			}
+
+			return;
 		}
-		else
+
+		// Keyboard
+		if (!controlled)
 		{
-			// Keyboard
-			if (!controlled)
+			mouseLastX = x;
+			mouseLastY = y;
+			return;
+		}
+
+		if (Input::IsMouseButtonDown(1))
+		{
+			// Should probably not have speed binding in here.
+			if (Input::YScroll != 0)
 			{
-				mouseLastX = x;
-				mouseLastY = y;
-				return;
-			}
-
-			if (Input::IsMouseButtonDown(1))
-			{
-				// Should probably not have speed binding in here.
-				if (Input::YScroll != 0)
-				{
-					Speed += Input::YScroll;
-					Input::YScroll = 0.0f;
-				}
-
-				if (Speed < 0)
-					Speed = 0;
-
-				if (m_Type == CAMERA_TYPE::ORTHO)
-				{
-					if (Input::IsKeyDown(GLFW_KEY_RIGHT))
-						Translation.x += Speed * ts;
-					if (Input::IsKeyDown(GLFW_KEY_LEFT))
-						Translation.x -= Speed * ts;
-					if (Input::IsKeyDown(GLFW_KEY_UP))
-						Translation.y += Speed * ts;
-					if (Input::IsKeyDown(GLFW_KEY_DOWN))
-						Translation.y -= Speed * ts;
-				}
-				else
-				{
-					auto movement = Vector3(0, 0, 0);
-
-					if (Input::IsKeyDown(GLFW_KEY_D))
-						movement -= Right * (Speed * ts);
-					if (Input::IsKeyDown(GLFW_KEY_A))
-						movement += Right * (Speed * ts);
-
-					if (Input::IsKeyDown(GLFW_KEY_W))
-						movement += Direction * (Speed * ts);
-					if (Input::IsKeyDown(GLFW_KEY_S))
-						movement -= Direction * (Speed * ts);
-					if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
-						movement -= Up * (Speed * ts);
-					if (Input::IsKeyDown(GLFW_KEY_SPACE))
-						movement += Up * (Speed * ts);
-
-					Translation += Vector3(movement);
-				}
-
-				if (firstMouse)
-				{
-					mouseLastX = x;
-					mouseLastY = y;
-					firstMouse = false;
-				}
-
-				// mouse
-				float diffx = x - mouseLastX;
-				float diffy = mouseLastY - y;
-				mouseLastX = x;
-				mouseLastY = y;
-
-				const float sensitivity = 0.1f;
-				diffx *= sensitivity;
-				diffy *= sensitivity;
-
-				Yaw += diffx;
-				Pitch += diffy;
-
-				if (Pitch > 89.0f)
-					Pitch = 89.0f;
-
-				if (Pitch < -89.0f)
-					Pitch = -89.0f;
-
-				Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-				Direction.y = sin(glm::radians(Pitch));
-				Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-
-				SetDirection(glm::normalize(Direction));
-				Right = glm::normalize(glm::cross(Up, Direction));
-			}
-			else if (Input::IsMouseButtonDown(2))
-			{
-				Vector3 movement = Vector3(0);
-				const float deltaX = x - mouseLastX;
-				const float deltaY = y - mouseLastY;
-				movement += Right * (deltaX * ts);
-				movement += Up * (deltaY * ts);
-				Translation += Vector3(movement) * 0.5f;
-
-				mouseLastX = x;
-				mouseLastY = y;
-				controlled = true;
-
-				SetDirection(glm::normalize(Direction));
-			}
-			else if (Input::YScroll != 0)
-			{
-				Translation += Vector3(Direction) * Input::YScroll;
+				Speed += Input::YScroll;
 				Input::YScroll = 0.0f;
 			}
 
-			SetDirection(glm::normalize(Direction));
+			if (Speed < 0)
+				Speed = 0;
+
+			if (m_Type == CAMERA_TYPE::ORTHO)
+			{
+				if (Input::IsKeyDown(GLFW_KEY_RIGHT))
+					Translation.x += Speed * ts;
+				if (Input::IsKeyDown(GLFW_KEY_LEFT))
+					Translation.x -= Speed * ts;
+				if (Input::IsKeyDown(GLFW_KEY_UP))
+					Translation.y += Speed * ts;
+				if (Input::IsKeyDown(GLFW_KEY_DOWN))
+					Translation.y -= Speed * ts;
+			}
+			else
+			{
+				auto movement = Vector3(0, 0, 0);
+
+				if (Input::IsKeyDown(GLFW_KEY_D))
+					movement -= Right * (Speed * ts);
+				if (Input::IsKeyDown(GLFW_KEY_A))
+					movement += Right * (Speed * ts);
+
+				if (Input::IsKeyDown(GLFW_KEY_W))
+					movement += Direction * (Speed * ts);
+				if (Input::IsKeyDown(GLFW_KEY_S))
+					movement -= Direction * (Speed * ts);
+				if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+					movement -= Up * (Speed * ts);
+				if (Input::IsKeyDown(GLFW_KEY_SPACE))
+					movement += Up * (Speed * ts);
+
+				Translation += Vector3(movement);
+			}
+
+			if (firstMouse)
+			{
+				mouseLastX = x;
+				mouseLastY = y;
+				firstMouse = false;
+			}
+
+			// mouse
+			float diffx = x - mouseLastX;
+			float diffy = mouseLastY - y;
 			mouseLastX = x;
 			mouseLastY = y;
+
+			const float sensitivity = 0.1f;
+			diffx *= sensitivity;
+			diffy *= sensitivity;
+
+			TargetYaw += diffx;
+			TargetPitch += diffy;
+
+			if (TargetPitch > 89.0f)
+				TargetPitch = 89.0f;
+
+			if (TargetPitch < -89.0f)
+				TargetPitch = -89.0f;
+
+			Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+			Direction.y = sin(glm::radians(Pitch));
+			Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+
+			SetDirection(glm::normalize(Direction));
+			Right = glm::normalize(glm::cross(Up, Direction));
 		}
+		else if (Input::IsMouseButtonDown(2))
+		{
+			Vector3 movement = Vector3(0);
+			const float deltaX = x - mouseLastX;
+			const float deltaY = y - mouseLastY;
+			movement += Right * (deltaX * ts);
+			movement += Up * (deltaY * ts);
+			Translation += Vector3(movement) * 0.5f;
+
+			mouseLastX = x;
+			mouseLastY = y;
+			controlled = true;
+
+			SetDirection(glm::normalize(Direction));
+		}
+		else if (Input::YScroll != 0)
+		{
+			Translation += Vector3(Direction) * Input::YScroll;
+			Input::YScroll = 0.0f;
+		}
+
+		SetDirection(glm::normalize(Direction));
+		mouseLastX = x;
+		mouseLastY = y;
+
+
 	}
 
 	Ref<EditorCamera> EditorCamera::Copy()
@@ -191,23 +196,22 @@ namespace Nuake
 
 	void EditorCamera::UpdateDirection()
 	{
-		Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-		Direction.y = sin(glm::radians(Pitch));
-		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction.x = cos(glm::radians(TargetYaw)) * cos(glm::radians(TargetPitch));
+		Direction.y = sin(glm::radians(TargetPitch));
+		Direction.z = sin(glm::radians(TargetYaw)) * cos(glm::radians(TargetPitch));
 		Direction = glm::normalize(Direction);
 		SetDirection(Direction);
-
 	}
 
 	void EditorCamera::SetYaw(float yaw)
 	{
-		Yaw = yaw;
+		TargetYaw = yaw;
 		UpdateDirection();
 	}
 
 	void EditorCamera::SetPitch(float pitch)
 	{
-		Pitch = pitch;
+		TargetPitch = pitch;
 		UpdateDirection();
 	}
 
