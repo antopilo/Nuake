@@ -111,6 +111,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 	mCylinderColliderPanel.Draw(entity);
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
+	mAudioEmitterPanel.Draw(entity);
 }
 
 void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)

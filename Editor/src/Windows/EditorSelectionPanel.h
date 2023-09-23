@@ -22,6 +22,7 @@
 #include "../ComponentsPanel/ParticleEmitterPanel.h"
 #include "../ComponentsPanel/SkinnedModelPanel.h"
 #include "../ComponentsPanel/BonePanel.h"
+#include "../ComponentsPanel/AudioEmitterPanel.h"
 
 class EditorSelectionPanel 
 {
@@ -43,6 +44,7 @@ private:
 	CharacterControllerPanel mCharacterControllerPanel;
 	ParticleEmitterPanel mParticleEmitterPanel;
 	BonePanel mBonePanel;
+	AudioEmitterPanel mAudioEmitterPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
