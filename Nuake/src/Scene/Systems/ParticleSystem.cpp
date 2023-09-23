@@ -19,7 +19,7 @@ namespace Nuake
 
 	void ParticleSystem::Update(Timestep ts)
 	{
-		auto& view = m_Scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
+		auto view = m_Scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 		for (auto& e : view)
 		{
 			auto [transformComponent, emitterComponent] = view.get<TransformComponent, ParticleEmitterComponent>(e);
@@ -42,7 +42,7 @@ namespace Nuake
 
 	void ParticleSystem::FixedUpdate(Timestep ts)
 	{
-		auto& view = m_Scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
+		auto view = m_Scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 		for (auto& e : view)
 		{
 			auto [transformComponent, emitterComponent] = view.get<TransformComponent, ParticleEmitterComponent>(e);

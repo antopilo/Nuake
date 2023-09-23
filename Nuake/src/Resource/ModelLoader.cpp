@@ -147,7 +147,7 @@ namespace Nuake
 
 			SkeletonNode rootSkeletonNode;
 			ProcessAnimationNode(rootSkeletonNode, scene->mRootNode);
-			model->SetSkeletonRootNode(std::move(rootSkeletonNode));
+			model->SetSkeletonRootNode(rootSkeletonNode);
 			model->SetAnimations(std::move(animations));
 		}
 
@@ -189,10 +189,10 @@ namespace Nuake
 
 	Ref<SkinnedMesh> ModelLoader::ProcessSkinnedMesh(aiMesh* node, const aiScene* scene)
 	{
-		auto& vertices = ProcessSkinnedVertices(node);
-		auto& indices = ProcessIndices(node);
-		auto& material = ProcessMaterials(scene, node);
-		auto& bones = std::vector<Bone>();
+		auto vertices = ProcessSkinnedVertices(node);
+		auto indices = ProcessIndices(node);
+		auto material = ProcessMaterials(scene, node);
+		auto bones = std::vector<Bone>();
 
 		if (node->HasBones())
 		{

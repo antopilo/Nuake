@@ -192,7 +192,7 @@ namespace Nuake
 	Ref<File> FileSystem::GetFile(const std::string& path)
 	{
 		// Note, Might be broken on other platforms.
-		auto& splits = String::Split(path, '/');
+		auto splits = String::Split(path, '/');
 
 		int currentDepth = -1;
 		std::string currentDirName = ".";

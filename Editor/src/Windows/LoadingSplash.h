@@ -16,7 +16,7 @@ private:
 	Ref<Nuake::Texture> _NuakeLogo;
 
 public:
-	static LoadingSplash& LoadingSplash::Get()
+	static LoadingSplash& Get()
 	{
 		static LoadingSplash instance;
 		return instance;

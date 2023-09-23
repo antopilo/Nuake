@@ -338,7 +338,7 @@ namespace Nuake
 			settings->mPredictiveContactDistance = 0.01f;
 			settings->mShape = GetJoltShape(cc->Shape);
 
-			auto& joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
+			auto joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
 
 			const Quat& bodyRotation = cc->Rotation;
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
@@ -487,14 +487,18 @@ namespace Nuake
 
 			if(ts > minStepDuration)
 			{
+#ifdef NK_DEBUG
 				Logger::Log("Large step detected: " + std::to_string(ts), "physics", WARNING);
+#endif
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
 			}
 
+#ifdef NK_DEBUG
 			if (collisionSteps >= maxStepCount)
 			{
 				Logger::Log("Very large step detected: " + std::to_string(ts), "physics", WARNING);
 			}
+#endif
 
 			// Prevents having too many steps and running out of jobs
 			collisionSteps = std::min(collisionSteps, maxStepCount);
@@ -502,7 +506,6 @@ namespace Nuake
 			// Step the world
 			try
 			{
-				// TODO: Potential memory leak with new keyword.
 				auto joltTempAllocator = CreateRef<JPH::TempAllocatorMalloc>();
 
 				JPH::CharacterVirtual::ExtendedUpdateSettings joltUpdateSettings;
@@ -563,11 +566,6 @@ namespace Nuake
 
 			if (!_registeredCharacters.empty())
 			{
-				for (auto& character : _registeredCharacters)
-				{
-					//character.second->RemoveFromPhysicsSystem();
-				}
-
 				_registeredCharacters.clear();
 			}
 		}

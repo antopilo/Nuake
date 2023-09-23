@@ -47,7 +47,7 @@ namespace Nuake
 	{
 		auto& animationTrack = animation->GetTrack(bone.Name);
 
-		Entity& boneEnt = m_Scene->GetEntityByID(bone.EntityHandle);
+		Entity boneEnt = m_Scene->GetEntityByID(bone.EntityHandle);
 		if (boneEnt.IsValid())
 		{
 			auto& transformComponent = boneEnt.GetComponent<TransformComponent>();

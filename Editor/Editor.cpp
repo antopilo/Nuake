@@ -121,7 +121,7 @@ int ApplicationMain(int argc, char* argv[])
 
     // Initialize Engine & Window
     Engine::Init();
-    auto& window = Engine::GetCurrentWindow();
+    auto window = Engine::GetCurrentWindow();
     window->SetSize(launchSettings.resolution);
     window->SetTitle(launchSettings.windowTitle);
 

@@ -269,7 +269,7 @@ namespace Nuake {
 
                 if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
                 {
-                    auto& ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
+                    auto ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
                     if (ent.IsValid())
                     {
                         Selection = EditorSelection(ent);
@@ -423,9 +423,9 @@ namespace Nuake {
         ImGui::TableNextColumn();
         {
             bool& isVisible = e.GetComponent<VisibilityComponent>().Visible;
-            char* visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
+            std::string visibilityIcon = isVisible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
             ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
-            if (ImGui::Button(visibilityIcon, { 40, 0 }))
+            if (ImGui::Button(visibilityIcon.c_str(), {40, 0}))
             {
                 isVisible = !isVisible;
             }
@@ -1540,7 +1540,7 @@ namespace Nuake {
             _WelcomeWindow->LoadQueuedProject();
             isLoadingProjectQueue = false;
 
-            auto& window = Window::Get();
+            auto window = Window::Get();
             window->SetDecorated(true);
             window->SetSize({ 1900, 1000 });
             window->Center();

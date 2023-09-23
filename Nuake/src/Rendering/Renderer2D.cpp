@@ -95,7 +95,7 @@ namespace Nuake
 		float lineHeight = 0.0f;
 		for (char const& c : str)
 		{
-			Char& letter = style.font->GetChar((int)c);
+			Char letter = style.font->GetChar((int)c);
 
 			if (letter.PlaneBounds.top - letter.PlaneBounds.bottom > lineHeight)
 				lineHeight = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
@@ -104,7 +104,7 @@ namespace Nuake
 		float advance = 0.0f;
 		for (char const& c : str)
 		{
-			Char& letter = style.font->GetChar((int)c);
+			Char letter = style.font->GetChar((int)c);
 			advance += letter.Advance * style.fontSize;
 		}
 		return Vector2(advance, lineHeight * style.fontSize);
@@ -121,7 +121,7 @@ namespace Nuake
 		float lineHeight = 0.0f;
 		for (char const& c : str)
 		{
-			Char& letter = style.font->GetChar((int)c);
+			Char letter = style.font->GetChar((int)c);
 
 			if (letter.PlaneBounds.top - letter.PlaneBounds.bottom > lineHeight)
 				lineHeight = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
@@ -130,7 +130,7 @@ namespace Nuake
 		float advance = 0.0f;
 		for (char const& c : str) 
 		{
-			Char& letter = style.font->GetChar((int)c);
+			Char letter = style.font->GetChar((int)c);
 
 			Matrix4 mat = glm::translate(model, Vector3(advance, (-(letter.PlaneBounds.top ) + (lineHeight)) * style.fontSize, 0.f));
 			float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;

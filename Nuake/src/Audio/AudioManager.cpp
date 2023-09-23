@@ -37,7 +37,28 @@ namespace Nuake {
 
 	void AudioManager::Deinitialize()
 	{
+		m_WavSamples.clear();
+		m_ActiveClips.clear();
 		m_Soloud->deinit();
+	}
+
+	void AudioManager::SetListenerPosition(const Vector3& position, const Vector3& direction, const Vector3& up)
+	{
+		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
+		
+		if (position != m_ListenerPosition || direction != m_ListenerDirection || up != m_ListenerUp)
+		{
+			m_ListenerPosition = position;
+			m_ListenerDirection = direction;
+			m_ListenerUp = up;
+
+			m_Soloud->set3dListenerParameters(m_ListenerPosition.x, m_ListenerPosition.y, m_ListenerPosition.z,
+					m_ListenerDirection.x, m_ListenerDirection.y, m_ListenerDirection.z,
+					m_ListenerUp.x, m_ListenerUp.y, m_ListenerUp.z
+			);
+
+			m_Soloud->update3dAudio();
+		}
 	}
 
 	void AudioManager::PlayTTS(const std::string& text)
@@ -60,9 +81,51 @@ namespace Nuake {
 		m_AudioQueue.push(request);
 	}
 
+	void AudioManager::UpdateVoice(const AudioRequest& request)
+	{
+		// Acquire mutex lock
+		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
+
+		if (IsVoiceActive(request.audioFile))
+		{
+			if (!m_Soloud->isValidVoiceHandle(m_ActiveClips[request.audioFile]))
+			{
+				m_ActiveClips.erase(request.audioFile);
+				return;
+			}
+		}
+
+		SoLoud::handle& voice = m_ActiveClips[request.audioFile];
+		m_Soloud->set3dSourcePosition(voice, request.position.x, request.position.y, request.position.z);
+		m_Soloud->setLooping(voice, request.Loop);
+		m_Soloud->set3dSourceMinMaxDistance(voice, request.MinDistance, request.MaxDistance);
+		m_Soloud->set3dSourceAttenuation(voice, 1, request.AttenuationFactor);
+		m_Soloud->setRelativePlaySpeed(voice, request.speed);
+		m_Soloud->setPan(voice, request.pan);
+		m_Soloud->update3dAudio();
+	}
+
+	void AudioManager::StopVoice(const std::string& filePath)
+	{
+		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
+
+		if (!IsVoiceActive(filePath))
+		{
+			return;
+		}
+
+		SoLoud::handle& voice = m_ActiveClips[filePath];
+		m_Soloud->stop(voice);
+	}
+
 	bool AudioManager::IsWavLoaded(const std::string& filePath) const
 	{
 		return m_WavSamples.find(filePath) != m_WavSamples.end();
+	}
+
+	bool AudioManager::IsVoiceActive(const std::string& voice) const
+	{
+		return m_ActiveClips.find(voice) != m_ActiveClips.end();
 	}
 
 	void AudioManager::LoadWavAudio(const std::string& filePath)
@@ -73,24 +136,57 @@ namespace Nuake {
 
 	void AudioManager::AudioThreadLoop()
 	{
+		
+
 		while(m_AudioThreadRunning)
 		{
 			// Acquire mutex lock
 			const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
 
+			//CleanupInactiveVoices();
+
 			// Check if we have audio queued
 			while (!m_AudioQueue.empty())
 			{
-				AudioRequest& currentAudio = m_AudioQueue.front();
+				AudioRequest& audioRequest = m_AudioQueue.front();
+				SoLoud::Wav& audio = m_WavSamples[audioRequest.audioFile];
 
-				SoLoud::handle soloudHandle = m_Soloud->play(m_WavSamples[currentAudio.audioFile]);
-				m_Soloud->setVolume(soloudHandle, currentAudio.volume);
-				m_Soloud->setPan(soloudHandle, currentAudio.pan);
-				m_Soloud->setRelativePlaySpeed(soloudHandle, currentAudio.speed);
+				SoLoud::handle soloudHandle;
+				if (!audioRequest.spatialized)
+				{
+					soloudHandle = m_Soloud->play(audio);
+					m_Soloud->setVolume(soloudHandle, audioRequest.volume);
+					m_Soloud->setPan(soloudHandle, audioRequest.pan);
+					m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
+					m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+				}
+				else
+				{
+					const Vector3& position = audioRequest.position;
+					soloudHandle = m_Soloud->play3d(audio, position.x, position.y, position.z);
+					m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
+					m_Soloud->set3dSourceAttenuation(soloudHandle, 1, audioRequest.AttenuationFactor);
+					m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+				}
+				
+				m_ActiveClips[audioRequest.audioFile] = soloudHandle;
 
 				// Remove item from queue.
 				m_AudioQueue.pop();
 			}
 		}
+	}
+
+	void AudioManager::CleanupInactiveVoices()
+	{
+		if (m_ActiveClips.empty())
+		{
+			return;
+		}
+
+		std::erase_if(m_ActiveClips, [this](const auto& item)
+		{
+			return !m_Soloud->isValidVoiceHandle(item.second);
+		});
 	}
 }

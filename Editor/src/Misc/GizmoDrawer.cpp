@@ -175,7 +175,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto capsuleColliderView = scene->m_Registry.view<TransformComponent, CapsuleColliderComponent>();
 	for (auto e : capsuleColliderView)
 	{
-		auto& [transform, capsule] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
+		auto [transform, capsule] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
 		if (_CapsuleEntity.find(entityId) == _CapsuleEntity.end())
@@ -199,7 +199,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto cylinderColliderView = scene->m_Registry.view<TransformComponent, CylinderColliderComponent>();
 	for (auto e : cylinderColliderView)
 	{
-		auto& [transform, cylinder] = scene->m_Registry.get<TransformComponent, CylinderColliderComponent>(e);
+		auto [transform, cylinder] = scene->m_Registry.get<TransformComponent, CylinderColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
 		if (_CylinderEntity.find(entityId) == _CylinderEntity.end())
@@ -235,7 +235,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto meshColliderView = scene->m_Registry.view<TransformComponent, MeshColliderComponent, ModelComponent>();
 	for (auto e : meshColliderView)
 	{
-		auto& [transform, mesh, model] = scene->m_Registry.get<TransformComponent, MeshColliderComponent, ModelComponent>(e);
+		auto [transform, mesh, model] = scene->m_Registry.get<TransformComponent, MeshColliderComponent, ModelComponent>(e);
 
 		// Component has no mesh set.
 		if (!model.ModelResource)

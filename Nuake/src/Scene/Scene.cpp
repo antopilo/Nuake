@@ -464,7 +464,7 @@ namespace Nuake
 			if (!parentComponent.HasParent)
 				continue;
 
-			auto& entity = Entity{ e, this };
+			auto entity = Entity{ e, this };
 			auto parentEntity = GetEntityByID(parentComponent.ParentID);
 			parentEntity.AddChild(entity);
 		}

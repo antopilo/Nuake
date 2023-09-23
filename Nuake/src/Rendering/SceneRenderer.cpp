@@ -235,7 +235,7 @@ namespace Nuake
 						if (!visibility.Visible || !sprite.SpriteMesh)
 							continue;
 
-						auto& finalQuadTransform = transform.GetGlobalTransform();
+						auto finalQuadTransform = transform.GetGlobalTransform();
 						if (sprite.Billboard)
 						{
 							finalQuadTransform = glm::inverse(mView);
@@ -358,7 +358,7 @@ namespace Nuake
 				if (!visibility.Visible || !sprite.SpriteMesh)
 					continue;
 
-				auto& finalQuadTransform = transform.GetGlobalTransform();
+				auto finalQuadTransform = transform.GetGlobalTransform();
 				if (sprite.Billboard)
 				{
 					finalQuadTransform = glm::inverse(mView);

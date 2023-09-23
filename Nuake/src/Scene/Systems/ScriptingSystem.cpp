@@ -15,7 +15,7 @@ namespace Nuake {
 
 		Logger::Log("Initializing ScriptingSystem");
 
-		auto& entities = m_Scene->m_Registry.view<WrenScriptComponent>();
+		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
 		for (auto& e : entities)
 		{
 			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);

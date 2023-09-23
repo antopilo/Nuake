@@ -21,12 +21,12 @@ namespace Nuake
 		
 		_ssaoFramebuffer = CreateRef<FrameBuffer>(false, Vector2(_size));
 
-		auto& renderTarget = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+		auto renderTarget = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
 		_ssaoFramebuffer->SetTexture(renderTarget, GL_COLOR_ATTACHMENT0);
 
 		_ssaoBlurFramebuffer = CreateRef<FrameBuffer>(false, Vector2(_size));
 
-		auto& renderTargetBlur = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+		auto renderTargetBlur = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
 		_ssaoBlurFramebuffer->SetTexture(renderTargetBlur);
 	}
 

@@ -25,7 +25,7 @@ namespace Nuake
 		{
 			bool hasFoundModule = false;
 
-			auto& splits = String::Split(fileContent, ' ');
+			auto splits = String::Split(fileContent, ' ');
 			for (unsigned int i = 0; i < splits.size(); i++)
 			{
 				std::string s = splits[i];

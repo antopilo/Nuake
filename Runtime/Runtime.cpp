@@ -22,14 +22,14 @@ int ApplicationMain(int argc, char* argv[])
     if (!FileSystem::FileExists(projectPath))
     {
         Logger::Log("game.project not found", "runtime", CRITICAL);
-        return;
+        return -1;
     }
 
     const std::string& projectfileContent = FileSystem::ReadFile(projectPath, true);
     if (projectfileContent.empty())
     {
         Logger::Log("game.project was empty", "runtime", CRITICAL);
-        return;
+        return -1;
     }
 
     project->Deserialize(json::parse(projectfileContent));
@@ -90,7 +90,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmds
 
 #else
 
-void main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     return ApplicationMain(argc, argv);
 }

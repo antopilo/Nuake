@@ -76,7 +76,7 @@ namespace Nuake {
                     {
                         //ImGuiTextSTD("Name", p.name);
                         ImGui::TableNextColumn();
-                        std::string current_item = NULL;
+                        std::string current_item = "";
                         if (ImGui::BeginCombo(("TypeSelection" + std::to_string(idx)).c_str(), current_item.c_str()))
                         {
                             for (int n = 0; n < IM_ARRAYSIZE(items); n++)

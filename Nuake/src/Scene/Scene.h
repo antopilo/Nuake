@@ -80,11 +80,6 @@ namespace Nuake
 		Ref<Environment> GetEnvironment() const;
 		void SetEnvironment(Ref<Environment> env);
 
-		template<class T>
-		Ref<T> GetResource(const UUID& uuid)
-		{
-			return m_Resources[uuid];
-		}
 
 		bool Save();
 		bool SaveAs(const std::string& path);

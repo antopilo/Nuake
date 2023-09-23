@@ -126,7 +126,7 @@ public:
 
                     uint32_t animIndex = model->GetCurrentAnimationIndex();
                     uint32_t oldAnimIndex = animIndex;
-                    auto& animations = model->GetAnimations();
+                    auto animations = model->GetAnimations();
                     if (ImGui::BeginCombo("Type", model->GetCurrentAnimation()->GetName().c_str()))
                     {
                         for (int n = 0; n < model->GetAnimationsCount(); n++)

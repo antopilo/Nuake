@@ -73,7 +73,7 @@ project "Nuake"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
+        cppdialect "C++20"
         staticruntime "On"
         defines {
             "NK_WIN"
@@ -154,7 +154,7 @@ project "NuakeRuntime"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
+        cppdialect "C++20"
         staticruntime "On"
         defines {
             "NK_WIN"
@@ -243,7 +243,7 @@ project "Editor"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
+        cppdialect "C++20"
         staticruntime "On"
 
     filter "configurations:Debug"

@@ -57,6 +57,16 @@ public:
             }
             ImGui::TableNextColumn();
             {
+                ImGui::Text("Loop");
+                ImGui::TableNextColumn();
+
+                ImGui::Checkbox("##Loop", &component.Loop);
+                ImGui::TableNextColumn();
+
+                ComponentTableReset(component.Loop, false);
+            }
+            ImGui::TableNextColumn();
+            {
                 ImGui::Text("Volume");
                 ImGui::TableNextColumn();
 
@@ -84,6 +94,51 @@ public:
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.Pan, 0.0f);
+            }
+
+            ImGui::TableNextColumn();
+            {
+                ImGui::Text("Spatialized");
+                ImGui::TableNextColumn();
+
+                ImGui::Checkbox("##Spatialized", &component.Spatialized);
+                ImGui::TableNextColumn();
+
+                ComponentTableReset(component.Spatialized, false);
+            }
+
+            if (component.Spatialized)
+            {
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Text("Min Distance");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##minDistance", &component.MinDistance, 0.001f, 0.0f);
+                    ImGui::TableNextColumn();
+
+                    ComponentTableReset(component.MinDistance, 1.0f);
+                }
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Text("Max Distance");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##maxDistance", &component.MaxDistance, 0.001f, 0.0f);
+                    ImGui::TableNextColumn();
+
+                    ComponentTableReset(component.MaxDistance, 10.0f);
+                }
+                ImGui::TableNextColumn();
+                {
+                    ImGui::Text("Attenuation Factor");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##attenuationFactor", &component.AttenuationFactor, 0.001f, 0.0f);
+                    ImGui::TableNextColumn();
+
+                    ComponentTableReset(component.AttenuationFactor, 1.0f);
+                }
             }
 		}
 		EndComponentTable();
