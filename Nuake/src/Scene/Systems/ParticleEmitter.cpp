@@ -32,6 +32,12 @@ namespace Nuake
 			const auto initialVelocity = Vector3();
 			const auto initialColor = ParticleColor;
 			const float initialLife = Life;
+			float Scale = 1.0f;
+
+			if (ScaleRandom != 0.0f)
+			{
+				Scale = m_ScaleRandom(m_MT);
+			}
 
 			if (IsGlobalSpace)
 			{
@@ -41,6 +47,7 @@ namespace Nuake
 			Particles.push_back({
 				initialPosition,
 				initialVelocity,
+				Scale,
 				initialColor,
 				initialLife
 			});
@@ -92,6 +99,24 @@ namespace Nuake
 		{
 			Radius = radius;
 			m_Random = std::uniform_real_distribution<float>(-Radius, Radius);
+		}
+	}
+
+	void ParticleEmitter::SetLifeRandom(float lifeRandom)
+	{
+		if (LifeRandom != lifeRandom)
+		{
+			LifeRandom = lifeRandom;
+			m_LifeRandom = std::uniform_real_distribution<float>(-lifeRandom, lifeRandom);
+		}
+	}
+
+	void ParticleEmitter::SetScaleRandom(float scaleRandom)
+	{
+		if (ScaleRandom != scaleRandom)
+		{
+			ScaleRandom = scaleRandom;
+			m_ScaleRandom = std::uniform_real_distribution<float>(-scaleRandom, scaleRandom);
 		}
 	}
 }

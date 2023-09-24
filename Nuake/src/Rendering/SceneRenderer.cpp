@@ -419,7 +419,13 @@ namespace Nuake
 					particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
 
 					// Scale
-					particleTransform = glm::scale(particleTransform, emitterComponent.ParticleScale);
+					Vector3 finalScale = emitterComponent.ParticleScale;
+					if (p.Scale != 1.0f)
+					{
+						finalScale += emitterComponent.ParticleScale * p.Scale;
+					}
+
+					particleTransform = glm::scale(particleTransform, finalScale);
 					
 					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
 				}

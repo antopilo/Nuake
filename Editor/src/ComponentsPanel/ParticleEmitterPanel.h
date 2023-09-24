@@ -24,19 +24,7 @@ public:
 		auto& component = entity.GetComponent<Nuake::ParticleEmitterComponent>();
 		BeginComponentTable(PARTICLE EMITTER, Nuake::ParticleEmitterComponent);
 		{
-			{
-				ImGui::Text("Particle Color");
-				ImGui::TableNextColumn();
-
-				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-				ImGui::ColorEdit3("##lightcolor", &component.ParticleColor.r, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
-				ImGui::PopItemWidth();
-
-				ImGui::TableNextColumn();
-				ComponentTableReset(component.ParticleColor, Nuake::Vector4(1, 1, 1, 1));
-			}
-
-			ImGui::TableNextColumn();
+		
 			{
 				ImGui::Text("Particle Material");
 				ImGui::TableNextColumn();
@@ -76,7 +64,7 @@ public:
 				//ImGui::EndChild();
 
 				ImGui::TableNextColumn();
-				ComponentTableReset(component.ParticleColor, Nuake::Vector4(1, 1, 1, 1));
+				//ComponentTableReset(component.ParticleColor, Nuake::Vector4(1, 1, 1, 1));
 			}
 
 			ImGui::TableNextColumn();
@@ -90,13 +78,23 @@ public:
 			}
 			ImGui::TableNextColumn();
 			{
-				ImGui::Text("Particle Size");
+				ImGui::Text("Particle Scale");
 				ImGui::TableNextColumn();
 
 				ImGuiHelper::DrawVec3("##particleSize", &component.ParticleScale);
 
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.ParticleScale, Nuake::Vector3(0.1, 0.1, 0.1));
+			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Particle Scale Random");
+				ImGui::TableNextColumn();
+
+				ImGui::DragFloat("##particleSizeRandom", &component.ScaleRandomness, 0.01f, 0.0f);
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.ScaleRandomness, 0.0f);
 			}
 			ImGui::TableNextColumn();
 			{

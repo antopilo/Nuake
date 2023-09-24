@@ -22,6 +22,9 @@ namespace Nuake
 		float Rate = 0.0f;
 		Color ParticleColor;
 
+		float LifeRandom = 0.0f;
+		float ScaleRandom = 0.0f;
+
 		bool IsGlobalSpace = false;
 		Vector3 GlobalOrigin;
 
@@ -29,7 +32,8 @@ namespace Nuake
 		float RateTimer = 0.0f;
 		std::mt19937 m_MT;
 		std::uniform_real_distribution<float> m_Random;
-
+		std::uniform_real_distribution<float> m_ScaleRandom;
+		std::uniform_real_distribution<float> m_LifeRandom;
 		void RecreateRandom();
 
 	public:
@@ -42,6 +46,9 @@ namespace Nuake
 		void Update(Timestep ts);
 
 		void SetRadius(float radius);
+		void SetScaleRandom(float scaleRandom);
+		void SetLifeRandom(float lifeRandom);
+
 		std::vector<Particle> Particles;
 	};
 }

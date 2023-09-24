@@ -6,7 +6,6 @@ namespace Nuake
 	json ParticleEmitterComponent::Serialize()
 	{
 		BEGIN_SERIALIZE();
-		SERIALIZE_VEC4(ParticleColor);
 		SERIALIZE_VEC3(ParticleScale);
 		SERIALIZE_VAL(Amount);
 		SERIALIZE_VAL(Life);
@@ -16,15 +15,26 @@ namespace Nuake
 		SERIALIZE_VAL(Radius);
 		SERIALIZE_VAL(GlobalSpace);
 		SERIALIZE_OBJECT(ParticleMaterial);
-
+		SERIALIZE_VAL(LifeRandomness);
+		SERIALIZE_VAL(ScaleRandomness);
 		END_SERIALIZE();
 	}
 
 	bool ParticleEmitterComponent::Deserialize(const json& j)
 	{
-		DESERIALIZE_VEC4(j["ParticleColor"], ParticleColor);
 		Amount = j["Amount"];
 		Life = j["Life"];
+
+		if (j.contains("LifeRandomness"))
+		{
+			LifeRandomness = j["LifeRandomness"];
+		}
+
+		if (j.contains("ScaleRandomness"))
+		{
+			ScaleRandomness = j["ScaleRandomness"];
+		}
+
 		if (j.contains("Rate"))
 		{
 			Rate = j["Rate"];
