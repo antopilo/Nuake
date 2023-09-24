@@ -53,7 +53,7 @@ namespace Nuake
 		}
 
 		m_Name = albedo;
-		InitDefaultTextures();
+		//InitDefaultTextures();
 	}
 
 	Material::Material(const Vector3 albedoColor)

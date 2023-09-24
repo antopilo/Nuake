@@ -76,7 +76,9 @@ void main()
     // Normal
     vec3 normal = vec3(0.5, 0.5, 1.0);
     if (u_HasNormal == 1)
+    {
         normal = texture(m_Normal, UV).rgb;
+    }
     normal = normal * 2.0 - 1.0;
     normal = TBN * normalize(normal);
     gNormal = vec4(normal / 2.0 + 0.5, 1.0f);

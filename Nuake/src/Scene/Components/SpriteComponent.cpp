@@ -3,6 +3,7 @@
 #include "src/Core/FileSystem.h"
 #include "src/Rendering/Textures/TextureManager.h"
 #include "src/Rendering/Textures/MaterialManager.h"
+#include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Vertex.h"
 
 namespace Nuake
@@ -19,19 +20,20 @@ namespace Nuake
 	{
 		std::vector<Vertex> quadVertices =
 		{
-			{ Vector3(-1.0f,  1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector3(0, 0, -1) },
-			{ Vector3(1.0f,  1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, -1) },
-			{ Vector3(-1.0f, -1.0f, 0.0f), Vector2(0, 0), Vector3(0, 0, -1) },
+			{ Vector3(-1.0f,  1.0f, 0.0f),	Vector2(0.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+			{ Vector3(1.0f,  1.0f, 0.0f),	Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+			{ Vector3(-1.0f, -1.0f, 0.0f),	Vector2(0, 0),		Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
 
-			{ Vector3(1.0f,  -1.0f, 0.0f), Vector2(1.0f, 0.0f), Vector3(0, 0, -1) },
-			{ Vector3(-1.0f, -1.0f, 0.0f), Vector2(0.0f, 0.0f), Vector3(0, 0, -1) },
-			{ Vector3(1.0f,   1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, -1) }
+			{ Vector3(1.0f,  -1.0f, 0.0f),	Vector2(1.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+			{ Vector3(-1.0f, -1.0f, 0.0f),	Vector2(0.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+			{ Vector3(1.0f,   1.0f, 0.0f),	Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) }
 		};
 
 		SpriteMesh = CreateRef<Mesh>();
 		SpriteMesh->AddSurface(quadVertices, { 0, 1, 2, 3, 4, 5 });
 
-		auto material = MaterialManager::Get()->GetMaterial(FileSystem::Root + SpritePath);
+		Ref<Material> material = MaterialManager::Get()->GetMaterial(FileSystem::Root + SpritePath);
+		bool hasNormal = material->HasNormal();
 		SpriteMesh->SetMaterial(material);
 
 		return true;
