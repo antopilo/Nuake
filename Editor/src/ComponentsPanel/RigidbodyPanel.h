@@ -25,6 +25,37 @@ public:
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.Mass, 0.0f);
 			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Lock X axis");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##lockx", &component.LockX);
+				
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.LockX, false);
+			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Lock Y axis");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##locky", &component.LockY);
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.LockY, false);
+			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Lock Z axis");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##lockz", &component.LockZ);
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.LockZ, false);
+			}
+			ImGui::TableNextColumn();
 		}
 		EndComponentTable();
 	}

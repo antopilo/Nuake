@@ -85,7 +85,7 @@ namespace Nuake
 		case Layers::MOVING:
 			return true; // Moving collides with everything
 		case Layers::KINEMATIC:
-			return inObject2 == Layers::NON_MOVING; // Only collides with static
+			return inObject2 == Layers::NON_MOVING || inObject2 == Layers::MOVING; // Only collides with non moving
 		default:
 			//JPH_ASSERT(false);
 			return false;
@@ -306,7 +306,7 @@ namespace Nuake
 			if (mass > 0.0f && !isMeshShape)
 			{
 				motionType = JPH::EMotionType::Dynamic;
-				layer = Layers::NON_MOVING;
+				layer = Layers::MOVING;
 			}
 
 			const auto& startPos = rb->GetPosition();
@@ -315,6 +315,23 @@ namespace Nuake
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
 			auto joltShape = GetJoltShape(rb->GetShape());
 			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
+
+			bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::All);
+
+			if (rb->GetLockXAxis())
+			{
+				bodySettings.mAllowedDOFs ^= JPH::EAllowedDOFs::RotationX;
+			}
+
+			if (rb->GetLockYAxis())
+			{
+				bodySettings.mAllowedDOFs ^= JPH::EAllowedDOFs::RotationY;
+			}
+
+			if (rb->GetLockZAxis())
+			{
+				bodySettings.mAllowedDOFs ^= JPH::EAllowedDOFs::RotationZ;
+			}
 
 			if (mass > 0.0f)
 			{
@@ -349,8 +366,6 @@ namespace Nuake
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
 			auto character = new JPH::CharacterVirtual(settings, std::move(joltPosition), std::move(joltRotation), _JoltPhysicsSystem.get());
 
-			//character->AddToPhysicsSystem(JPH::EActivation::Activate);
-			
 			// To get the jolt character control from a scene entity.
 			_registeredCharacters[cc->Owner.GetHandle()] = character;
 		}
