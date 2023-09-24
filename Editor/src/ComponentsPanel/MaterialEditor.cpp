@@ -27,7 +27,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			std::string fileData = material->Serialize().dump(4);
 
-			FileSystem::BeginWriteFile(FileSystem::Root + material->Path);
+			FileSystem::BeginWriteFile(material->Path);
 			FileSystem::WriteLine(fileData);
 			FileSystem::EndWriteFile();
 		}

@@ -84,12 +84,17 @@ namespace Nuake
 		}
 	}
 
-	bool FileSystem::DirectoryExists(const std::string path)
+	bool FileSystem::DirectoryExists(const std::string& path)
 	{
-		return false;
+		return std::filesystem::exists(path) && std::filesystem::is_directory(path);
 	}
 
-	bool FileSystem::FileExists(const std::string path, bool absolute)
+	bool FileSystem::MakeDirectory(const std::string& path, bool absolute)
+	{
+		return std::filesystem::create_directory(absolute ? path : FileSystem::Root + path);
+	}
+
+	bool FileSystem::FileExists(const std::string& path, bool absolute)
 	{
 		std::string fullPath = absolute ? path : FileSystem::Root + path;
 
@@ -154,10 +159,10 @@ namespace Nuake
 	}
 
 	std::ofstream FileSystem::fileWriter;
-	bool FileSystem::BeginWriteFile(const std::string path)
+	bool FileSystem::BeginWriteFile(const std::string path, bool absolute)
 	{
 		fileWriter = std::ofstream();
-		fileWriter.open(path);
+		fileWriter.open(absolute ? path : FileSystem::Root + path);
 
 		return false;
 	}

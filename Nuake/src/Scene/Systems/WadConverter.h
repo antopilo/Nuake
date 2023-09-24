@@ -1,15 +1,15 @@
 #pragma once
 
 #include <string>
+#include <vector>
+
 
 namespace Nuake
 {
 
 #define MAKE_RGB(r,g,b)     (uint32_t)(((r) << 16) | ((g) << 8) | (b) | (255<<24))
 
-	// John Carmack said the quake palette.lmp can be considered public domain because it is not an important asset to id, so I include it here as a fallback if no external palette file is found.
-		
-
+// John Carmack said the quake palette.lmp can be considered public domain because it is not an important asset to id, so I include it here as a fallback if no external palette file is found.
 #define 	CMP_LZSS   1
 #define 	CMP_NONE   0
 #define 	TYP_LABEL   1
@@ -20,7 +20,6 @@ namespace Nuake
 #define 	TYP_QPIC   66
 #define 	TYP_QTEX   65
 #define 	TYP_SOUND   67
-
 #define MIP_LEVELS 4
 	typedef struct miptex_s
 	{
@@ -83,6 +82,8 @@ namespace Nuake
 	}
 	pic_header_t;
 
+
+
 	int WAD2_EntryType(int entry);
 	bool WAD2_ReadData(int entry, int offset, int length, void *buffer);
 	void ExtractWad(const std::string& wadFilePath, const std::string& outputDir);
@@ -90,4 +91,5 @@ namespace Nuake
 	bool MIP_ExtractPicture(int entry, const char *lump_name);
 	void WAD2_CloseRead(void);
 	void WadOpenRead(const std::string& filename);
+	void CreateMaterials();
 }

@@ -2,6 +2,7 @@
 #include "../Core/Input.h"
 #include <GLFW/glfw3.h>
 #include <glm/trigonometric.hpp>
+
 #include "src/Core/Logger.h"
 
 namespace Nuake

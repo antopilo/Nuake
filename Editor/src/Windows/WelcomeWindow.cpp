@@ -329,7 +329,7 @@ namespace Nuake
 	{
 		if (!FileSystem::FileExists(_RecentProjectFilePath, true))
 		{
-			FileSystem::BeginWriteFile(_RecentProjectFilePath);
+			FileSystem::BeginWriteFile(_RecentProjectFilePath, true);
 			FileSystem::WriteLine(_RecentProjectFileDefaultContent);
 			FileSystem::EndWriteFile();
 		}
@@ -358,7 +358,7 @@ namespace Nuake
 			j["Projects"][i] = project.Serialize();
 		}
 
-		FileSystem::BeginWriteFile(_RecentProjectFilePath);
+		FileSystem::BeginWriteFile(_RecentProjectFilePath, true);
 		FileSystem::WriteLine(j.dump(4));
 		FileSystem::EndWriteFile();
 	}

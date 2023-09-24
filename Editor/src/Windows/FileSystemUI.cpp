@@ -338,7 +338,7 @@ namespace Nuake
             
             if (file->GetExtension() == ".wad")
             {
-                if (ImGui::MenuItem("Extract to PNG"))
+                if (ImGui::MenuItem("Convert to Materials"))
                 {
                     Nuake::ExtractWad(file->GetAbsolutePath(), FileSystem::Root);
                 }
@@ -471,7 +471,7 @@ namespace Nuake
 						material->IsEmbedded = false;
 						auto jsonData = material->Serialize();
 
-						FileSystem::BeginWriteFile(finalPath);
+						FileSystem::BeginWriteFile(finalPath, true);
 						FileSystem::WriteLine(jsonData.dump(4));
 						FileSystem::EndWriteFile();
 					    
@@ -496,7 +496,7 @@ namespace Nuake
 			            if(!String::IsDigit(fileName[0]))
 			            {
 			                
-                            FileSystem::BeginWriteFile(path);
+                            FileSystem::BeginWriteFile(path, true);
                             FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
                             FileSystem::EndWriteFile();
 			            

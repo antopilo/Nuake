@@ -33,7 +33,7 @@ namespace Nuake {
 	bool FGDFile::Save()
 	{
 		// Write to file.
-		FileSystem::BeginWriteFile(FileSystem::Root + Path);
+		FileSystem::BeginWriteFile(Path);
 		FileSystem::WriteLine(Serialize().dump(4));
 		FileSystem::EndWriteFile();
 

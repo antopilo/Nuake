@@ -357,7 +357,7 @@ namespace Nuake
 	{
 		std::string fileContent = Serialize().dump(4);
 
-		FileSystem::BeginWriteFile(FileSystem::Root + path);
+		FileSystem::BeginWriteFile(path);
 		FileSystem::WriteLine(fileContent);
 		FileSystem::EndWriteFile();
 

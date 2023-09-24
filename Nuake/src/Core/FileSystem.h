@@ -38,13 +38,14 @@ namespace Nuake
 		static void ScanDirectory(Ref<Directory> directory);
 		static void GetDirectories();
 
-		static bool DirectoryExists(const std::string path);
-		static bool FileExists(const std::string path, bool absolute = false);
+		static bool MakeDirectory(const std::string& path, bool absolute = false);
+		static bool DirectoryExists(const std::string& path);
+		static bool FileExists(const std::string& path, bool absolute = false);
 
 		static std::string ReadFile(const std::string& path, bool absolute = false);
 
 		static std::ofstream fileWriter;
-		static bool BeginWriteFile(const std::string path);
+		static bool BeginWriteFile(const std::string path, bool absolute = false);
 		static bool WriteLine(const std::string line);
 		static void EndWriteFile();
 		static uintmax_t DeleteFileFromPath(const std::string& path);

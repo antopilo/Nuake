@@ -33,7 +33,7 @@ namespace Nuake {
 		{
 			Path = path;
 
-			FileSystem::BeginWriteFile(path);
+			FileSystem::BeginWriteFile(path, true);
 			FileSystem::WriteLine(Serialize().dump(4));
 			FileSystem::EndWriteFile();
 		}

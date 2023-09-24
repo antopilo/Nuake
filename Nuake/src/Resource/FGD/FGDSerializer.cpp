@@ -4,7 +4,7 @@
 namespace Nuake {
 	bool FGDSerializer::BeginFGDFile(const std::string path)
 	{
-		FileSystem::BeginWriteFile(path);
+		FileSystem::BeginWriteFile(path, true);
 		return true;
 	}
 

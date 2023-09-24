@@ -11,6 +11,7 @@
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 
 #include <future>
+#include <src/Resource/ResourceLoader.h>
 
 namespace Nuake
 {
@@ -153,8 +154,23 @@ namespace Nuake
 
     bool Mesh::Deserialize(const json& j)
     {    
-        m_Material = CreateRef<Material>();
-        m_Material->Deserialize(j["Material"]);
+        bool loadedMaterialFile = false;
+        if (j["Material"].contains("Path"))
+        {
+            const std::string materialPath = j["Material"]["Path"];
+            if (!materialPath.empty())
+            {
+                Ref<Material> newMaterial = ResourceLoader::LoadMaterial(materialPath);
+                m_Material = newMaterial;
+                loadedMaterialFile = true;
+            }
+        }
+
+        if(!loadedMaterialFile)
+        {
+            m_Material = CreateRef<Material>();
+            m_Material->Deserialize(j["Material"]);
+        }
 
         m_Indices.reserve(j["Indices"].size());
         for (auto& i : j["Indices"])
