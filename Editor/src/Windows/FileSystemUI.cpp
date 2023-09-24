@@ -461,7 +461,7 @@ namespace Nuake
 						material->IsEmbedded = false;
 						auto jsonData = material->Serialize();
 
-						FileSystem::BeginWriteFile(path);
+						FileSystem::BeginWriteFile(finalPath);
 						FileSystem::WriteLine(jsonData.dump(4));
 						FileSystem::EndWriteFile();
 					    
