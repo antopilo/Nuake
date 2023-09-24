@@ -71,7 +71,8 @@ namespace Nuake
 	{
 		static constexpr uint8_t NON_MOVING = 0;
 		static constexpr uint8_t MOVING = 1;
-		static constexpr uint8_t NUM_LAYERS = 2;
+		static constexpr uint8_t KINEMATIC = 2;
+		static constexpr uint8_t NUM_LAYERS = 3;
 	};
 
 	// Function that determines if two object layers can collide
@@ -80,9 +81,11 @@ namespace Nuake
 		switch (inObject1)
 		{
 		case Layers::NON_MOVING:
-			return inObject2 == Layers::MOVING; // Non moving only collides with moving
+			return inObject2 == Layers::MOVING || inObject2 == Layers::KINEMATIC; // Non moving only collides with moving
 		case Layers::MOVING:
 			return true; // Moving collides with everything
+		case Layers::KINEMATIC:
+			return inObject2 == Layers::NON_MOVING; // Only collides with static
 		default:
 			//JPH_ASSERT(false);
 			return false;
@@ -296,12 +299,14 @@ namespace Nuake
 			
 			const float mass = rb->_mass;
 			JPH::EMotionType motionType = JPH::EMotionType::Static;
-			
+			JPH::ObjectLayer layer = Layers::MOVING;
+
 			// According to jolt documentation, Mesh shapes should only be static.
 			const bool isMeshShape = rb->GetShape()->GetType() == MESH;
 			if (mass > 0.0f && !isMeshShape)
 			{
 				motionType = JPH::EMotionType::Dynamic;
+				layer = Layers::NON_MOVING;
 			}
 
 			const auto& startPos = rb->GetPosition();
@@ -309,7 +314,7 @@ namespace Nuake
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
 			auto joltShape = GetJoltShape(rb->GetShape());
-			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, Layers::MOVING);
+			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
 
 			if (mass > 0.0f)
 			{
@@ -520,7 +525,7 @@ namespace Nuake
 						auto& characterControllerComponent = entity.GetComponent<CharacterControllerComponent>();
 						auto characterController = characterControllerComponent.GetCharacterController();
 
-						const auto& broadPhaseLayerFilter = _JoltPhysicsSystem->GetDefaultBroadPhaseLayerFilter(Layers::MOVING);
+						const auto& broadPhaseLayerFilter = _JoltPhysicsSystem->GetDefaultBroadPhaseLayerFilter(Layers::NON_MOVING);
 						const auto& LayerFilter = _JoltPhysicsSystem->GetDefaultLayerFilter(Layers::MOVING);
 						const auto& joltGravity = _JoltPhysicsSystem->GetGravity();
 						auto& tempAllocatorPtr = *(joltTempAllocator);
