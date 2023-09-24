@@ -27,6 +27,7 @@ extern "C" {
 
 #include <vector>
 #include <map>
+#include <src/Resource/ResourceLoader.h>
 
 namespace Nuake {
     struct ProcessedMesh
@@ -133,11 +134,18 @@ namespace Nuake {
             }
             else
             {
-                std::string path = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
-                auto tex = TextureManager::Get()->GetTexture(path);
+                if (FileSystem::FileExists("textures/" + std::string(texture->name) + ".material"))
+                {
 
-                texture->height = tex->GetHeight();
-                texture->width = tex->GetWidth();
+                }
+                else
+                {
+                    std::string path = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
+                    auto tex = TextureManager::Get()->GetTexture(path);
+
+                    texture->height = tex->GetHeight();
+                    texture->width = tex->GetWidth();
+                }
             }
 
             face_geometry* face_geo_inst = &brush_inst->faces[f];
@@ -179,7 +187,13 @@ namespace Nuake {
                 Ref<Mesh> mesh = CreateRef<Mesh>();
                 mesh->AddSurface(vertices, indices);
 
-                if (std::string(texture->name) != "__TB_empty")
+                if (const std::string materialPath = "textures/" + std::string(texture->name) + ".material";
+                    FileSystem::FileExists(materialPath))
+                {
+                    Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
+                    mesh->SetMaterial(material);
+                }
+                else if (std::string(texture->name) != "__TB_empty")
                 {
                     Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
                     mesh->SetMaterial(material);
@@ -519,8 +533,20 @@ namespace Nuake {
                         if (std::string(texture->name) != "__TB_empty")
                         {
                             std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
-                            if (m_Materials.find(path) == m_Materials.end())
-                                m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+
+                            if (const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
+                                FileSystem::FileExists(materialPath))
+                            {
+                                Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
+                                m_Materials[path] = material;
+                            }
+                            else
+                            {
+                                if (m_Materials.find(path) == m_Materials.end())
+                                {
+                                    m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+                                }
+                            }
 
                             currentMaterial = m_Materials[path];
                             texture->height = currentMaterial->m_Albedo->GetHeight();

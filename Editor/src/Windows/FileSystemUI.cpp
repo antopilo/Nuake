@@ -13,6 +13,8 @@
 #include <src/Rendering/Textures/Material.h>
 #include "../Misc/PopupHelper.h"
 
+#include "src/Scene/Systems/WadConverter.h"
+
 namespace Nuake
 {
     Ref<Directory> FileSystemUI::m_CurrentDirectory;
@@ -334,6 +336,14 @@ namespace Nuake
                 }
             }
             
+            if (file->GetExtension() == ".wad")
+            {
+                if (ImGui::MenuItem("Extract to PNG"))
+                {
+                    Nuake::ExtractWad(file->GetAbsolutePath(), FileSystem::Root);
+                }
+            }
+
             if (ImGui::MenuItem("Rename"))
             {
                 shouldRename = true;
