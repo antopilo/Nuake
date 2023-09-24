@@ -206,12 +206,14 @@ namespace Nuake
 	void EditorCamera::SetYaw(float yaw)
 	{
 		TargetYaw = yaw;
+		Yaw = yaw;
 		UpdateDirection();
 	}
 
 	void EditorCamera::SetPitch(float pitch)
 	{
 		TargetPitch = pitch;
+		Pitch = pitch;
 		UpdateDirection();
 	}
 
@@ -220,8 +222,8 @@ namespace Nuake
 		BEGIN_SERIALIZE();
 
 		SERIALIZE_VEC3(Translation);
-		j["Yaw"] = Yaw;
-		j["Pitch"] = Pitch;
+		j["Yaw"] = glm::clamp(Yaw, 0.f, 360.f);
+		j["Pitch"] = glm::clamp(Pitch, -90.f, 90.f);
 
 		return j;
 	}

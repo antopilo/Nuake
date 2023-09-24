@@ -10,6 +10,7 @@ namespace Nuake
 	public:
 		EditorCamera()
 		{
+			Yaw = 0.0f;
 			Translation = Vector3(10, 10, 10);
 			SetDirection(Vector3(-1, -1, -1));
 		}
@@ -33,10 +34,10 @@ namespace Nuake
 		float mouseLastX;
 		float mouseLastY;
 
-		float Yaw = -135.f;
-		float Pitch = -45.f;
-		float TargetYaw = -135.f;
-		float TargetPitch = -45.f;
+		float Yaw = 0.0f;
+		float Pitch = 0.0f;
+		float TargetYaw = 0.f;
+		float TargetPitch = 0.0f;
 		void UpdateDirection();
 	};
 }
