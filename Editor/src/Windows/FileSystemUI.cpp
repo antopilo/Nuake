@@ -232,6 +232,10 @@ namespace Nuake
                 {
                     dragType = "_Map";
                 }
+                else if (fileExtension == ".material")
+                {
+                    dragType = "_Material";
+                }
                 else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
                 {
                     dragType = "_Model";
@@ -444,14 +448,15 @@ namespace Nuake
 			{
 				if (ImGui::MenuItem("Material"))
 				{
-					std::string path = FileDialog::SaveFile("*.material");
-					if (!String::EndsWith(path, ".material"))
-					{
-						path += ".material";
-					}
-
+					const std::string path = FileDialog::SaveFile("*.material");
 					if (!path.empty())
 					{
+                        std::string finalPath = path;
+                        if (!String::EndsWith(path, ".material"))
+                        {
+                            finalPath = path + ".material";
+                        }
+
 						Ref<Material> material = CreateRef<Material>();
 						material->IsEmbedded = false;
 						auto jsonData = material->Serialize();

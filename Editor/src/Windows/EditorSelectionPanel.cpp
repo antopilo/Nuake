@@ -163,7 +163,8 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
     using namespace Nuake;
     if (file->GetExtension() == ".material")
     {
-        DrawMaterialPanel(std::static_pointer_cast<Material>(selectedResource));
+		MaterialEditor matEditor;
+		matEditor.Draw(std::static_pointer_cast<Material>(selectedResource));
     }
     if (file->GetExtension() == ".project")
     {

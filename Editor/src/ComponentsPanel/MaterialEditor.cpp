@@ -43,6 +43,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 			ImGui::TableSetupColumn("name", 0, 0.3f);
 			ImGui::TableSetupColumn("set", 0, 0.6f);
 			ImGui::TableSetupColumn("reset", 0, 0.1f);
+
 			ImGui::TableNextColumn();
 
 			ImGui::Text("Unlit");
@@ -51,6 +52,15 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 			bool unlit = material->data.u_Unlit == 1;
 			ImGui::Checkbox("Unlit", &unlit);
 			material->data.u_Unlit = (int)unlit;
+			ImGui::TableNextColumn();
+
+			ImGui::TableNextColumn();
+
+			ImGui::Text("Emissive");
+			ImGui::TableNextColumn();
+
+			ImGui::DragFloat("##Emissiveness", &material->data.u_Emissive, 0.1f, 1.0f);
+			ImGui::TableNextColumn();
 		}
 		ImGui::EndTable();
 	}
@@ -62,7 +72,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 		UIFont boldfont = UIFont(Fonts::Bold);
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f));
-		AlbedoOpened = ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen);
+		AlbedoOpened = ImGui::CollapsingHeader(" ALBEDO", ImGuiTreeNodeFlags_DefaultOpen);
 		ImGui::PopStyleVar(2);
 	}
 
