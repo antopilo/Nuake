@@ -26,6 +26,7 @@ namespace Nuake
 		int u_HasNormal;
 		int u_HasDisplacement;
 		int u_Unlit;
+		float u_Emissive;
 	};
 
 	class Material : ISerializable, public Resource
@@ -50,7 +51,8 @@ namespace Nuake
 				0.5f,					// u_AOValue
 				0,						// u_HasNormal
 				0,						// u_HasDisplacement
-				0
+				0, // unlit
+				1.0f // emissive
 			};
 		}
 	public:
@@ -114,15 +116,47 @@ namespace Nuake
 		json Serialize() override
 		{
 			BEGIN_SERIALIZE();
+
+			j["UUID"] = static_cast<uint64_t>(ID);
+
 			j["HasAlbedo"] = this->HasAlbedo();
 			if (HasAlbedo())
 			{
 				j["Albedo"] = this->m_Albedo->Serialize();
 			}
+			Vector3 AlbedoColor = data.m_AlbedoColor;
+			SERIALIZE_VEC3(AlbedoColor);
+
+			SERIALIZE_VAL_LBL("Emissive", data.u_Emissive);
+			SERIALIZE_VAL_LBL("AOValue", data.u_AOValue);
+			SERIALIZE_VAL_LBL("MetalnessValue", data.u_MetalnessValue);
+			SERIALIZE_VAL_LBL("RoughnessValue", data.u_RoughnessValue);
+			SERIALIZE_VAL_LBL("Unlit", data.u_Unlit);
+
 			j["HasAO"] = this->HasAO();
+			if (HasAO())
+			{
+				j["AO"] = m_AO->Serialize();
+			}
+
 			j["HasMetalness"] = this->HasMetalness();
+			if(HasMetalness())
+			{
+				j["Metalness"] = m_Metalness->Serialize();
+			}
+
 			j["HasRoughness"] = this->HasRoughness();
+			if (HasRoughness())
+			{
+				j["Roughness"] = m_Roughness->Serialize();
+			}
+
 			j["HasNormal"] = this->HasNormal();
+			if (HasNormal())
+			{
+				j["Normal"] = m_Normal->Serialize();
+			}
+
 			j["HasDisplacement"] = this->HasDisplacement();
 			
 			END_SERIALIZE();
@@ -130,6 +164,7 @@ namespace Nuake
 
 		bool Deserialize(const json& j) override
 		{
+			
 			if (j.contains("Path"))
 			{
 				Path = FileSystem::RelativeToAbsolute(j["Path"]);
@@ -147,6 +182,36 @@ namespace Nuake
 					const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
 					Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(absolutePath);
 					SetAlbedo(albedoTexture);
+				}
+
+				if (j.contains("AlbedoColor"))
+				{
+					DESERIALIZE_VEC3(j["AlbedoColor"], data.m_AlbedoColor);
+				}
+
+				if (j.contains("Emissive"))
+				{
+					data.u_Emissive = j["Emissive"];
+				}
+
+				if (j.contains("MetalnessValue"))
+				{
+					data.u_MetalnessValue = j["MetalnessValue"];
+				}
+
+				if (j.contains("RoughnessValue"))
+				{
+					data.u_RoughnessValue = j["RoughnessValue"];
+				}
+
+				if (j.contains("AOValue"))
+				{
+					data.u_AOValue = j["AOValue"];
+				}
+
+				if (j.contains("Unlit"))
+				{
+					data.u_Unlit = j["Unlit"];
 				}
 
 				if (j.contains("Normal"))

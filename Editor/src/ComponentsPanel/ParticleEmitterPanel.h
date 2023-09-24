@@ -5,10 +5,15 @@
 #include <src/Core/Maths.h>
 #include <src/Scene/Components/ParticleEmitterComponent.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
+#include "MaterialEditor.h"
+#include <src/Resource/ResourceLoader.h>
+#include <src/Resource/ResourceLoader.h>
 
 class ParticleEmitterPanel : ComponentPanel
 {
 public:
+	Scope<ModelResourceInspector> _modelInspector;
+
 	ParticleEmitterPanel() {}
 
 	void Draw(Nuake::Entity entity) override
@@ -30,6 +35,50 @@ public:
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.ParticleColor, Nuake::Vector4(1, 1, 1, 1));
 			}
+
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Particle Material");
+				ImGui::TableNextColumn();
+
+				std::string label = "Empty";
+				if (!component.ParticleMaterial->Path.empty())
+				{
+					label = component.ParticleMaterial->Path;
+				}
+
+				if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+				{
+					
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Material"))
+					{
+						char* file = (char*)payload->Data;
+						std::string fullPath = std::string(file, 256);
+
+						fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+
+						Ref<Nuake::Material> material = Nuake::ResourceLoader::LoadMaterial(fullPath);
+						component.ParticleMaterial = material;
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				//std::string childId = "materialEditorParticle";
+				//ImGui::BeginChild(childId.c_str(), ImVec2(0, 0), false);
+				//{
+				//	MaterialEditor editor;
+				//	editor.Draw(component.ParticleMaterial);
+				//}
+				//ImGui::EndChild();
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.ParticleColor, Nuake::Vector4(1, 1, 1, 1));
+			}
+
 			ImGui::TableNextColumn();
 			{
 				ImGui::Text("Amount");
@@ -38,6 +87,26 @@ public:
 				ImGui::DragFloat("##ParticleAmount", &component.Amount, 0.1f, 0.0f, 500.0f);
 				ImGui::TableNextColumn();
 				ComponentTableReset(component.Amount, 10.0f);
+			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Particle Size");
+				ImGui::TableNextColumn();
+
+				ImGuiHelper::DrawVec3("##particleSize", &component.ParticleScale);
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.ParticleScale, Nuake::Vector3(0.1, 0.1, 0.1));
+			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Global Space");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##globalSpace", &component.GlobalSpace);
+
+				ImGui::TableNextColumn();
+				ComponentTableReset(component.GlobalSpace, false);
 			}
 			ImGui::TableNextColumn();
 			{

@@ -16,10 +16,11 @@ namespace Nuake
 		const auto defaultResolution = Vector2(1920, 1080);
 		mGBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT);
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1);
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT2);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0); // Albedo
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1); //
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT2); // Material + unlit
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT3);
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -306,6 +307,8 @@ namespace Nuake
 		mGBuffer->Bind();
 		mGBuffer->Clear();
 		{
+			RenderCommand::Disable(RendererEnum::BLENDING);
+
 			// Init
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 			Shader* gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
@@ -349,6 +352,7 @@ namespace Nuake
 			Renderer::Flush(gBufferShader, false);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
+
 			// Sprites
 			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
 			for (auto& e : spriteView)
@@ -399,16 +403,26 @@ namespace Nuake
 					particleTransform = glm::inverse(mView);
 
 					// Translation
-					const Vector3& particleGlobalPosition = transform.GetGlobalPosition() + p.Position;
+					Vector3 particleGlobalPosition;
+					if (emitterComponent.GlobalSpace)
+					{
+						particleGlobalPosition = p.Position;
+					}
+					else
+					{
+						particleGlobalPosition = Vector3(initialTransform[3]) + p.Position;
+					}
 					particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
 
 					// Scale
-					particleTransform = glm::scale(particleTransform, transform.GetGlobalScale());
+					particleTransform = glm::scale(particleTransform, emitterComponent.ParticleScale);
 
 					Renderer::QuadMesh->GetMaterial()->data.u_HasAlbedo = 0;
 					Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = p.Color;
 					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
 				}
+
+				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
 
 				Renderer::Flush(gBufferShader, false);
 				Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = oldColor;
@@ -446,6 +460,8 @@ namespace Nuake
 				}
 			}
 		}
+
+		RenderCommand::Enable(RendererEnum::BLENDING);
 	}
 
 	void SceneRenderer::ShadingPass(Scene& scene)
@@ -494,11 +510,13 @@ namespace Nuake
 			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
 			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
 			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
+			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 
 			shadingShader->SetUniform1i("m_Depth", 5);
 			shadingShader->SetUniform1i("m_Albedo", 6);
 			shadingShader->SetUniform1i("m_Normal", 7);
 			shadingShader->SetUniform1i("m_Material", 8);
+			shadingShader->SetUniform1i("m_Emissive", 10);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 

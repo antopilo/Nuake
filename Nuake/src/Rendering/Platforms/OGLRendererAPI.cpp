@@ -119,6 +119,7 @@ namespace Nuake {
 			case RendererEnum::STATIC_DRAW: return GL_STATIC_DRAW;
 			case RendererEnum::DYNAMIC_DRAW: return GL_DYNAMIC_DRAW;
 			case RendererEnum::STREAM_DRAW: return GL_STREAM_DRAW;
+			case RendererEnum::BLENDING: return GL_BLEND;
 		}
 
 		return 0;

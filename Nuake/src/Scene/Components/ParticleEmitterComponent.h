@@ -14,10 +14,15 @@ namespace Nuake
 		ParticleEmitterComponent() = default;
 		~ParticleEmitterComponent() = default;
 
+		Ref<Material> ParticleMaterial = CreateRef<Material>();
+
 		Color ParticleColor;
 		float Amount;
 		float Life = 1.0f;
 		float Rate = 0.0f;
+		Vector3 ParticleScale = Vector3(0.1, 0.1, 0.1);
+
+		bool GlobalSpace = false;
 
 		Vector3 Gravity;
 		float GravityRandom;

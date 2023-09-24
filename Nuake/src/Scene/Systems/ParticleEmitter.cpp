@@ -13,6 +13,11 @@ namespace Nuake
 
 	}
 
+	void ParticleEmitter::SetGlobalOrigin(const Vector3& origin)
+	{
+		GlobalOrigin = origin;
+	}
+
 	void ParticleEmitter::SpawnParticle()
 	{
 		const bool canSpawnParticle = Particles.size() < Amount;
@@ -23,10 +28,15 @@ namespace Nuake
 
 		if (Rate == 0.0f || RateTimer > Rate)
 		{
-			const auto initialPosition = Vector3(m_Random(m_MT), m_Random(m_MT), m_Random(m_MT));
+			auto initialPosition = Vector3(m_Random(m_MT), m_Random(m_MT), m_Random(m_MT));
 			const auto initialVelocity = Vector3();
 			const auto initialColor = ParticleColor;
 			const float initialLife = Life;
+
+			if (IsGlobalSpace)
+			{
+				initialPosition = initialPosition + GlobalOrigin;
+			}
 
 			Particles.push_back({
 				initialPosition,

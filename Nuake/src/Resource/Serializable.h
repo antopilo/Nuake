@@ -8,16 +8,16 @@ using json = nlohmann::json;
 #define SERIALIZE_VAL(v) j[#v] = this->v;
 
 #define SERIALIZE_VEC2(v) \
-		j[#v]["x"] = this->v.x; \
-		j[#v]["y"] = this->v.y;
+		j[#v]["x"] = v.x; \
+		j[#v]["y"] = v.y;
 
 #define SERIALIZE_VEC3(v) \
 		SERIALIZE_VEC2(v) \
-		j[#v]["z"] = this->v.z;
+		j[#v]["z"] = v.z;
 
 #define SERIALIZE_VEC4(v) \
 		SERIALIZE_VEC3(v) \
-		j[#v]["w"] = this->v.w;
+		j[#v]["w"] = v.w;
 
 #define DESERIALIZE_VAL(p) \
 if(j.contains(#p)) \

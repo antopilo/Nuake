@@ -38,6 +38,7 @@ uniform sampler2D m_Albedo;
 uniform sampler2D m_Material; 
 uniform sampler2D m_Normal;
 uniform sampler2D m_SSAO;
+uniform sampler2D m_Emissive;
 
 // Lights
 const int MaxLight = 32;
@@ -223,10 +224,21 @@ void main()
     // Convert from [0, 1] to [-1, 1].
     vec3 albedo      = texture(m_Albedo, UV).rgb;
     vec3 normal      = texture(m_Normal, UV).rgb * 2.0 - 1.0;
-    float metallic   = texture(m_Material, UV).r;
-    float roughness  = texture(m_Material, UV).b;
-    float ao         = texture(m_Material, UV).g;
-    float ssao      = texture(m_SSAO, UV).r;
+
+    vec4 materialSample = texture(m_Material, UV);
+    float metallic   = materialSample.r;
+    float ao = materialSample.g;
+    float roughness  = materialSample.b;
+    float unlit = materialSample.a;
+    float ssao       = texture(m_SSAO, UV).r;
+    float emissive = texture(m_Emissive, UV).r;
+
+    if (unlit > 0.1f)
+    {
+        FragColor = vec4(albedo * ssao * emissive, 1.0);
+        return;
+    }
+
     vec3 N = normal;
     vec3 V = normalize(u_EyePosition - worldPos);
     vec3 R = reflect(-V, N);
@@ -240,6 +252,7 @@ void main()
     vec3 fog = vec3(0.0);
     float shadow = 0.0f;
 
+    
     if (true)
     {
         vec3 L = normalize(u_DirectionalLight.Direction);

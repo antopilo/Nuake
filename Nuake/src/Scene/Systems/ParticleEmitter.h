@@ -22,6 +22,9 @@ namespace Nuake
 		float Rate = 0.0f;
 		Color ParticleColor;
 
+		bool IsGlobalSpace = false;
+		Vector3 GlobalOrigin;
+
 	private:
 		float RateTimer = 0.0f;
 		std::mt19937 m_MT;
@@ -32,6 +35,8 @@ namespace Nuake
 	public:
 		ParticleEmitter();
 		~ParticleEmitter() = default;
+
+		void SetGlobalOrigin(const Vector3& origin);
 
 		void SpawnParticle();
 		void Update(Timestep ts);

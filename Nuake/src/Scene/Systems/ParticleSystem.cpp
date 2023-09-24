@@ -34,6 +34,8 @@ namespace Nuake
 			emitter.SetRadius(emitterComponent.Radius);
 			emitter.Life = emitterComponent.Life;
 			emitter.Rate = emitterComponent.Rate;
+			emitter.IsGlobalSpace = emitterComponent.GlobalSpace;
+			emitter.GlobalOrigin = transformComponent.GetGlobalTransform()[3];
 
 			// Spawn particle if possible
 			emitterComponent.Emitter.SpawnParticle();

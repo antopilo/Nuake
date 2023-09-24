@@ -31,7 +31,7 @@ namespace Nuake
 		SpriteMesh = CreateRef<Mesh>();
 		SpriteMesh->AddSurface(quadVertices, { 0, 1, 2, 3, 4, 5 });
 
-		auto& material = MaterialManager::Get()->GetMaterial(FileSystem::Root + SpritePath);
+		auto material = MaterialManager::Get()->GetMaterial(FileSystem::Root + SpritePath);
 		SpriteMesh->SetMaterial(material);
 
 		return true;

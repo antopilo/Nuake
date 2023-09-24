@@ -15,11 +15,13 @@ namespace Nuake
 		return false;
 	}
 
-	bool String::EndsWith(const std::string& string, const std::string& end)
+	bool String::EndsWith(const std::string& string, const std::string_view& end)
 	{
 		if (string.length() >= end.length())
 		{
-			return (0 == string.compare(string.length() - end.length(), end.length(), end));
+			bool result = string.ends_with(end);
+
+			return result;
 		}
 
 		return false;

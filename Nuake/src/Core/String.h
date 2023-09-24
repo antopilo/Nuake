@@ -12,7 +12,7 @@ namespace Nuake
 	{
 	public:
 		static bool BeginsWith(const std::string& string, const std::string& begin);
-		static bool EndsWith(const std::string& string, const std::string& end);
+		static bool EndsWith(const std::string& string, const std::string_view& end);
 		static bool IsDigit(const char& character);
 		static std::string RemoveWhiteSpace(const std::string& string);
 		static std::string Sanitize(const std::string& keyword);

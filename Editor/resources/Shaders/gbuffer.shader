@@ -40,6 +40,7 @@ layout(location = 0) out vec4 gAlbedo;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gMaterial;
 layout(location = 3) out int gEntityID;
+layout(location = 4) out float gEmissive;
 
 in vec3 FragPos;
 in vec2 UV;
@@ -67,6 +68,7 @@ layout(std140, binding = 32) uniform u_MaterialUniform
     int u_HasNormal;        //  56 byte
     int u_HasDisplacement;  //  60 byte
     int u_Unlit;
+    float u_Emissive;
 };
 
 void main()
@@ -77,10 +79,10 @@ void main()
         normal = texture(m_Normal, UV).rgb;
     normal = normal * 2.0 - 1.0;
     normal = TBN * normalize(normal);
-    gNormal = vec4(normal / 2.0 + 0.5, 1.0);
+    gNormal = vec4(normal / 2.0 + 0.5, 1.0f);
 
     // Albedo
-    gAlbedo = vec4(m_AlbedoColor, 1.0);
+    gAlbedo = vec4(m_AlbedoColor, 1.0f);
     if (u_HasAlbedo == 1)
     {
         vec4 albedoSample = texture(m_Albedo, UV);
@@ -106,10 +108,12 @@ void main()
     if (u_HasRoughness == 1)
         finalRoughness = texture(m_Roughness, UV).r;
 
-    gMaterial = vec4(0, 0, 0, 1);
+    gMaterial = vec4(0, 0, 0, u_Unlit);
     gMaterial.r = finalMetalness;
     gMaterial.g = finalAO;
     gMaterial.b = finalRoughness;
 
     gEntityID = int(u_EntityID);
+
+    gEmissive = u_Emissive;
 }
