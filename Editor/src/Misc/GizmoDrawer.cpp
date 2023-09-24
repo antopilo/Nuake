@@ -153,7 +153,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix, box.Size));
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		mBoxBuffer->Bind();
@@ -165,10 +165,33 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	{
 		auto [transform, sphere] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation), Vector3(sphere.Radius)));
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(sphere.Radius)));
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		mCircleBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 128);
+	}
+
+	auto audioEmitterView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
+	for (auto e : audioEmitterView)
+	{
+		auto [transform, emitter] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
+
+		// We dont need to draw the radius if its not spatialized
+		if (!emitter.Spatialized)
+		{
+			continue;
+		}
+
+		Vector3 globalPosition = Vector3(transform.GetGlobalTransform()[3]);
+		mLineShader->Bind();
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MaxDistance)));
+		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		mCircleBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 128);
+
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MinDistance)));
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
@@ -189,7 +212,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
+		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		_CapsuleEntity[entityId]->Bind();
@@ -213,7 +236,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
+		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		_CylinderEntity[entityId]->Bind();
@@ -225,7 +248,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	{
 		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation), Vector3(particle.Radius)));
+		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(particle.Radius)));
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		mCircleBuffer->Bind();
@@ -255,7 +278,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), transform.Translation) * rotationMatrix);
+		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
