@@ -387,6 +387,8 @@ namespace Nuake
 			Renderer::Flush(gBufferShader, false);
 
 			// Particles
+			Ref<Material> previousMaterial = Renderer::QuadMesh->GetMaterial();
+
 			auto particleEmitterView = scene.m_Registry.view<TransformComponent, ParticleEmitterComponent, VisibilityComponent>();
 			for (auto& e : particleEmitterView)
 			{
@@ -394,6 +396,8 @@ namespace Nuake
 
 				if (!visibility.Visible)
 					continue;
+
+				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
 
 				Vector3 oldColor = Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor;
 				auto initialTransform = transform.GetGlobalTransform();
@@ -416,17 +420,18 @@ namespace Nuake
 
 					// Scale
 					particleTransform = glm::scale(particleTransform, emitterComponent.ParticleScale);
-
-					Renderer::QuadMesh->GetMaterial()->data.u_HasAlbedo = 0;
-					Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = p.Color;
+					
 					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
 				}
 
 				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
-
 				Renderer::Flush(gBufferShader, false);
-				Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor = oldColor;
+
+				Renderer::QuadMesh->SetMaterial(previousMaterial);
 			}
+
+			// Reset material on quadmesh
+			//Renderer::QuadMesh->SetMaterial(previousMaterial);
 
 			// Skinned mesh at the end because we switch shader
 			gBufferSkinnedMeshShader->Bind();
