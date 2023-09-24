@@ -1,5 +1,6 @@
 #include "src/Scene/Components/ParticleEmitterComponent.h"
-
+#include <src/Resource/ResourceManager.h>
+#include <src/Resource/ResourceLoader.h>
 namespace Nuake
 {
 	json ParticleEmitterComponent::Serialize()
@@ -14,7 +15,6 @@ namespace Nuake
 		SERIALIZE_VAL(GravityRandom);
 		SERIALIZE_VAL(Radius);
 		SERIALIZE_VAL(GlobalSpace);
-
 		SERIALIZE_OBJECT(ParticleMaterial);
 
 		END_SERIALIZE();
@@ -40,9 +40,11 @@ namespace Nuake
 		}
 		if (j.contains("ParticleMaterial"))
 		{
-			Ref<Material> newMaterial = CreateRef<Material>();
-			newMaterial->Deserialize(j["ParticleMaterial"]);
-			ParticleMaterial = newMaterial;
+			if (j["ParticleMaterial"].contains("Path"))
+			{
+				Ref<Material> newMaterial = ResourceLoader::LoadMaterial(j["ParticleMaterial"]["Path"]);
+				ParticleMaterial = newMaterial;
+			}
 		}
 		GravityRandom = j["GravityRandom"];
 		Radius = j["Radius"];

@@ -3,6 +3,7 @@
 #include <src/Resource/FontAwesome5.h>
 #include <src/Vendors/imgui/imgui_internal.h>
 #include "../Misc/InterfaceFonts.h"
+#include <src/Resource/ResourceManager.h>
 
 void MaterialEditor::Draw(Ref<Nuake::Material> material)
 {
@@ -19,6 +20,11 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 		UIFont boldfont = UIFont(Fonts::Icons);
 		if (ImGui::Button(ICON_FA_SAVE))
 		{
+			if (ResourceManager::IsResourceLoaded(material->ID))
+			{
+				ResourceManager::RegisterResource(material);
+			}
+
 			std::string fileData = material->Serialize().dump(4);
 
 			FileSystem::BeginWriteFile(FileSystem::Root + material->Path);
