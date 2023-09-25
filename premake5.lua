@@ -176,8 +176,18 @@ project "NuakeRuntime"
             "WIN32_LEAN_AND_MEAN"
         }
         entrypoint "WinMainCRTStartup"
-        flags { "WinMain" }
         buildoptions { "-mwindows"}
+
+    filter "configurations:Dist"
+    kind "WindowedApp"
+        runtime "Release"
+        optimize "on"
+        entrypoint "WinMainCRTStartup"
+        flags { "WinMain" }
+        defines 
+        {
+            "NK_DIST"
+        }
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {
@@ -267,7 +277,6 @@ project "Editor"
             "WIN32_LEAN_AND_MEAN"
         }
         entrypoint "WinMainCRTStartup"
-        flags { "WinMain" }
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {

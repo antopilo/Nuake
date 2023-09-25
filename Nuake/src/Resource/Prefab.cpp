@@ -20,7 +20,11 @@ namespace Nuake
 		if (FileSystem::FileExists(path, false))
 		{
 			std::string prefabTextContent = FileSystem::ReadFile(path);
-			newPrefab->Deserialize(json::parse(prefabTextContent));
+
+			if (!prefabTextContent.empty())
+			{
+				newPrefab->Deserialize(json::parse(prefabTextContent));
+			}
 		}
 
 		return newPrefab;
