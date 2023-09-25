@@ -14,6 +14,7 @@
 #include "../Misc/PopupHelper.h"
 
 #include "src/Scene/Systems/WadConverter.h"
+#include "../Misc/ThumbnailManager.h"
 
 namespace Nuake
 {
@@ -38,6 +39,10 @@ namespace Nuake
 
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
+
+        
+
+
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
         //if (is_selected) 
        
@@ -211,10 +216,31 @@ namespace Nuake
                 icon = ICON_FA_FILE_IMAGE;
 
             std::string fullName = icon + std::string("##") + file->GetAbsolutePath();
-            if (ImGui::Button(fullName.c_str(), ImVec2(100, 100)))
+
+            bool pressed = false;
+            if (fileExtension == ".material")
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+                pressed = ImGui::ImageButton(fullName.c_str(), (void*)ThumbnailManager::Get().GetThumbnail(file->GetRelativePath())->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+                ImGui::PopStyleVar();
+            }
+            else
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+                pressed = ImGui::Button(fullName.c_str(), ImVec2(100, 100));
+                ImGui::PopStyleVar();
+            }
+           
+            if (Editor->Selection.File == file)
+            {
+                ThumbnailManager::Get().MarkThumbnailAsDirty(file->GetRelativePath());
+            }
+
+            if(pressed)
             {
                 Editor->Selection = EditorSelection(file);
             }
+
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
             {
                 OS::OpenTrenchbroomMap(file->GetAbsolutePath());
@@ -528,6 +554,13 @@ namespace Nuake
     static float sz2 = 300;
     void FileSystemUI::DrawDirectoryExplorer()
     {
+        //if (ImGui::Begin("thumbnail debugger"))
+        //{
+        //    auto texture = ThumbnailManager::Get().GetThumbnail("Materials/prototype_1_2/64_blood_2.material");
+        //    ImGui::Image((void*)texture->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+        //}
+        //ImGui::End();
+
         if (ImGui::Begin("File browser"))
         {
             Ref<Directory> rootDirectory = FileSystem::GetFileTree();

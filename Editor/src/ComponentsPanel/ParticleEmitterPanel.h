@@ -30,7 +30,7 @@ public:
 				ImGui::TableNextColumn();
 
 				std::string label = "Empty";
-				if (!component.ParticleMaterial->Path.empty())
+				if (component.ParticleMaterial && !component.ParticleMaterial->Path.empty())
 				{
 					label = component.ParticleMaterial->Path;
 				}

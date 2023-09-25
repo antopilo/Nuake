@@ -54,6 +54,7 @@ namespace Nuake
 
 		static Ref<Mesh> CubeMesh;
 		static Ref<Mesh> QuadMesh;
+		static Ref<Mesh> SphereMesh;
 
 		static void Init();
 		static void LoadShaders();
@@ -61,6 +62,8 @@ namespace Nuake
 		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId = -1);
 		static void SubmitCube(Matrix4 transform);
 		static void Flush(Shader* shader, bool depthOnly = false);
+
+		static Ref<Mesh> CreateSphereMesh();
 
 		// Drawing states
 		static void BeginDraw(Ref<Camera> camera);

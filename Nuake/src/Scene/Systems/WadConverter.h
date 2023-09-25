@@ -7,7 +7,8 @@
 namespace Nuake
 {
 
-#define MAKE_RGB(r,g,b)     (uint32_t)(((r) << 16) | ((g) << 8) | (b) | (255<<24))
+#define MAKE_RGB(r,g,b)     (unsigned int)((255 << 24) | (b << 16) | (g << 8) | r)
+#define MAKE_RGBA(r,g,b,a)  (unsigned int)((a << 24) | (b << 16) | (g << 8) | r)
 
 // John Carmack said the quake palette.lmp can be considered public domain because it is not an important asset to id, so I include it here as a fallback if no external palette file is found.
 #define 	CMP_LZSS   1

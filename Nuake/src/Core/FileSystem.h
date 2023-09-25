@@ -39,7 +39,7 @@ namespace Nuake
 		static void GetDirectories();
 
 		static bool MakeDirectory(const std::string& path, bool absolute = false);
-		static bool DirectoryExists(const std::string& path);
+		static bool DirectoryExists(const std::string& path, bool absolute = false);
 		static bool FileExists(const std::string& path, bool absolute = false);
 
 		static std::string ReadFile(const std::string& path, bool absolute = false);
@@ -71,6 +71,11 @@ namespace Nuake
 		std::string Read()
 		{
 			return FileSystem::ReadFile(AbsolutePath);
+		}
+
+		bool IsValid()
+		{
+			return FileSystem::FileExists(AbsolutePath, true);
 		}
 
 		File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)

@@ -84,9 +84,10 @@ namespace Nuake
 		}
 	}
 
-	bool FileSystem::DirectoryExists(const std::string& path)
+	bool FileSystem::DirectoryExists(const std::string& path, bool absolute)
 	{
-		return std::filesystem::exists(path) && std::filesystem::is_directory(path);
+		const std::string& finalPath = absolute ? path : Root + path;
+		return std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath);
 	}
 
 	bool FileSystem::MakeDirectory(const std::string& path, bool absolute)
@@ -97,9 +98,7 @@ namespace Nuake
 	bool FileSystem::FileExists(const std::string& path, bool absolute)
 	{
 		std::string fullPath = absolute ? path : FileSystem::Root + path;
-
-		std::ifstream f(fullPath.c_str());
-		return f.good();
+		return std::filesystem::exists(fullPath);
 	}
 
 	void FileSystem::SetRootDirectory(const std::string path)

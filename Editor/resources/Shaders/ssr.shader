@@ -75,8 +75,16 @@ vec3 SSR(vec3 position, vec3 reflection) {
 		delta = abs(marchingPosition.z) - depthFromScreen;
 
 		float depth = textureLod(textureDepth, screenPosition, 2).r;
-
-		if (abs(delta) < distanceBias || depthFromScreen > 1000.0f) {
+		if (depthFromScreen > 1000.0f)
+		{
+			vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - screenPosition.xy));
+			float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+			float ReflectionMultiplier = pow(Metallic, 3.0) *
+				screenEdgefactor *
+				-ReflectedVector.z;
+			return texture(textureFrame, screenPosition).xyz * ReflectionMultiplier;
+		}
+		if (abs(delta) < distanceBias) {
 			vec3 color = vec3(1);
 			if (debugDraw)
 				color = vec3(0.5 + sign(delta) / 2, 0.3, 0.5 - sign(delta) / 2);

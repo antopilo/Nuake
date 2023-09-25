@@ -33,13 +33,15 @@ namespace Nuake
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
-		
+		Scope<FrameBuffer> mBarrelDistortionBuffer;
+		Scope<FrameBuffer> mVignetteBuffer;
+		Scope<FrameBuffer> mDOFBuffer;;
 	private:
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);
 		void PostProcessPass(const Scene& scene);
 
-		void SetSkeletonBoneTransformRecursive(SkeletonNode& skeletonNode, Shader* shader);
+		void SetSkeletonBoneTransformRecursive(Scene& scene, SkeletonNode& skeletonNode, Shader* shader);
 	};
 }

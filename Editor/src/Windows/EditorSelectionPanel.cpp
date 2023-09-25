@@ -57,6 +57,20 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
                     ResolveFile(selection.File);
                 }
 
+				if (!selection.File->IsValid())
+				{
+					std::string text = "File is invaluid";
+					auto windowWidth = ImGui::GetWindowSize().x;
+					auto windowHeight = ImGui::GetWindowSize().y;
+
+					auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+					auto textHeight = ImGui::CalcTextSize(text.c_str()).y;
+					ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+					ImGui::SetCursorPosY((windowHeight - textHeight) * 0.5f);
+
+					ImGui::TextColored({1, 0.1, 0.1, 1.0}, text.c_str());
+				}
+
                 DrawFile(selection.File);
                 break;
             }

@@ -682,8 +682,13 @@ namespace Nuake {
                         ImGui::TableNextColumn();
 
                         int iteration = env->mBloom->GetIteration();
+                        int oldIteration = iteration;
                         ImGui::DragInt("##quality", &iteration, 1.0f, 0, 4);
-                        env->mBloom->SetIteration(iteration);
+
+                        if (oldIteration != iteration)
+                        {
+                            env->mBloom->SetIteration(iteration);
+                        }
                         ImGui::TableNextColumn();
 
                         // Reset button
@@ -1043,6 +1048,164 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+
+                BEGIN_COLLAPSE_HEADER(DOF)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("DOF Enabled");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##dofEnabled", &env->DOFEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
+                        if (ImGui::Button(resetSSR.c_str())) env->DOFEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+                BEGIN_COLLAPSE_HEADER(BARREL_DISTORTION)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Barrel Distortion");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##BarrelEnabled", &env->BarrelDistortionEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
+                        if (ImGui::Button(resetSSR.c_str())) env->BarrelDistortionEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Distortion");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##distortion", &env->BarrelDistortion, 0.01f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelDistortion = 0.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Edge Distortion");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##edgedistortion", &env->BarrelEdgeDistortion, 0.01f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelEdgeDistortion = 0.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Scale Adjustement");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##barrelScale", &env->BarrelScale, 0.01f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelScale = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(VIGNETTE)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Vignette Enabled");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##VignetteEnabled", &env->VignetteEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
+                        if (ImGui::Button(resetSSR.c_str())) env->VignetteEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Intensity");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##vignetteIntensity", &env->VignetteIntensity, 0.1f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VignetteIntensity = 0.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Extend");
+                        ImGui::TableNextColumn();
+                        ImGui::DragFloat("##vignetteExtend", &env->VignetteExtend, 0.01f, 0.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
+                        if (ImGui::Button(resetVolumetric.c_str())) env->VignetteExtend = 0.0f;
+                        ImGui::PopStyleColor();
+                    }
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()

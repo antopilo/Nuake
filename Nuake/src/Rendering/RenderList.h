@@ -6,6 +6,8 @@
 #include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Rendering/Shaders/ShaderManager.h"
+#include "src/Rendering/Textures/MaterialManager.h"
+
 namespace Nuake
 {
 	struct RenderMesh
@@ -26,6 +28,11 @@ namespace Nuake
 		void AddToRenderList(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId = -1)
 		{
 			Ref<Material> material = mesh->GetMaterial();
+
+			if (!material)
+			{
+				material = MaterialManager::Get()->GetMaterial("default");
+			}
 
 			if (m_RenderList.find(material) == m_RenderList.end())
 			{

@@ -10,9 +10,15 @@
 
 namespace Nuake
 {
+	struct ConvertedTexture
+	{
+		std::string path;
+		bool fullbright;
+	};
+
 	std::string TargetDirectory = "";
 	std::string WadName = "";
-	std::vector<std::string> ConvertedTextures;
+	std::vector<ConvertedTexture> ConvertedTextures;
 	
 
 	unsigned char host_quakepal[768] =
@@ -151,8 +157,8 @@ namespace Nuake
 			}
 		}
 
-		if (fullbright)
-			strcat(result, "_fbr");
+		//if (fullbright)
+		//	strcat(result, "_fbr");
 
 		strcat(result, ".png");
 
@@ -194,7 +200,7 @@ namespace Nuake
 			return false;
 		}
 
-		char *pixels = new char[width * height];
+		unsigned char* pixels = new unsigned char[width * height];
 
 		if (!WAD2_ReadData(entry, 0, width * height, pixels))
 		{
@@ -230,7 +236,7 @@ namespace Nuake
 			return false;
 		}
 
-		unsigned char* pixels = new unsigned char[width * height];
+		char* pixels = new char[width * height];
 
 		if (!WAD2_ReadData(entry, (int)sizeof(pic), width * height, pixels))
 		{
@@ -309,17 +315,20 @@ namespace Nuake
 			{
 				unsigned char pix = pixels[y * width + x];
 
+				if (pix >= 256 - 32)
+					fullbright = true;
+
 				textureData[y * width + x] = COL_ReadPalette(pix);
 			}
 		}
 
-		const std::string lumpName = ExpandFileName(lump_name, false);
+		const std::string lumpName = ExpandFileName(lump_name, fullbright);
 		const std::string finalFilePath = TargetDirectory + lumpName;
 		stbi_write_png((FileSystem::Root + finalFilePath).c_str(), width, height, 4, textureData.data(), width * 4);
 
 		delete[] pixels;
 
-		ConvertedTextures.push_back(std::string(lumpName));
+		ConvertedTextures.push_back({ std::string(lumpName), fullbright });
 
 		return true;
 	}
@@ -339,16 +348,15 @@ namespace Nuake
 			return;
 		}
 
-		ConvertedTextures = std::vector<std::string>();
+		ConvertedTextures = std::vector<ConvertedTexture>();
 
 		auto pathSplits = String::Split(std::string(wadPath.begin(), wadPath.end() - 4), '\\');
 		WadName = pathSplits[std::size(pathSplits) - 1];
 		TargetDirectory = "/textures/" + WadName + "/";
 
-		if (const std::string absoluteDirPath = FileSystem::RelativeToAbsolute(TargetDirectory);
-			!FileSystem::DirectoryExists(absoluteDirPath))
+		if (!FileSystem::DirectoryExists(TargetDirectory))
 		{
-			FileSystem::MakeDirectory(absoluteDirPath);
+			FileSystem::MakeDirectory(TargetDirectory);
 		}
 
 		WadOpenRead(wadPath);
@@ -425,10 +433,19 @@ namespace Nuake
 		{
 			Ref<Material> material = CreateRef<Material>();
 			material->IsEmbedded = false;
-			material->SetAlbedo(TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(TargetDirectory + t)));
+
+
+			if (t.fullbright)
+			{
+				material->SetUnlit(true);
+				material->data.u_Emissive = 2.0f;
+			}
+
+			material->SetAlbedo(TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(TargetDirectory + t.path)));
+
 			auto jsonData = material->Serialize();
 
-			const std::string materialFilePath = materialFolderPath + std::string(t.begin(), t.end() - 4) + ".material";
+			const std::string materialFilePath = materialFolderPath + std::string(t.path.begin(), t.path.end() - 4) + ".material";
 
 			FileSystem::BeginWriteFile(materialFilePath);
 			FileSystem::WriteLine(jsonData.dump(4));

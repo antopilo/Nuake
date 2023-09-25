@@ -25,6 +25,7 @@ namespace Nuake
 
     Ref<Mesh> Renderer::CubeMesh;
     Ref<Mesh> Renderer::QuadMesh;
+    Ref<Mesh> Renderer::SphereMesh;
 
     Shader* Renderer::m_Shader;
     Shader* Renderer::m_SkyboxShader;
@@ -67,12 +68,12 @@ namespace Nuake
 
     std::vector<Vertex> QuadVertices
     {
-        { Vector3(-1.0f,  1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,  1.0f, 0.0f),  Vector2(1.0f, 1.0f), Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0, 0),       Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,  -1.0f, 0.0f), Vector2(1.0f, 0.0f), Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0.0f, 0.0f), Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,   1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 1, 0) }
+        { Vector3(-1.0f,  1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+        { Vector3(1.0f,  1.0f, 0.0f),  Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0, 0),       Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+        { Vector3(1.0f,  -1.0f, 0.0f), Vector2(1.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+        { Vector3(1.0f,   1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) }
     };
 
 
@@ -95,6 +96,8 @@ namespace Nuake
         QuadMesh = CreateRef<Mesh>();
         QuadMesh->AddSurface(QuadVertices, { 0, 1, 2, 3, 4, 5 });
         QuadMesh->SetMaterial(defaultMaterial);
+
+        SphereMesh = CreateSphereMesh();
     }
 
     void Renderer::LoadShaders()
@@ -114,6 +117,122 @@ namespace Nuake
     void Renderer::Flush(Shader* shader, bool depthOnly)
     {
         m_RenderList.Flush(shader, depthOnly);
+    }
+
+    Vector3 ComputeFaceNormal(Vector3 a, Vector3 b, Vector3 c)
+    {
+        const float EPSILON = 0.000001f;
+
+        Vector3 normal;     // default return value (0,0,0)
+        float nx, ny, nz;
+
+        // find 2 edge vectors: v1-v2, v1-v3
+        float ex1 = b.x - a.x;
+        float ey1 = b.y - a.y;
+        float ez1 = b.z - a.z;
+        float ex2 = c.x - a.x;
+        float ey2 = c.y - a.y;
+        float ez2 = c.z - a.z;
+
+        // cross product: e1 x e2
+        nx = ez1 * ey2 - ey1 * ez2;
+        ny = ex1 * ez2 - ez1 * ex2;
+        nz = ey1 * ex2 - ex1 * ey2;
+
+        // normalize only if the length is > 0
+        float length = sqrtf(nx * nx + ny * ny + nz * nz);
+        if (length > EPSILON)
+        {
+            // normalize
+            float lengthInv = 1.0f / length;
+            normal.x = nx * lengthInv;
+            normal.y = ny * lengthInv;
+            normal.z = nz * lengthInv;
+        }
+
+        return normal * -1.0f;
+    }
+
+    Ref<Mesh> Renderer::CreateSphereMesh()
+    {
+        const float sectorCount = 36;
+        const float stackCount = 36;
+        const float radius = 0.5f;
+        const float PI = acos(-1.0f);
+
+        // new
+        std::vector<Vertex> finalVertices;
+
+        float x, y, z, xy;                              // vertex position
+        float nx, ny, nz, lengthInv = 1.0f / radius;    // normal
+        float s, t;                                     // texCoord
+
+        float sectorStep = 2 * PI / sectorCount;
+        float stackStep = PI / stackCount;
+        float sectorAngle, stackAngle;
+
+        for (int i = 0; i <= stackCount; ++i)
+        {
+            stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+            xy = radius * cosf(stackAngle);             // r * cos(u)
+            z = radius * sinf(stackAngle);              // r * sin(u)
+
+            // add (sectorCount+1) vertices per stack
+            // the first and last vertices have same position and normal, but different tex coords
+            for (int j = 0; j <= sectorCount; ++j)
+            {
+                sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+
+                Vertex newVertex;
+
+                x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
+                y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
+                newVertex.position = Vector3(x, y, z);
+
+                nx = x * lengthInv;
+                ny = y * lengthInv;
+                nz = z * lengthInv;
+                newVertex.normal = Vector3(nx, ny, nz) * -1.0f;
+                // vertex position
+                
+                s = (float)j / sectorCount * 4.f;
+                t = (float)i / stackCount * 4.f;
+                newVertex.uv = { t, s };
+
+                finalVertices.push_back(newVertex);
+            }
+        }
+
+        std::vector<uint32_t> finalIndices;
+        unsigned int k1, k2;
+        for (int i = 0; i < stackCount; ++i)
+        {
+            k1 = i * (sectorCount + 1);     // beginning of current stack
+            k2 = k1 + sectorCount + 1;      // beginning of next stack
+
+            for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+            {
+                // 2 triangles per sector excluding 1st and last stacks
+                if (i != 0)
+                {
+                    finalIndices.push_back(k1);
+                    finalIndices.push_back(k2);
+                    finalIndices.push_back(k1 + 1);
+                }
+
+                if (i != (stackCount - 1))
+                {
+                    finalIndices.push_back(k1 + 1);
+                    finalIndices.push_back(k2);
+                    finalIndices.push_back(k2 + 1);
+                }
+            }
+        }
+
+        Ref<Mesh> sphereMesh = CreateRef<Mesh>();
+        sphereMesh->SetMaterial(CreateRef<Material>("resources/Images/nuake-logo.png"));
+        sphereMesh->AddSurface(std::move(finalVertices), std::move(finalIndices));
+        return sphereMesh;
     }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
@@ -153,6 +272,7 @@ namespace Nuake
         int shadowmapAmount = 0;
         if (light.Type == Directional)
         {
+            deferredShader->SetUniform1i("u_DirectionalLight.Shadow", light.CastShadows);
             if (light.CastShadows)
             {
                 for (unsigned int i = 0; i < CSM_AMOUNT; i++)

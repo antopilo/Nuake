@@ -29,8 +29,7 @@ in mat4 InvProjection;
 in mat4 InvView;
 
 // Camera
-uniform float u_Exposure;
-uniform vec3  u_EyePosition;
+uniform vec3 u_EyePosition;
 
 // GBuffer
 uniform sampler2D m_Depth;
@@ -57,12 +56,14 @@ struct DirectionalLight
     float CascadeDepth[4];
     mat4 LightTransforms[4];
     int Volumetric;
+    int Shadow;
 };
 
 uniform sampler2D ShadowMaps[4];
 
 uniform Light Lights[MaxLight];
 uniform DirectionalLight u_DirectionalLight;
+uniform int u_DisableSSAO = 0;
 
 // Converts depth to World space coords.
 vec3 WorldPosFromDepth(float depth) {
@@ -230,7 +231,17 @@ void main()
     float ao = materialSample.g;
     float roughness  = materialSample.b;
     float unlit = materialSample.a;
-    float ssao       = texture(m_SSAO, UV).r;
+    float ssao = 0.0f;
+
+    if (u_DisableSSAO == 1)
+    {
+        ssao = 1.0f;
+    }
+    else
+    {
+        ssao = texture(m_SSAO, UV).r;
+    }
+
     float emissive = texture(m_Emissive, UV).r;
 
     if (unlit > 0.1f)
@@ -251,8 +262,12 @@ void main()
     vec3 Lo = vec3(0.0);
     vec3 fog = vec3(0.0);
     float shadow = 0.0f;
-
     
+    if (u_DirectionalLight.Shadow < 0.1f)
+    {
+        shadow = 1.f;
+    }
+
     if (true)
     {
         vec3 L = normalize(u_DirectionalLight.Direction);
@@ -260,7 +275,11 @@ void main()
         float attenuation = 1.0f;
 
         L = normalize(u_DirectionalLight.Direction);
-        shadow += ShadowCalculation(worldPos, N);
+
+        if(u_DirectionalLight.Shadow > 0.1f)
+        {
+            shadow += ShadowCalculation(worldPos, N);
+        }
 
         vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;
 

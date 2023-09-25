@@ -7,6 +7,7 @@
 
 #include <GL\glew.h>
 #include <src/Scene/Components/SkinnedModelComponent.h>
+#include <src/Vendors/imgui/imgui.h>
 
 
 namespace Nuake 
@@ -28,6 +29,15 @@ namespace Nuake
 		mSSR = CreateScope<SSR>();
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
+		mBarrelDistortionBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mBarrelDistortionBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
+		mVignetteBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mVignetteBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
+		mDOFBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mDOFBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 	}
 
 	void SceneRenderer::Cleanup()
@@ -47,7 +57,7 @@ namespace Nuake
 	/// </summary>
 	/// <param name="scene">Scene to render</param>
 	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
-	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer) 
+	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer)
 	{
 		// Renders all shadow maps
 		ShadowPass(scene);
@@ -88,12 +98,12 @@ namespace Nuake
 			if (lc.Type == Directional && lc.IsVolumetric && lc.CastShadows)
 				lightList.push_back(lc);
 		}
-		
+
 		if (sceneEnv->VolumetricEnabled)
 		{
 			sceneEnv->mVolumetric->Resize(framebuffer.GetSize());
 			sceneEnv->mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
-			sceneEnv->mVolumetric->Draw(mProjection , mView, mCamPos, lightList);
+			sceneEnv->mVolumetric->Draw(mProjection, mView, mCamPos, lightList);
 
 			//finalOutput = mVolumetric->GetFinalOutput().get();
 
@@ -170,6 +180,180 @@ namespace Nuake
 			}
 			framebuffer.Unbind();
 		}
+
+		static float focalDepth = 100.0f;
+		static float focalLength = 16.0f;
+		static float fstop = 6.0f;
+		static bool autoFocus = false;
+		static bool showFocus = false;
+		static bool manualdof = true;
+		static int samples = 3;
+		static int rings = 3;
+		static float ndofstart = 1.0f;
+		static float ndofDist = 2.0f;
+		static float fdofstart = 1.0f;
+		static float fdofdist = 3.0f;
+		static float coc = 0.03f;
+		static float maxBlue = 1.0f;
+		static float threshold = 0.7f;
+		static float gain = 100.0f;
+		static float biaos = 0.0f;
+		static float fringe = 0.0f;
+		static float nammount = 0.0001;
+		static float dbsize = 1.25f;
+		static float feather = 1.0f;
+		ImGui::Begin("DOF Setting");
+		{
+			ImGui::DragFloat("focalDepth", &focalDepth, 0.01f);
+			ImGui::DragFloat("focalLength", &focalLength, 0.01f);
+			ImGui::DragFloat("fstop", &fstop, 0.01f);
+			ImGui::DragInt("samples", &samples, 0.01f);
+			ImGui::DragInt("rings", &rings, 0.01f);
+			ImGui::Checkbox("showFocus", &showFocus);
+			ImGui::Checkbox("manualDof", &manualdof);
+			ImGui::Checkbox("autoFocus", &autoFocus);
+			ImGui::DragInt("rings", &rings, 0.01f);
+			ImGui::DragFloat("ndofstart", &ndofstart, 0.01f);
+			ImGui::DragFloat("ndofDist", &ndofDist, 0.01f);
+			ImGui::DragFloat("fdofstart", &fdofstart, 0.01f);
+			ImGui::DragFloat("fdofdist", &fdofdist, 0.01f);
+			ImGui::DragFloat("coc", &coc, 0.01f);
+			ImGui::DragFloat("maxBlue", &maxBlue, 0.01f);
+			ImGui::DragFloat("threshold", &threshold, 0.01f);
+			ImGui::DragFloat("gain", &gain, 0.01f);
+			ImGui::DragFloat("biaos", &biaos, 0.01f);
+			ImGui::DragFloat("fringe", &fringe, 0.01f);
+			ImGui::DragFloat("nammount", &nammount, 0.01f);
+			ImGui::DragFloat("dbsize", &dbsize, 0.01f);
+			ImGui::DragFloat("feather", &feather, 0.01f);
+		}
+		ImGui::End();
+
+		mDOFBuffer->QueueResize(framebuffer.GetSize());
+		mDOFBuffer->Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("resources/Shaders/dof.shader");
+			shader->Bind();
+
+			shader->SetUniform1f("focalDepth", focalDepth);
+			shader->SetUniform1f("focalLength", focalLength);
+			shader->SetUniform1f("fstop", fstop);
+			shader->SetUniform1i("showFocus", showFocus);
+			shader->SetUniform1i("autofocus", autoFocus);
+			shader->SetUniform1i("samples", samples);
+			shader->SetUniform1i("manualdof", manualdof);
+			shader->SetUniform1f("rings", rings);
+			shader->SetUniform1f("ndofstart", ndofstart);
+			shader->SetUniform1f("ndofdist", ndofDist);
+			shader->SetUniform1f("fdofstart", fdofstart);
+			shader->SetUniform1f("fdofdist", fdofdist);
+			shader->SetUniform1f("CoC", coc);
+			shader->SetUniform1f("maxblur", maxBlue);
+			shader->SetUniform1f("threshold", threshold);
+			shader->SetUniform1f("gain", gain);
+			shader->SetUniform1f("bias", biaos);
+			shader->SetUniform1f("fringe", fringe);
+			shader->SetUniform1f("namount", nammount);
+			shader->SetUniform1f("dbsize", dbsize);
+			shader->SetUniform1f("feather", feather);
+			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
+			shader->SetUniform1f("height", finalOutput->GetHeight());
+			shader->SetUniform1f("width", finalOutput->GetWidth());
+			shader->SetUniformTex("depthTex", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 0);
+			shader->SetUniformTex("renderTex", finalOutput.get(), 1);
+			Renderer::DrawQuad();
+		}
+		mDOFBuffer->Unbind();
+
+		if (ImGui::Begin("DOF"))
+		{
+			ImGui::Image((void*)mDOFBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		}
+		ImGui::End();
+
+		if (sceneEnv->BarrelDistortionEnabled)
+		{
+			mBarrelDistortionBuffer->QueueResize(framebuffer.GetSize());
+			mBarrelDistortionBuffer->Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/barrel_distortion.shader");
+				shader->Bind();
+
+				shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
+				shader->SetUniform1f("u_DistortionEdge", sceneEnv->BarrelEdgeDistortion);
+				shader->SetUniform1f("u_Scale", sceneEnv->BarrelScale);
+
+				if (sceneEnv->DOFEnabled)
+				{
+					shader->SetUniformTex("u_Source", mDOFBuffer->GetTexture().get(), 0);
+				}
+				else
+				{
+					shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				}
+
+				
+				Renderer::DrawQuad();
+			}
+			mBarrelDistortionBuffer->Unbind();
+
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+		}
+
+		if (sceneEnv->VignetteEnabled)
+		{
+			mVignetteBuffer->QueueResize(framebuffer.GetSize());
+			mVignetteBuffer->Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/vignette.shader");
+				shader->Bind();
+
+				shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
+				shader->SetUniform1f("u_Extend", sceneEnv->VignetteExtend);
+				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				Renderer::DrawQuad();
+			}
+			mVignetteBuffer->Unbind();
+
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+		}
+		
+
+		// Barrel distortion
+		//mVignetteBuffer->Bind();
+		//{
+		//	RenderCommand::Clear();
+		//	Shader* shader = ShaderManager::GetShader("resources/Shaders/vignette.shader");
+		//	shader->Bind();
+		//
+		//	shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
+		//	shader->SetUniform1f("u_Extend", sceneEnv->VignetteExtend);
+		//	shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
+		//	Renderer::DrawQuad();
+		//}
+		//mVignetteBuffer->Unbind();
+
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
@@ -289,7 +473,7 @@ namespace Nuake
 						if (mesh.ModelResource != nullptr && visibility.Visible)
 						{
 							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
-							SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
+							SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
 
 							for (auto& m : mesh.ModelResource->GetMeshes())
 							{
@@ -394,7 +578,7 @@ namespace Nuake
 			{
 				auto [transform, emitterComponent, visibility] = particleEmitterView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
 
-				if (!visibility.Visible)
+				if (!visibility.Visible || !emitterComponent.ParticleMaterial)
 					continue;
 
 				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
@@ -459,7 +643,7 @@ namespace Nuake
 				if (meshResource && visibility.Visible)
 				{
 					auto& rootBoneNode = meshResource->GetSkeletonRootNode();
-					SetSkeletonBoneTransformRecursive(rootBoneNode, gBufferSkinnedMeshShader);
+					SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
 
 					for (auto& m : mesh.ModelResource->GetMeshes())
 					{
@@ -539,18 +723,17 @@ namespace Nuake
 	{
 	}
 
-	void SceneRenderer::SetSkeletonBoneTransformRecursive(SkeletonNode& skeletonNode, Shader* shader)
+	void SceneRenderer::SetSkeletonBoneTransformRecursive(Scene& scene, SkeletonNode& skeletonNode, Shader* shader)
 	{
-		auto scene = Engine::GetCurrentScene();
 		for (auto& child : skeletonNode.Children)
 		{
-			if (auto entity = scene->GetEntity(child.Name); entity.GetHandle() != -1)
+			if (auto entity = scene.GetEntity(child.Name); entity.GetHandle() != -1)
 			{
 				const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(child.Id) + "]";
 				shader->SetUniformMat4f(boneMatrixUniformName, child.FinalTransform);
 			}
 
-			SetSkeletonBoneTransformRecursive(child, shader);
+			SetSkeletonBoneTransformRecursive(scene, child, shader);
 		}
 	}
 

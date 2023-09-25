@@ -44,6 +44,17 @@ namespace Nuake
 
 		bool SSREnabled = false;
 
+		bool DOFEnabled = false;
+
+		bool BarrelDistortionEnabled = true;
+		float BarrelDistortion = 0.f;
+		float BarrelEdgeDistortion = 0.f;
+		float BarrelScale = 1.0f;
+
+		bool VignetteEnabled = true;
+		float VignetteIntensity = 15.0f;
+		float VignetteExtend = 0.5f;
+
 		Vector3 ClearColor;
 
 		glm::vec4 m_AmbientColor;
