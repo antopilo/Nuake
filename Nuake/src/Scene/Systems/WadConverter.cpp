@@ -316,7 +316,9 @@ namespace Nuake
 				unsigned char pix = pixels[y * width + x];
 
 				if (pix >= 256 - 32)
+				{
 					fullbright = true;
+				}
 
 				textureData[y * width + x] = COL_ReadPalette(pix);
 			}
