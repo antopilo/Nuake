@@ -35,14 +35,14 @@ namespace Nuake
 		float Exposure = 3.5f;
 		float Gamma = 1.1f;
 
-		bool BloomEnabled = false;
+		bool BloomEnabled = true;
 		Scope<Bloom> mBloom;
 		Scope<Volumetric> mVolumetric;
 
 		bool SSAOEnabled = true;
 		Scope<SSAO> mSSAO;
 
-		bool SSREnabled = false;
+		bool SSREnabled = true;
 
 		bool DOFEnabled = false;
 

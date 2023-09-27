@@ -496,6 +496,11 @@ namespace Nuake
 
 		void DynamicWorld::StepSimulation(Timestep ts)
 		{
+			if (ts > 0.1f)
+			{
+				ts = 0.08f;
+			}
+
 			// Next step
 			++_stepCount;
 
