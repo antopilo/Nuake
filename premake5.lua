@@ -296,7 +296,7 @@ project "Editor"
         links
         {
             "GL",
-            "glfw3",
+            "glfw",
             "glad",
             "X11"
         }
