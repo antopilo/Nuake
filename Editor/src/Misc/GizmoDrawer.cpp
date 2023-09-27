@@ -11,7 +11,7 @@
 #include <src/Rendering/RenderList.h>
 #include <src/Rendering/Renderer.h>
 
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 
 #include "src/Scene/Components/CapsuleColliderComponent.h"
 #include <src/Scene/Components/CylinderColliderComponent.h>

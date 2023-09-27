@@ -20,7 +20,6 @@ namespace Nuake
 	std::string WadName = "";
 	std::vector<ConvertedTexture> ConvertedTextures;
 	
-
 	unsigned char host_quakepal[768] =
 	{
 		// marked: colormap colors: cb = (colormap & 0xF0);cb += (cb >= 128 && cb < 224) ? 4 : 12;

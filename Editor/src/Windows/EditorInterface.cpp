@@ -61,12 +61,15 @@ namespace Nuake {
     
     EditorInterface::EditorInterface()
     {
+        Logger::Log("Creating editor windows", "window", CRITICAL);
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
 
+        Logger::Log("Building fonts", "window", CRITICAL);
         BuildFonts();
 
+        Logger::Log("Loading imgui from mem", "window", CRITICAL);
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
     }
@@ -1853,8 +1856,10 @@ namespace Nuake {
 
         auto project = Project::New();
         auto projectFileData = FileSystem::ReadFile(projectPath, true);
+        Logger::Log("Reading file project: " + projectFileData, "window", CRITICAL);
         try
         {
+            Logger::Log("Starting deserializing", "window", CRITICAL);
             project->Deserialize(json::parse(projectFileData));
             project->FullPath = projectPath;
 

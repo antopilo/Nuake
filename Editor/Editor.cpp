@@ -131,13 +131,16 @@ int ApplicationMain(int argc, char* argv[])
     }
     WindowTheming::SetWindowDarkMode(window);
 
+    Logger::Log("Creating editor ", "window", CRITICAL);
     // Initialize Editor
     Nuake::EditorInterface editor;
    
+    Logger::Log("Created editor ", "window", CRITICAL);
     // Load project in argument
     if (!launchSettings.projectPath.empty())
     {
-       editor.LoadProject(launchSettings.projectPath);
+        Logger::Log("Loading project", "window", CRITICAL);
+        editor.LoadProject(launchSettings.projectPath);
     }
 
     // Start application main loop

@@ -104,6 +104,7 @@ namespace Nuake
 
         InitImgui();
 
+        Logger::Log("ImGui initialized ", "renderer");
         return 0;
     }
 
