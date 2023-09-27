@@ -2,7 +2,7 @@
 #include "src/Rendering/Textures/Texture.h"
 
 #include "src/Resource/StaticResources.h"
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 namespace Nuake
 {

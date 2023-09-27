@@ -3,7 +3,7 @@
 #include <src/Vendors/glm/ext/matrix_clip_space.hpp>
 #include <src/Rendering/SceneRenderer.h>
 #include <src/Resource/ResourceLoader.h>
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 
 ThumbnailManager::ThumbnailManager()

@@ -1,5 +1,5 @@
 #include "Skybox.h"
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/Cubemap.h"

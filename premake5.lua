@@ -56,17 +56,17 @@ project "Nuake"
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/dependencies/GLEW/include",
+        "%{prj.name}/../Nuake/dependencies/glfw/include",
+        "%{prj.name}/../Nuake/dependencies/assimp/include",
+        "%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/src/Vendors/incbin",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include"
+        "%{prj.name}/../Nuake/dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/soloud/include"
     }
 
     links
@@ -75,12 +75,22 @@ project "Nuake"
         "soloud"
     }
 
+    filter "system:linux"
+        cppdialect "C++20"
+        staticruntime "On"
+        defines {
+            "NK_LINUX",
+            "GLFW_STATIC",
+            "GLEW_NO_GLU"
+        }
     filter "system:windows"
         cppdialect "C++20"
         staticruntime "On"
         defines {
             "NK_WIN"
         }
+    
+    buildoptions { "-permissive", "-cxxflags"}
 
     filter "configurations:Debug"
         runtime "Debug"
@@ -133,6 +143,7 @@ project "NuakeRuntime"
     libdirs 
     { 
         "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
+        "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/Linux",
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
@@ -149,8 +160,6 @@ project "NuakeRuntime"
         "Nuake", 
         "GLFW",
         "assimp",
-        "glew32s.lib", 
-        "opengl32.lib",
 		"Freetype",
 		"JoltPhysics",
         "soloud"
@@ -161,6 +170,17 @@ project "NuakeRuntime"
         staticruntime "On"
         defines {
             "NK_WIN"
+        }
+        links
+        {
+            "opengl32.lib"
+        }
+
+    filter "system:linux"
+        links
+        {
+            "GL",
+            "GLEW"
         }
 
     filter "configurations:Debug"
@@ -209,23 +229,21 @@ project "Editor"
     {
         "%{prj.name}/Editor.cpp",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/resources/*.rc",
-        "%{prj.name}/resources/**.ico"
+        "%{prj.name}/src/**.h"
     }
 
     includedirs
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/GLEW/include",
+        "%{prj.name}/../Nuake/dependencies/glfw/include",
+        "%{prj.name}/../Nuake/dependencies/assimp/include",
+        "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include"
+		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/soloud/include"
     }
     
     libdirs 
@@ -244,11 +262,10 @@ project "Editor"
 
     links
     { 
-        "Nuake", 
+        "Nuake",
+        "GLEW", 
         "GLFW",
         "assimp",
-        "glew32s.lib", 
-        "opengl32.lib",
 		"Freetype",
 		"JoltPhysics",
         "soloud"
@@ -257,6 +274,29 @@ project "Editor"
     filter "system:windows"
         cppdialect "C++20"
         staticruntime "On"
+        links
+        {
+            "OpenGL32"
+        }
+        files
+        {
+        "%{prj.name}/resources/*.rc",
+        "%{prj.name}/resources/**.ico"
+        }
+
+    filter "system:linux"
+        links
+        {
+            "GL",
+            "GLEW",
+            "X11"
+        }
+        cppdialect "C++20"
+        staticruntime "On"
+        defines {
+            "NK_LINUX",
+            "GLFW_STATIC"
+        }
 
     filter "configurations:Debug"
         runtime "Debug"

@@ -42,7 +42,7 @@ namespace Nuake
         return m_Indices;
     }
 
-    Ref<Material> Mesh::GetMaterial() inline const
+    Ref<Material> Mesh::GetMaterial() const
     {
         return m_Material;
     }

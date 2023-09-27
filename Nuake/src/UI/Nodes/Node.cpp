@@ -116,9 +116,6 @@ namespace Nuake
 				style.Position.Bottom.mUnit = (Layout::Unit)s.second.type;
 				style.Position.Bottom.Value = s.second.value.Number;
 				break;
-			case PropType::BACKGROUND_COLOR:
-				style.BackgroundColor = s.second.value.Color;
-				break;
 			}
 		}
 

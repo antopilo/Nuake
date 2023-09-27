@@ -2,27 +2,36 @@
 #include "src/Window.h"
 #include "Engine.h"
 
-#define GLFW_EXPOSE_NATIVE_WIN32
+#ifdef NK_WIN
+	#define GLFW_EXPOSE_NATIVE_WIN32
+
+	#include <Windows.h>
+#endif
+
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
-#include <Windows.h>
+
 #include <chrono>
 #include <imgui/imgui.h>
 
 namespace Nuake {
+
 	void OS::CopyToClipboard(const std::string& value)
 	{
+		#ifdef NK_WIN
 		auto glob = GlobalAlloc(GMEM_FIXED, 512);
 		memcpy(glob, value.data(), value.size());
 		OpenClipboard(glfwGetWin32Window(Window::Get()->GetHandle()));
 		EmptyClipboard();
 		SetClipboardData(CF_TEXT, glob);
 		CloseClipboard();
+		#endif
 	}
 
 	std::string OS::GetFromClipboard()
 	{
+		#ifdef NK_WIN
 		OpenClipboard(nullptr);
 		HANDLE hData = GetClipboardData(CF_TEXT);
 
@@ -33,6 +42,9 @@ namespace Nuake {
 		CloseClipboard();
 
 		return text;
+		#endif
+
+		return "";
 	}
 
 	int OS::GetTime()
@@ -42,7 +54,9 @@ namespace Nuake {
 
 	void OS::OpenIn(const std::string& filePath)
 	{
+		#ifdef NK_WIN
 		ShellExecuteA(nullptr, "open", filePath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
+		#endif
 	}
 
 	int OS::RenameFile(const Ref<File>& file, const std::string& newName)
@@ -66,16 +80,22 @@ namespace Nuake {
 
 	void OS::ShowInFileExplorer(const std::string& filePath)
 	{
+		#ifdef NK_WIN
 		ShellExecuteA(nullptr, "open", "explorer.exe", ("/select," + std::string(filePath)).c_str(), nullptr, SW_SHOWDEFAULT);
+		#endif
 	}
 
 	void OS::OpenTrenchbroomMap(const std::string& filePath)
 	{
+		#ifdef NK_WIN
 		ShellExecuteA(nullptr, nullptr, Engine::GetProject()->TrenchbroomPath.c_str(), filePath.c_str(), nullptr, SW_SHOW);
+		#endif
 	}
 
 	void OS::OpenURL(const std::string& url)
 	{
+		#ifdef NK_WIN
 		ShellExecute(nullptr, nullptr, std::wstring(url.begin(), url.end()).c_str(), 0, 0, SW_SHOW);
+		#endif
 	}
 }

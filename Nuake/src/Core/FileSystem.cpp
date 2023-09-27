@@ -2,11 +2,15 @@
 
 #include "Engine.h"
 
+#include <GLFW/glfw3.h>
+
+#ifdef NK_WIN
 #define GLFW_EXPOSE_NATIVE_WIN32
 
-#include <GLFW/glfw3.h>
 #include "GLFW/glfw3native.h"
 #include <commdlg.h>
+
+#endif
 #include <fstream>
 #include <iostream>
 
@@ -16,6 +20,7 @@ namespace Nuake
 
 	std::string FileDialog::OpenFile(const char* filter)
 	{
+#ifdef NK_WIN
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -30,12 +35,14 @@ namespace Nuake
 		{
 			return ofn.lpstrFile;
 		}
+#endif
 		return std::string();
 
 	}
 
 	std::string FileDialog::SaveFile(const char* filter)
 	{
+#ifdef NK_WIN
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -50,8 +57,9 @@ namespace Nuake
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+#endif
 
+		return std::string();
 	}
 
 	std::string FileSystem::Root = "";

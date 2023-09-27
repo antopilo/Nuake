@@ -8,6 +8,16 @@
 #include <string.h>
 #include <stdio.h>
 
+int entity_count;
+entity *entities;
+entity_geometry *entity_geo;
+
+int texture_count;
+texture_data *textures;
+
+int worldspawn_layer_count;
+worldspawn_layer *worldspawn_layers;
+
 void map_data_reset()
 {
     if (entities != NULL)

@@ -2,6 +2,7 @@
 #include "src/Core/Core.h"
 #include <src/Core/Maths.h>
 
+#include <atomic>
 #include <mutex>
 #include <thread>
 

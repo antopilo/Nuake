@@ -10,7 +10,7 @@
 #include <src/Core/Physics/GhostObject.h>
 #include "CharacterController.h"
 
-#include <Jolt/Jolt.h>
+#include "Jolt/Jolt.h"
 
 
 namespace JPH

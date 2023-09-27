@@ -1,5 +1,5 @@
 #include "SkyboxHDR.h"
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/Cubemap.h"
 
@@ -294,8 +294,8 @@ namespace Nuake {
         for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
         {
             // reisze framebuffer according to mip-level size.
-            unsigned int mipWidth =  unsigned int(1024 * std::pow(0.5f, mip));
-            unsigned int mipHeight = unsigned int(1024 * std::pow(0.5f, mip));
+            uint32_t mipWidth =  1024 * std::pow(0.5f, mip);
+            uint32_t mipHeight = 1024 * std::pow(0.5f, mip);
             glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
             glViewport(0, 0, mipWidth, mipHeight);

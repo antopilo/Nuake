@@ -19,7 +19,7 @@ namespace Nuake {
 
 			void RegisterModule(WrenVM* vm) override
 			{
-				RegisterMethod("GetMouseX()", GetMouseX);
+				RegisterMethod("GetMouseX()", (void*)GetMouseX);
 				RegisterMethod("GetMouseY()", (void*)GetMouseY);
 
 				RegisterMethod("IsKeyDown_(_)", (void*)IsKeyDown);

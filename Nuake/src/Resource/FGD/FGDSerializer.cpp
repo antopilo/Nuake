@@ -1,5 +1,5 @@
 #include "FDGSerializer.h"
-#include <src\Core\FileSystem.h>
+#include <src/Core/FileSystem.h>
 
 namespace Nuake {
 	bool FGDSerializer::BeginFGDFile(const std::string path)

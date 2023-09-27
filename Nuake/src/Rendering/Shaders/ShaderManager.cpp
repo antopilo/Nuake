@@ -1,4 +1,3 @@
-#pragma once
 #include "ShaderManager.h"
 #include "src/Core/Logger.h"
 

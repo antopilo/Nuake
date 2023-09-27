@@ -72,7 +72,6 @@ namespace Nuake
 					PropValueType::COLOR,
 					{0},
 				};
-				data.value.Color = Color(r, g, b, a);
 				return data;
 			}
 		}

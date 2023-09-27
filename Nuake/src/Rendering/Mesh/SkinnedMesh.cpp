@@ -40,7 +40,7 @@ namespace Nuake
         return m_Indices;
     }
 
-    Ref<Material> SkinnedMesh::GetMaterial() inline const
+    Ref<Material> SkinnedMesh::GetMaterial() const
     {
         return m_Material;
     }

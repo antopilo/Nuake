@@ -1,11 +1,10 @@
-#pragma once
 #include "src/Core/Core.h"
 #include "Shader.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include <sstream>
-#include <GL\glew.h>
+#include <GL/glew.h>
 
 
 namespace Nuake

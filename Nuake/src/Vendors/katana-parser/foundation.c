@@ -12,9 +12,18 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
-strncasecmp(const char* a, const char* b)
+#ifdef _WIN32
+#include <string.h> // for _stricmp on Windows
+#else
+#include <strings.h> // for strcasecmp on non-Windows platforms
+#endif
+int strncasecmp(const char* a, const char* b, size_t n)
 {
-    return _stricmp(a, b);
+#ifdef _WIN32
+    return _strnicmp(a, b, n); // Case-insensitive comparison on Windows
+#else
+    return strncasecmp(a, b, n); // Case-insensitive comparison on non-Windows platforms
+#endif
 }
 //#undef	assert
 //#define assert(x)
@@ -87,7 +96,13 @@ bool katana_string_has_prefix(const char* str, const char* prefix)
 {
     size_t pre_len = strlen(prefix);
     size_t str_len = strlen(str);
-    return pre_len <= str_len && strncasecmp(prefix, str, pre_len);
+
+    // Ensure that the prefix length is less than or equal to the string length
+    if (pre_len <= str_len) {
+        return strncmp(prefix, str, pre_len) == 0;
+    }
+
+    return false;
 }
 
 void katana_string_to_lowercase(struct KatanaInternalParser* parser,

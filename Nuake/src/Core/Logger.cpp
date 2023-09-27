@@ -14,8 +14,18 @@ namespace Nuake
 		char buff[100];
 		time_t now = time(0);
 		struct tm timeinfo;
+
+#ifdef NK_WIN
+		
 		localtime_s(&timeinfo, &now);
 		strftime(buff, 100, "%H:%M:%S", &timeinfo);
+#endif
+
+#ifdef NK_LINUX
+		time_t timeinfo2;
+		localtime_r(&timeinfo2, &timeinfo);
+		strftime(buff, 100, "%H:%M:%S", localtime(&now));
+#endif
 
 		LogEntry newLog = {
 			type,

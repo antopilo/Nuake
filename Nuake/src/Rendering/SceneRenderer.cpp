@@ -5,7 +5,7 @@
 #include "src/Scene/Components/SpriteComponent.h"
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include <src/Scene/Components/SkinnedModelComponent.h>
 #include <src/Vendors/imgui/imgui.h>
 

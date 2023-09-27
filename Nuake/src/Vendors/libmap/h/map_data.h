@@ -1,3 +1,4 @@
+#pragma once
 #ifndef MAP_DATA_H
 #define MAP_DATA_H
 
@@ -18,15 +19,15 @@ typedef struct worldspawn_layer
     bool build_visuals;
 } worldspawn_layer;
 
-int entity_count;
-entity *entities;
-entity_geometry *entity_geo;
+extern int entity_count;
+extern entity *entities;
+extern entity_geometry *entity_geo;
 
-int texture_count;
-texture_data *textures;
+extern int texture_count;
+extern texture_data *textures;
 
-int worldspawn_layer_count;
-worldspawn_layer *worldspawn_layers;
+extern int worldspawn_layer_count;
+extern worldspawn_layer *worldspawn_layers;
 
 void map_data_reset();
 

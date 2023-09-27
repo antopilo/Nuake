@@ -2,7 +2,7 @@
 
 namespace Nuake
 {
-    Quat Nuake::LookAt(Vector3 sourcePoint, Vector3 destPoint)
+    Quat LookAt(Vector3 sourcePoint, Vector3 destPoint)
     {
         Vector3 forwardVector = glm::normalize(destPoint - sourcePoint);
 
@@ -23,7 +23,7 @@ namespace Nuake
     }
 
     // just in case you need that function also
-    Quat Nuake::CreateFromAxisAngle(Vector3 axis, float angle)
+    Quat CreateFromAxisAngle(Vector3 axis, float angle)
     {
         float halfAngle = angle * .5f;
         float s = sin(halfAngle);
@@ -35,7 +35,7 @@ namespace Nuake
         return q;
     }
 
-    Quat Nuake::QuatFromEuler(float x, float y, float z)
+    Quat QuatFromEuler(float x, float y, float z)
     {
         Quat pitchQuat = glm::angleAxis(Rad(x), Vector3(1.0f, 0.0f, 0.0f));
         Quat yawQuat = glm::angleAxis(Rad(y), Vector3(0.0f, 1.0f, 0.0f));
@@ -45,12 +45,12 @@ namespace Nuake
         return glm::normalize(orientation);
     }
 
-    Vector3 Nuake::QuatToDirection(const Quat& quat)
+    Vector3 QuatToDirection(const Quat& quat)
     {
         return glm::normalize(quat * Vector3(0, 0, -1));
     }
 
-    void Nuake::Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale)
+    void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale)
     {
         pos = m[3];
         for (int i = 0; i < 3; i++)
@@ -62,7 +62,7 @@ namespace Nuake
         rot = glm::quat_cast(rotMtx);
     }
 
-    const Matrix4& Nuake::TransformToCameraTransform(const Matrix4& mat)
+    const Matrix4& TransformToCameraTransform(const Matrix4& mat)
     {
         return mat;
     }

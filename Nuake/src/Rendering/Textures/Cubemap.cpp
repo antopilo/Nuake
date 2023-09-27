@@ -1,5 +1,5 @@
 #include "Cubemap.h"
-#include <GL\glew.h>
+#include <GL/glew.h>
 #include <iostream>
 #include "HDR.h"
 

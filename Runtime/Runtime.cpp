@@ -1,6 +1,6 @@
 #include <Engine.h>
 
-#include <dependencies/GLEW/include/GL/glew.h>
+//#include <dependencies/GLEW/include/GL/glew.h>
 #include <src/Vendors/imgui/imgui.h>
 
 #include <string>
@@ -45,7 +45,7 @@ int ApplicationMain(int argc, char* argv[])
         Engine::Draw();
 
         const auto& WindowSize = window->GetSize();
-        glViewport(0, 0, WindowSize.x, WindowSize.y);
+        //glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
 
         ImGuiViewport* viewport = ImGui::GetMainViewport();

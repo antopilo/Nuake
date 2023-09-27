@@ -26,7 +26,12 @@
 #include <string.h>
 strcasecmp(const char* a, const char* b)
 {
+    #ifdef NK_WIN
     return _stricmp(a, b);
+    #endif
+    #ifdef NK_LINUX
+    return strcasecmp(a, b);
+    #endif
 }
 #undef	assert
 #define assert(x)
