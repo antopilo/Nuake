@@ -1,11 +1,11 @@
 # Nuake
-![Nuake](Editor/resources/Images/logo.png)
+![Nuake](Resources/Images/logo.png)
 
 ## Quake inspired game engine
 Nuake is a game engine currently in developement that focuses on fast level design iteration time that integrates with quake level editing software. 
 > It is currently in developement and is not feature complete. We are currently aiming for an alpha release with basic features and a demo level.
 
-![Nuake](Editor/resources/Images/screenshot.png)
+![Nuake](Resources/Images/screenshot.png)
 
 
 You can join the discord server for updates and screenshots or if you want to contribute:
