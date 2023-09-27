@@ -56,28 +56,20 @@ namespace Nuake {
 		template<typename T>
 		void Push(unsigned int count)
 		{
-			if constexpr (std::is_same_v<T, float*>)
+			if constexpr (std::is_same_v<float, T>)
 			{
 				m_Elements.push_back({ RendererEnum::FLOAT, count, false });
 				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::FLOAT) * count;
 			}
-			
-			if constexpr (std::is_same_v<T, unsigned int*>)
+			else if constexpr (std::is_same_v<unsigned int, T>)
 			{
 				m_Elements.push_back({ RendererEnum::UINT, count, false });
 				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UINT) * count;
 			}
-
-			if constexpr (std::is_same_v<T, int*>)
+			else if constexpr (std::is_same_v<int, T>)
 			{
 				m_Elements.push_back({ RendererEnum::INT, count, false });
 				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::INT) * count;
-			}
-
-			if constexpr (std::is_same_v<T, int*>)
-			{
-				m_Elements.push_back({ RendererEnum::UBYTE, count, true });
-				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UBYTE) * count;
 			}
 		}
 #endif
@@ -85,8 +77,6 @@ namespace Nuake {
 
 		inline unsigned int GetStride() const { return m_Stride; }
 	};
-
-	
 
 #ifdef NK_WINs
 	template<>
