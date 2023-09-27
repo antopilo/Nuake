@@ -71,6 +71,7 @@ namespace Nuake
 	{
 		m_RendererId = 0;
 		int channels = 0;
+		stbi_set_flip_vertically_on_load(1);
 		m_LocalBuffer = stbi_load_from_memory(data, len, &m_Width, &m_Height, &channels, 4);
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);

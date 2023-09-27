@@ -76,17 +76,17 @@ namespace Nuake
 	void Material::InitDefaultTextures()
 	{
 		if (m_DefaultAlbedo == nullptr)
-			m_DefaultAlbedo = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+			m_DefaultAlbedo = TextureManager::Get()->GetTexture("Resources/Textures/Default.png");
 		if (m_DefaultAO == nullptr)
-			m_DefaultAO = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+			m_DefaultAO = TextureManager::Get()->GetTexture("Resources/Textures/Default.png");
 		if (m_DefaultNormal == nullptr)
-			m_DefaultNormal = TextureManager::Get()->GetTexture("resources/Textures/default/defaultNormal.png");
+			m_DefaultNormal = TextureManager::Get()->GetTexture("Resources/Textures/DefaultNormal.png");
 		if (m_DefaultDisplacement == nullptr)
-			m_DefaultDisplacement = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+			m_DefaultDisplacement = TextureManager::Get()->GetTexture("Resources/Textures/Default.png");
 		if (m_DefaultRoughness == nullptr)
-			m_DefaultRoughness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+			m_DefaultRoughness = TextureManager::Get()->GetTexture("Resources/Textures/Default.png");
 		if (m_DefaultMetalness == nullptr)
-			m_DefaultMetalness = TextureManager::Get()->GetTexture("resources/Textures/default/Default.png");
+			m_DefaultMetalness = TextureManager::Get()->GetTexture("Resources/Textures/Default.png");
 	}
 
 	void Material::Bind(Shader* shader)

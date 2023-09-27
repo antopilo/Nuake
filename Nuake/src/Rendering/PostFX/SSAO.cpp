@@ -101,7 +101,7 @@ namespace Nuake
 			_ssaoFramebuffer->Clear();
 			const auto& depthTexture = gBuffer->GetTexture(GL_DEPTH_ATTACHMENT);
 			const auto& normalTexture = gBuffer->GetTexture(GL_COLOR_ATTACHMENT1);
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/ssao.shader");
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/ssao.shader");
 			shader->Bind();
 			shader->SetUniformMat4f("u_Projection", projection);
 			shader->SetUniformMat4f("u_View", view);
@@ -131,7 +131,7 @@ namespace Nuake
 
 		_ssaoBlurFramebuffer->Bind();
 		{
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/blur.shader");
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/blur.shader");
 			shader->Bind();
 
 			shader->SetUniformTex("u_Input", _ssaoFramebuffer->GetTexture().get(), 2);

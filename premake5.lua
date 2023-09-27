@@ -47,7 +47,9 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/vm/*.h",
         "%{prj.name}/src/Vendors/wren/src/vm/*.c",
         "%{prj.name}/src/Vendors/katana-parser/*.h",
-        "%{prj.name}/src/Vendors/katana-parser/*.c"
+        "%{prj.name}/src/Vendors/katana-parser/*.c",
+        "%{prj.name}/../Nuake/src/Vendors/incbin/*.c",
+        "%{prj.name}/../Nuake/src/Vendors/incbin/*.h"
     }
 
     includedirs
@@ -62,6 +64,7 @@ project "Nuake"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
+        "%{prj.name}/../Nuake/src/Vendors/incbin",
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/Dependencies/soloud/include"
     }
@@ -182,7 +185,6 @@ project "NuakeRuntime"
     kind "WindowedApp"
         runtime "Release"
         optimize "on"
-        entrypoint "WinMainCRTStartup"
         flags { "WinMain" }
         defines 
         {
@@ -276,7 +278,6 @@ project "Editor"
             "NK_DIST",
             "WIN32_LEAN_AND_MEAN"
         }
-        entrypoint "WinMainCRTStartup"
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {

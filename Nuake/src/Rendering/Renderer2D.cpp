@@ -17,8 +17,8 @@ namespace Nuake
 
 	void Renderer2D::Init()
 	{
-		UIShader = ShaderManager::GetShader("resources/Shaders/ui.shader");
-		TextShader = ShaderManager::GetShader("resources/Shaders/sdf_text.shader");
+		UIShader = ShaderManager::GetShader("Resources/Shaders/ui.shader");
+		TextShader = ShaderManager::GetShader("Resources/Shaders/sdf_text.shader");
 
 		float quad_Vertices[] = {
 			// positions      texture Coords

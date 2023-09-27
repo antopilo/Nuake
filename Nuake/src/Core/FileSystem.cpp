@@ -87,6 +87,7 @@ namespace Nuake
 	bool FileSystem::DirectoryExists(const std::string& path, bool absolute)
 	{
 		const std::string& finalPath = absolute ? path : Root + path;
+
 		return std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath);
 	}
 

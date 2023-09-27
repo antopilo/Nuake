@@ -1,6 +1,9 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "Shader.h"
+#include "src/Core/FileSystem.h"
+#include "src/Core/Logger.h"
+
 #include <sstream>
 #include <GL\glew.h>
 
@@ -12,13 +15,37 @@ namespace Nuake
 	{
 		Path = filePath;
 
-		Source = ParseShader(this->Path);
+		if (FileSystem::FileExists(filePath, true))
+		{
+			if (const auto& fileContent = FileSystem::ReadFile(filePath);
+				!fileContent.empty())
+			{
+				Source = ParseShader(fileContent);
+				ProgramId = CreateProgram(Source);
+				return;
+			}
+		}
+
+		Logger::Log("Shader source file not found: " + filePath, "shader", CRITICAL);
+	}
+
+	Shader::Shader(const std::string& filePath, const std::string& content)
+	{
+		Path = filePath;
+
+		Source = ParseShader(content);
 		ProgramId = CreateProgram(Source);
 	}
 
 	bool Shader::Rebuild()
 	{
-		ShaderSource newSource = ParseShader(this->Path);
+		if (!FileSystem::FileExists(Path))
+		{
+			Logger::Log("Failed to reload shader, file doesn't exists: " + Path, "shader", CRITICAL);
+			return false;
+		}
+
+		ShaderSource newSource = ParseShader(FileSystem::ReadFile(this->Path));
 		unsigned int newProgramId = CreateProgram(newSource);
 
 		if(newProgramId == 0)
@@ -43,9 +70,9 @@ namespace Nuake
 	}
 
 	// Prase the shader file and create string source.
-	ShaderSource Shader::ParseShader(const std::string& filePath) 
+	ShaderSource Shader::ParseShader(const std::string& content) 
 	{
-		std::ifstream stream(filePath);
+		std::stringstream stream(content.c_str());
 
 		enum class ShaderType 
 		{

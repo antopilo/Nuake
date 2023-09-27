@@ -32,14 +32,14 @@ namespace Nuake
 	class WelcomeWindow
 	{
 	private:
-		const std::string NUAKE_LOGO_PATH = "resources/Images/logo_white.png";
+		const std::string NUAKE_LOGO_PATH = "Resources/Images/logo_white.png";
 		Ref<Texture> _NuakeLogo;
 		EditorInterface* _Editor;
 
 		const std::string _RecentProjectFilePath = "recent.json";
 		const std::string _RecentProjectFileDefaultContent = "{ \"Projects\": [ ] }";
 		
-		uint32_t SelectedProject = 0;
+		int32_t SelectedProject = -1;
 		std::vector<ProjectPreview> _Projects;
 		std::string queuedProjectPath;
 	public:

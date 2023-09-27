@@ -8,7 +8,7 @@ namespace Nuake {
 	SSR::SSR()
 	{
 		mSize = Vector2(1280, 720);
-		mShader = ShaderManager::GetShader("resources/Shaders/ssr.shader");
+		mShader = ShaderManager::GetShader("Resources/Shaders/ssr.shader");
 	}
 
 	void SSR::Init()

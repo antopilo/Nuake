@@ -543,7 +543,7 @@ namespace Nuake
 			std::string textureNotFoundmsg = "Texture file couldn't be found: " + texturePath;
 			Logger::Log(textureNotFoundmsg, "model", Nuake::LOG_TYPE::WARNING);
 
-			texturePath = "resources/Textures/default/Default.png";
+			texturePath = "Resources/Textures/Default.png";
 		}
 
 		return TextureManager::Get()->GetTexture(texturePath);

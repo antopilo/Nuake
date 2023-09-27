@@ -21,9 +21,8 @@ namespace Nuake
 
 		void EndWindow();
 
-		bool PrimaryButton(const std::string& name);
-
-		bool SecondaryButton(const std::string& name);
+		bool PrimaryButton(const std::string& name, const Vector2& size = {0, 0});
+		bool SecondaryButton(const std::string& name, const Vector2& size = { 0, 0 });
 
 		bool IconButton(const std::string& icon);
 

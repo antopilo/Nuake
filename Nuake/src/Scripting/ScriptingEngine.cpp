@@ -9,6 +9,8 @@
 #include "src/Scripting/Modules/InputModule.h"
 #include "src/Scripting/Modules/PhysicsModule.h"
 
+#include "src/Resource/StaticResources.h"
+
 namespace Nuake {
     WrenVM* ScriptingEngine::m_WrenVM;
 
@@ -64,6 +66,20 @@ namespace Nuake {
         }
     }
 
+#define GET_STATIC_RESOURCE_SCRIPT_SRC(name) std::string(name, name + name##_len)
+
+    std::map<std::string, std::string> _ModulesSRC =
+    {
+        {"Audio", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Audio_wren)},
+        {"Engine", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Engine_wren)},
+        {"Input", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Input_wren)},
+        {"Math", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Math_wren)},
+        {"Physics", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Physics_wren)},
+        {"Scene", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Scene_wren)},
+        {"ScriptableEntity", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_ScriptableEntity_wren)},
+    };
+
+
     const std::string NuakeModulePrefix = "Nuake:";
     WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name)
     {
@@ -72,12 +88,22 @@ namespace Nuake {
         std::string sname = std::string(name);
         std::string path = "resources/" + std::string(name);
 
+        std::string fileContent = "";
         bool isAbsolute = false;
         if (sname.rfind(NuakeModulePrefix, 0) == 0)
         {
             size_t prefixPosition = sname.find(NuakeModulePrefix);
             sname.erase(prefixPosition, NuakeModulePrefix.length());
-            path = "resources/Scripts/" + std::string(sname);
+            path = sname;
+
+            if (_ModulesSRC.find(sname) != _ModulesSRC.end())
+            {
+                fileContent = _ModulesSRC[sname];
+            }
+            else
+            {
+                Logger::Log("Internal script module not found: " + sname + ". \n Did you forget to register it?", "scripting engine", CRITICAL);
+            }
         }
         else
         {
@@ -88,8 +114,12 @@ namespace Nuake {
         if (!hasEnding(path, ".wren"))
             path += ".wren";
 
-        std::string str = FileSystem::ReadFile(path, true);
-        char* c = strcpy(new char[str.length() + 1], str.c_str());
+        if (isAbsolute)
+        {
+            fileContent = FileSystem::ReadFile(path, true);
+        }
+
+        char* c = strcpy(new char[fileContent.length() + 1], fileContent.c_str());
 
         result.source = c;
         return result;

@@ -35,7 +35,7 @@ namespace Nuake
 	}
 
 	void ProceduralSky::Draw(Matrix4 projection, Matrix4 view) {
-		Shader* skyShader = ShaderManager::GetShader("resources/Shaders/atmospheric_sky.shader");
+		Shader* skyShader = ShaderManager::GetShader("Resources/Shaders/atmospheric_sky.shader");
 		skyShader->Bind();
 		skyShader->SetUniform1f("SurfaceRadius", SurfaceRadius);
 		skyShader->SetUniform1f("AtmosphereRadius", AtmosphereRadius);

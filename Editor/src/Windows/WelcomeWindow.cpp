@@ -19,6 +19,8 @@
 #include "EditorInterface.h"
 #include "FileSystemUI.h"
 
+#include <src/UI/ImUI.h>
+
 namespace Nuake
 {
 	ProjectPreview::ProjectPreview(const std::string& path)
@@ -43,7 +45,7 @@ namespace Nuake
 			}
 			else
 			{
-				ProjectIcon = TextureManager::Get()->GetTexture("resources/Images/nuake-logo.png");
+				ProjectIcon = TextureManager::Get()->GetTexture("Resources/Images/nuake-logo.png");
 			}
 		}
 		else
@@ -124,6 +126,17 @@ namespace Nuake
 				ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
 			}
 
+			//ImGui::SameLine();
+
+			std::string versionInfo = "pre-alpha ";
+#ifdef NK_DEBUG
+			versionInfo += "debug build";
+#endif
+#ifdef NK_DIST
+			versionInfo += "dist build";
+#endif
+			ImGui::TextColored({1, 1, 1, 0.5}, versionInfo.c_str());
+			// ImGui::TextColored({ 1, 1, 1, 0.5 }, "239d9479");
 			// Add padding under logo
 			ImGui::Dummy(ImVec2(10, 16));
 
@@ -179,7 +192,6 @@ namespace Nuake
 
 	void WelcomeWindow::DrawProjectItem(const uint32_t itemIndex)
 	{
-		
 		const ProjectPreview& project = _Projects[itemIndex];
 		const uint32_t itemHeight = 120;
 		const float cursorYStart = ImGui::GetCursorPosY();
@@ -194,16 +206,14 @@ namespace Nuake
 		// Channel number is like z-order. Widgets in higher channels are rendered above widgets in lower channels.
 		draw_list->ChannelsSetCurrent(1);
 
-		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
-		bool result = ImGui::Selectable(selectableName.c_str(), isSelected, ImGuiSelectableFlags_AllowItemOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
-		if (isSelected)
+		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
+		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
+		if (result)
 		{
-			ImVec2 p_min = ImGui::GetItemRectMin();
-			ImVec2 p_max = ImGui::GetItemRectMax();
-			ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, IM_COL32(10.0f, 182.0f, 255.f, 255.0f), 8.0f);
+			SelectedProject = itemIndex;
 		}
 
-		ImGui::PopStyleColor();
+		//ImGui::PopStyleColor();
 		
 		draw_list->ChannelsMerge();
 
@@ -217,7 +227,10 @@ namespace Nuake
 		const ImVec2 iconSize = ImVec2(100, 100);
 		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(0, cursorYStart));
 
-		ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+		if (project.ProjectIcon)
+		{
+			ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+		}
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
@@ -244,14 +257,14 @@ namespace Nuake
 		const float buttonHeight = 36.0f;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 16.0f);
-		if (ImGui::BeginChild("Controls", ImVec2(200.0f, ImGui::GetContentRegionAvail().y), false))
+		if (ImGui::BeginChild("Controls", ImVec2(250.0f, ImGui::GetContentRegionAvail().y), false))
 		{
 			ImGui::PopStyleVar();
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.14f, 0.5f));
 			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + "  New Game Project...";
-			if (ImGui::Button(buttonLabel.c_str(), buttonSize))
+			if (Nuake::UI::PrimaryButton(buttonLabel.c_str(), { buttonSize.x, buttonSize.y }))
 			{
 				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
 					
@@ -287,34 +300,48 @@ namespace Nuake
 					projectPreview.Name = project->Name;
 					projectPreview.Description = project->Description;
 					projectPreview.Path = project->FullPath;
-
+					projectPreview.ProjectIcon = nullptr;
 					_Projects.push_back(projectPreview);
 				}
 			}
 			ImGui::PopStyleVar(2);
 			ImGui::Separator();
 
-			if (SelectedProject != -1)
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.16f, 0.5f));
+			const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + "  Load Selected Project";
+				
+			bool hasProjectSelected = false;
+			if (SelectedProject < std::size(_Projects) && SelectedProject >= 0)
 			{
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
-				ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.16f, 0.5f));
-				const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + "  Load Selected Project";
-				if (ImGui::Button(buttonLabelOpen.c_str(), buttonSize) || ImGui::IsMouseDoubleClicked(0))
-				{
-					assert(SelectedProject < std::size(_Projects));
-
-					SaveRecentFile();
-
-					queuedProjectPath = _Projects[SelectedProject].Path;;
-				}
-				ImGui::PopStyleVar(2);
+				hasProjectSelected = true;
 			}
+
+			if (!hasProjectSelected)
+			{
+				ImGui::BeginDisabled(true);
+			}
+
+			if (Nuake::UI::SecondaryButton(buttonLabelOpen, { buttonSize.x, buttonSize.y }))
+			{
+				SaveRecentFile();
+
+				queuedProjectPath = _Projects[SelectedProject].Path;;
+			}
+
+			if (!hasProjectSelected)
+			{
+				ImGui::EndDisabled();
+			}
+
+			ImGui::PopStyleVar(2);
+			
 			ImGui::Separator();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.09f, 0.5f));
 			const std::string buttonLabelDoc = std::string(ICON_FA_EXTERNAL_LINK_SQUARE_ALT) + "  Documentation";
-			if (ImGui::Button(buttonLabelDoc.c_str(), buttonSize))
+			if (Nuake::UI::SecondaryButton(buttonLabelDoc, { buttonSize.x, buttonSize.y }))
 			{
 				OS::OpenURL("https://nuake.readthedocs.io/en/latest/index.html");
 			}

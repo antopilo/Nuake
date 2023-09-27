@@ -23,7 +23,7 @@
 
 GizmoDrawer::GizmoDrawer()
 {
-	mLineShader = Nuake::ShaderManager::GetShader("resources/Shaders/line.shader");
+	mLineShader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
 
 	mAxisLineBuffer = CreateRef<Nuake::VertexArray>();
 	mAxisLineBuffer->Bind();
@@ -80,9 +80,9 @@ GizmoDrawer::GizmoDrawer()
 	// Load gizmos
 	ModelLoader loader;
 	_gizmos = std::map<std::string, Ref<Model>>();
-	_gizmos["cam"] = loader.LoadModel("resources/Models/Camera.gltf");
-	_gizmos["light"] = loader.LoadModel("resources/Models/Light.gltf");
-	_gizmos["player"] = loader.LoadModel("resources/Models/Camera.gltf");
+	//_gizmos["cam"] = loader.LoadModel("Resources/Models/Camera.gltf");
+	//_gizmos["light"] = loader.LoadModel("Resources/Models/Light.gltf");
+	//_gizmos["player"] = loader.LoadModel("Resources/Models/Camera.gltf");
 }
 
 void GizmoDrawer::GenerateSphereGizmo()
@@ -287,7 +287,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	auto flatShader = ShaderManager::GetShader("resources/Shaders/flat.shader");
+	auto flatShader = ShaderManager::GetShader("Resources/Shaders/flat.shader");
 	flatShader->Bind();
 	flatShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 	flatShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
@@ -300,7 +300,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	glLineWidth(1.0f);
 	RenderList renderList;
 
-	auto gizmoShader = ShaderManager::GetShader("resources/Shaders/gizmo.shader");
+	auto gizmoShader = ShaderManager::GetShader("Resources/Shaders/gizmo.shader");
 	gizmoShader->Bind();
 	gizmoShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 	gizmoShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
@@ -311,7 +311,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/camera.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/camera.png").get());
 		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -332,7 +332,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/light.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/light.png").get());
 		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -354,7 +354,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto characterControllerView = scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 	for (auto e : characterControllerView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/player.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/player.png").get());
 		auto [transform, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -376,7 +376,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto boneView = scene->m_Registry.view<TransformComponent, BoneComponent>();
 	for (auto e : boneView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/bone.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/bone.png").get());
 		auto [transform, boneComponent] = scene->m_Registry.get<TransformComponent, BoneComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -396,7 +396,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("resources/Gizmos/speaker.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/speaker.png").get());
 		auto [transformComponent, audioEmitterComponent] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
 		auto initialTransform = transformComponent.GetGlobalTransform();

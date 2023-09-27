@@ -28,6 +28,7 @@ namespace Nuake
 
 		Shader(const std::string& filePath);
 
+		Shader(const std::string& path, const std::string& content);
 		bool Rebuild();
 		void Bind() const;
 		void Unbind() const;

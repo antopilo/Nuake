@@ -51,6 +51,8 @@
 
 #include <src/UI/ImUI.h>
 
+#include <src/Resource/StaticResources.h>
+
 namespace Nuake {
     Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
@@ -64,6 +66,9 @@ namespace Nuake {
         _audioWindow = new AudioWindow();
 
         BuildFonts();
+
+        using namespace Nuake::StaticResources;
+        ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
     }
 
     void EditorInterface::Init()

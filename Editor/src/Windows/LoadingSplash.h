@@ -12,7 +12,7 @@ namespace Nuake
 class LoadingSplash
 {
 private:
-	const std::string NUAKE_LOGO_PATH = "resources/Images/logo_white.png";
+	const std::string NUAKE_LOGO_PATH = "Resources/Images/logo_white.png";
 	Ref<Nuake::Texture> _NuakeLogo;
 
 public:

@@ -23,6 +23,12 @@ namespace Nuake
 			const std::string FILE_NOT_FOUND = "[Resource Loader] File doesn't exists. \n ";
 			const std::string WRONG_EXTENSION = "[Resource Loader] Resource type mismatch file extension. \n expected: ";
 			const std::string MATERIAL_EXT = ".material";
+			if (path.empty())
+			{
+				Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
+				return nullptr;
+			}
+
 			if (!FileSystem::FileExists(path))
 			{
 				Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);

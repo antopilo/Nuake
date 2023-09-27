@@ -111,7 +111,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
@@ -125,7 +125,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
@@ -140,7 +140,7 @@ namespace Nuake
 		mToneMapBuffer->Bind();
 		{
 			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/tonemap.shader");
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/tonemap.shader");
 			shader->Bind();
 
 			shader->SetUniform1f("u_Exposure", scene.GetEnvironment()->Exposure);
@@ -158,7 +158,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/combine.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
@@ -172,7 +172,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
@@ -233,7 +233,7 @@ namespace Nuake
 		mDOFBuffer->Bind();
 		{
 			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("resources/Shaders/dof.shader");
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/dof.shader");
 			shader->Bind();
 
 			shader->SetUniform1f("focalDepth", focalDepth);
@@ -278,7 +278,7 @@ namespace Nuake
 			mBarrelDistortionBuffer->Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/barrel_distortion.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/barrel_distortion.shader");
 				shader->Bind();
 
 				shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
@@ -302,7 +302,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
@@ -317,7 +317,7 @@ namespace Nuake
 			mVignetteBuffer->Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/vignette.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
 				shader->Bind();
 
 				shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
@@ -330,7 +330,7 @@ namespace Nuake
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("resources/Shaders/copy.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
@@ -344,7 +344,7 @@ namespace Nuake
 		//mVignetteBuffer->Bind();
 		//{
 		//	RenderCommand::Clear();
-		//	Shader* shader = ShaderManager::GetShader("resources/Shaders/vignette.shader");
+		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
 		//	shader->Bind();
 		//
 		//	shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
@@ -363,7 +363,7 @@ namespace Nuake
 	{
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
-		Shader* shader = ShaderManager::GetShader("resources/Shaders/shadowMap.shader");
+		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
 		shader->Bind();
 
 		RenderCommand::Disable(RendererEnum::FACE_CULL);
@@ -448,7 +448,7 @@ namespace Nuake
 			}
 		}
 
-		Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("resources/Shaders/shadowMap_skinned.shader");
+		Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("Resources/Shaders/shadowMap_skinned.shader");
 		gBufferSkinnedMeshShader->Bind();
 		const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
 		gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
@@ -495,8 +495,8 @@ namespace Nuake
 
 			// Init
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
-			Shader* gBufferShader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
-			Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("resources/Shaders/gbuffer_skinned.shader");
+			Shader* gBufferShader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
+			Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("Resources/Shaders/gbuffer_skinned.shader");
 
 			gBufferShader->Bind();
 			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
@@ -680,7 +680,7 @@ namespace Nuake
 			}
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
-			Shader* shadingShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+			Shader* shadingShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 			shadingShader->Bind();
 			shadingShader->SetUniformMat4f("u_Projection", mProjection);
 			shadingShader->SetUniformMat4f("u_View", mView);

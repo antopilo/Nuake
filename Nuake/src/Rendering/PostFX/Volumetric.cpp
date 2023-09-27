@@ -43,7 +43,7 @@ namespace Nuake {
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 			auto cameraPosition = Vector3(view[3]);
-			Shader* volumetricShader = ShaderManager::GetShader("resources/Shaders/volumetric.shader");
+			Shader* volumetricShader = ShaderManager::GetShader("Resources/Shaders/volumetric.shader");
 			volumetricShader->Bind();
 			volumetricShader->SetUniformMat4f("u_Projection", projection);
 			volumetricShader->SetUniformMat4f("u_View", view);
@@ -74,7 +74,7 @@ namespace Nuake {
 		mFinalFramebuffer->Bind();
 		{
 			mFinalFramebuffer->Clear();
-			Shader* blurShader = ShaderManager::GetShader("resources/Shaders/blur.shader");
+			Shader* blurShader = ShaderManager::GetShader("Resources/Shaders/blur.shader");
 			blurShader->Bind();
 			//blurShader->SetUniformTex("u_Depth", mDepth, 1);
 			blurShader->SetUniformTex("u_Input", mVolumetricFramebuffer->GetTexture().get());

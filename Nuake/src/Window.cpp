@@ -10,6 +10,8 @@
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Scene/Scene.h"
 
+#include "src/Resource/StaticResources.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <imgui/imgui.h>
@@ -253,7 +255,7 @@ namespace Nuake
     void Window::SetWindowIcon(const std::string& path)
     {
         GLFWimage images[1];
-        images[0].pixels = stbi_load("resources/Images/nuake-logo.png", &images[0].width, &images[0].height, 0, 4); //rgba channels 
+        images[0].pixels = stbi_load_from_memory(StaticResources::Resources_Images_nuake_logo_png, StaticResources::Resources_Images_nuake_logo_png_len, &images[0].width, &images[0].height, 0, 4);
         glfwSetWindowIcon(m_Window, 1, images);
         stbi_image_free(images[0].pixels);
     }
@@ -272,10 +274,10 @@ namespace Nuake
     {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.Fonts->AddFontFromFileTTF("resources/Fonts/Poppins-Regular.ttf", 16.0);
+        io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         ImGui::StyleColorsDark();
 
         ImGuiStyle& s = ImGui::GetStyle();

@@ -81,7 +81,7 @@ namespace Nuake
     {
         RenderCommand::SetRendererAPI(RendererPlatforms::OpenGL);
 
-        LoadShaders();
+        ShaderManager::LoadShaders();
 
         m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
 
@@ -102,6 +102,7 @@ namespace Nuake
 
     void Renderer::LoadShaders()
     {
+       
     }
 
     void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId)
@@ -230,14 +231,14 @@ namespace Nuake
         }
 
         Ref<Mesh> sphereMesh = CreateRef<Mesh>();
-        sphereMesh->SetMaterial(CreateRef<Material>("resources/Images/nuake-logo.png"));
+        sphereMesh->SetMaterial(CreateRef<Material>());
         sphereMesh->AddSurface(std::move(finalVertices), std::move(finalIndices));
         return sphereMesh;
     }
 
     void Renderer::BeginDraw(Ref<Camera> camera)
     {
-        Shader* lineShader = ShaderManager::GetShader("resources/Shaders/line.shader");
+        Shader* lineShader = ShaderManager::GetShader("Resources/Shaders/line.shader");
         lineShader->Bind();
         lineShader->SetUniformMat4f("u_Projection", camera->GetPerspective());
         lineShader->SetUniformMat4f("u_View", camera->GetTransform());
@@ -258,7 +259,7 @@ namespace Nuake
 
     void Renderer::RegisterDeferredLight(TransformComponent transform, LightComponent light)
     {
-        Shader* deferredShader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+        Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
         deferredShader->Bind();
         m_Lights.push_back({ transform , light });
 
@@ -307,7 +308,7 @@ namespace Nuake
 
     void Renderer::DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform)
     {
-        Shader* shader = ShaderManager::GetShader("resources/Shaders/line.shader");
+        Shader* shader = ShaderManager::GetShader("Resources/Shaders/line.shader");
         shader->Bind();
         shader->SetUniformMat4f("u_Model", transform);
         shader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);

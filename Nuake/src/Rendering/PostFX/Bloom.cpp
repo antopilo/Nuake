@@ -72,7 +72,7 @@ namespace Nuake
 	{
 		if (!m_Source) return;
 
-		Shader* shader = ShaderManager::GetShader("resources/Shaders/bloom.shader");
+		Shader* shader = ShaderManager::GetShader("Resources/Shaders/bloom.shader");
 
 		m_ThresholdFB->Bind();
 		{

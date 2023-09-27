@@ -6,8 +6,9 @@
 enum EditorSelectionType {
 	None,
 	Entity, 
-	File, 
+	File,
 	Resource,
+	Directory
 };
 
 class EditorSelection {
@@ -17,6 +18,7 @@ public:
 
 	Nuake::Entity Entity;
 	Ref<Nuake::File> File;
+	Ref<Nuake::Directory> Directory;
 	Nuake::Resource Resource;
 
 	EditorSelection() 
@@ -34,6 +36,12 @@ public:
 	{
 		Type = EditorSelectionType::File;
 		File = file;
+	}
+
+	EditorSelection(const Ref<Nuake::Directory>& dir)
+	{
+		Type = EditorSelectionType::Directory;
+		Directory = dir;
 	}
 
 	EditorSelection(const Nuake::Resource& resource)

@@ -14,7 +14,7 @@ namespace Nuake {
 			ImGui::End();
 		}
 
-		bool PrimaryButton(const std::string& name)
+		bool PrimaryButton(const std::string& name, const Vector2& size)
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(97, 0, 255, 255));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
@@ -24,7 +24,7 @@ namespace Nuake {
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ButtonPadding);
 
 			UIFont boldFont(Bold);
-			const bool buttonPressed = ImGui::Button(name.c_str());
+			const bool buttonPressed = ImGui::Button(name.c_str(), ImVec2(size.x, size.y));
 
 			ImGui::PopStyleColor(3);
 
@@ -33,7 +33,7 @@ namespace Nuake {
 			return buttonPressed;
 		}
 
-		bool SecondaryButton(const std::string& name)
+		bool SecondaryButton(const std::string& name, const Vector2& size)
 		{
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
@@ -45,7 +45,7 @@ namespace Nuake {
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ButtonPadding);
 
 			UIFont boldFont(Bold);
-			const bool buttonPressed = ImGui::Button(name.c_str());
+			const bool buttonPressed = ImGui::Button(name.c_str(), ImVec2(size.x, size.y));
 
 			ImGui::PopStyleVar(3);
 

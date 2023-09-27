@@ -52,6 +52,19 @@ namespace Nuake
 		static uintmax_t DeleteFolder(const std::string& path);
 	};
 
+	enum class FileType
+	{
+		Unkown,
+		Image,
+		Material,
+		Script,
+		Project,
+		Prefab,
+		Scene,
+		Wad,
+		Map,
+	};
+
 	class File
 	{
 	private:
@@ -62,12 +75,102 @@ namespace Nuake
 		Ref<Directory> Parent;
 	public:
 
-		std::string GetExtension() { return Type; }
-		std::string GetName() { return Name; }
-		std::string GetRelativePath() { return RelativePath; }
-		std::string GetAbsolutePath() { return AbsolutePath; }
-		Ref<Directory> GetParent() { return Parent; }
+		std::string GetExtension() const { return Type; }
+		std::string GetName() const { return Name; }
+		std::string GetRelativePath() const { return RelativePath; }
+		std::string GetAbsolutePath() const { return AbsolutePath; }
+		Ref<Directory> GetParent() const { return Parent; }
+		FileType GetFileType() const
+		{
+			std::string ext = GetExtension();
+			if (ext == ".png" || ext == "jpg")
+			{
+				return FileType::Image;
+			}
 
+			if (ext == ".material")
+			{
+				return FileType::Material;
+			}
+
+			if (ext == ".scene")
+			{
+				return FileType::Scene;
+			}
+
+			if (ext == ".project")
+			{
+				return FileType::Project;
+			}
+
+			if (ext == ".script")
+			{
+				return FileType::Script;
+			}
+
+			if (ext == ".prefab")
+			{
+				return FileType::Prefab;
+			}
+
+			if (ext == ".wad")
+			{
+				return FileType::Wad;
+			}
+
+			if (ext == ".map")
+			{
+				return FileType::Map;
+			}
+
+			return FileType::Unkown;
+		}
+
+		std::string GetFileTypeAsString() const
+		{
+			std::string ext = GetExtension();
+			if (ext == ".png" || ext == "jpg")
+			{
+				return "Image";
+			}
+
+			if (ext == ".material")
+			{
+				return "Material";
+			}
+
+			if (ext == ".scene")
+			{
+				return "Scene";
+			}
+
+			if (ext == ".project")
+			{
+				return "Project";
+			}
+
+			if (ext == ".script")
+			{
+				return "Script";
+			}
+
+			if (ext == ".prefab")
+			{
+				return "Prefab";
+			}
+
+			if (ext == ".wad")
+			{
+				return "Wad";
+			}
+
+			if (ext == ".map")
+			{
+				return "Map";
+			}
+
+			return "File";
+		}
 		std::string Read()
 		{
 			return FileSystem::ReadFile(AbsolutePath);

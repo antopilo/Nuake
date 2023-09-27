@@ -13,6 +13,7 @@ namespace Nuake
 		static std::map<std::string, Scope<Shader>> m_Shaders;
 
 	public:
+		static void LoadShaders();
 		static Shader* GetShader(const std::string& path);
 		static void RebuildShaders();
 	};

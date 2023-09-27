@@ -266,10 +266,6 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 			{
 				textureID = material->m_Albedo->GetID();
 			}
-			else
-			{
-				textureID = TextureManager::Get()->GetTexture("default")->GetID();
-			}
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
@@ -304,10 +300,6 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 			{
 				textureID = material->m_Normal->GetID();
 			}
-			else
-			{
-				textureID = TextureManager::Get()->GetTexture("default")->GetID();
-			}
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
@@ -339,10 +331,6 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 			{
 				textureID = material->m_AO->GetID();
 			}
-			else
-			{
-				textureID = TextureManager::Get()->GetTexture("default")->GetID();
-			}
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
 			{
@@ -373,10 +361,6 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 			if (material->HasMetalness())
 			{
 				textureID = material->m_Metalness->GetID();
-			}
-			else
-			{
-				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
@@ -411,10 +395,6 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 			if (material->HasRoughness())
 			{
 				textureID = material->m_Roughness->GetID();
-			}
-			else
-			{
-				textureID = TextureManager::Get()->GetTexture("default")->GetID();
 			}
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))

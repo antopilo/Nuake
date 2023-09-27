@@ -14,11 +14,15 @@ namespace Nuake
 		static std::map<std::string, Ref<Texture>> m_Registry;
 		bool IsTextureLoaded(const std::string path);
 
+		void LoadStaticTextures();
+
 	public:
 		static TextureManager* Get();
 
 		TextureManager();
 
 		Ref<Texture> GetTexture(const std::string path);
+
+		
 	};
 }

@@ -24,7 +24,7 @@ namespace Nuake
 
 
 	public:
-		const std::string DEFAULT_MATERIAL = "resources/Textures/default/Default.png";
+		const std::string DEFAULT_MATERIAL = "Resources/Textures/Default.png";
 		UUID CurrentlyBoundedMaterial;
 		MaterialManager();
 

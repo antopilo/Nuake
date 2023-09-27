@@ -423,9 +423,16 @@ namespace Nuake
 
 	void CreateMaterials()
 	{
-		const std::string& materialFolderPath = "/Materials/" + WadName + "/";
+		const std::string materialFolderName = "/Materials";
+		const std::string& materialFolderPath = materialFolderName + "/" + WadName + "/";
+
 		if(!FileSystem::DirectoryExists(materialFolderPath))
 		{
+			if (!FileSystem::DirectoryExists(materialFolderName))
+			{
+				FileSystem::MakeDirectory(materialFolderName);
+			}
+
 			FileSystem::MakeDirectory(materialFolderPath);
 		}
 

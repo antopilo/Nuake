@@ -71,11 +71,47 @@ namespace Nuake
         ImGui::PushFont(FontManager::GetFont(Icons));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
-        const std::string id = ICON_FA_FOLDER + std::string("##") + directory->name;
-        if (ImGui::Button(id.c_str(), ImVec2(100, 100)))
+        const std::string id = std::string("##") + directory->name;
+
+        ImVec2 prevCursor = ImGui::GetCursorPos();
+        ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
+        const bool selected = ImGui::Selectable(id.c_str(), Editor->Selection.Directory == directory, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
+        if (selected)
         {
-            m_CurrentDirectory = directory;
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                m_CurrentDirectory = directory;
+            }
+
+            Editor->Selection = EditorSelection(directory);
         }
+
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(directory->name.c_str());
+
+
+        ImGui::SetCursorPos(prevCursor);
+        ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+
+
+        auto imguiStyle = ImGui::GetStyle();
+
+        ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
+        ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
+        ImU32 rectColor = IM_COL32(255, 255, 255, 16);
+        ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+        std::string visibleName = directory->name;
+        const uint32_t MAX_CHAR_NAME = 35;
+        if (directory->name.size() > MAX_CHAR_NAME)
+        {
+            visibleName = std::string(directory->name.begin(), directory->name.begin() + MAX_CHAR_NAME - 3) + "...";
+        }
+
+        ImGui::TextWrapped(visibleName.c_str());
+
+        ImGui::SetCursorPosY(prevCursor.y + 150 - ImGui::GetTextLineHeight());
+        ImGui::TextColored({ 1, 1, 1, 0.5f }, "Folder");
+
         ImGui::PopStyleVar();
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
@@ -168,8 +204,6 @@ namespace Nuake
             RefreshFileBrowser();
         }
 
-
-        ImGui::Text(directory->name.c_str());
         ImGui::PopFont();
     }
 
@@ -197,98 +231,169 @@ namespace Nuake
     {
         ImGui::PushFont(EditorInterface::bigIconFont);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {0.f, 0.f});
         std::string fileExtension = file->GetExtension();
-        if (fileExtension == ".png" || fileExtension == ".jpg")
+
+        ImVec2 prevCursor = ImGui::GetCursorPos();
+        ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
+        std::string id = std::string("##") + file->GetAbsolutePath();
+        const bool selected = ImGui::Selectable(id.c_str(), Editor->Selection.File == file, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
+       
+        bool shouldOpenScene = false;
+        if (selected)
         {
-            Ref<Texture> texture = TextureManager::Get()->GetTexture(file->GetAbsolutePath());
-            ImGui::ImageButton((void*)texture->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+            if (ImGui::IsMouseDoubleClicked(0))
+            {
+                if (file->GetFileType() == FileType::Map)
+                {
+                    OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+                }
+
+                if (file->GetFileType() == FileType::Scene)
+                {
+                    shouldOpenScene = true;
+                }
+            }
+            
+            Editor->Selection = EditorSelection(file);
         }
-        else
-        {
-            const char* icon = ICON_FA_FILE;
-            if (fileExtension == ".shader" || fileExtension == ".wren")
-                icon = ICON_FA_FILE_CODE;
-            if (fileExtension == ".map")
-                icon = ICON_FA_BROOM;
-            if (fileExtension == ".ogg" || fileExtension == ".mp3" || fileExtension == ".wav")
-                icon = ICON_FA_FILE_AUDIO;
-            if (fileExtension == ".gltf" || fileExtension == ".obj")
-                icon = ICON_FA_FILE_IMAGE;
 
-            std::string fullName = icon + std::string("##") + file->GetAbsolutePath();
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip(file->GetName().c_str());
 
-            bool pressed = false;
-            if (fileExtension == ".material")
-            {
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-                pressed = ImGui::ImageButton(fullName.c_str(), (void*)ThumbnailManager::Get().GetThumbnail(file->GetRelativePath())->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-                ImGui::PopStyleVar();
-            }
-            else
-            {
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-                pressed = ImGui::Button(fullName.c_str(), ImVec2(100, 100));
-                ImGui::PopStyleVar();
-            }
-           
-            if (Editor->Selection.File == file)
-            {
-                ThumbnailManager::Get().MarkThumbnailAsDirty(file->GetRelativePath());
-            }
-
-            if(pressed)
-            {
-                Editor->Selection = EditorSelection(file);
-            }
-
-            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
-            {
-                OS::OpenTrenchbroomMap(file->GetAbsolutePath());
-            }
-        }
-        ImGui::PopStyleVar();
         if (ImGui::BeginDragDropSource())
+        {
+            char pathBuffer[256];
+            std::strncpy(pathBuffer, file->GetAbsolutePath().c_str(), sizeof(pathBuffer));
+            std::string dragType;
+            if (fileExtension == ".wren")
             {
-                char pathBuffer[256];
-                std::strncpy(pathBuffer, file->GetAbsolutePath().c_str(), sizeof(pathBuffer));
-                std::string dragType;
-                if (fileExtension == ".wren")
-                {
-                    dragType = "_Script";
-                }
-                else if (fileExtension == ".map")
-                {
-                    dragType = "_Map";
-                }
-                else if (fileExtension == ".material")
-                {
-                    dragType = "_Material";
-                }
-                else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
-                {
-                    dragType = "_Model";
-                }
-                else if (fileExtension == ".interface")
-                {
-                    dragType = "_Interface";
-                }
-                else if (fileExtension == ".prefab")
-                {
-                    dragType = "_Prefab";
-                }
-                else if (fileExtension == ".png" || fileExtension == ".jpg")
-                {
-                    dragType = "_Image";
-                }
-                else if (fileExtension == ".wav" || fileExtension == ".ogg")
-                {
-                    dragType = "_AudioFile";
-                }
-
-                ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
-                ImGui::Text(file->GetName().c_str());
-                ImGui::EndDragDropSource();
+                dragType = "_Script";
             }
+            else if (fileExtension == ".map")
+            {
+                dragType = "_Map";
+            }
+            else if (fileExtension == ".material")
+            {
+                dragType = "_Material";
+            }
+            else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
+            {
+                dragType = "_Model";
+            }
+            else if (fileExtension == ".interface")
+            {
+                dragType = "_Interface";
+            }
+            else if (fileExtension == ".prefab")
+            {
+                dragType = "_Prefab";
+            }
+            else if (fileExtension == ".png" || fileExtension == ".jpg")
+            {
+                dragType = "_Image";
+            }
+            else if (fileExtension == ".wav" || fileExtension == ".ogg")
+            {
+                dragType = "_AudioFile";
+            }
+
+            ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
+            ImGui::Text(file->GetName().c_str());
+            ImGui::EndDragDropSource();
+        }
+
+
+        Ref<Texture> textureImage =TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png");
+
+        const auto textureMgr = TextureManager::Get();
+        const auto fileType = file->GetFileType();
+        if (fileType == FileType::Material)
+        {
+            textureImage = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+        }
+        else if (fileType == FileType::Image)
+        {
+            const std::string path = file->GetAbsolutePath();
+            textureImage = textureMgr->GetTexture(path);
+        }
+        else if (fileType == FileType::Project)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/logo.png");
+        }
+
+        ImGui::SetCursorPos(prevCursor);
+        ImGui::Image((ImTextureID)textureImage->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::PopStyleVar();
+        
+        auto imguiStyle = ImGui::GetStyle();
+
+        ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
+        ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
+        ImU32 rectColor = IM_COL32(255, 255, 255, 16);
+        ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+        std::string visibleName = file->GetName();
+        const uint32_t MAX_CHAR_NAME = 35;
+        if (file->GetName().size() > MAX_CHAR_NAME)
+        {
+            visibleName = std::string(file->GetName().begin(), file->GetName().begin() + MAX_CHAR_NAME - 3) + "...";
+        }
+
+        ImGui::TextWrapped(visibleName.c_str());
+
+        ImGui::SetCursorPosY(prevCursor.y + 150 - ImGui::GetTextLineHeight());
+        ImGui::TextColored({ 1, 1, 1, 0.5f }, file->GetFileTypeAsString().c_str());
+        
+        //if (fileExtension == ".png" || fileExtension == ".jpg")
+        //{
+        //    
+        //}
+        //else
+        //{
+        //    const char* icon = ICON_FA_FILE;
+        //    if (fileExtension == ".shader" || fileExtension == ".wren")
+        //        icon = ICON_FA_FILE_CODE;
+        //    if (fileExtension == ".map")
+        //        icon = ICON_FA_BROOM;
+        //    if (fileExtension == ".ogg" || fileExtension == ".mp3" || fileExtension == ".wav")
+        //        icon = ICON_FA_FILE_AUDIO;
+        //    if (fileExtension == ".gltf" || fileExtension == ".obj")
+        //        icon = ICON_FA_FILE_IMAGE;
+        //
+        //    std::string fullName = icon + std::string("##") + file->GetAbsolutePath();
+        //
+        //    bool pressed = false;
+        //    if (fileExtension == ".material")
+        //    {
+        //        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        //        pressed = ImGui::ImageButton(fullName.c_str(), (void*)ThumbnailManager::Get().GetThumbnail(file-//>GetRelativePath())->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        //        ImGui::PopStyleVar();
+        //    }
+        //    else
+        //    {
+        //        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        //        pressed = ImGui::Button(fullName.c_str(), ImVec2(100, 100));
+        //        ImGui::PopStyleVar();
+        //    }
+        //   
+        if (Editor->Selection.File == file)
+        {
+            ThumbnailManager::Get().MarkThumbnailAsDirty(file->GetRelativePath());
+        }
+        //
+        //    if(pressed)
+        //    {
+        //        Editor->Selection = EditorSelection(file);
+        //    }
+        //
+        //    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+        //    {
+        //        OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+        //    }
+        //}
+        ImGui::PopStyleVar();
+
 
         const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
         if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
@@ -298,7 +403,7 @@ namespace Nuake
         }
 
         const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
-        bool shouldOpenScene = false;
+        
 
         const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
         bool shouldRename = false;
@@ -385,11 +490,6 @@ namespace Nuake
             ImGui::EndPopup();
         }
 
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) 
-        {
-            shouldOpenScene = file->GetExtension() == ".scene";
-        }
-
         // Open Scene Popup
 
         if (shouldOpenScene)
@@ -407,6 +507,7 @@ namespace Nuake
                 return;
             }
 
+            FileSystem::SetRootDirectory(projectPath + "/");
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
             Engine::LoadScene(scene);
         }
@@ -445,8 +546,6 @@ namespace Nuake
             RefreshFileBrowser();
         }
 
-
-        ImGui::Text(file->GetName().c_str());
         ImGui::PopFont();
     }
 
@@ -793,6 +892,7 @@ namespace Nuake
                 }
                 ImGui::EndChild();
             }
+
             ImGui::EndChild();
         }
         ImGui::End();

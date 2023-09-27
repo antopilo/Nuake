@@ -76,7 +76,7 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 
 		RenderCommand::Disable(RendererEnum::BLENDING);
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-		auto shader = ShaderManager::GetShader("resources/Shaders/gbuffer.shader");
+		auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
 		shader->Bind();
 
 		auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
@@ -96,7 +96,7 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		m_ShadedFramebuffer->Clear();
 		RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 		RenderCommand::Disable(RendererEnum::FACE_CULL);
-		auto shader = ShaderManager::GetShader("resources/Shaders/deferred.shader");
+		auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 		shader->Bind();
 		shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
 		shader->SetUniform1i("LightCount", 0);
