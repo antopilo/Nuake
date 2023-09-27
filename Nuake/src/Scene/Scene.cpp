@@ -18,7 +18,7 @@
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/MaterialManager.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "Engine.h"
 #include "src/Core/Maths.h"

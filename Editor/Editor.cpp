@@ -1,4 +1,4 @@
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 
 #include <Engine.h>
 

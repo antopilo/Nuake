@@ -31,6 +31,28 @@ namespace Nuake {
 	public:
 		VertexBufferLayout() : m_Stride(0) {}
 
+#ifdef NK_WIN
+		template<typename T>
+		void Push(unsigned int count)
+		{
+			if constexpr (std::is_same_v<float, T>)
+			{
+				m_Elements.push_back({ RendererEnum::FLOAT, count, false });
+				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::FLOAT) * count;
+			}
+			else if constexpr (std::is_same_v<unsigned int, T>)
+			{
+				m_Elements.push_back({ RendererEnum::UINT, count, false });
+				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UINT) * count;
+			}
+			else if constexpr (std::is_same_v<int, T>)
+			{
+				m_Elements.push_back({ RendererEnum::INT, count, false });
+				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::INT) * count;
+			}
+		}	
+#endif
+#ifdef NK_LINUX
 		template<typename T>
 		void Push(unsigned int count)
 		{
@@ -43,7 +65,7 @@ namespace Nuake {
 			if constexpr (std::is_same_v<T, unsigned int*>)
 			{
 				m_Elements.push_back({ RendererEnum::UINT, count, false });
-			m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UINT) * count;
+				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UINT) * count;
 			}
 
 			if constexpr (std::is_same_v<T, int*>)
@@ -58,7 +80,7 @@ namespace Nuake {
 				m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UBYTE) * count;
 			}
 		}
-
+#endif
 		inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
 
 		inline unsigned int GetStride() const { return m_Stride; }
@@ -66,26 +88,33 @@ namespace Nuake {
 
 	
 
-#ifdef NK_WIN
+#ifdef NK_WINs
+	template<>
+	void VertexBufferLayout::Push<float>(unsigned int count)
+	{
+		m_Elements.push_back({ RendererEnum::FLOAT, count, false });
+		m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::FLOAT) * count;
+	}
+
 	template<>
 	void VertexBufferLayout::Push<unsigned int>(unsigned int count)
 	{
 		m_Elements.push_back({ RendererEnum::UINT, count, false });
 		m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UINT) * count;
-	};
+	}
 
 	template<>
 	void VertexBufferLayout::Push<int>(unsigned int count)
 	{
 		m_Elements.push_back({ RendererEnum::INT, count, false });
 		m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::INT) * count;
-	};
+	}
 
 	template<>
 	void VertexBufferLayout::Push<unsigned char>(unsigned int count)
 	{
 		m_Elements.push_back({ RendererEnum::UBYTE, count, true });
 		m_Stride += VertexBufferElement::GetSizeOfType(RendererEnum::UBYTE) * count;
-	};
+	}
 	#endif
 }

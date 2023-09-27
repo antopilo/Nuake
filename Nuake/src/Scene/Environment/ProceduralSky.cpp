@@ -4,7 +4,7 @@
 #include "src/Rendering/Shaders/Shader.h"
 #include "src/Rendering/Camera.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 namespace Nuake
 {

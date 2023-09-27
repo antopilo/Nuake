@@ -20,7 +20,7 @@
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 #include "src/Resource/FontAwesome5.h"
 
-#include "dependencies/GLEW/include/GL/glew.h"
+#include <glad/glad.h>
 
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/Components.h"

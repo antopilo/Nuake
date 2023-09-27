@@ -1,7 +1,7 @@
 #include "Light.h"
 #include <src/Vendors/glm/ext/matrix_clip_space.hpp>
 #include "src/Rendering/RenderCommand.h"
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 
 namespace Nuake
 {

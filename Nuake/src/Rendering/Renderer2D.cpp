@@ -1,5 +1,5 @@
 #include "Renderer2D.h"
-#include "GL/glew.h"
+#include <glad/glad.h>
 #include <Engine.h>
 #include "src/UI/Nodes/TextNode.h"
 #include "Shaders/ShaderManager.h"

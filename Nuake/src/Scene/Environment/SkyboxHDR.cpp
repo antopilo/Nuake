@@ -1,5 +1,5 @@
 #include "SkyboxHDR.h"
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/Cubemap.h"
 

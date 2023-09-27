@@ -16,7 +16,6 @@ namespace Nuake
 		struct tm timeinfo;
 
 #ifdef NK_WIN
-		
 		localtime_s(&timeinfo, &now);
 		strftime(buff, 100, "%H:%M:%S", &timeinfo);
 #endif

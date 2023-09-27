@@ -1,7 +1,7 @@
 
 #include "Window.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Engine.h"
@@ -67,17 +67,16 @@ namespace Nuake
         }
 
         SetWindowIcon("resources/Images/nuake-logo.png");
-
         glfwMakeContextCurrent(m_Window);
         SetVSync(false);
 
-        Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
-
-        if (glewInit() != GLEW_OK)
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            Logger::Log("GLEW initialization failed!", "window", CRITICAL);
+            Logger::Log("glad initialization failed!", "window", CRITICAL);
             return -1;
         }
+
+        Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
 
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);

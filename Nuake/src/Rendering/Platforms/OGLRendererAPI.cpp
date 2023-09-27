@@ -1,7 +1,8 @@
 #include "OGLRendererAPI.h"
-#include "GL/glew.h"
+#include "glad/glad.h"
 
 namespace Nuake {
+
 	void OGLRendererAPI::Enable(const RendererEnum enumType)
 	{
 		glEnable(GetType(enumType));

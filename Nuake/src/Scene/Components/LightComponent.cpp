@@ -3,7 +3,7 @@
 #include "LightComponent.h"
 #include "src/Rendering/Renderer.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "src/Core/Core.h"
 #include <src/Scene/Entities/ImGuiHelper.h>
 

@@ -1,5 +1,5 @@
 #include "SSR.h"
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 #include "src/Rendering/RenderCommand.h"
 #include "src/Rendering/Renderer.h"
 #include <src/Vendors/imgui/imgui.h>

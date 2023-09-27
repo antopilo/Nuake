@@ -1,6 +1,6 @@
 #include "Texture.h"
 #include "src/Core/Logger.h"
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <iostream>
 #include <src/Core/FileSystem.h>
 
