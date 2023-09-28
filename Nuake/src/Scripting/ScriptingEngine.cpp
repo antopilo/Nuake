@@ -66,7 +66,7 @@ namespace Nuake {
         }
     }
 
-#define GET_STATIC_RESOURCE_SCRIPT_SRC(name) std::string(name, name + name##_len)
+#define GET_STATIC_RESOURCE_SCRIPT_SRC(name) std::string(reinterpret_cast<const char*>(name), reinterpret_cast<const char*>(name) + name##_len)
 
     std::map<std::string, std::string> _ModulesSRC =
     {
@@ -95,15 +95,15 @@ namespace Nuake {
             size_t prefixPosition = sname.find(NuakeModulePrefix);
             sname.erase(prefixPosition, NuakeModulePrefix.length());
             path = "Resources/Scripts/"+std::string(sname);
-            isAbsolute = true;
-            // if (_ModulesSRC.find(sname) != _ModulesSRC.end())
-            // {
-            //     fileContent = _ModulesSRC[sname];
-            // }
-            // else
-            // {
-            //     Logger::Log("Internal script module not found: " + sname + ". \n Did you forget to register it?", "scripting engine", CRITICAL);
-            // }
+            
+            if (_ModulesSRC.find(sname) != _ModulesSRC.end())
+            {
+                fileContent = _ModulesSRC[sname];
+            }
+            else
+            {
+                Logger::Log("Internal script module not found: " + sname + ". \n Did you forget to register it?", "scripting engine", CRITICAL);
+            }
         }
         else
         {
