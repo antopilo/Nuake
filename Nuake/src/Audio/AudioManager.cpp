@@ -28,8 +28,13 @@ namespace Nuake {
 		m_Soloud = CreateRef<SoLoud::Soloud>();
 
 		// TODO: Sample rate, back end, buffer size, flags.
-		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF,SoLoud::Soloud::ALSA);
+#ifdef NK_WIN
+		m_Soloud->init();
+#endif
 
+#ifdef NK_LINUX
+		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA)
+#endif
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 
 		Logger::Log("Audio manager initialized", "audio", VERBOSE);

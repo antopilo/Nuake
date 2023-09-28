@@ -24,15 +24,15 @@
 #include <string.h>
 #include <assert.h>
 #include <string.h>
-// strcasecmp(const char* a, const char* b)
-// {
-//     #ifdef NK_WIN
-//     return _stricmp(a, b);
-//     #endif
-//     #ifdef NK_LINUX
-//     return strcasecmp(a, b);
-//     #endif
-// }
+
+
+#ifdef NK_WIN
+strcasecmp(const char* a, const char* b)
+{
+    return _stricmp(a, b);
+}
+#endif
+
 #undef	assert
 #define assert(x)
 

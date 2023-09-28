@@ -17,6 +17,7 @@ namespace Nuake
 
 	void Renderer2D::Init()
 	{
+		Logger::Log("Renderer 2D initiaizing", "render2d");
 		UIShader = ShaderManager::GetShader("Resources/Shaders/ui.shader");
 		TextShader = ShaderManager::GetShader("Resources/Shaders/sdf_text.shader");
 
@@ -30,6 +31,8 @@ namespace Nuake
 			1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 		};
 
+		
+		Logger::Log("Renderer 2D create VAOS", "render2d");
 		// setup plane VAO
 		glGenVertexArrays(1, &Renderer2D::VAO);
 		glGenBuffers(1, &Renderer2D::VBO);

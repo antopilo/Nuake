@@ -79,7 +79,6 @@ namespace Nuake {
         {"ScriptableEntity", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_ScriptableEntity_wren)},
     };
 
-
     const std::string NuakeModulePrefix = "Nuake:";
     WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name)
     {
