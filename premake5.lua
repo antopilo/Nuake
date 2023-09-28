@@ -209,9 +209,6 @@ project "NuakeRuntime"
             "WIN32_LEAN_AND_MEAN"
         }
 
-        entrypoint "WinMainCRTStartup"
-        buildoptions { "-mwindows"}
-
     filter "configurations:Dist"
         kind "WindowedApp"
         runtime "Release"
