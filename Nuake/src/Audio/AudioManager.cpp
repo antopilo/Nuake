@@ -31,8 +31,9 @@ namespace Nuake {
 #ifdef NK_WIN
 		m_Soloud->init();
 #else
-		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA)
+		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA);
 #endif
+
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 
 		Logger::Log("Audio manager initialized", "audio", VERBOSE);
