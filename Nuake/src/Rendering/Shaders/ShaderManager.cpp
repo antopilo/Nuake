@@ -4,7 +4,7 @@
 #include "src/Resource/StaticResources.h"
 
 #define LoadEmbeddedShader(file) \
-m_Shaders[file##_path] = CreateScope<Shader>(file##_path, std::string(file, file + file##_len));
+m_Shaders[file##_path] = CreateScope<Shader>(file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
 
 namespace Nuake
 {
@@ -17,7 +17,7 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_atmospheric_sky_shader);
 		LoadEmbeddedShader(Resources_Shaders_barrel_distortion_shader);
 		LoadEmbeddedShader(Resources_Shaders_bloom_shader);
-		LoadEmbeddedShader(Resources_Shaders_blur_shader);
+		LoadEmbeddedShader(Resources_Shaders_blur_shader);	
 		LoadEmbeddedShader(Resources_Shaders_BRD_shader);
 		LoadEmbeddedShader(Resources_Shaders_combine_shader);
 		LoadEmbeddedShader(Resources_Shaders_copy_shader);

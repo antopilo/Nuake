@@ -37,11 +37,11 @@ project 'Soloud'
 
 	filter "system:linux"
 		defines {
-			"WITH_OSS"
+			"WITH_ALSA"
 		}
 		files
 		{
-			"soloud/src/backend/oss/soloud_oss.cpp"
+			"soloud/src/backend/alsa/soloud_alsa.cpp"
 		}
 
 	filter "configurations:Debug"

@@ -28,7 +28,7 @@ namespace Nuake {
 		m_Soloud = CreateRef<SoLoud::Soloud>();
 
 		// TODO: Sample rate, back end, buffer size, flags.
-		m_Soloud->init();
+		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF,SoLoud::Soloud::ALSA);
 
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 

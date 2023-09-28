@@ -202,32 +202,6 @@ namespace Nuake
 		static float nammount = 0.0001;
 		static float dbsize = 1.25f;
 		static float feather = 1.0f;
-		ImGui::Begin("DOF Setting");
-		{
-			ImGui::DragFloat("focalDepth", &focalDepth, 0.01f);
-			ImGui::DragFloat("focalLength", &focalLength, 0.01f);
-			ImGui::DragFloat("fstop", &fstop, 0.01f);
-			ImGui::DragInt("samples", &samples, 0.01f);
-			ImGui::DragInt("rings", &rings, 0.01f);
-			ImGui::Checkbox("showFocus", &showFocus);
-			ImGui::Checkbox("manualDof", &manualdof);
-			ImGui::Checkbox("autoFocus", &autoFocus);
-			ImGui::DragInt("rings", &rings, 0.01f);
-			ImGui::DragFloat("ndofstart", &ndofstart, 0.01f);
-			ImGui::DragFloat("ndofDist", &ndofDist, 0.01f);
-			ImGui::DragFloat("fdofstart", &fdofstart, 0.01f);
-			ImGui::DragFloat("fdofdist", &fdofdist, 0.01f);
-			ImGui::DragFloat("coc", &coc, 0.01f);
-			ImGui::DragFloat("maxBlue", &maxBlue, 0.01f);
-			ImGui::DragFloat("threshold", &threshold, 0.01f);
-			ImGui::DragFloat("gain", &gain, 0.01f);
-			ImGui::DragFloat("biaos", &biaos, 0.01f);
-			ImGui::DragFloat("fringe", &fringe, 0.01f);
-			ImGui::DragFloat("nammount", &nammount, 0.01f);
-			ImGui::DragFloat("dbsize", &dbsize, 0.01f);
-			ImGui::DragFloat("feather", &feather, 0.01f);
-		}
-		ImGui::End();
 
 		mDOFBuffer->QueueResize(framebuffer.GetSize());
 		mDOFBuffer->Bind();
@@ -265,12 +239,6 @@ namespace Nuake
 			Renderer::DrawQuad();
 		}
 		mDOFBuffer->Unbind();
-
-		if (ImGui::Begin("DOF"))
-		{
-			ImGui::Image((void*)mDOFBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
 
 		if (sceneEnv->BarrelDistortionEnabled)
 		{
