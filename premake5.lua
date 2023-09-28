@@ -121,7 +121,7 @@ project "NuakeRuntime"
     location "Runtime"
     kind "ConsoleApp"
     language "C++"
-    
+
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("Editor")
@@ -144,9 +144,9 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/Dependencies/soloud/include"
     }
-    
-    libdirs 
-    { 
+
+    libdirs
+    {
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
@@ -159,8 +159,8 @@ project "NuakeRuntime"
     }
 
     links
-    { 
-        "Nuake", 
+    {
+        "Nuake",
         "GLFW",
         "glad",
         "assimp",
@@ -183,13 +183,17 @@ project "NuakeRuntime"
     filter "system:linux"
         links
         {
-            "GL"
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
         }
 
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
-        defines 
+        defines
         {
             "NK_DEBUG"
         }
@@ -199,7 +203,7 @@ project "NuakeRuntime"
         runtime "Release"
         optimize "on"
 
-        defines 
+        defines
         {
             "NK_DIST",
             "WIN32_LEAN_AND_MEAN"
@@ -213,7 +217,7 @@ project "NuakeRuntime"
         runtime "Release"
         optimize "on"
         flags { "WinMain" }
-        defines 
+        defines
         {
             "NK_DIST"
         }
@@ -298,7 +302,8 @@ project "Editor"
             "GL",
             "glfw",
             "glad",
-            "X11"
+            "X11",
+            "asound",
         }
 
         defines 
