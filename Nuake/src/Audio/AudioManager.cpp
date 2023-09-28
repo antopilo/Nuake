@@ -30,9 +30,7 @@ namespace Nuake {
 		// TODO: Sample rate, back end, buffer size, flags.
 #ifdef NK_WIN
 		m_Soloud->init();
-#endif
-
-#ifdef NK_LINUX
+#else
 		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA)
 #endif
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);

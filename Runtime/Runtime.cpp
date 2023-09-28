@@ -5,15 +5,100 @@
 
 #include <string>
 
+struct LaunchSettings
+{
+    int32_t monitor = -1;
+    Nuake::Vector2 resolution = { 1920, 1080 };
+    std::string windowTitle = "Nuake Editor ";
+    std::string projectPath;
+};
+
+std::vector<std::string> ParseArguments(int argc, char* argv[])
+{
+    std::vector<std::string> args;
+    for (uint32_t i = 0; i < argc; i++)
+    {
+        args.push_back(std::string(argv[i]));
+    }
+    return args;
+}
+
+LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
+{
+    using namespace Nuake;
+    LaunchSettings launchSettings;
+
+    const auto argumentSize = arguments.size();
+    size_t i = 0;
+    for (const auto& arg : arguments)
+    {
+        const size_t nextArgumentIndex = i + 1;
+        const bool containsAnotherArgument = nextArgumentIndex <= argumentSize;
+        if (arg == "--project")
+        {
+            if (!containsAnotherArgument)
+            {
+                continue;
+            }
+
+            // Load project on start
+            std::string projectPath = arguments[i + 1];
+            launchSettings.projectPath = projectPath;
+
+        }
+        else if (arg == "--resolution")
+        {
+            if (!containsAnotherArgument)
+            {
+                continue;
+            }
+
+            // Set editor window resolution
+            std::string resString = arguments[i + 1];
+            const auto& resSplits = String::Split(resString, 'x');
+            if (resSplits.size() == 2)
+            {
+                int width = stoi(resSplits[0]);
+                int height = stoi(resSplits[1]);
+                launchSettings.resolution = Vector2(width, height);
+            }
+        }
+        else if (arg == "--monitor")
+        {
+            // Set editor window monitor
+            if (containsAnotherArgument)
+            {
+                launchSettings.monitor = stoi(arguments[i + 1]);
+            }
+        }
+
+        i++;
+    }
+
+    return launchSettings;
+}
+
 int ApplicationMain(int argc, char* argv[])
 {
     using namespace Nuake;
+
+    const auto& arguments = ParseArguments(argc, argv);
+    LaunchSettings launchSettings = ParseLaunchSettings(arguments);
 
     Engine::Init();
 
     auto window = Nuake::Engine::GetCurrentWindow();
 
-    const std::string projectPath = "./game.project";
+    std::string projectPath; 
+    if (launchSettings.projectPath.empty())
+    {
+        projectPath = "./game.project";
+    }
+    else
+    {
+        projectPath = launchSettings.projectPath;
+    }
+    
     FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
 
     Ref<Nuake::Project> project = Nuake::Project::New();

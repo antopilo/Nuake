@@ -195,20 +195,22 @@ int ApplicationMain(int argc, char* argv[])
     return 0;
 }
 
+
+
+#ifdef NK_WIN
 #ifdef NK_DIST
-
 #include "windows.h"
-
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
 {
     return ApplicationMain(__argc, __argv);
 }
+#endif
+#endif
 
-#else
 
 int main(int argc, char* argv[]) 
 {
     return ApplicationMain(argc, argv);
 }
 
-#endif
+
