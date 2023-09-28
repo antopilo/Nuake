@@ -142,7 +142,7 @@ namespace Nuake
 	{
 		std::filesystem::path pathObj(fullPath);
 		auto returnvalue = pathObj.parent_path().string();
-		return returnvalue + "\\";
+		return returnvalue + "/";
 	}
 
 	std::string FileSystem::ReadFile(const std::string& path, bool absolute)
