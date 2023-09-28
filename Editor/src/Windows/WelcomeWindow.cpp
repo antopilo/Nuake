@@ -207,10 +207,17 @@ namespace Nuake
 		draw_list->ChannelsSetCurrent(1);
 
 		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
-		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
+		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
 		if (result)
 		{
 			SelectedProject = itemIndex;
+		}
+
+		if (result && ImGui::IsMouseDoubleClicked(0))
+		{
+			SaveRecentFile();
+
+			queuedProjectPath = _Projects[SelectedProject].Path;;
 		}
 
 		//ImGui::PopStyleColor();
