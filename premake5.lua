@@ -209,9 +209,6 @@ project "NuakeRuntime"
             "WIN32_LEAN_AND_MEAN"
         }
 
-        entrypoint "WinMainCRTStartup"
-        buildoptions { "-mwindows"}
-
     filter "configurations:Dist"
         kind "WindowedApp"
         runtime "Release"
@@ -219,7 +216,8 @@ project "NuakeRuntime"
         flags { "WinMain" }
         defines
         {
-            "NK_DIST"
+            "NK_DIST",
+            "WIN32_LEAN_AND_MEAN"
         }
 
 
@@ -333,8 +331,8 @@ project "Editor"
         }
 
     -- Removes the console for windows
-    filter {"configurations:Dist", "platforms:windows"}
-        kind "WindowedApp"
+    --filter {"configurations:Dist", "platforms:windows"}
+       -- kind "WindowedApp"--
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {
