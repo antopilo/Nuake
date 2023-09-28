@@ -94,16 +94,16 @@ namespace Nuake {
         {
             size_t prefixPosition = sname.find(NuakeModulePrefix);
             sname.erase(prefixPosition, NuakeModulePrefix.length());
-            path = sname;
-
-            if (_ModulesSRC.find(sname) != _ModulesSRC.end())
-            {
-                fileContent = _ModulesSRC[sname];
-            }
-            else
-            {
-                Logger::Log("Internal script module not found: " + sname + ". \n Did you forget to register it?", "scripting engine", CRITICAL);
-            }
+            path = "Resources/Scripts/"+std::string(sname);
+            isAbsolute = true;
+            // if (_ModulesSRC.find(sname) != _ModulesSRC.end())
+            // {
+            //     fileContent = _ModulesSRC[sname];
+            // }
+            // else
+            // {
+            //     Logger::Log("Internal script module not found: " + sname + ". \n Did you forget to register it?", "scripting engine", CRITICAL);
+            // }
         }
         else
         {
