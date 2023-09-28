@@ -76,12 +76,14 @@ int ApplicationMain(int argc, char* argv[])
 
 #ifdef NK_DIST
 
+#ifdef NK_WIN
 #include "windows.h"
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
 {
     return ApplicationMain(__argc, __argv);
 }
+#endif 
 
 #else
 
