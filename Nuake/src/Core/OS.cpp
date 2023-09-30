@@ -13,7 +13,7 @@
 #endif
 
 #ifdef NK_LINUX
-#include <gdk/gdkx.h>
+#include <gtk/gtk.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #endif
