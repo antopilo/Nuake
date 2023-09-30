@@ -19,8 +19,6 @@ namespace Nuake
 		void BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
 
-		Scope<SSR> mSSR;
-
 		FrameBuffer& GetGBuffer() const
 		{
 			return *mGBuffer;

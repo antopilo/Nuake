@@ -903,7 +903,7 @@ namespace Nuake {
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
 
-                    SSR* ssr = scene->m_SceneRenderer->mSSR.get();
+                    SSR* ssr = env->mSSR.get();
                     {
                         ImGui::TableNextColumn();
                         // Title
@@ -1112,7 +1112,6 @@ namespace Nuake {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
-
                     
                     {
                         ImGui::TableNextColumn();
