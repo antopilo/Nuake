@@ -334,5 +334,5 @@ namespace Nuake
 		const auto& split = String::Split(path, '\\');
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
-	
+
 }

@@ -26,7 +26,6 @@ namespace Nuake
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
 
-		mSSR = CreateScope<SSR>();
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 
@@ -152,8 +151,8 @@ namespace Nuake
 
 		if (sceneEnv->SSREnabled)
 		{
-			mSSR->Resize(framebuffer.GetSize());
-			mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+			sceneEnv->mSSR->Resize(framebuffer.GetSize());
+			sceneEnv->mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 			framebuffer.Bind();
 			{
@@ -162,7 +161,7 @@ namespace Nuake
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-				shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+				shader->SetUniformTex("u_Source2", sceneEnv->mSSR->OutputFramebuffer->GetTexture().get(), 1);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();

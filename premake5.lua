@@ -1,6 +1,6 @@
 workspace "Nuake"
     architecture "x64"
-
+    conformancemode "On"
     configurations
     {
         "Debug",
@@ -95,6 +95,21 @@ project "Nuake"
             "GLFW_STATIC",
             "NK_LINUX"
         }
+        
+        links 
+	{
+		"glib-2.0"
+	}
+        
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
+        }
 
         includedirs 
         {
@@ -118,8 +133,7 @@ project "Nuake"
             "NK_WIN"
         }
     
-    buildoptions { "-permissive", "-cxxflags"}
-
+    
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
@@ -204,7 +218,21 @@ project "NuakeRuntime"
             "glad",
             "X11",
             "asound",
+            "glib-2.0",
+            "gtk-3",
+		"gobject-2.0"
         }
+
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
+        }
+        
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
 
     filter "configurations:Debug"
         runtime "Debug"
@@ -266,7 +294,8 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
 		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
-        "%{prj.name}/../Nuake/dependencies/soloud/include"
+        "%{prj.name}/../Nuake/dependencies/soloud/include",
+        "/usr/include/gtk-3.0/"
     }
     
     libdirs 
@@ -289,8 +318,8 @@ project "Editor"
         "glad", 
         "GLFW",
         "assimp",
-		"Freetype",
-		"JoltPhysics",
+	"Freetype",
+	"JoltPhysics",
         "soloud"
     }
 
@@ -318,13 +347,31 @@ project "Editor"
             "glad",
             "X11",
             "asound",
+            "glib-2.0",
+            "gtk-3",
+		"gobject-2.0",
+		"asound"
         }
 
+ 	buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
+
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
+        }
+        
+       
+	
         defines 
         {
             "GLFW_STATIC",
             "NK_LINUX"
         }
+
 
     filter "configurations:Debug"
         runtime "Debug"
