@@ -1,5 +1,5 @@
 #shader vertex
-#version 460 core
+#version 440 core
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
 
@@ -20,7 +20,7 @@ void main()
 }
 
 #shader fragment
-#version 460 core
+#version 440 core
 
 out vec4 FragColor;
 
@@ -38,6 +38,7 @@ uniform sampler2D m_Material;
 uniform sampler2D m_Normal;
 uniform sampler2D m_SSAO;
 uniform sampler2D m_Emissive;
+uniform sampler2D m_UVOffset;
 
 // Lights
 const int MaxLight = 32;
@@ -64,6 +65,8 @@ uniform sampler2D ShadowMaps[4];
 uniform Light Lights[MaxLight];
 uniform DirectionalLight u_DirectionalLight;
 uniform int u_DisableSSAO = 0;
+
+uniform float u_AmbientTerm;
 
 // Converts depth to World space coords.
 vec3 WorldPosFromDepth(float depth) {
@@ -338,7 +341,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (vec3(0.5) * albedo) * ao * ssao;
+    vec3 ambient = (vec3(0.5) * albedo) * ao * ssao * u_AmbientTerm;
     vec3 color = (ambient) + Lo;
 
     // Display CSM splits..

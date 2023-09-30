@@ -1,5 +1,5 @@
 #shader vertex
-#version 460 core
+#version 440 core
 layout(location = 0) in vec3 Position;
 layout(location = 1) in vec3 Normal;
 layout(location = 1) in vec2 UV;
@@ -17,7 +17,7 @@ void main()
 }
 
 #shader fragment
-#version 460 core
+#version 440 core
 
 out vec4 FragColor;
 

@@ -1,5 +1,5 @@
 #shader vertex
-#version 460 core
+#version 440 core
 
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
@@ -20,7 +20,7 @@ void main()
 }
 
 #shader fragment
-#version 460 core
+#version 440 core
 
 float ditherPattern[4][4] = { { 0.0f, 0.5f, 0.125f, 0.625f},
 { 0.75f, 0.22f, 0.875f, 0.375f},
