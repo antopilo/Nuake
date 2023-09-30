@@ -1333,6 +1333,7 @@ namespace Nuake {
                     {
                         Engine::GetCurrentScene()->CreateEntity("Script").AddComponent<WrenScriptComponent>();
                     }
+                    ImGui::EndMenu();
                 }
                 
                 ImGui::EndPopup();
