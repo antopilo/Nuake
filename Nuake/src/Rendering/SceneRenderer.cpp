@@ -653,6 +653,7 @@ namespace Nuake
 			shadingShader->SetUniformMat4f("u_Projection", mProjection);
 			shadingShader->SetUniformMat4f("u_View", mView);
 			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
+			shadingShader->SetUniform1f("u_AmbientTerm", environment->AmbientTerm);
 
 			shadingShader->SetUniformTex("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
 

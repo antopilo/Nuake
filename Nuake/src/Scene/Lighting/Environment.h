@@ -32,6 +32,7 @@ namespace Nuake
 		float VolumetricFog = 0.90f;
 		float VolumetricStepCount = 50.f;
 
+		float AmbientTerm = 0.5f;
 		float Exposure = 3.5f;
 		float Gamma = 1.1f;
 
