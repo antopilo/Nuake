@@ -21,6 +21,7 @@ namespace Nuake
 
 	std::string FileDialog::OpenFile(const char* filter)
 	{
+		std::string filePath;
 #ifdef NK_WIN
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -34,11 +35,44 @@ namespace Nuake
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+			filePath = std::string(ofn.lpstrFile);
 		}
 #endif
-		return std::string();
 
+#ifdef NK_LINUX
+		GtkWidget *dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+		gint res;
+
+		dialog = gtk_file_chooser_dialog_new("Open File",
+			NULL,
+			action,
+			"_Cancel",
+			GTK_RESPONSE_CANCEL,
+			"_Open",
+			GTK_RESPONSE_ACCEPT,
+			NULL);
+
+		gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+
+		if (filter) {
+			GtkFileFilter *file_filter = gtk_file_filter_new();
+			gtk_file_filter_set_name(file_filter, "Filter Name");
+			gtk_file_filter_add_pattern(file_filter, filter);
+			gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+		}
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (res == GTK_RESPONSE_ACCEPT) {
+			char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			filePath = filename;
+			g_free(filename);
+		}
+
+		gtk_widget_destroy(dialog);
+#endif
+		return filePath;
 	}
 
 	std::string FileDialog::SaveFile(const char* filter)
@@ -57,6 +91,45 @@ namespace Nuake
 		if (GetSaveFileNameA(&ofn) == TRUE)
 		{
 			return ofn.lpstrFile;
+		}
+#endif
+
+#ifdef NK_LINUX
+		GtkWidget *dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+		gint res;
+
+		gtk_init(NULL, NULL);
+
+		dialog = gtk_file_chooser_dialog_new("Save File",
+											 NULL,
+											 action,
+											 "_Cancel",
+											 GTK_RESPONSE_CANCEL,
+											 "_Save",
+											 GTK_RESPONSE_ACCEPT,
+											 NULL);
+
+		GtkFileFilter *file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, filter);
+		gtk_file_filter_add_pattern(file_filter, "*.*"); // You can customize this pattern
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+		if (res == GTK_RESPONSE_ACCEPT)
+		{
+			char *filename;
+			GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+			filename = gtk_file_chooser_get_filename(chooser);
+			std::string result(filename);
+			g_free(filename);
+			gtk_widget_destroy(dialog);
+			return result;
+		}
+		else
+		{
+			gtk_widget_destroy(dialog);
+			return std::string();
 		}
 #endif
 
