@@ -638,6 +638,23 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Ambient Term");
+                        ImGui::TableNextColumn();
+
+                        // Here we create a dropdown for every sky type.
+                        ImGui::DragFloat("##AmbientTerm", &env->AmbientTerm, 0.001f, 0.00f, 1.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string ResetType = ICON_FA_UNDO + std::string("##ambient");
+                        if (ImGui::Button(ResetType.c_str())) env->AmbientTerm = 0.25f;
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()

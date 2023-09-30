@@ -42,9 +42,10 @@ namespace Nuake
 	json SpriteComponent::Serialize()
 	{
 		BEGIN_SERIALIZE();
-		SERIALIZE_VAL(Billboard)
-		SERIALIZE_VAL(LockYRotation)
-		SERIALIZE_VAL(SpritePath)
+		SERIALIZE_VAL(Billboard);
+		SERIALIZE_VAL(LockYRotation);
+		SERIALIZE_VAL(SpritePath);
+		SERIALIZE_VAL(PositionFacing);
 		END_SERIALIZE();
 	}
 
@@ -58,6 +59,11 @@ namespace Nuake
 		if (j.contains("LockYRotation"))
 		{
 			LockYRotation = j["LockYRotation"];
+		}
+
+		if (j.contains("PositionFacing"))
+		{
+			PositionFacing = j["PositionFacing"];
 		}
 
 		if (j.contains("SpritePath"))
