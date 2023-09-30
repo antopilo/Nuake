@@ -11,10 +11,6 @@ namespace SoLoud
 {
 	class Soloud;
 	class AudioSource;
-}
-
-namespace SoLoud
-{
 	class Wav;
 }
 
