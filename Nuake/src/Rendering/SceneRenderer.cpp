@@ -391,7 +391,19 @@ namespace Nuake
 						auto finalQuadTransform = transform.GetGlobalTransform();
 						if (sprite.Billboard)
 						{
-							finalQuadTransform = glm::inverse(mView);
+							if (sprite.PositionFacing)
+							{
+								const Matrix4& invView = glm::inverse(mView);
+								const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+								const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+								const Vector3& direction = cameraPosition - spritePosition;
+								finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+							}
+							else
+							{
+								finalQuadTransform = glm::inverse(mView);
+
+							}
 
 							if (sprite.LockYRotation)
 							{
@@ -401,8 +413,7 @@ namespace Nuake
 								finalQuadTransform = finalQuadTransform;
 							}
 
-							// Translation
-							finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+							finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
 
 							// Scale
 							finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
@@ -517,7 +528,19 @@ namespace Nuake
 				auto finalQuadTransform = transform.GetGlobalTransform();
 				if (sprite.Billboard)
 				{
-					finalQuadTransform = glm::inverse(mView);
+					if (sprite.PositionFacing)
+					{
+						const Matrix4& invView = glm::inverse(mView);
+						const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+						const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+						const Vector3& direction = cameraPosition - spritePosition;
+						finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+					}
+					else
+					{
+						finalQuadTransform = glm::inverse(mView);
+						
+					}
 
 					if (sprite.LockYRotation)
 					{
@@ -527,8 +550,7 @@ namespace Nuake
 						finalQuadTransform = finalQuadTransform;
 					}
 
-					// Translation
-					finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+					finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
 
 					// Scale
 					finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
