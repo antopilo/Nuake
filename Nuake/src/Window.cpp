@@ -68,7 +68,7 @@ namespace Nuake
 
         SetWindowIcon("resources/Images/nuake-logo.png");
         glfwMakeContextCurrent(m_Window);
-        SetVSync(false);
+        SetVSync(true);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -284,13 +284,13 @@ namespace Nuake
         s.WindowMenuButtonPosition = ImGuiDir_None;
         s.GrabRounding = 2.0f;
         s.CellPadding = ImVec2(8, 8);
-        s.WindowPadding = ImVec2(2, 2);
+        s.WindowPadding = ImVec2(4, 4);
         s.ScrollbarRounding = 9.0f;
         s.ScrollbarSize = 15.0f;
         s.GrabMinSize = 32.0f;
         s.TabRounding = 0;
-        s.WindowRounding = 0;
-        s.ChildRounding = 0;
+        s.WindowRounding = 4.0f;
+        s.ChildRounding = 4.0f;
         s.FrameRounding = 4.0f;
         s.GrabRounding = 0;
         s.FramePadding = ImVec2(8, 4);
@@ -301,7 +301,7 @@ namespace Nuake
         s.IndentSpacing = 12.0f;
         s.ChildBorderSize = 0.0f;
         s.PopupRounding = 4.0f;
-        s.FrameBorderSize = 1.0f;
+        s.FrameBorderSize = 0.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
