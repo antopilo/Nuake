@@ -1240,6 +1240,105 @@ namespace Nuake {
         std::string title = ICON_FA_TREE + std::string(" Hierarchy");
         if (ImGui::Begin(title.c_str()))
         {
+            if (UI::PrimaryButton("Add Entity"))
+            {
+                ImGui::OpenPopup("create_entity_popup");
+            }
+
+            if (ImGui::BeginPopup("create_entity_popup"))
+            {
+                if (ImGui::MenuItem("Empty"))
+                {
+                    Engine::GetCurrentScene()->CreateEntity("Empty");
+                }
+
+                if(ImGui::BeginMenu("3D"))
+                {
+                    if (ImGui::MenuItem("Camera"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Camera").AddComponent<CameraComponent>();
+                    }
+                    if (ImGui::MenuItem("Model"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Model").AddComponent<ModelComponent>();
+                    }
+                    if (ImGui::MenuItem("Skinned Model"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Skinned Model").AddComponent<SkinnedModelComponent>();
+                    }
+                    if (ImGui::MenuItem("Sprite"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Sprite").AddComponent<SpriteComponent>();
+                    }
+                    if (ImGui::MenuItem("Light"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Light").AddComponent<LightComponent>();
+                    }
+                    if (ImGui::MenuItem("Quake Map"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Quake Map").AddComponent<QuakeMapComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Physics"))
+                {
+                    if (ImGui::MenuItem("Character Controller"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Character Controller").AddComponent<CharacterControllerComponent>();
+                    }
+                    if (ImGui::MenuItem("Rigid Body"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Rigid Body").AddComponent<RigidBodyComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+                
+                if (ImGui::BeginMenu("Colliders"))
+                {
+                    if (ImGui::MenuItem("Box Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Box Collider").AddComponent<BoxColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Sphere Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Sphere Collider").AddComponent<SphereColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Capsule Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Capsule Collider").AddComponent<CapsuleColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Cylinder Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Cylinder Collider").AddComponent<CylinderColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Mesh Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Mesh Collider").AddComponent<MeshColliderComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Audio"))
+                {
+                    if (ImGui::MenuItem("Audio Emitter"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Audio Emitter").AddComponent<AudioEmitterComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Script"))
+                {
+                    if (ImGui::MenuItem("Script"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Script").AddComponent<WrenScriptComponent>();
+                    }
+                }
+                
+                ImGui::EndPopup();
+            }
+
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
@@ -1862,6 +1961,31 @@ namespace Nuake {
         if (entity.HasComponent<PrefabComponent>())
         {
             entityTypeName = "Prefab";
+        }
+
+        if (entity.HasComponent<AudioEmitterComponent>())
+        {
+            entityTypeName = "Audio Emitter";
+        }
+
+        if (entity.HasComponent<ParticleEmitterComponent>())
+        {
+            entityTypeName = "Particle Emitter";
+        }
+
+        if (entity.HasComponent<QuakeMapComponent>())
+        {
+            entityTypeName = "Quake Map";
+        }
+
+        if (entity.HasComponent<ModelComponent>())
+        {
+            entityTypeName = "Model";
+        }
+
+        if (entity.HasComponent<SkinnedModelComponent>())
+        {
+            entityTypeName = "Skinned Model";
         }
 
         return entityTypeName;
