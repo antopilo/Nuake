@@ -4,13 +4,11 @@
 #include "Engine.h"
 
 #ifdef NK_WIN
-
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <Windows.h>
 #include <ShlObj.h>
 #include <string.h>
 #include <tchar.h>
-
 #endif
 
 #ifdef NK_LINUX
@@ -23,7 +21,6 @@
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 
-
 #include <chrono>
 #include <imgui/imgui.h>
 
@@ -31,44 +28,12 @@ namespace Nuake {
 
 	void OS::CopyToClipboard(const std::string& value)
 	{
-#ifdef NK_WIN
-		auto glob = GlobalAlloc(GMEM_FIXED, 512);
-		memcpy(glob, value.data(), value.size());
-		OpenClipboard(glfwGetWin32Window(Window::Get()->GetHandle()));
-		EmptyClipboard();
-		SetClipboardData(CF_TEXT, glob);
-		CloseClipboard();
-#endif
-
-#ifdef NK_LINUX
-
 		glfwSetClipboardString(NULL, value.c_str());
-
-
-#endif
-
 	}
 
 	std::string OS::GetFromClipboard()
 	{
-#ifdef NK_WIN
-		OpenClipboard(nullptr);
-		HANDLE hData = GetClipboardData(CF_TEXT);
-
-		char* pszText = static_cast<char*>(GlobalLock(hData));
-		std::string text(pszText);
-
-		GlobalUnlock(hData);
-		CloseClipboard();
-
-		return text;
-#endif
-
-#ifdef NK_LINUX
-		glfwSetClipboardString(NULL, "A string with words in it");
-#endif
-
-		return "";
+		return std::string(glfwGetClipboardString(NULL));
 	}
 
 	int OS::GetTime()
