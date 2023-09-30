@@ -1,6 +1,6 @@
 workspace "Nuake"
     architecture "x64"
-
+    conformancemode "On"
     configurations
     {
         "Debug",
@@ -117,7 +117,7 @@ project "Nuake"
             "NK_WIN"
         }
     
-    buildoptions { "-permissive", "-cxxflags", "gtk+-3.0"}
+    
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
