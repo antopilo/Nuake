@@ -14,14 +14,13 @@ fi
 
 wget -q --progress=dot "https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-linux.tar.gz" &
 while pgrep -x wget >/dev/null; do
-    echo -e "${GREEN}Downloading...${RESET}"
+    echo -e "${GREEN}Dowloading premake...${RESET}"
     sleep 1
 done
 
-
-
 tar -xf "premake-5.0.0-beta2-linux.tar.gz"
-mv ./libluasocket.so/ /usr/lib/
+
+mv ./libluasocket.so /usr/lib/
 mv ./premake5 /usr/local/bin/
 
 apt update
