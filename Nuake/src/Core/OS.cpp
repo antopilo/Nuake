@@ -1,4 +1,4 @@
-﻿#include "OS.h"
+﻿﻿#include "OS.h"
 #include "src/Window.h"
 #include "Engine.h"
 
@@ -16,6 +16,7 @@
 #include <gtk/gtk.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/Xlib.h>
 #endif
 
 #include "GLFW/glfw3.h"
@@ -39,35 +40,10 @@ namespace Nuake {
 #endif
 
 #ifdef NK_LINUX
-		Display* display = XOpenDisplay(NULL);
-		if (display != nullptr)
-		{
-			XSetSelectionOwner(display, XA_CLIPBOARD, XDefaultRootWindow(display), CurrentTime);
 
-			Atom targets_atom = XInternAtom(display, "TARGETS", False);
-			Atom clipboard_atom = XInternAtom(display, "CLIPBOARD", False);
-			Atom utf8_atom = XInternAtom(display, "UTF8_STRING", False);
+		glfwSetClipboardString(NULL, value.c_str());
 
-			XSetSelectionOwner(display, clipboard_atom, XDefaultRootWindow(display), CurrentTime);
 
-			XEvent event;
-			memset(&event, 0, sizeof(event));
-			event.xclient.type = ClientMessage;
-			event.xclient.window = XDefaultRootWindow(display);
-			event.xclient.message_type = targets_atom;
-			event.xclient.format = 32;
-			event.xclient.data.l[0] = utf8_atom;
-			event.xclient.data.l[1] = 0;
-			event.xclient.data.l[2] = 0;
-			event.xclient.data.l[3] = 0;
-			event.xclient.data.l[4] = 0;
-
-			XSendEvent(display, XDefaultRootWindow(display), False, NoEventMask, &event);
-
-			XFlush(display);
-
-			XCloseDisplay(display);
-		}
 #endif
 
 	}
@@ -88,49 +64,7 @@ namespace Nuake {
 #endif
 
 #ifdef NK_LINUX
-		Display* display = XOpenDisplay(NULL);
-		if (display != nullptr)
-		{
-			Window owner = XGetSelectionOwner(display, XA_CLIPBOARD);
-			if (owner != None)
-			{
-				Atom target = XInternAtom(display, "UTF8_STRING", False);
-
-				XConvertSelection(display, XA_CLIPBOARD, target, target, XDefaultRootWindow(display), CurrentTime);
-
-				XFlush(display);
-
-				XEvent event;
-				memset(&event, 0, sizeof(event));
-
-				XNextEvent(display, &event);
-				if (event.type == SelectionNotify)
-				{
-					if (event.xselection.property != None)
-					{
-						Atom type;
-						int format;
-						unsigned long nitems;
-						unsigned long bytes_after;
-						unsigned char* prop_data;
-
-						XGetWindowProperty(display, XDefaultRootWindow(display), target, 0, LONG_MAX, False, AnyPropertyType, &type, &format, &nitems, &bytes_after, &prop_data);
-
-						if (prop_data != nullptr)
-						{
-							std::string text(reinterpret_cast<char*>(prop_data), nitems);
-							XFree(prop_data);
-
-							XCloseDisplay(display);
-
-							return text;
-						}
-					}
-				}
-			}
-
-			XCloseDisplay(display);
-		}
+		glfwSetClipboardString(NULL, "A string with words in it");
 #endif
 
 		return "";
@@ -192,7 +126,7 @@ namespace Nuake {
 #endif
 
 #ifdef NK_LINUX
-		std::string command = Engine::GetProject()->TrenchbroomPath.c_str() + filePath.c_str();
+		std::string command = Engine::GetProject()->TrenchbroomPath + filePath.c_str();
 		system(command.c_str());
 #endif
 	}
@@ -204,7 +138,7 @@ namespace Nuake {
 #ifdef NK_WIN
 		TCHAR appDataPath[64];
 		// Get the path to the AppData folder
-		if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, appDataPath) >= 0) 
+		if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, appDataPath) >= 0)
 		{
 			std::wstring wideString(appDataPath);
 			path = std::string(wideString.begin(), wideString.end());
@@ -215,7 +149,7 @@ namespace Nuake {
 				}), path.end());
 			std::replace(path.begin(), path.end(), '\\', '/');
 		}
-		else 
+		else
 		{
 			path = "";
 		}

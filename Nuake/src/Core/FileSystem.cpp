@@ -12,6 +12,11 @@
 #include <commdlg.h>
 
 #endif
+
+#ifdef NK_LINUX
+#include "gtk/gtk.h"
+#endif
+
 #include <fstream>
 #include <iostream>
 
@@ -327,5 +332,5 @@ namespace Nuake
 		const auto& split = String::Split(path, '\\');
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
-	
+
 }
