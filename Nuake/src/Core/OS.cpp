@@ -3,9 +3,19 @@
 #include "Engine.h"
 
 #ifdef NK_WIN
-	#define GLFW_EXPOSE_NATIVE_WIN32
 
-	#include <Windows.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <Windows.h>
+#include <ShlObj.h>
+#include <string.h>
+#include <tchar.h>
+
+#endif
+
+#ifdef NK_LINUX
+
+#include <gdk/gdkx.h>
+
 #endif
 
 #include "GLFW/glfw3.h"
@@ -90,6 +100,37 @@ namespace Nuake {
 		#ifdef NK_WIN
 		ShellExecuteA(nullptr, nullptr, Engine::GetProject()->TrenchbroomPath.c_str(), filePath.c_str(), nullptr, SW_SHOW);
 		#endif
+	}
+
+	std::string OS::GetConfigFolderPath()
+	{
+		std::string path;
+
+#ifdef NK_WIN
+		TCHAR appDataPath[64];
+		// Get the path to the AppData folder
+		if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, appDataPath) >= 0) 
+		{
+			std::wstring wideString(appDataPath);
+			path = std::string(wideString.begin(), wideString.end());
+			// Now, 'appDataPath' contains the path to the AppData folder
+			path.erase(std::remove_if(path.begin(), path.end(), [](char c)
+				{
+					return c == '\0';
+				}), path.end());
+			std::replace(path.begin(), path.end(), '\\', '/');
+		}
+		else 
+		{
+			path = "";
+		}
+#endif
+
+#ifdef NK_LINUX
+		path = "~/.config/";
+#endif
+
+		return path;
 	}
 
 	void OS::OpenURL(const std::string& url)

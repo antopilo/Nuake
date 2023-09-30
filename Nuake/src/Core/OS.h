@@ -17,5 +17,6 @@ namespace Nuake
 		static void ShowInFileExplorer(const std::string& filePath);
 		static void OpenTrenchbroomMap(const std::string& filePath);
 		static void OpenURL(const std::string& url);
+		static std::string GetConfigFolderPath();
 	};
 }

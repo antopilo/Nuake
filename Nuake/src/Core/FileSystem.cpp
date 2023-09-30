@@ -1,6 +1,7 @@
 #include "FileSystem.h"
 
 #include "Engine.h"
+#include "OS.h"
 
 #include <GLFW/glfw3.h>
 
@@ -195,6 +196,17 @@ namespace Nuake
 	uintmax_t FileSystem::DeleteFolder(const std::string& path)
 	{
 		return std::filesystem::remove_all(path.c_str());
+	}
+
+	std::string FileSystem::GetConfigFolderPath()
+	{
+		std::string subFolderPath = OS::GetConfigFolderPath().append("/Nuake/");
+		if (!DirectoryExists(subFolderPath))
+		{
+			MakeDirectory(subFolderPath);
+		}
+
+		return subFolderPath;
 	}
 
 	Ref<Directory> FileSystem::GetFileTree()
