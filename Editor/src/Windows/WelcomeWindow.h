@@ -36,7 +36,7 @@ namespace Nuake
 		Ref<Texture> _NuakeLogo;
 		EditorInterface* _Editor;
 
-		const std::string _RecentProjectFilePath = "recent.json";
+		std::string _RecentProjectFilePath = "";
 		const std::string _RecentProjectFileDefaultContent = "{ \"Projects\": [ ] }";
 		
 		int32_t SelectedProject = -1;

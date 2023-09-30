@@ -76,6 +76,8 @@ namespace Nuake
 	{
 		_Projects = std::vector<ProjectPreview>();
 
+		_RecentProjectFilePath = (FileSystem::GetConfigFolderPath() + "recent.json");
+
 		ParseRecentFile();
 
 		// Load Nuake logo
@@ -166,7 +168,7 @@ namespace Nuake
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 			{
-				const std::string path = FileDialog::OpenFile("Project file |*.project");
+				const std::string path = FileDialog::OpenFile("Project file(.project)\0*.project\0");
 				if (path != "" && String::EndsWith(path, ".project"))
 				{
 					// Prevent importing the same project twice in the list
