@@ -122,7 +122,7 @@ namespace Nuake {
 #endif
 
 #ifdef NK_LINUX
-		path = "~/.config/";
+		path = "~/.config";
 #endif
 
 		return path;
