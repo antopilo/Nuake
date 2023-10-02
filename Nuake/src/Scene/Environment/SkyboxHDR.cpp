@@ -63,7 +63,6 @@ namespace Nuake {
         glEnableVertexAttribArray(0);
 
 
-        m_HDRTexture = new HDRTexture(path);
         // Create cubemap.
         CreateHDRCubemap();
         // Create convulated from cubemap.
