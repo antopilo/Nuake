@@ -5,8 +5,11 @@ namespace Nuake
 {
 	Ref<Prefab> Prefab::CreatePrefabFromEntity(Entity entity)
 	{
+		auto& parentC = entity.GetComponent<ParentComponent>();
+		auto& nameComponent = entity.GetComponent<NameComponent>();
+
 		Ref<Prefab> prefab = CreateRef<Prefab>();
-		ParentComponent parentC = entity.GetComponent<ParentComponent>();
+		prefab->DisplayName = nameComponent.Name;
 		prefab->EntityWalker(entity);
 		prefab->Root = entity;
 		return prefab;

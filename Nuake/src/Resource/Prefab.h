@@ -6,16 +6,20 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
 namespace Nuake {
+
 	class Prefab : ISerializable
 	{
 	public:
+		std::string DisplayName;
+		std::string Description;
 		std::string Path;
 		std::vector<Entity> Entities;
 		Entity Root;
 
 		static Ref<Prefab> CreatePrefabFromEntity(Entity entity);
-
 		static Ref<Prefab> New(const std::string& path);
 
 		Prefab() 
@@ -42,10 +46,14 @@ namespace Nuake {
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(Path);
+			SERIALIZE_VAL(DisplayName);
+			SERIALIZE_VAL(Description);
 
-			std::vector<json> entities = std::vector<json>();
+			auto entities = std::vector<json>();
 			for (Entity e : Entities)
+			{
 				entities.push_back(e.Serialize());
+			}
 
 			j["Root"] = Root.GetComponent<NameComponent>().ID;
 			SERIALIZE_VAL_LBL("Entities", entities);
@@ -67,9 +75,22 @@ namespace Nuake {
 				return false;
 
 			Path = j["Path"];
+
+			if (j.contains("DisplayName"))
+			{
+				DisplayName = j["DisplayName"];
+			}
+
+			if (j.contains("Description"))
+			{
+				Description = j["Description"];
+			}
+
 			if (j.contains("Entities"))
 			{
 				const auto& scene = Engine::GetCurrentScene();
+
+				std::map<uint32_t, uint32_t> newIdsLut;
 
 				for (json e : j["Entities"])
 				{
@@ -81,27 +102,36 @@ namespace Nuake {
 					if (nameComponent.ID == j["Root"])
 					{
 						isRoot = true; // We found the root entity of the prefab.
+						auto& parentComponent = entity.GetComponent<ParentComponent>();
+						parentComponent.HasParent = false;
+						parentComponent.ParentID = 0;
 					}
 
+					uint32_t oldId = nameComponent.ID;
+					uint32_t newId = OS::GetTime();
 					nameComponent.Name = scene->GetUniqueEntityName(nameComponent.Name);
-					nameComponent.ID = OS::GetTime();
+					nameComponent.ID = newId;
+
+					newIdsLut[oldId] = newId;
 
 					if (isRoot)
 					{
 						Root = entity;
 					}
 
-					this->AddEntity(entity);
+					AddEntity(entity);
 				}
 
 				// Set reference to the parent entity to children
 				for (auto& e : Entities)
 				{
-					auto parentC = e.GetComponent<ParentComponent>();
-					if (!parentC.HasParent)
+					if (e.GetID() == Root.GetID())
+					{
 						continue;
+					}
 
-					auto parent = Engine::GetCurrentScene()->GetEntityByID(parentC.ParentID);
+					auto& parentC = e.GetComponent<ParentComponent>();
+					auto parent = Engine::GetCurrentScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
 					parent.AddChild(e);
 				}
 			}
