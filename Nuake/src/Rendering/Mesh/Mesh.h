@@ -39,6 +39,9 @@ namespace Nuake
 		std::vector<uint32_t> m_Indices;
 		std::vector<Vertex> m_Vertices;
 
+		uint32_t m_IndicesCount;
+		uint32_t m_VerticesCount;
+
 		Scope<VertexBuffer> m_VertexBuffer;
 		Scope<VertexArray> m_VertexArray;
 		Scope<VertexBuffer> m_ElementBuffer;

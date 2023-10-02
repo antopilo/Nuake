@@ -86,7 +86,7 @@ namespace Nuake {
 		glMultiDrawElements(GetType(mode), &count, GetType(type), indices, drawCount);
 	}
 
-	void OGLRendererAPI::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
+	void OGLRendererAPI::DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices)
 	{
 		glDrawElements(GetType(mode), count, GetType(type), indices);
 	}
