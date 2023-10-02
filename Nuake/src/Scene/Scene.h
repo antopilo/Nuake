@@ -42,7 +42,7 @@ namespace Nuake
 		std::unordered_map<std::string, Entity> m_EntitiesNameMap;
 		std::string Path = "";
 
-		SceneRenderer* m_SceneRenderer;
+		Ref<SceneRenderer> m_SceneRenderer;
 
 		static Ref<Scene> New();
 		Scene();

@@ -58,7 +58,7 @@ namespace Nuake
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 		m_Systems.push_back(CreateRef<AudioSystem>(this));
 
-		m_SceneRenderer = new SceneRenderer();
+		m_SceneRenderer = CreateRef<SceneRenderer>();
 		m_SceneRenderer->Init();
 	}
 
