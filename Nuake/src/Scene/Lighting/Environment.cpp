@@ -278,6 +278,11 @@ namespace Nuake {
 			BarrelDistortionEnabled = j["BarrelDistortionEnabled"];
 		}
 
+		if (j.contains("BarrelDistortion"))
+		{
+			BarrelDistortion = j["BarrelDistortion"];
+		}
+
 		if (j.contains("BarrelEdgeDistortion"))
 		{
 			BarrelEdgeDistortion = j["BarrelEdgeDistortion"];
