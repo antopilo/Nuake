@@ -72,10 +72,6 @@ namespace Nuake
 		std::string displacementPath;
 
 		Ref<Material> newMaterial = CreateRef<Material>(j["albedo"]);
-		//if (j.contains("albedo"))
-		//	newMaterial = new Material(albedoPath);
-		//else
-		//	newMaterial = new Material(glm::vec3(1, 1, 1));
 		newMaterial->SetName(matName);
 
 		if (j.contains("normal"))

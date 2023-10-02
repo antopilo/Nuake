@@ -159,6 +159,8 @@ namespace Nuake
 		if (cs != 0)
 			glDeleteShader(cs);
 
+		Source = {};
+
 		return program;
 	}
 
@@ -204,6 +206,9 @@ namespace Nuake
 			std::cout << message << std::endl;
 			// Delete invalid shader
 			glDeleteShader(id);
+
+			delete[] message;
+
 			return 0;
 		}
 
