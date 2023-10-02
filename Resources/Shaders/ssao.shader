@@ -113,7 +113,7 @@ void main()
     const float maxRadius = 1.2f;
     const float scalerPow = 1.8f;
     depthScaler = min(max(pow(depthScaler, scalerPow), minRadius), maxRadius);
-    float scaledRadius = u_Radius * depthScaler;
+    float scaledRadius = u_Radius;
 
     vec3 fragPos = ViewPosFromDepth(depth);
     vec3 normal = texture(u_Normal, UV).xyz * 2.0 - 1.0;//normal_from_depth(depth, UV);
