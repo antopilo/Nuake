@@ -17,6 +17,7 @@ namespace Nuake
 		std::string time;
 		std::string message;
 		std::string logger;
+		uint32_t count;
 	};
 
 	class Logger

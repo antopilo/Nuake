@@ -9,8 +9,14 @@ namespace Nuake
 {
 	std::vector<LogEntry> Logger::m_Logs = std::vector<LogEntry>();
 
-	void Logger::Log(const std::string& log, const std::string& logger ,LOG_TYPE type)
+	void Logger::Log(const std::string& log, const std::string& logger, LOG_TYPE type)
 	{
+		if (!m_Logs.empty() && m_Logs.back().message == log)
+		{
+			m_Logs.back().count += 1;
+			return;
+		}
+
 		char buff[100];
 		time_t now = time(0);
 		struct tm timeinfo;
@@ -30,7 +36,8 @@ namespace Nuake
 			type,
 			buff,
 			log,
-			logger
+			logger,
+			0
 		};
 
 		switch (type)
