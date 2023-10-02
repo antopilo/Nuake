@@ -9,6 +9,7 @@
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
 #include "AudioWindow.h"
+#include "../../TrenchbroomConfiguratorWindow.h"
 
 namespace Nuake
 {
@@ -27,6 +28,7 @@ namespace Nuake
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
 		bool m_IsViewportFocused = false;
+		bool m_ShowTrenchbroomConfigurator = false;
 
 		Vector2 m_ViewportPos = {0, 0};
 		Vector2 m_ViewportSize = {};
@@ -43,6 +45,7 @@ namespace Nuake
 		FileSystemUI* filesystem;
 		EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
+		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 
 		EditorInterface();
 

@@ -1497,7 +1497,9 @@ namespace Nuake {
                     ImVec4 color = ImVec4(1, 1, 1, 1.0);
                     ImGui::PushStyleColor(ImGuiCol_Text, color);
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
-                    ImGui::TextWrapped(l.message.c_str());
+
+                    std::string displayMessage = l.message + "(" + std::to_string(l.count) + ")";
+                    ImGui::TextWrapped(displayMessage.c_str());
                     ImGui::PopStyleColor();
 
                     ImGui::TableNextColumn();
@@ -1740,14 +1742,26 @@ namespace Nuake {
                 if (ImGui::MenuItem("Cut", "CTRL+X")) {}
                 if (ImGui::MenuItem("Copy", "CTRL+C")) {}
                 if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+                ImGui::Separator();
+
+                if(ImGui::MenuItem("Trenchbroom Configurator", NULL, m_ShowTrenchbroomConfigurator))
+                {
+                    m_ShowTrenchbroomConfigurator = !m_ShowTrenchbroomConfigurator;
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
             {
                 if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
+                {
                     m_DrawGrid = !m_DrawGrid;
+                }
+
                 if (ImGui::MenuItem("Draw Axis", NULL, m_DrawAxis))
+                {
                     m_DrawAxis = !m_DrawAxis;
+                }
+
                 if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
                 {
                     m_DebugCollisions = !m_DebugCollisions;
@@ -1885,6 +1899,11 @@ namespace Nuake {
         m_DemoWindow.Draw();
 
         _audioWindow->Draw();
+
+        if (m_ShowTrenchbroomConfigurator)
+        {
+            m_TrenchhbroomConfigurator.Draw();
+        }
 
         DrawMenuBar();
 

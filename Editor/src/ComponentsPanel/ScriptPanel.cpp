@@ -38,7 +38,10 @@ void ScriptPanel::Draw(Nuake::Entity entity)
             {
                 if(!component.Script.empty())
                 {
-                    Nuake::OS::OpenIn(component.mWrenScript->GetFile()->GetAbsolutePath());
+                    if (component.mWrenScript)
+                    {
+                        Nuake::OS::OpenIn(component.mWrenScript->GetFile()->GetAbsolutePath());
+                    }
                 }
                 else
                 {
