@@ -48,6 +48,25 @@ namespace Nuake
 		Scope<SSR> mSSR;
 
 		bool DOFEnabled = false;
+		float DOFFocalDepth = 1.0f;
+		float DOFFocalLength = 16.0f;
+		float DOFFstop = 1.0f;
+		bool DOFAutoFocus = false;
+		bool DOFShowFocus = false;
+		bool DOFManualFocus = false;
+		int DOFSamples = 3;
+		int DOFrings = 3;
+		float DOFStart = 1.0f;
+		float DOFDist = 3.0f;
+		float DOFCoc = 0.03f;
+		float DOFMaxBlue = 1.0f;
+		float DOFThreshold = 1.0f;
+		float DOFGain = 100.f;
+		float DOFBias = 0.0f;
+		float DOFFringe = 0.0f;
+		float DOFNAmmount = 0.0001;
+		float DOFDbSize = 1.25f;
+		float DOFFeather = 1.0f;
 
 		bool BarrelDistortionEnabled = true;
 		float BarrelDistortion = 0.f;

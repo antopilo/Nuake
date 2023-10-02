@@ -142,8 +142,8 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/tonemap.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("u_Exposure", scene.GetEnvironment()->Exposure);
-			shader->SetUniform1f("u_Gamma", scene.GetEnvironment()->Gamma);
+			shader->SetUniform1f("u_Exposure", sceneEnv->Exposure);
+			shader->SetUniform1f("u_Gamma", sceneEnv->Gamma);
 			shader->SetUniformTex("u_Source", finalOutput.get());
 			Renderer::DrawQuad();
 		}
@@ -180,28 +180,6 @@ namespace Nuake
 			framebuffer.Unbind();
 		}
 
-		static float focalDepth = 100.0f;
-		static float focalLength = 16.0f;
-		static float fstop = 6.0f;
-		static bool autoFocus = false;
-		static bool showFocus = false;
-		static bool manualdof = true;
-		static int samples = 3;
-		static int rings = 3;
-		static float ndofstart = 1.0f;
-		static float ndofDist = 2.0f;
-		static float fdofstart = 1.0f;
-		static float fdofdist = 3.0f;
-		static float coc = 0.03f;
-		static float maxBlue = 1.0f;
-		static float threshold = 0.7f;
-		static float gain = 100.0f;
-		static float biaos = 0.0f;
-		static float fringe = 0.0f;
-		static float nammount = 0.0001;
-		static float dbsize = 1.25f;
-		static float feather = 1.0f;
-
 		mDOFBuffer->QueueResize(framebuffer.GetSize());
 		mDOFBuffer->Bind();
 		{
@@ -209,27 +187,27 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/dof.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("focalDepth", focalDepth);
-			shader->SetUniform1f("focalLength", focalLength);
-			shader->SetUniform1f("fstop", fstop);
-			shader->SetUniform1i("showFocus", showFocus);
-			shader->SetUniform1i("autofocus", autoFocus);
-			shader->SetUniform1i("samples", samples);
-			shader->SetUniform1i("manualdof", manualdof);
-			shader->SetUniform1f("rings", rings);
-			shader->SetUniform1f("ndofstart", ndofstart);
-			shader->SetUniform1f("ndofdist", ndofDist);
-			shader->SetUniform1f("fdofstart", fdofstart);
-			shader->SetUniform1f("fdofdist", fdofdist);
-			shader->SetUniform1f("CoC", coc);
-			shader->SetUniform1f("maxblur", maxBlue);
-			shader->SetUniform1f("threshold", threshold);
-			shader->SetUniform1f("gain", gain);
-			shader->SetUniform1f("bias", biaos);
-			shader->SetUniform1f("fringe", fringe);
-			shader->SetUniform1f("namount", nammount);
-			shader->SetUniform1f("dbsize", dbsize);
-			shader->SetUniform1f("feather", feather);
+			shader->SetUniform1f("focalDepth", sceneEnv->DOFFocalDepth);
+			shader->SetUniform1f("focalLength", sceneEnv->DOFFocalLength);
+			shader->SetUniform1f("fstop", sceneEnv->DOFFstop);
+			shader->SetUniform1i("showFocus", sceneEnv->DOFShowFocus);
+			shader->SetUniform1i("autofocus", sceneEnv->DOFAutoFocus);
+			shader->SetUniform1i("samples", sceneEnv->DOFSamples);
+			shader->SetUniform1i("manualdof", sceneEnv->DOFManualFocus);
+			shader->SetUniform1f("rings", sceneEnv->DOFrings);
+			shader->SetUniform1f("ndofstart", sceneEnv->DOFStart);
+			shader->SetUniform1f("ndofdist", sceneEnv->DOFDist);
+			shader->SetUniform1f("fdofstart", sceneEnv->DOFStart);
+			shader->SetUniform1f("fdofdist", sceneEnv->DOFDist);	
+			shader->SetUniform1f("CoC", sceneEnv->DOFCoc);
+			shader->SetUniform1f("maxblur", sceneEnv->DOFMaxBlue);
+			shader->SetUniform1f("threshold", sceneEnv->DOFThreshold);
+			shader->SetUniform1f("gain", sceneEnv->DOFGain);
+			shader->SetUniform1f("bias", sceneEnv->DOFBias);
+			shader->SetUniform1f("fringe", sceneEnv->DOFFringe);
+			shader->SetUniform1f("namount", sceneEnv->DOFNAmmount);
+			shader->SetUniform1f("dbsize", sceneEnv->DOFDbSize);
+			shader->SetUniform1f("feather", sceneEnv->DOFFeather);
 			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
 			shader->SetUniform1f("height", finalOutput->GetHeight());
 			shader->SetUniform1f("width", finalOutput->GetWidth());

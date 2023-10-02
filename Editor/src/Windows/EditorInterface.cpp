@@ -1102,6 +1102,182 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Focal Depth");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##doffocalDepth", &env->DOFFocalDepth);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetdofFocalDepth = ICON_FA_UNDO + std::string("##resetdofFocalDepth");
+                        if (ImGui::Button(resetdofFocalDepth.c_str())) env->DOFFocalDepth = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Focal Length");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##doffocalLength", &env->DOFFocalLength);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFFocalLength = ICON_FA_UNDO + std::string("##resetDOFFocalLength");
+                        if (ImGui::Button(resetDOFFocalLength.c_str())) env->DOFFocalLength = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("fStop");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
+                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Auto focus");
+                        ImGui::TableNextColumn();
+            
+                        ImGui::Checkbox("##dofautofocus", &env->DOFAutoFocus);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetdofautofocus");
+                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFAutoFocus = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Display auto focus");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##dofshowautofocus", &env->DOFShowFocus);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFShowautofocus = ICON_FA_UNDO + std::string("##resetdofshowautofocus");
+                        if (ImGui::Button(resetDOFShowautofocus.c_str())) env->DOFShowFocus = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Manual focus");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##dofmanualfocus", &env->DOFManualFocus);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFShowautofocus = ICON_FA_UNDO + std::string("##resetdofshowautofocus");
+                        if (ImGui::Button(resetDOFShowautofocus.c_str())) env->DOFShowFocus = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("fStop");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
+                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("DOF Start");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##dofstart", &env->DOFStart);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetdofstartp");
+                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFStart = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("DOF Distance");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##dofdistance", &env->DOFDist);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
+                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("DOF Threshold");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##dofthreshold", &env->DOFThreshold, 0.001f, 0.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
+                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("DOF Feather");
+                        ImGui::TableNextColumn();
+
+                        ImGui::DragFloat("##doffeather", &env->DOFFeather, 0.001f, 0.0f, 1.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetdoffeather");
+                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()

@@ -9,7 +9,7 @@
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
 #include "AudioWindow.h"
-#include "../../TrenchbroomConfiguratorWindow.h"
+#include "../Windows/TrenchbroomConfiguratorWindow.h"
 
 namespace Nuake
 {
