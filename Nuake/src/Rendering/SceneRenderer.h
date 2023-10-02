@@ -33,8 +33,8 @@ namespace Nuake
 		Scope<FrameBuffer> mToneMapBuffer;
 		Scope<FrameBuffer> mBarrelDistortionBuffer;
 		Scope<FrameBuffer> mVignetteBuffer;
-		Scope<FrameBuffer> mDOFBuffer;;
-	private:
+		Scope<FrameBuffer> mDOFBuffer;
+
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);

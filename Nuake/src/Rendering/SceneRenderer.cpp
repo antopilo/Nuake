@@ -450,9 +450,6 @@ namespace Nuake
 						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
 						if (mesh.ModelResource != nullptr && visibility.Visible)
 						{
-							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
-							SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
-
 							for (auto& m : mesh.ModelResource->GetMeshes())
 							{
 								m->Draw(gBufferSkinnedMeshShader, false);
@@ -675,7 +672,6 @@ namespace Nuake
 			shadingShader->SetUniformMat4f("u_View", mView);
 			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
 			shadingShader->SetUniform1f("u_AmbientTerm", environment->AmbientTerm);
-
 			shadingShader->SetUniformTex("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
 
 			Ref<Environment> env = scene.GetEnvironment();
