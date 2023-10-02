@@ -20,7 +20,6 @@ namespace Nuake
 	std::string WadName = "";
 	std::vector<ConvertedTexture> ConvertedTextures;
 	
-
 	unsigned char host_quakepal[768] =
 	{
 		// marked: colormap colors: cb = (colormap & 0xF0);cb += (cb >= 128 && cb < 224) ? 4 : 12;
@@ -352,7 +351,7 @@ namespace Nuake
 
 		ConvertedTextures = std::vector<ConvertedTexture>();
 
-		auto pathSplits = String::Split(std::string(wadPath.begin(), wadPath.end() - 4), '\\');
+		auto pathSplits = String::Split(std::string(wadPath.begin(), wadPath.end() - 4), '/');
 		WadName = pathSplits[std::size(pathSplits) - 1];
 		TargetDirectory = "/textures/" + WadName + "/";
 

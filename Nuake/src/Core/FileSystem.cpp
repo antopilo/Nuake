@@ -1,12 +1,22 @@
 #include "FileSystem.h"
 
 #include "Engine.h"
-
-#define GLFW_EXPOSE_NATIVE_WIN32
+#include "OS.h"
 
 #include <GLFW/glfw3.h>
+
+#ifdef NK_WIN
+#define GLFW_EXPOSE_NATIVE_WIN32
+
 #include "GLFW/glfw3native.h"
 #include <commdlg.h>
+
+#endif
+
+#ifdef NK_LINUX
+#include "gtk/gtk.h"
+#endif
+
 #include <fstream>
 #include <iostream>
 
@@ -16,6 +26,8 @@ namespace Nuake
 
 	std::string FileDialog::OpenFile(const char* filter)
 	{
+		std::string filePath;
+#ifdef NK_WIN
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -28,14 +40,49 @@ namespace Nuake
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+			filePath = std::string(ofn.lpstrFile);
 		}
-		return std::string();
+#endif
 
+#ifdef NK_LINUX
+		GtkWidget *dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+		gint res;
+
+		dialog = gtk_file_chooser_dialog_new("Open File",
+			NULL,
+			action,
+			"_Cancel",
+			GTK_RESPONSE_CANCEL,
+			"_Open",
+			GTK_RESPONSE_ACCEPT,
+			NULL);
+
+		gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+
+		if (filter) {
+			GtkFileFilter *file_filter = gtk_file_filter_new();
+			gtk_file_filter_set_name(file_filter, "Filter Name");
+			gtk_file_filter_add_pattern(file_filter, filter);
+			gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+		}
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (res == GTK_RESPONSE_ACCEPT) {
+			char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			filePath = filename;
+			g_free(filename);
+		}
+
+		gtk_widget_destroy(dialog);
+#endif
+		return filePath;
 	}
 
 	std::string FileDialog::SaveFile(const char* filter)
 	{
+#ifdef NK_WIN
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -50,8 +97,48 @@ namespace Nuake
 		{
 			return ofn.lpstrFile;
 		}
-		return std::string();
+#endif
 
+#ifdef NK_LINUX
+		GtkWidget *dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+		gint res;
+
+		gtk_init(NULL, NULL);
+
+		dialog = gtk_file_chooser_dialog_new("Save File",
+											 NULL,
+											 action,
+											 "_Cancel",
+											 GTK_RESPONSE_CANCEL,
+											 "_Save",
+											 GTK_RESPONSE_ACCEPT,
+											 NULL);
+
+		GtkFileFilter *file_filter = gtk_file_filter_new();
+		gtk_file_filter_set_name(file_filter, filter);
+		gtk_file_filter_add_pattern(file_filter, "*.*"); // You can customize this pattern
+		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+		if (res == GTK_RESPONSE_ACCEPT)
+		{
+			char *filename;
+			GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
+			filename = gtk_file_chooser_get_filename(chooser);
+			std::string result(filename);
+			g_free(filename);
+			gtk_widget_destroy(dialog);
+			return result;
+		}
+		else
+		{
+			gtk_widget_destroy(dialog);
+			return std::string();
+		}
+#endif
+
+		return std::string();
 	}
 
 	std::string FileSystem::Root = "";
@@ -134,7 +221,7 @@ namespace Nuake
 	{
 		std::filesystem::path pathObj(fullPath);
 		auto returnvalue = pathObj.parent_path().string();
-		return returnvalue + "\\";
+		return returnvalue + "/";
 	}
 
 	std::string FileSystem::ReadFile(const std::string& path, bool absolute)
@@ -189,6 +276,17 @@ namespace Nuake
 		return std::filesystem::remove_all(path.c_str());
 	}
 
+	std::string FileSystem::GetConfigFolderPath()
+	{
+		std::string subFolderPath = OS::GetConfigFolderPath().append("/Nuake/");
+		if (!DirectoryExists(subFolderPath))
+		{
+			MakeDirectory(subFolderPath);
+		}
+
+		return subFolderPath;
+	}
+
 	Ref<Directory> FileSystem::GetFileTree()
 	{
 		return RootDirectory;
@@ -231,8 +329,8 @@ namespace Nuake
 
 	std::string FileSystem::GetFileNameFromPath(const std::string& path)
 	{
-		const auto& split = String::Split(path, '\\');
+		const auto& split = String::Split(path, '/');
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
-	
+
 }

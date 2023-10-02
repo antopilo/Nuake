@@ -1,5 +1,6 @@
 #include "GBuffer.h"
-#include "GL/glew.h"
+#include <glad/glad.h>
+
 GBuffer::GBuffer(glm::vec2 size)
 {
 	m_Size = size;

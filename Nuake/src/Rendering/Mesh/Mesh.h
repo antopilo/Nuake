@@ -22,7 +22,7 @@ namespace Nuake
 		std::vector<Vertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();
 
-		Ref<Material> GetMaterial() inline const;
+		Ref<Material> GetMaterial() const;
 		void SetMaterial(Ref<Material> material);
 
 		void Bind() const;
@@ -38,6 +38,9 @@ namespace Nuake
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<Vertex> m_Vertices;
+
+		uint32_t m_IndicesCount;
+		uint32_t m_VerticesCount;
 
 		Scope<VertexBuffer> m_VertexBuffer;
 		Scope<VertexArray> m_VertexArray;

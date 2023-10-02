@@ -2,6 +2,7 @@
 #include "src/Scripting/WrenScript.h"
 #include "src/Resource/Serializable.h"
 #include "src/Core/FileSystem.h"
+#include "src/Core/Logger.h"
 
 namespace Nuake 
 {
@@ -17,6 +18,13 @@ namespace Nuake
 		{
 			Script = path;
 			Ref<Nuake::File> nuakeFile = Nuake::FileSystem::GetFile(path);
+
+			if (!nuakeFile)
+			{
+				Logger::Log("Failed to load script: " + path, "script", CRITICAL);
+				return;
+			}
+
 			mWrenScript = CreateRef<Nuake::WrenScript>(nuakeFile, true);
 			auto modules = mWrenScript->GetModules();
 			if (modules.size() > 0)

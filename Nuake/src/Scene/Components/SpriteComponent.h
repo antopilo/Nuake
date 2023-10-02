@@ -11,6 +11,8 @@ namespace Nuake
 	public:
 		bool Billboard;
 		bool LockYRotation;
+		bool PositionFacing;
+
 		std::string SpritePath;
 		Ref<Mesh> SpriteMesh;
 

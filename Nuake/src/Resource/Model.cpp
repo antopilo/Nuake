@@ -58,12 +58,15 @@ namespace Nuake
 		}
 		else
 		{
-			for (auto& m : j["Meshes"])
+			if (j.contains("Meshes"))
 			{
-				Ref<Mesh> mesh = CreateRef<Mesh>();
-				mesh->Deserialize(m);
+				for (auto& m : j["Meshes"])
+				{
+					Ref<Mesh> mesh = CreateRef<Mesh>();
+						mesh->Deserialize(m);
 
-				m_Meshes.push_back(mesh);
+						m_Meshes.push_back(mesh);
+				}
 			}
 		}
 

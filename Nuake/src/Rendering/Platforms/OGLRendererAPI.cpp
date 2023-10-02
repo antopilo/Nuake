@@ -1,7 +1,8 @@
 #include "OGLRendererAPI.h"
-#include "GL/glew.h"
+#include "glad/glad.h"
 
 namespace Nuake {
+
 	void OGLRendererAPI::Enable(const RendererEnum enumType)
 	{
 		glEnable(GetType(enumType));
@@ -85,7 +86,7 @@ namespace Nuake {
 		glMultiDrawElements(GetType(mode), &count, GetType(type), indices, drawCount);
 	}
 
-	void OGLRendererAPI::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
+	void OGLRendererAPI::DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices)
 	{
 		glDrawElements(GetType(mode), count, GetType(type), indices);
 	}

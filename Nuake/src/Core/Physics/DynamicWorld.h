@@ -10,7 +10,7 @@
 #include <src/Core/Physics/GhostObject.h>
 #include "CharacterController.h"
 
-#include <Jolt/Jolt.h>
+#include "Jolt/Jolt.h"
 
 
 namespace JPH
@@ -42,13 +42,13 @@ namespace Nuake
 
 			Ref<JPH::PhysicsSystem> _JoltPhysicsSystem;
 			JPH::JobSystemThreadPool* _JoltJobSystem;
-			Scope<MyContactListener> _contactListener;
-			Scope<MyBodyActivationListener> _bodyActivationListener;
+			Ref<MyContactListener> _contactListener;
+			Ref<MyBodyActivationListener> _bodyActivationListener;
 			JPH::BodyInterface* _JoltBodyInterface;
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::map<uint32_t, JPH::CharacterVirtual*> _registeredCharacters;
+			std::map<uint32_t, Ref<JPH::CharacterVirtual>> _registeredCharacters;
 
 		public:
 			DynamicWorld();

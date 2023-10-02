@@ -12,7 +12,7 @@ namespace Nuake
 {
 	struct RenderMesh
 	{
-		Ref<Mesh> Mesh;
+		Ref<Mesh> mesh;
 		Matrix4 transform;
 		int32_t entityId;
 	};
@@ -62,7 +62,7 @@ namespace Nuake
 					}
 
 					shader->SetUniformMat4f(modelMatrixUniformLocation, m.transform);
-					m.Mesh->Draw(shader, false);
+					m.mesh->Draw(shader, false);
 				}
 			}
 

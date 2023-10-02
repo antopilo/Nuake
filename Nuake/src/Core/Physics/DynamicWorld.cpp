@@ -249,7 +249,7 @@ namespace Nuake
 	{
 		DynamicWorld::DynamicWorld() : _stepCount(0)
 		{
-			_registeredCharacters = std::map<uint32_t, JPH::CharacterVirtual*>();
+			_registeredCharacters = std::map<uint32_t, Ref<JPH::CharacterVirtual>>();
 
 			// Initialize Jolt Physics
 			const uint32_t MaxBodies = 2048;
@@ -339,10 +339,15 @@ namespace Nuake
 				bodySettings.mMassPropertiesOverride.mMass = mass;
 			}
 			
+			if (rb->GetEntity().GetID() == 0)
+			{
+				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
+			}
+
 			bodySettings.mUserData = rb->GetEntity().GetID();
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			_registeredBodies.push_back((uint32_t)body.GetIndexAndSequenceNumber());
+			_registeredBodies.push_back((uint32_t)body.GetIndex());
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -364,7 +369,7 @@ namespace Nuake
 
 			const Quat& bodyRotation = cc->Rotation;
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
-			auto character = new JPH::CharacterVirtual(settings, std::move(joltPosition), std::move(joltRotation), _JoltPhysicsSystem.get());
+			auto character = CreateRef<JPH::CharacterVirtual>(settings, std::move(joltPosition), std::move(joltRotation), _JoltPhysicsSystem.get());
 
 			// To get the jolt character control from a scene entity.
 			_registeredCharacters[cc->Owner.GetHandle()] = character;
@@ -468,7 +473,7 @@ namespace Nuake
 			{
 				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};
 
-				JPH::CharacterVirtual* characterController = e.second;
+				Ref<JPH::CharacterVirtual> characterController = e.second;
 				JPH::Mat44 joltTransform = characterController->GetWorldTransform();
 				const auto bodyRotation = characterController->GetRotation();
 
@@ -584,13 +589,17 @@ namespace Nuake
 
 			if (!_registeredBodies.empty())
 			{
-				_JoltBodyInterface->RemoveBodies(reinterpret_cast<JPH::BodyID*>(_registeredBodies.data()), _registeredBodies.size());
+				for (auto& body : _registeredBodies)
+				{
+					_JoltBodyInterface->RemoveBody(static_cast<JPH::BodyID>(body));
+				}
 
 				_registeredBodies.clear();
 			}
 
 			if (!_registeredCharacters.empty())
 			{
+				
 				_registeredCharacters.clear();
 			}
 		}
@@ -664,6 +673,7 @@ namespace Nuake
 			break;
 			case RigidbodyShapes::MESH:
 			{
+				assert(true);
 				MeshShape* meshShape = (MeshShape*)shape.get();
 				const auto& mesh = meshShape->GetMesh();
 				const auto& vertices = mesh->GetVertices();

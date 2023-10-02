@@ -9,9 +9,7 @@ project 'Soloud'
 	targetdir ("soloud/bin/" .. outputdir .. "/%{prj.name}")
     objdir ("soloud/bin-obj/" .. outputdir .. "/%{prj.name}")
 	
-	defines {
-		"WITH_WASAPI"
-	}
+	
 
 	includedirs {
 		"soloud/include"
@@ -20,13 +18,31 @@ project 'Soloud'
 	files {
 		"soloud/src/**.h",
 		"soloud/src/core/**.cpp",
-        "soloud/src/audiosource/**.c*",
-        "soloud/src/backend/wasapi/**.c*"
+        "soloud/src/audiosource/**.c*"
 	}
 
 	prebuildcommands {
 		
 	}
+
+	filter "system:windows"
+		defines {
+			"WITH_WASAPI"
+		}
+
+		files
+		{
+			"soloud/src/backend/wasapi/**.c*"
+		}
+
+	filter "system:linux"
+		defines {
+			"WITH_ALSA"
+		}
+		files
+		{
+			"soloud/src/backend/alsa/soloud_alsa.cpp"
+		}
 
 	filter "configurations:Debug"
 		cppdialect "C++17"

@@ -1,5 +1,5 @@
 #include "Skybox.h"
-#include <GL\glew.h>
+#include <glad/glad.h>
 
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/Cubemap.h"
@@ -66,15 +66,10 @@ namespace Nuake
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
         glEnableVertexAttribArray(0);
-
-        // TODO: mem leak.
-        m_Texture = new CubemapTexture("Res/Textures/Skyboxes/1/japan");
-        m_Hdr = new HDRTexture("Res/Textures/Skyboxes/HDR/OldIndustrialHall.jpg");
     }
 
     void Skybox::Draw(glm::mat4 projection, glm::mat4 view) 
     {
-
         glDepthMask(GL_FALSE);
         m_Texture->Bind(3);
         m_Hdr->Bind(4);

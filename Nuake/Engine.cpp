@@ -34,6 +34,7 @@ namespace Nuake
 		// Creates the window
 		s_CurrentWindow = Window::Get();
 
+		Logger::Log("Input initializing");
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");

@@ -140,8 +140,6 @@ int ApplicationMain(int argc, char* argv[])
     if (!launchSettings.projectPath.empty())
     {
         Logger::Log("Loading project", "window", CRITICAL);
-
-
         editor.LoadProject(launchSettings.projectPath);
     }
 

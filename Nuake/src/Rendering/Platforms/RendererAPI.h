@@ -35,7 +35,7 @@ namespace Nuake {
 		virtual void VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer) = 0;
 
 		virtual void DrawMultiElements(const RendererEnum mode, const int count, const RendererEnum type, const void* const* indices, unsigned int drawCount) = 0;
-		virtual void DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices) = 0;
+		virtual void DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices) = 0;
 		virtual void DrawArrays(int from, int count) = 0;
 		virtual void DrawLines(int from, int count) = 0;
 	};

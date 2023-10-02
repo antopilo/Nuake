@@ -19,8 +19,6 @@ namespace Nuake
 		void BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
 
-		Scope<SSR> mSSR;
-
 		FrameBuffer& GetGBuffer() const
 		{
 			return *mGBuffer;
@@ -35,8 +33,8 @@ namespace Nuake
 		Scope<FrameBuffer> mToneMapBuffer;
 		Scope<FrameBuffer> mBarrelDistortionBuffer;
 		Scope<FrameBuffer> mVignetteBuffer;
-		Scope<FrameBuffer> mDOFBuffer;;
-	private:
+		Scope<FrameBuffer> mDOFBuffer;
+
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);

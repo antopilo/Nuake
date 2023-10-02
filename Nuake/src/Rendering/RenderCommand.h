@@ -30,7 +30,7 @@ namespace Nuake {
 		static void BindVertexArray(const unsigned int& rendererID);
 		static void VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer);
 		static void DrawMultiElements(const RendererEnum mode, const int count, const RendererEnum type, const void* const* indices, unsigned int drawCount);
-		static void DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices);
+		static void DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices);
 		static void DrawArrays(int first, int count);
 
 		static void DrawLines(int first, int count);

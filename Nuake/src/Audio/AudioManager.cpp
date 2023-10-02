@@ -6,6 +6,7 @@
 #include "soloud_speech.h"
 #include "soloud_thread.h"
 #include <dependencies/soloud/include/soloud_wav.h>
+#include <dependencies/soloud/include/soloud_wavstream.h>
 
 
 namespace Nuake {
@@ -28,7 +29,11 @@ namespace Nuake {
 		m_Soloud = CreateRef<SoLoud::Soloud>();
 
 		// TODO: Sample rate, back end, buffer size, flags.
+#ifdef NK_WIN
 		m_Soloud->init();
+#else
+		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA);
+#endif
 
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 
@@ -84,30 +89,30 @@ namespace Nuake {
 		// Acquire mutex lock
 		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
 
+		auto& audioClip = m_ActiveClips[request.audioFile];
 		if (IsVoiceActive(request.audioFile))
 		{
-			if (!m_Soloud->isValidVoiceHandle(m_ActiveClips[request.audioFile]))
+			if (!m_Soloud->isValidVoiceHandle(audioClip))
 			{
 				m_ActiveClips.erase(request.audioFile);
 				return;
 			}
 		}
 
-		SoLoud::handle& voice = m_ActiveClips[request.audioFile];
-
 		if (request.spatialized)
 		{
-			m_Soloud->set3dSourcePosition(voice, request.position.x, request.position.y, request.position.z);
-			m_Soloud->set3dSourceMinMaxDistance(voice, request.MinDistance, request.MaxDistance);
-			m_Soloud->set3dSourceAttenuation(voice, 1, request.AttenuationFactor);
+			m_Soloud->set3dSourcePosition(audioClip, request.position.x, request.position.y, request.position.z);
+			m_Soloud->set3dSourceMinMaxDistance(audioClip, request.MinDistance, request.MaxDistance);
+			m_Soloud->set3dSourceAttenuation(audioClip, 1, request.AttenuationFactor);
 			m_Soloud->update3dAudio();
 		}
 		else
 		{
-			m_Soloud->setPan(voice, request.pan);
+			m_Soloud->setPan(audioClip, request.pan);
 		}
-		m_Soloud->setLooping(voice, request.Loop);
-		m_Soloud->setRelativePlaySpeed(voice, request.speed);
+
+		m_Soloud->setLooping(audioClip, request.Loop);
+		m_Soloud->setRelativePlaySpeed(audioClip, request.speed);
 	}
 
 	void AudioManager::StopVoice(const std::string& filePath)
@@ -116,8 +121,7 @@ namespace Nuake {
 
 		if (!IsVoiceActive(filePath))
 		{
-			// We can't stop a voice that isn't active.
-			return;
+			return; // We can't stop a voice that isn't active.
 		}
 
 		SoLoud::handle& voice = m_ActiveClips[filePath];
@@ -141,8 +145,20 @@ namespace Nuake {
 
 	void AudioManager::LoadWavAudio(const std::string& filePath)
 	{
-		m_WavSamples[filePath] = SoLoud::Wav();
-		m_WavSamples[filePath].load(filePath.c_str());
+		const bool STREAMING = true;
+		if (STREAMING)
+		{
+			Ref<SoLoud::WavStream> wavStream = CreateRef<SoLoud::WavStream>();
+			wavStream->load(filePath.c_str());
+			m_WavSamples[filePath] = wavStream;
+		}
+		else
+		{
+			auto wav = CreateRef<SoLoud::Wav>();
+			wav->load(filePath.c_str());
+			m_WavSamples[filePath] = wav;
+		}
+		
 	}
 
 	void AudioManager::AudioThreadLoop()
@@ -156,19 +172,19 @@ namespace Nuake {
 			while (!m_AudioQueue.empty())
 			{
 				AudioRequest& audioRequest = m_AudioQueue.front();
-				SoLoud::Wav& audio = m_WavSamples[audioRequest.audioFile];
+				Ref<SoLoud::AudioSource> audio = m_WavSamples[audioRequest.audioFile];
 
 				SoLoud::handle soloudHandle;
 				if (!audioRequest.spatialized)
 				{
-					soloudHandle = m_Soloud->play(audio);
+					soloudHandle = m_Soloud->play(*audio);
 					m_Soloud->setVolume(soloudHandle, audioRequest.volume);
 					m_Soloud->setPan(soloudHandle, audioRequest.pan);
 				}
 				else
 				{
 					const Vector3& position = audioRequest.position;
-					soloudHandle = m_Soloud->play3d(audio, position.x, position.y, position.z);
+					soloudHandle = m_Soloud->play3d(*audio, position.x, position.y, position.z);
 					m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
 					m_Soloud->set3dSourceAttenuation(soloudHandle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
 				}
@@ -178,7 +194,6 @@ namespace Nuake {
 
 				m_ActiveClips[audioRequest.audioFile] = soloudHandle;
 
-				// Remove item from queue.
 				m_AudioQueue.pop();
 			}
 		}

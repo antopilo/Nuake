@@ -11,11 +11,12 @@ namespace Nuake
 	class PhysicsManager
 	{
 	private:
-		Physics::DynamicWorld* m_World;
+		Ref<Physics::DynamicWorld> m_World;
 		bool m_IsRunning = false;
 
 		bool m_DrawDebug = false;
 		static PhysicsManager* m_Instance;
+
 	public:
 		static PhysicsManager& Get()
 		{
@@ -23,11 +24,12 @@ namespace Nuake
 			return instance;
 		}
 
-		Physics::DynamicWorld* GetWorld() { return m_World; }
+		Ref<Physics::DynamicWorld> GetWorld() { return m_World; }
 
 		PhysicsManager() { if (!m_Instance) m_Instance = this; }
 
-		void SetDrawDebug(bool value) {
+		void SetDrawDebug(bool value) 
+		{
 			m_DrawDebug = value;
 		}
 

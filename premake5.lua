@@ -1,6 +1,6 @@
 workspace "Nuake"
     architecture "x64"
-
+    conformancemode "On"
     configurations
     {
         "Debug",
@@ -8,9 +8,22 @@ workspace "Nuake"
         "Dist"
     }
 
+    filter "configurations:Dist"
+        defines 
+        {
+            "NK_DIST"
+        }
+
+    filter "configurations:Debug"
+        defines 
+        {
+            "NK_DEBUG"
+        }
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Nuake/dependencies/glfw_p5.lua"
+include "Nuake/dependencies/glad_p5.lua"
 include "Nuake/dependencies/assimp_p5.lua"
 include "Nuake/dependencies/freetype_p5.lua"
 include "Nuake/dependencies/jolt_p5.lua"
@@ -20,14 +33,15 @@ include "Nuake/dependencies/optick_p5.lua"
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
+    staticruntime "On"
+
     language "C++"
-    
+    cppdialect "C++20"
+   
     defines
     {
-        "GLEW_STATIC",
         "_MBCS"
     }
-
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -48,25 +62,25 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/vm/*.c",
         "%{prj.name}/src/Vendors/katana-parser/*.h",
         "%{prj.name}/src/Vendors/katana-parser/*.c",
-        "%{prj.name}/../Nuake/src/Vendors/incbin/*.c",
-        "%{prj.name}/../Nuake/src/Vendors/incbin/*.h"
+        "%{prj.name}/src/Vendors/incbin/*.c",
+        "%{prj.name}/src/Vendors/incbin/*.h"
     }
 
     includedirs
     {
-        "%{prj.name}/../Nuake",
-        "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen/include",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/include",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-        "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
-        "%{prj.name}/../Nuake/src/Vendors/incbin",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include"
+        "%{prj.name}",
+        "%{prj.name}/src/Vendors",
+        "%{prj.name}/dependencies/glad/include",
+        "%{prj.name}/dependencies/glfw/include",
+        "%{prj.name}/dependencies/assimp/include",
+        "%{prj.name}/dependencies/JoltPhysics",
+        "%{prj.name}/src/Vendors/msdfgen/include",
+        "%{prj.name}/src/Vendors/msdfgen/freetype/include",
+        "%{prj.name}/src/Vendors/msdfgen",
+        "%{prj.name}/src/Vendors/wren/src/include",
+        "%{prj.name}/src/Vendors/incbin",
+        "%{prj.name}/dependencies/build",
+        "%{prj.name}/dependencies/soloud/include"
     }
 
     links
@@ -75,20 +89,38 @@ project "Nuake"
         "soloud"
     }
 
-    filter "system:windows"
-        cppdialect "C++20"
-        staticruntime "On"
+    filter "system:linux"
         defines {
-            "NK_WIN"
+            "GLFW_STATIC",
+            "NK_LINUX"
+        }
+        
+        links 
+	{
+		"glib-2.0"
+	}
+        
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
         }
 
+    filter "system:windows"
+        staticruntime "On"
+        defines
+        {
+            "NK_WIN"
+        }
+    
+    
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
-        defines 
-        {
-            "NK_DEBUG"
-        }
 
     filter "configurations:Release"
         runtime "Release"
@@ -97,16 +129,13 @@ project "Nuake"
     filter "configurations:Dist"
         runtime "Release"
         optimize "on"
-        defines 
-        {
-            "NK_DIST"
-        }
+        
 
 project "NuakeRuntime"
     location "Runtime"
     kind "ConsoleApp"
     language "C++"
-    
+
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("Editor")
@@ -120,7 +149,7 @@ project "NuakeRuntime"
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
+        "%{prj.name}/../Nuake/Dependencies/glad/include",
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
@@ -129,10 +158,9 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/Dependencies/soloud/include"
     }
-    
-    libdirs 
-    { 
-        "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
+
+    libdirs
+    {
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
@@ -145,12 +173,11 @@ project "NuakeRuntime"
     }
 
     links
-    { 
-        "Nuake", 
+    {
+        "Nuake",
         "GLFW",
+        "glad",
         "assimp",
-        "glew32s.lib", 
-        "opengl32.lib",
 		"Freetype",
 		"JoltPhysics",
         "soloud"
@@ -162,11 +189,40 @@ project "NuakeRuntime"
         defines {
             "NK_WIN"
         }
+        links
+        {
+            "opengl32.lib"
+        }
+
+    filter "system:linux"
+        links
+        {
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
+            "glib-2.0",
+            "gtk-3",
+		"gobject-2.0"
+        }
+
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
+        }
+        
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
 
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
-        defines {
+        defines
+        {
             "NK_DEBUG"
         }
 
@@ -174,33 +230,32 @@ project "NuakeRuntime"
         kind "WindowedApp"
         runtime "Release"
         optimize "on"
-        defines {
+
+        defines
+        {
             "NK_DIST",
             "WIN32_LEAN_AND_MEAN"
         }
-        entrypoint "WinMainCRTStartup"
-        buildoptions { "-mwindows"}
 
     filter "configurations:Dist"
-    kind "WindowedApp"
+        kind "WindowedApp"
         runtime "Release"
         optimize "on"
         flags { "WinMain" }
-        defines 
+        defines
         {
-            "NK_DIST"
+            "NK_DIST",
+            "WIN32_LEAN_AND_MEAN"
         }
 
-    -- copy a file from the objects directory to the target directory
-    postbuildcommands {
-     --"{COPY} "Nuake/dependencies/GLFW/lib-vc2019/glfw3.dll" " .. "./bin/" .. outputdir .. "/%{prj.name}/glfw3.dll"
-    }
 
 project "Editor"
     location "Editor"
     kind "ConsoleApp"
     language "C++"
-    
+    cppdialect "C++20"
+    staticruntime "On"
+
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")
@@ -209,23 +264,22 @@ project "Editor"
     {
         "%{prj.name}/Editor.cpp",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/resources/*.rc",
-        "%{prj.name}/resources/**.ico"
+        "%{prj.name}/src/**.h"
     }
 
     includedirs
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/GLEW/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/glad/include",
+        "%{prj.name}/../Nuake/dependencies/glfw/include",
+        "%{prj.name}/../Nuake/dependencies/assimp/include",
+        "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include"
+		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/soloud/include",
+        "/usr/include/gtk-3.0/"
     }
     
     libdirs 
@@ -244,25 +298,70 @@ project "Editor"
 
     links
     { 
-        "Nuake", 
+        "Nuake",
+        "glad", 
         "GLFW",
         "assimp",
-        "glew32s.lib", 
-        "opengl32.lib",
-		"Freetype",
-		"JoltPhysics",
+	"Freetype",
+	"JoltPhysics",
         "soloud"
     }
 
-    filter "system:windows"
-        cppdialect "C++20"
-        staticruntime "On"
+    filter "system:Windows"
+        links
+        {
+            "OpenGL32"
+        }
+        files
+        {
+            "%{prj.name}/resources/*.rc",
+            "%{prj.name}/resources/**.ico"
+        }
+        defines
+        {
+            "NK_WIN"
+        }
+
+
+    filter "system:linux"
+        links
+        {
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
+            "glib-2.0",
+            "gtk-3",
+		"gobject-2.0",
+		"asound"
+        }
+
+ 	buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
+    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
+
+        
+        includedirs
+        {
+        	"/usr/include/gtk-3.0/",
+        	"/usr/lib/glib-2.0/include",
+		"/usr/include/glib-2.0",
+        }
+        
+       
+	
+        defines 
+        {
+            "GLFW_STATIC",
+            "NK_LINUX"
+        }
+
 
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
-        defines {
-            "NK_DEBUG",
+        defines 
+        {
             "WIN32_LEAN_AND_MEAN"
         }
 
@@ -271,13 +370,16 @@ project "Editor"
         optimize "on"
 
     filter "configurations:Dist"
-        kind "WindowedApp"
         runtime "Release"
         optimize "on"
-        defines {
-            "NK_DIST",
+        defines 
+        {
             "WIN32_LEAN_AND_MEAN"
         }
+
+    -- Removes the console for windows
+    --filter {"configurations:Dist", "platforms:windows"}
+       -- kind "WindowedApp"--
 
     -- copy a file from the objects directory to the target directory
     postbuildcommands {

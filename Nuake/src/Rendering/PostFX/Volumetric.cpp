@@ -1,7 +1,7 @@
 #include "Volumetric.h"
 #include "src/Rendering/Shaders/ShaderManager.h"
 #include "src/Rendering/Renderer.h"
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 #include <src/Vendors/imgui/imgui.h>
 namespace Nuake {
 	Volumetric::Volumetric()

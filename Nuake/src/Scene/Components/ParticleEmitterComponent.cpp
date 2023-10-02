@@ -14,7 +14,10 @@ namespace Nuake
 		SERIALIZE_VAL(GravityRandom);
 		SERIALIZE_VAL(Radius);
 		SERIALIZE_VAL(GlobalSpace);
-		SERIALIZE_OBJECT(ParticleMaterial);
+		if (ParticleMaterial)
+		{
+			SERIALIZE_OBJECT(ParticleMaterial);
+		}
 		SERIALIZE_VAL(LifeRandomness);
 		SERIALIZE_VAL(ScaleRandomness);
 		END_SERIALIZE();

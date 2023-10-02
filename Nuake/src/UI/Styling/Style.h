@@ -84,7 +84,7 @@ namespace Nuake
 	union Value
 	{
 		float Number;
-		Color Color;
+		Color Color_;
 		int Enum;
 	};
 	struct PropValue

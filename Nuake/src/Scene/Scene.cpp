@@ -18,7 +18,7 @@
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Textures/MaterialManager.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 #include "Engine.h"
 #include "src/Core/Maths.h"
@@ -58,7 +58,7 @@ namespace Nuake
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
 		m_Systems.push_back(CreateRef<AudioSystem>(this));
 
-		m_SceneRenderer = new SceneRenderer();
+		m_SceneRenderer = CreateRef<SceneRenderer>();
 		m_SceneRenderer->Init();
 	}
 

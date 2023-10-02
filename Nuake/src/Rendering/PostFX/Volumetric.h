@@ -1,7 +1,7 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
-#include "src/Rendering/Buffers/FrameBuffer.h"
+#include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Scene/Components/LightComponent.h"
 #include <vector>
 

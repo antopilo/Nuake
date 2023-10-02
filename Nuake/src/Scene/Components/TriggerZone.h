@@ -5,7 +5,7 @@
 namespace Nuake {
 	class TriggerZone {
 	public:
-		Ref<GhostObject> GhostObject;
+		Ref<GhostObject> m_GhostObject;
 		std::string target = "";
 
 		std::vector<Entity> Targets;
@@ -20,7 +20,7 @@ namespace Nuake {
 		{
 			if (!Enabled) return 0;
 
-			return GhostObject->OverlappingCount();
+			return m_GhostObject->OverlappingCount();
 		}
 
 		std::vector<Entity> GetTargets() {
@@ -32,7 +32,7 @@ namespace Nuake {
 			if (!Enabled)
 				return std::vector<Entity>();
 
-			return GhostObject->GetOverlappingEntities();
+			return m_GhostObject->GetOverlappingEntities();
 		}
 	};
 }

@@ -5,7 +5,7 @@
 #include "src/Scene/Components/SpriteComponent.h"
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 
-#include <GL\glew.h>
+#include <glad/glad.h>
 #include <src/Scene/Components/SkinnedModelComponent.h>
 #include <src/Vendors/imgui/imgui.h>
 
@@ -26,7 +26,6 @@ namespace Nuake
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
 
-		mSSR = CreateScope<SSR>();
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 
@@ -152,8 +151,8 @@ namespace Nuake
 
 		if (sceneEnv->SSREnabled)
 		{
-			mSSR->Resize(framebuffer.GetSize());
-			mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
+			sceneEnv->mSSR->Resize(framebuffer.GetSize());
+			sceneEnv->mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 			framebuffer.Bind();
 			{
@@ -162,7 +161,7 @@ namespace Nuake
 				shader->Bind();
 
 				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-				shader->SetUniformTex("u_Source2", mSSR->OutputFramebuffer->GetTexture().get(), 1);
+				shader->SetUniformTex("u_Source2", sceneEnv->mSSR->OutputFramebuffer->GetTexture().get(), 1);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
@@ -202,32 +201,6 @@ namespace Nuake
 		static float nammount = 0.0001;
 		static float dbsize = 1.25f;
 		static float feather = 1.0f;
-		ImGui::Begin("DOF Setting");
-		{
-			ImGui::DragFloat("focalDepth", &focalDepth, 0.01f);
-			ImGui::DragFloat("focalLength", &focalLength, 0.01f);
-			ImGui::DragFloat("fstop", &fstop, 0.01f);
-			ImGui::DragInt("samples", &samples, 0.01f);
-			ImGui::DragInt("rings", &rings, 0.01f);
-			ImGui::Checkbox("showFocus", &showFocus);
-			ImGui::Checkbox("manualDof", &manualdof);
-			ImGui::Checkbox("autoFocus", &autoFocus);
-			ImGui::DragInt("rings", &rings, 0.01f);
-			ImGui::DragFloat("ndofstart", &ndofstart, 0.01f);
-			ImGui::DragFloat("ndofDist", &ndofDist, 0.01f);
-			ImGui::DragFloat("fdofstart", &fdofstart, 0.01f);
-			ImGui::DragFloat("fdofdist", &fdofdist, 0.01f);
-			ImGui::DragFloat("coc", &coc, 0.01f);
-			ImGui::DragFloat("maxBlue", &maxBlue, 0.01f);
-			ImGui::DragFloat("threshold", &threshold, 0.01f);
-			ImGui::DragFloat("gain", &gain, 0.01f);
-			ImGui::DragFloat("biaos", &biaos, 0.01f);
-			ImGui::DragFloat("fringe", &fringe, 0.01f);
-			ImGui::DragFloat("nammount", &nammount, 0.01f);
-			ImGui::DragFloat("dbsize", &dbsize, 0.01f);
-			ImGui::DragFloat("feather", &feather, 0.01f);
-		}
-		ImGui::End();
 
 		mDOFBuffer->QueueResize(framebuffer.GetSize());
 		mDOFBuffer->Bind();
@@ -265,12 +238,6 @@ namespace Nuake
 			Renderer::DrawQuad();
 		}
 		mDOFBuffer->Unbind();
-
-		if (ImGui::Begin("DOF"))
-		{
-			ImGui::Image((void*)mDOFBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		}
-		ImGui::End();
 
 		if (sceneEnv->BarrelDistortionEnabled)
 		{
@@ -423,7 +390,19 @@ namespace Nuake
 						auto finalQuadTransform = transform.GetGlobalTransform();
 						if (sprite.Billboard)
 						{
-							finalQuadTransform = glm::inverse(mView);
+							if (sprite.PositionFacing)
+							{
+								const Matrix4& invView = glm::inverse(mView);
+								const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+								const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+								const Vector3& direction = cameraPosition - spritePosition;
+								finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+							}
+							else
+							{
+								finalQuadTransform = glm::inverse(mView);
+
+							}
 
 							if (sprite.LockYRotation)
 							{
@@ -433,8 +412,7 @@ namespace Nuake
 								finalQuadTransform = finalQuadTransform;
 							}
 
-							// Translation
-							finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+							finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
 
 							// Scale
 							finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
@@ -472,9 +450,6 @@ namespace Nuake
 						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
 						if (mesh.ModelResource != nullptr && visibility.Visible)
 						{
-							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
-							SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
-
 							for (auto& m : mesh.ModelResource->GetMeshes())
 							{
 								m->Draw(gBufferSkinnedMeshShader, false);
@@ -549,7 +524,19 @@ namespace Nuake
 				auto finalQuadTransform = transform.GetGlobalTransform();
 				if (sprite.Billboard)
 				{
-					finalQuadTransform = glm::inverse(mView);
+					if (sprite.PositionFacing)
+					{
+						const Matrix4& invView = glm::inverse(mView);
+						const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+						const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+						const Vector3& direction = cameraPosition - spritePosition;
+						finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+					}
+					else
+					{
+						finalQuadTransform = glm::inverse(mView);
+						
+					}
 
 					if (sprite.LockYRotation)
 					{
@@ -559,8 +546,7 @@ namespace Nuake
 						finalQuadTransform = finalQuadTransform;
 					}
 
-					// Translation
-					finalQuadTransform[3] = Vector4(transform.GetGlobalPosition(), 1.0f);
+					finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
 
 					// Scale
 					finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
@@ -685,7 +671,7 @@ namespace Nuake
 			shadingShader->SetUniformMat4f("u_Projection", mProjection);
 			shadingShader->SetUniformMat4f("u_View", mView);
 			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
-
+			shadingShader->SetUniform1f("u_AmbientTerm", environment->AmbientTerm);
 			shadingShader->SetUniformTex("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
 
 			Ref<Environment> env = scene.GetEnvironment();

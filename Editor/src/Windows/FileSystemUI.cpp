@@ -39,10 +39,6 @@ namespace Nuake
 
     void FileSystemUI::EditorInterfaceDrawFiletree(Ref<Directory> dir)
     {
-
-        
-
-
         ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
         //if (is_selected) 
        
@@ -76,6 +72,19 @@ namespace Nuake
         ImVec2 prevCursor = ImGui::GetCursorPos();
         ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
         const bool selected = ImGui::Selectable(id.c_str(), Editor->Selection.Directory == directory, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
+        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
+        {
+            ImGui::OpenPopup(hoverMenuId.c_str());
+            m_HasClickedOnFile = true;
+        }
+
+        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
+        bool shouldRename = false;
+
+        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
+        bool shouldDelete = false;
+        
         if (selected)
         {
             if (ImGui::IsMouseDoubleClicked(0))
@@ -92,7 +101,6 @@ namespace Nuake
 
         ImGui::SetCursorPos(prevCursor);
         ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
-
 
         auto imguiStyle = ImGui::GetStyle();
 
@@ -113,18 +121,7 @@ namespace Nuake
         ImGui::TextColored({ 1, 1, 1, 0.5f }, "Folder");
 
         ImGui::PopStyleVar();
-        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
-        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
-        {
-            ImGui::OpenPopup(hoverMenuId.c_str());
-            m_HasClickedOnFile = true;
-        }
-
-        const std::string renameId = "Rename" + std::string("##") + hoverMenuId;
-        bool shouldRename = false;
-
-        const std::string deleteId = "Delete" + std::string("##") + hoverMenuId;
-        bool shouldDelete = false;
+        
 
         if (ImGui::BeginPopup(hoverMenuId.c_str()))
         {
@@ -239,6 +236,13 @@ namespace Nuake
         std::string id = std::string("##") + file->GetAbsolutePath();
         const bool selected = ImGui::Selectable(id.c_str(), Editor->Selection.File == file, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
        
+        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
+        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
+        {
+            ImGui::OpenPopup(hoverMenuId.c_str());
+            m_HasClickedOnFile = true;
+        }
+
         bool shouldOpenScene = false;
         if (selected)
         {
@@ -395,12 +399,7 @@ namespace Nuake
         ImGui::PopStyleVar();
 
 
-        const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
-        if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
-        {
-            ImGui::OpenPopup(hoverMenuId.c_str());
-            m_HasClickedOnFile = true;
-        }
+        
 
         const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
         

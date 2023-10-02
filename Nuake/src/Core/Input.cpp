@@ -1,7 +1,7 @@
 #include "Input.h"
 #include "src/Window.h"
 
-#include <Imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 
 namespace Nuake

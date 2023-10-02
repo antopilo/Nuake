@@ -20,7 +20,7 @@
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"
 #include "src/Resource/FontAwesome5.h"
 
-#include "Dependencies/GLEW/include/GL/glew.h"
+#include <glad/glad.h>
 
 #include "src/Scene/Scene.h"
 #include "src/Scene/Components/Components.h"
@@ -61,12 +61,15 @@ namespace Nuake {
     
     EditorInterface::EditorInterface()
     {
+        Logger::Log("Creating editor windows", "window", CRITICAL);
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
 
+        Logger::Log("Building fonts", "window", CRITICAL);
         BuildFonts();
 
+        Logger::Log("Loading imgui from mem", "window", CRITICAL);
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
     }
@@ -635,6 +638,23 @@ namespace Nuake {
                         ImGui::PopStyleColor();
                     }
 
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Ambient Term");
+                        ImGui::TableNextColumn();
+
+                        // Here we create a dropdown for every sky type.
+                        ImGui::DragFloat("##AmbientTerm", &env->AmbientTerm, 0.001f, 0.00f, 1.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string ResetType = ICON_FA_UNDO + std::string("##ambient");
+                        if (ImGui::Button(ResetType.c_str())) env->AmbientTerm = 0.25f;
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()
@@ -883,7 +903,7 @@ namespace Nuake {
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
 
-                    SSR* ssr = scene->m_SceneRenderer->mSSR.get();
+                    SSR* ssr = env->mSSR.get();
                     {
                         ImGui::TableNextColumn();
                         // Title
@@ -1092,7 +1112,6 @@ namespace Nuake {
                     ImGui::TableSetupColumn("name", 0, 0.3);
                     ImGui::TableSetupColumn("set", 0, 0.6);
                     ImGui::TableSetupColumn("reset", 0, 0.1);
-
                     
                     {
                         ImGui::TableNextColumn();
@@ -1220,6 +1239,106 @@ namespace Nuake {
         std::string title = ICON_FA_TREE + std::string(" Hierarchy");
         if (ImGui::Begin(title.c_str()))
         {
+            if (UI::PrimaryButton("Add Entity"))
+            {
+                ImGui::OpenPopup("create_entity_popup");
+            }
+
+            if (ImGui::BeginPopup("create_entity_popup"))
+            {
+                if (ImGui::MenuItem("Empty"))
+                {
+                    Engine::GetCurrentScene()->CreateEntity("Empty");
+                }
+
+                if(ImGui::BeginMenu("3D"))
+                {
+                    if (ImGui::MenuItem("Camera"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Camera").AddComponent<CameraComponent>();
+                    }
+                    if (ImGui::MenuItem("Model"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Model").AddComponent<ModelComponent>();
+                    }
+                    if (ImGui::MenuItem("Skinned Model"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Skinned Model").AddComponent<SkinnedModelComponent>();
+                    }
+                    if (ImGui::MenuItem("Sprite"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Sprite").AddComponent<SpriteComponent>();
+                    }
+                    if (ImGui::MenuItem("Light"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Light").AddComponent<LightComponent>();
+                    }
+                    if (ImGui::MenuItem("Quake Map"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Quake Map").AddComponent<QuakeMapComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Physics"))
+                {
+                    if (ImGui::MenuItem("Character Controller"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Character Controller").AddComponent<CharacterControllerComponent>();
+                    }
+                    if (ImGui::MenuItem("Rigid Body"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Rigid Body").AddComponent<RigidBodyComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+                
+                if (ImGui::BeginMenu("Colliders"))
+                {
+                    if (ImGui::MenuItem("Box Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Box Collider").AddComponent<BoxColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Sphere Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Sphere Collider").AddComponent<SphereColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Capsule Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Capsule Collider").AddComponent<CapsuleColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Cylinder Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Cylinder Collider").AddComponent<CylinderColliderComponent>();
+                    }
+                    if (ImGui::MenuItem("Mesh Collider")) 
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Mesh Collider").AddComponent<MeshColliderComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Audio"))
+                {
+                    if (ImGui::MenuItem("Audio Emitter"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Audio Emitter").AddComponent<AudioEmitterComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Script"))
+                {
+                    if (ImGui::MenuItem("Script"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Script").AddComponent<WrenScriptComponent>();
+                    }
+                    ImGui::EndMenu();
+                }
+                
+                ImGui::EndPopup();
+            }
+
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
@@ -1378,7 +1497,9 @@ namespace Nuake {
                     ImVec4 color = ImVec4(1, 1, 1, 1.0);
                     ImGui::PushStyleColor(ImGuiCol_Text, color);
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
-                    ImGui::TextWrapped(l.message.c_str());
+
+                    std::string displayMessage = l.message + "(" + std::to_string(l.count) + ")";
+                    ImGui::TextWrapped(displayMessage.c_str());
                     ImGui::PopStyleColor();
 
                     ImGui::TableNextColumn();
@@ -1621,14 +1742,26 @@ namespace Nuake {
                 if (ImGui::MenuItem("Cut", "CTRL+X")) {}
                 if (ImGui::MenuItem("Copy", "CTRL+C")) {}
                 if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+                ImGui::Separator();
+
+                if(ImGui::MenuItem("Trenchbroom Configurator", NULL, m_ShowTrenchbroomConfigurator))
+                {
+                    m_ShowTrenchbroomConfigurator = !m_ShowTrenchbroomConfigurator;
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
             {
                 if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
+                {
                     m_DrawGrid = !m_DrawGrid;
+                }
+
                 if (ImGui::MenuItem("Draw Axis", NULL, m_DrawAxis))
+                {
                     m_DrawAxis = !m_DrawAxis;
+                }
+
                 if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
                 {
                     m_DebugCollisions = !m_DebugCollisions;
@@ -1767,6 +1900,11 @@ namespace Nuake {
 
         _audioWindow->Draw();
 
+        if (m_ShowTrenchbroomConfigurator)
+        {
+            m_TrenchhbroomConfigurator.Draw();
+        }
+
         DrawMenuBar();
 
 		pInterface.DrawEntitySettings();
@@ -1844,6 +1982,31 @@ namespace Nuake {
             entityTypeName = "Prefab";
         }
 
+        if (entity.HasComponent<AudioEmitterComponent>())
+        {
+            entityTypeName = "Audio Emitter";
+        }
+
+        if (entity.HasComponent<ParticleEmitterComponent>())
+        {
+            entityTypeName = "Particle Emitter";
+        }
+
+        if (entity.HasComponent<QuakeMapComponent>())
+        {
+            entityTypeName = "Quake Map";
+        }
+
+        if (entity.HasComponent<ModelComponent>())
+        {
+            entityTypeName = "Model";
+        }
+
+        if (entity.HasComponent<SkinnedModelComponent>())
+        {
+            entityTypeName = "Skinned Model";
+        }
+
         return entityTypeName;
     }
 
@@ -1853,8 +2016,10 @@ namespace Nuake {
 
         auto project = Project::New();
         auto projectFileData = FileSystem::ReadFile(projectPath, true);
+        Logger::Log("Reading file project: " + projectFileData, "window", CRITICAL);
         try
         {
+            Logger::Log("Starting deserializing", "window", CRITICAL);
             project->Deserialize(json::parse(projectFileData));
             project->FullPath = projectPath;
 

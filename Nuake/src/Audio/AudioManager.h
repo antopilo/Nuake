@@ -2,6 +2,7 @@
 #include "src/Core/Core.h"
 #include <src/Core/Maths.h>
 
+#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -10,10 +11,6 @@ namespace SoLoud
 {
 	class Soloud;
 	class AudioSource;
-}
-
-namespace SoLoud
-{
 	class Wav;
 }
 
@@ -52,7 +49,7 @@ namespace Nuake
 		Vector3 m_ListenerDirection;
 		Vector3 m_ListenerUp;
 
-		std::unordered_map<std::string, SoLoud::Wav> m_WavSamples;
+		std::unordered_map<std::string, Ref<SoLoud::AudioSource>> m_WavSamples;
 		std::unordered_map<std::string, unsigned int> m_ActiveClips;
 
 	public:

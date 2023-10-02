@@ -55,7 +55,7 @@ namespace Nuake
 		JPH::Factory::sInstance = new JPH::Factory();
 		JPH::RegisterTypes();
 
-		m_World = new Physics::DynamicWorld();
+		m_World = CreateRef<Physics::DynamicWorld>();
 		m_World->SetGravity(Vector3(0, -3, 0));
 
 		m_IsRunning = false;

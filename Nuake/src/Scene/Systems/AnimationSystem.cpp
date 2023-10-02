@@ -31,46 +31,51 @@ namespace Nuake
 				continue;
 			}
 
+			float animationTime = 0.0f;
 			Ref<SkeletalAnimation> animation = model->GetCurrentAnimation();
 			if (animation && model->IsPlaying)
 			{
-				float newAnimationTime = animation->GetCurrentTime() + (ts * animation->GetTicksPerSecond());
-				animation->SetCurrentTime(newAnimationTime);
+				animationTime = animation->GetCurrentTime() + (ts * animation->GetTicksPerSecond());
+				animation->SetCurrentTime(animationTime);
 			}
 
 			auto& rootBone = model->GetSkeletonRootNode();
-			UpdateBonePositionTraversal(rootBone, animation, animation->GetCurrentTime(), model->IsPlaying);
+			UpdateBonePositionTraversal(rootBone, animation, animationTime, model->IsPlaying);
 		}
 	}
 
 	void AnimationSystem::UpdateBonePositionTraversal(SkeletonNode& bone, Ref<SkeletalAnimation> animation, float time, bool isPlaying)
 	{
-		auto& animationTrack = animation->GetTrack(bone.Name);
-
-		Entity boneEnt = m_Scene->GetEntityByID(bone.EntityHandle);
-		if (boneEnt.IsValid())
+		if (Entity boneEnt = m_Scene->GetEntityByID(bone.EntityHandle); 
+			boneEnt.IsValid())
 		{
+			// Update the bone transform
 			auto& transformComponent = boneEnt.GetComponent<TransformComponent>();
 			bone.FinalTransform = transformComponent.GetGlobalTransform() * bone.Offset;
-
-			if (!animationTrack.IsEmpty() && isPlaying)
+			
+			if (animation)
 			{
-				// Get Update transform
-				animationTrack.Update(time);
+				if (auto& animationTrack = animation->GetTrack(bone.Name); 
+					!animationTrack.IsEmpty() && isPlaying)
+				{
+					// Get Update transform
+					animationTrack.Update(time);
 
-				const Matrix4& finalTransform = animationTrack.GetFinalTransform();
+					const Matrix4& finalTransform = animationTrack.GetFinalTransform();
 
-				Vector3 localPosition;
-				Quat localRotation;
-				Vector3 localScale;
-				Decompose(finalTransform, localPosition, localRotation, localScale);
+					Vector3 localPosition;
+					Quat localRotation;
+					Vector3 localScale;
+					Decompose(finalTransform, localPosition, localRotation, localScale);
 
-				transformComponent.SetLocalPosition(localPosition);
-				transformComponent.SetLocalRotation(localRotation);
-				transformComponent.SetLocalScale(localScale);
-				transformComponent.SetLocalTransform(finalTransform);
-				transformComponent.Dirty = false;
+					transformComponent.SetLocalPosition(localPosition);
+					transformComponent.SetLocalRotation(localRotation);
+					transformComponent.SetLocalScale(localScale);
+					transformComponent.SetLocalTransform(finalTransform);
+					transformComponent.Dirty = false;
+				}
 			}
+			
 		}
 
 		for (auto& childBone : bone.Children)

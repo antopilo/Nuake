@@ -1,5 +1,5 @@
 #include "UniformBuffer.h"
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 
 namespace Nuake
 {

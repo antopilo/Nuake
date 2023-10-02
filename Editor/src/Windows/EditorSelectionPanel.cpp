@@ -10,6 +10,7 @@
 #include <src/Scripting/WrenScript.h>
 
 #include <Engine.h>
+#include <src/Resource/Prefab.h>
 
 EditorSelectionPanel::EditorSelectionPanel()
 {
@@ -59,7 +60,7 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
 
 				if (!selection.File->IsValid())
 				{
-					std::string text = "File is invaluid";
+					std::string text = "File is invalid";
 					auto windowWidth = ImGui::GetWindowSize().x;
 					auto windowHeight = ImGui::GetWindowSize().y;
 
@@ -175,18 +176,30 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 {
     using namespace Nuake;
-    if (file->GetExtension() == ".material")
-    {
-		MaterialEditor matEditor;
-		matEditor.Draw(std::static_pointer_cast<Material>(selectedResource));
-    }
-    if (file->GetExtension() == ".project")
-    {
-        DrawProjectPanel(Nuake::Engine::GetProject());
-    }
-	if (file->GetExtension() == ".wren")
+	switch (file->GetFileType())
 	{
-		DrawWrenScriptPanel(CreateRef<WrenScript>(file, true));
+		case FileType::Material:
+		{
+			MaterialEditor matEditor;
+			matEditor.Draw(std::static_pointer_cast<Material>(selectedResource));
+			break;
+		}
+		case FileType::Project:
+		{
+			DrawProjectPanel(Nuake::Engine::GetProject());
+			break;
+		}
+		case FileType::Script:
+		{
+			DrawWrenScriptPanel(CreateRef<WrenScript>(file, true));
+			break;
+		}
+		case FileType::Prefab:
+		{
+			//Ref<Prefab> prefab = CreateRef<Prefab>(file->GetRelativePath());
+			//DrawPrefabPanel(prefab);
+			break;
+		}
 	}
 }
 

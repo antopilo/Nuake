@@ -48,7 +48,6 @@ namespace Nuake
 				initialPosition,
 				initialVelocity,
 				Scale,
-				initialColor,
 				initialLife
 			});
 

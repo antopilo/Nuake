@@ -76,6 +76,8 @@ namespace Nuake
 	{
 		_Projects = std::vector<ProjectPreview>();
 
+		_RecentProjectFilePath = (FileSystem::GetConfigFolderPath() + "recent.json");
+
 		ParseRecentFile();
 
 		// Load Nuake logo
@@ -166,7 +168,7 @@ namespace Nuake
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
 			{
-				const std::string path = FileDialog::OpenFile("Project file |*.project");
+				const std::string path = FileDialog::OpenFile("Project file(.project)\0*.project\0");
 				if (path != "" && String::EndsWith(path, ".project"))
 				{
 					// Prevent importing the same project twice in the list
@@ -207,10 +209,17 @@ namespace Nuake
 		draw_list->ChannelsSetCurrent(1);
 
 		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
-		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
+		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
 		if (result)
 		{
 			SelectedProject = itemIndex;
+		}
+
+		if (result && ImGui::IsMouseDoubleClicked(0))
+		{
+			SaveRecentFile();
+
+			queuedProjectPath = _Projects[SelectedProject].Path;;
 		}
 
 		//ImGui::PopStyleColor();

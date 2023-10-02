@@ -7,12 +7,14 @@
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
 #include "src/Rendering/PostFX/SSAO.h"
+#include "src/Rendering/PostFX/SSR.h"
 
 #include <vector>
 
 namespace Nuake
 {
-	enum class SkyType {
+	enum class SkyType 
+	{
 		ProceduralSky = 0,
 		ClearColor = 1
 		// CubeMap
@@ -23,26 +25,27 @@ namespace Nuake
 	public:
 		Environment();
 
-		SkyType CurrentSkyType = SkyType::ProceduralSky;
-
-		Color AmbientColor = Color(0, 0, 0, 1);
+		SkyType CurrentSkyType;
 		Ref<ProceduralSky> ProceduralSkybox;
 
-		bool VolumetricEnabled = true;
-		float VolumetricFog = 0.90f;
-		float VolumetricStepCount = 50.f;
+		Color AmbientColor;
 
+		bool VolumetricEnabled;
+		float VolumetricFog;
+		float VolumetricStepCount;
+
+		float AmbientTerm;
 		float Exposure = 3.5f;
 		float Gamma = 1.1f;
 
 		bool BloomEnabled = true;
 		Scope<Bloom> mBloom;
 		Scope<Volumetric> mVolumetric;
-
 		bool SSAOEnabled = true;
 		Scope<SSAO> mSSAO;
 
 		bool SSREnabled = true;
+		Scope<SSR> mSSR;
 
 		bool DOFEnabled = false;
 
@@ -60,8 +63,6 @@ namespace Nuake
 		glm::vec4 m_AmbientColor;
 		glm::vec4 GetAmbientColor();
 		void SetAmbientColor(glm::vec4 color);
-
-		void Push();
 
 		Ref<Environment> Copy();
 

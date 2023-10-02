@@ -1,11 +1,10 @@
-#pragma once
 #include "src/Core/Core.h"
 #include "Shader.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include <sstream>
-#include <GL\glew.h>
+#include <glad/glad.h>
 
 
 namespace Nuake
@@ -160,6 +159,8 @@ namespace Nuake
 		if (cs != 0)
 			glDeleteShader(cs);
 
+		Source = {};
+
 		return program;
 	}
 
@@ -205,6 +206,9 @@ namespace Nuake
 			std::cout << message << std::endl;
 			// Delete invalid shader
 			glDeleteShader(id);
+
+			delete[] message;
+
 			return 0;
 		}
 

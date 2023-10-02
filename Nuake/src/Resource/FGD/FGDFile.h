@@ -10,7 +10,8 @@ namespace Nuake {
 		Brush, Point, Base, None
 	};
 
-	class FGDFile : ISerializable {
+	class FGDFile : ISerializable 
+	{
 	public:
 		std::string Path;
 

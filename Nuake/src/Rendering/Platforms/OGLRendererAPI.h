@@ -2,7 +2,9 @@
 #include "RendererAPI.h"
 
 typedef unsigned int GLenum;
+
 namespace Nuake {
+
 	class OGLRendererAPI : public RendererAPI
 	{
 	public:
@@ -27,7 +29,7 @@ namespace Nuake {
 		void VertexAttribPointer(const unsigned int index, const int size, const RendererEnum type, bool normalized, int stride, const void* pointer) override;
 
 		void DrawMultiElements(const RendererEnum mode, const int count, const RendererEnum type, const void* const* indices, unsigned int drawCount) override;
-		void DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices) override;
+		void DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices) override;
 		void DrawArrays(int from, int count) override;
 
 		void DrawLines(int from, int count) override;

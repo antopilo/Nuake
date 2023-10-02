@@ -8,7 +8,6 @@ namespace Nuake
 		Vector3 Position;
 		Vector3 Velocity;
 		float Scale;
-		Color Color;
 		float Life;
 	};
 }

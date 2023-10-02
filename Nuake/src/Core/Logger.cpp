@@ -9,19 +9,35 @@ namespace Nuake
 {
 	std::vector<LogEntry> Logger::m_Logs = std::vector<LogEntry>();
 
-	void Logger::Log(const std::string& log, const std::string& logger ,LOG_TYPE type)
+	void Logger::Log(const std::string& log, const std::string& logger, LOG_TYPE type)
 	{
+		if (!m_Logs.empty() && m_Logs.back().message == log)
+		{
+			m_Logs.back().count += 1;
+			return;
+		}
+
 		char buff[100];
 		time_t now = time(0);
 		struct tm timeinfo;
+
+#ifdef NK_WIN
 		localtime_s(&timeinfo, &now);
 		strftime(buff, 100, "%H:%M:%S", &timeinfo);
+#endif
+
+#ifdef NK_LINUX
+		time_t timeinfo2;
+		localtime_r(&timeinfo2, &timeinfo);
+		strftime(buff, 100, "%H:%M:%S", localtime(&now));
+#endif
 
 		LogEntry newLog = {
 			type,
 			buff,
 			log,
-			logger
+			logger,
+			0
 		};
 
 		switch (type)

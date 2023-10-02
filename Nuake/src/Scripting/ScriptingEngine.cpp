@@ -19,20 +19,20 @@ namespace Nuake {
     std::vector<std::string> ScriptingEngine::m_LoadedScripts;
 
     void errorFn(WrenVM* vm, WrenErrorType errorType,
-        const char* module, const int line,
+        const char* moduleName, const int line,
         const char* msg)
     {
         switch (errorType)
         {
         case WREN_ERROR_COMPILE:
         {
-            std::string t = std::string(module) + " line " + std::to_string(line) + ": " + msg;
+            std::string t = std::string(moduleName) + " line " + std::to_string(line) + ": " + msg;
             Logger::Log(t, "script", CRITICAL);
             Engine::ExitPlayMode();
         } break;
         case WREN_ERROR_STACK_TRACE:
         {
-            std::string t = "Stack trace: " + std::string(module) + " line " + std::to_string(line) + ": " + msg;
+            std::string t = "Stack trace: " + std::string(moduleName) + " line " + std::to_string(line) + ": " + msg;
             Logger::Log(t, "script", CRITICAL);
         } break;
         case WREN_ERROR_RUNTIME:
@@ -66,25 +66,30 @@ namespace Nuake {
         }
     }
 
-#define GET_STATIC_RESOURCE_SCRIPT_SRC(name) std::string(name, name + name##_len)
+#define GET_STATIC_RESOURCE_SCRIPT_SRC(name) std::string(reinterpret_cast<const char*>(name), reinterpret_cast<const char*>(name) + name##_len)
 
     std::map<std::string, std::string> _ModulesSRC =
     {
-        {"Audio", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Audio_wren)},
-        {"Engine", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Engine_wren)},
-        {"Input", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Input_wren)},
-        {"Math", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Math_wren)},
-        {"Physics", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Physics_wren)},
-        {"Scene", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Scene_wren)},
-        {"ScriptableEntity", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_ScriptableEntity_wren)},
+        { "Audio", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Audio_wren) },
+        { "Engine", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Engine_wren) },
+        { "Input", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Input_wren) },
+        { "Math", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Math_wren) },
+        { "Physics", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Physics_wren) },
+        { "Scene", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_Scene_wren) },
+        { "ScriptableEntity", GET_STATIC_RESOURCE_SCRIPT_SRC(StaticResources::Resources_Scripts_ScriptableEntity_wren) },
     };
 
+    void onCompleteCB(WrenVM* vm, const char* name, WrenLoadModuleResult result)
+    {
+        delete result.source;
+    }
 
     const std::string NuakeModulePrefix = "Nuake:";
     WrenLoadModuleResult myLoadModule(WrenVM* vm, const char* name)
     {
         WrenLoadModuleResult result = { 0 };
 
+        result.onComplete = &onCompleteCB; // This will take care of the clean up of the new char*
         std::string sname = std::string(name);
         std::string path = "resources/" + std::string(name);
 
@@ -94,8 +99,8 @@ namespace Nuake {
         {
             size_t prefixPosition = sname.find(NuakeModulePrefix);
             sname.erase(prefixPosition, NuakeModulePrefix.length());
-            path = sname;
-
+            path = "Resources/Scripts/"+std::string(sname);
+            
             if (_ModulesSRC.find(sname) != _ModulesSRC.end())
             {
                 fileContent = _ModulesSRC[sname];
@@ -119,7 +124,9 @@ namespace Nuake {
             fileContent = FileSystem::ReadFile(path, true);
         }
 
-        char* c = strcpy(new char[fileContent.length() + 1], fileContent.c_str());
+        // We have to use c style char array and the callback takes care of cleaning up.
+        char* sourceC = new char[fileContent.length() + 1];
+        char* c = strcpy(sourceC, fileContent.c_str()); // copy into c array
 
         result.source = c;
         return result;
@@ -194,16 +201,11 @@ namespace Nuake {
         m_WrenVM = wrenNewVM(&config);
 
         Logger::Log("Registing Scripting Modules");
-        Ref<ScriptAPI::EngineModule> engineModule = CreateRef<ScriptAPI::EngineModule>();
-        RegisterModule(engineModule);
-        Ref<ScriptAPI::SceneModule> sceneModule = CreateRef<ScriptAPI::SceneModule>();
-        RegisterModule(sceneModule);
-        Ref<ScriptAPI::MathModule> mathModule = CreateRef<ScriptAPI::MathModule>();
-        RegisterModule(mathModule);
-        Ref<ScriptAPI::InputModule> inputModule = CreateRef<ScriptAPI::InputModule>();
-        RegisterModule(inputModule);
-        Ref<ScriptAPI::PhysicsModule> physicsModule = CreateRef<ScriptAPI::PhysicsModule>();
-        RegisterModule(physicsModule);
+        RegisterModule(CreateRef<ScriptAPI::EngineModule>());
+        RegisterModule(CreateRef<ScriptAPI::SceneModule>());
+        RegisterModule(CreateRef<ScriptAPI::MathModule>());
+        RegisterModule(CreateRef<ScriptAPI::InputModule>());
+        RegisterModule(CreateRef<ScriptAPI::PhysicsModule>());
         Logger::Log("Scripting Modules Registered");
         Logger::Log("Scripting Engine initialized successfully");
     }

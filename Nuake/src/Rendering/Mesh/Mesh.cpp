@@ -30,6 +30,11 @@ namespace Nuake
         {
             m_Material = MaterialManager::Get()->GetMaterial("default");
         }
+
+        m_IndicesCount = static_cast<uint32_t>(m_Indices.size());
+        m_VerticesCount = static_cast<uint32_t>(m_Vertices.size());
+
+        //m_Indices.clear();
     }
 
     std::vector<Vertex>& Mesh::GetVertices()
@@ -42,7 +47,7 @@ namespace Nuake
         return m_Indices;
     }
 
-    Ref<Material> Mesh::GetMaterial() inline const
+    Ref<Material> Mesh::GetMaterial() const
     {
         return m_Material;
     }
@@ -104,7 +109,7 @@ namespace Nuake
             m_Material->Bind(shader);
 
         m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, (int)m_Indices.size(), RendererEnum::UINT, 0);
+        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
     }
 
     void Mesh::DebugDraw()
@@ -113,14 +118,18 @@ namespace Nuake
         Renderer::m_DebugShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
 
         m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, (int)m_Indices.size(), RendererEnum::UINT, 0);
+        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
     }
 
     json Mesh::Serialize()
     {
         BEGIN_SERIALIZE();
 
-        j["Material"] = m_Material->Serialize();
+        if (m_Material)
+        {
+            j["Material"] = m_Material->Serialize();
+        }
+
         j["Indices"] = m_Indices;
 
 		json v;
@@ -155,7 +164,7 @@ namespace Nuake
     bool Mesh::Deserialize(const json& j)
     {    
         bool loadedMaterialFile = false;
-        if (j["Material"].contains("Path"))
+        if (j.contains("Material") && j["Material"].contains("Path"))
         {
             const std::string materialPath = j["Material"]["Path"];
             if (!materialPath.empty())
@@ -166,7 +175,7 @@ namespace Nuake
             }
         }
 
-        if(!loadedMaterialFile)
+        if(!loadedMaterialFile && j.contains("Material"))
         {
             m_Material = CreateRef<Material>();
             m_Material->Deserialize(j["Material"]);
@@ -177,6 +186,8 @@ namespace Nuake
         {
             m_Indices.push_back(i);
         }
+
+        m_IndicesCount = m_Indices.size();
 
         std::vector<Vertex> vertices;
        

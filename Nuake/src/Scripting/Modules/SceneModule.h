@@ -365,9 +365,9 @@ namespace Nuake
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 				auto& transform = ent.GetComponent<TransformComponent>();
 				// set the slots
-				//wrenSetSlotDouble(vm, 1, transform.Rotation.x);
-				//wrenSetSlotDouble(vm, 2, transform.Rotation.y);
-				//wrenSetSlotDouble(vm, 3, transform.Rotation.z);
+				wrenSetSlotDouble(vm, 1, transform.Rotation.x);
+				wrenSetSlotDouble(vm, 2, transform.Rotation.y);
+				wrenSetSlotDouble(vm, 3, transform.Rotation.z);
 
 				// Fill the list
 				wrenSetSlotNewList(vm, 0);

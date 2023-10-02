@@ -1,5 +1,5 @@
 #shader vertex
-#version 460 core
+#version 440 core
 
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
@@ -25,7 +25,7 @@ void main()
 }
 
 #shader fragment
-#version 460 core
+#version 440 core
 
 uniform sampler2D u_Depth;
 uniform sampler2D u_Normal;
@@ -113,7 +113,7 @@ void main()
     const float maxRadius = 1.2f;
     const float scalerPow = 1.8f;
     depthScaler = min(max(pow(depthScaler, scalerPow), minRadius), maxRadius);
-    float scaledRadius = u_Radius * depthScaler;
+    float scaledRadius = u_Radius;
 
     vec3 fragPos = ViewPosFromDepth(depth);
     vec3 normal = texture(u_Normal, UV).xyz * 2.0 - 1.0;//normal_from_depth(depth, UV);

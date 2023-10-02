@@ -50,6 +50,7 @@ namespace Nuake
 		static void EndWriteFile();
 		static uintmax_t DeleteFileFromPath(const std::string& path);
 		static uintmax_t DeleteFolder(const std::string& path);
+		static std::string GetConfigFolderPath();
 	};
 
 	enum class FileType

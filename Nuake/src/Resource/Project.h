@@ -8,6 +8,12 @@
 
 namespace Nuake
 {
+	struct ProjectSettings
+	{
+		bool ShowGizmos = true;
+		bool ShowAxis = true;
+	};
+
 	class Project : public ISerializable
 	{
 	public:

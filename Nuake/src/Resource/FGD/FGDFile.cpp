@@ -70,10 +70,30 @@ namespace Nuake {
 	bool FGDFile::Export()
 	{
 		Ref<Project> project = Engine::GetProject();
-		std::string path = project->TrenchbroomPath + "games/" + project->Name + "/" + project->Name + ".fgd";
 
+		if (project->Name.empty())
+		{
+			Logger::Log("Failed to create game configuration file: project name cannot be empty", "trenchbroom", CRITICAL);
+			return false;
+		}
 
-		FGDSerializer::BeginFGDFile(path);
+		// Create the games/PROJECT_NAME/ directories if they don't exist.
+		const std::string gamesDirectoryPath = project->TrenchbroomPath + "/../games/";
+		if (!FileSystem::DirectoryExists(gamesDirectoryPath, true))
+		{
+			FileSystem::MakeDirectory(gamesDirectoryPath, true);
+		}
+
+		const std::string configDirectoryPath = gamesDirectoryPath + project->Name;
+		if (!FileSystem::DirectoryExists(configDirectoryPath, true))
+		{
+			FileSystem::MakeDirectory(configDirectoryPath, true);
+			Logger::Log("Created game config directory: " + configDirectoryPath, "trenchbrrom");
+		}
+
+		// Write the file
+		const std::string filePath = configDirectoryPath + "/" + project->Name + ".fgd";
+		FGDSerializer::BeginFGDFile(filePath);
 
 		for (auto& b : BaseEntities)
 		{

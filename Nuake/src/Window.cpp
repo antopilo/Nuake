@@ -68,7 +68,7 @@ namespace Nuake
 
         SetWindowIcon("resources/Images/nuake-logo.png");
         glfwMakeContextCurrent(m_Window);
-        SetVSync(false);
+        SetVSync(true);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {

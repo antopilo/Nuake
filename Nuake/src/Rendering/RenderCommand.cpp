@@ -84,7 +84,7 @@ namespace Nuake {
 		sRendererAPI->DrawMultiElements(mode, count, type, indices, drawCount);
 	}
 
-	void RenderCommand::DrawElements(const RendererEnum mode, const int count, const RendererEnum type, const void* indices)
+	void RenderCommand::DrawElements(const RendererEnum mode, const uint32_t count, const RendererEnum type, const void* indices)
 	{
 		sRendererAPI->DrawElements(mode, count, type, indices);
 	}

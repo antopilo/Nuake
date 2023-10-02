@@ -47,6 +47,8 @@ namespace Nuake
 			model->AddMesh(mesh);
 		}
 
+		importer.FreeScene();
+
 		return model;
 	}
 

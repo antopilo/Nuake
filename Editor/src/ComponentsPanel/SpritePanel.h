@@ -67,6 +67,22 @@ public:
 
 				ComponentTableReset(component.LockYRotation, false);
 			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Position Based");
+				if (ImGui::BeginItemTooltip())
+				{
+					ImGui::Text("Orientation is based on the position of the camera or the orientation of the camera.");
+					ImGui::EndTooltip();
+				}
+				
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##positionbased", &component.PositionFacing);
+				ImGui::TableNextColumn();
+
+				ComponentTableReset(component.LockYRotation, false);
+			}
 		}
 		EndComponentTable();
 	}

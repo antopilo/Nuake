@@ -1,5 +1,5 @@
 #shader vertex
-#version 460 core
+#version 440 core
 
 layout(location = 0) in vec3 VertexPosition;
 
@@ -13,7 +13,7 @@ void main()
 }
 
 #shader fragment
-#version 460 core
+#version 440 core
 
 uniform vec4 u_Color;
 uniform float u_Time;
