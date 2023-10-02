@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+
 enum class ClassPropertyType {
 	String,
 	Integer,
