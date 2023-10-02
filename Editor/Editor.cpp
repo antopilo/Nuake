@@ -1,4 +1,4 @@
-#include <dependencies/GLEW/include/GL/glew.h>
+#include <glad/glad.h>
 
 #include <Engine.h>
 
@@ -131,13 +131,18 @@ int ApplicationMain(int argc, char* argv[])
     }
     WindowTheming::SetWindowDarkMode(window);
 
+    Logger::Log("Creating editor ", "window", CRITICAL);
     // Initialize Editor
     Nuake::EditorInterface editor;
    
+    Logger::Log("Created editor ", "window", CRITICAL);
     // Load project in argument
     if (!launchSettings.projectPath.empty())
     {
-       editor.LoadProject(launchSettings.projectPath);
+        Logger::Log("Loading project", "window", CRITICAL);
+
+
+        editor.LoadProject(launchSettings.projectPath);
     }
 
     // Start application main loop
@@ -192,20 +197,22 @@ int ApplicationMain(int argc, char* argv[])
     return 0;
 }
 
+
+
+#ifdef NK_WIN
 #ifdef NK_DIST
-
 #include "windows.h"
-
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
 {
     return ApplicationMain(__argc, __argv);
 }
+#endif
+#endif
 
-#else
 
 int main(int argc, char* argv[]) 
 {
     return ApplicationMain(argc, argv);
 }
 
-#endif
+

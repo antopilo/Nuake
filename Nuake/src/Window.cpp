@@ -1,7 +1,7 @@
 
 #include "Window.h"
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Engine.h"
@@ -67,17 +67,16 @@ namespace Nuake
         }
 
         SetWindowIcon("resources/Images/nuake-logo.png");
-
         glfwMakeContextCurrent(m_Window);
         SetVSync(false);
 
-        Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
-
-        if (glewInit() != GLEW_OK)
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            Logger::Log("GLEW initialization failed!", "window", CRITICAL);
+            Logger::Log("glad initialization failed!", "window", CRITICAL);
             return -1;
         }
+
+        Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
 
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(m_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -105,6 +104,7 @@ namespace Nuake
 
         InitImgui();
 
+        Logger::Log("ImGui initialized ", "renderer");
         return 0;
     }
 
@@ -284,13 +284,13 @@ namespace Nuake
         s.WindowMenuButtonPosition = ImGuiDir_None;
         s.GrabRounding = 2.0f;
         s.CellPadding = ImVec2(8, 8);
-        s.WindowPadding = ImVec2(2, 2);
+        s.WindowPadding = ImVec2(4, 4);
         s.ScrollbarRounding = 9.0f;
         s.ScrollbarSize = 15.0f;
         s.GrabMinSize = 32.0f;
         s.TabRounding = 0;
-        s.WindowRounding = 0;
-        s.ChildRounding = 0;
+        s.WindowRounding = 4.0f;
+        s.ChildRounding = 4.0f;
         s.FrameRounding = 4.0f;
         s.GrabRounding = 0;
         s.FramePadding = ImVec2(8, 4);
@@ -301,7 +301,7 @@ namespace Nuake
         s.IndentSpacing = 12.0f;
         s.ChildBorderSize = 0.0f;
         s.PopupRounding = 4.0f;
-        s.FrameBorderSize = 1.0f;
+        s.FrameBorderSize = 0.0f;
 
         ImVec4* colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);

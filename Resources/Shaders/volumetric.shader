@@ -38,6 +38,7 @@ uniform float u_FogAmount;
 
 const int MAX_LIGHT = 20;
 uniform int u_LightCount;
+
 struct Light {
     mat4 transform;
     vec3 color;

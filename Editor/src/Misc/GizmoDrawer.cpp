@@ -76,7 +76,6 @@ GizmoDrawer::GizmoDrawer()
 
 	mBoxBuffer->AddBuffer(*mBoxVertexBuffer, *vblayout);
 
-
 	// Load gizmos
 	ModelLoader loader;
 	_gizmos = std::map<std::string, Ref<Model>>();
@@ -89,6 +88,7 @@ void GizmoDrawer::GenerateSphereGizmo()
 {
 	const float subDivision = 32.0f;
 
+	
 	constexpr const float pi = glm::pi<float>() * 4.0;
 	float increment = pi / subDivision;
 	for (int i = 0; i < subDivision * 2.0; i++)
