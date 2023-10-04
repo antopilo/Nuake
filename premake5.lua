@@ -90,7 +90,8 @@ project "Nuake"
     }
 
     filter "system:linux"
-        defines {
+        defines 
+        {
             "GLFW_STATIC",
             "NK_LINUX"
         }
@@ -108,6 +109,21 @@ project "Nuake"
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
 		"/usr/include/glib-2.0",
+        }
+
+        includedirs 
+        {
+            "/usr/include/pango-1.0",
+            "/usr/include/gtk-3.0",
+            "/usr/include/glib-2.0",
+            "/usr/lib/x86_64-linux-gnu/glib-2.0/include"
+        }
+
+        links 
+        {
+            "gtk-3",
+            "gdk-3",
+            "glib-2.0"
         }
 
     filter "system:windows"

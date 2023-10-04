@@ -11,10 +11,12 @@
 #include "GLFW/glfw3native.h"
 #include <commdlg.h>
 
-#endif
+#endif 
 
 #ifdef NK_LINUX
-#include "gtk/gtk.h"
+
+#include <gtk-3.0/gtk/gtk.h>
+
 #endif
 
 #include <fstream>
