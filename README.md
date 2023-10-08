@@ -20,16 +20,16 @@ You can join the discord server for updates and screenshots or if you want to co
 - Post processing effects(Bloom, SSAO, SSR, Volumetrics, Procedural Sky)
 - Wren Scripting
 - Trenchbroom integration
+- WAD converter
+- Spatialized audio
 
 ## Planned features
 - C# Scripting
 - Custom Shaders
-- Spatialized audio
 - NuakeUI integration
 - Dynamic global illumination
 - Asset packing
 - Terrain editor
-- WAD converter
 
 ## Contributing
 We are currently looking for contributors, feel free to join the discord if you are looking to help the project.
