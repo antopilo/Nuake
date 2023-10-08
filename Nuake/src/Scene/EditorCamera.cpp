@@ -24,8 +24,8 @@ namespace Nuake
 		const float x = Input::GetMouseX();
 		const float y = Input::GetMouseY();
 
-		const bool isFlying = Input::IsMouseButtonDown(1) || Input::IsMouseButtonDown(2);
-		const bool isPressingMouse = isFlying || Input::YScroll != 0.0f;
+		m_IsFlying = Input::IsMouseButtonDown(1) || Input::IsMouseButtonDown(2);
+		const bool isPressingMouse = m_IsFlying || Input::YScroll != 0.0f;
 		
 		if (hover)
 		{
@@ -77,10 +77,9 @@ namespace Nuake
 		{
 			mouseLastX = x;
 			mouseLastY = y;
-			return;
 		}
 
-		if (Input::IsMouseButtonDown(1))
+		if (hover && Input::IsMouseButtonDown(1))
 		{
 			// Should probably not have speed binding in here.
 			if (Input::YScroll != 0)
@@ -91,6 +90,7 @@ namespace Nuake
 
 			if (Speed < 0)
 				Speed = 0;
+
 
 			if (m_Type == CAMERA_TYPE::ORTHO)
 			{
@@ -144,45 +144,48 @@ namespace Nuake
 			TargetYaw += diffx;
 			TargetPitch += diffy;
 
-			if (TargetPitch > 89.0f)
-				TargetPitch = 89.0f;
+		}	
 
-			if (TargetPitch < -89.0f)
-				TargetPitch = -89.0f;
+		if (TargetPitch > 89.0f)
+			TargetPitch = 89.0f;
 
-			Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-			Direction.y = sin(glm::radians(Pitch));
-			Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		if (TargetPitch < -89.0f)
+			TargetPitch = -89.0f;
 
-			SetDirection(glm::normalize(Direction));
-			Right = glm::normalize(glm::cross(Up, Direction));
-		}
-		else if (Input::IsMouseButtonDown(2))
+		Direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+		Direction.y = sin(glm::radians(Pitch));
+		Direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+
+		SetDirection(glm::normalize(Direction));
+		Right = glm::normalize(glm::cross(Up, Direction));
+		
+		if (hover)
 		{
-			Vector3 movement = Vector3(0);
-			const float deltaX = x - mouseLastX;
-			const float deltaY = y - mouseLastY;
-			movement += Right * (deltaX * ts);
-			movement += Up * (deltaY * ts);
-			Translation += Vector3(movement) * 0.5f;
+			if (Input::IsMouseButtonDown(2))
+			{
+				Vector3 movement = Vector3(0);
+				const float deltaX = x - mouseLastX;
+				const float deltaY = y - mouseLastY;
+				movement += Right * (deltaX * ts);
+				movement += Up * (deltaY * ts);
+				Translation += Vector3(movement) * 0.5f;
 
-			mouseLastX = x;
-			mouseLastY = y;
-			controlled = true;
+				mouseLastX = x;
+				mouseLastY = y;
+				controlled = true;
 
-			SetDirection(glm::normalize(Direction));
-		}
-		else if (Input::YScroll != 0)
-		{
-			Translation += Vector3(Direction) * Input::YScroll;
-			Input::YScroll = 0.0f;
+				SetDirection(glm::normalize(Direction));
+			}
+			else if (Input::YScroll != 0)
+			{
+				Translation += Vector3(Direction) * Input::YScroll;
+				Input::YScroll = 0.0f;
+			}
 		}
 
 		SetDirection(glm::normalize(Direction));
 		mouseLastX = x;
 		mouseLastY = y;
-
-
 	}
 
 	Ref<EditorCamera> EditorCamera::Copy()

@@ -1,4 +1,6 @@
 #include "GizmoDrawer.h"
+
+#include <src/Rendering/SceneRenderer.h>
 #include <src/Rendering/Buffers/VertexBuffer.h>
 
 #include <src/Scene/Components/LightComponent.h>
@@ -20,6 +22,7 @@
 #include <src/Scene/Components/ParticleEmitterComponent.h>
 #include <src/Scene/Components/BoneComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
+
 
 GizmoDrawer::GizmoDrawer()
 {
@@ -128,17 +131,19 @@ void GizmoDrawer::GenerateSphereGizmo()
 	mCircleBuffer->AddBuffer(*mCircleVertexBuffer, *vblayout);
 }
 
-void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
+void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 {
 	using namespace Nuake;
 	//RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-	//RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 	// Draw Axis lignes.
+	//glDepthFunc(GL_ALWAYS); // Disable built-in depth testing
+	//glDepthMask(false);     // Disable writing to the depth buffer
 	{
 		mLineShader->Bind();
 		mLineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-
+		mLineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
 		mAxisLineBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
@@ -304,7 +309,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 	gizmoShader->Bind();
 	gizmoShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 	gizmoShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-
+	gizmoShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
 	RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 	// Camera
@@ -413,5 +418,10 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene)
 
 	renderList.Flush(gizmoShader, true);
 	
+	// Revert to default depth testing
+	//glDepthFunc(GL_LESS);
+	//
+	//// Revert to default depth buffer writing
+	//glDepthMask(true);
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 }

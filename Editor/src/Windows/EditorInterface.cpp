@@ -54,6 +54,7 @@
 #include <src/Resource/StaticResources.h>
 
 namespace Nuake {
+    
     Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
     ImFont* boldFont;
@@ -1796,7 +1797,7 @@ namespace Nuake {
             Logger::Log("Failed creating project directory: " + dirPath);
         }
 
-        finalPath += "\\" + fileName;
+        finalPath += "/" + fileName;
         
         Ref<Project> project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
         Engine::LoadProject(project);
@@ -2105,13 +2106,11 @@ namespace Nuake {
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
 
-        if (m_IsViewportFocused)
-        {
-            editorCam->Update(ts, m_IsHoveringViewport);
-        }
+        editorCam->Update(ts, m_IsHoveringViewport);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
-        if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
+
+        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
         {
             editorCam->IsMoving = true;
             editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();

@@ -97,7 +97,8 @@ namespace Nuake
 			if (lc.Type == Directional && lc.IsVolumetric && lc.CastShadows)
 				lightList.push_back(lc);
 		}
-
+		
+		glDepthMask(false);
 		if (sceneEnv->VolumetricEnabled)
 		{
 			sceneEnv->mVolumetric->Resize(framebuffer.GetSize());
@@ -107,6 +108,7 @@ namespace Nuake
 			//finalOutput = mVolumetric->GetFinalOutput().get();
 
 			// combine
+			
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
@@ -118,6 +120,7 @@ namespace Nuake
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
+			
 		}
 		else
 		{
@@ -284,6 +287,7 @@ namespace Nuake
 			framebuffer.Unbind();
 		}
 		
+		glDepthMask(true);
 
 		// Barrel distortion
 		//mVignetteBuffer->Bind();
@@ -311,7 +315,7 @@ namespace Nuake
 		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
 		shader->Bind();
 
-		RenderCommand::Disable(RendererEnum::FACE_CULL);
+		RenderCommand::Enable(RendererEnum::FACE_CULL);
 		glCullFace(GL_BACK);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
@@ -456,7 +460,6 @@ namespace Nuake
 			gBufferShader->SetUniformMat4f("u_View", mView);
 
 			// Models
-			glDisable(GL_CULL_FACE);
 			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 			for (auto e : view)
 			{
@@ -486,9 +489,8 @@ namespace Nuake
 					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
 				}
 			}
+			glCullFace(GL_FRONT);
 			Renderer::Flush(gBufferShader, false);
-
-			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 			// Sprites
 			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();

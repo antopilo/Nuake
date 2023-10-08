@@ -48,5 +48,5 @@ public:
 	GizmoDrawer();
 	~GizmoDrawer() = default;
 
-	void DrawGizmos(Ref<Scene> scene);
+	void DrawGizmos(Ref<Scene> scene, bool occluded);
 };

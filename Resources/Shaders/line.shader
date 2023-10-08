@@ -23,7 +23,9 @@ in vec4 LineColor;
 
 out vec4 FragColor;
 
+uniform float u_Opacity;
+
 void main()
 {
-    FragColor = LineColor;
+    FragColor = LineColor * vec4(1, 1, 1, u_Opacity);
 }
