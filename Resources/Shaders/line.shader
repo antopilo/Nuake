@@ -21,11 +21,14 @@ void main()
 
 in vec4 LineColor;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out int gEntityID;
 
 uniform float u_Opacity;
+uniform int u_EntityID;
 
 void main()
 {
     FragColor = LineColor * vec4(1, 1, 1, u_Opacity);
+    gEntityID = int(u_EntityID);
 }

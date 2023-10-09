@@ -597,10 +597,14 @@ namespace Nuake {
                             });
                         }
 
-                        for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
+                        for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; i += 3)
                         {
-                            uint32_t index = face_geo_inst->indices[i];
-                            indices.push_back((unsigned int)index);
+                            uint32_t i1 = face_geo_inst->indices[i];
+                            uint32_t i2 = face_geo_inst->indices[i + 1];
+                            uint32_t i3 = face_geo_inst->indices[i + 2];
+                            indices.push_back(i3);
+                            indices.push_back(i2);
+                            indices.push_back(i1);
                         }
 
                         m_StaticWorld[currentMaterial].push_back({vertices, indices});

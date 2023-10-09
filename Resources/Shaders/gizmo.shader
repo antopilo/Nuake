@@ -23,7 +23,8 @@ void main()
 #shader fragment
 #version 440 core
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out int gEntityID;
 
 in vec2 a_UV;
 in mat4 o_Projection;
@@ -32,6 +33,7 @@ in vec4 o_FragPos;
 uniform sampler2D u_DepthTexture;
 uniform sampler2D gizmo_texture;
 uniform float u_Opacity;
+uniform int u_EntityID;
 
 void main() 
 {
@@ -41,4 +43,6 @@ void main()
     color = px_color * vec4(1, 1, 1, u_Opacity);
 
     FragColor = color;
+
+    gEntityID = int(0);
 }

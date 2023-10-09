@@ -24,19 +24,19 @@
 #include <src/Scene/Components/AudioEmitterComponent.h>
 
 
-GizmoDrawer::GizmoDrawer()
+GizmoDrawer::GizmoDrawer(EditorInterface* editor)
 {
-	mLineShader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
+	m_LineShader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
 
-	mAxisLineBuffer = CreateRef<Nuake::VertexArray>();
-	mAxisLineBuffer->Bind();
+	m_AxisLineBuffer = CreateRef<Nuake::VertexArray>();
+	m_AxisLineBuffer->Bind();
 
-	mAxisLineVertexBuffer = CreateRef<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Nuake::LineVertex));
+	m_AxisLineVertexBuffer = CreateRef<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Nuake::LineVertex));
 	auto vblayout = CreateRef<VertexBufferLayout>();
 	vblayout->Push<float>(3);
 	vblayout->Push<float>(4);
 
-	mAxisLineBuffer->AddBuffer(*mAxisLineVertexBuffer, *vblayout);
+	m_AxisLineBuffer->AddBuffer(*m_AxisLineVertexBuffer, *vblayout);
 
 	GenerateSphereGizmo();
 
@@ -72,19 +72,21 @@ GizmoDrawer::GizmoDrawer()
 		LineVertex{Vector3(1.0f, 1.0f, 1.f), cubeColor}
 	};
 
-	mBoxBuffer = CreateRef<Nuake::VertexArray>();
-	mBoxBuffer->Bind();
+	m_BoxBuffer = CreateRef<Nuake::VertexArray>();
+	m_BoxBuffer->Bind();
 
-	mBoxVertexBuffer = CreateRef<VertexBuffer>(mBoxVertices.data(), mBoxVertices.size() * sizeof(Nuake::LineVertex));
+	m_BoxVertexBuffer = CreateRef<VertexBuffer>(mBoxVertices.data(), mBoxVertices.size() * sizeof(Nuake::LineVertex));
 
-	mBoxBuffer->AddBuffer(*mBoxVertexBuffer, *vblayout);
+	m_BoxBuffer->AddBuffer(*m_BoxVertexBuffer, *vblayout);
 
 	// Load gizmos
 	ModelLoader loader;
-	_gizmos = std::map<std::string, Ref<Model>>();
+	m_Gizmos = std::map<std::string, Ref<Model>>();
 	//_gizmos["cam"] = loader.LoadModel("Resources/Models/Camera.gltf");
 	//_gizmos["light"] = loader.LoadModel("Resources/Models/Light.gltf");
 	//_gizmos["player"] = loader.LoadModel("Resources/Models/Camera.gltf");
+
+	m_Editor = editor;
 }
 
 void GizmoDrawer::GenerateSphereGizmo()
@@ -116,19 +118,48 @@ void GizmoDrawer::GenerateSphereGizmo()
 			vert2 = Vector3(x2, 0, z2);
 		}
 
-		circleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 0.5) });
-		circleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 0.5) });
+		m_CircleVertices.push_back(LineVertex{ vert1, Color(1.0, 0, 0.0, 0.5) });
+		m_CircleVertices.push_back(LineVertex{ vert2, Color(1.0, 0, 0.0, 0.5) });
 	}
 
-	mCircleBuffer = CreateRef<Nuake::VertexArray>();
-	mCircleBuffer->Bind();
+	m_CircleBuffer = CreateRef<Nuake::VertexArray>();
+	m_CircleBuffer->Bind();
 
-	mCircleVertexBuffer = CreateRef<VertexBuffer>(circleVertices.data(), circleVertices.size() * sizeof(Nuake::LineVertex));
+	m_CircleVertexBuffer = CreateRef<VertexBuffer>(m_CircleVertices.data(), m_CircleVertices.size() * sizeof(Nuake::LineVertex));
 	auto vblayout = CreateRef<VertexBufferLayout>();
 	vblayout->Push<float>(3);
 	vblayout->Push<float>(4);
 
-	mCircleBuffer->AddBuffer(*mCircleVertexBuffer, *vblayout);
+	m_CircleBuffer->AddBuffer(*m_CircleVertexBuffer, *vblayout);
+}
+
+bool GizmoDrawer::IsEntityInSelection(Nuake::Entity entity)
+{
+	if (m_Editor->Selection.Type != EditorSelectionType::Entity)
+	{
+		return false;
+	}
+
+	using namespace Nuake;
+	const Nuake::Entity selectedEntity = m_Editor->Selection.Entity;
+
+	if (selectedEntity.GetID() == entity.GetID())
+	{
+		return true;
+	}
+
+	auto& parentComponent = entity.GetComponent<ParentComponent>();
+	if (!parentComponent.HasParent)
+	{
+		return false;
+	}
+
+	if (IsEntityInSelection(parentComponent.Parent))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
@@ -140,46 +171,61 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	//glDepthFunc(GL_ALWAYS); // Disable built-in depth testing
 	//glDepthMask(false);     // Disable writing to the depth buffer
 	{
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-		mLineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
-		mAxisLineBuffer->Bind();
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
+		m_AxisLineBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
 
-	glLineWidth(1.0f);
+	glLineWidth(2.0f);
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
 	for (auto e : boxColliderView)
 	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
 		auto [transform, box] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
 
 		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
-		mBoxBuffer->Bind();
+		m_BoxBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 26);
 	}
 
 	auto sphereColliderView = scene->m_Registry.view<TransformComponent, SphereColliderComponent>();
 	for (auto e : sphereColliderView)
 	{
-		auto [transform, sphere] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(sphere.Radius)));
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
 
-		mCircleBuffer->Bind();
+		auto [transform, sphere] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(sphere.Radius)));
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
 	auto audioEmitterView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioEmitterView)
 	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
 		auto [transform, emitter] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
 		// We dont need to draw the radius if its not spatialized
@@ -189,80 +235,100 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		}
 
 		Vector3 globalPosition = Vector3(transform.GetGlobalTransform()[3]);
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MaxDistance)));
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MaxDistance)));
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
-		mCircleBuffer->Bind();
+		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
 
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MinDistance)));
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MinDistance)));
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
 	auto capsuleColliderView = scene->m_Registry.view<TransformComponent, CapsuleColliderComponent>();
 	for (auto e : capsuleColliderView)
 	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
 		auto [transform, capsule] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
-		if (_CapsuleEntity.find(entityId) == _CapsuleEntity.end())
+		if (m_CapsuleGizmo.find(entityId) == m_CapsuleGizmo.end())
 		{
-			_CapsuleEntity[entityId] = CreateScope<CapsuleGizmo>();
+			m_CapsuleGizmo[entityId] = CreateScope<CapsuleGizmo>();
 		}
 
-		_CapsuleEntity[entityId]->UpdateShape(capsule.Radius, capsule.Height);
+		m_CapsuleGizmo[entityId]->UpdateShape(capsule.Radius, capsule.Height);
 
 		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
-		_CapsuleEntity[entityId]->Bind();
+		m_CapsuleGizmo[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
 	}
 
 	auto cylinderColliderView = scene->m_Registry.view<TransformComponent, CylinderColliderComponent>();
 	for (auto e : cylinderColliderView)
 	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
 		auto [transform, cylinder] = scene->m_Registry.get<TransformComponent, CylinderColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
-		if (_CylinderEntity.find(entityId) == _CylinderEntity.end())
+		if (m_CylinderGizmo.find(entityId) == m_CylinderGizmo.end())
 		{
-			_CylinderEntity[entityId] = CreateScope<CylinderGizmo>();
+			m_CylinderGizmo[entityId] = CreateScope<CylinderGizmo>();
 		}
 
-		_CylinderEntity[entityId]->UpdateShape(cylinder.Radius, cylinder.Height);
+		m_CylinderGizmo[entityId]->UpdateShape(cylinder.Radius, cylinder.Height);
 
 		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
-		_CylinderEntity[entityId]->Bind();
+		m_CylinderGizmo[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
 	}
 
 	auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 	for (auto e : particleView)
 	{
-		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(particle.Radius)));
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
 
-		mCircleBuffer->Bind();
+		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(particle.Radius)));
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
 	auto meshColliderView = scene->m_Registry.view<TransformComponent, MeshColliderComponent, ModelComponent>();
 	for (auto e : meshColliderView)
 	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
 		auto [transform, mesh, model] = scene->m_Registry.get<TransformComponent, MeshColliderComponent, ModelComponent>(e);
 
 		// Component has no mesh set.
@@ -282,9 +348,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-		mLineShader->Bind();
-		mLineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		mLineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->Bind();
+		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		meshes[mesh.SubMesh]->Bind();
@@ -317,6 +383,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	for (auto e : camView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/camera.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", (uint32_t)e + 1);
 		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -330,14 +397,16 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+		renderList.Flush(gizmoShader, true);
 	}
-	renderList.Flush(gizmoShader, true);
+	
 
 	// Lights
 	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/light.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", (uint32_t)e + 1);
 		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -351,15 +420,16 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+		renderList.Flush(gizmoShader, true);
 	}
 
-	renderList.Flush(gizmoShader, true);
 
 	// Player
 	auto characterControllerView = scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 	for (auto e : characterControllerView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/player.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", static_cast<uint32_t>(e) + 1);
 		auto [transform, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -373,15 +443,17 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+		renderList.Flush(gizmoShader, true);
 	}
 
-	renderList.Flush(gizmoShader, true);
+	
 
 	// Bones
 	auto boneView = scene->m_Registry.view<TransformComponent, BoneComponent>();
 	for (auto e : boneView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/bone.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", static_cast<uint32_t>(e) + 1);
 		auto [transform, boneComponent] = scene->m_Registry.get<TransformComponent, BoneComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -394,14 +466,16 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
+		renderList.Flush(gizmoShader, true);
 	}
 
-	renderList.Flush(gizmoShader, true);
+	
 
 	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/speaker.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", static_cast<uint32_t>(e) + 1);
 		auto [transformComponent, audioEmitterComponent] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
 		auto initialTransform = transformComponent.GetGlobalTransform();
@@ -414,9 +488,10 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		transform = glm::scale(transform, Vector3(0.5f, 0.5f, 0.5f));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, transform);
+		renderList.Flush(gizmoShader, true);
 	}
 
-	renderList.Flush(gizmoShader, true);
+	
 	
 	// Revert to default depth testing
 	//glDepthFunc(GL_LESS);

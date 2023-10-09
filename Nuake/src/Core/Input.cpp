@@ -154,6 +154,13 @@ namespace Nuake
 
 		return Vector2(xpos, ypos);
 	}
+
+	void Input::SetMousePosition(const Vector2& position)
+	{
+		auto window = Window::Get()->GetHandle();
+		glfwSetCursorPos(window, position.x, position.y);
+	}
+
 #pragma endregion
 
 	bool Input::Init()

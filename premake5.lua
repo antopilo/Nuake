@@ -90,15 +90,16 @@ project "Nuake"
     }
 
     filter "system:linux"
-        defines {
+        defines 
+        {
             "GLFW_STATIC",
             "NK_LINUX"
         }
         
         links 
-	{
-		"glib-2.0"
-	}
+        {
+            "glib-2.0"
+        }
         
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
     	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
@@ -107,7 +108,7 @@ project "Nuake"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		"/usr/include/glib-2.0",
+		    "/usr/include/glib-2.0",
         }
 
     filter "system:windows"

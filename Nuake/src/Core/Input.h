@@ -156,6 +156,7 @@ namespace Nuake
 		static float GetMouseX();
 		static float GetMouseY();
 		static Vector2 GetMousePosition();
+		static void SetMousePosition(const Vector2& position);
 
 		static bool Init();
 		static void Update();

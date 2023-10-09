@@ -4,6 +4,7 @@
 #include <glm/trigonometric.hpp>
 
 #include "src/Core/Logger.h"
+#include <src/Vendors/imgui/imgui.h>
 
 namespace Nuake
 {
@@ -79,7 +80,8 @@ namespace Nuake
 			mouseLastY = y;
 		}
 
-		if (hover && Input::IsMouseButtonDown(1))
+		
+		if (controlled && Input::IsMouseButtonDown(1))
 		{
 			// Should probably not have speed binding in here.
 			if (Input::YScroll != 0)
@@ -131,7 +133,6 @@ namespace Nuake
 				firstMouse = false;
 			}
 
-			// mouse
 			float diffx = x - mouseLastX;
 			float diffy = mouseLastY - y;
 			mouseLastX = x;
@@ -159,31 +160,32 @@ namespace Nuake
 		SetDirection(glm::normalize(Direction));
 		Right = glm::normalize(glm::cross(Up, Direction));
 		
-		if (hover)
+		
+		if (Input::IsMouseButtonDown(2))
 		{
-			if (Input::IsMouseButtonDown(2))
-			{
-				Vector3 movement = Vector3(0);
-				const float deltaX = x - mouseLastX;
-				const float deltaY = y - mouseLastY;
-				movement += Right * (deltaX * ts);
-				movement += Up * (deltaY * ts);
-				Translation += Vector3(movement) * 0.5f;
+			Vector3 movement = Vector3(0);
+			const float deltaX = x - mouseLastX;
+			const float deltaY = y - mouseLastY;
+			movement += Right * (deltaX * ts);
+			movement += Up * (deltaY * ts);
+			Translation += Vector3(movement) * 0.5f;
 
-				mouseLastX = x;
-				mouseLastY = y;
-				controlled = true;
+			mouseLastX = x;
+			mouseLastY = y;
+			controlled = true;
 
-				SetDirection(glm::normalize(Direction));
-			}
-			else if (Input::YScroll != 0)
-			{
-				Translation += Vector3(Direction) * Input::YScroll;
-				Input::YScroll = 0.0f;
-			}
+			SetDirection(glm::normalize(Direction));
 		}
+		else if (Input::YScroll != 0)
+		{
+			Translation += Vector3(Direction) * Input::YScroll;
+			Input::YScroll = 0.0f;
+		}
+		
 
 		SetDirection(glm::normalize(Direction));
+
+		
 		mouseLastX = x;
 		mouseLastY = y;
 	}

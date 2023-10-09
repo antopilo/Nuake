@@ -7,7 +7,11 @@ namespace Nuake
 {
 	class EditorCamera : public Camera
 	{
+	private:
+		bool m_IsFlying = false;
+
 	public:
+		
 		EditorCamera()
 		{
 			Yaw = 0.0f;
@@ -27,6 +31,7 @@ namespace Nuake
 		void SetYaw(float yaw);
 		void SetPitch(float pitch);
 
+		bool IsFlying() const { return m_IsFlying; }
 	private:
 		bool controlled = false;
 		bool firstMouse = false;

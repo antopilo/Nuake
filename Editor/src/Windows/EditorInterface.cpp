@@ -260,14 +260,14 @@ namespace Nuake {
                 }
             }
 
-            if (m_IsHoveringViewport && !m_IsViewportFocused && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
+            if (ImGui::IsWindowHovered() && m_IsHoveringViewport && !m_IsViewportFocused && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
             {
                 ImGui::FocusWindow(ImGui::GetCurrentWindow());
             }
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
 
-            if (m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
+            if (ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
@@ -2106,10 +2106,9 @@ namespace Nuake {
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
 
-        editorCam->Update(ts, m_IsHoveringViewport);
+        editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
-
         if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
         {
             editorCam->IsMoving = true;
