@@ -38,7 +38,7 @@ namespace Nuake
 
 	bool Shader::Rebuild()
 	{
-		if (!FileSystem::FileExists(Path))
+		if (!FileSystem::FileExists(Path, true))
 		{
 			Logger::Log("Failed to reload shader, file doesn't exists: " + Path, "shader", CRITICAL);
 			return false;

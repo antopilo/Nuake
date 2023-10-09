@@ -13,7 +13,7 @@ namespace Nuake
 	void ShaderManager::LoadShaders()
 	{
 		using namespace StaticResources;
-
+		LoadEmbeddedShader(Resources_Shaders_outline_shader);
 		LoadEmbeddedShader(Resources_Shaders_atmospheric_sky_shader);
 		LoadEmbeddedShader(Resources_Shaders_barrel_distortion_shader);
 		LoadEmbeddedShader(Resources_Shaders_bloom_shader);

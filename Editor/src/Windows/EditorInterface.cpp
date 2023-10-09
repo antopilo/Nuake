@@ -287,6 +287,7 @@ namespace Nuake {
                 else
                 {
                     Selection = EditorSelection(); // None
+
                 }
 
                 gbuffer.Unbind();

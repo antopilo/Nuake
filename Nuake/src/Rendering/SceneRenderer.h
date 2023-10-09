@@ -24,16 +24,19 @@ namespace Nuake
 			return *mGBuffer;
 		}
 
+		uint32_t mOutlineEntityID = 0;
 	private:
 		Matrix4 mProjection, mView;
 		Vector3 mCamPos;
 
+		
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
 		Scope<FrameBuffer> mBarrelDistortionBuffer;
 		Scope<FrameBuffer> mVignetteBuffer;
 		Scope<FrameBuffer> mDOFBuffer;
+		Scope<FrameBuffer> mOutlineBuffer;
 
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);

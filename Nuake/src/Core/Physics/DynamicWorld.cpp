@@ -252,10 +252,10 @@ namespace Nuake
 			_registeredCharacters = std::map<uint32_t, Ref<JPH::CharacterVirtual>>();
 
 			// Initialize Jolt Physics
-			const uint32_t MaxBodies = 2048;
+			const uint32_t MaxBodies = 4096;
 			const uint32_t NumBodyMutexes = 0;
-			const uint32_t MaxBodyPairs = 1024;
-			const uint32_t MaxContactConstraints = 1024;
+			const uint32_t MaxBodyPairs = 2048;
+			const uint32_t MaxContactConstraints = 2048;
 
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, JoltObjectVSBroadphaseLayerFilter, JoltObjectVSObjectLayerFilter);
@@ -344,10 +344,18 @@ namespace Nuake
 				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
 			}
 
-			bodySettings.mUserData = rb->GetEntity().GetID();
+			int entityId = rb->GetEntity().GetID();
+
+			if (entityId == 0)
+			{
+				Logger::Log("ERROR");
+			}
+
+			bodySettings.mUserData = entityId;
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			_registeredBodies.push_back((uint32_t)body.GetIndex());
+			uint32_t bodyIndex = (uint32_t)body.GetIndex();
+			_registeredBodies.push_back(bodyIndex);
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -454,12 +462,15 @@ namespace Nuake
 				glm::decompose(transform, scale, rotation, pos, skew, pesp);
 
 				auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId));
-				Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
-				auto& transformComponent = entity.GetComponent<TransformComponent>();
-				transformComponent.SetLocalPosition(pos);
-				transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
-				transformComponent.SetLocalTransform(transform);
-				transformComponent.Dirty = true;
+				if (entId != 0)
+				{
+					Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
+					auto& transformComponent = entity.GetComponent<TransformComponent>();
+					transformComponent.SetLocalPosition(pos);
+					transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
+					transformComponent.SetLocalTransform(transform);
+					transformComponent.Dirty = true;
+				}
 			}
 		}
 		
