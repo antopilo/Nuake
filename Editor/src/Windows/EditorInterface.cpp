@@ -1446,6 +1446,10 @@ namespace Nuake {
                     {
                         Engine::GetCurrentScene()->CreateEntity("Sprite").AddComponent<SpriteComponent>();
                     }
+                    if (ImGui::MenuItem("Particle Emitter"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("Particle Emitter").AddComponent<ParticleEmitterComponent>();
+                    }
                     if (ImGui::MenuItem("Light"))
                     {
                         Engine::GetCurrentScene()->CreateEntity("Light").AddComponent<LightComponent>();
@@ -1523,8 +1527,8 @@ namespace Nuake {
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 8, 4 });
                 if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX))
                 {
-                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_IndentEnable);
-                    ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentEnable);
+                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_IndentEnable | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+                    ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Visibility", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableHeadersRow();
 

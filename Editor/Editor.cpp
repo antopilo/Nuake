@@ -144,10 +144,11 @@ int ApplicationMain(int argc, char* argv[])
     }
 
     // Start application main loop
-    GizmoDrawer gizmoDrawer = GizmoDrawer();
+    GizmoDrawer gizmoDrawer = GizmoDrawer(&editor);
     while (!window->ShouldClose())
     {
         Nuake::Engine::Tick(); // Update
+
         Nuake::Engine::Draw(); // Render
        
         // Render editor
@@ -155,15 +156,22 @@ int ApplicationMain(int argc, char* argv[])
         glViewport(0, 0, WindowSize.x, WindowSize.y);
         Nuake::Renderer2D::BeginDraw(WindowSize);
 
-        // Draw gizmos
         auto sceneFramebuffer = window->GetFrameBuffer();
+
+        Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+
+        // Draw gizmos
         sceneFramebuffer->Bind();
         {
-            Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
+            //glDepthMask(false);
+            
+            
             Ref<EditorCamera> camera;
             if (currentScene)
-            {
+            { 
                 camera = currentScene->m_EditorCamera;
+                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), 0);
+                //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->GetID(), 0);
             }
 
             if (currentScene && !Nuake::Engine::IsPlayMode())
@@ -177,20 +185,26 @@ int ApplicationMain(int argc, char* argv[])
 
                 if (editor.ShouldDrawCollision())
                 {
-                    gizmoDrawer.DrawGizmos(currentScene);
+                    gizmoDrawer.DrawGizmos(currentScene, false);
+                    glDepthFunc(GL_GREATER);
+
+                    gizmoDrawer.DrawGizmos(currentScene, true);
+                    glDepthFunc(GL_LESS);
                 }
             }
+            //glDepthMask(true);
+
+
         }
         sceneFramebuffer->Unbind();
 
-        // Update & Draw editor
-        editor.Update(Nuake::Engine::GetTimestep());
-        editor.Draw();
 
+        // Update & Draw editor
+        editor.Draw();
+        editor.Update(Nuake::Engine::GetTimestep());
         Nuake::Engine::EndDraw();
     }
 
-    // Shutdown
     Nuake::Engine::Close();
     return 0;
 }
