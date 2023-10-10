@@ -72,7 +72,6 @@ namespace Nuake
 					transformComponent.SetLocalRotation(localRotation);
 					transformComponent.SetLocalScale(localScale);
 					transformComponent.SetLocalTransform(finalTransform);
-					transformComponent.Dirty = false;
 				}
 			}
 			

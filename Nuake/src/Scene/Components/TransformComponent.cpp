@@ -37,6 +37,7 @@ namespace Nuake
     void TransformComponent::SetGlobalRotation(const Quat& rotation)
     {
         GlobalRotation = rotation;
+        Dirty = true;
     }
 
     Vector3 TransformComponent::GetLocalPosition() const

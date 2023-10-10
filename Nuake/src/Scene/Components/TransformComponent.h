@@ -18,6 +18,8 @@ namespace Nuake
 		Matrix4 GlobalTransform;
 	public:
 		bool Dirty = true;
+		bool GlobalDirty = true;
+
 		TransformComponent();
 
 		Matrix4 GetGlobalTransform() const;

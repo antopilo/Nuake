@@ -68,7 +68,7 @@ namespace Nuake
 
         SetWindowIcon("resources/Images/nuake-logo.png");
         glfwMakeContextCurrent(m_Window);
-        SetVSync(true);
+        SetVSync(false);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -99,8 +99,10 @@ namespace Nuake
         //glEnable(GL_CULL_FACE);
 
         // Create viewports
-        m_Framebuffer = CreateRef<FrameBuffer>(true, glm::vec2(1920, 1080));
-        m_Framebuffer->SetTexture(CreateRef<Texture>(glm::vec2(1920, 1080), GL_RGB));
+        const Vector2 defaultResolution = Vector2(1, 1);
+        m_Framebuffer = CreateRef<FrameBuffer>(true, defaultResolution);
+        m_Framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB));
+        m_Framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT3); // Entity ID
 
         InitImgui();
 

@@ -2,7 +2,9 @@
 #include "System.h"
 
 namespace Nuake {
+
 	class Scene;
+	class Entity;
 
 	class TransformSystem : public System 
 	{
@@ -14,6 +16,9 @@ namespace Nuake {
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
 
+	private:
 		void UpdateTransform();
+		void UpdateDirtyFlagRecursive(Entity& entity);
+		void CalculateGlobalTransform(Entity& entity);
 	};
 }

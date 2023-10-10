@@ -41,6 +41,8 @@ namespace Nuake
 		for (auto tv : localTransformView)
 		{
 			TransformComponent& transform = localTransformView.get<TransformComponent>(tv);
+			Entity currentEntity = { tv, m_Scene };
+			ParentComponent& parentComponent = currentEntity.GetComponent<ParentComponent>();
 			if (transform.Dirty)
 			{
 				const Vector3& localTranslate = transform.GetLocalPosition();
@@ -51,6 +53,9 @@ namespace Nuake
 				const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
 				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
 
+				transform.GlobalDirty = true;
+				UpdateDirtyFlagRecursive(currentEntity);
+				 
 				transform.SetLocalTransform(newLocalTransform);
 				transform.Dirty = false;
 			}
@@ -77,7 +82,7 @@ namespace Nuake
 			Vector3 globalPosition = transform.GetLocalPosition();
 			Quat globalOrientation = transform.GetLocalRotation();
 			Vector3 globalScale = transform.GetLocalScale();
-
+			
 			ParentComponent parentComponent = currentParent.GetComponent<ParentComponent>();
 #define FRAME_PERFECT_TRANSFORM
 #ifndef FRAME_PERFECT_TRANSFORM
@@ -92,15 +97,16 @@ namespace Nuake
 				globalTransform = transformComponent.GetGlobalTransform() * globalTransform;
 			}
 #else
+			bool exitEarly = false;
 			while (parentComponent.HasParent)
 			{
 				TransformComponent& transformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
 			
 				globalPosition = transformComponent.GetLocalPosition() + (globalPosition);
-			
 				globalScale *= transformComponent.GetLocalScale();
 				globalOrientation = transformComponent.GetLocalRotation() * globalOrientation;
 				globalTransform = transformComponent.GetLocalTransform() * globalTransform;
+				transformComponent.GlobalDirty = false;
 			
 				NameComponent& nameComponent = parentComponent.Parent.GetComponent<NameComponent>();
 				parentComponent = parentComponent.Parent.GetComponent<ParentComponent>();
@@ -132,6 +138,43 @@ namespace Nuake
 			camera.CameraInstance->Direction = globalForward;
 			camera.CameraInstance->Right = globalRight;
 ;			camera.CameraInstance->SetTransform(glm::inverse(translationMatrix * rotationMatrix));
+		}
+	}
+
+	void TransformSystem::UpdateDirtyFlagRecursive(Entity& entity)
+	{
+		auto& parentComponent = entity.GetComponent<ParentComponent>();
+
+		for (auto& c : parentComponent.Children)
+		{
+			
+			auto& childParentComponent = c.GetComponent<TransformComponent>();
+			childParentComponent.GlobalDirty = true;
+
+			UpdateDirtyFlagRecursive(c);
+		}
+	}
+
+	void TransformSystem::CalculateGlobalTransform(Entity& entity)
+	{
+		auto& parentComponent = entity.GetComponent<ParentComponent>();
+		auto& transformComponent = entity.GetComponent<TransformComponent>();
+		auto& parentTransformComponent = parentComponent.Parent.GetComponent<TransformComponent>();
+
+		Vector3 globalPosition = parentTransformComponent.GetGlobalPosition() + Vector3(transformComponent.GetLocalPosition());
+		Quat globalRotation = parentTransformComponent.GetGlobalRotation() * transformComponent.GetLocalRotation();
+		Vector3 globalScale = parentTransformComponent.GetGlobalScale() * transformComponent.GetGlobalScale();
+		auto globalTransform = transformComponent.GetGlobalTransform() * parentTransformComponent.GetGlobalTransform();
+
+		transformComponent.SetGlobalPosition(Vector3(globalPosition));
+		transformComponent.SetGlobalRotation(globalRotation);
+		transformComponent.SetGlobalScale(globalScale);
+		transformComponent.SetGlobalTransform(globalTransform);
+		transformComponent.GlobalDirty = false;
+
+		for (auto& c : parentComponent.Children)
+		{
+			CalculateGlobalTransform(c);
 		}
 	}
 }

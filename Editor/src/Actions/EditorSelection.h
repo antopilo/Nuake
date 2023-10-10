@@ -1,11 +1,14 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Scene/Entities/Entity.h"
+#include "src/Rendering/SceneRenderer.h"
 #include "src/Resource/Resource.h"
 #include "Engine.h"
-#include "src/Rendering/SceneRenderer.h"
 
-enum EditorSelectionType {
+
+
+enum EditorSelectionType 
+{
 	None,
 	Entity, 
 	File,
@@ -13,16 +16,19 @@ enum EditorSelectionType {
 	Directory
 };
 
-class EditorSelection {
-public:
 
+class EditorSelection 
+{
+
+public:
 	EditorSelectionType Type = EditorSelectionType::None;
 
-	Nuake::Entity Entity;
 	Ref<Nuake::File> File;
 	Ref<Nuake::Directory> Directory;
+	Nuake::Entity Entity;
 	Nuake::Resource Resource;
 
+public:
 	EditorSelection() 
 	{
 		Type = None;

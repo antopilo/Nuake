@@ -270,27 +270,43 @@ namespace Nuake {
             if (ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
+                
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
                 auto pixelPos = Input::GetMousePosition() - windowPosNuake;
                 pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
 
-                gbuffer.Bind();
-
-                if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
+                auto gizmoBuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
+                gizmoBuffer->Bind();
+                bool foundSomethingToSelect = false;
+                if (const int result = gizmoBuffer->ReadPixel(3, pixelPos); result > 0)
                 {
                     auto ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
                     if (ent.IsValid())
                     {
                         Selection = EditorSelection(ent);
+                        foundSomethingToSelect = true;
                     }
                 }
-                else
+                gizmoBuffer->Unbind();
+
+                if(!foundSomethingToSelect)
                 {
-                    Selection = EditorSelection(); // None
+                    gbuffer.Bind();
+                    if (const int result = gbuffer.ReadPixel(3, pixelPos); result > 0)
+                    {
+                        auto ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
+                        if (ent.IsValid())
+                        {
+                            Selection = EditorSelection(ent);
+                        }
+                    }
+                    else
+                    {
+                        Selection = EditorSelection(); // None
+                    }
 
+                    gbuffer.Unbind();
                 }
-
-                gbuffer.Unbind();
             }
         }
         else

@@ -43,6 +43,7 @@ struct LaunchSettings
     std::string projectPath;
 };
 
+
 std::vector<std::string> ParseArguments(int argc, char* argv[])
 {
     std::vector<std::string> args;
@@ -52,6 +53,7 @@ std::vector<std::string> ParseArguments(int argc, char* argv[])
     }
     return args;
 }
+
 
 LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
 {
@@ -170,8 +172,9 @@ int ApplicationMain(int argc, char* argv[])
             if (currentScene)
             { 
                 camera = currentScene->m_EditorCamera;
+                //currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->Unbind();
+                //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->GetID(), 0);
                 glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), 0);
-                //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->GetID(), 0);
             }
 
             if (currentScene && !Nuake::Engine::IsPlayMode())
@@ -194,11 +197,9 @@ int ApplicationMain(int argc, char* argv[])
             }
             //glDepthMask(true);
 
-
         }
         sceneFramebuffer->Unbind();
-
-
+        
         // Update & Draw editor
         editor.Draw();
         editor.Update(Nuake::Engine::GetTimestep());

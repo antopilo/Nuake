@@ -71,7 +71,7 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	// Gbuffer pass
 	m_Framebuffer->Bind();
 	{
-		RenderCommand::SetClearColor({ 0.2, 0.2, 0.2, 0.0f });
+		RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
 		m_Framebuffer->Clear();
 
 		RenderCommand::Disable(RendererEnum::BLENDING);

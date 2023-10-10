@@ -24,7 +24,7 @@ void main()
 #version 440 core
 
 layout(location = 0) out vec4 FragColor;
-layout(location = 1) out int gEntityID;
+layout(location = 3) out int gEntityID;
 
 in vec2 a_UV;
 in mat4 o_Projection;
@@ -42,7 +42,7 @@ void main()
     vec4 px_color = texture(gizmo_texture, a_UV).rgba;
     color = px_color * vec4(1, 1, 1, u_Opacity);
 
-    FragColor = color;
+    gEntityID = u_EntityID;
 
-    gEntityID = int(0);
+    FragColor = color;
 }
