@@ -278,7 +278,7 @@ namespace Nuake {
                 auto gizmoBuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
                 gizmoBuffer->Bind();
                 bool foundSomethingToSelect = false;
-                if (const int result = gizmoBuffer->ReadPixel(3, pixelPos); result > 0)
+                if (const int result = gizmoBuffer->ReadPixel(1, pixelPos); result > 0)
                 {
                     auto ent = Entity{ (entt::entity)(result - 1), Engine::GetCurrentScene().get() };
                     if (ent.IsValid())

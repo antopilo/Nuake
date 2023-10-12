@@ -24,7 +24,7 @@ void main()
 #version 440 core
 
 layout(location = 0) out vec4 FragColor;
-layout(location = 3) out int gEntityID;
+layout(location = 1) out int gEntityID;
 
 in vec2 a_UV;
 in mat4 o_Projection;
