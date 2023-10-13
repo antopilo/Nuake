@@ -18,6 +18,26 @@ void ExceptionCallback(std::string_view InMessage)
 
 namespace Nuake
 {
+	ScriptingEngineNet::ScriptingEngineNet()
+	{
+		auto coralDir = "";
+		Coral::HostSettings settings =
+		{
+			.CoralDirectory = coralDir,
+			.ExceptionCallback = ExceptionCallback
+		};
+		m_HostInstance = CreateScope<Coral::HostInstance>();
+		m_HostInstance->Initialize(settings);
+
+		m_LoadContext = CreateScope<Coral::AssemblyLoadContext>(m_HostInstance->CreateAssemblyLoadContext("NuakeEngineContext"));
+	}
+
+	ScriptingEngineNet::~ScriptingEngineNet()
+	{
+		m_HostInstance->UnloadAssemblyLoadContext(*m_LoadContext);
+		m_HostInstance->Shutdown();
+	}
+
 	ScriptingEngineNet& ScriptingEngineNet::Get()
 	{
 		static ScriptingEngineNet instance;
@@ -31,23 +51,19 @@ namespace Nuake
 
 	void ScriptingEngineNet::Initialize()
 	{
-		auto coralDir = "";
-		Coral::HostSettings settings =
-		{
-			.CoralDirectory = coralDir,
-			.ExceptionCallback = ExceptionCallback
-		};
-		Coral::HostInstance hostInstance;
-		hostInstance.Initialize(settings);
-
-		auto loadContext = hostInstance.CreateAssemblyLoadContext("NuakeEngineContext");
-		auto& assembly = loadContext.LoadAssembly("NuakeNet.dll");
+		
+		auto& assembly = m_LoadContext->LoadAssembly("NuakeNet.dll");
 
 		assembly.AddInternalCall("Nuake.Net.Engine", "LoggerLogIcall", reinterpret_cast<void*>(&Log));
 		assembly.UploadInternalCalls();
 
 		auto& engineType = assembly.GetType("Nuake.Net.Engine");
 		auto engineInstance = engineType.CreateInstance();
-		engineInstance.InvokeMethod("Log");
+
+		Coral::NativeString param1 = Coral::NativeString::FromUTF8("Hello from CPP");;
+		engineInstance.InvokeMethod("Log", param1);
+
+		engineInstance.Destroy();
+		Coral::GC::Collect();
 	}
 }

@@ -19,10 +19,9 @@ namespace Nuake.Net
         /// Prints a message to the console log
         /// </summary>
         /// <param name="message">message to be printed</param>
-        public void Log()
+        public void Log(NativeString input)
         {
-            NativeString str = "Hello from C#";
-            unsafe { LoggerLogIcall(str); }
+            unsafe { LoggerLogIcall(input + " - hello from c# man"); }
         }
     }
 }

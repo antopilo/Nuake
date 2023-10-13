@@ -64,7 +64,7 @@ namespace Nuake
 		float DOFGain = 100.f;
 		float DOFBias = 0.0f;
 		float DOFFringe = 0.0f;
-		float DOFNAmmount = 0.0001;
+		float DOFNAmmount = 0.0001f;
 		float DOFDbSize = 1.25f;
 		float DOFFeather = 1.0f;
 
