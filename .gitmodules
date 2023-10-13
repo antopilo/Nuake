@@ -22,3 +22,6 @@
 [submodule "Nuake/dependencies/optick"]
 	path = Nuake/dependencies/optick
 	url = https://github.com/bombomby/optick.git
+[submodule "Nuake/dependencies/Coral"]
+	path = Nuake/dependencies/Coral
+	url = https://github.com/antopilo/Coral.git

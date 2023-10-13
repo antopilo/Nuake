@@ -147,13 +147,13 @@ namespace Nuake
 
 	void FileSystem::ScanDirectory(Ref<Directory> directory)
 	{
-		for (const auto& entry : std::filesystem::directory_iterator(directory->fullPath))
+		for (const auto& entry : std::filesystem::directory_iterator(directory->FullPath))
 		{
 			if (entry.is_directory())
 			{
 				Ref<Directory> newDir = CreateRef<Directory>();
-				newDir->fullPath = entry.path().string();
-				newDir->name = entry.path().filename().string();
+				newDir->FullPath = entry.path().string();
+				newDir->Name = entry.path().filename().string();
 
 				newDir->Parent = directory;
 				ScanDirectory(newDir);
@@ -197,11 +197,7 @@ namespace Nuake
 
 	void FileSystem::Scan()
 	{
-		RootDirectory = CreateRef<Directory>();
-		RootDirectory->Files = std::vector<Ref<File>>();
-		RootDirectory->Directories = std::vector<Ref<Directory>>();
-		RootDirectory->name = FileSystem::AbsoluteToRelative(Root);
-		RootDirectory->fullPath = Root;
+		RootDirectory = CreateRef<Directory>(Root);
 		ScanDirectory(RootDirectory);
 	}
 
@@ -300,7 +296,7 @@ namespace Nuake
 		int currentDepth = -1;
 		std::string currentDirName = ".";
 		Ref<Directory> currentDirComparator = RootDirectory;
-		while (currentDirName == currentDirComparator->name)
+		while (currentDirName == currentDirComparator->Name)
 		{
 			currentDepth++;
 			currentDirName = splits[currentDepth];
@@ -308,7 +304,7 @@ namespace Nuake
 			// Find next directory
 			for (auto& d : currentDirComparator->Directories)
 			{
-				if (d->name == currentDirName)
+				if (d->Name == currentDirName)
 				{
 					currentDirComparator = d;
 				}
@@ -333,4 +329,12 @@ namespace Nuake
 		return String::Split(split[split.size() - 1], '.')[0];
 	}
 
+
+	Directory::Directory(const std::string& path)
+	{
+		Files = std::vector<Ref<File>>();
+		Directories = std::vector<Ref<Directory>>();
+		Name = FileSystem::AbsoluteToRelative(path);
+		FullPath = path;
+	}
 }

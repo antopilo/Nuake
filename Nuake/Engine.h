@@ -6,9 +6,7 @@
 #include "src/Core/Logger.h"
 
 /* TODOS:
-[ ] - Parse the bones
-[ ] - Create SceneStructure Entities(with bone component)
-[ ] - Create SkinnedMesh resource(?)
+
 */
 
 // Welcome to the Nuake source code.

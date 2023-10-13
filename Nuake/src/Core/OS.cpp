@@ -56,7 +56,7 @@ namespace Nuake {
 	int OS::RenameFile(const Ref<File>& file, const std::string& newName)
 	{
 		std::string extension = !String::EndsWith(newName, file->GetExtension().c_str()) ? file->GetExtension() : "";
-		std::string newFilePath = file->GetParent()->fullPath + newName + extension;
+		std::string newFilePath = file->GetParent()->FullPath + newName + extension;
 
 		std::error_code resultError;
 		std::filesystem::rename(file->GetAbsolutePath().c_str(), newFilePath.c_str(), resultError);
@@ -65,10 +65,10 @@ namespace Nuake {
 
 	int OS::RenameDirectory(const Ref<Directory>& dir, const std::string& newName)
 	{
-		std::string newDirPath = dir->Parent->fullPath + newName;
+		std::string newDirPath = dir->Parent->FullPath + newName;
 
 		std::error_code resultError;
-		std::filesystem::rename(dir->fullPath.c_str(), newDirPath.c_str(), resultError);
+		std::filesystem::rename(dir->FullPath.c_str(), newDirPath.c_str(), resultError);
 		return resultError.value() == 0;
 	}
 

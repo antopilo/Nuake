@@ -195,10 +195,14 @@ namespace Nuake
 	class Directory
 	{
 	public:
-		std::string name;
-		std::string fullPath;
+		std::string Name;
+		std::string FullPath;
 		Ref<Directory> Parent;
 		std::vector<Ref<Directory>> Directories;
 		std::vector<Ref<File>> Files;
+
+		Directory(const std::string& path);
+		Directory() = default;
+		~Directory() = default;
 	};
 }

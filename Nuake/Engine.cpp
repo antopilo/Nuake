@@ -34,7 +34,6 @@ namespace Nuake
 		// Creates the window
 		s_CurrentWindow = Window::Get();
 
-		Logger::Log("Input initializing");
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");
@@ -42,11 +41,9 @@ namespace Nuake
 
 	void Engine::Tick()
 	{
-		s_Time = (float)glfwGetTime();
+		s_Time = static_cast<float>(glfwGetTime());
 		s_TimeStep = s_Time - s_LastFrameTime;
 		s_LastFrameTime = s_Time;
-
-		//s_TimeStep = std::min((float)s_TimeStep, 0f);
 
 		// Dont update if no scene is loaded.
 		if (s_CurrentWindow->GetScene()) 
@@ -108,7 +105,7 @@ namespace Nuake
 
 	void Engine::Draw()
 	{
-		Nuake::RenderCommand::Clear();
+		RenderCommand::Clear();
 
 		// Start imgui frame
 		ImGui_ImplOpenGL3_NewFrame();

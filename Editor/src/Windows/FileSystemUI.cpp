@@ -48,7 +48,7 @@ namespace Nuake
             base_flags |= ImGuiTreeNodeFlags_Leaf;
 
         std::string icon = ICON_FA_FOLDER;
-        bool open = ImGui::TreeNodeEx((icon + "  " + dir->name.c_str()).c_str(), base_flags);
+        bool open = ImGui::TreeNodeEx((icon + "  " + dir->Name.c_str()).c_str(), base_flags);
 
         if (ImGui::IsItemClicked())
             m_CurrentDirectory = dir;
@@ -67,7 +67,7 @@ namespace Nuake
         ImGui::PushFont(FontManager::GetFont(Icons));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
-        const std::string id = std::string("##") + directory->name;
+        const std::string id = std::string("##") + directory->Name;
 
         ImVec2 prevCursor = ImGui::GetCursorPos();
         ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
@@ -96,7 +96,7 @@ namespace Nuake
         }
 
         if (ImGui::IsItemHovered())
-            ImGui::SetTooltip(directory->name.c_str());
+            ImGui::SetTooltip(directory->Name.c_str());
 
 
         ImGui::SetCursorPos(prevCursor);
@@ -108,11 +108,11 @@ namespace Nuake
         ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
         ImU32 rectColor = IM_COL32(255, 255, 255, 16);
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
-        std::string visibleName = directory->name;
+        std::string visibleName = directory->Name;
         const uint32_t MAX_CHAR_NAME = 35;
-        if (directory->name.size() > MAX_CHAR_NAME)
+        if (directory->Name.size() > MAX_CHAR_NAME)
         {
-            visibleName = std::string(directory->name.begin(), directory->name.begin() + MAX_CHAR_NAME - 3) + "...";
+            visibleName = std::string(directory->Name.begin(), directory->Name.begin() + MAX_CHAR_NAME - 3) + "...";
         }
 
         ImGui::TextWrapped(visibleName.c_str());
@@ -136,12 +136,12 @@ namespace Nuake
             {
                 if (ImGui::MenuItem("Full Path"))
                 {
-                    OS::CopyToClipboard(directory->fullPath);
+                    OS::CopyToClipboard(directory->FullPath);
                 }
 
                 if (ImGui::MenuItem("Directory Name"))
                 {
-                    OS::CopyToClipboard(String::Split(directory->name, '/')[0]);
+                    OS::CopyToClipboard(String::Split(directory->Name, '/')[0]);
                 }
 
                 ImGui::EndPopup();
@@ -161,7 +161,7 @@ namespace Nuake
 
             if (ImGui::MenuItem("Show in File Explorer"))
             {
-                OS::OpenIn(directory->fullPath);
+                OS::OpenIn(directory->FullPath);
             }
 
             ImGui::EndPopup();
@@ -171,7 +171,7 @@ namespace Nuake
         
         if (shouldRename)
         {
-            renameTempValue = directory->name;
+            renameTempValue = directory->Name;
             PopupHelper::OpenPopup(renameId);
         }
         
@@ -194,9 +194,9 @@ namespace Nuake
 
         if(PopupHelper::DefineConfirmationDialog(deleteId, " Are you sure you want to delete the folder and all its children?\n This action cannot be undone, and all data within the folder \n will be permanently lost."))
         {
-            if (FileSystem::DeleteFolder(directory->fullPath) != 0)
+            if (FileSystem::DeleteFolder(directory->FullPath) != 0)
             {
-                Logger::Log("Failed to remove directory: " + directory->name, "editor", CRITICAL);
+                Logger::Log("Failed to remove directory: " + directory->Name, "editor", CRITICAL);
             }
             RefreshFileBrowser();
         }
@@ -768,7 +768,7 @@ namespace Nuake
                         }
                         else
                         {
-                            pathLabel = paths[i]->name;
+                            pathLabel = paths[i]->Name;
                         }
 
                         if (ImGui::Button(pathLabel.c_str()))
@@ -801,7 +801,7 @@ namespace Nuake
 
                     if (ImGui::Button((std::string(ICON_FA_FOLDER_OPEN)).c_str(), buttonSize))
                     {
-                        OS::OpenIn(m_CurrentDirectory->fullPath);
+                        OS::OpenIn(m_CurrentDirectory->FullPath);
                     }
 
                     ImGui::SameLine();
@@ -849,7 +849,7 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
-                                if(String::Sanitize(d->name).find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
+                                if(String::Sanitize(d->Name).find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
                                     if (i + 1 % amount != 0)
                                         ImGui::TableNextColumn();
