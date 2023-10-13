@@ -3,7 +3,11 @@
 #include "src/Scene/Scene.h"
 #include "Engine.h"
 
-namespace Nuake {
+#include "src/Scripting/ScriptingEngineNet.h"
+
+
+namespace Nuake 
+{
 	ScriptingSystem::ScriptingSystem(Scene* scene)
 	{
 		m_Scene = scene;
@@ -12,6 +16,8 @@ namespace Nuake {
 	bool ScriptingSystem::Init()
 	{
 		ScriptingEngine::Init();
+
+		ScriptingEngineNet::Get().Initialize();
 
 		Logger::Log("Initializing ScriptingSystem");
 

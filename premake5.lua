@@ -86,7 +86,8 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/dependencies/build",
-        "%{prj.name}/dependencies/soloud/include"
+        "%{prj.name}/dependencies/soloud/include",
+        "%{prj.name}/dependencies/Coral/Coral.Native/Include"
     }
 
     links
@@ -286,7 +287,7 @@ project "Editor"
 		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/dependencies/soloud/include",
-        "/usr/include/gtk-3.0/"
+        "/usr/include/gtk-3.0/",
     }
     
     libdirs 
@@ -338,7 +339,8 @@ project "Editor"
         postbuildcommands {
             '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{cfg.targetdir}"',
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
         }
 
 
