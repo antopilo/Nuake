@@ -36,6 +36,8 @@ include "Nuake/dependencies/soloud_p5.lua"
 include "Nuake/dependencies/optick_p5.lua"
 include "Nuake/dependencies/coral_p5.lua"
 
+include "NuakeNet/premake5.lua"
+
 project "Nuake"
     location "Nuake"
     kind "StaticLib"
@@ -340,7 +342,8 @@ project "Editor"
             '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"',
+            '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/%{prj.name}"'
         }
 
 
@@ -366,10 +369,8 @@ project "Editor"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		"/usr/include/glib-2.0",
+		    "/usr/include/glib-2.0",
         }
-        
-       
 	
         defines 
         {
@@ -406,3 +407,4 @@ project "Editor"
     postbuildcommands {
      --"{COPY} "Nuake/dependencies/GLFW/lib-vc2019/glfw3.dll" " .. "./bin/" .. outputdir .. "/%{prj.name}/glfw3.dll"
     }
+

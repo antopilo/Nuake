@@ -24,6 +24,11 @@ namespace Nuake
 		return instance;
 	}
 
+	void Log(Coral::NativeString string)
+	{
+		Logger::Log(string.ToString(), ".net", VERBOSE);
+	}
+
 	void ScriptingEngineNet::Initialize()
 	{
 		auto coralDir = "";
@@ -36,5 +41,13 @@ namespace Nuake
 		hostInstance.Initialize(settings);
 
 		auto loadContext = hostInstance.CreateAssemblyLoadContext("NuakeEngineContext");
+		auto& assembly = loadContext.LoadAssembly("NuakeNet.dll");
+
+		assembly.AddInternalCall("Nuake.Net.Engine", "LoggerLogIcall", reinterpret_cast<void*>(&Log));
+		assembly.UploadInternalCalls();
+
+		auto& engineType = assembly.GetType("Nuake.Net.Engine");
+		auto engineInstance = engineType.CreateInstance();
+		engineInstance.InvokeMethod("Log");
 	}
 }
