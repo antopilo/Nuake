@@ -1,7 +1,7 @@
 #include "PhysicsShapes.h"
 #include "Rigibody.h"
 #include "src/Core/Core.h"
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 #include <glm/trigonometric.hpp>
 #include <src/Scene/Entities/Entity.h>

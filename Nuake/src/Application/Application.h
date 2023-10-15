@@ -60,9 +60,9 @@ namespace Nuake {
 			auto resultFindIt = std::find_if(
 				m_ApplicationModules.begin(), 
 				m_ApplicationModules.end(),
-				[](IApplicationModule& module) 
+				[](IApplicationModule& appModule) 
 				{
-					return dynamic_cast<T*>(&module) != nullptr;
+					return dynamic_cast<T*>(&appModule) != nullptr;
 				}
 			);
 

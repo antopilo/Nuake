@@ -12,6 +12,7 @@ namespace Nuake
 		static std::string GetFromClipboard();
 		static int GetTime();
 		static void OpenIn(const std::string& filePath);
+		static void ExecuteCommand(const std::string& command);
 		static int RenameFile(const Ref<File>& file, const std::string& newName);
 		static int RenameDirectory(const Ref<Directory>& dir, const std::string& newName);
 		static void ShowInFileExplorer(const std::string& filePath);

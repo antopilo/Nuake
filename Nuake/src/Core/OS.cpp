@@ -53,6 +53,17 @@ namespace Nuake {
 #endif
 	}
 
+	void OS::ExecuteCommand(const std::string& command)
+	{
+#ifdef NK_WIN
+		ShellExecuteA(nullptr, command.c_str(), nullptr, nullptr, nullptr, SW_SHOWDEFAULT);
+#endif
+
+#ifdef NK_LINUX
+		system(command.c_str());
+#endif
+	}
+
 	int OS::RenameFile(const Ref<File>& file, const std::string& newName)
 	{
 		std::string extension = !String::EndsWith(newName, file->GetExtension().c_str()) ? file->GetExtension() : "";
