@@ -162,14 +162,9 @@ bool GizmoDrawer::IsEntityInSelection(Nuake::Entity entity)
 	return false;
 }
 
-void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
+void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 {
-	using namespace Nuake;
-	//RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-	// Draw Axis lignes.
-	//glDepthFunc(GL_ALWAYS); // Disable built-in depth testing
-	//glDepthMask(false);     // Disable writing to the depth buffer
 	{
 		m_LineShader->Bind();
 		m_LineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
@@ -178,6 +173,13 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		m_AxisLineBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
+}
+
+void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
+{
+	using namespace Nuake;
+
+	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
 	glLineWidth(2.0f);
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();

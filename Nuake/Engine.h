@@ -29,7 +29,7 @@ namespace Nuake
 
 	public:
 		static void Init();  // Initialize the engine.
-		static void Tick();  // Updates everything, called everyframe.
+		static void Tick();  // Updates everything, called every frame.
 		static void Close(); // Shutdown the engine.
 
 		static void EnterPlayMode(); // Start the game

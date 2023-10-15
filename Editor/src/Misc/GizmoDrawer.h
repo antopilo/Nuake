@@ -49,10 +49,12 @@ private:
 
 public:
 	GizmoDrawer(EditorInterface* editor);
+
+	GizmoDrawer() = default;
 	~GizmoDrawer() = default;
 
 	void DrawGizmos(Ref<Scene> scene, bool occluded);
-
+	void DrawAxis(Ref<Scene> scene, bool occlude);
 
 private:
 	void GenerateSphereGizmo();

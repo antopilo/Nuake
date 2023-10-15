@@ -33,7 +33,11 @@
 #include <src/Rendering/SceneRenderer.h>
 
 #include "src/Misc/WindowTheming.h"
+#include <src/Core/Application.h>
 
+#include <src/Core/EntryPoint.h>
+
+#include "src/EditorApplication.h"
 
 struct LaunchSettings
 {
@@ -109,123 +113,25 @@ LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
     return launchSettings;
 }
 
-int ApplicationMain(int argc, char* argv[])
+
+Nuake::Application* Nuake::CreateApplication(int argc, char** argv)
 {
     using namespace Nuake;
 
-    // Parse launch arguments
     const auto& arguments = ParseArguments(argc, argv);
     LaunchSettings launchSettings = ParseLaunchSettings(arguments);
 
+    ApplicationSpecification specification
+    {
+        .Name = "Editor",
+        .WindowWidth = 1600,
+        .WindowHeight = 900,
+        .VSync = true
+    };
+
 #ifdef NK_DEBUG
-    launchSettings.windowTitle += "(DEBUG BUILD)";
-#endif // NK_DEBUG
-
-    // Initialize Engine & Window
-    Engine::Init();
-    auto window = Engine::GetCurrentWindow();
-    window->SetSize(launchSettings.resolution);
-    window->SetTitle(launchSettings.windowTitle);
-
-    if (launchSettings.monitor >= 0)
-    {
-        window->SetMonitor(launchSettings.monitor);
-    }
-    WindowTheming::SetWindowDarkMode(window);
-
-    Logger::Log("Creating editor ", "window", CRITICAL);
-    // Initialize Editor
-    Nuake::EditorInterface editor;
-   
-    Logger::Log("Created editor ", "window", CRITICAL);
-    // Load project in argument
-    if (!launchSettings.projectPath.empty())
-    {
-        Logger::Log("Loading project", "window", CRITICAL);
-        editor.LoadProject(launchSettings.projectPath);
-    }
-
-    // Start application main loop
-    GizmoDrawer gizmoDrawer = GizmoDrawer(&editor);
-    while (!window->ShouldClose())
-    {
-        Nuake::Engine::Tick(); // Update
-
-        Nuake::Engine::Draw(); // Render
-       
-        // Render editor
-        Nuake::Vector2 WindowSize = window->GetSize();
-        glViewport(0, 0, WindowSize.x, WindowSize.y);
-        Nuake::Renderer2D::BeginDraw(WindowSize);
-
-        auto sceneFramebuffer = window->GetFrameBuffer();
-
-        Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene();
-
-        // Draw gizmos
-        sceneFramebuffer->Bind();
-        {
-            //glDepthMask(false);
-            
-            
-            Ref<EditorCamera> camera;
-            if (currentScene)
-            { 
-                camera = currentScene->m_EditorCamera;
-                //currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->Unbind();
-                //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT3)->GetID(), 0);
-                glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, currentScene->m_SceneRenderer->GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), 0);
-            }
-
-            if (currentScene && !Nuake::Engine::IsPlayMode())
-            {
-                glEnable(GL_LINE_SMOOTH);
-
-                if (editor.ShouldDrawAxis())
-                {
-                    //gizmoDrawer.DrawAxis(currentScene);
-                }
-
-                if (editor.ShouldDrawCollision())
-                {
-                    gizmoDrawer.DrawGizmos(currentScene, false);
-                    glDepthFunc(GL_GREATER);
-
-                    gizmoDrawer.DrawGizmos(currentScene, true);
-                    glDepthFunc(GL_LESS);
-                }
-            }
-            //glDepthMask(true);
-
-        }
-        sceneFramebuffer->Unbind();
-        
-        // Update & Draw editor
-        editor.Draw();
-        editor.Update(Nuake::Engine::GetTimestep());
-        Nuake::Engine::EndDraw();
-    }
-
-    Nuake::Engine::Close();
-    return 0;
-}
-
-
-
-#ifdef NK_WIN
-#ifdef NK_DIST
-#include "windows.h"
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, LPSTR cdmline, int cmdshow)
-{
-    return ApplicationMain(__argc, __argv);
-}
-#endif
+    specification.Name += "(DEBUG BUILD)";
 #endif
 
-
-int main(int argc, char* argv[]) 
-{
-    return ApplicationMain(argc, argv);
+    return new EditorApplication(specification);
 }
-
-

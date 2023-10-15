@@ -22,6 +22,8 @@ namespace Nuake {
 
 		m_AudioThreadRunning = false;
 		m_AudioThread.join();
+
+		m_Soloud->deinit();
 	}
 
 	void AudioManager::Initialize()
@@ -35,6 +37,13 @@ namespace Nuake {
 		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA);
 #endif
 
+		if (m_AudioThread.joinable())
+		{
+			m_AudioThreadRunning = false;
+			m_AudioThread.join();
+		}
+
+		m_AudioThreadRunning = true;
 		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 
 		Logger::Log("Audio manager initialized", "audio", VERBOSE);

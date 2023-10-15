@@ -219,7 +219,7 @@ namespace Nuake
 		{
 			SaveRecentFile();
 
-			queuedProjectPath = _Projects[SelectedProject].Path;;
+			queuedProjectPath = _Projects[SelectedProject].Path;
 		}
 
 		//ImGui::PopStyleColor();
