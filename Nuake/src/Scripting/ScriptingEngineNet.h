@@ -1,6 +1,9 @@
 #pragma once
 #include "src/Core/Core.h"
 
+
+
+
 namespace Coral
 {
 	class HostInstance;
@@ -12,8 +15,8 @@ namespace Nuake
 	class ScriptingEngineNet
 	{
 	private:
-		Scope<Coral::HostInstance> m_HostInstance;
-		Scope<Coral::AssemblyLoadContext> m_LoadContext;
+		Coral::HostInstance* m_HostInstance;
+		Coral::AssemblyLoadContext* m_LoadContext;
 
 		ScriptingEngineNet();
 		~ScriptingEngineNet();
