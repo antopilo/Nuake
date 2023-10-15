@@ -1,6 +1,6 @@
 #include "GhostObject.h"
 
-#include <src/Core/Physics/PhysicsManager.h>
+#include "src/Physics/PhysicsManager.h"
 
 namespace Nuake
 {

@@ -9,7 +9,7 @@
 #include <wren.h>
 #include "Engine.h"
 
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 #include "../Scene/Entities/Entity.h"
 #include <src/Scene/Components/TransformComponent.h>

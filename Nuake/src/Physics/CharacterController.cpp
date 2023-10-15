@@ -1,8 +1,8 @@
 #include "CharacterController.h"
-#include "src/Core/Physics/PhysicsManager.h"
-#include "src/Core/Physics/RaycastResult.h"
+#include "src/Physics/PhysicsManager.h"
+#include "src/Physics/RaycastResult.h"
 
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 namespace Nuake
 {

@@ -12,7 +12,7 @@
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Vendors/imgui/ImGuizmo.h>
-#include <src/Core/Physics/PhysicsManager.h>
+#include <src/Physics/PhysicsManager.h>
 #include "src/Scene/Components/BoxCollider.h"
 
 #include <GLFW/glfw3.h>
@@ -33,9 +33,9 @@
 #include <src/Rendering/SceneRenderer.h>
 
 #include "src/Misc/WindowTheming.h"
-#include <src/Core/Application.h>
+#include <src/Application/Application.h>
 
-#include <src/Core/EntryPoint.h>
+#include <src/Application/EntryPoint.h>
 
 #include "src/EditorApplication.h"
 

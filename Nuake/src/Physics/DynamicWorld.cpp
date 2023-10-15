@@ -4,7 +4,7 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Core/Maths.h"
-#include <src/Core/Physics/PhysicsShapes.h>
+#include <src/Physics/PhysicsShapes.h>
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/CharacterControllerComponent.h"
 

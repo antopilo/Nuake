@@ -14,7 +14,7 @@
 #include "src/Rendering/Textures/Texture.h"
 #include "src/Rendering/Textures/MaterialManager.h"
 
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 #include "src/Vendors/glm/gtc/type_ptr.hpp"
 #include "src/Vendors/glm/gtx/matrix_decompose.hpp"

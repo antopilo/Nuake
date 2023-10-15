@@ -1,7 +1,7 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
-#include "src/Core/Physics/PhysicsShapes.h"
+#include "src/Physics/PhysicsShapes.h"
 #include "src/Scene/Entities/Entity.h"
 
 namespace Nuake

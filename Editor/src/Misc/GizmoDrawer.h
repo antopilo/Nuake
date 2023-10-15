@@ -6,7 +6,7 @@
 #include <src/Rendering/Vertex.h>
 #include <src/Scene/Scene.h>
 #include <src/Resource/Model.h>
-#include <src/Core/Physics/PhysicsShapes.h>
+#include <src/Physics/PhysicsShapes.h>
 
 #include "Gizmos/CapsuleGizmo.h"
 #include "Gizmos/CylinderGizmo.h"

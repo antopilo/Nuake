@@ -1,5 +1,5 @@
 #pragma once
-#include <src/Core/Application.h>
+#include <src/Application/Application.h>
 #include <src/Window.h>
 
 #include "Windows/EditorInterface.h"

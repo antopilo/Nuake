@@ -4,7 +4,7 @@
 
 #include "src/Core/Core.h"
 #include "src/Core/OS.h"
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 #include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scene/Systems/PhysicsSystem.h"
@@ -524,7 +524,7 @@ namespace Nuake
 			transformComponent.SetLocalRotation(boneRotation);
 			transformComponent.SetLocalScale(boneScale);
 			transformComponent.SetLocalTransform(c.Transform);
-			transformComponent.Dirty = false;
+			//transformComponent.Dirty = false;
 
 			CreateSkeletonTraverse(boneEntity, c);
 		}

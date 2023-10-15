@@ -1,5 +1,5 @@
 #pragma once
-#include "src/Core/Physics/PhysicsShapes.h"
+#include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
 namespace Nuake {

@@ -1,5 +1,5 @@
 #pragma once
-#include "src/Core/Physics/GhostObject.h"
+#include "src/Physics/GhostObject.h"
 #include <vector>
 
 namespace Nuake {

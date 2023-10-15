@@ -1,8 +1,8 @@
 #pragma once
 #include "RigidbodyComponent.h"
 
-#include "src/Core/Physics/Rigibody.h"
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/Rigibody.h"
+#include "src/Physics/PhysicsManager.h"
 #include "src/Rendering/Renderer.h"
 
 namespace Nuake {

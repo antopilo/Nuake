@@ -6,7 +6,7 @@
 #include "ScriptModule.h"
 #include <iostream>
 #include <wren.h>
-#include "../Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 
 namespace Nuake 
 {

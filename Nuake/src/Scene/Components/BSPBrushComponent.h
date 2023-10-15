@@ -4,7 +4,7 @@
 
 #include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Mesh/Mesh.h"
-#include "src/Core/Physics/Rigibody.h"
+#include "src/Physics/Rigibody.h"
 
 namespace Nuake {
 	class BSPBrushComponent

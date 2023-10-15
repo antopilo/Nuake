@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include "src/Core/Physics/PhysicsManager.h"
+#include "src/Physics/PhysicsManager.h"
 #include <GLFW/glfw3.h>
 
 #include "src/Core/Input.h"

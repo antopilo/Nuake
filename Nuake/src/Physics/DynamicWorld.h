@@ -7,7 +7,7 @@
 #include <map>
 #include "RaycastResult.h"
 
-#include <src/Core/Physics/GhostObject.h>
+#include <src/Physics/GhostObject.h>
 #include "CharacterController.h"
 
 #include "Jolt/Jolt.h"

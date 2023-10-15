@@ -7,7 +7,7 @@
 #include "src/Scene/Components/ModelComponent.h"
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include "src/Scene/Entities/Entity.h"
-#include <src/Core/Physics/PhysicsManager.h>
+#include <src/Physics/PhysicsManager.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Scene/Components/BSPBrushComponent.h>

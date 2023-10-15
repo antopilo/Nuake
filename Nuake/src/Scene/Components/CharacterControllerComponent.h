@@ -1,5 +1,5 @@
 #pragma once
-#include "src/Core/Physics/CharacterController.h"
+#include "src/Physics/CharacterController.h"
 
 namespace Nuake 
 {

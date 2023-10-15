@@ -1,6 +1,6 @@
 #pragma once
 #include "IApplicationModule.h"
-#include "Core.h"
+#include "src/Core/Core.h"
 #include "LayerStack.h"
 
 #include <string>
