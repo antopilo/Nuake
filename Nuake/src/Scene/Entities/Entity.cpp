@@ -77,6 +77,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("BoneComponent", GetComponent<BoneComponent>())
 		if (HasComponent<AudioEmitterComponent>())
 			SERIALIZE_OBJECT_REF_LBL("AudioEmitterComponent", GetComponent<AudioEmitterComponent>())
+		if (HasComponent<NetScriptComponent>())
+			SERIALIZE_OBJECT_REF_LBL("NetScriptComponent", GetComponent<NetScriptComponent>())
 		END_SERIALIZE();
 	}
 
@@ -108,6 +110,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(BoneComponent);
 		DESERIALIZE_COMPONENT(SkinnedModelComponent);
 		DESERIALIZE_COMPONENT(AudioEmitterComponent);
+		DESERIALIZE_COMPONENT(NetScriptComponent);
 		return true;
 	}
 

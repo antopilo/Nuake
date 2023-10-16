@@ -13,7 +13,6 @@ namespace Nuake.Net
     public class Engine
     {
         internal static unsafe delegate*<NativeString, void> LoggerLogIcall;
-        
 
         public Engine() { }
 
@@ -21,9 +20,9 @@ namespace Nuake.Net
         /// Prints a message to the console log
         /// </summary>
         /// <param name="message">message to be printed</param>
-        public void Log(NativeString input)
+        public static void Log(string input)
         {
-            unsafe { LoggerLogIcall(input + " - hello from c# man"); }
+            unsafe { LoggerLogIcall(input); }
         }
     }
 
@@ -64,17 +63,12 @@ namespace Nuake.Net
 
         public UInt32 ID { get; private set; }
 
-        Entity(UInt32 id)
-        {
-            ID = id;
-        }
-
         public virtual void OnInit() { }
         public virtual void OnUpdate(float dt) { }
         public virtual void OnFixedUpdate(float dt) { }
         public virtual void OnDestroy() { }
 
-        bool HasComponent<T>()
+        public bool HasComponent<T>()
         {
             if (typeof(T) == typeof(TransformComponent))
             {
@@ -88,7 +82,7 @@ namespace Nuake.Net
             return false;
         }
 
-        T GetComponent<T>()
+        public T GetComponent<T>()
         {
             if (typeof(T) == typeof(TransformComponent))
             {

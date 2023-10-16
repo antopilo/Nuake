@@ -226,18 +226,31 @@ namespace Nuake
 		if (!absolute)
 			finalPath = Root + path;
 
-		std::ifstream MyReadFile(finalPath);
+		std::ifstream myReadFile(finalPath, std::ios::in | std::ios::binary);
 		std::string fileContent = "";
 		std::string allFile = "";
+		
+		char bom[3];
+		myReadFile.read(bom, 3);
+
+		// Check for UTF-8 BOM (EF BB BF)
+		if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF) 
+		{
+			myReadFile.seekg(3);
+		}
+		else
+		{
+			myReadFile.seekg(0);
+		}
 
 		// Use a while loop together with the getline() function to read the file line by line
-		while (getline(MyReadFile, fileContent))
+		while (getline(myReadFile, fileContent))
 		{
 			allFile.append(fileContent + "\n");
 		}
 
 		// Close the file
-		MyReadFile.close();
+		myReadFile.close();
 		return allFile;
 	}
 

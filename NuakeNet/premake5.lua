@@ -20,3 +20,8 @@ project "NuakeNet"
     {
         "Coral.Managed"
     }
+
+    postbuildcommands {
+        '{ECHO} Copying "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" to "%{wks.location}/Editor"',
+        '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/Editor"'
+    }

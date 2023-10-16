@@ -23,6 +23,7 @@
 #include "../ComponentsPanel/SkinnedModelPanel.h"
 #include "../ComponentsPanel/BonePanel.h"
 #include "../ComponentsPanel/AudioEmitterPanel.h"
+#include "../ComponentsPanel/NetScriptPanel.h"
 
 class EditorSelectionPanel 
 {
@@ -30,6 +31,7 @@ private:
 	TransformPanel mTransformPanel;
 	LightPanel mLightPanel;
 	ScriptPanel mScriptPanel;
+	NetScriptPanel mNetScriptPanel;
 	MeshPanel mMeshPanel;
 	SkinnedModelPanel mSkinnedModelPanel;
 	QuakeMapPanel mQuakeMapPanel;

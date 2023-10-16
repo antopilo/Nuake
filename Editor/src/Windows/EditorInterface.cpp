@@ -52,6 +52,7 @@
 #include <src/UI/ImUI.h>
 
 #include <src/Resource/StaticResources.h>
+#include <src/Scripting/ScriptingEngineNet.h>
 
 namespace Nuake {
     
@@ -2009,6 +2010,16 @@ namespace Nuake {
                 if (ImGui::MenuItem("Duplicate selected", NULL)) {}
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu(".Net"))
+            {
+                if (ImGui::MenuItem("Generate Solution", NULL))
+                {
+                    Nuake::ScriptingEngineNet::Get().GenerateSolution(FileSystem::Root, Engine::GetProject()->Name);
+                    Nuake::Logger::Log("Generated Solution.");
+                }
+                ImGui::EndMenu();
+            }
+            
             if (ImGui::BeginMenu("Debug"))
             {
                 if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;

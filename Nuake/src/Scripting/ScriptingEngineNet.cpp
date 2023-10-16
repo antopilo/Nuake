@@ -2,11 +2,16 @@
 
 #include "src/Core/Logger.h"
 #include "src/Core/FileSystem.h"
+#include "src/Core/OS.h"
+#include "src/Resource/Project.h"
+
+#include "NetModules/EngineNetAPI.h"
 
 #include <Coral/HostInstance.hpp>
 #include <Coral/GC.hpp>
 #include <Coral/NativeArray.hpp>
 #include <Coral/Attribute.hpp>
+#include <src/Scene/Components/NetScriptComponent.h>
 
 
 void ExceptionCallback(std::string_view InMessage)
@@ -19,16 +24,21 @@ namespace Nuake
 {
 	ScriptingEngineNet::ScriptingEngineNet()
 	{
-		auto coralDir = "";
-		Coral::HostSettings settings =
-		{
-			.CoralDirectory = coralDir,
-			.ExceptionCallback = ExceptionCallback
-		};
-		m_HostInstance = new Coral::HostInstance();
-		m_HostInstance->Initialize(settings);
-
+		// Initialize Coral
+		// ----------------------------------
 		
+
+		// Initialize API modules
+		// ----------------------------------
+		m_Modules =
+		{
+			CreateRef<EngineNetAPI>()
+		};
+
+		for (auto& m : m_Modules)
+		{
+			m->RegisterMethods();
+		}
 	}
 
 	ScriptingEngineNet::~ScriptingEngineNet()
@@ -42,30 +52,241 @@ namespace Nuake
 		return instance;
 	}
 
-	void Log(Coral::NativeString string)
-	{
-		Logger::Log(string.ToString(), ".net", VERBOSE);
-	}
-
 	void ScriptingEngineNet::Initialize()
 	{
-		auto loadContext = m_HostInstance->CreateAssemblyLoadContext("NuakeEngineContext");
+		Coral::HostSettings settings =
+		{
+			.CoralDirectory = "",
+			.ExceptionCallback = ExceptionCallback
+		};
 
-		auto& assembly = loadContext.LoadAssembly("NuakeNet.dll");
-		assembly.AddInternalCall("Nuake.Net.Engine", "LoggerLogIcall", reinterpret_cast<void*>(&Log));
-		assembly.UploadInternalCalls();
+		m_HostInstance = new Coral::HostInstance();
+		m_HostInstance->Initialize(settings);
 
-		auto& engineType = assembly.GetType("Nuake.Net.Engine");
-		auto engineInstance = engineType.CreateInstance();
+		m_LoadContext = std::move(m_HostInstance->CreateAssemblyLoadContext(m_ContextName));
 
-		Coral::NativeString param1 = Coral::NativeString::FromUTF8("Hello from CPP");;
-		engineInstance.InvokeMethod("Log", std::string("Hello from CPP"));
+		// Load Nuake assembly DLL
+		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
+		m_NuakeAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
 
-		engineInstance.Destroy();
+		// Upload internal calls for each module
+		// --------------------------------------------------
+		for (const auto& netModule : m_Modules)
+		{
+			const std::string inClassName = m_Scope + '.' + netModule->GetModuleName();
+			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
+			{
+				m_NuakeAssembly.AddInternalCall(inClassName, methodName, methodPtr);
+			}
+		}
 
-		Coral::GC::Collect();
+		m_NuakeAssembly.UploadInternalCalls();
+	}
+
+	void ScriptingEngineNet::Uninitialize()
+	{
+		// We have to manually destroy every managed object we have created
+		for (auto& [entity, managedObject] : m_EntityToManagedObjects)
+		{
+			managedObject.Destroy();
+		}
+
+		Coral::GC::Collect(1, Coral::GCCollectionMode::Forced);
 		Coral::GC::WaitForPendingFinalizers();
 
-		m_HostInstance->UnloadAssemblyLoadContext(loadContext);
+		m_HostInstance->UnloadAssemblyLoadContext(m_LoadContext);
+
+		m_EntityToManagedObjects.clear();
+		m_GameEntityTypes.clear();
 	}
+
+	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
+	{
+		const std::string sanitizedProjectName = String::Sanitize(project->Name);
+		const std::string assemblyPath = "/bin/Debug/net7.0/" + sanitizedProjectName + ".dll";
+
+		if (!FileSystem::FileExists(assemblyPath))
+		{
+			Logger::Log("Couldn't load .net assembly. Did you forget to build the .net project?", ".net", CRITICAL);
+			return;
+		}
+
+		const std::string absoluteAssemblyPath = FileSystem::Root + assemblyPath;
+		m_GameAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
+
+		for (auto& type : m_GameAssembly.GetTypes())
+		{
+			Logger::Log(std::string("Detected type: ") + std::string(type->GetName()), ".net");
+			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetName()), ".net");
+
+			const std::string baseTypeName = std::string(type->GetBaseType().GetName());
+			if (baseTypeName == "Entity")
+			{
+				// We have found an entity script.
+				m_GameEntityTypes[std::string(type->GetName())] = type;
+			}
+		}
+	}
+
+	void ScriptingEngineNet::RegisterEntityScript(Entity& entity)
+	{
+		if (!entity.IsValid())
+		{
+			Logger::Log("Failed to register entity .net script: Entity not valid.", ".net", CRITICAL);
+			return;
+		}
+
+		if (!entity.HasComponent<NetScriptComponent>())
+		{
+			Logger::Log("Failed to register entity .net script: Entity doesn't have a .net script component.", ".net", CRITICAL);
+			return;
+		}
+
+		auto& component = entity.GetComponent<NetScriptComponent>();
+		const auto& filePath = component.ScriptPath;
+		if (filePath.empty())
+		{
+			Logger::Log("Skipped .net entity script since it was empty.", ".net", VERBOSE);
+			return;
+		}
+
+		if (!FileSystem::FileExists(filePath))
+		{
+			Logger::Log("Skipped .net entity script: The file path doesn't exist.", ".net", WARNING);
+			return;
+		}
+
+		// We can now scan the file and look for this pattern: class XXXXX : Entity
+		// Warning, this doesnt do any bound check so if there is a semicolon at the end 
+		// of the file. IT MIGHT CRASH HERE. POTENTIALLY - I have not tested.
+		// -----------------------------------------------------
+		std::string fileContent = FileSystem::ReadFile(filePath);
+		fileContent = fileContent.substr(3, fileContent.size());
+		fileContent = String::RemoveWhiteSpace(fileContent);
+
+		// Find class token
+		size_t classTokenPos = fileContent.find("class");
+		if (classTokenPos == std::string::npos)
+		{
+			Logger::Log("Skipped .net entity script: file doesnt contain entity class.", ".net", WARNING);
+			return;
+		}
+
+		size_t classNameStartIndex = classTokenPos + 5; // 4 letter: class + 1 for next char
+
+		// Find semi-colon token
+		size_t semiColonPos = fileContent.find(":");
+		if (semiColonPos == std::string::npos || semiColonPos < classTokenPos)
+		{
+			Logger::Log("Skipped .net entity script: Not class inheriting Entity was found.", ".net", WARNING);
+			return;
+		}
+
+		size_t classNameLength = semiColonPos - classNameStartIndex;
+
+		const std::string className = fileContent.substr(classNameStartIndex, classNameLength);
+
+		if(m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
+		{
+			// The class name parsed in the file was not found in the game's DLL.
+			const std::string& msg = "Skipped .net entity script: \n Class: " + 
+				className + " not found in " + std::string(m_GameAssembly.GetName());
+			Logger::Log(msg, ".net", CRITICAL);
+			return;
+		}
+
+		auto classInstance = m_GameEntityTypes[className]->CreateInstance();
+		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
+	}
+
+	Coral::ManagedObject ScriptingEngineNet::GetEntityScript(const Entity& entity)
+	{
+		if (!HasEntityScriptInstance(entity))
+		{
+			Logger::Log("Failed to get entity .Net script instance, doesn't exist", ".net", CRITICAL);
+			throw std::exception("Failed to get entity .Net script instance, doesn't exist");
+		}
+
+		return m_EntityToManagedObjects[entity.GetID()];
+	}
+
+	bool ScriptingEngineNet::HasEntityScriptInstance(const Entity& entity)
+	{
+		return m_EntityToManagedObjects.find(entity.GetID()) != m_EntityToManagedObjects.end();
+	}
+
+	void ScriptingEngineNet::GenerateSolution(const std::string& path, const std::string& projectName)
+	{
+		// Create .Net directory in projects folder.
+		const auto netDirectionPath = '/' + m_NetDirectory + '/';
+		const auto netDir = path + netDirectionPath;
+		if (!FileSystem::DirectoryExists(netDirectionPath))
+		{
+			FileSystem::MakeDirectory(netDirectionPath);
+		}
+
+		// Copy engine assembly to projects folder.
+		const std::vector<std::string> dllToCopy =
+		{
+			m_EngineAssemblyName
+		};
+
+		for (const auto& fileToCopy : dllToCopy)
+		{
+			std::filesystem::copy_file(fileToCopy, netDir + fileToCopy, std::filesystem::copy_options::overwrite_existing);
+		}
+
+		// Generate premake5 templates
+		// ----------------------------------------
+		const std::string cleanProjectName = String::Sanitize(projectName);
+		const std::string premakeScript = R"(
+workspace ")" + cleanProjectName + R"("
+	project ")" + cleanProjectName + R"("
+		language "C#"
+		dotnetframework "net7.0"
+
+		kind "SharedLib"
+			clr "Unsafe"
+	
+		-- Don't specify architecture here. (see https://github.com/premake/premake-core/issues/1758)
+
+		files 
+		{
+			"**.cs"
+		}
+    
+		links 
+		{
+			".net/NuakeNet"
+		}
+)";
+
+		// Writting premake5 templates in project's directory
+		// ----------------------------------------
+		FileSystem::BeginWriteFile("premake5.lua");
+		FileSystem::WriteLine(premakeScript);
+		FileSystem::EndWriteFile();
+
+		// Execute premake script, generating .sln
+		OS::ExecuteCommand("cd " + path + " && premake5 vs2022");
+
+		// Open solution file in visual studio
+		OS::OpenIn(path + cleanProjectName + ".sln");
+
+		// Delete premake script
+		FileSystem::DeleteFileFromPath(FileSystem::Root + "/premake5.lua");
+	}
+
+	void ScriptingEngineNet::CreateEntityScript(const std::string & path, const std::string& entityName)
+	{
+		const std::string scriptTemplate = R"(
+using )" + m_Scope + R"(;
+
+namespace NuakeShowcase 
+{
+	class )" + entityName + R"( 
+}
+)";
+	}
+
 }

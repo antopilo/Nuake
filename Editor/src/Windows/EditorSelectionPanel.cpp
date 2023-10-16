@@ -112,6 +112,8 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mTransformPanel.Draw(entity);
     mLightPanel.Draw(entity);
     mScriptPanel.Draw(entity);
+	mNetScriptPanel.Draw(entity);
+	mAudioEmitterPanel.Draw(entity);
 	mParticleEmitterPanel.Draw(entity);
     mSpritePanel.Draw(entity);
     mMeshPanel.Draw(entity);
@@ -127,6 +129,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
 	mAudioEmitterPanel.Draw(entity);
+
 }
 
 void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
@@ -144,6 +147,7 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
         if (ImGui::BeginPopup("ComponentPopup"))
         {
 			MenuItemComponent("Wren Script", WrenScriptComponent);
+			MenuItemComponent("C# Script", NetScriptComponent);
 			MenuItemComponent("Camera", CameraComponent);
 			MenuItemComponent("Light", LightComponent);
 			ImGui::Separator();

@@ -59,11 +59,13 @@ namespace Nuake
 		Image,
 		Material,
 		Script,
+		NetScript,
 		Project,
 		Prefab,
 		Scene,
 		Wad,
 		Map,
+		Assembly
 	};
 
 	class File
@@ -124,6 +126,16 @@ namespace Nuake
 				return FileType::Map;
 			}
 
+			if (ext == ".dll")
+			{
+				return FileType::Assembly;
+			}
+
+			if (ext == ".cs")
+			{
+				return FileType::NetScript;
+			}
+
 			return FileType::Unkown;
 		}
 
@@ -168,6 +180,16 @@ namespace Nuake
 			if (ext == ".map")
 			{
 				return "Map";
+			}
+
+			if (ext == ".map")
+			{
+				return "Assembly";
+			}
+
+			if (ext == ".cs")
+			{
+				return "C# Script";
 			}
 
 			return "File";

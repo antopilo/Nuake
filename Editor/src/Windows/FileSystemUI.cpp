@@ -274,6 +274,10 @@ namespace Nuake
             {
                 dragType = "_Script";
             }
+            else if (fileExtension == ".cs")
+            {
+                dragType = "_NetScript";
+            }
             else if (fileExtension == ".map")
             {
                 dragType = "_Map";

@@ -1,5 +1,6 @@
 #include "ScriptingSystem.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
+#include "src/Scene/Components/NetScriptComponent.h"
 #include "src/Scene/Scene.h"
 #include "Engine.h"
 
@@ -17,14 +18,12 @@ namespace Nuake
 	{
 		ScriptingEngine::Init();
 
-		ScriptingEngineNet::Get().Initialize();
-
 		Logger::Log("Initializing ScriptingSystem");
 
-		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto& e : entities)
+		auto wrenEntities = m_Scene->m_Registry.view<WrenScriptComponent>();
+		for (auto& e : wrenEntities)
 		{
-			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
+			WrenScriptComponent& wren = wrenEntities.get<WrenScriptComponent>(e);
 
 			if (!wren.mWrenScript)
 				continue;
@@ -39,6 +38,27 @@ namespace Nuake
 
 			wren.mWrenScript->SetScriptableEntityID((int)e);
 			wren.mWrenScript->CallInit();
+		}
+
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		scriptingEngineNet.Initialize();
+		scriptingEngineNet.LoadProjectAssembly(Engine::GetProject());
+
+		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+		for (auto& e : netEntities)
+		{
+			NetScriptComponent& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+
+			if (netScriptComponent.ScriptPath.empty())
+				continue;
+
+			// Creates an instance of the entity script in C#
+			auto entity = Entity{ e, m_Scene };
+			scriptingEngineNet.RegisterEntityScript(entity);
+
+			// We can now call on init on it.
+			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+			scriptInstance.InvokeMethod("OnInit");
 		}
 
 		return true;
@@ -57,6 +77,20 @@ namespace Nuake
 			if (wren.mWrenScript != nullptr)
 				wren.mWrenScript->CallUpdate(ts);
 		}
+
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+		for (auto& e : netEntities)
+		{
+			NetScriptComponent& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+
+			if (netScriptComponent.ScriptPath.empty())
+				continue;
+
+			auto entity = Entity{ e, m_Scene };
+			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
+		}
 	}
 
 
@@ -72,6 +106,20 @@ namespace Nuake
 
 			if (wren.mWrenScript != nullptr)
 				wren.mWrenScript->CallFixedUpdate(ts);
+		}
+
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+		for (auto& e : netEntities)
+		{
+			NetScriptComponent& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+
+			if (netScriptComponent.ScriptPath.empty())
+				continue;
+
+			auto entity = Entity{ e, m_Scene };
+			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+			scriptInstance.InvokeMethod("OnFixedUpdate", ts.GetSeconds());
 		}
 	}
 
@@ -94,6 +142,22 @@ namespace Nuake
 			
 		}
 
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+		for (auto& e : netEntities)
+		{
+			NetScriptComponent& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+
+			if (netScriptComponent.ScriptPath.empty())
+				continue;
+
+			// Creates an instance of the entity script in C#
+			auto entity = Entity{ e, m_Scene };
+			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+			scriptInstance.InvokeMethod("OnDestroy");
+		}
+
 		ScriptingEngine::Close();
+		ScriptingEngineNet::Get().Uninitialize();
 	}
 }

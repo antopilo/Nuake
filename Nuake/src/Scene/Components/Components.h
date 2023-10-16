@@ -24,4 +24,5 @@
 #include "BoxCollider.h"
 #include "AudioEmitterComponent.h"
 #include "WrenScriptComponent.h"
+#include "NetScriptComponent.h"
 #include "../Entities/Entity.h"

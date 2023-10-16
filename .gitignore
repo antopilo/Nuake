@@ -857,3 +857,8 @@ bin-int
 imgui.ini
 .vscode/launch.json
 .directory
+Nuake/dependencies/glad/bin-obj
+Nuake/dependencies/glad/glad.vcxproj
+Nuake/dependencies/glad/glad.vcxproj.filters
+*.vcxproj
+*.csproj
