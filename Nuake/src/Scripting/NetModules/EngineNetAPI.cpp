@@ -9,7 +9,7 @@ namespace Nuake {
 
 	void EngineNetAPI::RegisterMethods()
 	{
-		RegisterMethod("LoggerLogIcall", (void*)(&Log));
+		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
 	}
 
 }

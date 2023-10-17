@@ -4,14 +4,16 @@
 #include "src/Core/FileSystem.h"
 #include "src/Core/OS.h"
 #include "src/Resource/Project.h"
+#include "src/Scene/Components/NetScriptComponent.h"
 
 #include "NetModules/EngineNetAPI.h"
+#include "NetModules/InputNetAPI.h"
+#include "NetModules/SceneNetAPI.h"
 
 #include <Coral/HostInstance.hpp>
 #include <Coral/GC.hpp>
 #include <Coral/NativeArray.hpp>
 #include <Coral/Attribute.hpp>
-#include <src/Scene/Components/NetScriptComponent.h>
 
 
 void ExceptionCallback(std::string_view InMessage)
@@ -20,19 +22,29 @@ void ExceptionCallback(std::string_view InMessage)
 	Nuake::Logger::Log(message, ".net", Nuake::CRITICAL);
 }
 
+
 namespace Nuake
 {
 	ScriptingEngineNet::ScriptingEngineNet()
 	{
 		// Initialize Coral
 		// ----------------------------------
-		
+		Coral::HostSettings settings =
+		{
+			.CoralDirectory = "",
+			.ExceptionCallback = ExceptionCallback
+		};
+
+		m_HostInstance = new Coral::HostInstance();
+		m_HostInstance->Initialize(settings);
 
 		// Initialize API modules
 		// ----------------------------------
 		m_Modules =
 		{
-			CreateRef<EngineNetAPI>()
+			CreateRef<EngineNetAPI>(),
+			CreateRef<InputNetAPI>(), 
+			CreateRef<SceneNetAPI>()
 		};
 
 		for (auto& m : m_Modules)
@@ -54,16 +66,7 @@ namespace Nuake
 
 	void ScriptingEngineNet::Initialize()
 	{
-		Coral::HostSettings settings =
-		{
-			.CoralDirectory = "",
-			.ExceptionCallback = ExceptionCallback
-		};
-
-		m_HostInstance = new Coral::HostInstance();
-		m_HostInstance->Initialize(settings);
-
-		m_LoadContext = std::move(m_HostInstance->CreateAssemblyLoadContext(m_ContextName));
+		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
 
 		// Load Nuake assembly DLL
 		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
@@ -73,10 +76,10 @@ namespace Nuake
 		// --------------------------------------------------
 		for (const auto& netModule : m_Modules)
 		{
-			const std::string inClassName = m_Scope + '.' + netModule->GetModuleName();
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
-				m_NuakeAssembly.AddInternalCall(inClassName, methodName, methodPtr);
+				auto namespaceClassSplit = String::Split(methodName, '.');
+				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
 			}
 		}
 
@@ -85,19 +88,17 @@ namespace Nuake
 
 	void ScriptingEngineNet::Uninitialize()
 	{
-		// We have to manually destroy every managed object we have created
 		for (auto& [entity, managedObject] : m_EntityToManagedObjects)
 		{
 			managedObject.Destroy();
 		}
 
-		Coral::GC::Collect(1, Coral::GCCollectionMode::Forced);
-		Coral::GC::WaitForPendingFinalizers();
+		m_GameEntityTypes.clear();
+		Coral::GC::Collect();
 
 		m_HostInstance->UnloadAssemblyLoadContext(m_LoadContext);
 
 		m_EntityToManagedObjects.clear();
-		m_GameEntityTypes.clear();
 	}
 
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
