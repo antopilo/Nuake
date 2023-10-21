@@ -247,16 +247,23 @@ namespace Nuake
         if (selected)
         {
             if (ImGui::IsMouseDoubleClicked(0))
-            {
-                if (file->GetFileType() == FileType::Map)
+            { 
+                switch (file->GetFileType())
                 {
-                    OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+                    case FileType::Map:
+                        OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+                        break;
+                    case FileType::NetScript:
+                        OS::OpenIn(file->GetAbsolutePath());
+                        break;
+                    case FileType::Scene:
+                        shouldOpenScene = true;
+                        break;
+                    case FileType::Solution:
+                        OS::OpenIn(file->GetAbsolutePath());
+                        break;
                 }
-
-                if (file->GetFileType() == FileType::Scene)
-                {
-                    shouldOpenScene = true;
-                }
+                
             }
             
             Editor->Selection = EditorSelection(file);
@@ -401,9 +408,6 @@ namespace Nuake
         //    }
         //}
         ImGui::PopStyleVar();
-
-
-        
 
         const std::string openSceneId = "Open Scene" + std::string("##") + hoverMenuId;
         
@@ -632,7 +636,7 @@ namespace Nuake
                         }
 			            else
 			            {
-			                Logger::Log("[FileSystem] Cannot create script files that starts with a number.", "editor", CRITICAL);
+			                Logger::Log("Cannot create script files that starts with a number.", "filesystem", CRITICAL);
 			            }
 			        }
 			    }
@@ -749,7 +753,10 @@ namespace Nuake
                     const auto buttonWidth = cursorEnd - cursorStart;
                     if (ImGui::Button((std::string(ICON_FA_ANGLE_RIGHT)).c_str(), buttonSize))
                     {
-                        // TODO
+                        if (Editor->Selection.Type == EditorSelectionType::Directory)
+                        {
+                            m_CurrentDirectory = Editor->Selection.Directory;
+                        }
                     }
                    
                     const uint32_t numButtonAfterPathBrowser = 2;
@@ -806,13 +813,6 @@ namespace Nuake
                     if (ImGui::Button((std::string(ICON_FA_FOLDER_OPEN)).c_str(), buttonSize))
                     {
                         OS::OpenIn(m_CurrentDirectory->FullPath);
-                    }
-
-                    ImGui::SameLine();
-
-                    if (ImGui::Button((std::string(ICON_FA_ELLIPSIS_V)).c_str(), buttonSize))
-                    {
-                        // TODO
                     }
 
                     ImGui::PopStyleColor(); // Button color

@@ -2017,6 +2017,14 @@ namespace Nuake {
                     Nuake::ScriptingEngineNet::Get().GenerateSolution(FileSystem::Root, Engine::GetProject()->Name);
                     Nuake::Logger::Log("Generated Solution.");
                 }
+
+#ifdef NK_DEBUG
+                if (ImGui::MenuItem("Copy Nuake.NET", NULL))
+                {
+                    Nuake::ScriptingEngineNet::Get().CopyNuakeNETAssemblies(FileSystem::Root);
+                    Nuake::Logger::Log("Copied Nuake.Net Assemblies.");
+                }
+#endif // NK_DEBUG
                 ImGui::EndMenu();
             }
             

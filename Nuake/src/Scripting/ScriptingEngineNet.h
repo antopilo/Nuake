@@ -55,6 +55,7 @@ namespace Nuake {
 		Coral::ManagedObject GetEntityScript(const Entity& entity);
 		bool HasEntityScriptInstance(const Entity& entity);
 
+		void CopyNuakeNETAssemblies(const std::string& path);
 		void GenerateSolution(const std::string& path, const std::string& projectName);
 		void CreateEntityScript(const std::string& path, const std::string& entityName);
 	};

@@ -161,27 +161,29 @@ namespace Nuake
 		Right = glm::normalize(glm::cross(Up, Direction));
 		
 		
-		if (Input::IsMouseButtonDown(2))
+		if (controlled)
 		{
-			Vector3 movement = Vector3(0);
-			const float deltaX = x - mouseLastX;
-			const float deltaY = y - mouseLastY;
-			movement += Right * (deltaX * ts);
-			movement += Up * (deltaY * ts);
-			Translation += Vector3(movement) * 0.5f;
+			if (Input::IsMouseButtonDown(2))
+			{
+				Vector3 movement = Vector3(0);
+				const float deltaX = x - mouseLastX;
+				const float deltaY = y - mouseLastY;
+				movement += Right * (deltaX * ts);
+				movement += Up * (deltaY * ts);
+				Translation += Vector3(movement) * 0.5f;
 
-			mouseLastX = x;
-			mouseLastY = y;
-			controlled = true;
+				mouseLastX = x;
+				mouseLastY = y;
+				controlled = true;
 
-			SetDirection(glm::normalize(Direction));
+				SetDirection(glm::normalize(Direction));
+			}
+			else if (Input::YScroll != 0)
+			{
+				Translation += Vector3(Direction) * Input::YScroll;
+				Input::YScroll = 0.0f;
+			}
 		}
-		else if (Input::YScroll != 0)
-		{
-			Translation += Vector3(Direction) * Input::YScroll;
-			Input::YScroll = 0.0f;
-		}
-		
 
 		SetDirection(glm::normalize(Direction));
 

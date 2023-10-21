@@ -65,7 +65,8 @@ namespace Nuake
 		Scene,
 		Wad,
 		Map,
-		Assembly
+		Assembly,
+		Solution
 	};
 
 	class File
@@ -134,6 +135,10 @@ namespace Nuake
 			if (ext == ".cs")
 			{
 				return FileType::NetScript;
+			}
+			if (ext == ".sln")
+			{
+				return FileType::Solution;
 			}
 
 			return FileType::Unkown;

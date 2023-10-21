@@ -216,7 +216,7 @@ namespace Nuake
 		return m_EntityToManagedObjects.find(entity.GetID()) != m_EntityToManagedObjects.end();
 	}
 
-	void ScriptingEngineNet::GenerateSolution(const std::string& path, const std::string& projectName)
+	void ScriptingEngineNet::CopyNuakeNETAssemblies(const std::string& path)
 	{
 		// Create .Net directory in projects folder.
 		const auto netDirectionPath = '/' + m_NetDirectory + '/';
@@ -236,6 +236,11 @@ namespace Nuake
 		{
 			std::filesystem::copy_file(fileToCopy, netDir + fileToCopy, std::filesystem::copy_options::overwrite_existing);
 		}
+	}
+
+	void ScriptingEngineNet::GenerateSolution(const std::string& path, const std::string& projectName)
+	{
+		CopyNuakeNETAssemblies(path);
 
 		// Generate premake5 templates
 		// ----------------------------------------
