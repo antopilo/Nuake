@@ -62,39 +62,64 @@ namespace Nuake {
 		SPRITE
 	};
 
-	bool EntityHasComponent(uint32_t handle, uint32_t componentEnumValue)
+	bool EntityHasComponent(int id, int componentType)
 	{
-		Entity entity = { (entt::entity)handle, Engine::GetCurrentScene().get()};
+		uint32_t componentEnumValue = 3;
+		//Entity entity = Engine::GetCurrentScene()->GetEntityByID(id);
+		Entity entity = { (entt::entity)(id), Engine::GetCurrentScene().get()};
 
-		if (entity.IsValid())
+		if (!entity.IsValid())
 		{
 			return false;
 		}
 
 		switch (static_cast<ComponentTypes>(componentEnumValue))
 		{
-		case PARENT: return entity.HasComponent<ParentComponent>();
-		case NAME: return entity.HasComponent<NameComponent>();
-		case PREFAB: return entity.HasComponent<PrefabComponent>();
-		case TRANSFORM: return entity.HasComponent<TransformComponent>();
-		case LIGHT: return entity.HasComponent<LightComponent>();
-		case CAMERA: return entity.HasComponent<CameraComponent>();
-		case AUDIO_EMITTER: return entity.HasComponent<AudioEmitterComponent>();
-		case MODEL: return entity.HasComponent<ModelComponent>();
-		case SKINNED_MODEL: return entity.HasComponent<SkinnedModelComponent>();
-		case BONE: return entity.HasComponent<BoneComponent>();
-		case BOX_COLLIDER: return entity.HasComponent<BoxColliderComponent>();
-		case SPHERE_COLLIDER: return entity.HasComponent<SphereColliderComponent>();
-		case CAPSULE_COLLIDER: return entity.HasComponent<CapsuleColliderComponent>();
-		case CYLINDER_COLLIDER: return entity.HasComponent<CylinderColliderComponent>();
-		case MESH_COLLIDER: return entity.HasComponent<MeshColliderComponent>();
-		case CHARACTER_CONTROLLER: return entity.HasComponent<CharacterControllerComponent>();
-		case PARTICLE_EMITTER: return entity.HasComponent<ParticleEmitterComponent>();
-		case QUAKE_MAP: return entity.HasComponent<QuakeMapComponent>();
-		case BSP_BRUSH: return entity.HasComponent<BSPBrushComponent>();
-		case SPRITE: return entity.HasComponent<SpriteComponent>();
-		default:
-			return false;
+			case PARENT:				return entity.HasComponent<ParentComponent>();
+			case NAME:					return entity.HasComponent<NameComponent>();
+			case PREFAB:				return entity.HasComponent<PrefabComponent>();
+			case TRANSFORM:				return entity.HasComponent<TransformComponent>();
+			case LIGHT:					return entity.HasComponent<LightComponent>();
+			case CAMERA:				return entity.HasComponent<CameraComponent>();
+			case AUDIO_EMITTER:			return entity.HasComponent<AudioEmitterComponent>();
+			case MODEL:					return entity.HasComponent<ModelComponent>();
+			case SKINNED_MODEL:			return entity.HasComponent<SkinnedModelComponent>();
+			case BONE:					return entity.HasComponent<BoneComponent>();
+			case BOX_COLLIDER:			return entity.HasComponent<BoxColliderComponent>();
+			case SPHERE_COLLIDER:		return entity.HasComponent<SphereColliderComponent>();
+			case CAPSULE_COLLIDER:		return entity.HasComponent<CapsuleColliderComponent>();
+			case CYLINDER_COLLIDER:		return entity.HasComponent<CylinderColliderComponent>();
+			case MESH_COLLIDER:			return entity.HasComponent<MeshColliderComponent>();
+			case CHARACTER_CONTROLLER:	return entity.HasComponent<CharacterControllerComponent>();
+			case PARTICLE_EMITTER:		return entity.HasComponent<ParticleEmitterComponent>();
+			case QUAKE_MAP:				return entity.HasComponent<QuakeMapComponent>();
+			case BSP_BRUSH:				return entity.HasComponent<BSPBrushComponent>();
+			case SPRITE:				return entity.HasComponent<SpriteComponent>();
+			default:
+				return false;
+		}
+	}
+
+	void TransformSetPosition(int entityId, float x, float y, float z)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
+		{
+			auto& component = entity.GetComponent<TransformComponent>();
+			component.SetLocalPosition({ x, y, z });
+		}
+	}
+
+	void TransformRotate(int entityId, float x, float y, float z)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
+		{
+			Quat quat = QuatFromEuler(x, y, z);
+			auto& component = entity.GetComponent<TransformComponent>();
+			component.SetLocalRotation(quat);
 		}
 	}
 
@@ -102,6 +127,10 @@ namespace Nuake {
 	{
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
+
+		// Components
+		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
+		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
 	}
 
 }

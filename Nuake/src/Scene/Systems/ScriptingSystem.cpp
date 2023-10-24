@@ -32,7 +32,7 @@ namespace Nuake
 			
 			if (!wren.mWrenScript->HasCompiledSuccesfully())
 			{
-				Logger::Log("ScriptingSystem failed");
+				Logger::Log("Failed to compile Wren script: " + wren.Script, "scripting system");
 				return false;
 			}
 

@@ -43,7 +43,7 @@ namespace Nuake
 		m_Modules =
 		{
 			CreateRef<EngineNetAPI>(),
-			CreateRef<InputNetAPI>(), 
+			CreateRef<InputNetAPI>(),
 			CreateRef<SceneNetAPI>()
 		};
 
@@ -79,7 +79,7 @@ namespace Nuake
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
 				auto namespaceClassSplit = String::Split(methodName, '.');
-				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+ 				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
 			}
 		}
 
@@ -93,11 +93,11 @@ namespace Nuake
 			managedObject.Destroy();
 		}
 
-		m_GameEntityTypes.clear();
 		Coral::GC::Collect();
 
 		m_HostInstance->UnloadAssemblyLoadContext(m_LoadContext);
 
+		m_GameEntityTypes.clear();
 		m_EntityToManagedObjects.clear();
 	}
 
@@ -123,8 +123,7 @@ namespace Nuake
 			const std::string baseTypeName = std::string(type->GetBaseType().GetName());
 			if (baseTypeName == "Entity")
 			{
-				// We have found an entity script.
-				m_GameEntityTypes[std::string(type->GetName())] = type;
+				m_GameEntityTypes[std::string(type->GetName())] = type; // We have found an entity script.
 			}
 		}
 	}
@@ -197,6 +196,12 @@ namespace Nuake
 		}
 
 		auto classInstance = m_GameEntityTypes[className]->CreateInstance();
+
+		int handle = entity.GetHandle();
+		int id = entity.GetID();
+		classInstance.SetPropertyValue("ECSHandle", handle);
+		classInstance.SetPropertyValue("ID", id);
+
 		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
 	}
 
