@@ -6273,7 +6273,45 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         if (flags & ImGuiTreeNodeFlags_Bullet)
             RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.60f, text_pos.y + g.FontSize * 0.5f), text_col);
         else if (!is_leaf)
-            RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 1.0f);
+        {
+            const float scale = 1.0f;
+            const float h = window->DrawList->_Data->FontSize * 1.00f;
+            float r = h * 0.30f * scale;
+            const auto pos = ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y);
+            ImVec2 center = pos + ImVec2(h * 0.50f, h * 0.50f * scale);
+
+            ImVec2 a, b, c;
+            if (is_open)
+            {
+                if (flags & ImGuiTreeNodeFlags_UpsideDownArrow)
+                {
+                    a = ImVec2(+0.866f, +0.750f) * r;
+                    b = ImVec2(+0.866f, -0.866f) * r;
+                    c = ImVec2(+0.0f, -0.866f) * r;
+                }
+                else
+                {
+                   // a = ImVec2(+0.866f, -0.750f) * r;
+                   // b = ImVec2(+0.866f, +0.750) * r;
+                   // c = ImVec2(+0.0f, +0.750f) * r;
+
+                    a = ImVec2(+0.866f, +0.750f) * r;
+                    b = ImVec2(-0.866f, +0.750f) * r;
+                    c = ImVec2(+0.866f, -0.750f) * r;
+                }
+            }
+            else
+            {
+                a = ImVec2(+0.750f, +0.000f) * r;
+                b = ImVec2(-0.750f, +0.866f) * r;
+                c = ImVec2(-0.750f, -0.866f) * r;
+            }
+
+            window->DrawList->AddTriangleFilled(center + a, center + b, center + c, text_col);
+            //RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 1.0f);
+        }
+       
+            //
         else // Leaf without bullet, left-adjusted text
             text_pos.x -= text_offset_x -padding.x;
         if (flags & ImGuiTreeNodeFlags_ClipLabelForTrailingButton)
@@ -6295,7 +6333,42 @@ bool ImGui::TreeNodeBehavior(ImGuiID id, ImGuiTreeNodeFlags flags, const char* l
         if (flags & ImGuiTreeNodeFlags_Bullet)
             RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.5f, text_pos.y + g.FontSize * 0.5f), text_col);
         else if (!is_leaf)
-            RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ((flags & ImGuiTreeNodeFlags_UpsideDownArrow) ? ImGuiDir_Up : ImGuiDir_Down) : ImGuiDir_Right, 0.70f);
+        {
+            const float scale = 0.70f;
+            const float h = window->DrawList->_Data->FontSize * 1.00f;
+            float r = h * 0.30f * scale;
+            const auto pos = ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f);
+            ImVec2 center = pos + ImVec2(h * 0.50f, h * 0.50f * scale);
+
+            ImVec2 a, b, c;
+            if (is_open)
+            {
+                if (flags & ImGuiTreeNodeFlags_UpsideDownArrow)
+                {
+                    a = ImVec2(+0.866f, +0.750f) * r;
+                    b = ImVec2(+0.866f, -0.866f) * r;
+                    c = ImVec2(+0.0f, -0.866f) * r;
+                }
+                else
+                {
+                    // a = ImVec2(+0.866f, -0.750f) * r;
+                    // b = ImVec2(+0.866f, +0.750) * r;
+                    // c = ImVec2(+0.0f, +0.750f) * r;
+
+                    a = ImVec2(+0.866f, +0.750f) * r;
+                    b = ImVec2(-0.866f, +0.750f) * r;
+                    c = ImVec2(+0.866f, -0.750f) * r;
+                }
+            }
+            else
+            {
+                a = ImVec2(+0.750f, +0.000f) * r;
+                b = ImVec2(-0.750f, +0.866f) * r;
+                c = ImVec2(-0.750f, -0.866f) * r;
+            }
+
+            window->DrawList->AddTriangleFilled(center + a, center + b, center + c, text_col);
+        }
         if (g.LogEnabled)
             LogSetNextTextDecoration(">", NULL);
         RenderText(text_pos, label, label_end, false);
