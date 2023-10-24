@@ -111,15 +111,30 @@ namespace Nuake {
             float needed = half - used;
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-            if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+
+            if (Engine::IsPlayMode())
             {
-                SceneSnapshot = Engine::GetCurrentScene()->Copy();
-                Engine::EnterPlayMode();
+                if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyReleased(GLFW_KEY_F5)))
+                {
+                    Engine::ExitPlayMode();
+                
+                    Engine::LoadScene(SceneSnapshot);
+                    Selection = EditorSelection();
+                }
+            }
+            else
+            {
+               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyReleased(GLFW_KEY_F5)))
+               {
+                    Engine::LoadScene(SceneSnapshot);
+                    Selection = EditorSelection();
+               }
             }
 
             ImGui::SameLine();
 
-            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
+            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyReleased(GLFW_KEY_F8)) && Engine::IsPlayMode())
             {
                 Engine::ExitPlayMode();
 
@@ -127,9 +142,40 @@ namespace Nuake {
                 Selection = EditorSelection();
             }
 
+
+            //if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
+            //{
+            //    SceneSnapshot = Engine::GetCurrentScene()->Copy();
+            //    Engine::EnterPlayMode();
+            //}
+            //
+            //ImGui::SameLine();
+            //
+            //if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
+            //{
+            //    Engine::ExitPlayMode();
+            //
+            //    Engine::LoadScene(SceneSnapshot);
+            //    Selection = EditorSelection();
+            //}
             ImGui::SameLine();
 
-            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - 120, 30));
+            ImGui::PopStyleColor();
+
+            float lineHeight = 130.0f;
+            float separatorHeight = lineHeight * 8.0f;
+            float separatorThickness = 1.0f;
+
+            ImVec2 curPos = ImGui::GetCursorPos();
+            ImVec2 min = ImVec2(curPos.x - separatorThickness, curPos.y - separatorHeight);
+            ImVec2 max = ImVec2(curPos.x + separatorThickness, curPos.y - separatorHeight);
+            ImGui::GetWindowDrawList()->AddRectFilled(min, max, IM_COL32(255, 255, 255, 32), 2.0f);
+
+            ImGui::SameLine();
+
+            const int sizeofRightPart = 160;
+
+            ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - sizeofRightPart, 30));
 
             ImGui::SameLine();
 

@@ -60,14 +60,10 @@ namespace Nuake
 		bool result = state == GLFW_RELEASE;
 
 		// First time pressed?
-		if (m_Keys.find(keycode) == m_Keys.end())
-			return result;
-
-		if (result && m_Keys[keycode] == true)
+		if (m_Keys.find(keycode) != m_Keys.end())
 		{
-			return true;
+			return result && m_Keys[keycode] == true;
 		}
-
 
 		return false;
 	}
