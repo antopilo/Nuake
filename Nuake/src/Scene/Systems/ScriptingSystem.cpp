@@ -93,7 +93,6 @@ namespace Nuake
 		}
 	}
 
-
 	void ScriptingSystem::FixedUpdate(Timestep ts)
 	{
 		if (!Engine::IsPlayMode())
@@ -122,7 +121,6 @@ namespace Nuake
 			scriptInstance.InvokeMethod("OnFixedUpdate", ts.GetSeconds());
 		}
 	}
-
 
 	void ScriptingSystem::Exit()
 	{

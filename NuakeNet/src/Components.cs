@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Coral.Managed.Interop;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -102,12 +103,27 @@ namespace Nuake.Net
 
     public class CameraComponent : IComponent
     {
+        internal static unsafe delegate*<int, NativeArray<float>> GetDirectionIcall;
+
         public CameraComponent(int entityId)
         {
             EntityID = entityId;
         }
 
         public float FOV { get; set; }
+
+        public Vector3 Direction
+        {
+            get
+            {
+                unsafe 
+                { 
+                    NativeArray<float> direction = GetDirectionIcall(EntityID);
+                    return new Vector3(direction[0], direction[1], direction[2]);
+                }
+            }
+        }
+
     }
 
     public class AudioEmitterComponent : IComponent
@@ -211,6 +227,9 @@ namespace Nuake.Net
 
     public class CharacterControllerComponent : IComponent
     {
+        internal static unsafe delegate*<int, float, float, float, void> MoveAndSlideIcall;
+        internal static unsafe delegate*<int, bool> IsOnGroundIcall;
+
         public CharacterControllerComponent(int entityId)
         {
             EntityID = entityId;
@@ -218,12 +237,12 @@ namespace Nuake.Net
 
         public void MoveAndSlide(Vector3 velocity)
         {
-
+            unsafe { MoveAndSlideIcall(EntityID, velocity.X, velocity.Y, velocity.Z); }
         }
 
         public bool IsOnGround()
         {
-            return false;
+            unsafe { return IsOnGroundIcall(EntityID); }
         }
     }
 
