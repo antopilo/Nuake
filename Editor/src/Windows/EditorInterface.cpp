@@ -115,7 +115,7 @@ namespace Nuake {
 
             if (Engine::IsPlayMode())
             {
-                if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyReleased(GLFW_KEY_F5)))
+                if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
                 {
                     Engine::ExitPlayMode();
                 
@@ -125,16 +125,16 @@ namespace Nuake {
             }
             else
             {
-               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyReleased(GLFW_KEY_F5)))
+               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
                {
-                    Engine::LoadScene(SceneSnapshot);
-                    Selection = EditorSelection();
+                   SceneSnapshot = Engine::GetCurrentScene()->Copy();
+                   Engine::EnterPlayMode();
                }
             }
 
             ImGui::SameLine();
 
-            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyReleased(GLFW_KEY_F8)) && Engine::IsPlayMode())
+            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
             {
                 Engine::ExitPlayMode();
 
