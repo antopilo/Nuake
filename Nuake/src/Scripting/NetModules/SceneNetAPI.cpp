@@ -2,23 +2,27 @@
 
 #include "Engine.h"
 #include "src/Scene/Entities/Entity.h"
-#include <src/Scene/Components/ParentComponent.h>
-#include <src/Scene/Components/PrefabComponent.h>
-#include <src/Scene/Components/CameraComponent.h>
-#include <src/Scene/Components/AudioEmitterComponent.h>
-#include <src/Scene/Components/ModelComponent.h>
-#include <src/Scene/Components/SkinnedModelComponent.h>
-#include <src/Scene/Components/BoneComponent.h>
-#include <src/Scene/Components/BoxCollider.h>
-#include <src/Scene/Components/SphereCollider.h>
-#include <src/Scene/Components/CapsuleColliderComponent.h>
-#include <src/Scene/Components/CylinderColliderComponent.h>
-#include <src/Scene/Components/MeshCollider.h>
-#include <src/Scene/Components/CharacterControllerComponent.h>
-#include <src/Scene/Components/ParticleEmitterComponent.h>
-#include <src/Scene/Components/BSPBrushComponent.h>
-#include <src/Scene/Components/SpriteComponent.h>
-#include <src/Scene/Components/QuakeMap.h>
+#include "src/Scene/Components/ParentComponent.h"
+#include "src/Scene/Components/PrefabComponent.h"
+#include "src/Scene/Components/CameraComponent.h"
+#include "src/Scene/Components/AudioEmitterComponent.h"
+#include "src/Scene/Components/ModelComponent.h"
+#include "src/Scene/Components/SkinnedModelComponent.h"
+#include "src/Scene/Components/BoneComponent.h"
+#include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components/SphereCollider.h"
+#include "src/Scene/Components/CapsuleColliderComponent.h"
+#include "src/Scene/Components/CylinderColliderComponent.h"
+#include "src/Scene/Components/MeshCollider.h"
+#include "src/Scene/Components/CharacterControllerComponent.h"
+#include "src/Scene/Components/ParticleEmitterComponent.h"
+#include "src/Scene/Components/BSPBrushComponent.h"
+#include "src/Scene/Components/SpriteComponent.h"
+#include "src/Scene/Components/QuakeMap.h"
+
+#include "src/Physics/PhysicsManager.h"
+
+#include <Coral/NativeArray.hpp>
 
 
 namespace Nuake {
@@ -123,6 +127,48 @@ namespace Nuake {
 		}
 	}
 
+	Coral::NativeArray<float> CameraGetDirection(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CameraComponent>())
+		{
+			auto& component = entity.GetComponent<CameraComponent>();
+			const Vector3 camDirection = component.CameraInstance->GetDirection();
+			return { camDirection.x, camDirection.y, camDirection.z };
+		}
+	}
+
+	void MoveAndSlide(int entityId, float vx, float vy, float vz)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& component = entity.GetComponent<CharacterControllerComponent>();
+
+			if (std::isnan(vx) || std::isnan(vy) || std::isnan(vz))
+			{
+				return; // Log message here? invalid input
+			}
+
+			component.GetCharacterController()->MoveAndSlide({ vx, vy, vz });
+		}
+	}
+
+	bool IsOnGround(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
+			return PhysicsManager::Get().GetWorld()->IsCharacterGrounded(entity);
+		}
+
+		return false;
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
@@ -131,6 +177,11 @@ namespace Nuake {
 		// Components
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
+
+		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
+
+		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
+		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
 	}
 
 }
