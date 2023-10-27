@@ -137,7 +137,6 @@ namespace Nuake
 			catch (std::exception* e)
 			{
 			}
-			
 		}
 
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();

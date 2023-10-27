@@ -63,7 +63,6 @@ namespace Nuake {
 			m_ListenerPosition = position;
 			m_ListenerDirection = direction;
 			m_ListenerUp = up;
-
 			m_Soloud->set3dListenerParameters(m_ListenerPosition.x, m_ListenerPosition.y, m_ListenerPosition.z,
 					m_ListenerDirection.x, m_ListenerDirection.y, m_ListenerDirection.z,
 					m_ListenerUp.x, m_ListenerUp.y, m_ListenerUp.z

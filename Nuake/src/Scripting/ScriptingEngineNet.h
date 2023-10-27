@@ -49,6 +49,7 @@ namespace Nuake {
 		void Initialize();
 		void Uninitialize();
 
+		void BuildProjectAssembly(Ref<Project> project);
 		void LoadProjectAssembly(Ref<Project> project);
 
 		void RegisterEntityScript(Entity& entity);

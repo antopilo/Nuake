@@ -34,7 +34,7 @@ namespace Nuake
 		Vector3 direction = currentCamera->GetDirection();
 		if (Engine::IsPlayMode())
 		{
-			direction *= Vector3(-1, -1, -1);
+			direction *= -1.0f;
 		}
 
 		audioManager.SetListenerPosition(currentCamera->GetTranslation(), std::move(direction), currentCamera->GetUp());

@@ -128,11 +128,25 @@ namespace Nuake {
                if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
                {
                    SceneSnapshot = Engine::GetCurrentScene()->Copy();
+
+                   ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                    Engine::EnterPlayMode();
+               }
+
+               if (ImGui::BeginItemTooltip())
+               {
+                   ImGui::Text("Build & Play");
+                   ImGui::EndTooltip();
                }
             }
 
             ImGui::SameLine();
+
+            const bool wasPlayMode = Engine::IsPlayMode();
+            if (!wasPlayMode)
+            {
+                ImGui::BeginDisabled();
+            }
 
             if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
             {
@@ -142,6 +156,19 @@ namespace Nuake {
                 Selection = EditorSelection();
             }
 
+            if(!wasPlayMode)
+            {
+                ImGui::EndDisabled();
+               
+            }
+            else
+            {
+                if (ImGui::BeginItemTooltip())
+                {
+                    ImGui::Text("Exit play mode");
+                    ImGui::EndTooltip();
+                }
+            }
 
             //if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
             //{
@@ -173,7 +200,7 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            const int sizeofRightPart = 160;
+            const int sizeofRightPart = 156;
 
             ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - sizeofRightPart, 30));
 
@@ -205,6 +232,25 @@ namespace Nuake {
             ImGui::Text(text.c_str());
 
             ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+
+            if (ImGui::Button(ICON_FA_HAMMER, ImVec2(30, 30)))
+            {
+                Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+            }
+
+            if (ImGui::BeginItemTooltip())
+            {
+                ImGui::Text("Built .Net project");
+                ImGui::EndTooltip();
+            }
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar();
 
             ImGui::PopStyleColor();
             ImGui::PopStyleVar();

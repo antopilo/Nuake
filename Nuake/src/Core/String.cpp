@@ -47,7 +47,7 @@ namespace Nuake
 		sanitizedKeyword = std::regex_replace(sanitizedKeyword, std::regex("[ _-]+"), "");
 
 		// Convert to lowercase
-		std::transform(sanitizedKeyword.begin(), sanitizedKeyword.end(), sanitizedKeyword.begin(), ::tolower);
+		//std::transform(sanitizedKeyword.begin(), sanitizedKeyword.end(), sanitizedKeyword.begin(), ::tolower);
 
 		return sanitizedKeyword;
 	}

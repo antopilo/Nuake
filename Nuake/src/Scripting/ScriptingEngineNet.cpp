@@ -101,6 +101,18 @@ namespace Nuake
 		m_EntityToManagedObjects.clear();
 	}
 
+	void ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
+	{
+		const std::string sanitizedProjectName = String::Sanitize(project->Name);
+		if (!FileSystem::FileExists(sanitizedProjectName + ".sln"))
+		{
+			Logger::Log("Couldn't find .net solution. Have you created a solution?", ".net", CRITICAL);
+			return;
+		}
+
+		OS::CompileSln(FileSystem::Root + sanitizedProjectName + ".sln");
+	}
+
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
 	{
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);

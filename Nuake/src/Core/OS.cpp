@@ -139,6 +139,16 @@ namespace Nuake {
 		return path;
 	}
 
+	void OS::CompileSln(const std::string& slnPath)
+	{
+		int result = system(std::string("dotnet build " + slnPath).c_str());
+
+		if (result != 0)
+		{
+			Logger::Log("Failed to execute `dotnet build` command.", "OS", CRITICAL);
+		}
+	}
+
 	void OS::OpenURL(const std::string& url)
 	{
 #ifdef NK_WIN
