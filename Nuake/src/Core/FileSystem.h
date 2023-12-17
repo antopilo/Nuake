@@ -66,7 +66,8 @@ namespace Nuake
 		Wad,
 		Map,
 		Assembly,
-		Solution
+		Solution,
+		Audio
 	};
 
 	class File
@@ -87,11 +88,14 @@ namespace Nuake
 		FileType GetFileType() const
 		{
 			std::string ext = GetExtension();
-			if (ext == ".png" || ext == "jpg")
+			if (ext == ".png" || ext == ".jpg")
 			{
 				return FileType::Image;
 			}
-
+			if (ext == ".ogg" || ext == ".wav")
+			{
+				return FileType::Audio;
+			}
 			if (ext == ".material")
 			{
 				return FileType::Material;

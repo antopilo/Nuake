@@ -320,7 +320,7 @@ namespace Nuake
         }
 
 
-        Ref<Texture> textureImage =TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png");
+        Ref<Texture> textureImage =TextureManager::Get()->GetTexture("Resources/Images/file_icon.png");
 
         const auto textureMgr = TextureManager::Get();
         const auto fileType = file->GetFileType();
@@ -335,7 +335,23 @@ namespace Nuake
         }
         else if (fileType == FileType::Project)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/logo.png");
+            textureImage = textureMgr->GetTexture("Resources/Images/project_icon.png");
+        }
+        else if (fileType == FileType::NetScript)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/csharp_icon.png");
+        }
+        else if (fileType == FileType::Scene)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/scene_icon.png");
+        }
+        else if (fileType == FileType::Script)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/script_file_icon.png");
+        }
+        else if (fileType == FileType::Audio)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/Audio_file_icon.png");
         }
 
         ImGui::SetCursorPos(prevCursor);
