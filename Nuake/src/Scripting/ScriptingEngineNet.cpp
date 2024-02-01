@@ -66,10 +66,18 @@ namespace Nuake
 
 	void ScriptingEngineNet::Initialize()
 	{
+		// Check if we have an .sln in the project.
+		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
+
+		if (!FileSystem::FileExists(absoluteAssemblyPath))
+		{
+			m_IsInitialized = false;
+			return;
+		}
+
 		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
 
 		// Load Nuake assembly DLL
-		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
 		m_NuakeAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
 
 		// Upload internal calls for each module
@@ -79,15 +87,22 @@ namespace Nuake
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
 				auto namespaceClassSplit = String::Split(methodName, '.');
- 				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
 			}
 		}
 
 		m_NuakeAssembly.UploadInternalCalls();
+
+		m_IsInitialized = true;
 	}
 
 	void ScriptingEngineNet::Uninitialize()
 	{
+		if (!m_IsInitialized)
+		{
+			return;
+		}
+
 		for (auto& [entity, managedObject] : m_EntityToManagedObjects)
 		{
 			managedObject.Destroy();
@@ -115,6 +130,11 @@ namespace Nuake
 
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
 	{
+		if (!m_IsInitialized)
+		{
+			return;
+		}
+
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
 		const std::string assemblyPath = "/bin/Debug/net7.0/" + sanitizedProjectName + ".dll";
 
@@ -142,6 +162,11 @@ namespace Nuake
 
 	void ScriptingEngineNet::RegisterEntityScript(Entity& entity)
 	{
+		if (!m_IsInitialized)
+		{
+			return;
+		}
+
 		if (!entity.IsValid())
 		{
 			Logger::Log("Failed to register entity .net script: Entity not valid.", ".net", CRITICAL);
@@ -230,6 +255,11 @@ namespace Nuake
 
 	bool ScriptingEngineNet::HasEntityScriptInstance(const Entity& entity)
 	{
+		if (!m_IsInitialized)
+		{
+			return false;
+		}
+
 		return m_EntityToManagedObjects.find(entity.GetID()) != m_EntityToManagedObjects.end();
 	}
 
