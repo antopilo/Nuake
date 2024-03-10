@@ -53,6 +53,7 @@
 
 #include <src/Resource/StaticResources.h>
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Threading/JobSystem.h>
 
 namespace Nuake {
     
@@ -127,10 +128,14 @@ namespace Nuake {
             {
                if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
                {
-                   SceneSnapshot = Engine::GetCurrentScene()->Copy();
+                   this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
-                   ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                   Engine::EnterPlayMode();
+                   auto job = [this]()
+                   {
+                        ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                   };
+
+                   JobSystem::Get().Dispatch(job, []() { Engine::EnterPlayMode(); });
                }
 
                if (ImGui::BeginItemTooltip())
@@ -240,7 +245,12 @@ namespace Nuake {
 
             if (ImGui::Button(ICON_FA_HAMMER, ImVec2(30, 30)))
             {
-                Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                JobSystem::Get().Dispatch([]() 
+                    {
+                        Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject()); 
+                    }, 
+                    []() {}
+                );
             }
 
             if (ImGui::BeginItemTooltip())
