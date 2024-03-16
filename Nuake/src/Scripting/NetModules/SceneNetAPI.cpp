@@ -169,6 +169,33 @@ namespace Nuake {
 		return false;
 	}
 
+	void Play(int entityId, Coral::NativeString animation)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<SkinnedModelComponent>())
+		{
+			auto& skinnedModel = entity.GetComponent<SkinnedModelComponent>();
+
+			if (skinnedModel.ModelResource)
+			{
+				auto& model = skinnedModel.ModelResource;
+
+				// Find animation from name
+				int animIndex = 0;
+				for (const auto& anim : model->GetAnimations())
+				{
+					if (anim->GetName() == animation.ToString())
+					{
+						model->PlayAnimation(animIndex);
+					}
+
+					animIndex++;
+				}
+			}
+		}
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
@@ -182,6 +209,8 @@ namespace Nuake {
 
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
+
+		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 	}
 
 }

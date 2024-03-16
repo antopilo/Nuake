@@ -152,10 +152,20 @@ namespace Nuake.Net
 
     public class SkinnedModelComponent : IComponent
     {
-        public SkinnedModelComponent(int entityId) { }
+        internal static unsafe delegate*<int, NativeString, void> PlayIcall;
+
+        public SkinnedModelComponent(int entityId) 
+        {
+            EntityID = entityId;
+        }
 
         public bool Playing { get; set; }
         public int CurrentAnimation { get; set; }
+
+        public void Play(String name)
+        {
+            unsafe { PlayIcall(EntityID, name); }
+        }
     }
 
     public class BoneComponent : IComponent
