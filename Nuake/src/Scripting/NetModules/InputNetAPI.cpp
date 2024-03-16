@@ -6,6 +6,18 @@
 
 namespace Nuake {
 
+	void ShowMouse(bool visible)
+	{
+		if (visible)
+		{
+			Input::ShowMouse();
+		}
+		else
+		{
+			Input::HideMouse();
+		}
+	}
+
 	bool IsKeyDown(int keyCode)
 	{
 		return Input::IsKeyDown(keyCode);
@@ -25,6 +37,7 @@ namespace Nuake {
 
 	void InputNetAPI::RegisterMethods()
 	{
+		RegisterMethod("Input.ShowMouseIcall", &ShowMouse);
 		RegisterMethod("Input.IsKeyDownIcall", &IsKeyDown);
 		RegisterMethod("Input.IsKeyPressedIcall", &IsKeyPressed);
 

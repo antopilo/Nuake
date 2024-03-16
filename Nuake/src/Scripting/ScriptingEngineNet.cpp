@@ -223,7 +223,7 @@ namespace Nuake
 		if (!HasEntityScriptInstance(entity))
 		{
 			Logger::Log("Failed to get entity .Net script instance, doesn't exist", ".net", CRITICAL);
-			throw std::exception("Failed to get entity .Net script instance, doesn't exist");
+			return Coral::ManagedObject();
 		}
 
 		return m_EntityToManagedObjects[entity.GetID()];

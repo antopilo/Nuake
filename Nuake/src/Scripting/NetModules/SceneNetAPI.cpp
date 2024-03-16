@@ -115,6 +115,19 @@ namespace Nuake {
 		}
 	}
 
+	Coral::NativeArray<float> TransformGetGlobalPosition(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
+		{
+			auto& component = entity.GetComponent<TransformComponent>();
+			const auto& globalPosition = component.GetGlobalPosition();
+			Coral::NativeArray<float> result = { globalPosition.x, globalPosition.y, globalPosition.z };
+			return result;
+		}
+	}
+
 	void TransformRotate(int entityId, float x, float y, float z)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -203,6 +216,7 @@ namespace Nuake {
 
 		// Components
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
+		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
 
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);

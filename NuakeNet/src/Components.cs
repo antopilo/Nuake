@@ -39,6 +39,7 @@ namespace Nuake.Net
 
     public class TransformComponent : IComponent
     {
+        internal static unsafe delegate*<int, NativeArray<float>> GetGlobalPositionIcall;
         internal static unsafe delegate*<int, float, float, float, void> SetPositionIcall;
         internal static unsafe delegate*<int, float, float, float, void> RotateIcall;
 
@@ -76,7 +77,18 @@ namespace Nuake.Net
                 unsafe { SetPositionIcall(EntityID, value.X, value.Y, value.Z); }
             }
         }
-        public Vector3 GlobalPosition { get; set; }
+        public Vector3 GlobalPosition 
+        {
+            get
+            {
+                unsafe 
+                { 
+                    NativeArray<float> result = GetGlobalPositionIcall(EntityID); 
+                    return new Vector3(result[0], result[1], result[2]);
+                }
+            }
+            set { }
+        }
     }
 
     public class LightComponent : IComponent

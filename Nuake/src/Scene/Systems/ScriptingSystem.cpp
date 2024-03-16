@@ -52,13 +52,22 @@ namespace Nuake
 			if (netScriptComponent.ScriptPath.empty())
 				continue;
 
-			// Creates an instance of the entity script in C#
 			auto entity = Entity{ e, m_Scene };
-			scriptingEngineNet.RegisterEntityScript(entity);
 
-			// We can now call on init on it.
-			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnInit");
+			// Creates an instance of the entity script in C#
+			scriptingEngineNet.RegisterEntityScript(entity);
+		}
+
+		for (auto& e : netEntities)
+		{
+			auto entity = Entity{ e, m_Scene };
+
+			if (entity.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity))
+			{
+				// We can now call on init on it.
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+				scriptInstance.InvokeMethod("OnInit");
+			}
 		}
 
 		return true;

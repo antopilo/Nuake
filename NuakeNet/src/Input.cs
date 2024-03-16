@@ -134,9 +134,15 @@ namespace Nuake.Net
 
     public class Input
     {
+        internal static unsafe delegate*<bool, void> ShowMouseIcall;
         internal static unsafe delegate*<int, bool> IsKeyDownIcall;
         internal static unsafe delegate*<int, bool> IsKeyPressedIcall;
         internal static unsafe delegate*<NativeArray<float>> GetMousePositionIcall;
+
+        public static void ShowMouse(bool visible)
+        {
+            unsafe { ShowMouseIcall(visible); }
+        }
 
         public static bool IsKeyDown(Key keys)
         {
