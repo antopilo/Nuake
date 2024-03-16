@@ -34,12 +34,11 @@ void main()
     
 	// sample middle
 	uint middleSample = texture(u_EntityTexture, uv).r;
-	float opacityMult = mix(0.0, 1.0, int(middleSample) == target);
 
     // Correct aspect ratio
     vec2 aspect = 1.0 / vec2(textureSize(u_EntityTexture, 0));
     
-	float hasMissed = 0.0f;
+	float hasHit = 0.0f;
 	vec4 fragColor = vec4(0.0, 0.0, 0.0, 0.0f);
 	for (float i = 0.0; i < TAU; i += TAU / steps) 
     {
@@ -47,13 +46,13 @@ void main()
         vec2 offset = vec2(sin(i), cos(i)) * aspect * radius;
 		uint col = texture(u_EntityTexture, uv + offset).r;
 		
-		if(col == target || col == 0)
+		if(col == target)
 		{
-			hasMissed = 1.0f;
+			hasHit = 1.0f;
 		}
 
 		// Mix outline with background
-		float alpha = smoothstep(0.5, 0.7, int(col != target) * hasMissed * 10.0f);
+		float alpha = smoothstep(0.5, 0.7, int(col != target) * hasHit * 10.0f);
 		fragColor = mix(fragColor, u_OutlineColor, alpha);
 	}
 	
@@ -62,5 +61,5 @@ void main()
         fragColor.a = 1.0f;
     }
     
-    FragColor = mix(vec4(0), fragColor, middleSample != target);
+    FragColor = mix(vec4(0), fragColor, middleSample != target && hasHit > 0.0f);
 }
