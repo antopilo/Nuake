@@ -42,7 +42,10 @@ void main()
     vec4 px_color = texture(gizmo_texture, a_UV).rgba;
     color = px_color * vec4(1, 1, 1, u_Opacity);
 
-    gEntityID = u_EntityID;
+    if(u_Opacity >= 0.5f)
+    {
+        gEntityID = u_EntityID;
+    }
 
     FragColor = color;
 }

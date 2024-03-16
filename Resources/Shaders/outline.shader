@@ -52,7 +52,7 @@ void main()
 		}
 
 		// Mix outline with background
-		float alpha = smoothstep(0.5, 0.7, int(col != target) * hasHit * 10.0f);
+		float alpha = smoothstep(0.5, 0.9, int(col != target) * hasHit * 10.0f);
 		fragColor = mix(fragColor, u_OutlineColor, alpha);
 	}
 	
