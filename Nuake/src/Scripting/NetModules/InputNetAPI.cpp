@@ -11,6 +11,11 @@ namespace Nuake {
 		return Input::IsKeyDown(keyCode);
 	}
 
+	bool IsKeyPressed(int keyCode)
+	{
+		return Input::IsKeyPressed(keyCode);
+	}
+
 	Coral::NativeArray<float> GetMousePosition()
 	{
 		Vector2 mousePosition = Input::GetMousePosition();
@@ -21,6 +26,8 @@ namespace Nuake {
 	void InputNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Input.IsKeyDownIcall", &IsKeyDown);
+		RegisterMethod("Input.IsKeyPressedIcall", &IsKeyPressed);
+
 		RegisterMethod("Input.GetMousePositionIcall", &GetMousePosition);
 	}
 
