@@ -370,7 +370,7 @@ namespace Nuake {
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
 
-            if (ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
+            if (!Engine::IsPlayMode() && ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 

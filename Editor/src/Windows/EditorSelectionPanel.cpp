@@ -170,6 +170,8 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 			MenuItemComponent("Quake map", QuakeMapComponent);
 			ImGui::Separator();
 			MenuItemComponent("Audio Emitter", AudioEmitterComponent);
+			ImGui::Separator();
+			MenuItemComponent("Path", AudioEmitterComponent);
             ImGui::EndPopup();
         }
         ImGui::Separator();
