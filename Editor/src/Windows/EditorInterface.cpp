@@ -119,14 +119,14 @@ namespace Nuake {
                 if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
                 {
                     Engine::ExitPlayMode();
-                
+
                     Engine::LoadScene(SceneSnapshot);
                     Selection = EditorSelection();
                 }
             }
             else
             {
-               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
+               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
                {
                    this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
@@ -134,6 +134,8 @@ namespace Nuake {
                    {
                         ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                    };
+
+                   Selection = EditorSelection();
 
                    JobSystem::Get().Dispatch(job, []() { Engine::EnterPlayMode(); });
                }
