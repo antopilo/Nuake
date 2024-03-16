@@ -219,6 +219,8 @@ namespace Nuake
 			Entity ent = Entity({ e, m_Scene });
 			Ref<Physics::RigidBody> rigidBody;
 			Ref<Physics::PhysicShape> shape;
+
+			bool isTrigger = false;
 			if (rigidBodyComponent.GetRigidBody())
 			{
 				continue;
@@ -227,6 +229,7 @@ namespace Nuake
 			if (ent.HasComponent<BoxColliderComponent>())
 			{
 				BoxColliderComponent& boxComponent = ent.GetComponent<BoxColliderComponent>();
+				isTrigger = boxComponent.IsTrigger;
 				shape = CreateRef<Physics::Box>(boxComponent.Size);
 			}
 
@@ -235,6 +238,7 @@ namespace Nuake
 				auto& capsuleComponent = ent.GetComponent<CapsuleColliderComponent>();
 				float radius = capsuleComponent.Radius;
 				float height = capsuleComponent.Height;
+				isTrigger = capsuleComponent.IsTrigger;
 				shape = CreateRef<Physics::Capsule>(radius, height);
 			}
 
@@ -243,12 +247,14 @@ namespace Nuake
 				auto& cylinderComponent = ent.GetComponent<CylinderColliderComponent>();
 				float radius = cylinderComponent.Radius;
 				float height = cylinderComponent.Height;
+				isTrigger = cylinderComponent.IsTrigger;
 				shape = CreateRef<Physics::Cylinder>(radius, height);
 			}
 
 			if (ent.HasComponent<SphereColliderComponent>())
 			{
 				const auto& component = ent.GetComponent<SphereColliderComponent>();
+				isTrigger = component.IsTrigger;
 				shape = CreateRef<Physics::Sphere>(component.Radius);
 			}
 
@@ -261,6 +267,8 @@ namespace Nuake
 
 				const auto& modelComponent = ent.GetComponent<ModelComponent>();
 				const auto& component = ent.GetComponent<MeshColliderComponent>();
+
+				isTrigger = component.IsTrigger;
 
 				if (modelComponent.ModelResource)
 				{
@@ -282,10 +290,14 @@ namespace Nuake
 			}
 
 			rigidBody = CreateRef<Physics::RigidBody>(rigidBodyComponent.Mass, transform.GetGlobalPosition(), transform.GetGlobalRotation(), transform.GetGlobalTransform(), shape, ent);
-			rigidBody->setLockXAxis(rigidBodyComponent.LockX);
-			rigidBody->setLockYAxis(rigidBodyComponent.LockY);
-			rigidBody->setLockZAxis(rigidBodyComponent.LockZ);
+			rigidBody->SetLockXAxis(rigidBodyComponent.LockX);
+			rigidBody->SetLockYAxis(rigidBodyComponent.LockY);
+			rigidBody->SetLockZAxis(rigidBodyComponent.LockZ);
+
+			rigidBody->SetIsTrigger(isTrigger);
+
 			PhysicsManager::Get().RegisterBody(rigidBody);
+
 			rigidBodyComponent.Rigidbody = rigidBody;
 		}
 	}

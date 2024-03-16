@@ -170,12 +170,21 @@ namespace Nuake
 			//std::cout << "Contact validate callback" << std::endl;
 
 			// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
-			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
+  			return JPH::ValidateResult::AcceptAllContactsForThisBodyPair;
 		}
 
 		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			//std::cout << "A contact was added" << std::endl;
+			auto entId1 = static_cast<int>(inBody1.GetUserData());
+			Entity entity1 = Engine::GetCurrentScene()->GetEntityByID(entId1);
+
+			auto entId2 = static_cast<int>(inBody2.GetUserData());
+			Entity entity2 = Engine::GetCurrentScene()->GetEntityByID(entId2);
+
+			const std::string entity1Name = entity1.GetComponent<NameComponent>().Name;
+			const std::string entity2Name = entity2.GetComponent<NameComponent>().Name;
+
+			Logger::Log("Collision detected between " + entity1Name + " and " + entity2Name);
 		}
 
 		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
@@ -314,8 +323,9 @@ namespace Nuake
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
 			auto joltShape = GetJoltShape(rb->GetShape());
-			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
 
+			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
+			bodySettings.mIsSensor = rb->IsTrigger();
 			bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::All);
 
 			if (rb->GetLockXAxis())
@@ -372,7 +382,6 @@ namespace Nuake
 			settings->mPenetrationRecoverySpeed = 1.0f;
 			settings->mPredictiveContactDistance = 0.01f;
 			settings->mShape = GetJoltShape(cc->Shape);
-
 			auto joltPosition = JPH::Vec3(cc->Position.x, cc->Position.y, cc->Position.z);
 
 			const Quat& bodyRotation = cc->Rotation;
