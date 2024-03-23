@@ -35,6 +35,12 @@ namespace Nuake
 
 	namespace Physics
 	{
+		struct CharacterGhostPair
+		{
+			Ref<JPH::CharacterVirtual> Character;
+			uint32_t Ghost;
+		};
+
 		class DynamicWorld 
 		{
 		private:
@@ -48,7 +54,7 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::map<uint32_t, Ref<JPH::CharacterVirtual>> _registeredCharacters;
+			std::map<uint32_t, CharacterGhostPair> _registeredCharacters;
 
 		public:
 			DynamicWorld();
