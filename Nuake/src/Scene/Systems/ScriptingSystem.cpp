@@ -100,6 +100,8 @@ namespace Nuake
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
 		}
+
+		DispatchPhysicCallbacks();
 	}
 
 	void ScriptingSystem::FixedUpdate(Timestep ts)
@@ -129,8 +131,6 @@ namespace Nuake
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 			scriptInstance.InvokeMethod("OnFixedUpdate", ts.GetSeconds());
 		}
-
-		DispatchPhysicCallbacks();
 	}
 
 	void ScriptingSystem::Exit()
