@@ -41,6 +41,14 @@ namespace Nuake
 			uint32_t Ghost;
 		};
 
+		struct CollisionCallbackData
+		{
+			uint32_t Entity1;
+			uint32_t Entity2;
+			Vector3 Normal;
+			Vector3 Position;
+		};
+
 		class DynamicWorld 
 		{
 		private:
@@ -56,6 +64,8 @@ namespace Nuake
 			std::vector<uint32_t> _registeredBodies;
 			std::map<uint32_t, CharacterGhostPair> _registeredCharacters;
 
+			std::mutex _CollisionCallbackMutex;
+			std::vector<CollisionCallbackData> _CollisionCallbacks;
 		public:
 			DynamicWorld();
 
@@ -74,6 +84,8 @@ namespace Nuake
 			std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
 			void StepSimulation(Timestep ts);
 			void Clear();
+
+			void RegisterCollisionCallback(const CollisionCallbackData& data);
 
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);

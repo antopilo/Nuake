@@ -124,7 +124,15 @@ namespace Nuake
 	// An example contact listener
 	class MyContactListener : public JPH::ContactListener
 	{
+	private:
+		Physics::DynamicWorld* _World;
+
 	public:
+		MyContactListener(Physics::DynamicWorld* world)
+			: _World(world)
+		{
+		}
+
 		// See: ContactListener
 		virtual JPH::ValidateResult	OnContactValidate(const JPH::Body& inBody1, const JPH::Body& inBody2, JPH::RVec3Arg inBaseOffset, const JPH::CollideShapeResult& inCollisionResult) override
 		{
@@ -146,6 +154,9 @@ namespace Nuake
 			const std::string entity2Name = entity2.GetComponent<NameComponent>().Name;
 
 			Logger::Log("Collision detected between " + entity1Name + " and " + entity2Name);
+
+			Physics::CollisionCallbackData data;
+			_World->RegisterCollisionCallback(std::move(data));
 		}
 
 		virtual void OnContactPersisted(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
@@ -217,7 +228,6 @@ namespace Nuake
 		}
 	};
 
-
 	BPLayerInterfaceImpl JoltBroadphaseLayerInterface = BPLayerInterfaceImpl();
 	ObjectVsBroadPhaseLayerFilterImpl JoltObjectVSBroadphaseLayerFilter = ObjectVsBroadPhaseLayerFilterImpl();
 	ObjectLayerPairFilterImpl JoltObjectVSObjectLayerFilter;
@@ -246,7 +256,7 @@ namespace Nuake
 			// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
 			// Registering one is entirely optional.
-			_contactListener = CreateScope<MyContactListener>();
+			_contactListener = CreateScope<MyContactListener>(this);
 			_JoltPhysicsSystem->SetContactListener(_contactListener.get());
 
 			// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
@@ -665,6 +675,14 @@ namespace Nuake
 				
 				_registeredCharacters.clear();
 			}
+		}
+
+		void DynamicWorld::RegisterCollisionCallback(const CollisionCallbackData& data)
+		{
+			// This will be called from multiple threads
+			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex); 
+
+			_CollisionCallbacks.push_back(std::move(data));
 		}
 
 		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity)

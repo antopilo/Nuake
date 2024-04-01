@@ -52,12 +52,6 @@ namespace Nuake
 		{
 			auto [transform, brush] = brushes.get<TransformComponent, BSPBrushComponent>(e);
 
-			for (auto& r : brush.Rigidbody)
-			{
-				//r->m_Transform->setOrigin(btVector3(transform.GlobalTranslation.x, transform.GlobalTranslation.y, transform.GlobalTranslation.z));
-				//r->UpdateTransform(*r->m_Transform);
-			}
-
 			if (!brush.IsFunc)
 				continue;
 
@@ -73,37 +67,6 @@ namespace Nuake
 				}
 			}
 		}
-
-		//auto bspTriggerView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, TriggerZone>();
-		//for (auto e : bspTriggerView)
-		//{
-		//	auto [transform, brush, trigger] = bspTriggerView.get<TransformComponent, BSPBrushComponent, TriggerZone>(e);
-		//	trigger.GhostObject->ScanOverlap();
-
-		//	brush.Targets.clear();
-		//	auto targetnameView = m_Scene->m_Registry.view<TransformComponent, NameComponent>();
-		//	for (auto e2 : targetnameView)
-		//	{
-		//		auto [ttransform, name] = targetnameView.get<TransformComponent, NameComponent>(e2);
-
-		//		if (name.Name == brush.target) {
-		//			brush.Targets.push_back(Entity{ e2, m_Scene });
-		//		}
-		//	}
-		//}
-
-
-		/*auto physicGroup = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
-		for (auto e : physicGroup) {
-			auto [transform, rb] = physicGroup.get<TransformComponent, RigidBodyComponent>(e);
-			rb.SyncTransformComponent(&m_Scene->m_Registry.get<TransformComponent>(e));
-		}*/
-
-		//auto ccGroup = m_Scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
-		//for (auto e : ccGroup) {
-		//	auto [transform, rb] = ccGroup.get<TransformComponent, CharacterControllerComponent>(e);
-		//	rb.SyncWithTransform(m_Scene->m_Registry.get<TransformComponent>(e));
-		//}
 	}
 
 	void PhysicsSystem::FixedUpdate(Timestep ts)
