@@ -183,7 +183,7 @@ namespace Nuake
 			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
 			{
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
-				scriptInstance.InvokeMethod("OnCollision", (int)col.Entity1, (int)col.Entity2);
+				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1, (int)col.Entity2);
 			}
 		}
 	}
