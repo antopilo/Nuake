@@ -1964,7 +1964,8 @@ namespace Nuake {
         std::string projectPath = FileDialog::OpenFile(".scene");
 
         Ref<Scene> scene = Scene::New();
-        if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) 
+        const std::string& fileContent = FileSystem::ReadFile(projectPath, true);
+        if (!scene->Deserialize(json::parse(fileContent)))
         {
             Logger::Log("Error failed loading scene: " + projectPath, "editor", CRITICAL);
             return;
