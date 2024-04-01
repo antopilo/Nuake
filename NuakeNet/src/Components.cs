@@ -22,12 +22,24 @@ namespace Nuake.Net
     }
     public class NameComponent : IComponent
     {
+        internal static unsafe delegate*<int, NativeString> GetNameIcall;
+
         public NameComponent(int entityId)
         {
             EntityID = entityId;
         }
 
-        public string Name { get; set; }
+        public string Name 
+        {
+            get
+            {
+                unsafe { return GetNameIcall(EntityID).ToString(); }
+            }
+            set
+            {
+
+            }
+        }
     }
 
     public class PrefabComponent : IComponent
