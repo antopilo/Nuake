@@ -9,6 +9,7 @@
 
 #include <src/Physics/GhostObject.h>
 #include "CharacterController.h"
+#include "CollisionData.h"
 
 #include "Jolt/Jolt.h"
 
@@ -41,13 +42,7 @@ namespace Nuake
 			uint32_t Ghost;
 		};
 
-		struct CollisionCallbackData
-		{
-			uint32_t Entity1;
-			uint32_t Entity2;
-			Vector3 Normal;
-			Vector3 Position;
-		};
+
 
 		class DynamicWorld 
 		{
@@ -65,7 +60,7 @@ namespace Nuake
 			std::map<uint32_t, CharacterGhostPair> _registeredCharacters;
 
 			std::mutex _CollisionCallbackMutex;
-			std::vector<CollisionCallbackData> _CollisionCallbacks;
+			std::vector<CollisionData> _CollisionCallbacks;
 		public:
 			DynamicWorld();
 
@@ -85,8 +80,8 @@ namespace Nuake
 			void StepSimulation(Timestep ts);
 			void Clear();
 
-			void RegisterCollisionCallback(const CollisionCallbackData& data);
-
+			void RegisterCollisionCallback(const CollisionData& data);
+			const std::vector<CollisionData>& GetCollisionsData();
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();

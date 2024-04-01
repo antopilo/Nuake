@@ -5,7 +5,7 @@
 #include "Engine.h"
 
 #include "src/Scripting/ScriptingEngineNet.h"
-
+#include "src/Physics/PhysicsManager.h"
 
 namespace Nuake 
 {
@@ -129,6 +129,8 @@ namespace Nuake
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 			scriptInstance.InvokeMethod("OnFixedUpdate", ts.GetSeconds());
 		}
+
+		DispatchPhysicCallbacks();
 	}
 
 	void ScriptingSystem::Exit()
@@ -165,5 +167,24 @@ namespace Nuake
 
 		ScriptingEngine::Close();
 		ScriptingEngineNet::Get().Uninitialize();
+	}
+
+	void ScriptingSystem::DispatchPhysicCallbacks()
+	{
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+
+		auto& physicsManager = PhysicsManager::Get();
+		const auto& collisions = physicsManager.GetCollisions();
+		for (const auto& col : collisions)
+		{
+			Entity entity1 = m_Scene->GetEntityByID(col.Entity1);
+			Entity entity2 = m_Scene->GetEntityByID(col.Entity2);
+
+			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
+			{
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
+				scriptInstance.InvokeMethod("OnCollision", col.Entity1, col.Entity2);
+			}
+		}
 	}
 }

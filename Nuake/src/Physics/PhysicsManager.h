@@ -3,6 +3,7 @@
 #include "../Scene/Entities/Entity.h"
 #include "DynamicWorld.h"
 #include "Rigibody.h"
+#include "CollisionData.h"
 
 #include "RaycastResult.h"
 
@@ -48,6 +49,8 @@ namespace Nuake
 		void Reset();
 
 		std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
+
+		const std::vector<Physics::CollisionData>& GetCollisions();
 
 		void RegisterBody(Ref<Physics::RigidBody> rb);
 		void RegisterGhostBody(Ref<GhostObject> rb);

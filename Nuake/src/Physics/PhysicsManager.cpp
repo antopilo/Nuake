@@ -42,6 +42,11 @@ namespace Nuake
 		return m_World->Raycast(from, to);
 	}
 
+	const std::vector<Physics::CollisionData>& PhysicsManager::GetCollisions()
+	{
+		return m_World->GetCollisionsData();
+	}
+
 	void PhysicsManager::DrawDebug()
 	{
 		if (m_DrawDebug)

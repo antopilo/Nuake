@@ -144,18 +144,23 @@ namespace Nuake
 
 		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			auto entId1 = static_cast<int>(inBody1.GetUserData());
-			Entity entity1 = Engine::GetCurrentScene()->GetEntityByID(entId1);
+			int entity1 = static_cast<int>(inBody1.GetUserData());
+			int entity2 = static_cast<int>(inBody2.GetUserData());
 
-			auto entId2 = static_cast<int>(inBody2.GetUserData());
-			Entity entity2 = Engine::GetCurrentScene()->GetEntityByID(entId2);
+			JPH::Vec3 joltNormal = inManifold.mWorldSpaceNormal;
+			Vector3 normal = Vector3(joltNormal.GetX(), joltNormal.GetY(), joltNormal.GetZ());
 
-			const std::string entity1Name = entity1.GetComponent<NameComponent>().Name;
-			const std::string entity2Name = entity2.GetComponent<NameComponent>().Name;
+			JPH::Vec3 joltPos = inManifold.GetWorldSpaceContactPointOn1(0);
+			Vector3 position = Vector3(joltPos.GetX(), joltPos.GetY(), joltPos.GetZ());
 
-			Logger::Log("Collision detected between " + entity1Name + " and " + entity2Name);
+			Physics::CollisionData data
+			{
+				entity1,
+				entity2,
+				normal,
+				position
+			};
 
-			Physics::CollisionCallbackData data;
 			_World->RegisterCollisionCallback(std::move(data));
 		}
 
@@ -399,12 +404,12 @@ namespace Nuake
 				Logger::Log("ERROR");
 			}
 
-			bodySettings.mUserData = 1337;
+			bodySettings.mUserData = cc->Owner.GetHandle();
 
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
 			uint32_t bodyIndex = body.GetIndexAndSequenceNumber();
-			_registeredBodies.push_back(bodyIndex);
+			//_registeredBodies.push_back(bodyIndex);
 
 			// To get the jolt character control from a scene entity.
 			_registeredCharacters[cc->Owner.GetHandle()] = CharacterGhostPair{ character, bodyIndex };
@@ -548,6 +553,12 @@ namespace Nuake
 
 		void DynamicWorld::StepSimulation(Timestep ts)
 		{
+			// Clear collisions, before very step
+			{
+				std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
+				_CollisionCallbacks.clear();
+			}
+
 			if (ts > 0.1f)
 			{
 				ts = 0.08f;
@@ -677,12 +688,18 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::RegisterCollisionCallback(const CollisionCallbackData& data)
+		void DynamicWorld::RegisterCollisionCallback(const CollisionData& data)
 		{
 			// This will be called from multiple threads
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex); 
 
 			_CollisionCallbacks.push_back(std::move(data));
+		}
+
+		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()
+		{
+			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
+			return _CollisionCallbacks;
 		}
 
 		void DynamicWorld::MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity)

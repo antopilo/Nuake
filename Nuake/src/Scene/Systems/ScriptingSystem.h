@@ -13,5 +13,8 @@ namespace Nuake {
 		void Draw() override {}
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
+
+	private:
+		void DispatchPhysicCallbacks();
 	};
 }
