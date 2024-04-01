@@ -27,6 +27,11 @@ namespace Nuake
 		m_World->AddCharacterController(cc);
 	}
 
+	void PhysicsManager::SetCharacterControllerPosition(const Entity& entity, const Vector3& position)
+	{
+		m_World->SetCharacterControllerPosition(entity, position);
+	}
+
 	void PhysicsManager::Step(Timestep ts)
 	{
 		m_World->StepSimulation(ts);

@@ -52,15 +52,14 @@ namespace Nuake.Net
         public virtual void OnFixedUpdate(float dt) { }
         public virtual void OnDestroy() { }
 
-        public virtual void OnCollision(int entity1, int entity2) 
+        public virtual void OnCollision(Entity entity1, Entity entity2) 
         {
-            Engine.Log("penis");
         }
 
         // Physics
         public void OnCollisionInternal(int entity1, int entity2) 
         {
-            //OnCollision(new Entity { ECSHandle = entity1 }, new Entity { ECSHandle = entity2 });
+            OnCollision(new Entity { ECSHandle = entity1 }, new Entity { ECSHandle = entity2 });
         }
 
         protected static Dictionary<Type, ComponentTypes> MappingTypeEnum = new Dictionary<Type, ComponentTypes>()

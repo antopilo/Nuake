@@ -112,6 +112,11 @@ namespace Nuake {
 		{
 			auto& component = entity.GetComponent<TransformComponent>();
 			component.SetLocalPosition({ x, y, z });
+
+			if (entity.HasComponent<CharacterControllerComponent>())
+			{
+				PhysicsManager::Get().SetCharacterControllerPosition(entity, { x, y, z });
+			}
 		}
 	}
 

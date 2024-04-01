@@ -430,6 +430,16 @@ namespace Nuake
 			return false;
 		}
 
+		void DynamicWorld::SetCharacterControllerPosition(const Entity & entity, const Vector3 & position)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+  				characterController->SetPosition({ position.x, position.y, position.z });
+			}
+		}
+
 		std::vector<RaycastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
 		{
 			// Create jolt ray
@@ -474,37 +484,27 @@ namespace Nuake
 			for (const auto& body : _registeredBodies)
 			{
 				auto bodyId = static_cast<JPH::BodyID>(body);
-				JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
-				JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
-				JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
-				const auto bodyRotation = bodyInterface.GetRotation(bodyId);
-
-				Matrix4 transform = glm::mat4(
-					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
-					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
-					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
-					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
-				);
-
-				Vector3 scale = Vector3();
-				Quat rotation = Quat();
-				Vector3 pos = Vector3();
-				Vector3 skew = Vector3();
-				Vector4 pesp = Vector4();
-				glm::decompose(transform, scale, rotation, pos, skew, pesp);
-
-				auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId));
-				if (entId == 1337)
+				if (auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId)); entId != 0)
 				{
-					Entity entity = Engine::GetCurrentScene()->GetEntity("Gizmo");
-					auto& transformComponent = entity.GetComponent<TransformComponent>();
-					transformComponent.SetLocalPosition(pos);
-					transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
-					transformComponent.SetLocalTransform(transform);
-					transformComponent.Dirty = true;
-				}
-				if (entId != 0)
-				{
+					JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
+					JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
+					JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
+					const auto bodyRotation = bodyInterface.GetRotation(bodyId);
+
+					Matrix4 transform = glm::mat4(
+						joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
+						joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
+						joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
+						joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
+					);
+
+					Vector3 scale = Vector3();
+					Quat rotation = Quat();
+					Vector3 pos = Vector3();
+					Vector3 skew = Vector3();
+					Vector4 pesp = Vector4();
+					glm::decompose(transform, scale, rotation, pos, skew, pesp);
+
 					Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
 					auto& transformComponent = entity.GetComponent<TransformComponent>();
 					transformComponent.SetLocalPosition(pos);
@@ -517,10 +517,6 @@ namespace Nuake
 		
 		void DynamicWorld::SyncCharactersTransforms()
 		{
-			// TODO(ANTO): Finish this to connect updated jolt transforms back to the entity.
-			// The problem was that I dont know yet how to go from jolt body ptr to the entity
-			// Combinations of find and iterators etc. I do not have the brain power rn zzz.
-			// const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
 			for (const auto& e : _registeredCharacters)
 			{
 				Entity entity { (entt::entity)e.first, Engine::GetCurrentScene().get()};

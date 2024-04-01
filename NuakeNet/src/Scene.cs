@@ -21,6 +21,7 @@ namespace Nuake.Net
             {
                 ECSHandle = handle
             };
+
             return entity;
         }
     }

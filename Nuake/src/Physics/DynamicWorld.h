@@ -72,6 +72,8 @@ namespace Nuake
 			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
+			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
+
 			// This is going to be ugly. TODO: Find a better way that passing itself as a parameter
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(Entity& entity, const Vector3& force);

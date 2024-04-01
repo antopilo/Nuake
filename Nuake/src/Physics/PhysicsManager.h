@@ -55,5 +55,7 @@ namespace Nuake
 		void RegisterBody(Ref<Physics::RigidBody> rb);
 		void RegisterGhostBody(Ref<GhostObject> rb);
 		void RegisterCharacterController(Ref<Physics::CharacterController> c);
+
+		void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
 	};
 }
