@@ -74,26 +74,8 @@ namespace Nuake
 		static constexpr uint8_t KINEMATIC = 2;
 		static constexpr uint8_t CHARACTER_GHOST = 3;
 		static constexpr uint8_t CHARACTER = 4;
-		static constexpr uint8_t NUM_LAYERS = 5;
-	};
-
-	// Function that determines if two object layers can collide
-	static bool MyObjectCanCollide(JPH::ObjectLayer inObject1, JPH::ObjectLayer inObject2)
-	{
-		switch (inObject1)
-		{
-		case Layers::NON_MOVING:
-			return inObject2 == Layers::MOVING || inObject2 == Layers::KINEMATIC || inObject2 == Layers::CHARACTER; // Non moving only collides with moving
-		case Layers::MOVING:
-			return true; // Moving collides with everything
-		case Layers::KINEMATIC:
-			return inObject2 == Layers::NON_MOVING || inObject2 == Layers::MOVING || inObject2 == Layers::CHARACTER; // Only collides with non moving
-		case Layers::CHARACTER:
-			return true;
-		default:
-			//JPH_ASSERT(false);
-			return false;
-		}
+		static constexpr uint8_t SENSORS = 5;
+		static constexpr uint8_t NUM_LAYERS = 6;
 	};
 
 	// Each broadphase layer results in a separate bounding volume tree in the broad phase. You at least want to have
@@ -120,6 +102,7 @@ namespace Nuake
 			mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
 			mObjectToBroadPhase[Layers::CHARACTER] = BroadPhaseLayers::MOVING;
 			mObjectToBroadPhase[Layers::CHARACTER_GHOST] = BroadPhaseLayers::MOVING;
+			mObjectToBroadPhase[Layers::SENSORS] = BroadPhaseLayers::MOVING;
 		}
 
 		virtual JPH::uint GetNumBroadPhaseLayers() const override
@@ -134,37 +117,9 @@ namespace Nuake
 			return mObjectToBroadPhase[inLayer];
 		}
 
-#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
-		virtual const char* GetBroadPhaseLayerName(BroadPhaseLayer inLayer) const override
-		{
-			switch ((BroadPhaseLayer::Type)inLayer)
-			{
-			case (BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
-			case (BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
-			default:													JPH_ASSERT(false); return "INVALID";
-			}
-		}
-#endif // JPH_EXTERNAL_PROFILE || JPH_PROFILE_ENABLED
-
 	private:
 		JPH::BroadPhaseLayer					mObjectToBroadPhase[Layers::NUM_LAYERS];
 	};
-
-	// Function that determines if two broadphase layers can collide
-	static bool MyBroadPhaseCanCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2)
-	{
-		using namespace JPH;
-		switch (inLayer1)
-		{
-		case Layers::NON_MOVING:
-			return inLayer2 == BroadPhaseLayers::MOVING;
-		case Layers::MOVING:
-			return true;
-		default:
-			JPH_ASSERT(false);
-			return false;
-		}
-	}
 
 	// An example contact listener
 	class MyContactListener : public JPH::ContactListener
@@ -230,8 +185,9 @@ namespace Nuake
 				return inLayer2 == BroadPhaseLayers::MOVING;
 			case Layers::MOVING:
 				return true;
+			case Layers::SENSORS:
+				return inLayer2 == BroadPhaseLayers::MOVING;;
 			default:
-				
 				return false;
 			}
 		}
@@ -245,13 +201,15 @@ namespace Nuake
 			switch (inObject1)
 			{
 			case Layers::NON_MOVING:
-				return inObject2 == Layers::MOVING || Layers::CHARACTER_GHOST; // Non moving only collides with moving
+				return inObject2 == Layers::MOVING || inObject2 == Layers::CHARACTER_GHOST || inObject2 == Layers::CHARACTER; // Non moving only collides with moving
 			case Layers::MOVING:
 				return true; // Moving collides with everything
 			case Layers::CHARACTER_GHOST:
-				return true;// inObject2 != Layers::CHARACTER;
+				return inObject2 != Layers::CHARACTER;
 			case Layers::CHARACTER:
 				return inObject2 != Layers::CHARACTER_GHOST;
+			case Layers::SENSORS:
+				return inObject2 == Layers::MOVING || inObject2 == Layers::CHARACTER_GHOST;
 			default:
 				
 				return false;
@@ -328,14 +286,30 @@ namespace Nuake
 				layer = Layers::MOVING;
 			}
 
+			if (rb->IsTrigger())
+			{
+				layer = Layers::SENSORS;
+				motionType = JPH::EMotionType::Kinematic;
+			}
+
 			const auto& startPos = rb->GetPosition();
 			const Quat& bodyRotation = rb->GetRotation();
 			const auto& joltRotation = JPH::Quat(bodyRotation.x, bodyRotation.y, bodyRotation.z, bodyRotation.w);
 			const auto& joltPos = JPH::Vec3(startPos.x, startPos.y, startPos.z);
-			auto joltShape = GetJoltShape(rb->GetShape());
+			JPH::Ref<JPH::Shape> joltShape = GetJoltShape(rb->GetShape());
+
+			if (!joltShape)
+			{
+				return;
+			}
 
 			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
 			bodySettings.mIsSensor = rb->IsTrigger();
+			if (bodySettings.mIsSensor)
+			{
+				bodySettings.mCollideKinematicVsNonDynamic = true;
+			}
+
 			bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::All);
 
 			if (rb->GetLockXAxis())
@@ -375,7 +349,6 @@ namespace Nuake
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
 			uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
-			auto userData = _JoltBodyInterface->GetUserData(body);
 			_registeredBodies.push_back(bodyIndex);
 		}
 
@@ -402,8 +375,8 @@ namespace Nuake
 			// add ghost kinematic body to respond to hit test as the virtual char are not present in the world.
 			JPH::BodyInterface& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
 
-			const float mass = 0.1f;
-			JPH::EMotionType motionType = JPH::EMotionType::Kinematic;
+			const float mass = 0.0f;
+			JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
 			JPH::ObjectLayer layer = Layers::CHARACTER_GHOST;
 
 			const auto& startPos = joltPosition;
@@ -416,7 +389,7 @@ namespace Nuake
 				Logger::Log("ERROR");
 			}
 
-			//bodySettings.mUserData = entityId;
+			bodySettings.mUserData = 1337;
 
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
@@ -506,6 +479,15 @@ namespace Nuake
 				glm::decompose(transform, scale, rotation, pos, skew, pesp);
 
 				auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId));
+				if (entId == 1337)
+				{
+					Entity entity = Engine::GetCurrentScene()->GetEntity("Gizmo");
+					auto& transformComponent = entity.GetComponent<TransformComponent>();
+					transformComponent.SetLocalPosition(pos);
+					transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
+					transformComponent.SetLocalTransform(transform);
+					transformComponent.Dirty = true;
+				}
 				if (entId != 0)
 				{
 					Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
@@ -573,7 +555,7 @@ namespace Nuake
 			if(ts > minStepDuration)
 			{
 #ifdef NK_DEBUG
-				Logger::Log("Large step detected: " + std::to_string(ts), "physics", WARNING);
+				//Logger::Log("Large step detected: " + std::to_string(ts), "physics", WARNING);
 #endif
 				collisionSteps = static_cast<float>(ts) / minStepDuration;
 			}
@@ -624,6 +606,27 @@ namespace Nuake
 						{
 							c.second.Character->Update(ts, joltGravity, broadPhaseLayerFilter, LayerFilter, {}, {}, tempAllocatorPtr);
 						}
+
+						uint32_t ghostId = c.second.Ghost;
+
+						JPH::Mat44 joltTransform = c.second.Character->GetWorldTransform();
+						const auto bodyRotation = c.second.Character->GetRotation();
+						Matrix4 transform = glm::mat4(
+							joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
+							joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
+							joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
+							joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
+						);
+
+						Vector3 scale = Vector3();
+						Quat rotation = Quat();
+						Vector3 pos = Vector3();
+						Vector3 skew = Vector3();
+						Vector4 pesp = Vector4();
+						glm::decompose(transform, scale, rotation, pos, skew, pesp);
+
+						//auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterfaceNoLock();
+						_JoltBodyInterface->MoveKinematic(static_cast<JPH::BodyID>(ghostId), JPH::Vec3{ pos.x, pos.y, pos.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, ts);
 					}
 				}
 
@@ -636,26 +639,7 @@ namespace Nuake
 
 			for (auto& c : _registeredCharacters)
 			{
-				uint32_t ghostId = c.second.Ghost;
-
-				JPH::Mat44 joltTransform = c.second.Character->GetWorldTransform();
-				const auto bodyRotation = c.second.Character->GetRotation();
-				Matrix4 transform = glm::mat4(
-					joltTransform(0, 0), joltTransform(1, 0), joltTransform(2, 0), joltTransform(3, 0),
-					joltTransform(0, 1), joltTransform(1, 1), joltTransform(2, 1), joltTransform(3, 1),
-					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
-					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
-				);
-
-				Vector3 scale = Vector3();
-				Quat rotation = Quat();
-				Vector3 pos = Vector3();
-				Vector3 skew = Vector3();
-				Vector4 pesp = Vector4();
-				glm::decompose(transform, scale, rotation, pos, skew, pesp);
-
-				//auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterfaceNoLock();
-				_JoltBodyInterface->MoveKinematic(static_cast<JPH::BodyID>(ghostId), JPH::Vec3{ pos.x, pos.y, pos.z }, { rotation.x, rotation.y, rotation.z, rotation.w }, 1.0);
+				
 			}
 
 			SyncEntitiesTranforms();
@@ -693,6 +677,11 @@ namespace Nuake
 				characterController->SetLinearVelocity(joltVelocity);
 
 				auto& ghost = _registeredCharacters[entityHandle].Ghost;
+				auto ghostPos = _JoltBodyInterface->GetPosition(static_cast<JPH::BodyID>(ghost));
+				//std::cout << "Ghost pos: " << ghostPos.GetX() << ", " << ghostPos.GetY() << ", " << ghostPos.GetZ() << std::endl;
+
+				auto charPos = characterController->GetPosition();
+				//std::cout << "Char pos: " << charPos.GetX() << ", " << charPos.GetY() << ", " << charPos.GetZ() << std::endl;
 				//_JoltBodyInterface->SetLinearVelocity(static_cast<JPH::BodyID>(ghost), joltVelocity);
 			}
 		}
@@ -798,6 +787,14 @@ namespace Nuake
 				result = shapeSettings.Create();
 			}
 			break;
+			}
+
+			if (!result.IsValid())
+			{
+				const std::string errorMessage = std::string("Failed to create physics shape: ") + result.GetError().c_str();
+				Logger::Log(errorMessage, "physics", WARNING);
+
+				return nullptr;
 			}
 
 			return result.Get();
