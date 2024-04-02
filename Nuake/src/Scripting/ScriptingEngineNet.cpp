@@ -13,7 +13,7 @@
 
 #include <Coral/HostInstance.hpp>
 #include <Coral/GC.hpp>
-#include <Coral/NativeArray.hpp>
+#include <Coral/Array.hpp>
 #include <Coral/Attribute.hpp>
 
 
@@ -130,13 +130,15 @@ namespace Nuake
 
 		for (auto& type : m_GameAssembly.GetTypes())
 		{
-			Logger::Log(std::string("Detected type: ") + std::string(type->GetName()), ".net");
-			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetName()), ".net");
+			Logger::Log(std::string("Detected type: ") + std::string(type->GetFullName()), ".net");
+			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetFullName()), ".net");
 
-			const std::string baseTypeName = std::string(type->GetBaseType().GetName());
-			if (baseTypeName == "Entity")
+			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
+			if (baseTypeName == "Nuake.Net.Entity")
 			{
-				m_GameEntityTypes[std::string(type->GetName())] = type; // We have found an entity script.
+				auto typeSplits = String::Split(type->GetFullName(), '.');
+				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
+				m_GameEntityTypes[shortenedTypeName] = type; // We have found an entity script.
 			}
 		}
 	}
@@ -198,7 +200,6 @@ namespace Nuake
 		size_t classNameLength = semiColonPos - classNameStartIndex;
 
 		const std::string className = fileContent.substr(classNameStartIndex, classNameLength);
-
 		if(m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
 		{
 			// The class name parsed in the file was not found in the game's DLL.

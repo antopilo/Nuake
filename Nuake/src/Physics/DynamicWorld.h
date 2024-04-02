@@ -13,6 +13,7 @@
 
 #include "Jolt/Jolt.h"
 
+#include <mutex>
 
 namespace JPH
 {

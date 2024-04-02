@@ -180,7 +180,7 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/7.0.7/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
     }
 
     links
@@ -193,8 +193,6 @@ project "NuakeRuntime"
 		"JoltPhysics",
         "soloud",
         "Coral.Native",
-        "nethost",
-        "libnethost"
     }
 
     filter "system:windows"
@@ -211,11 +209,7 @@ project "NuakeRuntime"
         externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
     
         postbuildcommands {
-            '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/%{prj.name}"'
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
         }
 
     filter "system:linux"
@@ -318,7 +312,7 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/7.0.7/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
     }
 
     links
@@ -330,9 +324,7 @@ project "Editor"
         "Freetype",
         "JoltPhysics",
         "soloud",
-        "Coral.Native",
-        "nethost",
-        "libnethost"
+        "Coral.Native"
     }
 
     filter "system:Windows"
@@ -353,11 +345,7 @@ project "Editor"
         externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
     
         postbuildcommands {
-            '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/%{prj.name}"'
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
         }
 
 

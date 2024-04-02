@@ -22,22 +22,20 @@
 
 #include "src/Physics/PhysicsManager.h"
 
-#include <Coral/NativeArray.hpp>
+#include <Coral/Array.hpp>
 
 
 namespace Nuake {
 
-	uint32_t GetEntity(Coral::NativeString entityName)
+	uint32_t GetEntity(Coral::String entityName)
 	{
 		auto scene = Engine::GetCurrentScene();
-
-		std::string entityNameString = entityName.ToString();
-		if (!scene->EntityExists(entityNameString))
+		if (!scene->EntityExists(entityName))
 		{
 			return UINT32_MAX; // Error code: entity not found.
 		}
 
-		return scene->GetEntity(entityNameString).GetHandle();
+		return scene->GetEntity(entityName).GetHandle();
 	}
 
 	static enum ComponentTypes
@@ -120,7 +118,7 @@ namespace Nuake {
 		}
 	}
 
-	Coral::NativeArray<float> TransformGetGlobalPosition(int entityId)
+	Coral::Array<float> TransformGetGlobalPosition(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
 
@@ -128,7 +126,7 @@ namespace Nuake {
 		{
 			auto& component = entity.GetComponent<TransformComponent>();
 			const auto& globalPosition = component.GetGlobalPosition();
-			Coral::NativeArray<float> result = { globalPosition.x, globalPosition.y, globalPosition.z };
+			Coral::Array<float> result = Coral::Array<float>::New({ globalPosition.x, globalPosition.y, globalPosition.z });
 			return result;
 		}
 	}
@@ -145,7 +143,7 @@ namespace Nuake {
 		}
 	}
 
-	Coral::NativeArray<float> CameraGetDirection(int entityId)
+	Coral::Array<float> CameraGetDirection(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
 
@@ -153,7 +151,7 @@ namespace Nuake {
 		{
 			auto& component = entity.GetComponent<CameraComponent>();
 			const Vector3 camDirection = component.CameraInstance->GetDirection();
-			return { camDirection.x, camDirection.y, camDirection.z };
+			return Coral::Array<float>::New({ camDirection.x, camDirection.y, camDirection.z });
 		}
 	}
 
@@ -187,7 +185,7 @@ namespace Nuake {
 		return false;
 	}
 
-	void Play(int entityId, Coral::NativeString animation)
+	void Play(int entityId, Coral::String animation)
 	{
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
 
@@ -203,7 +201,7 @@ namespace Nuake {
 				int animIndex = 0;
 				for (const auto& anim : model->GetAnimations())
 				{
-					if (anim->GetName() == animation.ToString())
+					if (anim->GetName() == animation)
 					{
 						model->PlayAnimation(animIndex);
 					}

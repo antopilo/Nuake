@@ -2,7 +2,7 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 
-#include <Coral/NativeString.hpp>
+#include <Coral/String.hpp>
 
 namespace Nuake {
 

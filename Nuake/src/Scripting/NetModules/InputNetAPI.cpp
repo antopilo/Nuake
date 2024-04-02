@@ -2,7 +2,7 @@
 
 #include "src/Core/Input.h"
 
-#include <Coral/NativeArray.hpp>
+#include <Coral/Array.hpp>
 
 namespace Nuake {
 
@@ -28,10 +28,10 @@ namespace Nuake {
 		return Input::IsKeyPressed(keyCode);
 	}
 
-	Coral::NativeArray<float> GetMousePosition()
+	Coral::Array<float> GetMousePosition()
 	{
 		Vector2 mousePosition = Input::GetMousePosition();
-		return { mousePosition.x, mousePosition.y};
+		return Coral::Array<float>::New({ mousePosition.x, mousePosition.y });
 	}
 
 
