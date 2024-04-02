@@ -345,7 +345,8 @@ project "Editor"
         externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
     
         postbuildcommands {
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
         }
 
 
