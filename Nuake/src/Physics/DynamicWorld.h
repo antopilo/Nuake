@@ -9,9 +9,11 @@
 
 #include <src/Physics/GhostObject.h>
 #include "CharacterController.h"
+#include "CollisionData.h"
 
 #include "Jolt/Jolt.h"
 
+#include <mutex>
 
 namespace JPH
 {
@@ -35,6 +37,14 @@ namespace Nuake
 
 	namespace Physics
 	{
+		struct CharacterGhostPair
+		{
+			Ref<JPH::CharacterVirtual> Character;
+			uint32_t Ghost;
+		};
+
+
+
 		class DynamicWorld 
 		{
 		private:
@@ -48,8 +58,10 @@ namespace Nuake
 			BPLayerInterfaceImpl* _JoltBroadphaseLayerInterface;
 
 			std::vector<uint32_t> _registeredBodies;
-			std::map<uint32_t, Ref<JPH::CharacterVirtual>> _registeredCharacters;
+			std::map<uint32_t, CharacterGhostPair> _registeredCharacters;
 
+			std::mutex _CollisionCallbackMutex;
+			std::vector<CollisionData> _CollisionCallbacks;
 		public:
 			DynamicWorld();
 
@@ -61,6 +73,8 @@ namespace Nuake
 			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
+			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
+
 			// This is going to be ugly. TODO: Find a better way that passing itself as a parameter
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(Entity& entity, const Vector3& force);
@@ -69,6 +83,8 @@ namespace Nuake
 			void StepSimulation(Timestep ts);
 			void Clear();
 
+			void RegisterCollisionCallback(const CollisionData& data);
+			const std::vector<CollisionData>& GetCollisionsData();
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();

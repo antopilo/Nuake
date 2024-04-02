@@ -3,6 +3,7 @@
 #include "src/Core/Logger.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/OS.h"
+#include "src/Threading/JobSystem.h"
 #include "src/Resource/Project.h"
 #include "src/Scene/Components/NetScriptComponent.h"
 
@@ -12,7 +13,7 @@
 
 #include <Coral/HostInstance.hpp>
 #include <Coral/GC.hpp>
-#include <Coral/NativeArray.hpp>
+#include <Coral/Array.hpp>
 #include <Coral/Attribute.hpp>
 
 
@@ -136,7 +137,7 @@ namespace Nuake
 		}
 
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
-		const std::string assemblyPath = "/bin/Debug/net7.0/" + sanitizedProjectName + ".dll";
+		const std::string assemblyPath = "/bin/Debug/net8.0/" + sanitizedProjectName + ".dll";
 
 		if (!FileSystem::FileExists(assemblyPath))
 		{
@@ -149,13 +150,15 @@ namespace Nuake
 
 		for (auto& type : m_GameAssembly.GetTypes())
 		{
-			Logger::Log(std::string("Detected type: ") + std::string(type->GetName()), ".net");
-			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetName()), ".net");
+			Logger::Log(std::string("Detected type: ") + std::string(type->GetFullName()), ".net");
+			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetFullName()), ".net");
 
-			const std::string baseTypeName = std::string(type->GetBaseType().GetName());
-			if (baseTypeName == "Entity")
+			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
+			if (baseTypeName == "Nuake.Net.Entity")
 			{
-				m_GameEntityTypes[std::string(type->GetName())] = type; // We have found an entity script.
+				auto typeSplits = String::Split(type->GetFullName(), '.');
+				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
+				m_GameEntityTypes[shortenedTypeName] = type; // We have found an entity script.
 			}
 		}
 	}
@@ -222,7 +225,6 @@ namespace Nuake
 		size_t classNameLength = semiColonPos - classNameStartIndex;
 
 		const std::string className = fileContent.substr(classNameStartIndex, classNameLength);
-
 		if(m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
 		{
 			// The class name parsed in the file was not found in the game's DLL.
@@ -246,8 +248,10 @@ namespace Nuake
 	{
 		if (!HasEntityScriptInstance(entity))
 		{
+			std::string name = entity.GetComponent<NameComponent>().Name;
+			Logger::Log(name);
 			Logger::Log("Failed to get entity .Net script instance, doesn't exist", ".net", CRITICAL);
-			throw std::exception("Failed to get entity .Net script instance, doesn't exist");
+			return Coral::ManagedObject();
 		}
 
 		return m_EntityToManagedObjects[entity.GetID()];
@@ -294,10 +298,10 @@ namespace Nuake
 		const std::string cleanProjectName = String::Sanitize(projectName);
 		const std::string premakeScript = R"(
 workspace ")" + cleanProjectName + R"("
+configurations { "Debug", "Release" }
 	project ")" + cleanProjectName + R"("
 		language "C#"
-		dotnetframework "net7.0"
-
+		dotnetframework "net8.0"
 		kind "SharedLib"
 			clr "Unsafe"
 	

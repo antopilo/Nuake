@@ -5,7 +5,7 @@
 #include "Engine.h"
 
 #include "src/Scripting/ScriptingEngineNet.h"
-
+#include "src/Physics/PhysicsManager.h"
 
 namespace Nuake 
 {
@@ -52,13 +52,22 @@ namespace Nuake
 			if (netScriptComponent.ScriptPath.empty())
 				continue;
 
-			// Creates an instance of the entity script in C#
 			auto entity = Entity{ e, m_Scene };
-			scriptingEngineNet.RegisterEntityScript(entity);
 
-			// We can now call on init on it.
-			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnInit");
+			// Creates an instance of the entity script in C#
+			scriptingEngineNet.RegisterEntityScript(entity);
+		}
+
+		for (auto& e : netEntities)
+		{
+			auto entity = Entity{ e, m_Scene };
+
+			if (entity.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity))
+			{
+				// We can now call on init on it.
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+				scriptInstance.InvokeMethod("OnInit");
+			}
 		}
 
 		return true;
@@ -91,6 +100,8 @@ namespace Nuake
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
 		}
+
+		DispatchPhysicCallbacks();
 	}
 
 	void ScriptingSystem::FixedUpdate(Timestep ts)
@@ -156,5 +167,24 @@ namespace Nuake
 
 		ScriptingEngine::Close();
 		ScriptingEngineNet::Get().Uninitialize();
+	}
+
+	void ScriptingSystem::DispatchPhysicCallbacks()
+	{
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+
+		auto& physicsManager = PhysicsManager::Get();
+		const auto& collisions = physicsManager.GetCollisions();
+		for (const auto& col : collisions)
+		{
+			Entity entity1 = m_Scene->GetEntityByID(col.Entity1);
+			Entity entity2 = m_Scene->GetEntityByID(col.Entity2);
+
+			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
+			{
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
+				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1, (int)col.Entity2);
+			}
+		}
 	}
 }

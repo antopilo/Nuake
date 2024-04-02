@@ -53,6 +53,7 @@
 
 #include <src/Resource/StaticResources.h>
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Threading/JobSystem.h>
 
 namespace Nuake {
     
@@ -115,22 +116,28 @@ namespace Nuake {
 
             if (Engine::IsPlayMode())
             {
-                if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
+                if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyDown(GLFW_KEY_F5)))
                 {
                     Engine::ExitPlayMode();
-                
+
                     Engine::LoadScene(SceneSnapshot);
                     Selection = EditorSelection();
                 }
             }
             else
             {
-               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5)))
+               if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) )
                {
-                   SceneSnapshot = Engine::GetCurrentScene()->Copy();
+                   this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
-                   ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                   Engine::EnterPlayMode();
+                   auto job = [this]()
+                   {
+                        ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                   };
+
+                   Selection = EditorSelection();
+
+                   JobSystem::Get().Dispatch(job, []() { Engine::EnterPlayMode(); });
                }
 
                if (ImGui::BeginItemTooltip())
@@ -148,7 +155,7 @@ namespace Nuake {
                 ImGui::BeginDisabled();
             }
 
-            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
+            if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F5)) && Engine::IsPlayMode())
             {
                 Engine::ExitPlayMode();
 
@@ -240,7 +247,12 @@ namespace Nuake {
 
             if (ImGui::Button(ICON_FA_HAMMER, ImVec2(30, 30)))
             {
-                Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                JobSystem::Get().Dispatch([]() 
+                    {
+                        Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject()); 
+                    }, 
+                    []() {}
+                );
             }
 
             if (ImGui::BeginItemTooltip())
@@ -360,7 +372,7 @@ namespace Nuake {
 
             m_IsViewportFocused = ImGui::IsWindowFocused();
 
-            if (ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
+            if (!Engine::IsPlayMode() && ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
                 const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
                 
@@ -1952,7 +1964,8 @@ namespace Nuake {
         std::string projectPath = FileDialog::OpenFile(".scene");
 
         Ref<Scene> scene = Scene::New();
-        if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true))) 
+        const std::string& fileContent = FileSystem::ReadFile(projectPath, true);
+        if (!scene->Deserialize(json::parse(fileContent)))
         {
             Logger::Log("Error failed loading scene: " + projectPath, "editor", CRITICAL);
             return;

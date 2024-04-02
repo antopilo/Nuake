@@ -27,6 +27,11 @@ namespace Nuake
 		m_World->AddCharacterController(cc);
 	}
 
+	void PhysicsManager::SetCharacterControllerPosition(const Entity& entity, const Vector3& position)
+	{
+		m_World->SetCharacterControllerPosition(entity, position);
+	}
+
 	void PhysicsManager::Step(Timestep ts)
 	{
 		m_World->StepSimulation(ts);
@@ -40,6 +45,11 @@ namespace Nuake
 	std::vector<RaycastResult> PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
 	{
 		return m_World->Raycast(from, to);
+	}
+
+	const std::vector<Physics::CollisionData>& PhysicsManager::GetCollisions()
+	{
+		return m_World->GetCollisionsData();
 	}
 
 	void PhysicsManager::DrawDebug()

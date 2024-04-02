@@ -1,6 +1,6 @@
 project "NuakeNet"
     language "C#"
-    dotnetframework "net7.0"
+    dotnetframework "net8.0"
     kind "SharedLib"
 	    clr "Unsafe"
 	

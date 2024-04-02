@@ -22,12 +22,24 @@ namespace Nuake.Net
     }
     public class NameComponent : IComponent
     {
+        internal static unsafe delegate*<int, NativeString> GetNameIcall;
+
         public NameComponent(int entityId)
         {
             EntityID = entityId;
         }
 
-        public string Name { get; set; }
+        public string Name 
+        {
+            get
+            {
+                unsafe { return GetNameIcall(EntityID).ToString(); }
+            }
+            set
+            {
+
+            }
+        }
     }
 
     public class PrefabComponent : IComponent
@@ -39,6 +51,7 @@ namespace Nuake.Net
 
     public class TransformComponent : IComponent
     {
+        internal static unsafe delegate*<int, NativeArray<float>> GetGlobalPositionIcall;
         internal static unsafe delegate*<int, float, float, float, void> SetPositionIcall;
         internal static unsafe delegate*<int, float, float, float, void> RotateIcall;
 
@@ -76,7 +89,18 @@ namespace Nuake.Net
                 unsafe { SetPositionIcall(EntityID, value.X, value.Y, value.Z); }
             }
         }
-        public Vector3 GlobalPosition { get; set; }
+        public Vector3 GlobalPosition 
+        {
+            get
+            {
+                unsafe 
+                { 
+                    NativeArray<float> result = GetGlobalPositionIcall(EntityID); 
+                    return new Vector3(result[0], result[1], result[2]);
+                }
+            }
+            set { }
+        }
     }
 
     public class LightComponent : IComponent
@@ -152,10 +176,20 @@ namespace Nuake.Net
 
     public class SkinnedModelComponent : IComponent
     {
-        public SkinnedModelComponent(int entityId) { }
+        internal static unsafe delegate*<int, NativeString, void> PlayIcall;
+
+        public SkinnedModelComponent(int entityId) 
+        {
+            EntityID = entityId;
+        }
 
         public bool Playing { get; set; }
         public int CurrentAnimation { get; set; }
+
+        public void Play(String name)
+        {
+            unsafe { PlayIcall(EntityID, name); }
+        }
     }
 
     public class BoneComponent : IComponent

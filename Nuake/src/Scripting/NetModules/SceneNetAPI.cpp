@@ -21,23 +21,40 @@
 #include "src/Scene/Components/QuakeMap.h"
 
 #include "src/Physics/PhysicsManager.h"
+#include "src/Scripting/ScriptingEngineNet.h"
 
-#include <Coral/NativeArray.hpp>
+#include <Coral/Array.hpp>
 
 
 namespace Nuake {
 
-	uint32_t GetEntity(Coral::NativeString entityName)
+	uint32_t GetEntity(Coral::String entityName)
 	{
 		auto scene = Engine::GetCurrentScene();
-
-		std::string entityNameString = entityName.ToString();
-		if (!scene->EntityExists(entityNameString))
+		if (!scene->EntityExists(entityName))
 		{
 			return UINT32_MAX; // Error code: entity not found.
 		}
 
-		return scene->GetEntity(entityNameString).GetHandle();
+		return scene->GetEntity(entityName).GetHandle();
+	}
+
+	Coral::ManagedObject GetEntityScript(Coral::String entityName)
+	{
+		auto scene = Engine::GetCurrentScene();
+		if (!scene->EntityExists(entityName))
+		{
+			return Coral::ManagedObject(); // Error code: entity not found.
+		}
+
+		Entity entity = scene->GetEntity(entityName);
+
+		auto& scriptingEngine = ScriptingEngineNet::Get();
+		if (scriptingEngine.HasEntityScriptInstance(entity))
+		{
+			auto instance = scriptingEngine.GetEntityScript(entity);
+			return instance;
+		}
 	}
 
 	static enum ComponentTypes
@@ -112,6 +129,24 @@ namespace Nuake {
 		{
 			auto& component = entity.GetComponent<TransformComponent>();
 			component.SetLocalPosition({ x, y, z });
+
+			if (entity.HasComponent<CharacterControllerComponent>())
+			{
+				PhysicsManager::Get().SetCharacterControllerPosition(entity, { x, y, z });
+			}
+		}
+	}
+
+	Coral::Array<float> TransformGetGlobalPosition(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
+		{
+			auto& component = entity.GetComponent<TransformComponent>();
+			const auto& globalPosition = component.GetGlobalPosition();
+			Coral::Array<float> result = Coral::Array<float>::New({ globalPosition.x, globalPosition.y, globalPosition.z });
+			return result;
 		}
 	}
 
@@ -127,7 +162,7 @@ namespace Nuake {
 		}
 	}
 
-	Coral::NativeArray<float> CameraGetDirection(int entityId)
+	Coral::Array<float> CameraGetDirection(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
 
@@ -135,7 +170,7 @@ namespace Nuake {
 		{
 			auto& component = entity.GetComponent<CameraComponent>();
 			const Vector3 camDirection = component.CameraInstance->GetDirection();
-			return { camDirection.x, camDirection.y, camDirection.z };
+			return Coral::Array<float>::New({ camDirection.x, camDirection.y, camDirection.z });
 		}
 	}
 
@@ -169,19 +204,50 @@ namespace Nuake {
 		return false;
 	}
 
+	void Play(int entityId, Coral::String animation)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<SkinnedModelComponent>())
+		{
+			auto& skinnedModel = entity.GetComponent<SkinnedModelComponent>();
+
+			if (skinnedModel.ModelResource)
+			{
+				auto& model = skinnedModel.ModelResource;
+
+				// Find animation from name
+				int animIndex = 0;
+				for (const auto& anim : model->GetAnimations())
+				{
+					if (anim->GetName() == animation)
+					{
+						model->PlayAnimation(animIndex);
+					}
+
+					animIndex++;
+				}
+			}
+		}
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
+		RegisterMethod("Scene.GetEntityScriptIcall", &GetEntityScript);
 
 		// Components
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
+		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
 
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
 
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
+
+		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 	}
 
 }

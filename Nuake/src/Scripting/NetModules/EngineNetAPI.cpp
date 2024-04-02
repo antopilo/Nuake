@@ -2,9 +2,9 @@
 
 namespace Nuake {
 
-	void Log(Coral::NativeString string)
+	void Log(Coral::String string)
 	{
-		Logger::Log(string.ToString(), ".net", VERBOSE);
+		Logger::Log(string, ".net", VERBOSE);
 	}
 
 	void EngineNetAPI::RegisterMethods()

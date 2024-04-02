@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Nuake.Net
 {
+    public struct CollisionData
+    {
+        Entity Entity1;
+        Entity Entity2;
+        Vector3 Normal;
+        Vector3 Position;
+    }
+
     public class Entity
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
@@ -42,6 +51,16 @@ namespace Nuake.Net
         public virtual void OnUpdate(float dt) { }
         public virtual void OnFixedUpdate(float dt) { }
         public virtual void OnDestroy() { }
+
+        public virtual void OnCollision(Entity entity1, Entity entity2) 
+        {
+        }
+
+        // Physics
+        public void OnCollisionInternal(int entity1, int entity2) 
+        {
+            OnCollision(new Entity { ECSHandle = entity1 }, new Entity { ECSHandle = entity2 });
+        }
 
         protected static Dictionary<Type, ComponentTypes> MappingTypeEnum = new Dictionary<Type, ComponentTypes>()
         {

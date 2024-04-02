@@ -41,7 +41,7 @@ namespace Nuake
 		bool result = state == GLFW_PRESS;
 
 		// First time pressed?
-		if (m_Keys.find(keycode) == m_Keys.end() || m_Keys[keycode] == true)
+		if (m_Keys.find(keycode) == m_Keys.end() || m_Keys[keycode] == false)
 		{
 			if (result)
 				m_Keys[keycode] = true;

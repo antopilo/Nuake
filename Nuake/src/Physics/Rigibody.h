@@ -20,6 +20,7 @@ namespace Nuake
 			Quat _rotation;
 			Entity _entity;
 
+			bool _isTrigger = false;
 			bool m_LockXAxis = false;
 			bool m_LockYAxis = false;
 			bool m_LockZAxis = false;
@@ -33,13 +34,16 @@ namespace Nuake
 
 			void UpdateTransform();
 
+			void SetIsTrigger(bool isTrigger) { _isTrigger = isTrigger; }
+			bool IsTrigger() const { return _isTrigger; }
+
 			bool GetLockXAxis() const { return m_LockXAxis; }
 			bool GetLockYAxis() const { return m_LockYAxis; }
 			bool GetLockZAxis() const { return m_LockZAxis; }
 
-			void setLockXAxis(bool lock) { m_LockXAxis = lock; }
-			void setLockYAxis(bool lock) { m_LockYAxis = lock; }
-			void setLockZAxis(bool lock) { m_LockZAxis = lock; }
+			void SetLockXAxis(bool lock) { m_LockXAxis = lock; }
+			void SetLockYAxis(bool lock) { m_LockYAxis = lock; }
+			void SetLockZAxis(bool lock) { m_LockZAxis = lock; }
 
 			void SetEntityID(Entity ent);
 			Vector3 GetPosition() const { return _position; }

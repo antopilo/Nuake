@@ -6,7 +6,7 @@
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
 #include "src/Audio/AudioManager.h"
-
+#include "src/Threading/JobSystem.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
 
@@ -41,6 +41,8 @@ namespace Nuake
 
 	void Engine::Tick()
 	{
+		JobSystem::Get().Update();
+
 		s_Time = static_cast<float>(glfwGetTime());
 		s_TimeStep = s_Time - s_LastFrameTime;
 		s_LastFrameTime = s_Time;

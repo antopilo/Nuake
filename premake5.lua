@@ -1,5 +1,6 @@
 workspace "Nuake"
-    conformancemode "On"
+    architecture "x64"
+
     configurations
     {
         "Debug",
@@ -19,12 +20,6 @@ workspace "Nuake"
             "NK_DEBUG"
         }
 
-    filter { "language:C++" }
-        architecture "x64"
-
-    filter { "language:C" }
-        architecture "x64"
-
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Nuake/dependencies/glfw_p5.lua"
@@ -34,9 +29,6 @@ include "Nuake/dependencies/freetype_p5.lua"
 include "Nuake/dependencies/jolt_p5.lua"
 include "Nuake/dependencies/soloud_p5.lua"
 include "Nuake/dependencies/optick_p5.lua"
-include "Nuake/dependencies/coral_p5.lua"
-
-include "NuakeNet/premake5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -88,8 +80,7 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/dependencies/build",
-        "%{prj.name}/dependencies/soloud/include",
-        "%{prj.name}/dependencies/Coral/Coral.Native/Include"
+        "%{prj.name}/dependencies/soloud/include"
     }
 
     links
@@ -99,16 +90,15 @@ project "Nuake"
     }
 
     filter "system:linux"
-        defines 
-        {
+        defines {
             "GLFW_STATIC",
             "NK_LINUX"
         }
         
         links 
-        {
-            "glib-2.0"
-        }
+	{
+		"glib-2.0"
+	}
         
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
     	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
@@ -117,7 +107,7 @@ project "Nuake"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		    "/usr/include/glib-2.0",
+		"/usr/include/glib-2.0",
         }
 
     filter "system:windows"
@@ -127,7 +117,7 @@ project "Nuake"
             "NK_WIN"
         }
     
-    
+    buildoptions { "-permissive", "-cxxflags", "gtk+-3.0"}
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
@@ -179,8 +169,7 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
-        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/7.0.7/"
+        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
     }
 
     links
@@ -191,10 +180,7 @@ project "NuakeRuntime"
         "assimp",
 		"Freetype",
 		"JoltPhysics",
-        "soloud",
-        "Coral.Native",
-        "nethost",
-        "libnethost"
+        "soloud"
     }
 
     filter "system:windows"
@@ -206,16 +192,6 @@ project "NuakeRuntime"
         links
         {
             "opengl32.lib"
-        }
-
-        externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
-    
-        postbuildcommands {
-            '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/%{prj.name}"'
         }
 
     filter "system:linux"
@@ -236,7 +212,7 @@ project "NuakeRuntime"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		    "/usr/include/glib-2.0",
+		"/usr/include/glib-2.0",
         }
         
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
@@ -303,7 +279,7 @@ project "Editor"
 		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/dependencies/soloud/include",
-        "/usr/include/gtk-3.0/",
+        "/usr/include/gtk-3.0/"
     }
     
     libdirs 
@@ -317,8 +293,7 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
-        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/7.0.7/"
+        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
     }
 
     links
@@ -327,12 +302,9 @@ project "Editor"
         "glad", 
         "GLFW",
         "assimp",
-        "Freetype",
-        "JoltPhysics",
-        "soloud",
-        "Coral.Native",
-        "nethost",
-        "libnethost"
+	"Freetype",
+	"JoltPhysics",
+        "soloud"
     }
 
     filter "system:Windows"
@@ -349,16 +321,6 @@ project "Editor"
         {
             "NK_WIN"
         }
-        
-        externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
-    
-        postbuildcommands {
-            '{ECHO} Copying "%{wks.location}/NetCore/7.0.7/nethost.dll" to "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/NetCore/7.0.7/nethost.dll" "%{cfg.targetdir}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Build/%{cfg.buildcfg}-%{cfg.system}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"',
-            '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/%{prj.name}"'
-        }
 
 
     filter "system:linux"
@@ -371,8 +333,8 @@ project "Editor"
             "asound",
             "glib-2.0",
             "gtk-3",
-            "gobject-2.0",
-            "asound"
+		"gobject-2.0",
+		"asound"
         }
 
  	buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
@@ -383,8 +345,10 @@ project "Editor"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		    "/usr/include/glib-2.0",
+		"/usr/include/glib-2.0",
         }
+        
+       
 	
         defines 
         {
@@ -421,4 +385,3 @@ project "Editor"
     postbuildcommands {
      --"{COPY} "Nuake/dependencies/GLFW/lib-vc2019/glfw3.dll" " .. "./bin/" .. outputdir .. "/%{prj.name}/glfw3.dll"
     }
-
