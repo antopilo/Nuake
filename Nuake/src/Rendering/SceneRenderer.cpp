@@ -289,8 +289,7 @@ namespace Nuake
 			}
 			framebuffer.Unbind();
 		}
-		
-		
+
 		{
 			mOutlineBuffer->QueueResize(framebuffer.GetSize());
 			mOutlineBuffer->Bind();
@@ -310,13 +309,21 @@ namespace Nuake
 			ImGui::Begin("outline");
 			ImGui::Image((void*)mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 			ImGui::End();
+
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
-			
-				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+				
+				if (sceneEnv->VignetteEnabled)
+				{
+					shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+				}
+				else
+				{
+					shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				}
 				shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 1);
 				Renderer::DrawQuad();
 			}
@@ -486,7 +493,7 @@ namespace Nuake
 			RenderCommand::Disable(RendererEnum::BLENDING);
 
 			// Init
-			RenderCommand::Enable(RendererEnum::FACE_CULL);
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			Shader* gBufferShader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
 			Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("Resources/Shaders/gbuffer_skinned.shader");
 

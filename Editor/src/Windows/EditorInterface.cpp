@@ -1644,21 +1644,21 @@ namespace Nuake {
 
             // Draw a tree of entities.
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(26.f / 255.0f, 26.f / 255.0f, 26.f / 255.0f, 1));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4, 4 });
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 8, 4 });
-                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_NoPadInnerX | ImGuiTableFlags_NoPadOuterX))
+                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_IndentEnable | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+                    ImGui::TableSetupColumn("   Label", ImGuiTableColumnFlags_IndentEnable | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
                     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
-                    ImGui::TableSetupColumn("Visibility", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("Visibility   ", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableHeadersRow();
 
                     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
                     std::vector<Entity> entities = scene->GetAllEntities();
                     for (Entity e : entities)
                     {
-                        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
                         std::string name = e.GetComponent<NameComponent>().Name;
                         // If selected add selected flag.
                         if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
@@ -1684,12 +1684,11 @@ namespace Nuake {
                     ImGui::PopStyleVar();
                 }
 				ImGui::EndTable();
-                ImGui::PopStyleVar();
 				
             }
             ImGui::EndChild();
+            ImGui::PopStyleVar();
             ImGui::PopStyleColor();
-            
             if (ImGui::BeginDragDropTarget()) // Drag n drop new prefab file into scene tree
             {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Prefab"))

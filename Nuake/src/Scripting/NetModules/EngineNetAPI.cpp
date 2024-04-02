@@ -1,4 +1,5 @@
 #include "EngineNetAPI.h"
+#include <Coral/String.hpp>
 
 namespace Nuake {
 

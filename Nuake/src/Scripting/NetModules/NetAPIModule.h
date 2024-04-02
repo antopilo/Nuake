@@ -2,7 +2,6 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 
-#include <Coral/String.hpp>
 
 namespace Nuake {
 

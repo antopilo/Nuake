@@ -109,7 +109,7 @@ namespace Nuake
         ImU32 rectColor = IM_COL32(255, 255, 255, 16);
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
         std::string visibleName = directory->Name;
-        const uint32_t MAX_CHAR_NAME = 35;
+        const uint32_t MAX_CHAR_NAME = 34;
         if (directory->Name.size() > MAX_CHAR_NAME)
         {
             visibleName = std::string(directory->Name.begin(), directory->Name.begin() + MAX_CHAR_NAME - 3) + "...";
@@ -857,13 +857,13 @@ namespace Nuake
                     if (ImGui::BeginTable("ssss", amount))
                     {
                         // Button to go up a level.
-                        if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
-                        {
-                            ImGui::TableNextColumn();
-                            if (ImGui::Button("..", buttonSize))
-                                m_CurrentDirectory = m_CurrentDirectory->Parent;
-                            i++;
-                        }
+                        //if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
+                        //{
+                        //    ImGui::TableNextColumn();
+                        //    if (ImGui::Button("..", buttonSize))
+                        //        m_CurrentDirectory = m_CurrentDirectory->Parent;
+                        //    i++;
+                        //}
 
                         if (m_CurrentDirectory && m_CurrentDirectory->Directories.size() > 0)
                         {
@@ -875,7 +875,7 @@ namespace Nuake
                                         ImGui::TableNextColumn();
                                     else
                                         ImGui::TableNextRow();
-
+                        
                                     DrawDirectory(d, i);
                                     i++;
                                 }

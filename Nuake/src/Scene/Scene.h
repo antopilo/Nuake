@@ -17,7 +17,8 @@
 
 namespace Nuake 
 {
-	class SkeletonNode;
+	struct SkeletonNode;
+
 	class Entity;
 	class SceneRenderer;
 

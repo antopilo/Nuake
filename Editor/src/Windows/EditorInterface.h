@@ -1,6 +1,8 @@
 #pragma once
 #include <src/Scene/Entities/Entity.h>
+
 #include "src/Vendors/imgui/imgui.h"
+
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
 

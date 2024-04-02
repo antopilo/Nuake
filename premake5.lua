@@ -1,6 +1,5 @@
 workspace "Nuake"
-    architecture "x64"
-
+    conformancemode "On"
     configurations
     {
         "Debug",
@@ -20,6 +19,12 @@ workspace "Nuake"
             "NK_DEBUG"
         }
 
+    filter { "language:C++" }
+        architecture "x64"
+
+    filter { "language:C" }
+        architecture "x64"
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Nuake/dependencies/glfw_p5.lua"
@@ -29,6 +34,9 @@ include "Nuake/dependencies/freetype_p5.lua"
 include "Nuake/dependencies/jolt_p5.lua"
 include "Nuake/dependencies/soloud_p5.lua"
 include "Nuake/dependencies/optick_p5.lua"
+include "Nuake/dependencies/coral_p5.lua"
+
+include "NuakeNet/premake5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -40,7 +48,8 @@ project "Nuake"
    
     defines
     {
-        "_MBCS"
+        "_MBCS",
+		"IMGUI_DEFINE_MATH_OPERATORS"
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -80,7 +89,8 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/dependencies/build",
-        "%{prj.name}/dependencies/soloud/include"
+        "%{prj.name}/dependencies/soloud/include",
+        "%{prj.name}/dependencies/Coral/Coral.Native/Include"
     }
 
     links
@@ -90,15 +100,16 @@ project "Nuake"
     }
 
     filter "system:linux"
-        defines {
+        defines 
+        {
             "GLFW_STATIC",
             "NK_LINUX"
         }
         
         links 
-	{
-		"glib-2.0"
-	}
+        {
+            "glib-2.0"
+        }
         
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
     	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
@@ -107,7 +118,7 @@ project "Nuake"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		"/usr/include/glib-2.0",
+		    "/usr/include/glib-2.0",
         }
 
     filter "system:windows"
@@ -117,7 +128,7 @@ project "Nuake"
             "NK_WIN"
         }
     
-    buildoptions { "-permissive", "-cxxflags", "gtk+-3.0"}
+    
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
@@ -169,7 +180,8 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
-        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
     }
 
     links
@@ -180,7 +192,8 @@ project "NuakeRuntime"
         "assimp",
 		"Freetype",
 		"JoltPhysics",
-        "soloud"
+        "soloud",
+        "Coral.Native",
     }
 
     filter "system:windows"
@@ -192,6 +205,12 @@ project "NuakeRuntime"
         links
         {
             "opengl32.lib"
+        }
+
+        externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
+    
+        postbuildcommands {
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
         }
 
     filter "system:linux"
@@ -212,7 +231,7 @@ project "NuakeRuntime"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		"/usr/include/glib-2.0",
+		    "/usr/include/glib-2.0",
         }
         
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
@@ -279,7 +298,7 @@ project "Editor"
 		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/dependencies/soloud/include",
-        "/usr/include/gtk-3.0/"
+        "/usr/include/gtk-3.0/",
     }
     
     libdirs 
@@ -293,7 +312,8 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
-        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+        "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
     }
 
     links
@@ -302,9 +322,10 @@ project "Editor"
         "glad", 
         "GLFW",
         "assimp",
-	"Freetype",
-	"JoltPhysics",
-        "soloud"
+        "Freetype",
+        "JoltPhysics",
+        "soloud",
+        "Coral.Native"
     }
 
     filter "system:Windows"
@@ -321,6 +342,13 @@ project "Editor"
         {
             "NK_WIN"
         }
+        
+        externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
+    
+        postbuildcommands {
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"',
+            '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
+        }
 
 
     filter "system:linux"
@@ -333,8 +361,8 @@ project "Editor"
             "asound",
             "glib-2.0",
             "gtk-3",
-		"gobject-2.0",
-		"asound"
+            "gobject-2.0",
+            "asound"
         }
 
  	buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
@@ -345,15 +373,14 @@ project "Editor"
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
-		"/usr/include/glib-2.0",
+		    "/usr/include/glib-2.0",
         }
-        
-       
 	
         defines 
         {
             "GLFW_STATIC",
-            "NK_LINUX"
+            "NK_LINUX",
+			"IMGUI_DEFINE_MATH_OPERATORS"
         }
 
 
