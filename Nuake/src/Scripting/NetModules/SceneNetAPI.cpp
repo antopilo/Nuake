@@ -21,6 +21,7 @@
 #include "src/Scene/Components/QuakeMap.h"
 
 #include "src/Physics/PhysicsManager.h"
+#include "src/Scripting/ScriptingEngineNet.h"
 
 #include <Coral/Array.hpp>
 
@@ -36,6 +37,24 @@ namespace Nuake {
 		}
 
 		return scene->GetEntity(entityName).GetHandle();
+	}
+
+	Coral::ManagedObject GetEntityScript(Coral::String entityName)
+	{
+		auto scene = Engine::GetCurrentScene();
+		if (!scene->EntityExists(entityName))
+		{
+			return Coral::ManagedObject(); // Error code: entity not found.
+		}
+
+		Entity entity = scene->GetEntity(entityName);
+
+		auto& scriptingEngine = ScriptingEngineNet::Get();
+		if (scriptingEngine.HasEntityScriptInstance(entity))
+		{
+			auto instance = scriptingEngine.GetEntityScript(entity);
+			return instance;
+		}
 	}
 
 	static enum ComponentTypes
@@ -216,6 +235,7 @@ namespace Nuake {
 	{
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
+		RegisterMethod("Scene.GetEntityScriptIcall", &GetEntityScript);
 
 		// Components
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);

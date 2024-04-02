@@ -117,7 +117,7 @@ namespace Nuake
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
 	{
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
-		const std::string assemblyPath = "/bin/Debug/net7.0/" + sanitizedProjectName + ".dll";
+		const std::string assemblyPath = "/bin/Debug/net8.0/" + sanitizedProjectName + ".dll";
 
 		if (!FileSystem::FileExists(assemblyPath))
 		{
@@ -223,6 +223,8 @@ namespace Nuake
 	{
 		if (!HasEntityScriptInstance(entity))
 		{
+			std::string name = entity.GetComponent<NameComponent>().Name;
+			Logger::Log(name);
 			Logger::Log("Failed to get entity .Net script instance, doesn't exist", ".net", CRITICAL);
 			return Coral::ManagedObject();
 		}
@@ -266,10 +268,10 @@ namespace Nuake
 		const std::string cleanProjectName = String::Sanitize(projectName);
 		const std::string premakeScript = R"(
 workspace ")" + cleanProjectName + R"("
+configurations { "Debug", "Release" }
 	project ")" + cleanProjectName + R"("
 		language "C#"
-		dotnetframework "net7.0"
-
+		dotnetframework "net8.0"
 		kind "SharedLib"
 			clr "Unsafe"
 	
