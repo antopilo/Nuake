@@ -1540,8 +1540,47 @@ namespace Nuake {
         {
             if (UI::PrimaryButton("Add Entity"))
             {
-                ImGui::OpenPopup("create_entity_popup");
+                ImGui::OpenPopup("create_entity_new_popup");
             }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 8, 8 });
+
+            if (ImGui::BeginPopup("create_entity_new_popup"))
+            {
+                ImGui::BeginChild("entity_child", ImVec2(442, 442), ImGuiChildFlags_AlwaysUseWindowPadding);
+
+                std::string searchQuery = "";
+                
+                ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
+                ImGui::InputTextWithHint("##search", "Search entity", &searchQuery, 0, 0, 0);
+                ImGui::PopItemWidth();
+
+                ImGui::Button("Empty", { 130, 130 });
+                ImGui::SameLine();
+                ImGui::Button("3D", { 130, 130 });
+                ImGui::SameLine();
+                ImGui::Button("Lights", { 130, 130 });
+
+                ImGui::Button("Physics", { 130, 130 });
+                ImGui::SameLine();
+                ImGui::Button("Shapes", { 130, 130 });
+                ImGui::SameLine();
+                ImGui::Button("Scripts", { 130, 130 });
+
+                ImGui::Button("Prefabs", { 130, 130 });
+                ImGui::SameLine();
+                ImGui::Button("Utilities", { 130, 130 });
+                ImGui::SameLine();
+
+                ImGui::BeginDisabled();
+                ImGui::Button("Addons", { 130, 130 });
+                ImGui::EndDisabled();
+
+                ImGui::EndChild();
+                ImGui::EndPopup();
+            }
+            ImGui::PopStyleVar();
+
 
             if (ImGui::BeginPopup("create_entity_popup"))
             {

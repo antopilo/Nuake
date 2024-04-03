@@ -3,6 +3,7 @@
 
 #include "../Misc/InterfaceFonts.h"
 
+#include "src/UI/ImUI.h"
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Resource/FontAwesome5.h>
 

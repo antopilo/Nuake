@@ -340,7 +340,8 @@ project "Editor"
         }
         defines
         {
-            "NK_WIN"
+            "NK_WIN",
+            "IMGUI_DEFINE_MATH_OPERATORS"
         }
         
         externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
@@ -365,7 +366,7 @@ project "Editor"
             "asound"
         }
 
- 	buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
+ 	    buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
     	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
 
         
@@ -389,7 +390,8 @@ project "Editor"
         symbols "on"
         defines 
         {
-            "WIN32_LEAN_AND_MEAN"
+            "WIN32_LEAN_AND_MEAN",
+            "IMGUI_DEFINE_MATH_OPERATORS"
         }
 
     filter "configurations:Release"
@@ -401,7 +403,8 @@ project "Editor"
         optimize "on"
         defines 
         {
-            "WIN32_LEAN_AND_MEAN"
+            "WIN32_LEAN_AND_MEAN",
+            "IMGUI_DEFINE_MATH_OPERATORS"
         }
 
     -- Removes the console for windows

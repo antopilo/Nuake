@@ -50,7 +50,8 @@ public:
                 ImGui::Text("Playing");
                 ImGui::TableNextColumn();
 
-                ImGui::Checkbox("##Playing", &component.IsPlaying);
+                UI::ToggleButton("##Player", &component.IsPlaying);
+                //ImGui::Checkbox("##Playing", &component.IsPlaying);
                 ImGui::TableNextColumn();
 
                 ComponentTableReset(component.IsPlaying, false);

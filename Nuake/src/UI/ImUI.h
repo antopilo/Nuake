@@ -29,5 +29,7 @@ namespace Nuake
 		bool FloatSlider(const std::string& name, float& input, float min = 0.0f, float max = 1.0f, float speed = 0.01f);
 
 		bool CheckBox(const std::string& name, bool& value);
+
+		void ToggleButton(const char* str_id, bool* v);
 	}
 }

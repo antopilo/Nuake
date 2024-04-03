@@ -30,7 +30,7 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_gbuffer_skinned_shader);
 		LoadEmbeddedShader(Resources_Shaders_gizmo_shader);
 		LoadEmbeddedShader(Resources_Shaders_line_shader);
-		LoadEmbeddedShader(Resources_Shaders_pbr_shader);
+		//LoadEmbeddedShader(Resources_Shaders_pbr_shader);
 		LoadEmbeddedShader(Resources_Shaders_sdf_text_shader);
 		LoadEmbeddedShader(Resources_Shaders_shadowMap_shader);
 		LoadEmbeddedShader(Resources_Shaders_shadowMap_skinned_shader);

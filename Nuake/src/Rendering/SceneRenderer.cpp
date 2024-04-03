@@ -20,8 +20,13 @@ namespace Nuake
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0); // Albedo
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1); // Normal
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT2); // Material + unlit
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT3); // Entity ID
+
+		auto entityTexture = CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT);
+		entityTexture->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		mGBuffer->SetTexture(entityTexture, GL_COLOR_ATTACHMENT3); // Entity ID
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
+
+		
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -262,33 +267,31 @@ namespace Nuake
 			framebuffer.Unbind();
 		}
 
-		if (sceneEnv->VignetteEnabled)
+		mVignetteBuffer->QueueResize(framebuffer.GetSize());
+		mVignetteBuffer->Bind();
 		{
-			mVignetteBuffer->QueueResize(framebuffer.GetSize());
-			mVignetteBuffer->Bind();
-			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
-				shader->Bind();
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
+			shader->Bind();
 
-				shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
-				shader->SetUniform1f("u_Extend", sceneEnv->VignetteExtend);
-				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
-				Renderer::DrawQuad();
-			}
-			mVignetteBuffer->Unbind();
-
-			framebuffer.Bind();
-			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
-				shader->Bind();
-
-				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
-				Renderer::DrawQuad();
-			}
-			framebuffer.Unbind();
+			shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
+			shader->SetUniform1f("u_Extend", sceneEnv->VignetteEnabled ? sceneEnv->VignetteExtend : 0.0f);
+			shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+			Renderer::DrawQuad();
 		}
+		mVignetteBuffer->Unbind();
+
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+			Renderer::DrawQuad();
+		}
+		framebuffer.Unbind();
+
 
 		{
 			mOutlineBuffer->QueueResize(framebuffer.GetSize());
@@ -316,14 +319,8 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
 				
-				if (sceneEnv->VignetteEnabled)
-				{
-					shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
-				}
-				else
-				{
-					shader->SetUniformTex("u_Source", finalOutput.get(), 0);
-				}
+				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+
 				shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 1);
 				Renderer::DrawQuad();
 			}
