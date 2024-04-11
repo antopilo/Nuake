@@ -743,6 +743,7 @@ namespace Nuake
                 avail.y = 30;
                 if (ImGui::BeginChild("Path", avail, true))
                 {
+                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 2, 4 });
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
                     const auto buttonSize = ImVec2(26, 26);
@@ -834,6 +835,7 @@ namespace Nuake
                     ImGui::PopStyleColor(); // Button color
                     
                     ImGui::SameLine();
+                    ImGui::PopStyleVar();
                 }
                 ImGui::EndChild();
 
