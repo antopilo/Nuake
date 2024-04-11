@@ -70,7 +70,7 @@ namespace Nuake
 		// Check if we have an .sln in the project.
 		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
 
-		if (!FileSystem::FileExists(absoluteAssemblyPath))
+		if (!FileSystem::FileExists(m_EngineAssemblyName, true))
 		{
 			m_IsInitialized = false;
 			return;
@@ -79,7 +79,7 @@ namespace Nuake
 		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
 
 		// Load Nuake assembly DLL
-		m_NuakeAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
+		m_NuakeAssembly = m_LoadContext.LoadAssembly(m_EngineAssemblyName);
 
 		// Upload internal calls for each module
 		// --------------------------------------------------

@@ -21,7 +21,7 @@ namespace Nuake {
 	private:
 		const std::string m_Scope = "Nuake.Net";
 		const std::string m_EngineAssemblyName = "NuakeNet.dll";
-		const std::string m_NetDirectory = ".net";
+		const std::string m_NetDirectory = "bin/Debug/net8.0";
 		const std::string m_ContextName = "NuakeEngineContext";
 
 		bool m_IsInitialized = false;
