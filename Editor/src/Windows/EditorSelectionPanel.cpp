@@ -130,6 +130,49 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mCharacterControllerPanel.Draw(entity);
 	mAudioEmitterPanel.Draw(entity);
 
+	using namespace Nuake;
+	
+	float availWidth = ImGui::GetContentRegionAvail().x;
+	const float buttonWidth = 200.f;
+	float posX = (availWidth / 2.f) - (buttonWidth / 2.f);
+	ImGui::SetCursorPosX(posX);
+	
+	if (UI::PrimaryButton("Add Component", { buttonWidth, 32 }))
+	{
+		ImGui::OpenPopup("ComponentPopup");
+	}
+
+	if (ImGui::BeginPopup("ComponentPopup"))
+	{
+		MenuItemComponent("Wren Script", WrenScriptComponent);
+		MenuItemComponent("C# Script", NetScriptComponent);
+		MenuItemComponent("Camera", CameraComponent);
+		MenuItemComponent("Light", LightComponent);
+		ImGui::Separator();
+		MenuItemComponent("Model", ModelComponent);
+		MenuItemComponent("Skinned Model", SkinnedModelComponent);
+		MenuItemComponent("Bone", BoneComponent)
+			ImGui::Separator();
+		MenuItemComponent("Sprite", SpriteComponent)
+			MenuItemComponent("Particle Emitter", ParticleEmitterComponent)
+			ImGui::Separator();
+		MenuItemComponent("Character Controller", CharacterControllerComponent)
+			MenuItemComponent("Rigid body", RigidBodyComponent)
+			ImGui::Separator();
+		MenuItemComponent("Box collider", BoxColliderComponent)
+			MenuItemComponent("Capsule collider", CapsuleColliderComponent)
+			MenuItemComponent("Cylinder collider", CylinderColliderComponent)
+			MenuItemComponent("Sphere collider", SphereColliderComponent)
+			MenuItemComponent("Mesh collider", MeshColliderComponent)
+			ImGui::Separator();
+		MenuItemComponent("Quake map", QuakeMapComponent);
+		ImGui::Separator();
+		MenuItemComponent("Audio Emitter", AudioEmitterComponent);
+		ImGui::Separator();
+		MenuItemComponent("Path", AudioEmitterComponent);
+		ImGui::EndPopup();
+	}
+
 }
 
 void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
@@ -139,42 +182,6 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
     {
         auto& entityName = entity.GetComponent<NameComponent>().Name;
         ImGuiTextSTD("##Name", entityName);
-        ImGui::SameLine();
-
-        if (ImGui::Button("Add Component"))
-            ImGui::OpenPopup("ComponentPopup");
-
-        if (ImGui::BeginPopup("ComponentPopup"))
-        {
-			MenuItemComponent("Wren Script", WrenScriptComponent);
-			MenuItemComponent("C# Script", NetScriptComponent);
-			MenuItemComponent("Camera", CameraComponent);
-			MenuItemComponent("Light", LightComponent);
-			ImGui::Separator();
-			MenuItemComponent("Model", ModelComponent);
-			MenuItemComponent("Skinned Model", SkinnedModelComponent);
-			MenuItemComponent("Bone", BoneComponent)
-			ImGui::Separator();
-			MenuItemComponent("Sprite", SpriteComponent)
-			MenuItemComponent("Particle Emitter", ParticleEmitterComponent)
-			ImGui::Separator();
-			MenuItemComponent("Character Controller", CharacterControllerComponent)
-            MenuItemComponent("Rigid body", RigidBodyComponent)
-			ImGui::Separator();
-            MenuItemComponent("Box collider", BoxColliderComponent)
-			MenuItemComponent("Capsule collider", CapsuleColliderComponent)
-			MenuItemComponent("Cylinder collider", CylinderColliderComponent)
-            MenuItemComponent("Sphere collider", SphereColliderComponent)
-            MenuItemComponent("Mesh collider", MeshColliderComponent)
-			ImGui::Separator();
-			MenuItemComponent("Quake map", QuakeMapComponent);
-			ImGui::Separator();
-			MenuItemComponent("Audio Emitter", AudioEmitterComponent);
-			ImGui::Separator();
-			MenuItemComponent("Path", AudioEmitterComponent);
-            ImGui::EndPopup();
-        }
-        ImGui::Separator();
     }
     
 }

@@ -428,7 +428,7 @@ namespace Nuake {
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
 
-        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAllColumns;
 
 		NameComponent& nameComponent = e.GetComponent<NameComponent>();
 		std::string name = nameComponent.Name;
@@ -1540,7 +1540,7 @@ namespace Nuake {
         {
             if (UI::PrimaryButton("Add Entity"))
             {
-                ImGui::OpenPopup("create_entity_new_popup");
+                ImGui::OpenPopup("create_entity_popup");
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 8, 8 });
@@ -1555,21 +1555,24 @@ namespace Nuake {
                 ImGui::InputTextWithHint("##search", "Search entity", &searchQuery, 0, 0, 0);
                 ImGui::PopItemWidth();
 
-                ImGui::Button("Empty", { 130, 130 });
+                //ImGui::Button("Empty", { 130, 130 });
+                auto textureManager = TextureManager::Get();
+                ImVec2 buttonSize = { 120, 120 };
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/cube.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
-                ImGui::Button("3D", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/cube.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
-                ImGui::Button("Lights", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/light.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
 
-                ImGui::Button("Physics", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/physics.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
-                ImGui::Button("Shapes", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/shape.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
-                ImGui::Button("Scripts", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/code.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
 
-                ImGui::Button("Prefabs", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/box.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
-                ImGui::Button("Utilities", { 130, 130 });
+                ImGui::ImageButton((ImTextureID)textureManager->GetTexture("Resources/Images/wrench.png")->GetID(), buttonSize, ImVec2(0, 1), ImVec2(1, 0));
                 ImGui::SameLine();
 
                 ImGui::BeginDisabled();

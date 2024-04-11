@@ -14,14 +14,19 @@
         else if (ImGui::MenuItem(label))        \
             entity.AddComponent<Component>();
 
+#define CompononentPropertyName(name) \
+ImGui::AlignTextToFramePadding(); \
+ImGui::Text(##name);
 
 #define BeginComponentTable(name, component)                                            \
     UIFont* boldFont = new UIFont(Fonts::Bold);                                         \
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));                   \
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f));                  \
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);                             \
     bool removed = false;                                                               \
     bool headerOpened = ImGui::CollapsingHeader(#name, ImGuiTreeNodeFlags_DefaultOpen); \
-     if (#name != "TRANSFORM" && ImGui::BeginPopupContextItem())                                                \
+    ImGui::PopStyleVar();                                                               \
+     if (#name != "TRANSFORM" && ImGui::BeginPopupContextItem())                        \
      {                                                                                  \
         if (ImGui::Selectable("Remove")) { removed = true; }                            \
         ImGui::EndPopup();                                                              \
@@ -37,10 +42,11 @@
     {                                                                                   \
         delete boldFont;                                                                \
         ImGui::PopStyleVar();                                                           \
-        if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))                  \
+        ImGui::Indent();    \
+        if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_SizingStretchProp))             \
         {                                                                               \
-            ImGui::TableSetupColumn("name", 0, 0.25f);                                   \
-            ImGui::TableSetupColumn("set", 0, 0.65f);                                    \
+            ImGui::TableSetupColumn("name", 0, 0.25f);                                  \
+            ImGui::TableSetupColumn("set", 0, 0.65f);                                   \
             ImGui::TableSetupColumn("reset", 0, 0.1f);                                  \
                                                                                         \
             ImGui::TableNextColumn();
@@ -49,13 +55,14 @@
 #define EndComponentTable()             \
             ImGui::EndTable();          \
         }                               \
+        ImGui::Unindent();              \
     }                                   \
     else                                \
     {                                   \
         ImGui::PopStyleVar();           \
         delete boldFont;                \
     }                                   \
-    ImGui::PopStyleVar(); 
+    ImGui::PopStyleVar(); \
    
 
 #define ComponentTableReset(setting, value)                                     \
