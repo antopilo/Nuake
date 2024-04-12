@@ -185,10 +185,10 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
 	for (auto e : boxColliderView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
+		//if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		//{
+		//	continue;
+		//}
 
 		auto [transform, box] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
 
@@ -207,11 +207,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto sphereColliderView = scene->m_Registry.view<TransformComponent, SphereColliderComponent>();
 	for (auto e : sphereColliderView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, sphere] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
 		m_LineShader->Bind();
 		m_LineShader->SetUniform1f("u_Opacity", 0.5f);
@@ -225,11 +220,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto audioEmitterView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioEmitterView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, emitter] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
 		// We dont need to draw the radius if its not spatialized
@@ -254,11 +244,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto capsuleColliderView = scene->m_Registry.view<TransformComponent, CapsuleColliderComponent>();
 	for (auto e : capsuleColliderView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, capsule] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
@@ -284,11 +269,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto cylinderColliderView = scene->m_Registry.view<TransformComponent, CylinderColliderComponent>();
 	for (auto e : cylinderColliderView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, cylinder] = scene->m_Registry.get<TransformComponent, CylinderColliderComponent>(e);
 
 		const auto entityId = (uint32_t)e;
@@ -314,11 +294,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 	for (auto e : particleView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
 		m_LineShader->Bind();
 		m_LineShader->SetUniform1f("u_Opacity", 0.5f);
@@ -332,11 +307,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto meshColliderView = scene->m_Registry.view<TransformComponent, MeshColliderComponent, ModelComponent>();
 	for (auto e : meshColliderView)
 	{
-		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
-		{
-			continue;
-		}
-
 		auto [transform, mesh, model] = scene->m_Registry.get<TransformComponent, MeshColliderComponent, ModelComponent>(e);
 
 		// Component has no mesh set.
