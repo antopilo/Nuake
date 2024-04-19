@@ -18,6 +18,11 @@ namespace Nuake {
 		}
 	}
 
+	bool IsMouseButtonDown(int keyCode)
+	{
+		return Input::IsMouseButtonDown(keyCode);
+	}
+
 	bool IsKeyDown(int keyCode)
 	{
 		return Input::IsKeyDown(keyCode);
@@ -41,6 +46,7 @@ namespace Nuake {
 		RegisterMethod("Input.IsKeyDownIcall", &IsKeyDown);
 		RegisterMethod("Input.IsKeyPressedIcall", &IsKeyPressed);
 
+		RegisterMethod("Input.IsMouseButtonDownIcall", &IsMouseButtonDown);
 		RegisterMethod("Input.GetMousePositionIcall", &GetMousePosition);
 	}
 

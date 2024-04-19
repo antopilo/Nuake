@@ -132,12 +132,30 @@ namespace Nuake.Net
         MENU = 348,
     }
 
+    public enum MouseButton
+    {
+        BUTTON_LEFT = 0,
+        BUTTON_RIGHT = 1,
+        BUTTON_MIDDLE = 2,
+        BUTTON_4 = 3,
+        BUTTON_5 = 4,
+        BUTTON_6 = 5,
+        BUTTON_7 = 6,
+        BUTTON_8 = 7,
+    }
+
     public class Input
     {
         internal static unsafe delegate*<bool, void> ShowMouseIcall;
         internal static unsafe delegate*<int, bool> IsKeyDownIcall;
         internal static unsafe delegate*<int, bool> IsKeyPressedIcall;
+        internal static unsafe delegate*<int, bool> IsMouseButtonDownIcall;
         internal static unsafe delegate*<NativeArray<float>> GetMousePositionIcall;
+
+        public static bool IsMouseButtonDown(MouseButton button)
+        {
+            unsafe { return IsMouseButtonDownIcall((int)button); }
+        }
 
         public static void ShowMouse(bool visible)
         {
