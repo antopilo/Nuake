@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Coral.Managed.Interop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -18,6 +19,7 @@ namespace Nuake.Net
     public class Entity
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
+        internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
 
         public enum ComponentTypes
         {
@@ -59,7 +61,22 @@ namespace Nuake.Net
         // Physics
         public void OnCollisionInternal(int entity1, int entity2) 
         {
-            OnCollision(new Entity { ECSHandle = entity1 }, new Entity { ECSHandle = entity2 });
+            Entity entityInstance;
+            unsafe
+            {
+                bool hasInstance = EntityHasManagedInstanceIcall(entity2);
+
+                if (hasInstance)
+                {
+                    entityInstance = Scene.GetEntity<Entity>(entity2);
+                }
+                else
+                {
+                    entityInstance = new Entity { ECSHandle = entity2 };
+                }
+            }
+
+            OnCollision(new Entity { ECSHandle = entity1 }, entityInstance);
         }
 
         protected static Dictionary<Type, ComponentTypes> MappingTypeEnum = new Dictionary<Type, ComponentTypes>()
