@@ -37,6 +37,15 @@ public:
 				ImGui::TableNextColumn();
 				ComponentTableReset(Height, 1.0f)
 			}
+			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Is Trigger");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##isTrigger", &IsTrigger);
+				ImGui::TableNextColumn();
+				ComponentTableReset(IsTrigger, false);
+			}
 		}
 		EndComponentTable()
 	}
