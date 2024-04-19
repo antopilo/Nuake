@@ -75,6 +75,8 @@ namespace Nuake
 			bool IsCharacterGrounded(const Entity& entity);
 			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
 
+			void SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation);
+
 			// This is going to be ugly. TODO: Find a better way that passing itself as a parameter
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(Entity& entity, const Vector3& force);

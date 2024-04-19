@@ -25,7 +25,6 @@ namespace Nuake
 			_collisionShape(shape),
 			_mass(mass),
 			_entity(entity),
-			_transform(transform),
 			_rotation(rotation)
 		{
 			

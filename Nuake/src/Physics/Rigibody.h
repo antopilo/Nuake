@@ -26,7 +26,6 @@ namespace Nuake
 			bool m_LockZAxis = false;
 		public:
 			float _mass;
-			Matrix4 _transform;
 
 			RigidBody();
 			RigidBody(Vector3 position, Entity handle);

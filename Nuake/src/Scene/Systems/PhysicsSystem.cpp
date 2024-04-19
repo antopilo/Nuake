@@ -75,7 +75,32 @@ namespace Nuake
 			return;
 
 		InitializeRigidbodies();
-		
+
+		auto view = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
+		for (auto e : view)
+		{
+			auto [transform, rigidBodyComponent] = view.get<TransformComponent, RigidBodyComponent>(e);
+			Entity ent = Entity({ e, m_Scene });
+
+			bool isTrigger = false;
+			if (!rigidBodyComponent.GetRigidBody())
+			{
+				continue;
+			}
+
+			if (rigidBodyComponent.Rigidbody->IsTrigger())
+			{
+				auto globaltransform = transform.GetGlobalTransform();
+				Vector3 translation;
+				glm::quat rotation;
+				Vector3 scale;
+				Vector3 skew;
+				Vector4 perspective;
+				glm::decompose(globaltransform, scale, rotation, translation, skew, perspective);
+
+				PhysicsManager::Get().SetBodyTransform(ent, globaltransform[3], glm::normalize(transform.GetGlobalRotation()));
+			}
+		}
 	}
 
 	void PhysicsSystem::Exit()
@@ -155,7 +180,7 @@ namespace Nuake
 				Logger::Log("Cannot use mesh collider without model component", "physics", WARNING);
 			}
 
-			auto meshColliderComponent = meshColliderView.get<MeshColliderComponent>(e);
+			auto& meshColliderComponent = meshColliderView.get<MeshColliderComponent>(e);
 			const auto& modelComponent = entity.GetComponent<ModelComponent>();
 
 			if (modelComponent.ModelResource)

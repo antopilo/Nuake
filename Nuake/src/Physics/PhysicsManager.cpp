@@ -27,6 +27,11 @@ namespace Nuake
 		m_World->AddCharacterController(cc);
 	}
 
+	void PhysicsManager::SetBodyTransform(const Entity& entity, const Vector3& position, const Quat& rotation)
+	{
+		m_World->SetBodyPosition(entity, position, rotation);
+	}
+
 	void PhysicsManager::SetCharacterControllerPosition(const Entity& entity, const Vector3& position)
 	{
 		m_World->SetCharacterControllerPosition(entity, position);

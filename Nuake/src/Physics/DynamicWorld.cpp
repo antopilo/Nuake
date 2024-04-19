@@ -144,8 +144,8 @@ namespace Nuake
 
 		virtual void OnContactAdded(const JPH::Body& inBody1, const JPH::Body& inBody2, const JPH::ContactManifold& inManifold, JPH::ContactSettings& ioSettings) override
 		{
-			int entity1 = static_cast<int>(inBody1.GetUserData());
-			int entity2 = static_cast<int>(inBody2.GetUserData());
+			uint32_t entity1 = static_cast<uint32_t>(inBody1.GetUserData());
+			uint32_t entity2 = static_cast<uint32_t>(inBody2.GetUserData());
 
 			JPH::Vec3 joltNormal = inManifold.mWorldSpaceNormal;
 			Vector3 normal = Vector3(joltNormal.GetX(), joltNormal.GetY(), joltNormal.GetZ());
@@ -301,6 +301,7 @@ namespace Nuake
 				layer = Layers::MOVING;
 			}
 
+			const std::string name = rb->GetEntity().GetComponent<NameComponent>().Name;
 			if (rb->IsTrigger())
 			{
 				layer = Layers::SENSORS;
@@ -353,7 +354,7 @@ namespace Nuake
 				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
 			}
 
-			int entityId = rb->GetEntity().GetID();
+			int entityId = rb->GetEntity().GetHandle();
 
 			if (entityId == 0)
 			{
@@ -430,6 +431,31 @@ namespace Nuake
 			return false;
 		}
 
+		void DynamicWorld::SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation)
+		{
+			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
+			for (const auto& body : _registeredBodies)
+			{
+				auto bodyId = static_cast<JPH::BodyID>(body);
+				auto bodyEntityId = bodyInterface.GetUserData(bodyId);
+				if (bodyEntityId == entity.GetHandle())
+				{
+					JPH::Vec3 currentPosition;
+					JPH::Quat currentRotation;
+					_JoltBodyInterface->GetPositionAndRotation(bodyId, currentPosition, currentRotation);
+
+					JPH::Vec3 newPosition = { position.x, position.y, position.z };
+					JPH::Quat newRotation = { rotation.x, rotation.y, rotation.z, rotation.w };
+
+					if (newPosition != currentPosition || currentRotation != newRotation)
+					{
+						std::string name = entity.GetComponent<NameComponent>().Name;
+						_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+					}
+				}
+			}
+		}
+
 		void DynamicWorld::SetCharacterControllerPosition(const Entity & entity, const Vector3 & position)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
@@ -486,6 +512,11 @@ namespace Nuake
 				auto bodyId = static_cast<JPH::BodyID>(body);
 				if (auto entId = static_cast<int>(bodyInterface.GetUserData(bodyId)); entId != 0)
 				{
+					if (bodyInterface.GetObjectLayer(bodyId) == Layers::SENSORS)
+					{
+						continue;
+					}
+
 					JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
 					JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 					JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
@@ -505,7 +536,7 @@ namespace Nuake
 					Vector4 pesp = Vector4();
 					glm::decompose(transform, scale, rotation, pos, skew, pesp);
 
-					Entity entity = Engine::GetCurrentScene()->GetEntityByID(entId);
+					Entity entity = { (entt::entity)entId, Engine::GetCurrentScene().get() };
 					auto& transformComponent = entity.GetComponent<TransformComponent>();
 					transformComponent.SetLocalPosition(pos);
 					transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
@@ -724,7 +755,7 @@ namespace Nuake
 			{
 				auto bodyId = static_cast<JPH::BodyID>(body);
 				auto entityId = bodyInterface.GetUserData(bodyId);
-				if (entityId == entity.GetID())
+				if (entityId == entity.GetHandle())
 				{
 					bodyInterface.AddForce(bodyId, JPH::Vec3(force.x, force.y, force.z));
 					return;
@@ -744,7 +775,7 @@ namespace Nuake
 			{
 				Box* box = (Box*)shape.get();
 				const Vector3& boxSize = box->GetSize();
-				JPH::BoxShapeSettings shapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z));
+				JPH::BoxShapeSettings shapeSettings(JPH::Vec3(boxSize.x, boxSize.y, boxSize.z), 0.01f);
 				result = shapeSettings.Create();
 			}
 			break;

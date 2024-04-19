@@ -150,9 +150,6 @@ namespace Nuake
 
 		for (auto& type : m_GameAssembly.GetTypes())
 		{
-			Logger::Log(std::string("Detected type: ") + std::string(type->GetFullName()), ".net");
-			Logger::Log(std::string("Detected base type: ") + std::string(type->GetBaseType().GetFullName()), ".net");
-
 			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
 			if (baseTypeName == "Nuake.Net.Entity")
 			{

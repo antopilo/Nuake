@@ -177,8 +177,8 @@ namespace Nuake
 		const auto& collisions = physicsManager.GetCollisions();
 		for (const auto& col : collisions)
 		{
-			Entity entity1 = m_Scene->GetEntityByID(col.Entity1);
-			Entity entity2 = m_Scene->GetEntityByID(col.Entity2);
+			Entity entity1 = { (entt::entity)col.Entity1, m_Scene };
+			Entity entity2 = { (entt::entity)col.Entity2, m_Scene };
 
 			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
 			{
