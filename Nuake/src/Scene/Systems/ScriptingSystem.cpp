@@ -174,17 +174,17 @@ namespace Nuake
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 
 		auto& physicsManager = PhysicsManager::Get();
-		const auto& collisions = physicsManager.GetCollisions();
+		const auto collisions = physicsManager.GetCollisions();
 		for (const auto& col : collisions)
 		{
 			Entity entity1 = { (entt::entity)col.Entity1, m_Scene };
-			Entity entity2 = { (entt::entity)col.Entity2, m_Scene };
-
 			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
 			{
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
 				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1, (int)col.Entity2);
 			}
 		}
+
+		physicsManager.GetWorld()->ClearCollisionData();
 	}
 }

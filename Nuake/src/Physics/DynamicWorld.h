@@ -85,6 +85,8 @@ namespace Nuake
 			void StepSimulation(Timestep ts);
 			void Clear();
 
+			void ClearCollisionData();
+
 			void RegisterCollisionCallback(const CollisionData& data);
 			const std::vector<CollisionData>& GetCollisionsData();
 		private:

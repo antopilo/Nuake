@@ -715,12 +715,20 @@ namespace Nuake
 			}
 		}
 
+		void DynamicWorld::ClearCollisionData()
+		{
+			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
+			_CollisionCallbacks.clear();;
+		}
+
 		void DynamicWorld::RegisterCollisionCallback(const CollisionData& data)
 		{
 			// This will be called from multiple threads
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex); 
 
 			_CollisionCallbacks.push_back(std::move(data));
+
+			Logger::Log("Registered collision");
 		}
 
 		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()

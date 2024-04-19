@@ -29,13 +29,13 @@
 #include "src/Misc/GizmoDrawer.h"
 #include "src/Windows/FileSystemUI.h"
 
-#include <src/Core/Maths.h>
-#include <src/Rendering/SceneRenderer.h>
+#include "src/Core/Maths.h"
+#include "src/Rendering/SceneRenderer.h"
 
 #include "src/Misc/WindowTheming.h"
-#include <src/Application/Application.h>
+#include "src/Application/Application.h"
 
-#include <src/Application/EntryPoint.h>
+#include "src/Application/EntryPoint.h"
 
 #include "src/EditorApplication.h"
 
