@@ -108,6 +108,29 @@ namespace Nuake
 		return Entity{ (entt::entity)0, this };
 	}
 
+	Entity Scene::GetEntityFromPath(const std::string& path)
+	{
+		auto splits = String::Split(path, '/');
+
+		std::vector<Entity> rootEntities;
+		const auto& view = m_Registry.view<ParentComponent, NameComponent>();
+		for (const auto& e : view)
+		{
+			auto [parent, name] = view.get<ParentComponent, NameComponent>(e);
+			if (!parent.HasParent)
+			{
+				rootEntities.push_back({ e, this });
+			}
+		}
+
+		return Entity();
+	}
+
+	Entity Scene::GetRelativeEntityFromPath(Entity entity, const std::string& path)
+	{
+		return Entity();
+	}
+
 	bool Scene::OnInit()
 	{
 		for (auto& system : m_Systems)

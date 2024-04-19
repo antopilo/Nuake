@@ -74,13 +74,14 @@ namespace Nuake
 		Entity GetEntity(const std::string& name);
 		Entity GetEntity(int handle);
 		Entity GetEntityByID(int id);
+		Entity GetEntityFromPath(const std::string& path);
+		Entity GetRelativeEntityFromPath(Entity entity, const std::string& path);
 
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src);
 
 		Ref<Environment> GetEnvironment() const;
 		void SetEnvironment(Ref<Environment> env);
-
 
 		bool Save();
 		bool SaveAs(const std::string& path);

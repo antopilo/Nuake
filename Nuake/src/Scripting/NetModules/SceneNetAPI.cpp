@@ -150,6 +150,20 @@ namespace Nuake {
 		return ScriptingEngineNet::Get().HasEntityScriptInstance(entity);
 	}
 
+	int EntityGetEntity(int handle, Coral::String input)
+	{
+		std::string path = input;
+
+		Ref<Scene> scene = Engine::GetCurrentScene();
+		if (String::BeginsWith(input, "/"))
+		{
+			return scene->GetEntityFromPath(input).GetHandle();
+		}
+
+		Entity entity = { (entt::entity)handle, scene.get() };
+		return scene->GetRelativeEntityFromPath(entity, input).GetHandle();
+	}
+
 	void TransformSetPosition(int entityId, float x, float y, float z)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -275,8 +289,11 @@ namespace Nuake {
 
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
+		// Entity
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
+		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
+		// Scene
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
 		RegisterMethod("Scene.GetEntityScriptFromNameIcall", &GetEntityScriptFromName);
 		RegisterMethod("Scene.GetEntityScriptFromHandleIcall", &GetEntityScriptFromHandle);

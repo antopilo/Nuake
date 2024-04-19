@@ -1,6 +1,7 @@
 ﻿using Coral.Managed.Interop;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -20,7 +21,7 @@ namespace Nuake.Net
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
         internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
-
+        internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
         public enum ComponentTypes
         {
             Unknown = -1,
@@ -118,6 +119,27 @@ namespace Nuake.Net
             if (HasComponent<T>())
             {
                 return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
+            }
+
+            return null;
+        }
+
+        public Entity? GetEntity<T>(string path) where T : Entity
+        {
+            Entity entityInstance;
+            unsafe
+            {
+                int entityHandle = EntityGetEntityIcall(ECSHandle, path );
+
+                bool hasInstance = EntityHasManagedInstanceIcall(entityHandle);
+                if (hasInstance)
+                {
+                    entityInstance = Scene.GetEntity<Entity>(entityHandle);
+                }
+                else
+                {
+                    entityInstance = new Entity { ECSHandle = entityHandle };
+                }
             }
 
             return null;
