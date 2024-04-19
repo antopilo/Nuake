@@ -8,10 +8,13 @@ namespace Nuake {
 	class NetAPIModule
 	{
 	public:
+		using MethodMap = std::unordered_map<std::string, void*>;
+
 		virtual const std::string GetModuleName() const = 0;
 		virtual void RegisterMethods() = 0;
 
-		std::unordered_map<std::string, void*> GetMethods() const { return m_Methods; }
+		MethodMap GetMethods() const { return m_Methods; }
+
 	protected:
 		void RegisterMethod(const std::string& name, void* methodPtr)
 		{
@@ -19,6 +22,6 @@ namespace Nuake {
 		}
 
 	private:
-		std::unordered_map<std::string, void*> m_Methods;
+		MethodMap m_Methods;
 	};
 }
