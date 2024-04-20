@@ -124,13 +124,13 @@ namespace Nuake.Net
             return null;
         }
 
-        public Entity? GetEntity<T>(string path) where T : Entity
+        public T? GetEntity<T>(string path) where T : Entity
         {
             Entity entityInstance;
             unsafe
             {
                 int entityHandle = EntityGetEntityIcall(ECSHandle, path );
-
+                 
                 bool hasInstance = EntityHasManagedInstanceIcall(entityHandle);
                 if (hasInstance)
                 {
@@ -142,7 +142,7 @@ namespace Nuake.Net
                 }
             }
 
-            return null;
+            return entityInstance as T;
         }
     }
 }

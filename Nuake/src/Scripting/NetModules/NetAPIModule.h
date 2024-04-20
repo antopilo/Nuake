@@ -13,7 +13,7 @@ namespace Nuake {
 		virtual const std::string GetModuleName() const = 0;
 		virtual void RegisterMethods() = 0;
 
-		MethodMap GetMethods() const { return m_Methods; }
+		const MethodMap& GetMethods() const { return m_Methods; }
 
 	protected:
 		void RegisterMethod(const std::string& name, void* methodPtr)

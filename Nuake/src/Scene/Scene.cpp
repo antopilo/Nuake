@@ -123,12 +123,89 @@ namespace Nuake
 			}
 		}
 
-		return Entity();
+		Entity currentEntity;
+		uint32_t currentSplitIndex = 1;
+		while (currentSplitIndex < splits.size())
+		{
+			// Look at root entities first
+			if (currentSplitIndex == 1) 
+			{
+				for (auto& rootEntity : rootEntities)
+				{
+					if (!rootEntity.IsValid())
+					{
+						continue;
+					}
+
+					const std::string& name = rootEntity.GetComponent<NameComponent>().Name;
+					if (name == splits[currentSplitIndex])
+					{
+						currentEntity = rootEntity;
+						continue;
+					}
+				}
+			}
+
+			// Then look through child of root entity
+			for (auto& child : currentEntity.GetComponent<ParentComponent>().Children)
+			{
+				if (!child.IsValid())
+				{
+					continue;
+				}
+
+				if (child.GetComponent<NameComponent>().Name == splits[currentSplitIndex])
+				{
+					currentEntity = child;
+				}
+			}
+
+			currentSplitIndex++;
+		}
+
+		return currentEntity;
 	}
 
 	Entity Scene::GetRelativeEntityFromPath(Entity entity, const std::string& path)
 	{
-		return Entity();
+		Entity currentEntity = entity;
+
+		auto splits = String::Split(path, '/');
+		uint32_t currentSplitIndex = 0;
+		while (currentSplitIndex < splits.size())
+		{
+			const std::string& currentSplit = splits[currentSplitIndex];
+
+			if (currentSplit == ".")
+			{
+				currentSplitIndex++;
+				continue; // ignore
+			}
+
+			if (currentSplit == "..") // Go up a level
+			{
+				auto& parentComponent = currentEntity.GetComponent<ParentComponent>();
+				if (parentComponent.HasParent)
+				{
+					currentEntity = parentComponent.Parent;
+				}
+			}
+			else
+			{
+				for (auto& child : currentEntity.GetComponent<ParentComponent>().Children)
+				{
+					auto& nameComponent = child.GetComponent<NameComponent>();
+					if (nameComponent.Name == currentSplit)
+					{
+						currentEntity = child;
+					}
+				}
+			}
+
+			currentSplitIndex++;
+		}
+
+		return currentEntity;
 	}
 
 	bool Scene::OnInit()

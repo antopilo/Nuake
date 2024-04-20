@@ -152,8 +152,6 @@ namespace Nuake {
 
 	int EntityGetEntity(int handle, Coral::String input)
 	{
-		std::string path = input;
-
 		Ref<Scene> scene = Engine::GetCurrentScene();
 		if (String::BeginsWith(input, "/"))
 		{
