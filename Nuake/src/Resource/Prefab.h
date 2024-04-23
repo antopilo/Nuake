@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <src/Scene/Components/SkinnedModelComponent.h>
 
 namespace Nuake {
 
@@ -109,11 +110,10 @@ namespace Nuake {
 
 					uint32_t oldId = nameComponent.ID;
 					uint32_t newId = OS::GetTime();
-					nameComponent.Name = scene->GetUniqueEntityName(nameComponent.Name);
+					nameComponent.Name = nameComponent.Name;
 					nameComponent.ID = newId;
 
 					newIdsLut[oldId] = newId;
-
 					if (isRoot)
 					{
 						Root = entity;
@@ -133,6 +133,36 @@ namespace Nuake {
 					auto& parentC = e.GetComponent<ParentComponent>();
 					auto parent = Engine::GetCurrentScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
 					parent.AddChild(e);
+				}
+
+				// Since the bones point to an entity, and we are instancing a prefab, the new skeleton is gonna be pointing to the wrong
+				// bones, we need to remap the skeleton to the new entities. We are simply reussing the same map we are using for the 
+				// reparenting. Pretty neat.
+				std::function<void(SkeletonNode&)> recursiveBoneRemapping = [&recursiveBoneRemapping, &newIdsLut](SkeletonNode& currentBone) 
+				{
+					for (SkeletonNode& bone : currentBone.Children)
+					{
+						bone.EntityHandle = newIdsLut[bone.EntityHandle];
+						recursiveBoneRemapping(bone);
+					}
+				};
+
+				// Do the remapping of the skeleton
+				for (auto& e : Entities)
+				{
+					if (e.GetID() == Root.GetID() || !e.HasComponent<SkinnedModelComponent>())
+					{
+						continue;
+					}
+
+					auto& skinnedModelComponent = e.GetComponent<SkinnedModelComponent>();
+					if (!skinnedModelComponent.ModelResource)
+					{
+						continue;
+					}
+
+					SkeletonNode& currentBone = skinnedModelComponent.ModelResource->GetSkeletonRootNode();
+					recursiveBoneRemapping(currentBone);
 				}
 			}
 			return true;
