@@ -55,29 +55,29 @@ namespace Nuake.Net
         public virtual void OnFixedUpdate(float dt) { }
         public virtual void OnDestroy() { }
 
-        public virtual void OnCollision(Entity entity1, Entity entity2) 
+        public virtual void OnCollision(Entity entity) 
         {
         }
 
         // Physics
-        public void OnCollisionInternal(int entity1, int entity2) 
+        public void OnCollisionInternal(int entity) 
         {
             Entity entityInstance;
             unsafe
             {
-                bool hasInstance = EntityHasManagedInstanceIcall(entity2);
+                bool hasInstance = EntityHasManagedInstanceIcall(entity);
 
                 if (hasInstance)
                 {
-                    entityInstance = Scene.GetEntity<Entity>(entity2);
+                    entityInstance = Scene.GetEntity<Entity>(entity);
                 }
                 else
                 {
-                    entityInstance = new Entity { ECSHandle = entity2 };
+                    entityInstance = new Entity { ECSHandle = entity };
                 }
             }
 
-            OnCollision(new Entity { ECSHandle = entity1 }, entityInstance);
+            OnCollision(entityInstance);
         }
 
         protected static Dictionary<Type, ComponentTypes> MappingTypeEnum = new Dictionary<Type, ComponentTypes>()

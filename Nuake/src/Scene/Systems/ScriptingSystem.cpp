@@ -213,11 +213,19 @@ namespace Nuake
 		const auto collisions = physicsManager.GetCollisions();
 		for (const auto& col : collisions)
 		{
+			// Calling both collidee(?)
 			Entity entity1 = { (entt::entity)col.Entity1, m_Scene };
 			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
 			{
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
-				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1, (int)col.Entity2);
+				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity2);
+			}
+
+			Entity entity2 = { (entt::entity)col.Entity2, m_Scene };
+			if (entity2.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity2))
+			{
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity2);
+				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1);
 			}
 		}
 
