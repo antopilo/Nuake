@@ -181,47 +181,9 @@ namespace Nuake
 
 		auto& component = entity.GetComponent<NetScriptComponent>();
 		const auto& filePath = component.ScriptPath;
-		if (filePath.empty())
-		{
-			Logger::Log("Skipped .net entity script since it was empty.", ".net", VERBOSE);
-			return;
-		}
+		
+		const std::string& className = FindClassNameInScript(filePath);
 
-		if (!FileSystem::FileExists(filePath))
-		{
-			Logger::Log("Skipped .net entity script: The file path doesn't exist.", ".net", WARNING);
-			return;
-		}
-
-		// We can now scan the file and look for this pattern: class XXXXX : Entity
-		// Warning, this doesnt do any bound check so if there is a semicolon at the end 
-		// of the file. IT MIGHT CRASH HERE. POTENTIALLY - I have not tested.
-		// -----------------------------------------------------
-		std::string fileContent = FileSystem::ReadFile(filePath);
-		fileContent = fileContent.substr(3, fileContent.size());
-		fileContent = String::RemoveWhiteSpace(fileContent);
-
-		// Find class token
-		size_t classTokenPos = fileContent.find("class");
-		if (classTokenPos == std::string::npos)
-		{
-			Logger::Log("Skipped .net entity script: file doesnt contain entity class.", ".net", WARNING);
-			return;
-		}
-
-		size_t classNameStartIndex = classTokenPos + 5; // 4 letter: class + 1 for next char
-
-		// Find semi-colon token
-		size_t semiColonPos = fileContent.find(":");
-		if (semiColonPos == std::string::npos || semiColonPos < classTokenPos)
-		{
-			Logger::Log("Skipped .net entity script: Not class inheriting Entity was found.", ".net", WARNING);
-			return;
-		}
-
-		size_t classNameLength = semiColonPos - classNameStartIndex;
-
-		const std::string className = fileContent.substr(classNameStartIndex, classNameLength);
 		if(m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
 		{
 			// The class name parsed in the file was not found in the game's DLL.
@@ -341,6 +303,50 @@ namespace NuakeShowcase
 	class )" + entityName + R"( 
 }
 )";
+	}
+
+	std::string ScriptingEngineNet::FindClassNameInScript(const std::string & filePath)
+	{
+		if (filePath.empty())
+		{
+			Logger::Log("Skipped .net entity script since it was empty.", ".net", VERBOSE);
+			return "";
+		}
+
+		if (!FileSystem::FileExists(filePath))
+		{
+			Logger::Log("Skipped .net entity script: The file path doesn't exist.", ".net", WARNING);
+			return "";
+		}
+
+		// We can now scan the file and look for this pattern: class XXXXX : Entity
+		// Warning, this doesnt do any bound check so if there is a semicolon at the end 
+		// of the file. IT MIGHT CRASH HERE. POTENTIALLY - I have not tested.
+		// -----------------------------------------------------
+		std::string fileContent = FileSystem::ReadFile(filePath);
+		fileContent = fileContent.substr(3, fileContent.size());
+		fileContent = String::RemoveWhiteSpace(fileContent);
+
+		// Find class token
+		size_t classTokenPos = fileContent.find("class");
+		if (classTokenPos == std::string::npos)
+		{
+			Logger::Log("Skipped .net entity script: file doesnt contain entity class.", ".net", WARNING);
+			return "";
+		}
+
+		size_t classNameStartIndex = classTokenPos + 5; // 4 letter: class + 1 for next char
+
+		// Find semi-colon token
+		size_t semiColonPos = fileContent.find(":");
+		if (semiColonPos == std::string::npos || semiColonPos < classTokenPos)
+		{
+			Logger::Log("Skipped .net entity script: Not class inheriting Entity was found.", ".net", WARNING);
+			return "";
+		}
+
+		size_t classNameLength = semiColonPos - classNameStartIndex;
+		return fileContent.substr(classNameStartIndex, classNameLength);
 	}
 
 }

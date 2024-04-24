@@ -43,6 +43,10 @@ namespace Nuake
 			return;
 		}
 
+		InitializeShapes();
+		InitializeRigidbodies();
+		InitializeCharacterControllers();
+
 		ApplyForces();
 
 		PhysicsManager::Get().Step(ts);
@@ -73,8 +77,6 @@ namespace Nuake
 	{
 		if (!Engine::IsPlayMode())
 			return;
-
-		InitializeRigidbodies();
 
 		auto view = m_Scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
 		for (auto e : view)
@@ -143,32 +145,44 @@ namespace Nuake
 		for (auto entity : boxView)
 		{
 			auto& boxComponent = boxView.get<BoxColliderComponent>(entity);
-			boxComponent.Box = CreateRef<Physics::Box>(boxComponent.Size);
+			if (!boxComponent.Box)
+			{
+				boxComponent.Box = CreateRef<Physics::Box>(boxComponent.Size);
+			}
 		}
 
 		const auto capsuleView = m_Scene->m_Registry.view<CapsuleColliderComponent>();
 		for (auto entity : capsuleView)
 		{
 			auto& capsuleComponent = capsuleView.get<CapsuleColliderComponent>(entity);
-			float radius = capsuleComponent.Radius;
-			float height = capsuleComponent.Height;
-			capsuleComponent.Capsule = CreateRef<Physics::Capsule>(radius, height);
+			if (!capsuleComponent.Capsule)
+			{
+				float radius = capsuleComponent.Radius;
+				float height = capsuleComponent.Height;
+				capsuleComponent.Capsule = CreateRef<Physics::Capsule>(radius, height);
+			}
 		}
 
 		const auto cylinderView = m_Scene->m_Registry.view<CylinderColliderComponent>();
 		for (auto entity : cylinderView)
 		{
 			auto& cylinderComponent = cylinderView.get<CylinderColliderComponent>(entity);
-			float radius = cylinderComponent.Radius;
-			float height = cylinderComponent.Height;
-			cylinderComponent.Cylinder = CreateRef<Physics::Cylinder>(radius, height);
+			if (!cylinderComponent.Cylinder)
+			{
+				float radius = cylinderComponent.Radius;
+				float height = cylinderComponent.Height;
+				cylinderComponent.Cylinder = CreateRef<Physics::Cylinder>(radius, height);
+			}
 		}
 
 		const auto sphereView = m_Scene->m_Registry.view<SphereColliderComponent>();
 		for (auto entity : sphereView)
 		{
 			auto& sphereComponent = sphereView.get<SphereColliderComponent>(entity);
-			sphereComponent.Sphere = CreateRef<Physics::Sphere>(sphereComponent.Radius);
+			if (!sphereComponent.Sphere)
+			{
+				sphereComponent.Sphere = CreateRef<Physics::Sphere>(sphereComponent.Radius);
+			}
 		}
 
 		const auto meshColliderView = m_Scene->m_Registry.view<MeshColliderComponent>();
@@ -181,19 +195,22 @@ namespace Nuake
 			}
 
 			auto& meshColliderComponent = meshColliderView.get<MeshColliderComponent>(e);
-			const auto& modelComponent = entity.GetComponent<ModelComponent>();
-
-			if (modelComponent.ModelResource)
+			if (!meshColliderComponent.Shape)
 			{
-				uint32_t subMeshId = meshColliderComponent.SubMesh;
-				const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
-				if (subMeshId >= submeshes.size())
-				{
-					Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
-				}
+				const auto& modelComponent = entity.GetComponent<ModelComponent>();
 
-				Ref<Mesh> mesh = submeshes[subMeshId];
-				meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
+				if (modelComponent.ModelResource)
+				{
+					uint32_t subMeshId = meshColliderComponent.SubMesh;
+					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
+					if (subMeshId >= submeshes.size())
+					{
+						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
+					}
+
+					Ref<Mesh> mesh = submeshes[subMeshId];
+					meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
+				}
 			}
 		}
 	}
@@ -298,6 +315,11 @@ namespace Nuake
 			Entity entity = Entity({ e, m_Scene });
 			auto [transformComponent, characterControllerComponent] = characterControllerView.get<TransformComponent, CharacterControllerComponent>(e);
 
+			if (characterControllerComponent.GetCharacterController())
+			{
+				continue;
+			}
+
 			Ref<Physics::PhysicShape> shape;
 			if (entity.HasComponent<CapsuleColliderComponent>())
 			{
@@ -328,6 +350,7 @@ namespace Nuake
 			characterController->Position = transformComponent.GetGlobalPosition();
 			characterController->Rotation = transformComponent.GetGlobalRotation();
 			characterControllerComponent.SetCharacterController(characterController);
+
 			PhysicsManager::Get().RegisterCharacterController(characterController);
 		}
 	}

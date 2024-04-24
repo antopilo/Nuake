@@ -61,5 +61,7 @@ namespace Nuake {
 		void CopyNuakeNETAssemblies(const std::string& path);
 		void GenerateSolution(const std::string& path, const std::string& projectName);
 		void CreateEntityScript(const std::string& path, const std::string& entityName);
+
+		std::string FindClassNameInScript(const std::string& filePath);
 	};
 }

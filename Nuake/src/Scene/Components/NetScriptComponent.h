@@ -13,6 +13,8 @@ namespace Nuake {
 		std::string ScriptPath;
 		std::string Class;
 
+		bool Initialized = false;
+
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();

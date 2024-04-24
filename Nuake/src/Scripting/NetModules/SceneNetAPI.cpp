@@ -75,6 +75,17 @@ namespace Nuake {
 		}
 	}
 
+	int InstancePrefab(Coral::String path)
+	{
+		if (!FileSystem::FileExists(path))
+		{
+			return -1;
+		}
+
+		const auto& prefab = Prefab::New(path);
+		return prefab->Root.GetHandle();
+	}
+
 	static enum ComponentTypes
 	{
 		Unknown = -1,
@@ -291,11 +302,12 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
 		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
+
 		// Scene
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
 		RegisterMethod("Scene.GetEntityScriptFromNameIcall", &GetEntityScriptFromName);
 		RegisterMethod("Scene.GetEntityScriptFromHandleIcall", &GetEntityScriptFromHandle);
-
+		RegisterMethod("Scene.InstancePrefabIcall", &InstancePrefab);
 		// Components
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
 		RegisterMethod("TransformComponent.GetPositionIcall", &TransformGetPosition);
