@@ -92,7 +92,6 @@ namespace Nuake {
 				const auto& scene = Engine::GetCurrentScene();
 
 				std::map<uint32_t, uint32_t> newIdsLut;
-
 				for (json e : j["Entities"])
 				{
 					Entity entity = { scene->m_Registry.create(), scene.get() };
@@ -140,9 +139,9 @@ namespace Nuake {
 				// reparenting. Pretty neat.
 				std::function<void(SkeletonNode&)> recursiveBoneRemapping = [&recursiveBoneRemapping, &newIdsLut](SkeletonNode& currentBone) 
 				{
+					currentBone.EntityHandle = newIdsLut[currentBone.EntityHandle];
 					for (SkeletonNode& bone : currentBone.Children)
 					{
-						bone.EntityHandle = newIdsLut[bone.EntityHandle];
 						recursiveBoneRemapping(bone);
 					}
 				};
