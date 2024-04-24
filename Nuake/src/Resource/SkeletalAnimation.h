@@ -85,7 +85,7 @@ namespace Nuake
 
 		int GetPositionIndex(float animationTime)
 		{
-			if (m_Positions.size() == 0)
+			if (m_Positions.empty())
 			{
 				return 0;
 			}
