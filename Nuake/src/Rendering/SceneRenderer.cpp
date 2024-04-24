@@ -308,10 +308,9 @@ namespace Nuake
 			}
 			mOutlineBuffer->Unbind();
  
-
-			ImGui::Begin("outline");
-			ImGui::Image((void*)mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-			ImGui::End();
+			//ImGui::Begin("outline");
+			//ImGui::Image((void*)mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::End();
 
 			framebuffer.Bind();
 			{
