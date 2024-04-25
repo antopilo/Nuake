@@ -4,6 +4,7 @@
 #include <src/Rendering/SceneRenderer.h>
 #include <src/Resource/ResourceLoader.h>
 #include <glad/glad.h>
+#include <src/Resource/Prefab.h>
 
 
 ThumbnailManager::ThumbnailManager()
@@ -68,61 +69,130 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	Matrix4 view = Matrix4(1.0f);
 	view = glm::lookAt(Vector3(1, -1.0, 0), Vector3(0, 0, 0), Vector3(0, 1, 0));;
 	
-	// Gbuffer pass
-	m_Framebuffer->Bind();
+
+	auto file = FileSystem::GetFile(path);
+	if (file->GetFileType() == FileType::Prefab)
 	{
-		RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
-		m_Framebuffer->Clear();
+		Ref<Scene> scene = Scene::New();
+		auto cam = scene->CreateEntity("Camera");
+		cam.AddComponent<CameraComponent>();
 
-		RenderCommand::Disable(RendererEnum::BLENDING);
-		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-		auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
-		shader->Bind();
+		scene->Update(0.01f);
+		scene->Draw(*m_ShadedFramebuffer.get());
 
-		auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-		shader->SetUniformMat4f("u_View", view);
-		shader->SetUniformMat4f("u_Projection", ortho);
-		shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
-		Ref<Material> material = ResourceLoader::LoadMaterial(path);
-		material->Bind(shader);
-		Renderer::SphereMesh->Draw(shader, false);
+		// Gbuffer pass
+		//m_Framebuffer->Bind();
+		//{
+		//	RenderCommand::SetClearColor({ 0.3f, 0.3f, 0.3f, 0.3f });
+		//	m_Framebuffer->Clear();
+		//
+		//	RenderCommand::Disable(RendererEnum::BLENDING);
+		//	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+		//	auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
+		//	shader->Bind();
+		//
+		//	auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
+		//	shader->SetUniformMat4f("u_View", view);
+		//	shader->SetUniformMat4f("u_Projection", ortho);
+		//	shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+		//	Renderer::SphereMesh->Draw(shader, true);
+		//}
+		//m_Framebuffer->Unbind();
+		//m_ShadedFramebuffer->SetTexture(texture);
+		//m_ShadedFramebuffer->Bind();
+		//{
+		//	//RenderCommand::Enable(RendererEnum::BLENDING);
+		//	RenderCommand::SetClearColor({ 0.2, 0.2, 0.2, 1 });
+		//	m_ShadedFramebuffer->Clear();
+		//	RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+		//	RenderCommand::Disable(RendererEnum::FACE_CULL);
+		//	auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
+		//	shader->Bind();
+		//	shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
+		//	shader->SetUniform1i("LightCount", 0);
+		//	auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
+		//	shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+		//	shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+		//	shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
+		//	shader->SetUniform1i("u_DisableSSAO", 1);
+		//	shader->SetUniformMat4f("u_View", view);
+		//	shader->SetUniformMat4f("u_Projection", ortho);
+		//
+		//	m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
+		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
+		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
+		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
+		//
+		//	shader->SetUniform1i("m_Depth", 5);
+		//	shader->SetUniform1i("m_Albedo", 6);
+		//	shader->SetUniform1i("m_Normal", 7);
+		//	shader->SetUniform1i("m_Material", 8);
+		//	shader->SetUniform1i("m_Emissive", 10);
+		//
+		//	Renderer::DrawQuad(Matrix4());
+		//}
+		//m_ShadedFramebuffer->Unbind();
 	}
-	m_Framebuffer->Unbind();
-	m_ShadedFramebuffer->SetTexture(texture);
-	m_ShadedFramebuffer->Bind();
+	else if (file->GetFileType() == FileType::Material)
 	{
-		//RenderCommand::Enable(RendererEnum::BLENDING);
-		RenderCommand::SetClearColor({ 0.2, 0.2, 0.2, 1 });
-		m_ShadedFramebuffer->Clear();
-		RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-		RenderCommand::Disable(RendererEnum::FACE_CULL);
-		auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
-		shader->Bind();
-		shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
-		shader->SetUniform1i("LightCount", 0);
-		auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
-		shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
-		shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
-		shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
-		shader->SetUniform1i("u_DisableSSAO", 1);
-		shader->SetUniformMat4f("u_View", view);
-		shader->SetUniformMat4f("u_Projection", ortho);
+		// Gbuffer pass
+		m_Framebuffer->Bind();
+		{
+			RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
+			m_Framebuffer->Clear();
 
-		m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
-		m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
-		m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
-		m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
-		m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
+			RenderCommand::Disable(RendererEnum::BLENDING);
+			RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+			auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
+			shader->Bind();
 
-		shader->SetUniform1i("m_Depth", 5);
-		shader->SetUniform1i("m_Albedo", 6);
-		shader->SetUniform1i("m_Normal", 7);
-		shader->SetUniform1i("m_Material", 8);
-		shader->SetUniform1i("m_Emissive", 10);
+			auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
+			shader->SetUniformMat4f("u_View", view);
+			shader->SetUniformMat4f("u_Projection", ortho);
+			shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+			Ref<Material> material = ResourceLoader::LoadMaterial(path);
+			material->Bind(shader);
+			Renderer::SphereMesh->Draw(shader, false);
+		}
+		m_Framebuffer->Unbind();
+		m_ShadedFramebuffer->SetTexture(texture);
+		m_ShadedFramebuffer->Bind();
+		{
+			//RenderCommand::Enable(RendererEnum::BLENDING);
+			RenderCommand::SetClearColor({ 0.2, 0.2, 0.2, 1 });
+			m_ShadedFramebuffer->Clear();
+			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+			RenderCommand::Disable(RendererEnum::FACE_CULL);
+			auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
+			shader->Bind();
+			shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
+			shader->SetUniform1i("LightCount", 0);
+			auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
+			shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+			shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+			shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
+			shader->SetUniform1i("u_DisableSSAO", 1);
+			shader->SetUniformMat4f("u_View", view);
+			shader->SetUniformMat4f("u_Projection", ortho);
+
+			m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
+			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT1)->Bind(7);
+			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
+			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
+
+			shader->SetUniform1i("m_Depth", 5);
+			shader->SetUniform1i("m_Albedo", 6);
+			shader->SetUniform1i("m_Normal", 7);
+			shader->SetUniform1i("m_Material", 8);
+			shader->SetUniform1i("m_Emissive", 10);
+
+			Renderer::DrawQuad(Matrix4());
+		}
+		m_ShadedFramebuffer->Unbind();
+	}
 	
-		Renderer::DrawQuad(Matrix4());
-	}
-	m_ShadedFramebuffer->Unbind();
 
 	return m_ShadedFramebuffer->GetTexture(GL_COLOR_ATTACHMENT0);
 }

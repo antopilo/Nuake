@@ -11,6 +11,7 @@ namespace Nuake
 		Ref<Prefab> prefab = CreateRef<Prefab>();
 		prefab->DisplayName = nameComponent.Name;
 		prefab->EntityWalker(entity);
+		entity.GetComponent<TransformComponent>() = TransformComponent{};
 		prefab->Root = entity;
 		return prefab;
 	}

@@ -353,6 +353,10 @@ namespace Nuake
         {
             textureImage = textureMgr->GetTexture("Resources/Images/Audio_file_icon.png");
         }
+        else if (fileType == FileType::Prefab)
+        {
+            textureImage = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+        }
 
         ImGui::SetCursorPos(prevCursor);
         ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
