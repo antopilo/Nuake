@@ -746,8 +746,6 @@ namespace Nuake
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex); 
 
 			_CollisionCallbacks.push_back(std::move(data));
-
-			Logger::Log("Registered collision");
 		}
 
 		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()
