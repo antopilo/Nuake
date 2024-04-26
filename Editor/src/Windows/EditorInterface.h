@@ -41,6 +41,9 @@ namespace Nuake
 		Ref<Directory> m_CurrentDirectory;
 
 		bool m_IsMaterialSelected = false;
+
+		std::string m_StatusMessage = "";
+		Color m_StatusBarColor = Color(0.08f, 0.08f, 0.08f, 1.0f);
 	public:
 		WelcomeWindow* _WelcomeWindow;
 		AudioWindow* _audioWindow;
@@ -57,7 +60,10 @@ namespace Nuake
 		void Draw();
 		void Update(float ts);
 		void DrawMenuBar();
+		void SetStatusMessage(const std::string& msg, const Color& color = Color(0.08f, 0.08f, 0.08f, 1.0f)) { m_StatusMessage = msg; m_StatusBarColor = color; }
 		void DrawViewport();
+		void DrawStatusBar();
+		void DrawMenuBars();
 		void DrawEntityTree(Entity ent);
 		void DrawSceneTree();
 		void DrawLogger();
