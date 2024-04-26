@@ -22,6 +22,6 @@ project "NuakeNet"
     }
 
     postbuildcommands {
-        '{ECHO} Copying "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" to "%{wks.location}/Editor"',
-        '{COPYFILE} "%{wks.location}/NuakeNet/bin/%{cfg.buildcfg}/NuakeNet.dll" "%{wks.location}/Editor"'
+        '{ECHO} Copying "%{wks.location}/NuakeNet/bin/$(Configuration)/NuakeNet.dll" to "%{wks.location}/Editor"',
+	'{COPYFILE} "%{wks.location}/NuakeNet/bin/$(Configuration)/NuakeNet.dll" "%{wks.location}/Editor"'
     }
