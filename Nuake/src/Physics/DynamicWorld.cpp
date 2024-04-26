@@ -33,6 +33,7 @@
 #include <Jolt/Core/TempAllocator.h>
 
 #include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
+#include <src/Scene/Components/ParentComponent.h>
 
 namespace Nuake
 {
@@ -529,14 +530,23 @@ namespace Nuake
 						joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
 					);
 
+					Entity entity = { (entt::entity)entId, Engine::GetCurrentScene().get() };
+					if (entity.GetComponent<ParentComponent>().HasParent)
+					{
+						auto& parent = entity.GetComponent<ParentComponent>().Parent;
+						auto& parentTransformComponent = parent.GetComponent<TransformComponent>();
+						const Matrix4& parentTransform = parentTransformComponent.GetGlobalTransform();
+
+						transform = glm::inverse(parentTransform) * transform;
+					}
+
 					Vector3 scale = Vector3();
 					Quat rotation = Quat();
 					Vector3 pos = Vector3();
 					Vector3 skew = Vector3();
 					Vector4 pesp = Vector4();
 					glm::decompose(transform, scale, rotation, pos, skew, pesp);
-
-					Entity entity = { (entt::entity)entId, Engine::GetCurrentScene().get() };
+					
 					auto& transformComponent = entity.GetComponent<TransformComponent>();
 					transformComponent.SetLocalPosition(pos);
 					transformComponent.SetLocalRotation(Quat(bodyRotation.GetW(), bodyRotation.GetX(), bodyRotation.GetY(), bodyRotation.GetZ()));
@@ -562,6 +572,15 @@ namespace Nuake
 					joltTransform(0, 2), joltTransform(1, 2), joltTransform(2, 2), joltTransform(3, 2),
 					joltTransform(0, 3), joltTransform(1, 3), joltTransform(2, 3), joltTransform(3, 3)
 				);
+
+				if(entity.GetComponent<ParentComponent>().HasParent)
+				{
+					auto& parent = entity.GetComponent<ParentComponent>().Parent;
+					auto& parentTransformComponent = parent.GetComponent<TransformComponent>();
+					const Matrix4& parentTransform = parentTransformComponent.GetGlobalTransform();
+
+					transform = glm::inverse(parentTransform) * transform;
+				}
 
 				Vector3 scale = Vector3();
 				Quat rotation = Quat();
