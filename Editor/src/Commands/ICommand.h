@@ -5,7 +5,16 @@ namespace NuakeEditor
 	class ICommand
 	{
 	public:
-		virtual void Execute() = 0;
-		virtual void Undo() = 0;
+		ICommand() = default;
+
+		virtual bool Execute()
+		{
+			return false;
+		}
+
+		virtual bool Undo() 
+		{
+			return false;
+		}
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <src/Application/Layer.h>
+#include "Commands/CommandBuffer.h"
 
 namespace Nuake {
 
@@ -9,15 +10,19 @@ namespace Nuake {
 
 class GizmoDrawer;
 
+using namespace NuakeEditor;
 
 class EditorLayer : public Nuake::Layer
 {
 public:
+	EditorLayer() : mCommandBuffer() {}
+
 	virtual void OnAttach() override;
 	virtual void OnUpdate() override;
 	virtual void OnDetach() override;
 
 private:
+	CommandBuffer mCommandBuffer;
 	Nuake::EditorInterface* m_EditorInterface;
 	GizmoDrawer* m_GizmoDrawer;
 };

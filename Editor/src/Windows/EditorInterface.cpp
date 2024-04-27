@@ -54,6 +54,7 @@
 #include <src/Resource/StaticResources.h>
 #include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Threading/JobSystem.h>
+#include "../Commands/Commands/Commands.h"
 
 namespace Nuake {
     
@@ -62,7 +63,8 @@ namespace Nuake {
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
     
-    EditorInterface::EditorInterface()
+    EditorInterface::EditorInterface(CommandBuffer& commandBuffer) :
+        mCommandBuffer(&commandBuffer)
     {
         Logger::Log("Creating editor windows", "window", CRITICAL);
         filesystem = new FileSystemUI(this);
@@ -2111,12 +2113,12 @@ namespace Nuake {
                 }
                 if (ImGui::MenuItem("Save", "CTRL+S"))
                 {
-                    Engine::GetProject()->Save();
-                    Engine::GetCurrentScene()->Save();
+                    PushCommand(SaveProjectCommand(Engine::GetProject()));
+
+                    Selection = EditorSelection();
 
                     SetStatusMessage("Project saved.");
 
-                    Selection = EditorSelection();
                 }
                 if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S"))
                 {
@@ -2453,6 +2455,11 @@ namespace Nuake {
         }
 
         return entityTypeName;
+    }
+
+    void EditorInterface::PushCommand(ICommand&& command)
+    {
+        mCommandBuffer->PushCommand(command);
     }
 
 	bool EditorInterface::LoadProject(const std::string& projectPath)

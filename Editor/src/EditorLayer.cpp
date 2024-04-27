@@ -8,7 +8,7 @@
 
 void EditorLayer::OnAttach()
 {
-    m_EditorInterface = new Nuake::EditorInterface();
+    m_EditorInterface = new Nuake::EditorInterface(mCommandBuffer);
     m_GizmoDrawer = new GizmoDrawer(m_EditorInterface);
 }
 
@@ -20,7 +20,6 @@ void EditorLayer::OnUpdate()
     Nuake::Engine::Draw();
 
     auto sceneFramebuffer = GetApplication().GetWindow()->GetFrameBuffer();
-
 
     // Draw gizmos
     if (Ref<Nuake::Scene> currentScene = Nuake::Engine::GetCurrentScene(); currentScene)
@@ -64,6 +63,7 @@ void EditorLayer::OnUpdate()
 
     m_EditorInterface->Draw();
     m_EditorInterface->Update(Nuake::Engine::GetTimestep());
+
     Nuake::Engine::EndDraw();
 }
 

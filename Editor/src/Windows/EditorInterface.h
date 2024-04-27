@@ -6,12 +6,15 @@
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include "src/Core/FileSystem.h"
 
-
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
 #include "AudioWindow.h"
 #include "../Windows/TrenchbroomConfiguratorWindow.h"
+#include "../Commands/CommandBuffer.h"
+#include "../Commands/ICommand.h"
+
+using namespace NuakeEditor;
 
 namespace Nuake
 {
@@ -22,6 +25,7 @@ namespace Nuake
 	{
 	private:
 		Ref<Scene> SceneSnapshot;
+		NuakeEditor::CommandBuffer* mCommandBuffer;
 
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
@@ -52,7 +56,7 @@ namespace Nuake
 		EditorSelectionPanel SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 
-		EditorInterface();
+		EditorInterface(CommandBuffer& commandBuffer);
 
 		static ImFont* bigIconFont;
 		void BuildFonts();
@@ -76,5 +80,6 @@ namespace Nuake
 
 	private:
 		std::string GetEntityTypeName(const Entity& entity) const;
+		void PushCommand(ICommand&& command);
 	};
 }
