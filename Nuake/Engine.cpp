@@ -15,16 +15,19 @@
 
 namespace Nuake
 {
+
+
 	Ref<Project> Engine::s_CurrentProject;
 	Ref<Window> Engine::s_CurrentWindow;
 
-	bool Engine::s_IsPlayMode = false;
+	GameState Engine::s_GameState = GameState::Stopped;
 
 	float Engine::s_LastFrameTime = 0.0f;
 	float Engine::s_FixedUpdateRate = 1.0f / 90.0f;
 	float Engine::s_FixedUpdateDifference = 0.f;
 	float Engine::s_Time = 0.f;
 	Timestep Engine::s_TimeStep = 0.f;
+	float Engine::s_TimeScale = 1.0f;
 
 	void Engine::Init()
 	{
@@ -48,14 +51,15 @@ namespace Nuake
 		s_LastFrameTime = s_Time;
 
 		// Dont update if no scene is loaded.
-		if (s_CurrentWindow->GetScene()) 
+		if (s_CurrentWindow->GetScene() && GetGameState() == GameState::Playing) 
 		{
-			s_CurrentWindow->Update(s_TimeStep);
+			float scaledTimeStep = s_TimeStep * s_TimeScale;
+			s_CurrentWindow->Update(scaledTimeStep);
 
 			// Play mode update all the entities, Editor does not.
 			if (!Engine::IsPlayMode())
 			{
-				GetCurrentScene()->EditorUpdate(s_TimeStep);
+				GetCurrentScene()->EditorUpdate(scaledTimeStep);
 			}
 
 			s_FixedUpdateDifference += s_TimeStep;
@@ -63,13 +67,15 @@ namespace Nuake
 			// Fixed update
 			while (s_FixedUpdateDifference >= s_FixedUpdateRate) 
 			{
-				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate);
+				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate * s_TimeScale);
 
 				s_FixedUpdateDifference -= s_FixedUpdateRate;
 			}
+
+			Input::Update();
 		}
 
-		Input::Update();
+		
 	}
 
 	void Engine::EnterPlayMode()
@@ -77,7 +83,7 @@ namespace Nuake
 		s_LastFrameTime = (float)glfwGetTime();; // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
-		if (IsPlayMode())
+		if (s_GameState == GameState::Playing)
 		{
 			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
 			return;
@@ -85,7 +91,7 @@ namespace Nuake
 
 		if (GetCurrentScene()->OnInit())
 		{
-			s_IsPlayMode = true;
+			s_GameState = GameState::Playing;
 		}
 		else
 		{
@@ -97,11 +103,11 @@ namespace Nuake
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (IsPlayMode())
+		if (s_GameState == GameState::Playing)
 		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();
-			s_IsPlayMode = false;
+			s_GameState = GameState::Stopped;
 		}
 	}
 

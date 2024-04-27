@@ -324,39 +324,47 @@ namespace Nuake {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
                 ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 
-                if (Engine::IsPlayMode())
-                {
-                    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyDown(GLFW_KEY_F5)))
-                    {
-                        Engine::ExitPlayMode();
+                ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
+                ImGui::SameLine();
 
-                        Engine::LoadScene(SceneSnapshot);
-                        Selection = EditorSelection();
-                        SetStatusMessage("Ready");
+                if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
+                {
+                    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
+                    {
+                        Engine::SetGameState(GameState::Paused);
+
+                        SetStatusMessage("Paused");
                     }
                 }
                 else
                 {
-                    if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
+                    if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5))
                     {
-                        this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
-
-                        SetStatusMessage("Building .Net solution...");
-                        auto job = [this]()
-                            {
-                                ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                            };
-
-                        Selection = EditorSelection();
-
-                        JobSystem::Get().Dispatch(job, [this]() 
+                        if (Engine::GetGameState() == GameState::Paused)
                         {
-                            SetStatusMessage("Entering play mode...");
-                            Engine::EnterPlayMode();
+                            Engine::SetGameState(GameState::Playing);
+                        }
+                        else
+                        {
+                            this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
-                            std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                            SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1});
-                        });
+                            SetStatusMessage("Building .Net solution...");
+                            auto job = [this]()
+                                {
+                                    ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                                };
+
+                            Selection = EditorSelection();
+
+                            JobSystem::Get().Dispatch(job, [this]()
+                            {
+                                    SetStatusMessage("Entering play mode...");
+                                    Engine::EnterPlayMode();
+
+                                    std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                                    SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                            });
+                        }
                     }
 
                     if (ImGui::BeginItemTooltip())
@@ -374,7 +382,7 @@ namespace Nuake {
                     ImGui::BeginDisabled();
                 }
 
-                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F5)) && Engine::IsPlayMode())
+                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && Engine::IsPlayMode())
                 {
                     Engine::ExitPlayMode();
 
@@ -1953,7 +1961,7 @@ namespace Nuake {
             ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
             ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
             ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-            ImGui::SetNextWindowPos(window_pos + ImVec2(0, 36), ImGuiCond_Always, window_pos_pivot);
+            ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
             ImGui::SetNextWindowViewport(viewport->ID);
         }
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
@@ -1961,17 +1969,17 @@ namespace Nuake {
         if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
         {
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyDown(GLFW_KEY_W))
+            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyDown(Key::W))
             {
                 CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyDown(GLFW_KEY_E))
+            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyDown(Key::E))
             {
                 CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyDown(GLFW_KEY_R))
+            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyDown(Key::R))
             {
                 CurrentOperation = ImGuizmo::OPERATION::SCALE;
             }
@@ -2382,13 +2390,13 @@ namespace Nuake {
         editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
-        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
+        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(Key::F))
         {
             editorCam->IsMoving = true;
             editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();
         }
 
-        if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_ESCAPE))
+        if (entityIsSelected && Input::IsKeyPressed(Key::ESCAPE))
         {
             Selection = EditorSelection();
         }

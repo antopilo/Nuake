@@ -61,7 +61,7 @@ namespace Nuake
 			Input::HideMouse();
 		}
 
-		if (Input::IsKeyDown(GLFW_KEY_LEFT_ALT))
+		if (Input::IsKeyDown(Key::LEFT_ALT))
 		{
 			if (Input::YScroll != 0.0f) 
 			{
@@ -96,31 +96,31 @@ namespace Nuake
 
 			if (m_Type == CAMERA_TYPE::ORTHO)
 			{
-				if (Input::IsKeyDown(GLFW_KEY_RIGHT))
+				if (Input::IsKeyDown(Key::RIGHT))
 					Translation.x += Speed * ts;
-				if (Input::IsKeyDown(GLFW_KEY_LEFT))
+				if (Input::IsKeyDown(Key::LEFT))
 					Translation.x -= Speed * ts;
-				if (Input::IsKeyDown(GLFW_KEY_UP))
+				if (Input::IsKeyDown(Key::UP))
 					Translation.y += Speed * ts;
-				if (Input::IsKeyDown(GLFW_KEY_DOWN))
+				if (Input::IsKeyDown(Key::DOWN))
 					Translation.y -= Speed * ts;
 			}
 			else
 			{
 				auto movement = Vector3(0, 0, 0);
 
-				if (Input::IsKeyDown(GLFW_KEY_D))
+				if (Input::IsKeyDown(Key::D))
 					movement -= Right * (Speed * ts);
-				if (Input::IsKeyDown(GLFW_KEY_A))
+				if (Input::IsKeyDown(Key::A))
 					movement += Right * (Speed * ts);
 
-				if (Input::IsKeyDown(GLFW_KEY_W))
+				if (Input::IsKeyDown(Key::W))
 					movement += Direction * (Speed * ts);
-				if (Input::IsKeyDown(GLFW_KEY_S))
+				if (Input::IsKeyDown(Key::S))
 					movement -= Direction * (Speed * ts);
-				if (Input::IsKeyDown(GLFW_KEY_LEFT_SHIFT))
+				if (Input::IsKeyDown(Key::LEFT_SHIFT))
 					movement -= Up * (Speed * ts);
-				if (Input::IsKeyDown(GLFW_KEY_SPACE))
+				if (Input::IsKeyDown(Key::SPACE))
 					movement += Up * (Speed * ts);
 
 				Translation += Vector3(movement);

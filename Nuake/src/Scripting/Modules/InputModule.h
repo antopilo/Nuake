@@ -69,14 +69,14 @@ namespace Nuake {
 			static void IsKeyDown(WrenVM* vm)
 			{
 				int key = (int)wrenGetSlotDouble(vm, 1);
-				bool result = Input::IsKeyDown(key);
+				bool result = Input::IsKeyDown((Key)key);
 				wrenSetSlotBool(vm, 0, result);
 			}
 
 			static void IsKeyPressed(WrenVM* vm)
 			{
 				int key = (int)wrenGetSlotDouble(vm, 1);
-				bool result = Input::IsKeyPressed(key);
+				bool result = Input::IsKeyPressed((Key)key);
 				wrenSetSlotBool(vm, 0, result);
 			}
 

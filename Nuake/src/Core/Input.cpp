@@ -22,29 +22,27 @@ namespace Nuake
 
 #pragma region Keys
 	// Only true if the key is currently being pressed
-	bool Input::IsKeyDown(int keycode)
+	bool Input::IsKeyDown(Key keycode)
 	{
 		auto window = Window::Get()->GetHandle();
-		int state = glfwGetKey(window, keycode);
+		int state = glfwGetKey(window, (int)keycode);
 		bool result = state == GLFW_PRESS;
-
-		m_Keys[keycode] = state;
 
 		return result;
 	}
 
 	// Only true if the key is pressed for the first frame. no repeat.
-	bool Input::IsKeyPressed(int keycode)
+	bool Input::IsKeyPressed(Key keycode)
 	{
 		auto window = Window::Get()->GetHandle();
-		int state = glfwGetKey(window, keycode);
+		int state = glfwGetKey(window, (int)keycode);
 		bool result = state == GLFW_PRESS;
 
 		// First time pressed?
-		if (m_Keys.find(keycode) == m_Keys.end() || m_Keys[keycode] == false)
+		if (m_Keys.find((int)keycode) == m_Keys.end() || m_Keys[(int)keycode] == false)
 		{
 			if (result)
-				m_Keys[keycode] = true;
+				m_Keys[(int)keycode] = true;
 
 			return result;
 		}
@@ -172,7 +170,7 @@ namespace Nuake
 		// Reset all input to false.
 		for (auto& k : m_Keys)
 		{
-			if (!IsKeyDown(k.first))
+			if (!IsKeyDown((Key)k.first))
 			{
 				k.second = false;
 			}
