@@ -71,9 +71,11 @@ namespace Nuake
 
 				s_FixedUpdateDifference -= s_FixedUpdateRate;
 			}
+
+			Input::Update();
 		}
 
-		Input::Update();
+		
 	}
 
 	void Engine::EnterPlayMode()

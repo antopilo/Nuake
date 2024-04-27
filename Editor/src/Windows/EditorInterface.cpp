@@ -327,7 +327,7 @@ namespace Nuake {
 
                 if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
                 {
-                    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyDown(GLFW_KEY_F5)))
+                    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
                     {
                         Engine::SetGameState(GameState::Paused);
 
@@ -336,7 +336,7 @@ namespace Nuake {
                 }
                 else
                 {
-                    if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)))
+                    if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5))
                     {
                         if (Engine::GetGameState() == GameState::Paused)
                         {
@@ -380,7 +380,7 @@ namespace Nuake {
                     ImGui::BeginDisabled();
                 }
 
-                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F5)) && Engine::IsPlayMode())
+                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && Engine::IsPlayMode())
                 {
                     Engine::ExitPlayMode();
 
@@ -1967,17 +1967,17 @@ namespace Nuake {
         if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
         {
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyDown(GLFW_KEY_W))
+            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyDown(Key::W))
             {
                 CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyDown(GLFW_KEY_E))
+            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyDown(Key::E))
             {
                 CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             }
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyDown(GLFW_KEY_R))
+            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyDown(Key::R))
             {
                 CurrentOperation = ImGuizmo::OPERATION::SCALE;
             }
@@ -2388,13 +2388,13 @@ namespace Nuake {
         editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
-        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(GLFW_KEY_F))
+        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(Key::F))
         {
             editorCam->IsMoving = true;
             editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();
         }
 
-        if (entityIsSelected && Input::IsKeyPressed(GLFW_KEY_ESCAPE))
+        if (entityIsSelected && Input::IsKeyPressed(Key::ESCAPE))
         {
             Selection = EditorSelection();
         }

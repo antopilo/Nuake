@@ -31,7 +31,7 @@ namespace Nuake
 	bool dragging2 = false;
 	void NewEditor::Update(Timestep ts)
 	{
-		if (Input::IsKeyPressed(GLFW_KEY_F1))
+		if (Input::IsKeyPressed(Key::F1))
 		{
 			m_UserInterface->Reload();
 			FetchNodes();

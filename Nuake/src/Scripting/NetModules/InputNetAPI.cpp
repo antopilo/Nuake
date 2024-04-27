@@ -25,12 +25,12 @@ namespace Nuake {
 
 	bool IsKeyDown(int keyCode)
 	{
-		return Input::IsKeyDown(keyCode);
+		return Input::IsKeyDown((Key)keyCode);
 	}
 
 	bool IsKeyPressed(int keyCode)
 	{
-		return Input::IsKeyPressed(keyCode);
+		return Input::IsKeyPressed((Key)keyCode);
 	}
 
 	Coral::Array<float> GetMousePosition()

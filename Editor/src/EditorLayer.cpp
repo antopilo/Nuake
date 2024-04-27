@@ -3,6 +3,8 @@
 #include "Windows/EditorInterface.h"
 #include "Misc/GizmoDrawer.h"
 
+#include "src/Core/Input.h"
+
 #include <glad/glad.h>
 
 
@@ -65,6 +67,8 @@ void EditorLayer::OnUpdate()
     m_EditorInterface->Draw();
     m_EditorInterface->Update(Nuake::Engine::GetTimestep());
     Nuake::Engine::EndDraw();
+
+    Nuake::Input::Update();
 }
 
 void EditorLayer::OnDetach()

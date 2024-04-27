@@ -138,8 +138,8 @@ namespace Nuake
 		static bool m_MouseButtons[5];
 		static std::map<int, bool> m_Keys;
 	public:
-		static bool IsKeyPressed(int keycode);
-		static bool IsKeyDown(int keycode);
+		static bool IsKeyPressed(Key keycode);
+		static bool IsKeyDown(Key keycode);
 		static bool IsKeyReleased(int keycode);
 
 		static float YScroll;
