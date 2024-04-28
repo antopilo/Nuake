@@ -1,5 +1,6 @@
 #include "AnimationSystem.h"
 
+#include <Engine.h>
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
@@ -20,6 +21,11 @@ namespace Nuake
 
 	void AnimationSystem::Update(Timestep ts)
 	{
+		if (Engine::GetGameState() == GameState::Paused)
+		{
+			return;
+		}
+
 		auto view = m_Scene->m_Registry.view<TransformComponent, SkinnedModelComponent>();
 		for (auto e : view)
 		{
