@@ -337,10 +337,32 @@ namespace Nuake {
                         SetStatusMessage("Paused");
                     }
                     ImGui::PopStyleColor();
+
+                    if (ImGui::BeginItemTooltip())
+                    {
+                        ImGui::Text("Pause game (F6)");
+                        ImGui::EndTooltip();
+                    }
                 }
                 else
                 {
-                    if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5))
+                    bool playButtonPressed;
+                    std::string tooltip;
+                    if (Engine::GetGameState() == GameState::Paused)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, { 97.0 / 255.0, 0, 1, 1 });
+                        playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F6);
+                        ImGui::PopStyleColor();
+
+                        tooltip = "Resume (F6)";
+                    }
+                    else
+                    {
+                        playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5);
+                        tooltip = "Build & Play (F5)";
+                    }
+                   
+                    if (playButtonPressed)
                     {
                         if (Engine::GetGameState() == GameState::Paused)
                         {
@@ -353,42 +375,43 @@ namespace Nuake {
                         {
                             this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
-                            SetStatusMessage("Building .Net solution...");
+                            std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
+                            SetStatusMessage(statusMessage);
                             auto job = [this]()
-                                {
-                                    ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                                };
+                            {
+                                ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                            };
 
                             Selection = EditorSelection();
 
                             JobSystem::Get().Dispatch(job, [this]()
                             {
-                                    SetStatusMessage("Entering play mode...");
+                                SetStatusMessage("Entering play mode...");
                                     
-                                    PushCommand(SetGameState(GameState::Playing));
+                                PushCommand(SetGameState(GameState::Playing));
 
-                                    std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                                    SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                                std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                                SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
                             });
                         }
                     }
 
                     if (ImGui::BeginItemTooltip())
                     {
-                        ImGui::Text("Build & Play");
+                        ImGui::Text(tooltip.c_str());
                         ImGui::EndTooltip();
                     }
                 }
 
                 ImGui::SameLine();
 
-                const bool wasPlayMode = Engine::IsPlayMode();
+                const bool wasPlayMode = Engine::GetGameState() != GameState::Stopped;
                 if (!wasPlayMode)
                 {
                     ImGui::BeginDisabled();
                 }
 
-                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && Engine::IsPlayMode())
+                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && wasPlayMode)
                 {
                     Engine::ExitPlayMode();
 
@@ -400,32 +423,16 @@ namespace Nuake {
                 if (!wasPlayMode)
                 {
                     ImGui::EndDisabled();
-
                 }
                 else
                 {
                     if (ImGui::BeginItemTooltip())
                     {
-                        ImGui::Text("Exit play mode");
+                        ImGui::Text("Stop game (F5)");
                         ImGui::EndTooltip();
                     }
                 }
 
-                //if (ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || (Input::IsKeyPressed(GLFW_KEY_F5) && !Engine::IsPlayMode()))
-                //{
-                //    SceneSnapshot = Engine::GetCurrentScene()->Copy();
-                //    Engine::EnterPlayMode();
-                //}
-                //
-                //ImGui::SameLine();
-                //
-                //if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(GLFW_KEY_F8)) && Engine::IsPlayMode())
-                //{
-                //    Engine::ExitPlayMode();
-                //
-                //    Engine::LoadScene(SceneSnapshot);
-                //    Selection = EditorSelection();
-                //}
                 ImGui::SameLine();
 
                 ImGui::PopStyleColor();
@@ -483,7 +490,7 @@ namespace Nuake {
                 {
                     JobSystem::Get().Dispatch([]()
                         {
-                                Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                            Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                         }, []() {}
                         );
                 }
