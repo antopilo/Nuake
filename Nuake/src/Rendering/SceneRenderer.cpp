@@ -681,6 +681,7 @@ namespace Nuake
 			{
 				RenderCommand::SetClearColor(environment->AmbientColor);
 				RenderCommand::Clear();
+				RenderCommand::SetClearColor(Color(0, 0, 0, 1));
 			}
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
