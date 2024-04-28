@@ -329,12 +329,14 @@ namespace Nuake {
 
                 if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
                 {
+                    ImGui::PushStyleColor(ImGuiCol_Text, { 97.0 / 255.0, 0, 1, 1 });
                     if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
                     {
                         Engine::SetGameState(GameState::Paused);
 
                         SetStatusMessage("Paused");
                     }
+                    ImGui::PopStyleColor();
                 }
                 else
                 {

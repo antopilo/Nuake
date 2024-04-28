@@ -4,6 +4,9 @@ namespace NuakeEditor
 {
 	class ICommand
 	{
+	protected:
+		bool mIsUndoable = false;
+
 	public:
 		ICommand() = default;
 
@@ -16,5 +19,7 @@ namespace NuakeEditor
 		{
 			return false;
 		}
+
+		bool IsUndoable() const { return mIsUndoable; }
 	};
 }
