@@ -36,7 +36,7 @@ namespace Nuake
 
 		float AmbientTerm;
 		float Exposure = 3.5f;
-		float Gamma = 1.1f;
+		float Gamma = 2.2f;
 
 		bool BloomEnabled = true;
 		Scope<Bloom> mBloom;

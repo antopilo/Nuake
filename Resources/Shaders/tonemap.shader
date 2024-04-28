@@ -36,12 +36,12 @@ vec3 aces(vec3 x) {
 void main()
 {
     vec3 color = texture(u_Source, UV).rgb;
-
+    vec3 mapped = vec3(1.0) - exp(-color * u_Exposure);
     //color = vec3(1.0) - exp(-color * u_Exposure);
     // reinhard
     //color = color / (color + vec3(1.0));
     // gamma correct
-    //color = pow(color, vec3(1.0 / u_Gamma));
+    color = pow(mapped, vec3(u_Gamma));
 
     FragColor = vec4(color, 1.0);
 }

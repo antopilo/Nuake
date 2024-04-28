@@ -103,7 +103,7 @@ namespace Nuake
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (s_GameState == GameState::Playing)
+		if (s_GameState != GameState::Stopped)
 		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();

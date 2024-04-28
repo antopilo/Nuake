@@ -370,7 +370,7 @@ namespace Nuake
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
         std::string visibleName = file->GetName();
         const uint32_t MAX_CHAR_NAME = 35;
-        if (file->GetName().size() > MAX_CHAR_NAME)
+        if (file->GetName().size() >= MAX_CHAR_NAME)
         {
             visibleName = std::string(file->GetName().begin(), file->GetName().begin() + MAX_CHAR_NAME - 3) + "...";
         }

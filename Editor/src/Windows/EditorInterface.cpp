@@ -324,6 +324,21 @@ namespace Nuake {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
                 ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 
+                if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::W))
+                {
+                    CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::E))
+                {
+                    CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::R))
+                {
+                    CurrentOperation = ImGuizmo::OPERATION::SCALE;
+                }
+                ImGui::SameLine();
                 ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
                 ImGui::SameLine();
 
@@ -711,6 +726,40 @@ namespace Nuake {
                         static int currentSkyType = (int)env->CurrentSkyType;
                         ImGui::Combo("##SkyType", &currentSkyType, SkyTypes, IM_ARRAYSIZE(SkyTypes));
                         env->CurrentSkyType = (SkyType)currentSkyType;
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
+                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Gamma");
+                        ImGui::TableNextColumn();
+
+                        // Here we create a dropdown for every sky type.
+                        ImGui::DragFloat("##gamma", &env->Gamma, 0.001f, 0.0f);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
+                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Exposure");
+                        ImGui::TableNextColumn();
+
+                        // Here we create a dropdown for every sky type.
+                        ImGui::DragFloat("##exposure", &env->Exposure, 0.001f, 0.0f);
                         ImGui::TableNextColumn();
 
                         // Reset button

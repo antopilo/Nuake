@@ -245,10 +245,9 @@ void main()
         ssao = texture(m_SSAO, UV).r;
     }
 
-    float emissive = texture(m_Emissive, UV).r;
-
     if (unlit > 0.1f)
     {
+        float emissive = texture(m_Emissive, UV).r;
         FragColor = vec4(albedo * ssao * emissive, 1.0);
         return;
     }
@@ -341,7 +340,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    vec3 ambient = (vec3(0.5) * albedo) * ao * ssao * u_AmbientTerm;
+    vec3 ambient = (albedo) * ao * ssao * u_AmbientTerm;
     vec3 color = (ambient) + Lo;
 
     // Display CSM splits..
