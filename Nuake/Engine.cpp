@@ -83,7 +83,7 @@ namespace Nuake
 		s_LastFrameTime = (float)glfwGetTime();; // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
-		if (s_GameState == GameState::Playing)
+		if (GetGameState() == GameState::Playing)
 		{
 			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
 			return;
@@ -91,7 +91,7 @@ namespace Nuake
 
 		if (GetCurrentScene()->OnInit())
 		{
-			s_GameState = GameState::Playing;
+			SetGameState(GameState::Playing);
 		}
 		else
 		{

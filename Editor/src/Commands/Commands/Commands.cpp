@@ -16,4 +16,21 @@ namespace NuakeEditor
 
 		return true;
 	}
+
+	bool SetGameState::Execute()
+	{
+		GameState gameState = Engine::GetGameState();
+		if (gameState == GameState::Stopped && mGameState == GameState::Playing)
+		{
+			Engine::EnterPlayMode();
+		}
+		else if (mGameState == GameState::Stopped)
+		{
+			Engine::ExitPlayMode();
+		}
+
+		Engine::SetGameState(mGameState);
+
+		return true;
+	}
 }

@@ -5,7 +5,7 @@
 #include <src/Core/Core.h>
 #include <src/Scene/Scene.h>
 #include <src/Resource/Project.h>
-
+#include <Engine.h>
 
 namespace NuakeEditor {
 	using namespace Nuake;
@@ -32,4 +32,18 @@ namespace NuakeEditor {
 		bool Execute() override;
 	};
 
+	// GameState
+	class SetGameState : public ICommand
+	{
+	private:
+		GameState mGameState;
+
+	public:
+		SetGameState(GameState gameState) :
+			mGameState(gameState)
+		{
+		}
+
+		bool Execute() override;
+	};
 }

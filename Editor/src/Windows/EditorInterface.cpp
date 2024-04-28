@@ -344,7 +344,8 @@ namespace Nuake {
                     {
                         if (Engine::GetGameState() == GameState::Paused)
                         {
-                            Engine::SetGameState(GameState::Playing);
+                            PushCommand(SetGameState(GameState::Playing));
+
                             std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
                             SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
                         }
@@ -363,7 +364,8 @@ namespace Nuake {
                             JobSystem::Get().Dispatch(job, [this]()
                             {
                                     SetStatusMessage("Entering play mode...");
-                                    Engine::EnterPlayMode();
+                                    
+                                    PushCommand(SetGameState(GameState::Playing));
 
                                     std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
                                     SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
