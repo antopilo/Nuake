@@ -343,6 +343,8 @@ namespace Nuake {
                         if (Engine::GetGameState() == GameState::Paused)
                         {
                             Engine::SetGameState(GameState::Playing);
+                            std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                            SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
                         }
                         else
                         {
@@ -388,6 +390,7 @@ namespace Nuake {
 
                     Engine::LoadScene(SceneSnapshot);
                     Selection = EditorSelection();
+                    SetStatusMessage("Ready");
                 }
 
                 if (!wasPlayMode)

@@ -51,7 +51,7 @@ namespace Nuake
 		s_LastFrameTime = s_Time;
 
 		// Dont update if no scene is loaded.
-		if (s_CurrentWindow->GetScene() && GetGameState() == GameState::Playing) 
+		if (s_CurrentWindow->GetScene()) 
 		{
 			float scaledTimeStep = s_TimeStep * s_TimeScale;
 			s_CurrentWindow->Update(scaledTimeStep);
