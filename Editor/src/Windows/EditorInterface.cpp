@@ -2027,30 +2027,6 @@ namespace Nuake {
             ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
             ImGui::SetNextWindowViewport(viewport->ID);
         }
-        ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
-        if (ImGui::Begin("Example: Simple overlay", &m_ShowOverlay, window_flags))
-        {
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            if (ImGui::Button(ICON_FA_ARROWS_ALT) || Input::IsKeyDown(Key::W))
-            {
-                CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_SYNC_ALT) || Input::IsKeyDown(Key::E))
-            {
-                CurrentOperation = ImGuizmo::OPERATION::ROTATE;
-            }
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_EXPAND_ALT) || Input::IsKeyDown(Key::R))
-            {
-                CurrentOperation = ImGuizmo::OPERATION::SCALE;
-            }
-            ImGui::PopStyleVar();
-        }
-        ImGui::PopStyleVar();
-        ImGui::End();
-        
         int corner2 = 1;
 
         window_flags |= ImGuiWindowFlags_NoMove;
@@ -2318,6 +2294,7 @@ namespace Nuake {
                     SetStatusMessage("Visual studio solution generated succesfully.");
                 }
 
+
 #ifdef NK_DEBUG
                 if (ImGui::MenuItem("Copy Nuake.NET", NULL))
                 {
@@ -2339,6 +2316,12 @@ namespace Nuake {
                     Nuake::Logger::Log("Shaders Rebuilt.");
                     SetStatusMessage("Shaders rebuilt.");
                 }
+
+                if (ImGui::MenuItem("Create trenchbroom config", NULL))
+                {
+                    PushCommand(CreateTrenchbroomGameConfig(Engine::GetProject()));
+                }
+
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();

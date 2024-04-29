@@ -46,4 +46,18 @@ namespace NuakeEditor {
 
 		bool Execute() override;
 	};
+
+	class CreateTrenchbroomGameConfig : public ICommand
+	{
+	private:
+		Ref<Project> mProject;
+
+	public:
+		CreateTrenchbroomGameConfig(Ref<Project> project) :
+			mProject(project)
+		{
+		}
+
+		bool Execute() override;
+	};
 }
