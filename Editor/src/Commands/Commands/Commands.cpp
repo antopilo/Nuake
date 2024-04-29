@@ -37,8 +37,9 @@ namespace NuakeEditor
 	bool CreateTrenchbroomGameConfig::Execute()
 	{
         const std::string& cleanProjectName = String::Sanitize(mProject->Name);
-        const std::string& gameConfigPath = mProject->TrenchbroomPath + "/../games/" + cleanProjectName + "/GameConfig.cfg";
-        FileSystem::BeginWriteFile(gameConfigPath, true);
+        const std::string& gameConfigFolderPath = mProject->TrenchbroomPath + "/../games/" + cleanProjectName + "/";
+        const std::string& gameConfigFilePath = gameConfigFolderPath + "GameConfig.cfg";
+        FileSystem::BeginWriteFile(gameConfigFilePath, true);
 
         std::string templateFile = R"(
 			{
@@ -129,6 +130,12 @@ namespace NuakeEditor
  )";
         FileSystem::WriteLine(templateFile);
         FileSystem::EndWriteFile();
+
+        // Copy Icon.png
+        if (FileSystem::FileExists("icon.png"))
+        {
+            std::filesystem::copy_file(FileSystem::RelativeToAbsolute("icon.png"), gameConfigFolderPath + "Icon.png");
+        }
 		return true;
 	}
 }
