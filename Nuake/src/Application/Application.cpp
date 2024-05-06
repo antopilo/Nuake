@@ -31,7 +31,7 @@ namespace Nuake {
 
 	void Application::Run()
 	{
-		while (m_Running)
+		while (!m_Window->ShouldClose())
 		{
 			for (auto& layer : m_LayerStack)
 			{
