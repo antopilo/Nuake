@@ -86,7 +86,7 @@ public:
                 {
                     for (auto& mesh : component.m_Brushes)
                     {
-                        if (mesh.HasComponent<ModelComponent>())\
+                        if (mesh.HasComponent<ModelComponent>())
                         {
                             TransformComponent& transformComponent = mesh.GetComponent<TransformComponent>();
                             for (auto& mesh : mesh.GetComponent<ModelComponent>().ModelResource->GetMeshes())

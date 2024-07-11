@@ -114,6 +114,11 @@ namespace Nuake
 		return true;
 	}
 
+	void Entity::PostDeserialize()
+	{
+		POSTDESERIALIZE_COMPONENT(QuakeMapComponent);
+	}
+
 	Entity::Entity(entt::entity handle, Scene* scene)
 	{
 		m_EntityHandle = handle;

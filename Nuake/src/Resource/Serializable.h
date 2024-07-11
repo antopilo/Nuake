@@ -66,6 +66,9 @@ p = j[#p]; \
 #define DESERIALIZE_COMPONENT(c) \
 		if(j.contains(#c)) \
 			AddComponent<c>().Deserialize(j[#c]);
+#define POSTDESERIALIZE_COMPONENT(c) \
+		if(HasComponent<c>()) \
+			GetComponent<c>().PostDeserialize(*m_Scene);
 
 class ISerializable
 {

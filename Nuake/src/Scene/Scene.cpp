@@ -557,6 +557,7 @@ namespace Nuake
 			m_EditorCamera->Deserialize(j["m_EditorCamera"]);
 		}
 
+		// TODO: Move this to post deserialize.
 		auto view = m_Registry.view<ParentComponent>();
 		for (auto e : view)
 		{
@@ -568,6 +569,14 @@ namespace Nuake
 			auto parentEntity = GetEntityByID(parentComponent.ParentID);
 			parentEntity.AddChild(entity);
 		}
+
+		// This will turn the deserialized entity ids into actual Entities.
+		// This has to be done after the whole scene has been deserialized 
+		// to make sure we can fetch  the id in the scene. Otherwise, we could 
+		m_Registry.each([this](auto e) {
+			auto entity = Entity{ e, this };
+			entity.PostDeserialize();
+		});
 
 		return true;
 	}

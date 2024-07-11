@@ -15,6 +15,8 @@ namespace Nuake {
 	public:
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::vector<Entity> m_Brushes;
+		std::vector<int> m_SerializedBrushIDs;
+
 		std::string Path;
 		float ScaleFactor = 1.0f;
 		bool HasCollisions = false;
@@ -26,6 +28,7 @@ namespace Nuake {
 			SERIALIZE_VAL(HasCollisions);
 			SERIALIZE_VAL(Path);
 			SERIALIZE_VAL(AutoRebuild);
+
 			for (uint32_t i = 0; i < std::size(m_Brushes); i++)
 			{
 				j["Brushes"][i] = m_Brushes[i].GetID();
@@ -46,17 +49,31 @@ namespace Nuake {
 				this->AutoRebuild = j["AutoRebuild"];
 			}
 
+			m_Brushes.clear();
+
 			if (j.contains("Brushes"))
 			{
 				for (auto& b : j["Brushes"])
 				{
-					//m_Brushes.push_back(Engine::GetCurrentScene()->GetEntityByID(b));
+					m_SerializedBrushIDs.push_back(b);
 				}
 			}
 
 			this->Path = j["Path"];
 			this->HasCollisions = j["HasCollisions"];
 			return true;
+		}
+
+		void PostDeserialize(Scene& scene)
+		{
+			m_Brushes.clear();
+
+			for (auto& b : m_SerializedBrushIDs)
+			{
+				m_Brushes.push_back(scene.GetEntityByID(b));
+			}
+
+			m_SerializedBrushIDs.clear();
 		}
 	};
 }
