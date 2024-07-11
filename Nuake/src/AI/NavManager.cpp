@@ -1,0 +1,274 @@
+#include "NavManager.h"
+#include "src/Core/Logger.h"
+#include "src/Rendering/Vertex.h"
+#include "Recast.h"
+#include <DetourNavMeshBuilder.h>
+#include <DetourNavMesh.h>
+#include <DetourNavMeshQuery.h>
+#include <DetourDebugDraw.h>
+#include <DebugDraw.h>
+
+
+namespace Nuake {
+
+	void NavManager::Initialize()
+	{
+		m_RecastContext = CreateRef<rcContext>();
+	}
+
+	void NavManager::Cleanup()
+	{
+		dtFree(m_DetourNavMesh);
+	}
+
+	void NavManager::PushMesh(const Ref<Mesh>& mesh, const Matrix4& transform)
+	{
+		m_Meshes.push_back({ mesh, transform });
+	}
+
+	void NavManager::BuildNavMesh()
+	{
+		// Merge all meshes togheter
+		std::vector<Vector3> vertices;
+		std::vector<int> indices;
+
+		// Since we are merging all the meshes togheter, we need to offset
+		// the indices so they point to the correct vertices in the array.
+		// Example: Model1 + Model2 + Model3 will get merged together in one array
+		// and we need to make sure the indices of Model2 point to the correct location in the merged array
+		uint32_t currentVertexOffset = 0;
+		for (auto& mesh : m_Meshes)
+		{
+			for (auto& vert : mesh.mesh->GetVertices())
+			{
+				Vector4 transformVertex = mesh.transform * Vector4(vert.position.x, vert.position.y, vert.position.z, 1.0f);
+				vertices.push_back({ transformVertex.x, transformVertex.y, transformVertex.z });
+			}
+
+			for (auto& index : mesh.mesh->GetIndices())
+			{
+				indices.push_back(currentVertexOffset + index);
+			}
+
+			currentVertexOffset = std::size(vertices);
+		}
+
+		float bmin[3] = { -100.0f, -100.0f, -100.0f };
+		float bmax[3] = { 100.0f, 100.0f, 100.0f };
+		rcConfig recastConfig;
+		recastConfig.cs = 0.2f;
+		recastConfig.ch = 0.2f;
+		recastConfig.tileSize = 10.0f;
+		recastConfig.walkableSlopeAngle = 45.0f;
+		recastConfig.maxEdgeLen = 12.0f;
+		recastConfig.detailSampleDist = 1.2f;
+		recastConfig.detailSampleMaxError = 0.1f;
+		recastConfig.maxVertsPerPoly = 6.0f;
+		recastConfig.walkableHeight = 1.0f;
+		recastConfig.walkableClimb = 1.0f;
+		recastConfig.walkableRadius = 1.0f;
+		recastConfig.maxSimplificationError = 1.3f;
+		recastConfig.minRegionArea = 8.0f;
+		recastConfig.mergeRegionArea = 20.0f;
+		recastConfig.detailSampleDist = 6.0f;
+		recastConfig.detailSampleMaxError = 1.0f;
+		
+		rcVcopy(recastConfig.bmin, bmin);
+		rcVcopy(recastConfig.bmax, bmax);
+
+		// Calculate grid size given world size
+		rcCalcGridSize(recastConfig.bmin, recastConfig.bmax, recastConfig.cs, &recastConfig.width, &recastConfig.height);
+
+		Logger::Log("Building navigation:", "NavManager", VERBOSE);
+		Logger::Log(" - " + std::to_string(recastConfig.width) + " x " + std::to_string(recastConfig.height), "NavManager", VERBOSE);
+
+		auto voxelHeightField = rcAllocHeightfield();
+		if (!voxelHeightField)
+		{
+			Logger::Log("buildNavigation: Out of memory 'solid'.", "NavManager", CRITICAL);
+		}
+		if (!rcCreateHeightfield(m_RecastContext.get(), *voxelHeightField, recastConfig.width, recastConfig.height, recastConfig.bmin, recastConfig.bmax, recastConfig.cs, recastConfig.ch))
+		{
+			Logger::Log("buildNavigation: Could not create solid heightfield.", "NavManager", CRITICAL);
+		}
+
+		unsigned char* m_triareas = new unsigned char[indices.size()];
+		memset(m_triareas, 0, indices.size() * sizeof(unsigned char));
+
+		float* verts = reinterpret_cast<float*>(vertices.data());
+		int* tris = reinterpret_cast<int*>(indices.data());
+		rcMarkWalkableTriangles(m_RecastContext.get(), 45.0f, verts, std::size(vertices), tris, std::size(indices) / 3, m_triareas);
+		if (!rcRasterizeTriangles(m_RecastContext.get(), verts, std::size(vertices), tris, m_triareas, std::size(indices) / 3, *voxelHeightField, recastConfig.walkableClimb))
+		{
+			Logger::Log("buildNavigation: Could not rasterize triangles.", "NavManager", CRITICAL);
+		}
+
+		// Filter walkable surfaces.
+		const bool filterLowHangingObstacles = true;
+		const bool filterLedgeSpans = true;
+		const bool filterWalkableLowHeightSpans = true;
+		if (filterLowHangingObstacles)
+		{
+			rcFilterLowHangingWalkableObstacles(m_RecastContext.get(), recastConfig.walkableClimb, *voxelHeightField);
+		}
+
+		if (filterLedgeSpans)
+		{
+			rcFilterLedgeSpans(m_RecastContext.get(), recastConfig.walkableHeight, recastConfig.walkableClimb, *voxelHeightField);
+		}
+
+		if (filterWalkableLowHeightSpans)
+		{
+			rcFilterWalkableLowHeightSpans(m_RecastContext.get(), recastConfig.walkableHeight, *voxelHeightField);
+		}
+
+		auto compactHeightField = rcAllocCompactHeightfield();
+		bool result = rcBuildCompactHeightfield(m_RecastContext.get(), recastConfig.walkableHeight, recastConfig.walkableClimb, *voxelHeightField, *compactHeightField);
+
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not build compact data.", "NavManager", CRITICAL);
+		}
+
+		// We dont need to keep in memory the height field
+		rcFreeHeightField(voxelHeightField);
+
+		result = rcErodeWalkableArea(m_RecastContext.get(), recastConfig.walkableRadius, *compactHeightField);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not erode.", "NavManager", CRITICAL);
+		}
+
+		// Water shed for now...
+		result = rcBuildDistanceField(m_RecastContext.get(), *compactHeightField);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not build distance field.", "NavManager", CRITICAL);
+		}
+
+		result = rcBuildRegions(m_RecastContext.get(), *compactHeightField, 0, recastConfig.minRegionArea, recastConfig.mergeRegionArea);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not build watershed regions.", "NavManager", CRITICAL);
+		}
+
+		// Trace and simplify region countours.
+		auto contourSet = rcAllocContourSet();
+		result = rcBuildContours(m_RecastContext.get(), *compactHeightField, recastConfig.maxSimplificationError, recastConfig.maxEdgeLen, *contourSet);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not create contours.", "NavManager", CRITICAL);
+		}
+
+		// Build polygons mesh from contours
+		auto polygonMesh = rcAllocPolyMesh();
+		result = rcBuildPolyMesh(m_RecastContext.get(), *contourSet, recastConfig.maxVertsPerPoly, *polygonMesh);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not triangulate contours.", "NavManager", CRITICAL);
+		}
+
+		// Create detail polygon mesh
+		auto detailMesh = rcAllocPolyMeshDetail();
+		result = rcBuildPolyMeshDetail(m_RecastContext.get(), *polygonMesh, *compactHeightField, recastConfig.detailSampleDist, recastConfig.detailSampleMaxError, *detailMesh);
+		if (!result)
+		{
+			Logger::Log("buildNavigation: Could not build detail mesh.", "NavManager", CRITICAL);
+		}
+
+		// Free memory
+		rcFreeCompactHeightfield(compactHeightField);
+		rcFreeContourSet(contourSet);
+
+		// Apply flags and areas type checking here, example, swim, grass, door, etc.
+		// Should be user defined almost...
+
+		// DETOUR 
+		unsigned char* navData = 0;
+		int navDataSize = 0;
+
+		// Create detour data from poly mesh...
+		dtNavMeshCreateParams params;
+		memset(&params, 0, sizeof(params));
+		params.verts = polygonMesh->verts;
+		params.vertCount = polygonMesh->nverts;
+		params.polys = polygonMesh->polys;
+		params.polyAreas = polygonMesh->areas;
+		params.polyFlags = polygonMesh->flags;
+		params.polyCount = polygonMesh->npolys;
+		params.nvp = polygonMesh->nvp;
+		params.detailVerts = detailMesh->verts;
+		params.detailVertsCount = detailMesh->nverts;
+		params.detailTris = detailMesh->tris;
+		params.detailTriCount = detailMesh->ntris;
+
+		// Off connection, might be useful for user defined jump points?
+		// Maybe useful for ziplines, scripted jumppad, idk
+		// See sample OffMeshConnectionTool.cpp in RecastDemo project.
+
+		//params.offMeshConVerts = m_geom->getOffMeshConnectionVerts();
+		//params.offMeshConRad = m_geom->getOffMeshConnectionRads();
+		//params.offMeshConDir = m_geom->getOffMeshConnectionDirs();
+		//params.offMeshConAreas = m_geom->getOffMeshConnectionAreas();
+		//params.offMeshConFlags = m_geom->getOffMeshConnectionFlags();
+		//params.offMeshConUserID = m_geom->getOffMeshConnectionId();
+		//params.offMeshConCount = m_geom->getOffMeshConnectionCount();
+
+		const float agentHeight = 0.1f;
+		const float agentRadius = 0.1f;
+		const float agentMaxClimb = 0.1f;
+		params.walkableHeight = agentHeight;
+		params.walkableRadius = agentRadius;
+		params.walkableClimb = agentMaxClimb;
+
+		rcVcopy(params.bmin, polygonMesh->bmin);
+		rcVcopy(params.bmax, polygonMesh->bmax);
+
+		// Cell size and cell height
+		params.cs = recastConfig.cs;
+		params.ch = recastConfig.ch;
+		params.buildBvTree = true; // Not sure the difference it makes in performance. based on sample.
+
+		result = dtCreateNavMeshData(&params, &navData, &navDataSize);
+		if (!result)
+		{
+			Logger::Log("Could not build Detour navmesh.", "NavManager", CRITICAL);
+		}
+
+		m_DetourNavMesh = dtAllocNavMesh();
+		if (!m_DetourNavMesh)
+		{
+			Logger::Log("Could not create Detour navmesh.", "NavManager", CRITICAL);
+		}
+
+		dtStatus status;
+		status = m_DetourNavMesh->init(navData, navDataSize, DT_TILE_FREE_DATA);
+		if (dtStatusFailed(status))
+		{
+			dtFree(navData);
+			Logger::Log("Could not init Detour navmesh", "NavManager", CRITICAL);
+		}
+
+		m_DetourNavQuery = dtAllocNavMeshQuery();
+		if (!m_DetourNavQuery)
+		{
+			Logger::Log("Could not create Detour navquery.", "NavManager", CRITICAL);
+		}
+
+		status = m_DetourNavQuery->init(m_DetourNavMesh, 2048);
+		if (!status)
+		{
+			Logger::Log("Could not init Detour navmesh query", "NavManager", CRITICAL);
+		}
+	}
+
+	void NavManager::DrawNavMesh()
+	{
+		if (m_DetourNavMesh)
+		{
+			duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
+			duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
+			duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
+		}
+	}
+}

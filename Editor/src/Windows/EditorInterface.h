@@ -31,6 +31,7 @@ namespace Nuake
 		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;
 		bool m_DebugCollisions = true;
+		bool m_DrawNavMesh = true;
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
 		bool m_IsViewportFocused = false;
@@ -76,6 +77,7 @@ namespace Nuake
 
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
 		bool ShouldDrawCollision() const { return m_DebugCollisions; }
+		bool ShouldDrawNavMesh() const { return m_DrawNavMesh; }
 		bool LoadProject(const std::string& projectPath);
 
 	private:

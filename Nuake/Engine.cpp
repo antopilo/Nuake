@@ -6,6 +6,7 @@
 #include "src/Core/FileSystem.h"
 #include "src/Scripting/ScriptingEngine.h"
 #include "src/Audio/AudioManager.h"
+#include "src/AI/NavManager.h"
 #include "src/Threading/JobSystem.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
@@ -33,6 +34,7 @@ namespace Nuake
 	{
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
+		NavManager::Get().Initialize();
 
 		// Creates the window
 		s_CurrentWindow = Window::Get();

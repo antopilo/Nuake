@@ -35,7 +35,7 @@ include "Nuake/dependencies/jolt_p5.lua"
 include "Nuake/dependencies/soloud_p5.lua"
 include "Nuake/dependencies/optick_p5.lua"
 include "Nuake/dependencies/coral_p5.lua"
-
+include "Nuake/dependencies/recastnavigation_p5.lua"
 include "NuakeNet/premake5.lua"
 
 project "Nuake"
@@ -90,7 +90,12 @@ project "Nuake"
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/dependencies/build",
         "%{prj.name}/dependencies/soloud/include",
-        "%{prj.name}/dependencies/Coral/Coral.Native/Include"
+        "%{prj.name}/dependencies/Coral/Coral.Native/Include",
+	"%{prj.name}/dependencies/recastnavigation/DebugUtils/Include",
+	"%{prj.name}/dependencies/recastnavigation/Detour/Include",
+	"%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
+	"%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
+	"%{prj.name}/dependencies/recastnavigation/Recast/Include"
     }
 
     links
@@ -286,7 +291,7 @@ project "Editor"
         "%{prj.name}/src/**.h"
     }
 
-    includedirs
+    includedirs 
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
@@ -295,10 +300,15 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/assimp/include",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-		"%{prj.name}/../Nuake/dependencies/JoltPhysics",
+	"%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/dependencies/soloud/include",
         "/usr/include/gtk-3.0/",
+	"%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
+	"%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
+	"%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
+	"%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
+	"%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
     }
     
     libdirs 
@@ -325,7 +335,12 @@ project "Editor"
         "Freetype",
         "JoltPhysics",
         "soloud",
-        "Coral.Native"
+        "Coral.Native",
+	"DebugUtils",
+	"Detour",
+	"DetourCrowd",
+	"DetourTileCache",
+	"Recast"
     }
 
     filter "system:Windows"

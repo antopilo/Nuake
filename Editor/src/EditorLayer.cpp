@@ -6,7 +6,9 @@
 #include "src/Core/Input.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
+#include "glad/glad.h"
 
 void EditorLayer::OnAttach()
 {
@@ -50,6 +52,28 @@ void EditorLayer::OnUpdate()
                     glDepthFunc(GL_LESS);
                 }
 
+                if (m_EditorInterface->ShouldDrawNavMesh())
+                {
+                    auto cam = Engine::GetCurrentScene()->m_EditorCamera;
+
+                    glMatrixMode(GL_PROJECTION);
+                    glLoadMatrixf(glm::value_ptr(cam->GetPerspective()));
+
+                    glMatrixMode(GL_MODELVIEW);
+                    glLoadMatrixf(glm::value_ptr(cam->GetTransform()));
+
+
+                    glDepthFunc(GL_LESS);
+                    RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+                    Nuake::NavManager::Get().DrawNavMesh();
+                    RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+
+                    Nuake::NavManager::Get().DrawNavMesh();
+                    glDepthFunc(GL_GREATER);
+                    Nuake::NavManager::Get().DrawNavMesh();
+                    glDepthFunc(GL_LESS);
+                }
+
                 if (m_EditorInterface->ShouldDrawCollision())
                 {
                     m_GizmoDrawer->DrawGizmos(currentScene, false);
@@ -58,6 +82,8 @@ void EditorLayer::OnUpdate()
                     m_GizmoDrawer->DrawGizmos(currentScene, true);
                     glDepthFunc(GL_LESS);
                 }
+
+                
             }
         }
         sceneFramebuffer->Unbind();

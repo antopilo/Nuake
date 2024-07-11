@@ -513,6 +513,8 @@ namespace Nuake {
                 auto& transformComponent = brushEntity.GetComponent<TransformComponent>();
                 auto& bsp = brushEntity.AddComponent<BSPBrushComponent>();
                 
+                quakeMapC.m_Brushes.push_back(brushEntity);
+
                 bsp.IsSolid = true;
                 bsp.IsTransparent = false;
                 bsp.IsFunc = false;

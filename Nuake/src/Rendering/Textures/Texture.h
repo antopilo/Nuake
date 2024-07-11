@@ -8,7 +8,6 @@
 
 #include <string>
 
-
 namespace Nuake
 {
 	typedef unsigned int GLenum;

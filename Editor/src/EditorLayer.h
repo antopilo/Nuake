@@ -1,6 +1,7 @@
 #pragma once
 #include <src/Application/Layer.h>
 #include "Commands/CommandBuffer.h"
+#include "src/AI/NavMeshDebugDrawer.h"
 
 namespace Nuake {
 
@@ -25,4 +26,6 @@ private:
 	CommandBuffer mCommandBuffer;
 	Nuake::EditorInterface* m_EditorInterface;
 	GizmoDrawer* m_GizmoDrawer;
+
+	Nuake::NavMeshDebugDrawer m_NavMeshDrawer;
 };

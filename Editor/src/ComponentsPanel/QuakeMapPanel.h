@@ -3,6 +3,7 @@
 #include <src/Scene/Components/QuakeMap.h>
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include <src/Core/FileSystem.h>
+#include <src/AI/NavManager.h>
 
 
 class QuakeMapPanel : ComponentPanel {
@@ -73,6 +74,32 @@ public:
                 ImGui::TableNextColumn();
 
                 //ComponentTableReset(component.Class, "");
+            }
+            ImGui::TableNextColumn();
+            {
+                using namespace Nuake;
+
+                ImGui::Text("Build Navigation Mesh");
+                ImGui::TableNextColumn();
+
+                if (ImGui::Button("Build Navigation"))
+                {
+                    for (auto& mesh : component.m_Brushes)
+                    {
+                        if (mesh.HasComponent<ModelComponent>())\
+                        {
+                            TransformComponent& transformComponent = mesh.GetComponent<TransformComponent>();
+                            for (auto& mesh : mesh.GetComponent<ModelComponent>().ModelResource->GetMeshes())
+                            {
+                                Nuake::NavManager::Get().PushMesh(mesh, transformComponent.GetGlobalTransform());
+                            }
+                        }
+                    }
+
+                    Nuake::NavManager::Get().BuildNavMesh();
+                }
+
+                ImGui::TableNextColumn();
             }
         }
         EndComponentTable();

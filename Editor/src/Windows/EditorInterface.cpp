@@ -2242,6 +2242,11 @@ namespace Nuake {
                     PhysicsManager::Get().SetDrawDebug(m_DebugCollisions);
                 }
 
+                if (ImGui::MenuItem("Draw navigation meshes", NULL, m_DrawNavMesh))
+                {
+
+                }
+
                 if (ImGui::MenuItem("Settings", NULL)) {}
                 ImGui::EndMenu();
             }
