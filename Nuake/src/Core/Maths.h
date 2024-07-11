@@ -27,4 +27,11 @@ namespace Nuake
 	void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale);
 
 	const Matrix4& TransformToCameraTransform(const Matrix4& mat);
+
+	// Returns a random number [0..1]
+	static float frand()
+	{
+		//	return ((float)(rand() & 0xffff)/(float)0xffff);
+		return (float)rand() / (float)RAND_MAX;
+	}
 }

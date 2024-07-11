@@ -8,6 +8,9 @@
 #include <DetourDebugDraw.h>
 #include <DebugDraw.h>
 
+#include "Engine.h"
+#include "src/Scene/Entities/Entity.h"
+#include "src/Core/Maths.h"
 
 namespace Nuake {
 
@@ -61,16 +64,14 @@ namespace Nuake {
 		recastConfig.tileSize = 10.0f;
 		recastConfig.walkableSlopeAngle = 45.0f;
 		recastConfig.maxEdgeLen = 12.0f;
-		recastConfig.detailSampleDist = 1.2f;
-		recastConfig.detailSampleMaxError = 0.1f;
 		recastConfig.maxVertsPerPoly = 6.0f;
 		recastConfig.walkableHeight = 1.0f;
 		recastConfig.walkableClimb = 1.0f;
 		recastConfig.walkableRadius = 1.0f;
 		recastConfig.maxSimplificationError = 1.3f;
-		recastConfig.minRegionArea = 8.0f;
-		recastConfig.mergeRegionArea = 20.0f;
-		recastConfig.detailSampleDist = 6.0f;
+		recastConfig.minRegionArea = 4.0f;
+		recastConfig.mergeRegionArea = 10.0f;
+		recastConfig.detailSampleDist = 2.0f;
 		recastConfig.detailSampleMaxError = 1.0f;
 		
 		rcVcopy(recastConfig.bmin, bmin);
@@ -187,6 +188,19 @@ namespace Nuake {
 		unsigned char* navData = 0;
 		int navDataSize = 0;
 
+		for (int i = 0; i < polygonMesh->npolys; i++)
+		{
+			if (polygonMesh->areas[i] == RC_WALKABLE_AREA)
+			{
+				polygonMesh->areas[i] = 0;
+			}
+
+			if (polygonMesh->areas[i] == 0)
+			{
+				polygonMesh->flags[i] = 1;
+			}
+		}
+
 		// Create detour data from poly mesh...
 		dtNavMeshCreateParams params;
 		memset(&params, 0, sizeof(params));
@@ -264,11 +278,72 @@ namespace Nuake {
 
 	void NavManager::DrawNavMesh()
 	{
-		if (m_DetourNavMesh)
+		if (!m_DetourNavMesh)
 		{
-			duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
-			duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
-			duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
+			return;
 		}
+
+		duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
+		duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
+		duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
+
+		if (Engine::GetCurrentScene()->EntityExists("test"))
+		{
+			Ref<Scene> scene = Engine::GetCurrentScene();
+			Entity testEntity = scene->GetEntity("test");
+			auto& transform = testEntity.GetComponent<TransformComponent>();
+
+			dtQueryFilter filter;
+			Vector3 entityPosition = transform.GetGlobalPosition();
+			float searchPosition[3] = { entityPosition.x, entityPosition.y, entityPosition.z };
+			float searchExtent[3] = { 102.0f, 140.0f, 120.0f };
+			dtStatus status;
+			dtPolyRef resultPoly = 0;
+			float nearestPoint[3];
+
+			filter.setIncludeFlags(1);
+
+			status = m_DetourNavQuery->findRandomPoint(&filter, frand, &resultPoly, nearestPoint);
+
+			status = m_DetourNavQuery->findNearestPoly(searchPosition, searchExtent, &filter, &resultPoly, nearestPoint);
+
+			if (resultPoly)
+			{
+				duDebugDrawNavMeshPoly(&m_DebugDrawer, *m_DetourNavMesh, resultPoly, duRGBA(0, 255, 0, 255));
+			}
+
+			if (scene->EntityExists("test2"))
+			{
+				static const int MAX_POLYS = 256;
+				dtPolyRef m_polys[MAX_POLYS];
+				Entity testEntity2 = scene->GetEntity("test2");
+				auto& transform2 = testEntity2.GetComponent<TransformComponent>();
+
+				Vector3 entityPosition2 = transform2.GetGlobalPosition();
+				float searchPosition2[3] = { entityPosition2.x, entityPosition2.y, entityPosition2.z };
+				float searchExtent2[3] = { 102.0f, 140.0f, 120.0f };
+				dtStatus statu2s;
+				dtPolyRef resultPoly2 = 0;
+				float nearestPoint2[3];
+
+				status = m_DetourNavQuery->findNearestPoly(searchPosition2, searchExtent2, &filter, &resultPoly2, nearestPoint2);
+				if (resultPoly2)
+				{
+					duDebugDrawNavMeshPoly(&m_DebugDrawer, *m_DetourNavMesh, resultPoly2, duRGBA(0, 0, 255, 255));
+				}
+
+				int m_NumPolys;
+				m_DetourNavQuery->findPath(resultPoly, resultPoly2, nearestPoint, nearestPoint2, &filter, m_polys, &m_NumPolys, MAX_POLYS);
+
+				for (int i = 0; i < m_NumPolys; i++)
+				{
+					duDebugDrawNavMeshPoly(&m_DebugDrawer, *m_DetourNavMesh, m_polys[i], duRGBA(255, 255, 0, 255));
+				}
+			}
+		}
+
+		
 	}
+
+
 }
