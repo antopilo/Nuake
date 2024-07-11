@@ -369,10 +369,10 @@ namespace Nuake
         ImU32 rectColor = IM_COL32(255, 255, 255, 16);
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
         std::string visibleName = file->GetName();
-        const uint32_t MAX_CHAR_NAME = 35;
+        const uint32_t MAX_CHAR_NAME = 32;
         if (file->GetName().size() >= MAX_CHAR_NAME)
         {
-            visibleName = std::string(file->GetName().begin(), file->GetName().begin() + MAX_CHAR_NAME - 3) + "...";
+            visibleName = std::string(visibleName.begin(), visibleName.begin() + MAX_CHAR_NAME - 3) + "...";
         }
 
         ImGui::TextWrapped(visibleName.c_str());
@@ -412,11 +412,11 @@ namespace Nuake
         //        ImGui::PopStyleVar();
         //    }
         //   
-        if (Editor->Selection.File == file)
+        if (Editor->Selection.File == file && Editor->Selection.File->GetFileType() != FileType::Prefab)
         {
             ThumbnailManager::Get().MarkThumbnailAsDirty(file->GetRelativePath());
         }
-        //
+
         //    if(pressed)
         //    {
         //        Editor->Selection = EditorSelection(file);

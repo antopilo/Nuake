@@ -69,13 +69,26 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	Matrix4 view = Matrix4(1.0f);
 	view = glm::lookAt(Vector3(1, -1.0, 0), Vector3(0, 0, 0), Vector3(0, 1, 0));;
 	
-
 	auto file = FileSystem::GetFile(path);
 	if (file->GetFileType() == FileType::Prefab)
 	{
 		Ref<Scene> scene = Scene::New();
 		auto cam = scene->CreateEntity("Camera");
-		cam.AddComponent<CameraComponent>();
+		TransformComponent& camTransform = cam.GetComponent<TransformComponent>();
+		camTransform.SetLocalPosition({ 0.0f, 0.0f, 2.0f });
+
+		auto& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
+		previewLight.SetCastShadows(false);
+		previewLight.Type = LightType::Directional;
+
+		scene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
+		scene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
+		auto& camComponent = cam.AddComponent<CameraComponent>();
+		camComponent.CameraInstance->Fov = 45.0f;
+		camComponent.CameraInstance->AspectRatio = 1.0f;
+		m_ShadedFramebuffer->SetTexture(texture);
+
+		Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene);
 
 		scene->Update(0.01f);
 		scene->Draw(*m_ShadedFramebuffer.get());

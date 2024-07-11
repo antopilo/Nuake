@@ -34,6 +34,24 @@ namespace Nuake
 		return newPrefab;
 	}
 
+	Ref<Prefab> Prefab::InstanceInScene(const std::string& path, Ref<Scene> scene)
+	{
+		Ref<Prefab> newPrefab = CreateRef<Prefab>();
+		newPrefab->Path = path;
+
+		if (FileSystem::FileExists(path, false))
+		{
+			std::string prefabTextContent = FileSystem::ReadFile(path);
+
+			if (!prefabTextContent.empty())
+			{
+				newPrefab->DeserializeIntoScene(json::parse(prefabTextContent), scene);
+			}
+		}
+
+		return newPrefab;
+	}
+
 	void Prefab::EntityWalker(Entity entity)
 	{
 		Root = entity;

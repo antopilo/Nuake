@@ -25,3 +25,6 @@
 [submodule "Nuake/dependencies/Coral"]
 	path = Nuake/dependencies/Coral
 	url = https://github.com/antopilo/Coral.git
+[submodule "Nuake/dependencies/recastnavigation"]
+	path = Nuake/dependencies/recastnavigation
+	url = https://github.com/antopilo/recastnavigation.git
