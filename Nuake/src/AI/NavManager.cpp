@@ -35,7 +35,7 @@ namespace Nuake {
 		std::vector<Vector3> vertices;
 		std::vector<int> indices;
 
-		// Since we are merging all the meshes togheter, we need to offset
+		// Since we are merging all the meshes together, we need to offset
 		// the indices so they point to the correct vertices in the array.
 		// Example: Model1 + Model2 + Model3 will get merged together in one array
 		// and we need to make sure the indices of Model2 point to the correct location in the merged array
@@ -283,8 +283,8 @@ namespace Nuake {
 			return;
 		}
 
-		duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
-		duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
+		//duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
+		//duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
 		duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
 
 		if (Engine::GetCurrentScene()->EntityExists("test"))

@@ -105,7 +105,7 @@ namespace Nuake
 
 	bool Project::Deserialize(const json& j)
 	{
-		Logger::Log("Starting deserializing project", "window", CRITICAL);
+		Logger::Log("Starting deserializing project", "window", VERBOSE);
 		if (!j.contains("Name") || !j.contains("Description"))
 			return false;
 
@@ -138,7 +138,7 @@ namespace Nuake
 		if (!FileSystem::FileExists(scenePath))
 			return true;
 
-		Logger::Log("Starting deserializing scene", "window", CRITICAL);
+		Logger::Log("Starting deserializing scene", "window", VERBOSE);
 		std::string sceneContent = FileSystem::ReadFile(scenePath, false);
 		if (!DefaultScene->Deserialize(nlohmann::json::parse(sceneContent)))
 		{

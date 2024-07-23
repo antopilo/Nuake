@@ -66,15 +66,15 @@ namespace Nuake {
     EditorInterface::EditorInterface(CommandBuffer& commandBuffer) :
         mCommandBuffer(&commandBuffer)
     {
-        Logger::Log("Creating editor windows", "window", CRITICAL);
+        Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
 
-        Logger::Log("Building fonts", "window", CRITICAL);
+        Logger::Log("Building fonts", "window", VERBOSE);
         BuildFonts();
 
-        Logger::Log("Loading imgui from mem", "window", CRITICAL);
+        Logger::Log("Loading imgui from mem", "window", VERBOSE);
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
     }
@@ -1990,7 +1990,12 @@ namespace Nuake {
                     ImGui::PushStyleColor(ImGuiCol_Text, color);
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
 
-                    std::string displayMessage = l.message + "(" + std::to_string(l.count) + ")";
+                    std::string displayMessage = l.message; 
+                    if (l.count > 0)
+                    {
+                        displayMessage + "(" + std::to_string(l.count) + ")";
+                    } 
+
                     ImGui::TextWrapped(displayMessage.c_str());
                     ImGui::PopStyleColor();
 
@@ -2527,10 +2532,10 @@ namespace Nuake {
 
         auto project = Project::New();
         auto projectFileData = FileSystem::ReadFile(projectPath, true);
-        Logger::Log("Reading file project: " + projectFileData, "window", CRITICAL);
+        Logger::Log("Reading file project: " + projectFileData, "window", VERBOSE);
         try
         {
-            Logger::Log("Starting deserializing", "window", CRITICAL);
+            Logger::Log("Starting deserializing", "window", VERBOSE);
             project->Deserialize(json::parse(projectFileData));
             project->FullPath = projectPath;
 
