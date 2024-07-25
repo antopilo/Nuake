@@ -10,6 +10,8 @@ class dtNavMeshQuery;
 
 namespace Nuake {
 
+	struct RecastConfig;
+
 	struct MeshTransformKeyPair
 	{
 		Ref<Mesh> mesh;
@@ -28,7 +30,7 @@ namespace Nuake {
 		void Initialize();
 		void PushMesh(const Ref<Mesh>& mesh, const Matrix4& transform);
 
-		void BuildNavMesh();
+		void BuildNavMesh(const RecastConfig& config);
 
 		void DrawNavMesh();
 

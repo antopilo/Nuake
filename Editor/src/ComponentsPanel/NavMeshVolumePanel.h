@@ -4,6 +4,7 @@
 #include <src/Scene/Entities/ImGuiHelper.h>
 #include <src/Scene/Components/NavMeshVolumeComponent.h>
 #include <src/Core/Maths.h>
+#include <src/AI/RecastConfig.h>
 
 class NavMeshVolumePanel : ComponentPanel {
 
@@ -94,7 +95,7 @@ public:
                                 }
                             }
 
-                            NavManager::Get().BuildNavMesh();
+                            NavManager::Get().BuildNavMesh(RecastConfig(component));
                         }
                     }
                 }
