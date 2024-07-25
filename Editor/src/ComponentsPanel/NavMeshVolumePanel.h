@@ -74,7 +74,7 @@ public:
                 CompononentPropertyName("Cell Size");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##cellsize", component.CellSize, 0.01f);
+                UI::FloatSlider("##cellsize", component.CellSize, 0.01f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -93,7 +93,7 @@ public:
                 CompononentPropertyName("Cell Height");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##cellHeight", component.CellHeight, 0.01f);
+                UI::FloatSlider("##cellHeight", component.CellHeight, 0.01f, 50.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -112,7 +112,7 @@ public:
                 CompononentPropertyName("Tile Size");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##tilesize", component.TileSize, 0.01f);
+                UI::FloatSlider("##tilesize", component.TileSize, 0.01f, 50.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -131,7 +131,7 @@ public:
                 CompononentPropertyName("Walkable Slope Angle");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##walkableslopeAngle", component.WalkableSlopeAngle, 1.0f);
+                UI::FloatSlider("##walkableslopeAngle", component.WalkableSlopeAngle, 1.0f, 90.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -150,7 +150,7 @@ public:
                 CompononentPropertyName("Walkable Height");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##WalkableHeight", component.WalkableHeight, 0.1f);
+                UI::FloatSlider("##WalkableHeight", component.WalkableHeight, 10.0f, 0.1f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -169,7 +169,7 @@ public:
                 CompononentPropertyName("Walkable Radius");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##WalkableRadius", component.WalkableRadius, 0.1f);
+                UI::FloatSlider("##WalkableRadius", component.WalkableRadius, 0.1f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -188,7 +188,7 @@ public:
                 CompononentPropertyName("Walkable Climb");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##WalkableClimb", component.WalkableClimb, 0.1f);
+                UI::FloatSlider("##WalkableClimb", component.WalkableClimb, 0.1f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -207,7 +207,7 @@ public:
                 CompononentPropertyName("Max Simplification Error");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##MaxSimplificationError", component.MaxSimplificationError, 0.1f);
+                UI::FloatSlider("##MaxSimplificationError", component.MaxSimplificationError, 0.1f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -226,7 +226,7 @@ public:
                 CompononentPropertyName("Min Region Area");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##MinRegionArea", component.MinRegionArea, 0.1f);
+                UI::FloatSlider("##MinRegionArea", component.MinRegionArea, 0.1f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -245,7 +245,7 @@ public:
                 CompononentPropertyName("Merge Region Area");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##MergeRegionArea", component.MergeRegionArea, 0.1f);
+                UI::FloatSlider("##MergeRegionArea", component.MergeRegionArea, 0.1f, 25.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -264,7 +264,7 @@ public:
                 CompononentPropertyName("Max Edge Length");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##MaxEdgeLength", component.MaxEdgeLength, 0.1f);
+                UI::FloatSlider("##MaxEdgeLength", component.MaxEdgeLength, 0.1f, 20.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -283,7 +283,7 @@ public:
                 CompononentPropertyName("MaxVertsPerPoly");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##MaxVertsPerPoly", component.MaxVertsPerPoly, 2.f);
+                UI::FloatSlider("##MaxVertsPerPoly", component.MaxVertsPerPoly, 3.f, 6.0f, 1.0f);
 
                 ImGui::TableNextColumn();
 
@@ -302,7 +302,7 @@ public:
                 CompononentPropertyName("Detail Sample Distance");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##DetailSampleDistance", component.DetailSampleDistance, 0.1f);
+                UI::FloatSlider("##DetailSampleDistance", component.DetailSampleDistance, 0.1f, 10.0f , 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -321,7 +321,7 @@ public:
                 CompononentPropertyName("Detail Sample Max Error");
                 ImGui::TableNextColumn();
 
-                UI::FloatSlider("##DetailsampleMaxError", component.DetailsampleMaxError, 0.1f);
+                UI::FloatSlider("##DetailsampleMaxError", component.DetailsampleMaxError, 0.1f, 10.0f, 0.1f);
 
                 ImGui::TableNextColumn();
 
@@ -345,6 +345,10 @@ public:
                 {
                     if (component.OnlyIncludeMapGeometry)
                     {
+                        auto& volumeTransformComponent = entity.GetComponent<TransformComponent>();
+                        Matrix4 globalTransform = volumeTransformComponent.GetGlobalTransform();
+                        Matrix4 offset = Matrix4(1.0f);
+                        offset = glm::translate(offset, volumeTransformComponent.GetGlobalPosition());
                         auto view = Engine::GetCurrentScene()->m_Registry.view<TransformComponent, QuakeMapComponent>();
                         for (auto e : view)
                         {
