@@ -91,7 +91,7 @@ namespace Nuake {
 		{
 			const float height = ImGui::GetTextLineHeight() + ButtonPadding.y * 2.0;
 
-			if (value)
+			if (!value)
 			{
 				ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
@@ -110,7 +110,7 @@ namespace Nuake {
 
 				if (buttonPressed)
 				{
-					value = false;
+					value = !value;
 				}
 			}
 			else
@@ -132,7 +132,7 @@ namespace Nuake {
 
 				if (buttonPressed)
 				{
-					value = true;
+					value = !value;
 				}
 			}
 
