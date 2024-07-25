@@ -6,6 +6,7 @@ namespace Nuake {
 
 	RecastConfig::RecastConfig(const NavMeshVolumeComponent& component)
 	{
+		Bound = component.VolumeSize;
 		CellSize = component.CellSize;
 		CellHeight = component.CellHeight;
 		TileSize = component.TileSize;

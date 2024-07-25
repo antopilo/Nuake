@@ -1,4 +1,5 @@
 #pragma once
+#include "src/Core/Maths.h"
 
 namespace Nuake {
 
@@ -7,6 +8,7 @@ namespace Nuake {
 	class RecastConfig
 	{
 	public:
+		Vector3 Bound = Vector3(100, 100, 100);
 		float CellSize = 0.2f;
 		float CellHeight = 0.2f;
 		float TileSize = 10.0f;
