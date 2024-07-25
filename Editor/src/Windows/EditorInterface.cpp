@@ -1770,6 +1770,10 @@ namespace Nuake {
                     {
                         Engine::GetCurrentScene()->CreateEntity("Quake Map").AddComponent<QuakeMapComponent>();
                     }
+                    if (ImGui::MenuItem("NavMesh Volume"))
+                    {
+                        Engine::GetCurrentScene()->CreateEntity("NavMesh Volume").AddComponent<NavMeshVolumeComponent>();
+                    }
                     ImGui::EndMenu();
                 }
 

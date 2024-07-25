@@ -18,6 +18,7 @@
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 #include "src/Scene/Components/BoneComponent.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
+#include <src/Scene/Components/NavMeshVolumeComponent.h>
 
 namespace Nuake
 {
@@ -79,6 +80,9 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("AudioEmitterComponent", GetComponent<AudioEmitterComponent>())
 		if (HasComponent<NetScriptComponent>())
 			SERIALIZE_OBJECT_REF_LBL("NetScriptComponent", GetComponent<NetScriptComponent>())
+		if (HasComponent<NavMeshVolumeComponent>())
+			SERIALIZE_OBJECT_REF_LBL("NavMeshVolumeComponent", GetComponent<NavMeshVolumeComponent>())
+
 		END_SERIALIZE();
 	}
 
@@ -111,6 +115,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(SkinnedModelComponent);
 		DESERIALIZE_COMPONENT(AudioEmitterComponent);
 		DESERIALIZE_COMPONENT(NetScriptComponent);
+		DESERIALIZE_COMPONENT(NavMeshVolumeComponent);
 		return true;
 	}
 

@@ -24,6 +24,7 @@
 #include "../ComponentsPanel/BonePanel.h"
 #include "../ComponentsPanel/AudioEmitterPanel.h"
 #include "../ComponentsPanel/NetScriptPanel.h"
+#include "../ComponentsPanel/NavMeshVolumePanel.h"
 
 class EditorSelectionPanel 
 {
@@ -47,6 +48,7 @@ private:
 	ParticleEmitterPanel mParticleEmitterPanel;
 	BonePanel mBonePanel;
 	AudioEmitterPanel mAudioEmitterPanel;
+	NavMeshVolumePanel mNavMeshVolumePanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

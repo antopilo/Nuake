@@ -129,6 +129,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
 	mAudioEmitterPanel.Draw(entity);
+	mNavMeshVolumePanel.Draw(entity);
 
 	using namespace Nuake;
 	
@@ -169,7 +170,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 		ImGui::Separator();
 		MenuItemComponent("Audio Emitter", AudioEmitterComponent);
 		ImGui::Separator();
-		MenuItemComponent("Path", AudioEmitterComponent);
+		MenuItemComponent("NavMesh Volume", NavMeshVolumeComponent);
 		ImGui::EndPopup();
 	}
 

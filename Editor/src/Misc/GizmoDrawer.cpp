@@ -204,6 +204,28 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		Nuake::RenderCommand::DrawLines(0, 26);
 	}
 
+	auto navMeshVolumeView = scene->m_Registry.view<TransformComponent, NavMeshVolumeComponent>();
+	for (auto e : navMeshVolumeView)
+	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
+		auto [transform, volume] = scene->m_Registry.get<TransformComponent, NavMeshVolumeComponent>(e);
+
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+		m_LineShader->Bind();
+		m_LineShader->SetUniform1f("u_Opacity", 0.9f);
+		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, volume.VolumeSize));
+		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		m_BoxBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 26);
+	}
+
 	auto sphereColliderView = scene->m_Registry.view<TransformComponent, SphereColliderComponent>();
 	for (auto e : sphereColliderView)
 	{

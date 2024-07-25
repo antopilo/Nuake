@@ -274,6 +274,8 @@ namespace Nuake {
 		{
 			Logger::Log("Could not init Detour navmesh query", "NavManager", CRITICAL);
 		}
+
+		m_Meshes.clear();
 	}
 
 	void NavManager::DrawNavMesh()
