@@ -58,8 +58,8 @@ namespace Nuake {
 			currentVertexOffset = std::size(vertices);
 		}
 
-		float bmin[3] = { -config.Bound.x, -config.Bound.y, -config.Bound.z };
-		float bmax[3] = { config.Bound.x, config.Bound.y, config.Bound.z };
+		float bmin[3] = { config.Position.x - config.Bound.x, config.Position.y - config.Bound.y, config.Position.z - config.Bound.z };
+		float bmax[3] = { config.Position.x + config.Bound.x, config.Position.y + config.Bound.y, config.Position.z + config.Bound.z };
 		rcConfig recastConfig;
 		recastConfig.cs = config.CellSize;
 		recastConfig.ch = config.CellHeight;

@@ -368,7 +368,9 @@ public:
                                 }
                             }
 
-                            NavManager::Get().BuildNavMesh(RecastConfig(component));
+                            auto recastConfig = RecastConfig(component);
+                            recastConfig.Position = volumeTransformComponent.GetGlobalPosition();
+                            NavManager::Get().BuildNavMesh(std::move(recastConfig));
                         }
                     }
                 }

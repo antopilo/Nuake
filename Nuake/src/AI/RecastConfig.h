@@ -8,6 +8,7 @@ namespace Nuake {
 	class RecastConfig
 	{
 	public:
+		Vector3 Position = { 0, 0, 0 };
 		Vector3 Bound = Vector3(100, 100, 100);
 		float CellSize = 0.2f;
 		float CellHeight = 0.2f;
