@@ -352,6 +352,7 @@ namespace Nuake
 		ConvertedTextures = std::vector<ConvertedTexture>();
 
 		auto pathSplits = String::Split(std::string(wadPath.begin(), wadPath.end() - 4), '/');
+		pathSplits = String::Split(pathSplits[std::size(pathSplits) - 1], '\\');
 		WadName = pathSplits[std::size(pathSplits) - 1];
 		TargetDirectory = "/textures/" + WadName + "/";
 

@@ -4,6 +4,7 @@
 #include <src/UI/ImUI.h>
 #include <src/Core/Logger.h>
 #include <regex>
+#include <src/Threading/JobSystem.h>
 
 void MapImporterWindow::Draw()
 {
@@ -64,11 +65,80 @@ void MapImporterWindow::Draw()
 			ImGui::EndDragDropTarget();
 		}
 
-		auto wads = ScanUsedWads();
+		if (Nuake::UI::PrimaryButton("Scan WADs"))
+		{
+			m_MapToImport = nullptr;
+		}
+
+		for (auto& w : ScanUsedWads())
+		{
+			auto pathSplits = String::Split(std::string(w.begin(), w.end() - 4), '/');
+			std::string WadName = pathSplits[std::size(pathSplits) - 1];
+			std::string TargetDirectory = "/Materials/" + WadName + "/";
+		}
 
 		if (Nuake::UI::PrimaryButton("Export"))
 		{
+			if (m_OutputFile.empty())
+			{
+				std::string outputFile = FileDialog::SaveFile("*.map");
+				if (!String::EndsWith(outputFile, ".map"))
+				{
+					outputFile += ".map";
+				}
+				m_OutputFile = FileSystem::AbsoluteToRelative(outputFile);
+			}
+
+			std::string mapContent = m_MapToImport->Read();
+			std::istringstream stream(mapContent);
+
+			std::ostringstream modifiedMapContent;
+
+			std::regex pattern(R"(\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*([^\s]+))");
+
+			std::string line;
+			while (std::getline(stream, line))
+			{
+				std::smatch match;
+				if (std::regex_search(line, match, pattern))
+				{
+					// If a match is found, return the captured value
+					std::string result = match[1].str();
+					std::string result2 = match[0].str();
+					result2.erase(result2.end() - result.length(), result2.end());
+
+					std::string transformWad = GetTransformedWadPath(result);
+					if (transformWad.empty())
+					{
+						Logger::Log("Couldn't find texture: " + result, "map importer", CRITICAL);
+					}
+
+					line = result2 + std::regex_replace(line, pattern, transformWad);
+				}
+
+				modifiedMapContent << line << std::endl;
+			}
+
+			FileSystem::BeginWriteFile(m_OutputFile);
+			FileSystem::WriteLine(modifiedMapContent.str());
+			FileSystem::EndWriteFile();
+
 			m_MapToImport = nullptr;
+		}
+
+		ImGui::SameLine();
+
+		ImGui::TextUnformatted(m_OutputFile.c_str());
+
+		if (ImGui::IsItemClicked())
+		{
+			std::string outputFile = FileDialog::SaveFile("*.map");
+			if (!String::EndsWith(outputFile, ".map"))
+			{
+				outputFile += ".map";
+			}
+
+			m_OutputFile = FileSystem::AbsoluteToRelative(outputFile);
 		}
 	}
 	ImGui::End();
@@ -80,6 +150,8 @@ std::vector<std::string> MapImporterWindow::ScanUsedWads()
 	{
 		return std::vector<std::string>();
 	}
+
+	m_DetectedWads.clear();
 
 	using namespace Nuake;
 
@@ -104,4 +176,55 @@ std::vector<std::string> MapImporterWindow::ScanUsedWads()
 
 	// If no match is found, return an empty string
 	return usedWads;
+}
+
+std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
+{
+	const std::string& baseTextureDir = "/textures/";
+
+	using namespace Nuake;
+	std::regex backslash_pattern("\\\\");
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(FileSystem::Root + baseTextureDir))
+	{
+		// Check if the current entry is a regular file and matches the file name
+		const std::string stem = String::ToLower(entry.path().stem().string());
+		std::string upperInput = String::ToLower(path);
+
+		std::string prefix = "";
+		if (String::BeginsWith(upperInput, "*"))
+		{
+			prefix = "star_";
+		}
+		else if (String::BeginsWith(upperInput, "+"))
+		{
+			prefix = "plus_";
+		}
+		else if (String::BeginsWith(upperInput, "-"))
+		{
+			prefix = "minu_";
+		}
+		else if (String::BeginsWith(upperInput, "/"))
+		{
+			prefix = "divd_";
+		}
+
+		if (!prefix.empty())
+		{
+			upperInput = prefix + std::string(upperInput.begin() + 1, upperInput.end());
+		}
+
+		if (entry.is_regular_file() && stem == upperInput)
+		{
+			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), FileSystem::Root + "/textures/");
+			std::filesystem::path pathWithoutExtension = relativePath;
+			pathWithoutExtension = pathWithoutExtension.parent_path(); // Remove the file name
+
+			pathWithoutExtension /= relativePath.stem(); // Add the file name without extension
+			Logger::Log("Map importer found matching material: " + pathWithoutExtension.string(), "map importer", VERBOSE);
+
+			return std::regex_replace(pathWithoutExtension.string(), backslash_pattern, "/");
+		}
+	}
+
+	return std::string();
 }

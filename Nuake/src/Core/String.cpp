@@ -88,4 +88,15 @@ namespace Nuake
 
 		return result;
 	}
+
+	std::string String::ToLower(const std::string& str) 
+	{
+		std::string result = str; // Create a copy of the input string
+
+		// Transform each character to lowercase
+		std::transform(result.begin(), result.end(), result.begin(),
+					   [](unsigned char c) { return std::tolower(c); });
+
+		return result;
+	}
 }

@@ -20,5 +20,6 @@ namespace Nuake
 
 		static float ToFloat(const std::string& string);
 		static std::string ToUpper(const std::string& string);
+		static std::string ToLower(const std::string& string);
 	};
 }
