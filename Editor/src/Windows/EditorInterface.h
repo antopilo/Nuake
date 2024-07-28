@@ -13,6 +13,7 @@
 #include "../Windows/TrenchbroomConfiguratorWindow.h"
 #include "../Commands/CommandBuffer.h"
 #include "../Commands/ICommand.h"
+#include "MapImporterWindow.h"
 
 using namespace NuakeEditor;
 
@@ -36,6 +37,7 @@ namespace Nuake
 		bool m_IsHoveringViewport = false;
 		bool m_IsViewportFocused = false;
 		bool m_ShowTrenchbroomConfigurator = false;
+		bool m_ShowMapImporter = false;
 
 		Vector2 m_ViewportPos = {0, 0};
 		Vector2 m_ViewportSize = {};
@@ -56,6 +58,7 @@ namespace Nuake
 		EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
+		MapImporterWindow m_MapImporter;
 
 		EditorInterface(CommandBuffer& commandBuffer);
 

@@ -2231,6 +2231,11 @@ namespace Nuake {
                 {
                     m_ShowTrenchbroomConfigurator = !m_ShowTrenchbroomConfigurator;
                 }
+
+                if (ImGui::MenuItem("Map Importer", NULL, m_ShowMapImporter))
+                {
+                    m_ShowMapImporter = !m_ShowMapImporter;
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
@@ -2419,6 +2424,11 @@ namespace Nuake {
         if (m_ShowTrenchbroomConfigurator)
         {
             m_TrenchhbroomConfigurator.Draw();
+        }
+
+        if (m_ShowMapImporter)
+        {
+            m_MapImporter.Draw();
         }
 
         DrawMenuBar();

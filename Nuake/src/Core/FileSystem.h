@@ -203,9 +203,10 @@ namespace Nuake
 
 			return "File";
 		}
+
 		std::string Read()
 		{
-			return FileSystem::ReadFile(AbsolutePath);
+			return FileSystem::ReadFile(AbsolutePath, true);
 		}
 
 		bool IsValid()

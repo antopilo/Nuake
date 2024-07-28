@@ -180,7 +180,7 @@ namespace Nuake
 
 	bool FileSystem::MakeDirectory(const std::string& path, bool absolute)
 	{
-		return std::filesystem::create_directory(absolute ? path : FileSystem::Root + path);
+		return std::filesystem::create_directories(absolute ? path : FileSystem::Root + path);
 	}
 
 	bool FileSystem::FileExists(const std::string& path, bool absolute)
