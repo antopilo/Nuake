@@ -63,6 +63,7 @@ public:
                 ComponentTableReset(component.Type, Nuake::LightType::Point);
             }
             ImGui::TableNextColumn();
+
             if (component.Type == Nuake::LightType::Directional)
             {
                 {
@@ -98,6 +99,33 @@ public:
                             ComponentTableReset(component.Direction, Nuake::Vector3(0, -1, 0));
                         }
                     }
+                }
+            }
+            else if (component.Type == Nuake::LightType::Spot)
+            {
+                {
+                    ImGui::Text("Cutoff");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##cutoff", &component.Cutoff, 1.0f, 0.0f, 360.0f);
+                    ImGui::TableNextColumn();
+
+                    // Clamp inner angle so it doesnt exceed outer angle.
+                    component.Cutoff = glm::min(component.Cutoff, component.OuterCutoff);
+
+                    ComponentTableReset(component.Cutoff, 12.5f);
+                    ImGui::TableNextColumn();
+                }
+
+                {
+                    ImGui::Text("Outer Cutoff");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##outercutoff", &component.OuterCutoff, 1.0f, component.Cutoff, 360.0f);
+                    ImGui::TableNextColumn();
+
+                    ComponentTableReset(component.OuterCutoff, 30.0f);
+                    ImGui::TableNextColumn();
                 }
             }
         }  

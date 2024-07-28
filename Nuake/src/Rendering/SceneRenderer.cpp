@@ -26,8 +26,6 @@ namespace Nuake
 		mGBuffer->SetTexture(entityTexture, GL_COLOR_ATTACHMENT3); // Entity ID
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
 
-		
-
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
 
@@ -49,7 +47,6 @@ namespace Nuake
 
 	void SceneRenderer::Cleanup()
 	{
-		
 	}
 
 	void SceneRenderer::BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos)
@@ -683,6 +680,7 @@ namespace Nuake
 				RenderCommand::Clear();
 				RenderCommand::SetClearColor(Color(0, 0, 0, 1));
 			}
+
 			RenderCommand::Enable(RendererEnum::FACE_CULL);
 
 			Shader* shadingShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
@@ -700,8 +698,14 @@ namespace Nuake
 			{
 				auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
 
-				if (light.SyncDirectionWithSky)
+				if (light.Type == Directional && light.SyncDirectionWithSky)
+				{
 					light.Direction = env->ProceduralSkybox->GetSunDirection();
+				}
+				else
+				{
+					light.Direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
+				}
 
 				Renderer::RegisterDeferredLight(transform, light);
 			}

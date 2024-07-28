@@ -22,6 +22,8 @@ namespace Nuake
     public:
         LightType Type = Point;
         Vector3 Direction;
+        float Cutoff = 12.5f;
+        float OuterCutoff = 20.0f;
         Vector3 Color;
 
         bool IsVolumetric = false;

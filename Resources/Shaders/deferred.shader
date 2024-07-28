@@ -41,12 +41,16 @@ uniform sampler2D m_Emissive;
 uniform sampler2D m_UVOffset;
 
 // Lights
-const int MaxLight = 32;
+const int MaxLight = 28;
 uniform int LightCount = 0;
 
 struct Light {
     vec3 Color;
     vec3 Position;
+    int Type; // 0 = Point, 1 = Directional, 2 = Spot
+    vec3 Direction;
+    float OuterAngle;
+    float InnerAngle;
 };
 
 struct DirectionalLight
@@ -306,12 +310,24 @@ void main()
 
     for (int i = 0; i < LightCount; i++)
     {
+        Light light = Lights[i];
         vec3 L = normalize(Lights[i].Position - worldPos);
 
-        float distance = length(Lights[i].Position - worldPos);
+        float distance = length(light.Position - worldPos);
         float attenuation = 1.0 / (distance * distance);
 
-        vec3 radiance = Lights[i].Color * attenuation ;
+        vec3 radiance;
+        if(Lights[i].Type == 1) // Point
+        {
+            radiance = Lights[i].Color * attenuation;
+        }
+        else if(Lights[i].Type == 2) // Spot
+        {
+            float theta = dot(L, normalize(-Lights[i].Direction));
+            float epsilon   = Lights[i].InnerAngle - Lights[i].OuterAngle;
+            float intensity = clamp((theta - Lights[i].OuterAngle) / epsilon, 0.0, 1.0);    
+            radiance = Lights[i].Color * intensity;
+        }
 
         // Cook-Torrance BRDF
         vec3 H = normalize(V + L);

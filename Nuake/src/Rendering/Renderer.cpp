@@ -10,6 +10,7 @@
 #include "src/Rendering/Shaders/ShaderManager.h"
 #include "Engine.h"
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include "Buffers/VertexBufferLayout.h"
@@ -261,29 +262,30 @@ namespace Nuake
     {
         Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
         deferredShader->Bind();
-        m_Lights.push_back({ transform , light });
-
-        size_t idx = m_Lights.size();
-
+        
         Vector3 direction = light.GetDirection();
         Vector3 pos = transform.GetGlobalPosition();
+        Quat lightRotation = transform.GetGlobalRotation();
 
-        //light.m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17);
-
-        int shadowmapAmount = 0;
         if (light.Type == Directional)
         {
+            int shadowmapAmount = 0;
+
             deferredShader->SetUniform1i("u_DirectionalLight.Shadow", light.CastShadows);
+
             if (light.CastShadows)
             {
                 for (unsigned int i = 0; i < CSM_AMOUNT; i++)
                 {
-                    light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
+                    // Bind shadowmap texture 
                     const uint32_t shadowMapId = shadowmapAmount + i;
-                    deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
-                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
-                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
-                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+                    Ref<Texture> shadowMapTexture = light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT);
+                    deferredShader->SetUniformTex("ShadowMaps[" + std::to_string(shadowMapId) + "]", shadowMapTexture, 17 + i);
+
+                    const std::string stringIndex = std::to_string(i);
+                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + stringIndex + "]", shadowMapId);
+                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + stringIndex + "]", light.mCascadeSplitDepth[i]);
+                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + stringIndex + "]", light.mViewProjections[i]);
                 }
             }
 
@@ -293,17 +295,32 @@ namespace Nuake
 
             shadowmapAmount += CSM_AMOUNT;
         }
-
-        if (m_Lights.size() == MAX_LIGHT)
+        else
         {
-            return;
+            if (m_Lights.size() == MAX_LIGHT)
+            {
+                return;
+            }
+
+            m_Lights.push_back({ transform , light });
+            size_t idx = m_Lights.size();
+
+            const std::string uniformAccessor = "Lights[" + std::to_string(idx - 1) + "].";
+            deferredShader->SetUniform3f(uniformAccessor + "Position", pos.x, pos.y, pos.z);
+            deferredShader->SetUniform3f(uniformAccessor + "Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+            deferredShader->SetUniform1i(uniformAccessor + "Type", static_cast<int>(light.Type));
+
+            if (light.Type == Spot)
+            {
+                deferredShader->SetUniform3f(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
+                deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
+                deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
+            }
+
+            deferredShader->SetUniform1i("LightCount", static_cast<int>(idx));
         }
-
-       deferredShader->SetUniform1i("LightCount", (int)idx);
-       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Position", pos.x, pos.y, pos.z);
-       deferredShader->SetUniform3f("Lights[" + std::to_string(idx - 1) + "].Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
-
-       m_LightsUniformBuffer->Bind();
+        
+        m_LightsUniformBuffer->Bind();
     }
 
     void Renderer::DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform)
