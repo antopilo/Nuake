@@ -320,7 +320,7 @@ namespace Nuake
         }
 
 
-        Ref<Texture> textureImage =TextureManager::Get()->GetTexture("Resources/Images/file_icon.png");
+        Ref<Texture> textureImage = TextureManager::Get()->GetTexture("Resources/Images/file_icon.png");
 
         const auto textureMgr = TextureManager::Get();
         const auto fileType = file->GetFileType();

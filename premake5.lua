@@ -350,8 +350,8 @@ project "Editor"
         }
         files
         {
-            "%{prj.name}/resources/*.rc",
-            "%{prj.name}/resources/**.ico"
+            "%{prj.name}/*.rc",
+            "%{prj.name}/**.ico"
         }
         defines
         {

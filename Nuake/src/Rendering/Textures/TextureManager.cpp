@@ -27,6 +27,9 @@ namespace Nuake
 		m_Registry.emplace(Resources_Images_nuake_logo_png_path, CreateRef<Texture>(Resources_Images_nuake_logo_png, Resources_Images_nuake_logo_png_len));
 		m_Registry.emplace(Resources_Images_logo_white_png_path, CreateRef<Texture>(Resources_Images_logo_white_png, Resources_Images_logo_white_png_len));
 		m_Registry.emplace(Resources_Images_logo_png_path, CreateRef<Texture>(Resources_Images_logo_png, Resources_Images_logo_png_len));
+		m_Registry.emplace(Resources_Images_file_icon_png_path, CreateRef<Texture>(Resources_Images_file_icon_png, Resources_Images_file_icon_png_len));
+		m_Registry.emplace(Resources_Images_scene_icon_png_path, CreateRef<Texture>(Resources_Images_scene_icon_png, Resources_Images_scene_icon_png_len));
+		m_Registry.emplace(Resources_Images_project_icon_png_path, CreateRef<Texture>(Resources_Images_project_icon_png, Resources_Images_project_icon_png_len));
 
 		unsigned char whitePixel[] = { 255, 255, 255, 255 };
 		m_Registry.emplace("Resources/Textures/Default.png", CreateRef<Texture>(Vector2( 1, 1 ), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &whitePixel));

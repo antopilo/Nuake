@@ -252,6 +252,10 @@ namespace Nuake
 
     void Renderer::EndDraw()
     {
+        Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
+        deferredShader->Bind();
+        deferredShader->SetUniform1i("LightCount", 0);
+
         m_Lights.clear();
     }
 
