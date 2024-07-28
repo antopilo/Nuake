@@ -700,7 +700,7 @@ namespace Nuake
 
 				if (light.Type == Directional && light.SyncDirectionWithSky)
 				{
-					light.Direction = env->ProceduralSkybox->GetSunDirection();
+					light.Direction = -env->ProceduralSkybox->GetSunDirection();
 				}
 				else
 				{

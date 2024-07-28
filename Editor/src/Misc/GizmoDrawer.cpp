@@ -313,6 +313,40 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		Nuake::RenderCommand::DrawLines(0, 264);
 	}
 
+	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+	for (auto e : lightView)
+	{
+		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+		if (light.Type == Spot || (light.Type == Directional && !light.SyncDirectionWithSky))
+		{
+			const auto entityId = (uint32_t)e;
+			if (m_CylinderGizmo.find(entityId) == m_CylinderGizmo.end())
+			{
+				m_CylinderGizmo[entityId] = CreateScope<CylinderGizmo>(Color(light.Color.r, light.Color.g, light.Color.b, 0.6f));
+			}
+
+			const float cylinderLength = 2.0f;
+			m_CylinderGizmo[entityId]->UpdateShape(0.1f, cylinderLength, Color(light.Color.r, light.Color.g, light.Color.b, 0.6f));
+
+			const Quat& rotationOffset = QuatFromEuler(90.0f, 0, 0);
+			const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation()) * rotationOffset;
+			const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+			Matrix4 gizmoPosition = Matrix4(1.0f);
+			gizmoPosition = glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3]));
+			gizmoPosition = gizmoPosition * rotationMatrix;
+			gizmoPosition = glm::translate(gizmoPosition, { 0, cylinderLength / 2.0, 0 });
+
+			m_LineShader->Bind();
+			m_LineShader->SetUniform1f("u_Opacity", 0.5f);
+			m_LineShader->SetUniformMat4f("u_View", gizmoPosition);
+			m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+			m_CylinderGizmo[entityId]->Bind();
+			Nuake::RenderCommand::DrawLines(0, 264);
+		}
+	}
+
 	auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 	for (auto e : particleView)
 	{
@@ -401,7 +435,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	}
 
 	// Lights
-	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
 		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/light.png").get());

@@ -128,7 +128,7 @@ namespace Nuake
                 glm::vec3 minExtents = -maxExtents;
 
                 // Calculate the view and projection matrix
-                glm::vec3 lightDir = -this->Direction;
+                glm::vec3 lightDir = this->Direction;
                 glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
                 glm::mat4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
 
