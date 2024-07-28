@@ -347,4 +347,12 @@ namespace Nuake
 		SetUniform1i(name, slot);
 		texture->Bind(slot);
 	}
+
+	void Shader::SetUniformTex(const std::string& name, Ref<Texture> texture, unsigned int slot)
+	{
+		//ASSERT(texture != nullptr);
+
+		SetUniform1i(name, slot);
+		texture->Bind(slot);
+	}
 }

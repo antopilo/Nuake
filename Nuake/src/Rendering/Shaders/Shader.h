@@ -6,6 +6,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "src/Core/Maths.h"
 #include "src/Rendering/Textures/Texture.h"
+#include "src/Core/Core.h"
 
 namespace Nuake
 {
@@ -42,6 +43,7 @@ namespace Nuake
 		void SetUniform1f(const std::string& name, float v0);
 		void SetUniform1b(const std::string& name, bool v0);
 		void SetUniformTex(const std::string& name, Texture* texture, unsigned int slot = 0);
+		void SetUniformTex(const std::string& name, Ref<Texture> texture, unsigned int slot = 0);
 		void SetUniform1i(const std::string& name, int v0);
 		void SetUniform1i(uint32_t location, int v0);
 
