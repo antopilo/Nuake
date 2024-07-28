@@ -355,6 +355,11 @@ namespace Nuake
 		WadName = pathSplits[std::size(pathSplits) - 1];
 		TargetDirectory = "/textures/" + WadName + "/";
 
+		if (!FileSystem::DirectoryExists("/textures/"))
+		{
+			FileSystem::MakeDirectory("/textures/");
+		}
+
 		if (!FileSystem::DirectoryExists(TargetDirectory))
 		{
 			FileSystem::MakeDirectory(TargetDirectory);
