@@ -127,10 +127,12 @@ namespace Nuake {
             face* face = &brush->faces[f];
             texture_data* texture = &textures[face->texture_idx];
 
-            if (std::string(texture->name) == "__TB_empty")
+            bool textureIsEmpty = std::string(texture->name) == "__TB_empty" || std::string(texture->name).empty();
+            if (textureIsEmpty)
             {
                 texture->height = 1;
                 texture->width = 1;
+                continue;
             }
             else
             {
@@ -198,7 +200,7 @@ namespace Nuake {
                     Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
                     mesh->SetMaterial(material);
                 }
-
+                
                 bsp.Meshes.push_back(mesh);
 
                 index_offset = 0;
@@ -558,6 +560,8 @@ namespace Nuake {
                         }
                         else
                         {
+                            continue;
+
                             currentMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
                             texture->height = texture->width = 1;
                         }
