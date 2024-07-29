@@ -69,7 +69,7 @@ namespace Nuake {
 		{
 			for (auto& b : BrushEntities)
 			{
-				if (name == b.Name)
+				if (String::ToLower(name) == String::ToLower(b.Name))
 					return b;
 			}
 
@@ -80,8 +80,10 @@ namespace Nuake {
 		{
 			for (auto& p : PointEntities)
 			{
-				if (name == p.Name) 
+				if (String::ToLower(name) == String::ToLower(p.Name))
+				{
 					return p;
+				}
 			}
 
 			assert(false && "Point entity not found!");
@@ -91,13 +93,13 @@ namespace Nuake {
 		{
 			for (auto& b : BrushEntities)
 			{
-				if (b.Name == className)
+				if (String::ToLower(b.Name) == String::ToLower(className))
 					return EntityType::Brush;
 			}
 
 			for (auto& p : PointEntities)
 			{
-				if (p.Name == className)
+				if (String::ToLower(p.Name) == String::ToLower(className))
 					return EntityType::Point;
 			}
 

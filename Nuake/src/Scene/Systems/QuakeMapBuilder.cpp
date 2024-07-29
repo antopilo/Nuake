@@ -403,21 +403,17 @@ namespace Nuake {
         geo_generator_run();
 
         DefaultMaterial = MaterialManager::Get()->GetMaterial("default");
+        Entity worldspawnEntity = { (entt::entity)-1, m_Scene };
+        std::map<std::string, Entity> pointEntities = std::map<std::string, Entity>();
         for (uint32_t e = 0; e < (uint32_t)entity_count; ++e)
         {
             entity* entity_inst = &entities[e];
             entity_geometry* entity_geo_inst = &entity_geo[e];
 
-            Entity newEntity = m_Scene->CreateEntity("Brush " + std::to_string(e));
-
-            if (entity_inst->spawn_type == entity_spawn_type::EST_GROUP)
-                newEntity.GetComponent<NameComponent>().Name = "Group " + std::to_string(e);
-
             bool isTrigger = false;
             bool isFunc = false;
             bool isPos = false;
-            ent.AddChild(newEntity);
-
+            
             std::string target = "";
             std::string targetname = "";
             FGDBrushEntity fgdBrush;
@@ -425,6 +421,7 @@ namespace Nuake {
             bool isEntity = false;
             bool isWorldSpawn = false;
             bool isPointEntity = false;
+            Vector3 brushLocalPosition = { 0, 0, 0 };
             for (int i = 0; i < entity_inst->property_count; i++)
             {
                 property* prop = &(entity_inst->properties)[i];
@@ -439,7 +436,7 @@ namespace Nuake {
                     float z = String::ToFloat(splits[0]);
 
                     Vector3 position = Vector3(x, y, z) * ScaleFactor * (1.0f / 64.0f);
-                    newEntity.GetComponent<TransformComponent>().SetLocalPosition(position);
+                    brushLocalPosition = position;
                 }
 
                 if (key == "classname")
@@ -478,19 +475,37 @@ namespace Nuake {
                 if (key == "target")
                     target = value;
             }
+
+            if (!worldspawnEntity.IsValid())
+            {
+                worldspawnEntity = m_Scene->CreateEntity("WorldSpawn");
+                ent.AddChild(worldspawnEntity);
+            }
+
             if (!isWorldSpawn)
             {
                 if (isPointEntity)
                 {
-                    Entity newPEntity = Engine::GetCurrentScene()->CreateEntity("New prefab Entity");
-                    newEntity.AddChild(newPEntity);
-                    auto& prefabComponent = newPEntity.AddComponent<PrefabComponent>();
+                    if (pointEntities.find(pointEntity.Name) == pointEntities.end())
+                    {
+                        Entity pointEntityParent = Engine::GetCurrentScene()->CreateEntity(pointEntity.Name);
+                        pointEntities[pointEntity.Name] = pointEntityParent;
+                        ent.AddChild(pointEntityParent);
+                    }
+
+                    Entity newPrefab = Engine::GetCurrentScene()->CreateEntity(pointEntity.Name);
+
+                    pointEntities[pointEntity.Name].AddChild(newPrefab);
+
+                    auto& prefabComponent = newPrefab.AddComponent<PrefabComponent>();
                     prefabComponent.SetPrefab(Prefab::New(pointEntity.Prefab));
+                    newPrefab.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
+
                     for (auto& e : prefabComponent.PrefabInstance->Entities)
                     {
                         if (!e.GetComponent<ParentComponent>().HasParent)
                         {
-                            newPEntity.AddChild(e);
+                            newPrefab.AddChild(e);
                         }
                     }
                 }
@@ -500,10 +515,10 @@ namespace Nuake {
                     brush* brush_inst = &entity_inst->brushes[b];
                     brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
 
-                    if (isEntity)
-                        CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
-                    else
-                        CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
+                    //if (isEntity)
+                    //    CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
+                    //else
+                    //    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
                 }
             }
             else
@@ -511,10 +526,11 @@ namespace Nuake {
                 std::map<std::string, Ref<Material>> m_Materials;
                 std::map<Ref<Material>, std::vector<ProcessedMesh>> m_StaticWorld;
 
-                Entity brushEntity = m_Scene->CreateEntity("WorldSpawn");
-                newEntity.AddChild(brushEntity);
+                Entity brushEntity = m_Scene->CreateEntity("Brush " + std::to_string(e));
+                worldspawnEntity.AddChild(brushEntity);
 
                 auto& transformComponent = brushEntity.GetComponent<TransformComponent>();
+                transformComponent.SetLocalPosition(brushLocalPosition);
                 auto& bsp = brushEntity.AddComponent<BSPBrushComponent>();
                 
                 quakeMapC.m_Brushes.push_back(brushEntity);

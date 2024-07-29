@@ -350,8 +350,8 @@ namespace Nuake
 		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
 		shader->Bind();
 
-		RenderCommand::Enable(RendererEnum::FACE_CULL);
-		glCullFace(GL_BACK);
+		RenderCommand::Disable(RendererEnum::FACE_CULL);
+		glCullFace(GL_FRONT);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
@@ -693,7 +693,20 @@ namespace Nuake
 
 			Ref<Environment> env = scene.GetEnvironment();
 
+			struct LightDistance
+			{
+				TransformComponent transform;
+				LightComponent light;
+				float distance;
+			};
+
+			std::vector<LightDistance> lightDistances;
+
 			auto view = scene.m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
+
+			lightDistances.reserve(view.size_hint());
+
+			const Vector3 camPosition = scene.GetCurrentCamera()->Translation;
 			for (auto l : view)
 			{
 				auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
@@ -707,7 +720,22 @@ namespace Nuake
 					light.Direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
 				}
 
-				Renderer::RegisterDeferredLight(transform, light);
+				Vector3 lightPosition = transform.GetGlobalPosition();
+				float distanceFromCam = glm::length(camPosition - lightPosition);
+
+				lightDistances.push_back({transform, light, distanceFromCam});
+			}
+
+			std::sort(lightDistances.begin(), lightDistances.end(), 
+				[](const LightDistance& a, const LightDistance& b) 
+				{
+					return a.distance < b.distance;
+				}
+			);
+
+			for (const auto& l : lightDistances)
+			{
+				Renderer::RegisterDeferredLight(l.transform, l.light);
 			}
 
 			mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
