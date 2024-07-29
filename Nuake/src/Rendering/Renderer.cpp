@@ -19,7 +19,7 @@
 
 namespace Nuake
 {
-    uint32_t Renderer::MAX_LIGHT = 32;
+    uint32_t Renderer::MAX_LIGHT = 42;
 
     unsigned int depthTexture;
     unsigned int depthFBO;

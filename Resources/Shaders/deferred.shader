@@ -41,7 +41,7 @@ uniform sampler2D m_Emissive;
 uniform sampler2D m_UVOffset;
 
 // Lights
-const int MaxLight = 28;
+const int MaxLight = 42;
 uniform int LightCount = 0;
 
 struct Light {
