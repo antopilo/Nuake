@@ -2,6 +2,7 @@
 
 #include <src/Core/FileSystem.h>
 #include <src/Core/FileSystem.h>
+#include <atomic>
 
 class MapImporterWindow
 {
@@ -17,7 +18,9 @@ private:
 	std::vector<std::string> m_DetectedWads;
 	std::string m_OutputFile = "";
 	std::vector<std::string> ScanUsedWads();
-
+	std::map<std::string, std::string> m_WadToMaterialMap;
+	std::atomic<bool> m_Working = false;
+	std::atomic<int> m_Percentage;
 	std::string GetTransformedWadPath(const std::string& path);
 	
 };

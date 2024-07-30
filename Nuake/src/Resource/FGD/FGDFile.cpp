@@ -20,13 +20,6 @@ namespace Nuake {
 		this->BaseEntities = std::vector<FGDBaseEntity>();
 		this->BrushEntities = std::vector<FGDBrushEntity>();
 		this->PointEntities = std::vector<FGDPointEntity>();
-
-		// TODO: Remove this, debugging stuff.
-		FGDPointEntity newEnt;
-		newEnt.Name = "Light";
-		newEnt.Description = "A Nuake PBR light";
-
-		this->PointEntities.push_back(newEnt);
 	}
 
 

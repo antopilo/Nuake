@@ -5,6 +5,7 @@
 #include <src/Core/Logger.h>
 #include <regex>
 #include <src/Threading/JobSystem.h>
+#include <Engine.h>
 
 void MapImporterWindow::Draw()
 {
@@ -35,7 +36,7 @@ void MapImporterWindow::Draw()
 		{
 			std::string selectedFile = FileDialog::OpenFile("*.map");
 			std::string relativePath = FileSystem::AbsoluteToRelative(selectedFile);
-			if (FileSystem::FileExists(relativePath))
+			if (!selectedFile.empty() && FileSystem::FileExists(relativePath))
 			{
 				if (Ref<File> file = FileSystem::GetFile(relativePath); file)
 				{
@@ -70,11 +71,16 @@ void MapImporterWindow::Draw()
 			m_MapToImport = nullptr;
 		}
 
-		for (auto& w : ScanUsedWads())
+		//for (auto& w : ScanUsedWads())
+		//{
+		//	auto pathSplits = String::Split(std::string(w.begin(), w.end() - 4), '/');
+		//	std::string WadName = pathSplits[std::size(pathSplits) - 1];
+		//	std::string TargetDirectory = "/Materials/" + WadName + "/";
+		//}
+
+		if (m_Working)
 		{
-			auto pathSplits = String::Split(std::string(w.begin(), w.end() - 4), '/');
-			std::string WadName = pathSplits[std::size(pathSplits) - 1];
-			std::string TargetDirectory = "/Materials/" + WadName + "/";
+			ImGui::BeginDisabled();
 		}
 
 		if (Nuake::UI::PrimaryButton("Export"))
@@ -89,41 +95,75 @@ void MapImporterWindow::Draw()
 				m_OutputFile = FileSystem::AbsoluteToRelative(outputFile);
 			}
 
+			m_Percentage = 0;
+
 			std::string mapContent = m_MapToImport->Read();
-			std::istringstream stream(mapContent);
+			JobSystem::Get().Dispatch([this, mapContent]() {
+				m_Working = true;
+				std::string fileContent = mapContent;
+				std::istringstream stream(fileContent);
 
-			std::ostringstream modifiedMapContent;
+				std::ostringstream modifiedMapContent;
 
-			std::regex pattern(R"(\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*\(\s*-?\d+\s*-?\d+\s*-?\d+\s*\)\s*([^\s]+))");
+				std::string pattern = R"(\(\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*\)\s*\(\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*\)\s*\(\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*-?\d+(\.\d+)?\s*\)\s*([^\s]+))";
+				std::regex regexPattern(pattern);
 
-			std::string line;
-			while (std::getline(stream, line))
-			{
-				std::smatch match;
-				if (std::regex_search(line, match, pattern))
+				std::string line;
+
+				int lines = std::count(fileContent.begin(), fileContent.end(), '\n');
+
+				int lineEdited = 0;
+				
+				while (std::getline(stream, line))
 				{
-					// If a match is found, return the captured value
-					std::string result = match[1].str();
-					std::string result2 = match[0].str();
-					result2.erase(result2.end() - result.length(), result2.end());
-
-					std::string transformWad = GetTransformedWadPath(result);
-					if (transformWad.empty())
+					if (String::BeginsWith(line, "// Game:"))
 					{
-						Logger::Log("Couldn't find texture: " + result, "map importer", CRITICAL);
+						line = "// Game: " + String::RemoveWhiteSpace(Nuake::Engine::GetProject()->Name);
+					}
+					else
+					{
+						std::smatch match;
+						if (std::regex_search(line, match, regexPattern))
+						{
+							// If a match is found, return the captured value
+							std::string result = match[10].str();
+							std::string result2 = match[0].str();
+							result2.erase(result2.end() - result.length(), result2.end());
+
+							std::string transformWad = GetTransformedWadPath(result);
+							if (transformWad.empty())
+							{
+								Logger::Log("Couldn't find texture: " + result, "map importer", CRITICAL);
+							}
+
+							line = result2 + std::regex_replace(line, regexPattern, transformWad);
+						}
 					}
 
-					line = result2 + std::regex_replace(line, pattern, transformWad);
+					modifiedMapContent << line << std::endl;
+					lineEdited++;
+
+					int newPercentage = ((float)lineEdited / (float)lines) * 100;
+					if (newPercentage != m_Percentage)
+					{
+						m_Percentage.store(newPercentage, std::memory_order_relaxed);
+					}
 				}
 
-				modifiedMapContent << line << std::endl;
-			}
-
-			FileSystem::BeginWriteFile(m_OutputFile);
-			FileSystem::WriteLine(modifiedMapContent.str());
-			FileSystem::EndWriteFile();
+				FileSystem::BeginWriteFile(m_OutputFile);
+				FileSystem::WriteLine(modifiedMapContent.str());
+				FileSystem::EndWriteFile();
+				
+			}, [this]() {
+				m_Working = false;
+			});
 
 			m_MapToImport = nullptr;
+		}
+
+		if (m_Working)
+		{
+			ImGui::EndDisabled();
 		}
 
 		ImGui::SameLine();
@@ -139,6 +179,13 @@ void MapImporterWindow::Draw()
 			}
 
 			m_OutputFile = FileSystem::AbsoluteToRelative(outputFile);
+		}
+
+		if (m_Working)
+		{
+			ImGui::SameLine();
+
+			ImGui::TextUnformatted((std::string("Progress: ") + std::to_string(m_Percentage) + "%").c_str());
 		}
 	}
 	ImGui::End();
@@ -183,12 +230,22 @@ std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 	const std::string& baseTextureDir = "/textures/";
 
 	using namespace Nuake;
+	if (m_WadToMaterialMap.find(path) != m_WadToMaterialMap.end())
+	{
+		const std::string resolvedPath = m_WadToMaterialMap[path];
+		Logger::Log("Map importer found matching material: " + resolvedPath, "map importer", VERBOSE);
+		return resolvedPath;
+		return resolvedPath;
+	}
+
 	std::regex backslash_pattern("\\\\");
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(FileSystem::Root + baseTextureDir))
 	{
 		// Check if the current entry is a regular file and matches the file name
 		const std::string stem = String::ToLower(entry.path().stem().string());
 		std::string upperInput = String::ToLower(path);
+
+		upperInput = String::Split(upperInput, '/')[String::Split(upperInput, '/').size() - 1];
 
 		std::string prefix = "";
 		if (String::BeginsWith(upperInput, "*"))
@@ -222,9 +279,12 @@ std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 			pathWithoutExtension /= relativePath.stem(); // Add the file name without extension
 			Logger::Log("Map importer found matching material: " + pathWithoutExtension.string(), "map importer", VERBOSE);
 
-			return std::regex_replace(pathWithoutExtension.string(), backslash_pattern, "/");
+			const std::string& foundMaterialPath = std::regex_replace(pathWithoutExtension.string(), backslash_pattern, "/");
+			m_WadToMaterialMap[path] = foundMaterialPath;
+			return foundMaterialPath;
 		}
 	}
 
+	Logger::Log("Map importer failed to find material: " + path, "map importer", VERBOSE);
 	return std::string();
 }
