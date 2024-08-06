@@ -189,7 +189,10 @@ void GizmoDrawer::DrawNavMesh(Ref<Scene> scene, bool occluded)
 		}
 
 		auto [transform, navmesh] = scene->m_Registry.get<TransformComponent, NavMeshVolumeComponent>(e);
-		duDebugDrawNavMesh(&m_DebugDrawer, *navmesh.NavMeshData->GetNavMesh(), DU_DRAWNAVMESH_OFFMESHCONS);
+		if (navmesh.NavMeshData && navmesh.NavMeshData->IsValid())
+		{
+			duDebugDrawNavMesh(&m_DebugDrawer, *navmesh.NavMeshData->GetNavMesh(), DU_DRAWNAVMESH_OFFMESHCONS);
+		}
 	}
 }
 
