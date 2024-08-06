@@ -1,6 +1,7 @@
 #pragma once
 #include "../Entities/Entity.h"
 #include "Engine.h"
+#include <src/AI/NavMesh.h>
 
 namespace Nuake
 {
@@ -25,12 +26,14 @@ namespace Nuake
 		float DetailSampleDistance = 2.0f;
 		float DetailsampleMaxError = 1.0f;
 
+		Ref<NavMesh> NavMeshData;
+
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VEC3(VolumeSize);
 			SERIALIZE_VAL(OnlyIncludeMapGeometry);
-
+			SERIALIZE_OBJECT(NavMeshData);
 			// Generation config
 			END_SERIALIZE();
 		}
@@ -45,6 +48,12 @@ namespace Nuake
 			if (j.contains("OnlyIncludeMapGeometry"))
 			{
 				DESERIALIZE_VAL(OnlyIncludeMapGeometry);
+			}
+
+			if (j.contains("NavMeshData"))
+			{
+				NavMeshData = CreateRef<NavMesh>();
+				NavMeshData->Deserialize(j["NavMeshData"]);
 			}
 
 			return true;

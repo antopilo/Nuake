@@ -278,15 +278,9 @@ namespace Nuake {
 			Logger::Log("Could not init Detour navmesh query", "NavManager", CRITICAL);
 		}
 
-		Ref<NavMesh> navMesh = CreateRef<NavMesh>(m_DetourNavMesh, m_DetourNavQuery);
-
-		const std::string& deserializedNavMesh = navMesh->Serialize().dump(4);
-		Logger::Log(deserializedNavMesh, "debug", VERBOSE);
-
-		Ref<NavMesh> navMesh2 = CreateRef<NavMesh>();
-		navMesh->Deserialize(json::parse(deserializedNavMesh));
 		m_Meshes.clear();
 
+		Ref<NavMesh> navMesh = CreateRef<NavMesh>(m_DetourNavMesh, m_DetourNavQuery);
 		return navMesh;
 	}
 

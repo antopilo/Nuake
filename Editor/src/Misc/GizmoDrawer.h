@@ -11,7 +11,7 @@
 #include "Gizmos/CapsuleGizmo.h"
 #include "Gizmos/CylinderGizmo.h"
 #include "../Windows/EditorInterface.h"
-
+#include "src/AI/NavMeshDebugDrawer.h"
 
 using namespace Nuake;
 
@@ -20,7 +20,7 @@ class GizmoDrawer
 private:
 	EditorInterface* m_Editor;
 	Shader* m_LineShader;
-
+	NavMeshDebugDrawer m_DebugDrawer;
 	std::map<std::string, Ref<Model>> m_Gizmos;
 	std::map<uint32_t, Scope<CapsuleGizmo>> m_CapsuleGizmo;
 	std::map<uint32_t, Scope<CylinderGizmo>> m_CylinderGizmo;
@@ -54,8 +54,8 @@ public:
 	~GizmoDrawer() = default;
 
 	void DrawGizmos(Ref<Scene> scene, bool occluded);
-	void DrawAxis(Ref<Scene> scene, bool occlude);
-
+	void DrawAxis(Ref<Scene> scene, bool occluded);
+	void DrawNavMesh(Ref<Scene> scene, bool occluded);
 private:
 	void GenerateSphereGizmo();
 	bool IsEntityInSelection(Nuake::Entity entity);

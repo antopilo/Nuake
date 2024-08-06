@@ -54,24 +54,8 @@ void EditorLayer::OnUpdate()
 
                 if (m_EditorInterface->ShouldDrawNavMesh())
                 {
-                    auto cam = Engine::GetCurrentScene()->m_EditorCamera;
-
-                    glMatrixMode(GL_PROJECTION);
-                    glLoadMatrixf(glm::value_ptr(cam->GetPerspective()));
-
-                    glMatrixMode(GL_MODELVIEW);
-                    glLoadMatrixf(glm::value_ptr(cam->GetTransform()));
-
-
-                    glDepthFunc(GL_LESS);
-                    RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-                    Nuake::NavManager::Get().DrawNavMesh();
-                    RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-
-                    Nuake::NavManager::Get().DrawNavMesh();
-                    glDepthFunc(GL_GREATER);
-                    Nuake::NavManager::Get().DrawNavMesh();
-                    glDepthFunc(GL_LESS);
+                    
+                    m_GizmoDrawer->DrawNavMesh(currentScene, true);
                 }
 
                 if (m_EditorInterface->ShouldDrawCollision())

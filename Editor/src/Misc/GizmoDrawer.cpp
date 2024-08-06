@@ -22,6 +22,7 @@
 #include <src/Scene/Components/ParticleEmitterComponent.h>
 #include <src/Scene/Components/BoneComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
+#include <DetourDebugDraw.h>
 
 
 GizmoDrawer::GizmoDrawer(EditorInterface* editor)
@@ -172,6 +173,23 @@ void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 		m_LineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
 		m_AxisLineBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 6);
+	}
+}
+
+void GizmoDrawer::DrawNavMesh(Ref<Scene> scene, bool occluded)
+{
+	auto cam = Engine::GetCurrentScene()->m_EditorCamera;
+
+	auto navVolumesView = scene->m_Registry.view<TransformComponent, NavMeshVolumeComponent>();
+	for (auto e : navVolumesView)
+	{
+		if (!IsEntityInSelection(Nuake::Entity{ (entt::entity)e, scene.get() }))
+		{
+			continue;
+		}
+
+		auto [transform, navmesh] = scene->m_Registry.get<TransformComponent, NavMeshVolumeComponent>(e);
+		duDebugDrawNavMesh(&m_DebugDrawer, *navmesh.NavMeshData->GetNavMesh(), DU_DRAWNAVMESH_OFFMESHCONS);
 	}
 }
 

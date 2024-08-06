@@ -21,6 +21,13 @@ namespace Nuake {
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 
+		bool IsValid() const 
+		{
+			return m_DetourNavMesh != nullptr && m_DetourNavQuery != nullptr;
+		}
+
+		dtNavMesh* GetNavMesh() const { return m_DetourNavMesh; }
+
 	private:
 		const dtMeshTile* GetTile(int i) const;
 

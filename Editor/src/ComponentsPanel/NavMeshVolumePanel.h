@@ -367,11 +367,11 @@ public:
                                     Nuake::NavManager::Get().PushMesh(mesh, transformComponent.GetGlobalTransform());
                                 }
                             }
-
-                            auto recastConfig = RecastConfig(component);
-                            recastConfig.Position = volumeTransformComponent.GetGlobalPosition();
-                            NavManager::Get().BuildNavMesh(std::move(recastConfig));
                         }
+
+                        auto recastConfig = RecastConfig(component);
+                        recastConfig.Position = volumeTransformComponent.GetGlobalPosition();
+                        component.NavMeshData = NavManager::Get().BuildNavMesh(std::move(recastConfig));
                     }
                 }
 
