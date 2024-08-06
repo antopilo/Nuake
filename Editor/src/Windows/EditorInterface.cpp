@@ -2118,7 +2118,7 @@ namespace Nuake {
 
         FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));
         Ref<Project> project = Project::New();
-        if (!project->Deserialize(FileSystem::ReadFile(projectPath, true)))
+        if (!project->Deserialize(json::parse(FileSystem::ReadFile(projectPath, true))))
         {
             Logger::Log("Error loading project: " + projectPath, "editor", CRITICAL);
             return;
@@ -2225,17 +2225,6 @@ namespace Nuake {
                 if (ImGui::MenuItem("Cut", "CTRL+X")) {}
                 if (ImGui::MenuItem("Copy", "CTRL+C")) {}
                 if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-                ImGui::Separator();
-
-                if(ImGui::MenuItem("Trenchbroom Configurator", NULL, m_ShowTrenchbroomConfigurator))
-                {
-                    m_ShowTrenchbroomConfigurator = !m_ShowTrenchbroomConfigurator;
-                }
-
-                if (ImGui::MenuItem("Map Importer", NULL, m_ShowMapImporter))
-                {
-                    m_ShowMapImporter = !m_ShowMapImporter;
-                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
@@ -2262,6 +2251,41 @@ namespace Nuake {
                 }
 
                 if (ImGui::MenuItem("Settings", NULL)) {}
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Tool"))
+            {
+                if (ImGui::MenuItem("Trenchbroom Configurator", NULL, m_ShowTrenchbroomConfigurator))
+                {
+                    m_ShowTrenchbroomConfigurator = !m_ShowTrenchbroomConfigurator;
+                }
+
+                if (ImGui::MenuItem("Map Importer", NULL, m_ShowMapImporter))
+                {
+                    m_ShowMapImporter = !m_ShowMapImporter;
+                }
+
+                if (ImGui::MenuItem("Generate VisualStudio solution", NULL))
+                {
+                    Nuake::ScriptingEngineNet::Get().GenerateSolution(FileSystem::Root, Engine::GetProject()->Name);
+                    Nuake::Logger::Log("Generated Solution.");
+                    SetStatusMessage("Visual studio solution generated succesfully.");
+                }
+
+                if (ImGui::MenuItem("Generate Trenchbroom config", NULL))
+                {
+                    PushCommand(CreateTrenchbroomGameConfig(Engine::GetProject()));
+                }
+
+#ifdef NK_DEBUG
+                if (ImGui::MenuItem("Copy Nuake.NET", NULL))
+                {
+                    Nuake::ScriptingEngineNet::Get().CopyNuakeNETAssemblies(FileSystem::Root);
+                    Nuake::Logger::Log("Copied Nuake.Net Assemblies.");
+                    SetStatusMessage("Nuake.Net assemblies succesfully copied.");
+                }
+#endif // NK_DEBUG
+
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Entity"))
@@ -2304,26 +2328,6 @@ namespace Nuake {
                 if (ImGui::MenuItem("Duplicate selected", NULL)) {}
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu(".Net"))
-            {
-                if (ImGui::MenuItem("Generate Solution", NULL))
-                {
-                    Nuake::ScriptingEngineNet::Get().GenerateSolution(FileSystem::Root, Engine::GetProject()->Name);
-                    Nuake::Logger::Log("Generated Solution.");
-                    SetStatusMessage("Visual studio solution generated succesfully.");
-                }
-
-
-#ifdef NK_DEBUG
-                if (ImGui::MenuItem("Copy Nuake.NET", NULL))
-                {
-                    Nuake::ScriptingEngineNet::Get().CopyNuakeNETAssemblies(FileSystem::Root);
-                    Nuake::Logger::Log("Copied Nuake.Net Assemblies.");
-                    SetStatusMessage("Nuake.Net assemblies succesfully copied.");
-                }
-#endif // NK_DEBUG
-                ImGui::EndMenu();
-            }
             
             if (ImGui::BeginMenu("Debug"))
             {
@@ -2336,10 +2340,7 @@ namespace Nuake {
                     SetStatusMessage("Shaders rebuilt.");
                 }
 
-                if (ImGui::MenuItem("Create trenchbroom config", NULL))
-                {
-                    PushCommand(CreateTrenchbroomGameConfig(Engine::GetProject()));
-                }
+
 
                 ImGui::EndMenu();
             }
