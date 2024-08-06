@@ -115,7 +115,6 @@ namespace Nuake {
 			int numTiles = j["header"]["numTiles"];
 		}
 
-
 		//dtStatus status = mesh->init(&header.params);
 		dtNavMesh* mesh = dtAllocNavMesh();
 
@@ -154,6 +153,11 @@ namespace Nuake {
 			mesh->addTile(data, dataSize, DT_TILE_FREE_DATA, tileJson["tileRef"].get<int>(), 0);
 		}
 
+
+		m_DetourNavMesh = mesh;
+
+		m_DetourNavQuery = dtAllocNavMeshQuery();
+		m_DetourNavQuery->init(m_DetourNavMesh, 2048);
 		return true;
 	}
 
