@@ -99,4 +99,43 @@ namespace Nuake
 
 		return result;
 	}
+	std::string String::Base64Encode(const std::vector<uint8_t>& data)
+	{
+		static const char* chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		std::string result;
+		int val = 0, valb = -6;
+		for (uint8_t c : data) 
+		{
+			val = (val << 8) + c;
+			valb += 8;
+			while (valb >= 0) 
+			{
+				result.push_back(chars[(val >> valb) & 0x3F]);
+				valb -= 6;
+			}
+		}
+		if (valb > -6) result.push_back(chars[((val << 8) >> (valb + 8)) & 0x3F]);
+		while (result.size() % 4) result.push_back('=');
+		return result;
+	}
+	std::vector<uint8_t> String::Base64Decode(const std::string& data)
+	{
+		static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		std::vector<uint8_t> out;
+		std::vector<int> T(256, -1);
+		for (int i = 0; i < 64; i++) T[chars[i]] = i;
+		int val = 0, valb = -8;
+		for (unsigned char c : data) 
+		{
+			if (T[c] == -1) break;
+			val = (val << 6) + T[c];
+			valb += 6;
+			if (valb >= 0) 
+			{
+				out.push_back(uint8_t((val >> valb) & 0xFF));
+				valb -= 8;
+			}
+		}
+		return out;
+	}
 }

@@ -21,5 +21,8 @@ namespace Nuake
 		static float ToFloat(const std::string& string);
 		static std::string ToUpper(const std::string& string);
 		static std::string ToLower(const std::string& string);
+
+		static std::string Base64Encode(const std::vector<uint8_t>& data);
+		static std::vector<uint8_t> Base64Decode(const std::string& data);
 	};
 }
