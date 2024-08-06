@@ -17,7 +17,6 @@
 namespace Nuake
 {
 
-
 	Ref<Project> Engine::s_CurrentProject;
 	Ref<Window> Engine::s_CurrentWindow;
 

@@ -127,6 +127,10 @@ namespace Nuake
 		{
 			strcpy(result, "divd_");
 		}
+		else if (lump_name[0] == '{')
+		{
+			strcpy(result, "bra_");
+		}
 		else
 		{
 			result[0] = lump_name[0];
