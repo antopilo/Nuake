@@ -299,7 +299,7 @@ namespace Nuake {
 
 		//duDebugDrawNavMeshBVTree(&m_DebugDrawer, *m_DetourNavMesh);
 		//duDebugDrawNavMeshNodes(&m_DebugDrawer, *m_DetourNavQuery);
-		duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
+		/*duDebugDrawNavMesh(&m_DebugDrawer, *m_DetourNavMesh, DU_DRAWNAVMESH_OFFMESHCONS);
 
 		if (Engine::GetCurrentScene()->EntityExists("test"))
 		{
@@ -354,7 +354,6 @@ namespace Nuake {
 					duDebugDrawNavMeshPoly(&m_DebugDrawer, *m_DetourNavMesh, m_polys[i], duRGBA(255, 255, 0, 255));
 				}
 			}
-		}
+		}*/
 	}
-
 }
