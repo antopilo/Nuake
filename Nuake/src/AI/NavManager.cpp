@@ -13,6 +13,7 @@
 #include "src/Core/Maths.h"
 
 #include "src/AI/RecastConfig.h"
+#include "NavMesh.h"
 
 namespace Nuake {
 
@@ -31,7 +32,7 @@ namespace Nuake {
 		m_Meshes.push_back({ mesh, transform });
 	}
 
-	void NavManager::BuildNavMesh(const RecastConfig& config)
+	Ref<NavMesh> NavManager::BuildNavMesh(const RecastConfig& config)
 	{
 		// Merge all meshes togheter
 		std::vector<Vector3> vertices;
@@ -277,7 +278,16 @@ namespace Nuake {
 			Logger::Log("Could not init Detour navmesh query", "NavManager", CRITICAL);
 		}
 
+		Ref<NavMesh> navMesh = CreateRef<NavMesh>(m_DetourNavMesh, m_DetourNavQuery);
+
+		const std::string& deserializedNavMesh = navMesh->Serialize().dump(4);
+		Logger::Log(deserializedNavMesh, "debug", VERBOSE);
+
+		Ref<NavMesh> navMesh2 = CreateRef<NavMesh>();
+		navMesh->Deserialize(json::parse(deserializedNavMesh));
 		m_Meshes.clear();
+
+		return navMesh;
 	}
 
 	void NavManager::DrawNavMesh()
@@ -345,9 +355,6 @@ namespace Nuake {
 				}
 			}
 		}
-
-		
 	}
-
 
 }

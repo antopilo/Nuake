@@ -1,6 +1,8 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Rendering/Mesh/Mesh.h"
+#include "src/AI/NavMesh.h"
+
 #include "NavMeshDebugDrawer.h"
 
 class rcContext;
@@ -30,7 +32,7 @@ namespace Nuake {
 		void Initialize();
 		void PushMesh(const Ref<Mesh>& mesh, const Matrix4& transform);
 
-		void BuildNavMesh(const RecastConfig& config);
+		Ref<NavMesh> BuildNavMesh(const RecastConfig& config);
 
 		void DrawNavMesh();
 
