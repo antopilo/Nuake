@@ -281,6 +281,10 @@ namespace Nuake
 
     void Window::Maximize()
     {
+        const auto monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        Center();
+        SetSize({mode->width, mode->height});
         glfwMaximizeWindow(m_Window);
     }
 
