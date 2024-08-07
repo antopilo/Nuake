@@ -46,9 +46,9 @@ namespace Nuake
 
 		void SetWindowIcon(const std::string& path);
 		void SetVSync(bool enabled);
-
 		void SetDecorated(bool enabled);
-
+		void SetFullScreen(bool enabled);
+		void Maximize();
 	private:
 		const std::string DEFAULT_TITLE = "Untitled Window";
 		const uint32_t DEFAULT_WIDTH = 1280;

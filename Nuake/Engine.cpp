@@ -2,14 +2,14 @@
 #include "src/Physics/PhysicsManager.h"
 #include <GLFW/glfw3.h>
 
-#include "src/Core/Input.h"
-#include "src/Core/FileSystem.h"
-#include "src/Scripting/ScriptingEngine.h"
-#include "src/Audio/AudioManager.h"
 #include "src/AI/NavManager.h"
-#include "src/Threading/JobSystem.h"
+#include "src/Audio/AudioManager.h"
+#include "src/Core/FileSystem.h"
+#include "src/Core/Input.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
+#include "src/Scripting/ScriptingEngine.h"
+#include "src/Threading/JobSystem.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -52,7 +52,7 @@ namespace Nuake
 		s_LastFrameTime = s_Time;
 
 		// Dont update if no scene is loaded.
-		if (s_CurrentWindow->GetScene()) 
+		if (s_CurrentWindow->GetScene())
 		{
 			float scaledTimeStep = s_TimeStep * s_TimeScale;
 			s_CurrentWindow->Update(scaledTimeStep);
@@ -66,7 +66,7 @@ namespace Nuake
 			s_FixedUpdateDifference += s_TimeStep;
 
 			// Fixed update
-			while (s_FixedUpdateDifference >= s_FixedUpdateRate) 
+			while (s_FixedUpdateDifference >= s_FixedUpdateRate)
 			{
 				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate * s_TimeScale);
 
@@ -81,7 +81,7 @@ namespace Nuake
 
 	void Engine::EnterPlayMode()
 	{
-		s_LastFrameTime = (float)glfwGetTime();; // Reset timestep timer.
+		s_LastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
 		if (GetGameState() == GameState::Playing)

@@ -2366,6 +2366,7 @@ namespace Nuake {
             auto window = Window::Get();
             window->SetDecorated(true);
             window->SetSize({ 1900, 1000 });
+            window->Maximize();
             window->Center();
             frameCount = 0;
             return;

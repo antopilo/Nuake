@@ -272,6 +272,18 @@ namespace Nuake
         glfwSetWindowAttrib(m_Window, GLFW_DECORATED, enabled);
     }
 
+    void Window::SetFullScreen(bool enabled)
+    {
+        const auto monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwSetWindowMonitor(m_Window, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
+    }
+
+    void Window::Maximize()
+    {
+        glfwMaximizeWindow(m_Window);
+    }
+
     void Window::InitImgui()
     {
         ImGui::CreateContext();
