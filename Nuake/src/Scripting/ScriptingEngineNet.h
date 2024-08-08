@@ -63,5 +63,8 @@ namespace Nuake {
 		void CreateEntityScript(const std::string& path, const std::string& entityName);
 
 		std::string FindClassNameInScript(const std::string& filePath);
+
+	private:
+		std::string GenerateGUID();
 	};
 }

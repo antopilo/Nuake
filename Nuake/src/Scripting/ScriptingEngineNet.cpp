@@ -15,6 +15,7 @@
 #include <Coral/GC.hpp>
 #include <Coral/Array.hpp>
 #include <Coral/Attribute.hpp>
+#include <random>
 
 
 void ExceptionCallback(std::string_view InMessage)
@@ -252,39 +253,89 @@ namespace Nuake
 	{
 		CopyNuakeNETAssemblies(path);
 
-		// Generate premake5 templates
-		// ----------------------------------------
 		const std::string cleanProjectName = String::Sanitize(projectName);
-		const std::string premakeScript = R"(
-workspace ")" + cleanProjectName + R"("
-configurations { "Debug", "Release" }
-	project ")" + cleanProjectName + R"("
-		language "C#"
-		dotnetframework "net8.0"
-		kind "SharedLib"
-			clr "Unsafe"
-	
-		-- Don't specify architecture here. (see https://github.com/premake/premake-core/issues/1758)
-
-		files 
-		{
-			"**.cs"
-		}
-    
-		links 
-		{
-			".net/NuakeNet"
-		}
+		const std::string csprojFilePath = cleanProjectName + ".csproj";
+		const std::string& csProjFileContent = R"(<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NuakeNet\NuakeNet.csproj" />
+  </ItemGroup>
+</Project>
 )";
-
-		// Writting premake5 templates in project's directory
-		// ----------------------------------------
-		FileSystem::BeginWriteFile("premake5.lua");
-		FileSystem::WriteLine(premakeScript);
+		FileSystem::BeginWriteFile(csprojFilePath);
+		FileSystem::WriteLine(csProjFileContent);
 		FileSystem::EndWriteFile();
 
-		// Execute premake script, generating .sln
-		OS::ExecuteCommand("cd " + path + " && premake5 vs2022");
+		const std::string slnFilePath = cleanProjectName + ".sln";
+		const std::string guid = GenerateGUID(); // Generate GUID
+
+		const std::string& slnFileContent = R"(Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32327.299
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ")" + cleanProjectName + R"(", ")" + cleanProjectName + R"(.csproj", ")" + guid + R"(")
+  EndProject
+Global
+  GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    Debug|Any CPU = Debug|Any CPU
+    Release|Any CPU = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {)" + guid + R"(.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {)" + guid + R"(.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {)" + guid + R"(.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {)" + guid + R"(.Release|Any CPU.Build.0 = Release|Any CPU
+  EndGlobalSection
+  GlobalSection(SolutionProperties) = preSolution
+    HideSolutionNode = FALSE
+  EndGlobalSection
+EndGlobal
+)";
+		FileSystem::BeginWriteFile(slnFilePath);
+		FileSystem::WriteLine(slnFileContent);
+		FileSystem::EndWriteFile();
+
+//		// Generate premake5 templates
+//		// ----------------------------------------
+//		const std::string cleanProjectName = String::Sanitize(projectName);
+//		const std::string premakeScript = R"(
+//workspace ")" + cleanProjectName + R"("
+//configurations { "Debug", "Release" }
+//	project ")" + cleanProjectName + R"("
+//		language "C#"
+//		dotnetframework "net8.0"
+//		kind "SharedLib"
+//			clr "Unsafe"
+//	
+//		-- Don't specify architecture here. (see https://github.com/premake/premake-core/issues/1758)
+//
+//		files 
+//		{
+//			"**.cs"
+//		}
+//    
+//		links 
+//		{
+//			".net/NuakeNet"
+//		}
+//)";
+//
+//		// Writting premake5 templates in project's directory
+//		// ----------------------------------------
+//		FileSystem::BeginWriteFile("premake5.lua");
+//		FileSystem::WriteLine(premakeScript);
+//		FileSystem::EndWriteFile();
+//
+//		// Execute premake script, generating .sln
+//		OS::ExecuteCommand("cd " + path + " && premake5 vs2022");
 
 		// Open solution file in visual studio
 		OS::OpenIn(path + cleanProjectName + ".sln");
@@ -347,6 +398,35 @@ namespace NuakeShowcase
 
 		size_t classNameLength = semiColonPos - classNameStartIndex;
 		return fileContent.substr(classNameStartIndex, classNameLength);
+	}
+
+	std::string ScriptingEngineNet::GenerateGUID()
+	{
+		// Random number generator
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> dis(0, 15);
+
+		auto randomHexDigit = [&]() {
+			static const char hexDigits[] = "0123456789ABCDEF";
+			return hexDigits[dis(gen)];
+			};
+
+		// Generate a UUID (this is a simplified version and not a real UUID)
+		std::ostringstream oss;
+		for (int i = 0; i < 8; ++i) oss << randomHexDigit();
+		oss << '-';
+		for (int i = 0; i < 4; ++i) oss << randomHexDigit();
+		oss << '-';
+		oss << '4'; // UUID version 4
+		for (int i = 0; i < 3; ++i) oss << randomHexDigit();
+		oss << '-';
+		oss << '8'; // UUID variant
+		for (int i = 0; i < 3; ++i) oss << randomHexDigit();
+		oss << '-';
+		for (int i = 0; i < 12; ++i) oss << randomHexDigit();
+
+		return oss.str();
 	}
 
 }
