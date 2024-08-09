@@ -6,7 +6,14 @@
 
 namespace Nuake {
 
-	class NavMesh : ISerializable {
+	class NavMesh : ISerializable 
+	{
+	private:
+		struct PolySearchResult
+		{
+			int PolyID;
+			Vector3 PositionInPoly;
+		};
 
 	public:
 		NavMesh(dtNavMesh* navMesh, dtNavMeshQuery* navMeshQuery);
@@ -14,7 +21,9 @@ namespace Nuake {
 		~NavMesh();
 
 		// Query
-		int FindNearestPolygon(const Vector3 & searchPosition, const Vector3 & searchBox);
+		PolySearchResult FindNearestPolygon(const Vector3 & searchPosition, const Vector3 & searchBox);
+
+		std::vector<Vector3> FindStraightPath(const Vector3& start, const Vector3& end);
 
 		std::vector<Vector3> FindPath(int polyStart, int polyEnd, const Vector3& nearestPointStart, const Vector3& nearestPointEnd, const int maxPoly);
 

@@ -319,4 +319,28 @@ namespace Nuake.Net
 
         public string Sprite { get; set; }
     }
+
+    public class NavMeshVolumeComponent : IComponent
+    {
+        internal static unsafe delegate*<int, float, float, float, float, float, float, NativeArray<float>> FindPathIcall;
+
+        public NavMeshVolumeComponent(int entityId) {  EntityID = entityId; }
+
+        public List<Vector3> FindStraightPath(Vector3 start, Vector3 end)
+        {
+            List<Vector3> pathWaypoints = [];
+            unsafe
+            {
+                NativeArray<float> waypoints = FindPathIcall(EntityID, start.X, start.Y, start.Z, end.X, end.Y, end.Z);
+                for(int i = 0; i < waypoints.Length; i += 3)
+                {
+                    Vector3 waypointPosition = new Vector3(waypoints[i], waypoints[i + 1], waypoints[i + 2]);
+                    pathWaypoints.Add(waypointPosition);
+                }
+
+                return pathWaypoints;
+            }
+        }
+    }
+
 }

@@ -231,9 +231,9 @@ namespace Nuake {
 		//params.offMeshConUserID = m_geom->getOffMeshConnectionId();
 		//params.offMeshConCount = m_geom->getOffMeshConnectionCount();
 
-		const float agentHeight = 0.1f;
+		const float agentHeight = 0.5f;
 		const float agentRadius = 0.1f;
-		const float agentMaxClimb = 0.1f;
+		const float agentMaxClimb = 0.01f;
 		params.walkableHeight = agentHeight;
 		params.walkableRadius = agentRadius;
 		params.walkableClimb = agentMaxClimb;

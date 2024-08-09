@@ -27,7 +27,7 @@ namespace Nuake {
 		m_DetourNavQuery = navMeshQuery;
 	}
 
-	int NavMesh::FindNearestPolygon(const Vector3& searchPosition, const Vector3& searchBox)
+	NavMesh::PolySearchResult NavMesh::FindNearestPolygon(const Vector3& searchPosition, const Vector3& searchBox)
 	{
 		float nearestPoint[3];
 		float searchPos[3] = { searchPosition.x, searchPosition.y, searchPosition.z };
@@ -38,7 +38,60 @@ namespace Nuake {
 
 		dtPolyRef resultPoly = 0;
 		dtStatus status = m_DetourNavQuery->findNearestPoly(searchPos, searchExtent, &filter, &resultPoly, nearestPoint);
-		return resultPoly;
+
+		PolySearchResult result = 
+		{
+			.PolyID = static_cast<int>(resultPoly),
+			.PositionInPoly = { nearestPoint[0], nearestPoint[1], nearestPoint[2] }
+		};
+		return result;
+	}
+
+	std::vector<Vector3> NavMesh::FindStraightPath(const Vector3& start, const Vector3& end)
+	{
+		// Find start & end polygon
+		constexpr Vector3 SEARCH_BOX = { 0.6, 0.85, 0.6 };
+		PolySearchResult startPoly = FindNearestPolygon(start, SEARCH_BOX);
+		PolySearchResult endPoly = FindNearestPolygon(end, SEARCH_BOX);
+
+		// Find poly corridor
+		constexpr int MAX_PATH = 2048;
+		constexpr int MAX_POLYS = 256;
+
+		dtQueryFilter filter;
+		filter.setIncludeFlags(1);
+		dtPolyRef resultPoly[MAX_POLYS];
+		int resultPathCount = 0;
+		dtStatus result = m_DetourNavQuery->findPath(startPoly.PolyID, endPoly.PolyID, 
+														&(startPoly.PositionInPoly.x), &(endPoly.PositionInPoly.x), 
+														&filter, resultPoly, &resultPathCount, MAX_PATH);
+
+		// Find straight path in corridor
+		float straightPath[MAX_POLYS * 3];
+		unsigned char straightPathFlags[MAX_POLYS];
+		dtPolyRef straightPathPolys[MAX_POLYS];
+		int nstraightPath;
+		result = m_DetourNavQuery->findStraightPath(&(startPoly.PositionInPoly.x), &(endPoly.PositionInPoly.x), 
+														resultPoly, resultPathCount, straightPath, straightPathFlags, 
+														straightPathPolys, &nstraightPath, MAX_POLYS);
+
+		// Convert path into points
+		std::vector<Vector3> pathWaypoints;
+		if (dtStatusFailed(result)) 
+		{
+			Logger::Log("Failed to find straight path.", "navmesh", VERBOSE);
+			return pathWaypoints;
+		}
+
+		pathWaypoints.reserve(nstraightPath);
+		for (int i = 0; i < nstraightPath; ++i) 
+		{
+			float* v = &straightPath[i * 3];
+			const Vector3 waypoint = { v[0], v[1], v[2] };
+			pathWaypoints.push_back(waypoint);
+		}
+
+		return pathWaypoints;
 	}
 
 	std::vector<Vector3> NavMesh::FindPath(int polyStart, int polyEnd, const Vector3& nearestPointStart, const Vector3& nearestPointEnd, const int maxPoly)

@@ -24,6 +24,7 @@
 #include "src/Scripting/ScriptingEngineNet.h"
 
 #include <Coral/Array.hpp>
+#include <src/Scene/Components/NavMeshVolumeComponent.h>
 
 
 namespace Nuake {
@@ -109,7 +110,8 @@ namespace Nuake {
 		PARTICLE_EMITTER,
 		QUAKE_MAP,
 		BSP_BRUSH,
-		SPRITE
+		SPRITE,
+		NAVMESH
 	};
 
 	bool EntityHasComponent(int id, int componentType)
@@ -145,6 +147,7 @@ namespace Nuake {
 			case QUAKE_MAP:				return entity.HasComponent<QuakeMapComponent>();
 			case BSP_BRUSH:				return entity.HasComponent<BSPBrushComponent>();
 			case SPRITE:				return entity.HasComponent<SpriteComponent>();
+			case NAVMESH:				return entity.HasComponent<NavMeshVolumeComponent>();
 			default:
 				return false;
 		}
@@ -296,6 +299,36 @@ namespace Nuake {
 		}
 	}
 
+	Coral::Array<float> NavMeshComponentFindPath(int entityId, float startx, float starty, float startz, float endx, float endy, float endz)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+		if (entity.IsValid() && entity.HasComponent<NavMeshVolumeComponent>())
+		{
+			auto& navMeshVolume = entity.GetComponent<NavMeshVolumeComponent>();
+			if (navMeshVolume.NavMeshData && navMeshVolume.NavMeshData->IsValid())
+			{
+				auto& navMesh = navMeshVolume.NavMeshData;
+
+				const Vector3& startPosition = { startx, starty, startz };
+				const Vector3& endPosition = { endx, endy, endz };
+				auto waypoints = navMesh->FindStraightPath(startPosition, endPosition);
+
+				// Convert Vector3 array into float array
+				Coral::Array<float> returnResult = Coral::Array<float>::New(waypoints.size() * 3);
+				for (int i = 0; i < waypoints.size(); i++)
+				{
+					returnResult[i * 3 + 0] = waypoints[i].x;
+					returnResult[i * 3 + 1] = waypoints[i].y;
+					returnResult[i * 3 + 2] = waypoints[i].z;
+				}
+
+				return returnResult;
+			}
+		}
+
+		return {};
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
@@ -320,6 +353,8 @@ namespace Nuake {
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
 
 		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
+
+		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", &NavMeshComponentFindPath);
 	}
 
 }

@@ -288,7 +288,7 @@ namespace Nuake
 	std::string FileSystem::GetConfigFolderPath()
 	{
 		std::string subFolderPath = OS::GetConfigFolderPath().append("/Nuake/");
-		if (!DirectoryExists(subFolderPath))
+		if (!DirectoryExists(subFolderPath, true))
 		{
 			MakeDirectory(subFolderPath);
 		}

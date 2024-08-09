@@ -45,7 +45,8 @@ namespace Nuake.Net
             PARTICLE_EMITTER,
             QUAKE_MAP,
             BSP_BRUSH,
-            SPRITE
+            SPRITE,
+            NAVMESH
         }
 
         public int ID { get; set; }
@@ -101,7 +102,8 @@ namespace Nuake.Net
             { typeof(ParticleEmitterComponent), ComponentTypes.PARTICLE_EMITTER },
             { typeof(QuakeMapComponent), ComponentTypes.QUAKE_MAP },
             { typeof(BSPBrushComponent), ComponentTypes.BSP_BRUSH },
-            { typeof(SpriteComponent), ComponentTypes.SPRITE }
+            { typeof(SpriteComponent), ComponentTypes.SPRITE },
+            { typeof(NavMeshVolumeComponent), ComponentTypes.NAVMESH }
         };
 
         public bool HasComponent<T>()

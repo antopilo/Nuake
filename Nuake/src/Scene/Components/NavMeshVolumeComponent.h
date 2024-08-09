@@ -33,7 +33,12 @@ namespace Nuake
 			BEGIN_SERIALIZE();
 			SERIALIZE_VEC3(VolumeSize);
 			SERIALIZE_VAL(OnlyIncludeMapGeometry);
-			SERIALIZE_OBJECT(NavMeshData);
+
+			if (NavMeshData != nullptr)
+			{
+				SERIALIZE_OBJECT(NavMeshData);
+			}
+
 			// Generation config
 			END_SERIALIZE();
 		}
