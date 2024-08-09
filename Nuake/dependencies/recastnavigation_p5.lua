@@ -1,3 +1,4 @@
+group "Dependencies"
 project "DebugUtils"
 	language "C++"
 	kind "StaticLib"
@@ -74,3 +75,4 @@ project "Detour"
 			"-Wno-error=class-memaccess",
 			"-Wno-error=maybe-uninitialized"
 		}
+group ""

@@ -3,6 +3,8 @@ project '*'
 		'./build/assimp', -- Location of assimp's config.h, for a template see include/assimp/config.h.in
 		'assimp/include/',
 	}
+
+group "Dependencies"
 project 'assimp'
 	kind "StaticLib"
 	staticruntime "on"
@@ -125,3 +127,4 @@ project 'assimp'
 	filter "configurations:Release"
 		runtime "Release"
 		optimize "on"
+group ""

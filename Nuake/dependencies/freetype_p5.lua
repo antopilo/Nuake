@@ -1,3 +1,4 @@
+group ""
 project "Freetype"
 	location "freetype"
 	kind "StaticLib"
@@ -80,3 +81,4 @@ project "Freetype"
 		files { "freetype/src/base/ftdebug.c" }
 		runtime "Release"
 		optimize "on"
+group ""

@@ -1,3 +1,4 @@
+group "Dependencies"
 project 'Soloud'
 	location "soloud"
 
@@ -53,3 +54,4 @@ project 'Soloud'
 		cppdialect "C++17"
 		runtime "Release"
 		optimize "on"
+group ""

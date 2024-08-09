@@ -1,3 +1,4 @@
+group "Dependencies"
 project 'JoltPhysics'
 	location "JoltPhysics"
 
@@ -49,3 +50,4 @@ project 'JoltPhysics'
 		cppdialect "C++17"
 		runtime "Release"
 		optimize "on"
+group ""
