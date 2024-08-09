@@ -211,7 +211,23 @@ namespace Nuake
         {
             const auto monitor = *(monitors + monitorIdx);
             const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-            glfwSetWindowMonitor(m_Window, monitor, 0, 0, m_Width, m_Height, mode->refreshRate);
+
+            int monitorX, monitorY;
+            glfwGetMonitorPos(monitor, &monitorX, &monitorY);
+
+            // Calculate the center of the monitor
+            int monitorWidth, monitorHeight;
+            glfwGetMonitorPhysicalSize(monitor, &monitorWidth, &monitorHeight);
+
+            // Convert physical size to pixels (assuming a DPI scale factor of 1.0)
+            monitorWidth = monitorWidth * 96 / 25.4;
+            monitorHeight = monitorHeight * 96 / 25.4;
+
+            // Center the window on the new monitor
+            int windowX = monitorX + (monitorWidth - m_Width) / 2;
+            int windowY = monitorY + (monitorHeight - m_Height) / 2;
+
+            glfwSetWindowMonitor(m_Window, nullptr, windowX, windowY, m_Width, m_Height, GLFW_DONT_CARE);
         }
     }
 
