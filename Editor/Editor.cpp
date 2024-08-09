@@ -39,13 +39,7 @@
 
 #include "src/EditorApplication.h"
 
-struct LaunchSettings
-{
-    int32_t monitor = -1;
-    Vector2 resolution = { 1920, 1080 };
-    std::string windowTitle = "Nuake Editor ";
-    std::string projectPath;
-};
+#include "LaunchSettings.h"
 
 
 std::vector<std::string> ParseArguments(int argc, char* argv[])
@@ -133,5 +127,5 @@ Nuake::Application* Nuake::CreateApplication(int argc, char** argv)
     specification.Name += "(DEBUG BUILD)";
 #endif
 
-    return new EditorApplication(specification);
+    return new EditorApplication(specification, launchSettings);
 }

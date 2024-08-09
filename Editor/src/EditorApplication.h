@@ -6,6 +6,7 @@
 #include "Misc/GizmoDrawer.h"
 
 #include "Commands/CommandBuffer.h"
+#include "../LaunchSettings.h"
 
 using namespace NuakeEditor;
 
@@ -15,9 +16,10 @@ private:
 	CommandBuffer mCommandBuffer;
 
 public:
-	EditorApplication(const Nuake::ApplicationSpecification& specification)
+	EditorApplication(const Nuake::ApplicationSpecification& specification, const LaunchSettings& launchSettings)
 		: Application(specification),
-		m_Editor(nullptr)
+		m_Editor(nullptr),
+		m_LaunchSettings(launchSettings)
 	{
 	}
 
@@ -28,4 +30,5 @@ public:
 
 private:
 	Nuake::EditorInterface* m_Editor;
+	LaunchSettings m_LaunchSettings;
 };

@@ -68,6 +68,7 @@ namespace Nuake {
     {
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
+
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
 
@@ -2007,9 +2008,9 @@ namespace Nuake {
                 }
                 ImGui::PopStyleVar();
 
-                if (AutoScroll)
+                if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
                 {
-                    ImGui::SetScrollY(ImGui::GetScrollMaxY());
+                    ImGui::SetScrollHereY(1.0f);
                 }
 
                 ImGui::EndTable();
