@@ -236,7 +236,10 @@ namespace Nuake
 			system->Update(ts);
 		}
 
-		m_SceneRenderer->Update(ts);
+		if (Engine::IsPlayMode())
+		{
+			m_SceneRenderer->Update(ts);
+		}
 	}
 
 	void Scene::FixedUpdate(Timestep ts)

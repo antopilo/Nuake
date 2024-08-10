@@ -11,4 +11,11 @@ namespace Nuake
 		Vector3 WorldPosition;
 		float Fraction;
 	};
+
+	struct ShapeCastResult
+	{
+		Vector3 ImpactPosition;
+		float Fraction;
+		Vector3 ImpactNormal;
+	};
 }

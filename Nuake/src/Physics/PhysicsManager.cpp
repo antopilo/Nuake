@@ -52,6 +52,11 @@ namespace Nuake
 		return m_World->Raycast(from, to);
 	}
 
+	std::vector<ShapeCastResult> PhysicsManager::Shapecast(const Vector3& from, const Vector3&  to, const Ref<Physics::PhysicShape>& shape)
+	{
+		return m_World->CastShape(from, to, shape);
+	}
+
 	const std::vector<Physics::CollisionData>& PhysicsManager::GetCollisions()
 	{
 		return m_World->GetCollisionsData();

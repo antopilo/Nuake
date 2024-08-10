@@ -226,6 +226,12 @@ void generate_brush_vertices(int entity_idx, int brush_idx)
                         if (phong)
                         {
                             const char* phong_angle_property = map_data_get_entity_property(entity_idx, "_phong_angle");
+
+                            if (phong_angle_property == NULL)
+                            {
+                                phong_angle_property = "89";
+                            }
+
                             if (phong_angle_property != NULL)
                             {
                                 double threshold = cos((atof(phong_angle_property) + 0.01) * 0.0174533);

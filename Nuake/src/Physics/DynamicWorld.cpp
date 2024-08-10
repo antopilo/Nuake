@@ -15,6 +15,12 @@
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <Jolt/Physics/Character/CharacterVirtual.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/ShapeCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
@@ -25,11 +31,6 @@
 #include <Jolt/Physics/Collision/Shape/MeshShape.h>
 #include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
-#include <Jolt/Physics/Character/CharacterVirtual.h>
-#include <Jolt/Physics/Collision/RayCast.h>
-#include <Jolt/Physics/Collision/CastResult.h>
 #include <Jolt/Core/TempAllocator.h>
 
 #include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
@@ -480,7 +481,6 @@ namespace Nuake
 
 			// Fetch results
 			std::vector<RaycastResult> raycastResults;
-
 			if (collector.HadHit())
 			{
 				int num_hits = (int)collector.mHits.size();
@@ -503,6 +503,56 @@ namespace Nuake
 			}
 			
 			return raycastResults;
+		}
+
+		std::vector<ShapeCastResult> DynamicWorld::CastShape(const Vector3& from, const Vector3& to, const Ref<PhysicShape>& shape)
+		{
+			auto joltShape = GetJoltShape(shape);
+			const auto& fromJolt = JPH::Vec3(from.x, from.y, from.z);
+			const auto& toDirectionJolt = JPH::Vec3(to.x - from.x, to.y - from.y, to.z - from.z);
+			const auto& scale = JPH::Vec3(1, 1, 1);
+			JPH::Mat44 centerOfMass = JPH::Mat44::sIdentity();
+			centerOfMass.SetTranslation(JPH::Vec3(from.x, from.y, from.z));
+			const JPH::AABox worldBound = JPH::AABox(JPH::Vec3{-1000, -1000, -1000}, JPH::Vec3{1000, 1000, 1000});
+
+			JPH::RShapeCast ray = JPH::RShapeCast(joltShape, scale, centerOfMass, toDirectionJolt, worldBound);
+			JPH::AllHitCollisionCollector<JPH::CastShapeCollector> collector;
+
+			JPH::RayCastResult result;
+
+			JPH::ShapeCastSettings shapeCastSetting;
+			shapeCastSetting.mCollectFacesMode = JPH::ECollectFacesMode::CollectFaces;
+			_JoltPhysicsSystem->GetNarrowPhaseQuery().CastShape(ray, shapeCastSetting, JPH::Vec3(0, 0, 0), collector);
+
+			std::vector<ShapeCastResult> shapecastResults;
+			if (collector.HadHit())
+			{
+				int num_hits = (int)collector.mHits.size();
+				auto results = collector.mHits.data();
+
+				// Format result
+				for (int i = 0; i < num_hits; ++i)
+				{
+					const float hitFraction = results[i].mFraction;
+					const JPH::Vec3& hitPosition = ray.GetPointOnRay(results[i].mFraction);
+					
+					auto bodyId = static_cast<JPH::BodyID>(results[i].mBodyID2);
+					JPH::TransformedShape ts = _JoltPhysicsSystem->GetBodyInterface().GetTransformedShape(results[i].mBodyID2);
+					
+					JPH::Vec3 surfaceNormal = ts.GetWorldSpaceSurfaceNormal(results[i].mSubShapeID2, results[i].mContactPointOn2);
+					
+					ShapeCastResult result
+					{
+						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
+						hitFraction,
+						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ())
+					};
+
+					shapecastResults.push_back(std::move(result));
+				}
+			}
+
+			return shapecastResults;
 		}
 
 		void DynamicWorld::SyncEntitiesTranforms()

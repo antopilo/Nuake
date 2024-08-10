@@ -49,6 +49,7 @@ namespace Nuake
 		void Reset();
 
 		std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
+		std::vector<ShapeCastResult> Shapecast(const Vector3& from, const Vector3& to, const Ref<Physics::PhysicShape>& shape);
 
 		const std::vector<Physics::CollisionData>& GetCollisions();
 
