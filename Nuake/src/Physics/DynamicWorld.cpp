@@ -233,6 +233,7 @@ namespace Nuake
 				return false;
 			}
 		}
+
 	};
 
 	BPLayerInterfaceImpl JoltBroadphaseLayerInterface = BPLayerInterfaceImpl();
@@ -522,6 +523,8 @@ namespace Nuake
 
 			JPH::ShapeCastSettings shapeCastSetting;
 			shapeCastSetting.mCollectFacesMode = JPH::ECollectFacesMode::CollectFaces;
+			shapeCastSetting.mUseShrunkenShapeAndConvexRadius = true;
+
 			_JoltPhysicsSystem->GetNarrowPhaseQuery().CastShape(ray, shapeCastSetting, JPH::Vec3(0, 0, 0), collector);
 
 			std::vector<ShapeCastResult> shapecastResults;
@@ -538,14 +541,16 @@ namespace Nuake
 					
 					auto bodyId = static_cast<JPH::BodyID>(results[i].mBodyID2);
 					JPH::TransformedShape ts = _JoltPhysicsSystem->GetBodyInterface().GetTransformedShape(results[i].mBodyID2);
-					
 					JPH::Vec3 surfaceNormal = ts.GetWorldSpaceSurfaceNormal(results[i].mSubShapeID2, results[i].mContactPointOn2);
-					
+
+					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
+
 					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
-						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ())
+						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ()),
+						layer
 					};
 
 					shapecastResults.push_back(std::move(result));

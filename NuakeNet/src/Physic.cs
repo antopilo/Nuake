@@ -92,6 +92,7 @@ namespace Nuake.Net
             public Vector3 ImpactPosition;
             public Vector3 ImpactNormal;
             public float Fraction;
+            public Layers Layer;
         }
         public struct BoxInternal
         {
@@ -104,6 +105,16 @@ namespace Nuake.Net
         {
             public float Radius;
             public float Height;
+        }
+
+        public enum Layers
+        {
+            NON_MOVING = 0,
+            MOVING = 1,
+            KINEMATIC = 2,
+            CHARACTER_GHOST = 3,
+            CHARACTER = 4,
+            SENSORS = 5
         }
 
         internal static unsafe delegate*<float, float, float, float, float, float, BoxInternal, NativeArray<float>> ShapeCastBoxIcall;
@@ -125,7 +136,6 @@ namespace Nuake.Net
             {
                 NativeArray<float> resultICall = ShapeCastBoxIcall(from.X, from.Y, from.Z, to.X, to.Y, to.Z, boxInternal);
 
-                
                 for (int i = 0; i < resultICall.Length / 7; i++)
                 {
                     int index = i * 7;
@@ -133,7 +143,8 @@ namespace Nuake.Net
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
-                        Fraction = resultICall[index + 6]
+                        Fraction = resultICall[index + 6],
+                        Layer = (Layers)resultICall[index + 7]
                     };
 
                     result.Add(shapeCastResult);
@@ -158,7 +169,8 @@ namespace Nuake.Net
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
-                        Fraction = resultICall[index + 6]
+                        Fraction = resultICall[index + 6],
+                        Layer = (Layers)resultICall[index + 7]
                     };
 
                     result.Add(shapeCastResult);
@@ -189,7 +201,8 @@ namespace Nuake.Net
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
-                        Fraction = resultICall[index + 6]
+                        Fraction = resultICall[index + 6],
+                        Layer = (Layers)resultICall[index + 7]
                     };
 
                     result.Add(shapeCastResult);
@@ -220,7 +233,8 @@ namespace Nuake.Net
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
-                        Fraction = resultICall[index + 6]
+                        Fraction = resultICall[index + 6],
+                        Layer = (Layers)resultICall[index + 7]
                     };
 
                     result.Add(shapeCastResult);

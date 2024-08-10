@@ -17,5 +17,6 @@ namespace Nuake
 		Vector3 ImpactPosition;
 		float Fraction;
 		Vector3 ImpactNormal;
+		float Layer;
 	};
 }
