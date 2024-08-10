@@ -12,9 +12,36 @@ namespace Nuake
 {
 	class SceneRenderer 
 	{
+		struct DebugSphere
+		{
+			Vector3 Position;
+			float Radius;
+			Color SphereColor;
+			float Life;
+		};
+
+		struct DebugQuad
+		{
+			Vector3 Position;
+			Vector3 Size;
+			Color SphereColor;
+			float Life;
+		};
+
+		struct DebugLine
+		{
+			Vector3 Start;
+			Vector3 End;
+			Color LineColor;
+			float Life;
+			float Width;
+		};
+
 	public:
 		void Init();
 		void Cleanup();
+
+		void Update(const Timestep time);
 
 		void BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
@@ -24,12 +51,13 @@ namespace Nuake
 			return *mGBuffer;
 		}
 
+		void DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color = Color(1, 0, 0, 1), float life = 0.0f);
+
 		uint32_t mOutlineEntityID = 0;
 	private:
 		Matrix4 mProjection, mView;
 		Vector3 mCamPos;
 
-		
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
@@ -38,10 +66,15 @@ namespace Nuake
 		Scope<FrameBuffer> mDOFBuffer;
 		Scope<FrameBuffer> mOutlineBuffer;
 
+		Ref<Mesh> mLineMesh;
+
+		std::vector<DebugLine> mDebugLines;
+
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);
 		void PostProcessPass(const Scene& scene);
+		void DebugRendererPass(Scene& scene);
 
 		void SetSkeletonBoneTransformRecursive(Scene& scene, SkeletonNode& skeletonNode, Shader* shader);
 	};

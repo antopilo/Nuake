@@ -29,5 +29,25 @@ namespace Nuake.Net
         }
     }
 
+    public class Debug
+    {
+        internal static unsafe delegate*</* start */ float, float, float,
+                                         /* end */   float, float, float,
+                                         /* color */ float, float, float, float,
+                                        /* life */   float, 
+                                                     void> DrawLineIcall;
+
+        public Debug() { }
+
+        public static void DrawLine(Vector3 start, Vector3 end, Vector4 color, float life = 0.0f)
+        {
+            unsafe
+            {
+                DrawLineIcall(start.X, start.Y, start.Z, end.X, end.Y, end.Z, color.X, color.Y, color.Z, color.W, life);
+            }
+        }
+    }
     
+
+
 }

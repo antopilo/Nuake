@@ -43,10 +43,33 @@ namespace Nuake
 
 		mOutlineBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mOutlineBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
+		// Generate debug meshes
+		std::vector<Vertex> lineVertices
+		{
+			{ Vector3(0, 0, 0), Vector2(0, 0), Vector3(0, 0, 0) },
+			{ Vector3(1, 1, 1), Vector2(0, 0), Vector3(0, 0, 0) }
+		};
+
+		std::vector<uint32_t> lineIndices
+		{
+			0, 1
+		};
+
+		mLineMesh = CreateRef<Mesh>();
+		mLineMesh->AddSurface(lineVertices, lineIndices);
 	}
 
 	void SceneRenderer::Cleanup()
 	{
+	}
+
+	void SceneRenderer::Update(const Timestep time)
+	{
+		for (auto& line : mDebugLines)
+		{
+			line.Life -= time;
+		}
 	}
 
 	void SceneRenderer::BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos)
@@ -83,6 +106,8 @@ namespace Nuake
 
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
+
+		DebugRendererPass(scene);
 
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
@@ -341,6 +366,19 @@ namespace Nuake
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();
+	}
+
+	void SceneRenderer::DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color, float life)
+	{
+		DebugLine debugLine = {
+			.Start = start,
+			.End = end,
+			.LineColor = color,
+			.Life = life,
+			.Width = 2.0f
+		};
+
+		mDebugLines.push_back(debugLine);
 	}
 	
 	void SceneRenderer::ShadowPass(Scene& scene)
@@ -622,7 +660,7 @@ namespace Nuake
 			}
 
 			// Reset material on quadmesh
-			//Renderer::QuadMesh->SetMaterial(previousMaterial);
+			// Renderer::QuadMesh->SetMaterial(previousMaterial);
 
 			// Skinned mesh at the end because we switch shader
 			gBufferSkinnedMeshShader->Bind();
@@ -699,7 +737,6 @@ namespace Nuake
 				LightComponent light;
 				float distance;
 			};
-
 			std::vector<LightDistance> lightDistances;
 
 			auto view = scene.m_Registry.view<TransformComponent, LightComponent, ParentComponent>();
@@ -758,6 +795,46 @@ namespace Nuake
 
 	void SceneRenderer::PostProcessPass(const Scene& scene)
 	{
+
+	}
+
+	void SceneRenderer::DebugRendererPass(Scene& scene)
+	{
+		mShadingBuffer->Bind();
+		{
+			// Lines
+			mLineMesh->Bind();
+
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/debugLine.shader");
+			shader->Bind();
+
+			shader->SetUniformMat4f("u_Projection", mProjection);
+			shader->SetUniformMat4f("u_View", mView);
+
+			for (auto& l : mDebugLines)
+			{
+				shader->SetUniformVec4("u_Color", l.LineColor);
+				shader->SetUniformVec3("u_StartPos", l.Start);
+				shader->SetUniformVec3("u_EndPos", l.End);
+
+				glLineWidth(l.Width);
+				RenderCommand::DrawLines(0, 2);
+			}
+
+			std::erase_if(mDebugLines, [](const DebugLine& line) 
+				{
+					return line.Life <= 0.0f;
+				});
+
+			shader->Unbind();
+
+			// Cubes
+
+			// Spheres
+
+			// Quads
+		}
+		mShadingBuffer->Unbind();
 	}
 
 	void SceneRenderer::SetSkeletonBoneTransformRecursive(Scene& scene, SkeletonNode& skeletonNode, Shader* shader)

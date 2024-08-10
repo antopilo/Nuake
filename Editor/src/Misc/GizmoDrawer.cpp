@@ -178,8 +178,7 @@ void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 
 void GizmoDrawer::DrawNavMesh(Ref<Scene> scene, bool occluded)
 {
-	auto cam = Engine::GetCurrentScene()->m_EditorCamera;
-
+	auto& cam = Engine::GetCurrentScene()->m_EditorCamera;
 	auto navVolumesView = scene->m_Registry.view<TransformComponent, NavMeshVolumeComponent>();
 	for (auto e : navVolumesView)
 	{
