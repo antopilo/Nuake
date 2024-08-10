@@ -201,7 +201,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
-	glLineWidth(2.0f);
+	glLineWidth(3.0f);
 	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
 	for (auto e : boxColliderView)
 	{
@@ -300,7 +300,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 0.5f);
+		m_LineShader->SetUniform1f("u_Opacity", 1.f);
 		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
 		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
@@ -325,7 +325,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 0.5f);
+		m_LineShader->SetUniform1f("u_Opacity", 1.0f);
 		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
 		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 
@@ -358,7 +358,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 			gizmoPosition = glm::translate(gizmoPosition, { 0, cylinderLength / 2.0, 0 });
 
 			m_LineShader->Bind();
-			m_LineShader->SetUniform1f("u_Opacity", 0.5f);
+			m_LineShader->SetUniform1f("u_Opacity", 1.0f);
 			m_LineShader->SetUniformMat4f("u_View", gizmoPosition);
 			m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 

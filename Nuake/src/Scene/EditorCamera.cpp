@@ -49,8 +49,8 @@ namespace Nuake
 			}
 		}
 
-		Yaw = glm::mix(Yaw, TargetYaw, ts * 20.f);
-		Pitch = glm::mix(Pitch, TargetPitch, ts * 20.f);
+		Yaw = glm::mix(Yaw, TargetYaw, 1.0f);
+		Pitch = glm::mix(Pitch, TargetPitch, 1.0f);
 
 		if (!controlled)
 		{
