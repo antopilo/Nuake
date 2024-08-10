@@ -101,7 +101,7 @@ namespace Nuake {
 
 		float* verts = reinterpret_cast<float*>(vertices.data());
 		int* tris = reinterpret_cast<int*>(indices.data());
-		rcMarkWalkableTriangles(m_RecastContext.get(), 45.0f, verts, std::size(vertices), tris, std::size(indices) / 3, m_triareas);
+		rcMarkWalkableTriangles(m_RecastContext.get(), config.WalkableSlopeAngle, verts, std::size(vertices), tris, std::size(indices) / 3, m_triareas);
 		if (!rcRasterizeTriangles(m_RecastContext.get(), verts, std::size(vertices), tris, m_triareas, std::size(indices) / 3, *voxelHeightField, recastConfig.walkableClimb))
 		{
 			Logger::Log("buildNavigation: Could not rasterize triangles.", "NavManager", CRITICAL);
@@ -218,7 +218,6 @@ namespace Nuake {
 		params.detailVertsCount = detailMesh->nverts;
 		params.detailTris = detailMesh->tris;
 		params.detailTriCount = detailMesh->ntris;
-
 		// Off connection, might be useful for user defined jump points?
 		// Maybe useful for ziplines, scripted jumppad, idk
 		// See sample OffMeshConnectionTool.cpp in RecastDemo project.
@@ -231,12 +230,9 @@ namespace Nuake {
 		//params.offMeshConUserID = m_geom->getOffMeshConnectionId();
 		//params.offMeshConCount = m_geom->getOffMeshConnectionCount();
 
-		const float agentHeight = 0.5f;
-		const float agentRadius = 0.1f;
-		const float agentMaxClimb = 0.01f;
-		params.walkableHeight = agentHeight;
-		params.walkableRadius = agentRadius;
-		params.walkableClimb = agentMaxClimb;
+		params.walkableHeight = config.WalkableHeight;
+		params.walkableRadius = config.WalkableRadius;
+		params.walkableClimb = config.WalkableClimb;
 
 		rcVcopy(params.bmin, polygonMesh->bmin);
 		rcVcopy(params.bmax, polygonMesh->bmax);
