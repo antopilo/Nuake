@@ -134,6 +134,14 @@ namespace Nuake
 		return pixelData;
 	}
 
+	float FrameBuffer::ReadDepth(const Vector2& coords)
+	{
+		glReadBuffer(GL_DEPTH_ATTACHMENT);
+		float pixelData;
+		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &pixelData);
+		return pixelData;
+	}
+
 	void FrameBuffer::SetDrawBuffer(GLenum draw)
 	{
 		Bind();

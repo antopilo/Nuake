@@ -35,6 +35,13 @@ namespace Nuake
 			Color LineColor;
 			float Life;
 			float Width;
+			bool DepthTest = true;
+		};
+
+		struct TemporaryModels
+		{
+			Ref<Model> ModelResource;
+			Matrix4 Transform;
 		};
 
 	public:
@@ -51,7 +58,17 @@ namespace Nuake
 			return *mGBuffer;
 		}
 
+		bool IsTempModelLoaded(const std::string& name) const
+		{
+			return mTempModels.find(name) != mTempModels.end();
+		}
+
+		void DrawTemporaryModel(const std::string& name, Ref<Model> model, Matrix4 transform);
 		void DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color = Color(1, 0, 0, 1), float life = 0.0f);
+		void ClearTemporaryModels()
+		{
+			mTempModels.clear();
+		}
 
 		uint32_t mOutlineEntityID = 0;
 	private:
@@ -68,6 +85,8 @@ namespace Nuake
 
 		Ref<Mesh> mLineMesh;
 
+
+		std::map<std::string, TemporaryModels> mTempModels;
 		std::vector<DebugLine> mDebugLines;
 
 		void ShadowPass(Scene& scene);

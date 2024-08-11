@@ -40,6 +40,7 @@ namespace Nuake
 
 		uint32_t GetRenderID() const { return m_FramebufferID; }
 		int ReadPixel(uint32_t attachment, const Vector2 coords);
+		float ReadDepth(const Vector2& coords);
 		void SetDrawBuffer(GLenum draw);
 		void SetReadBuffer(GLenum read);
 	};

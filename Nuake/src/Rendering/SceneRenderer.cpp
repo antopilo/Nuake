@@ -330,14 +330,14 @@ namespace Nuake
 			}
 			mOutlineBuffer->Unbind();
  
-			//ImGui::Begin("outline");
-			//ImGui::Image((void*)mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-			//ImGui::End();
+			ImGui::Begin("normals");
+			ImGui::Image((void*)mGBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::End();
 
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
 				shader->Bind();
 				
 				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
@@ -368,6 +368,17 @@ namespace Nuake
 		Renderer::EndDraw();
 	}
 
+	void SceneRenderer::DrawTemporaryModel(const std::string & name, Ref<Model> model, Matrix4 transform)
+	{
+		if (IsTempModelLoaded(name))
+		{
+			mTempModels[name].Transform = transform;
+			return;
+		}
+
+		mTempModels[name] = TemporaryModels{ model, transform };
+	}
+
 	void SceneRenderer::DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color, float life)
 	{
 		DebugLine debugLine = {
@@ -375,7 +386,8 @@ namespace Nuake
 			.End = end,
 			.LineColor = color,
 			.Life = life,
-			.Width = 2.0f
+			.Width = 2.0f,
+			.DepthTest = true
 		};
 
 		mDebugLines.push_back(debugLine);
@@ -389,7 +401,7 @@ namespace Nuake
 		shader->Bind();
 
 		RenderCommand::Disable(RendererEnum::FACE_CULL);
-		glCullFace(GL_FRONT);
+		glCullFace(GL_BACK);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
@@ -548,6 +560,22 @@ namespace Nuake
 			}
 			Renderer::Flush(gBufferShader, false);
 
+			for (auto& mesh : mTempModels)
+			{
+				if (mesh.second.ModelResource)
+				{
+					for (auto& m : mesh.second.ModelResource->GetMeshes())
+					{
+						Renderer::SubmitMesh(m, mesh.second.Transform, (uint32_t)-1);
+					}
+				}
+			}
+
+			glEnable(GL_DEPTH_TEST);
+			glDepthMask(GL_FALSE);
+			Renderer::Flush(gBufferShader, true);
+			glDepthMask(GL_TRUE);
+
 			// Quake BSPs
 			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
 			for (auto e : quakeView)
@@ -562,8 +590,10 @@ namespace Nuake
 					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
 				}
 			}
+			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
-			Renderer::Flush(gBufferShader, false);
+			Renderer::Flush(gBufferShader, true);
 
 			// Sprites
 			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
@@ -659,6 +689,12 @@ namespace Nuake
 				Renderer::QuadMesh->SetMaterial(previousMaterial);
 			}
 
+
+			// Temp models
+
+
+
+
 			// Reset material on quadmesh
 			// Renderer::QuadMesh->SetMaterial(previousMaterial);
 
@@ -696,6 +732,8 @@ namespace Nuake
 		}
 
 		RenderCommand::Enable(RendererEnum::BLENDING);
+
+
 	}
 
 	void SceneRenderer::ShadingPass(Scene& scene)
@@ -811,11 +849,17 @@ namespace Nuake
 			shader->SetUniformMat4f("u_Projection", mProjection);
 			shader->SetUniformMat4f("u_View", mView);
 
+			bool depthTestState = true;
 			for (auto& l : mDebugLines)
 			{
 				shader->SetUniformVec4("u_Color", l.LineColor);
 				shader->SetUniformVec3("u_StartPos", l.Start);
 				shader->SetUniformVec3("u_EndPos", l.End);
+
+				if (l.DepthTest)
+				{
+
+				}
 
 				glLineWidth(l.Width);
 				RenderCommand::DrawLines(0, 2);
