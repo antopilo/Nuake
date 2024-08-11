@@ -198,6 +198,8 @@ namespace Nuake
 		copy->Translation = this->Translation;
 		copy->Yaw = this->Yaw;
 		copy->Pitch = this->Pitch;
+		copy->TargetYaw = copy->Yaw;
+		copy->TargetPitch = copy->Pitch;
 
 		return copy;
 	}
@@ -232,7 +234,7 @@ namespace Nuake
 		SERIALIZE_VEC3(Translation);
 		j["Yaw"] = glm::clamp(Yaw, 0.f, 360.f);
 		j["Pitch"] = glm::clamp(Pitch, -90.f, 90.f);
-
+		SERIALIZE_VAL(Speed);
 		return j;
 	}
 
@@ -241,6 +243,8 @@ namespace Nuake
 		DESERIALIZE_VEC3(j["Translation"], Translation);
 		SetYaw(j["Yaw"]);
 		SetPitch(j["Pitch"]);
+		UpdateDirection();
+		DESERIALIZE_VAL(Speed);
 
 		return true;
 	}

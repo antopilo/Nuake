@@ -281,15 +281,12 @@ namespace Nuake
             {
                 for (unsigned int i = 0; i < CSM_AMOUNT; i++)
                 {
-                    // Bind shadowmap texture 
+                    light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
                     const uint32_t shadowMapId = shadowmapAmount + i;
-                    Ref<Texture> shadowMapTexture = light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT);
-                    deferredShader->SetUniformTex("ShadowMaps[" + std::to_string(shadowMapId) + "]", shadowMapTexture, 17 + i);
-
-                    const std::string stringIndex = std::to_string(i);
-                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + stringIndex + "]", shadowMapId);
-                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + stringIndex + "]", light.mCascadeSplitDepth[i]);
-                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + stringIndex + "]", light.mViewProjections[i]);
+                    deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
+                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
+                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
+                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
                 }
             }
 

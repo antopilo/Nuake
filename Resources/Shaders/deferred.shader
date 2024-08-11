@@ -198,7 +198,7 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
         const float NUM_SAMPLES = 4.f;
         const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
         const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
-        vec2 texelSize = 1.0 / vec2(2048, 2048);
+        vec2 texelSize = 1.0 / vec2(4096, 4096);
 
         float result = 0.0f;
         for (float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0f)

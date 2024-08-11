@@ -55,6 +55,7 @@
 #include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Threading/JobSystem.h>
 #include "../Commands/Commands/Commands.h"
+#include <src/Resource/ModelLoader.h>
 
 namespace Nuake {
     
@@ -63,6 +64,38 @@ namespace Nuake {
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
     
+    glm::vec3 DepthToWorldPosition(const glm::vec2& pixelPos, float depth, const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, const glm::vec2& viewportSize)
+    {
+        // Convert pixel position to normalized device coordinates (NDC)
+        glm::vec2 ndcPos;
+        ndcPos.x = (2.0f * pixelPos.x) / viewportSize.x - 1.0f;
+        ndcPos.y = 1.0f - (2.0f * pixelPos.y) / viewportSize.y;  // Y-axis inversion
+
+        // Depth value ranges from 0 to 1 in NDC space
+        float ndcDepth = depth * 2.0f - 1.0f;
+
+        // Construct the NDC position
+        glm::vec4 ndcPos4(ndcPos.x, ndcPos.y, ndcDepth, 1.0f);
+
+        // Compute the inverse of the projection and view matrices
+        glm::mat4 invProj = glm::inverse(projectionMatrix);
+        glm::mat4 invView = glm::inverse(viewMatrix);
+
+        // Transform the NDC position to eye space
+        glm::vec4 eyePos4 = invProj * ndcPos4;
+        eyePos4.z = -1.0f;  // Set Z to -1 as it's on the near plane
+        eyePos4 /= eyePos4.w;
+        
+        //eyePos4.w = 0.0f;
+
+        // Transform the eye space position to world space
+        glm::vec4 worldPos4 = invView * eyePos4;
+
+        // Return the 3D world position
+        glm::vec3 worldPos(worldPos4.x, worldPos4.y, worldPos4.z);
+        return worldPos;
+    }
+
     EditorInterface::EditorInterface(CommandBuffer& commandBuffer) :
         mCommandBuffer(&commandBuffer)
     {
@@ -98,7 +131,7 @@ namespace Nuake {
     ImVec2 LastSize = ImVec2();
     void EditorInterface::DrawViewport()
     {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         std::string name = ICON_FA_GAMEPAD + std::string("  Scene");
         if (ImGui::Begin(name.c_str()))
         {
@@ -125,11 +158,85 @@ namespace Nuake {
             ImGui::PopStyleVar();
 
             const Vector2& mousePos = Input::GetMousePosition();
-            const ImVec2& windowPos = ImGui::GetWindowPos() + ImVec2(0, 30.0);
-            const ImVec2& windowSize = ImGui::GetWindowSize() - ImVec2(0, 30.0);
+            
+            const ImVec2& windowPos = ImGui::GetWindowPos();
+            const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
+            const ImVec2& windowSize = ImGui::GetWindowSize();
             const bool isInsideWidth = mousePos.x > windowPos.x && mousePos.x < windowPos.x + windowSize.x;
             const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
             m_IsHoveringViewport = isInsideWidth && isInsideHeight;
+
+            
+            if (ImGui::BeginDragDropTarget())
+            {
+                auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
+                Vector2 textureSize = gbuffer.GetTexture(GL_DEPTH_ATTACHMENT)->GetSize();
+                auto pixelPos = Input::GetMousePosition() - windowPosNuake;
+                pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
+
+                auto gizmoBuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
+                gizmoBuffer->Bind();
+                bool foundSomethingToSelect = false;
+                Vector3 dragnDropWorldPos = Vector3(0, 0, 0);
+                if (const float result = gizmoBuffer->ReadDepth(pixelPos); result > 0)
+                {
+                    const Matrix4& proj = Engine::GetCurrentScene()->m_EditorCamera->GetPerspective();
+                    Matrix4 view = Engine::GetCurrentScene()->m_EditorCamera->GetTransform();
+                    
+                    pixelPos.y = (Input::GetMousePosition() - windowPosNuake).y;
+                    dragnDropWorldPos = DepthToWorldPosition(pixelPos, result, proj, view, textureSize);
+
+                    auto renderer = Engine::GetCurrentScene()->m_SceneRenderer;
+                    const ImGuiPayload* payload = ImGui::GetDragDropPayload();
+                    if(payload && payload->IsDataType("_Model"))
+                    {
+                        char* file = (char*)payload->Data;
+                        std::string fullPath = std::string(file, 256);
+                        fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+
+                        Matrix4 transform = Matrix4(1.0f);
+                        transform = glm::translate(transform, dragnDropWorldPos);
+
+                        if (!renderer->IsTempModelLoaded(fullPath))
+                        {
+                            auto loader = ModelLoader();
+                            auto modelResource = loader.LoadModel(fullPath);
+
+                            Matrix4 transform = Matrix4(1.0f);
+                            transform = glm::translate(transform, dragnDropWorldPos);
+                            renderer->DrawTemporaryModel(fullPath, modelResource, transform);
+                        }
+                        else
+                        {
+                            renderer->DrawTemporaryModel(fullPath, nullptr, transform);
+                        }
+
+                    }
+
+                    Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugLine(dragnDropWorldPos, dragnDropWorldPos + Vector3{0, 5, 0}, Vector4(1, 0, 1, 1));
+                }
+                gizmoBuffer->Unbind();
+
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
+                {
+                    char* file = (char*)payload->Data;
+                    std::string fullPath = std::string(file, 256);
+                    fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+
+                    auto loader = ModelLoader();
+                    auto modelResource = loader.LoadModel(fullPath);
+
+                    auto entity = Engine::GetCurrentScene()->CreateEntity(FileSystem::GetFileNameFromPath(fullPath));
+                    ModelComponent& modelComponent = entity.AddComponent<ModelComponent>();
+                    modelComponent.ModelPath = fullPath;
+                    modelComponent.ModelResource = modelResource;
+                    entity.GetComponent<TransformComponent>().SetLocalPosition(dragnDropWorldPos);
+                }
+            }
+            else
+            {
+                Engine::GetCurrentScene()->m_SceneRenderer->ClearTemporaryModels();
+            }
 
             ImGuizmo::SetDrawlist();
             ImGuizmo::AllowAxisFlip(true);

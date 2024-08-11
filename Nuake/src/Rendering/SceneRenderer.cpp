@@ -400,7 +400,7 @@ namespace Nuake
 		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
 		shader->Bind();
 
-		RenderCommand::Disable(RendererEnum::FACE_CULL);
+		RenderCommand::Enable(RendererEnum::FACE_CULL);
 		glCullFace(GL_BACK);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();

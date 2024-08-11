@@ -53,7 +53,7 @@ namespace Nuake
 
             // TODO: Automate this
             const float nearClip = 0.01f;
-            const float farClip = 500.0f;
+            const float farClip = 800.0f;
             const float clipRange = farClip - nearClip;
 
             const float mCascadeNearPlaneOffset = -100.0f;
@@ -73,7 +73,7 @@ namespace Nuake
                 mCascadeSplits[i] = (d - nearClip) / clipRange;
             }
 
-            //mCascadeSplits[0] = 0.01f;
+            mCascadeSplits[0] = 0.01f;
             //mCascadeSplits[1] = 0.45f;
             //mCascadeSplits[2] = 1.0f;
 
