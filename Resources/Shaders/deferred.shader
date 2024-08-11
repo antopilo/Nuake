@@ -276,9 +276,12 @@ void main()
 
     if (true)
     {
-        vec3 L = normalize(-u_DirectionalLight.Direction);
+        vec3 L = normalize(u_DirectionalLight.Direction);
 
         float attenuation = 1.0f;
+
+        L = normalize(u_DirectionalLight.Direction);
+
         if(u_DirectionalLight.Shadow > 0.1f)
         {
             shadow += ShadowCalculation(worldPos, N);

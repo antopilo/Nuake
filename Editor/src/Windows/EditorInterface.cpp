@@ -2244,6 +2244,10 @@ namespace Nuake {
     {
         // Parse the project and load it.
         std::string projectPath = FileDialog::OpenFile(".scene");
+        if (projectPath.empty() || !FileSystem::FileExists(projectPath, true))
+        {
+            return;
+        }
 
         Ref<Scene> scene = Scene::New();
         const std::string& fileContent = FileSystem::ReadFile(projectPath, true);
