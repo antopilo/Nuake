@@ -43,13 +43,23 @@ Ref<Nuake::Texture> ThumbnailManager::GetThumbnail(const std::string& path)
 	{
 		return m_Thumbnails[path];
 	}
+
+	int i = 0;
+	std::string m = "masing" + std::to_string(i) + std::endl;
 	using namespace Nuake;
+
+	if (m_ThumbnailGeneratedThisFrame > MAX_THUMBNAIL_PER_FRAME)
+	{
+		return nullptr;
+	}
 
 	// Generate Thumbnail
 	Ref<Texture> thumbnail = CreateRef<Texture>(m_ThumbnailSize, GL_RGB, GL_RGB16F, GL_FLOAT);
 	GenerateThumbnail(path, thumbnail);
 
 	m_Thumbnails[path] = thumbnail;
+
+	m_ThumbnailGeneratedThisFrame++;
 	return thumbnail;
 }
 
@@ -208,4 +218,9 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	
 
 	return m_ShadedFramebuffer->GetTexture(GL_COLOR_ATTACHMENT0);
+}
+
+void ThumbnailManager::OnEndFrame()
+{
+	m_ThumbnailGeneratedThisFrame = 0;
 }

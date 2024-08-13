@@ -326,7 +326,11 @@ namespace Nuake
         const auto fileType = file->GetFileType();
         if (fileType == FileType::Material)
         {
-            textureImage = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            if (image)
+            {
+                textureImage = image;
+            }
         }
         else if (fileType == FileType::Image)
         {
@@ -355,7 +359,11 @@ namespace Nuake
         }
         else if (fileType == FileType::Prefab)
         {
-            textureImage = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            if (image)
+            {
+                textureImage = image;
+            }
         }
 
         ImGui::SetCursorPos(prevCursor);
@@ -917,6 +925,8 @@ namespace Nuake
                 }
                 ImGui::EndChild();
             }
+
+            ThumbnailManager::Get().OnEndFrame();
 
             ImGui::EndChild();
         }

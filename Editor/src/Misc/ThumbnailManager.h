@@ -12,6 +12,9 @@ private:
 	Ref<Nuake::FrameBuffer> m_ShadedFramebuffer;
 	const Nuake::Vector2 m_ThumbnailSize = { 128, 128 };
 
+	const uint32_t MAX_THUMBNAIL_PER_FRAME = 1;
+	uint32_t m_ThumbnailGeneratedThisFrame = 0;
+
 public:
 	ThumbnailManager();
 	~ThumbnailManager() = default;
@@ -22,4 +25,5 @@ public:
 	Ref<Nuake::Texture> GetThumbnail(const std::string& path);
 	void MarkThumbnailAsDirty(const std::string& path);
 	Ref<Nuake::Texture> GenerateThumbnail(const std::string& path, Ref<Nuake::Texture> texture);
+	void OnEndFrame();
 };
