@@ -16,7 +16,7 @@ void EditorApplication::OnInit()
     m_Window = Engine::GetCurrentWindow();
     m_Window->SetSize({ m_Specification.WindowWidth, m_Specification.WindowHeight });
     m_Window->SetTitle(m_Specification.Name);
-    m_Window->SetMonitor(1);
+    //m_Window->SetMonitor(1);
     
     if (!m_LaunchSettings.projectPath.empty())
     {
