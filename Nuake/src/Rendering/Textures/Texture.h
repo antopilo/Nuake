@@ -4,7 +4,6 @@
 #include "src/Resource/Serializable.h"
 
 #include "stb_image/stb_image.h"
-#include "msdfgen/core/BitmapRef.hpp"
 
 #include <string>
 
@@ -31,7 +30,6 @@ namespace Nuake
 		Texture(unsigned char* data, int len); // Used to load texture from a memory buffer
 
 		Texture(Vector2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0, void* data = 0); // Used to load texture from memeory with known size
-		Texture(Vector2 size, msdfgen::BitmapConstRef<unsigned char, 4>& bitmap, bool t); // Used internally for MSDF fonts
 		~Texture();
 
 		void Resize(glm::vec2 size);

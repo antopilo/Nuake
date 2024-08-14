@@ -335,7 +335,7 @@ namespace Nuake
 						int32_t handle;
 					};
 
-					exposedVar.Value = classInstance.GetFieldValue<EntityWrapper>(varName).id;
+					//exposedVar.Value = classInstance.GetFieldValue<EntityWrapper>(varName).id;
 					break;
 				}
 			}
@@ -371,7 +371,6 @@ namespace Nuake
 						auto newEntity = m_BaseEntityType.CreateInstance();
 						newEntity.SetPropertyValue("ECSHandle", scriptEntity.GetHandle());
 						newEntity.SetPropertyValue("ID", scriptEntity.GetID());
-
 						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
 					}
 				}

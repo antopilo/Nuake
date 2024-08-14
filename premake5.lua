@@ -163,7 +163,6 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/Dependencies/GLFW/include",
         "%{prj.name}/../Nuake/Dependencies/assimp/include",
         "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
 		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/Dependencies/build",
         "%{prj.name}/../Nuake/Dependencies/soloud/include",
