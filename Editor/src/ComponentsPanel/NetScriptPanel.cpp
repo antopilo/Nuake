@@ -179,6 +179,35 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                     field.Value = currentValue;
                 }
 
+                if (field.Type == Nuake::NetScriptExposedVarType::Vector2)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    
+                    Nuake::Vector2 currentValue = std::any_cast<Nuake::Vector2>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGuiHelper::DrawVec2(sliderName, &currentValue);
+
+                    field.Value = currentValue;
+                }
+
+                if (field.Type == Nuake::NetScriptExposedVarType::Vector3)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    Nuake::Vector3 currentValue = std::any_cast<Nuake::Vector3>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGuiHelper::DrawVec3(sliderName, &currentValue);
+
+                    field.Value = currentValue;
+                }
+
                 ImGui::TableNextColumn();
             }
         }

@@ -1,5 +1,6 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 #include "src/Core/FileSystem.h"
 #include "src/Core/Logger.h"
 #include "src/Resource/Serializable.h"
@@ -70,6 +71,30 @@ namespace Nuake {
 						varJ["Value"] = std::any_cast<std::string>(e.Value);
 						varJ["DefaultValue"] = std::any_cast<std::string>(e.DefaultValue);
 						break;
+					case NetScriptExposedVarType::Vector2:
+					{
+						Vector2 value = std::any_cast<Vector2>(e.Value);
+						varJ["Value"][0] = value.x;
+						varJ["Value"][1] = value.y;
+
+						value = std::any_cast<Vector2>(e.DefaultValue);
+						varJ["DefaultValue"][0] = value.x;
+						varJ["DefaultValue"][1] = value.y;
+						break;
+					}
+					case NetScriptExposedVarType::Vector3:
+					{
+						Vector3 value = std::any_cast<Vector3>(e.Value);
+						varJ["Value"][0] = value.x;
+						varJ["Value"][1] = value.y;
+						varJ["Value"][2] = value.z;
+
+						value = std::any_cast<Vector3>(e.DefaultValue);
+						varJ["DefaultValue"][0] = value.x;
+						varJ["DefaultValue"][1] = value.y;
+						varJ["DefaultValue"][2] = value.z;
+						break;
+					}
 					default:
 						varJ["Value"] = 0;
 						break;
@@ -121,6 +146,31 @@ namespace Nuake {
 						exposedVar.Value = (std::string)exposedVarJson["Value"];
 						exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
 						break;
+					case NetScriptExposedVarType::Vector2:
+					{
+						float x = exposedVarJson["Value"][0];
+						float y = exposedVarJson["Value"][1];
+
+						exposedVar.Value = Vector2(x, y);
+
+						x = exposedVarJson["DefaultValue"][0];
+						y = exposedVarJson["DefaultValue"][1];
+
+						exposedVar.DefaultValue = Vector2(x, y);
+						break;
+					}
+					case NetScriptExposedVarType::Vector3:
+					{
+						float x = exposedVarJson["Value"][0];
+						float y = exposedVarJson["Value"][1];
+						float z = exposedVarJson["Value"][2];
+						exposedVar.Value = Vector3(x, y, z);
+
+						x = exposedVarJson["DefaultValue"][0];
+						y = exposedVarJson["DefaultValue"][1];
+						z = exposedVarJson["DefaultValue"][2];
+						exposedVar.DefaultValue = Vector3(x, y, z);
+					}
 					default:
 						exposedVar.DefaultValue = 0;
 						break;

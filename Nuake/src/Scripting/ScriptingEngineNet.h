@@ -26,7 +26,8 @@ namespace Nuake {
 		Entity,
 		Vector2,
 		Vector3,
-		Vector4
+		Vector4,
+		Unsupported
 	};
 
 	struct ExposedVar

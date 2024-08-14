@@ -198,7 +198,7 @@ namespace Nuake
 							exposedVar.Name = f.GetName();
 
 							auto typeName = f.GetType().GetFullName();
-							ExposedVarTypes varType = ExposedVarTypes::Float;
+							ExposedVarTypes varType = ExposedVarTypes::Unsupported;
 							if (typeName == "System.Single")
 							{
 								varType = ExposedVarTypes::Float;
@@ -215,10 +215,21 @@ namespace Nuake
 							{
 								varType = ExposedVarTypes::Bool;
 							}
+							else if (typeName == "System.Numerics.Vector2")
+							{
+								varType = ExposedVarTypes::Vector2;
+							}
+							else if (typeName == "System.Numerics.Vector3")
+							{
+								varType = ExposedVarTypes::Vector3;
+							}
 
-							exposedVar.Type = varType;
+							if (varType != ExposedVarTypes::Unsupported)
+							{
+								exposedVar.Type = varType;
+								gameScriptObject.exposedVars.push_back(exposedVar);
+							}
 
-							gameScriptObject.exposedVars.push_back(exposedVar);
 							Logger::Log("Exposed field detected: " + std::string(f.GetName()) + " of type " + std::string(f.GetType().GetFullName()) );
 						}
 					}
@@ -298,6 +309,16 @@ namespace Nuake
 				case ExposedVarTypes::Bool:
 				{
 					exposedVar.Value = (bool)classInstance.GetFieldValue<int>(varName);
+					break;
+				}
+				case ExposedVarTypes::Vector2:
+				{
+					exposedVar.Value = (Vector2)classInstance.GetFieldValue<Vector2>(varName);
+					break;
+				}
+				case ExposedVarTypes::Vector3:
+				{
+					exposedVar.Value = (Vector3)classInstance.GetFieldValue<Vector3>(varName);
 					break;
 				}
 				case ExposedVarTypes::Entity:
