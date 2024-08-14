@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,7 @@ namespace Nuake.Net
         Vector3 Position;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public class Entity
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
@@ -49,8 +51,10 @@ namespace Nuake.Net
             NAVMESH
         }
 
+
         public int ID { get; set; }
         public int ECSHandle { get; set; }
+
         public virtual void OnInit() { }
         public virtual void OnUpdate(float dt) { }
         public virtual void OnFixedUpdate(float dt) { }

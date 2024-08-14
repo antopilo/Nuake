@@ -95,6 +95,15 @@ namespace Nuake {
 						varJ["DefaultValue"][2] = value.z;
 						break;
 					}
+					case NetScriptExposedVarType::Entity:
+					{
+						int value = std::any_cast<int>(e.Value);
+						varJ["Value"] = value;
+
+						value = std::any_cast<int>(e.DefaultValue);
+						varJ["DefaultValue"] = value;
+						break;
+					}
 					default:
 						varJ["Value"] = 0;
 						break;
@@ -150,12 +159,10 @@ namespace Nuake {
 					{
 						float x = exposedVarJson["Value"][0];
 						float y = exposedVarJson["Value"][1];
-
 						exposedVar.Value = Vector2(x, y);
 
 						x = exposedVarJson["DefaultValue"][0];
 						y = exposedVarJson["DefaultValue"][1];
-
 						exposedVar.DefaultValue = Vector2(x, y);
 						break;
 					}
@@ -170,6 +177,16 @@ namespace Nuake {
 						y = exposedVarJson["DefaultValue"][1];
 						z = exposedVarJson["DefaultValue"][2];
 						exposedVar.DefaultValue = Vector3(x, y, z);
+						break;
+					}
+					case NetScriptExposedVarType::Entity:
+					{
+						int x = exposedVarJson["Value"];
+						exposedVar.Value = x;
+
+						x = exposedVarJson["DefaultValue"];
+						exposedVar.DefaultValue = x;
+						break;
 					}
 					default:
 						exposedVar.DefaultValue = 0;

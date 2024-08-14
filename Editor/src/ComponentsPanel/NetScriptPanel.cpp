@@ -208,6 +208,41 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                     field.Value = currentValue;
                 }
 
+                if (field.Type == Nuake::NetScriptExposedVarType::Entity)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+
+                    int entityId = std::any_cast<int>(field.Value);
+                    auto entity = Nuake::Engine::GetCurrentScene()->GetEntityByID(entityId);
+                    bool invalid = !entity.IsValid();
+                    std::string buttonLabel;
+                    if (invalid)
+                    {
+                        buttonLabel = "Invalid Entity*";
+                    }
+                    else
+                    {
+                        buttonLabel = entity.GetComponent<Nuake::NameComponent>().Name;
+                    }
+
+                    ImGui::Button(buttonLabel.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+
+                    if (ImGui::BeginDragDropTarget())
+                    {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
+                        {
+                            Nuake::Entity payload_entity = *(const Nuake::Entity*)payload->Data;
+
+                            field.Value = payload_entity.GetID();
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                }
+
                 ImGui::TableNextColumn();
             }
         }

@@ -139,7 +139,6 @@ namespace Nuake {
 
             Overlay();
             ImGuizmo::BeginFrame();
-
  
             ImGuizmo::SetOrthographic(false);
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
@@ -321,7 +320,7 @@ namespace Nuake {
 
             if (!Engine::IsPlayMode() && ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
-                const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
+                
                 
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
                 auto pixelPos = Input::GetMousePosition() - windowPosNuake;
@@ -367,6 +366,8 @@ namespace Nuake {
         }
 
         ImGui::End();
+
+       
     }
 
     void EditorInterface::DrawStatusBar()
@@ -671,15 +672,17 @@ namespace Nuake {
         
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
 
-		if(nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
+        bool isDragging = false;
+        if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
+        {
 			ImGui::PopStyleColor();
-		else
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
-				ImGui::Text(name.c_str());
-				ImGui::EndDragDropSource();
-			}
+        }
+		else if (ImGui::BeginDragDropSource())
+		{ 
+			ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
+			ImGui::Text(name.c_str());
+			ImGui::EndDragDropSource();
+		}
 
         if (ImGui::BeginDragDropTarget())
         {
@@ -706,7 +709,7 @@ namespace Nuake {
             ImGui::EndDragDropTarget();
         }
 
-        if (ImGui::IsItemClicked())
+        if (!isDragging && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
             Selection = EditorSelection(e);
 
         if (ImGui::BeginPopupContextItem())
@@ -1785,7 +1788,7 @@ namespace Nuake {
         }
         ImGui::End();
 
-        std::string title = ICON_FA_TREE + std::string(" Hierarchy");
+        std::string title = ICON_FA_TREE + std::string("   Hierarchy");
         if (ImGui::Begin(title.c_str()))
         {
             std::string searchQuery = "";

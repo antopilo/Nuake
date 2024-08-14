@@ -51,6 +51,7 @@ namespace Nuake {
 		const std::string m_NetDirectory = ".net";
 		const std::string m_ContextName = "NuakeEngineContext";
 
+		Coral::Type m_BaseEntityType;
 		bool m_IsInitialized = false;
 
 		Coral::HostInstance* m_HostInstance;

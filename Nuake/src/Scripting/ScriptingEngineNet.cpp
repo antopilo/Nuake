@@ -181,6 +181,8 @@ namespace Nuake
 			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
 			if (baseTypeName == "Nuake.Net.Entity")
 			{
+				m_BaseEntityType = type->GetBaseType();
+
 				auto typeSplits = String::Split(type->GetFullName(), '.');
 				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
 
@@ -222,6 +224,10 @@ namespace Nuake
 							else if (typeName == "System.Numerics.Vector3")
 							{
 								varType = ExposedVarTypes::Vector3;
+							}
+							else if (typeName == "Nuake.Net.Entity")
+							{
+								varType = ExposedVarTypes::Entity;
 							}
 
 							if (varType != ExposedVarTypes::Unsupported)
@@ -323,11 +329,19 @@ namespace Nuake
 				}
 				case ExposedVarTypes::Entity:
 				{
-					exposedVar.Value = classInstance.GetFieldValue<int>(varName);
+					struct EntityWrapper
+					{
+						int32_t id;
+						int32_t handle;
+					};
+
+					exposedVar.Value = classInstance.GetFieldValue<EntityWrapper>(varName).id;
 					break;
 				}
 			}
 		}
+
+		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
 
 		// Override with user values set in the editor.
 		for (auto& exposedVarUserValue : component.ExposedVar)
@@ -338,13 +352,39 @@ namespace Nuake
 				Coral::String coralString = Coral::String::New(stringValue);
 				classInstance.SetFieldValue(exposedVarUserValue.Name, coralString);
 			}
+			else if (exposedVarUserValue.Type == NetScriptExposedVarType::Entity)
+			{
+				int entityId = std::any_cast<int>(exposedVarUserValue.Value);
+				Entity scriptEntity = entity.GetScene()->GetEntityByID(entityId);
+				if (scriptEntity.IsValid())
+				{
+					if (HasEntityScriptInstance(scriptEntity))
+					{
+						// In the case the entity has a script & instance, we pass that.
+						// This gives access to the objects scripts.
+						auto scriptInstance = GetEntityScript(scriptEntity);
+						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, scriptInstance);
+					}
+					else
+					{
+						// In the case where the entity doesnt have an instance, we create one
+						auto newEntity = m_BaseEntityType.CreateInstance();
+						newEntity.SetPropertyValue("ECSHandle", scriptEntity.GetHandle());
+						newEntity.SetPropertyValue("ID", scriptEntity.GetID());
+
+						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
+					}
+				}
+				else
+				{
+					Logger::Log("Invalid entity exposed variable set", ".net", CRITICAL);
+				}
+			}
 			else
 			{
 				classInstance.SetFieldValue(exposedVarUserValue.Name, exposedVarUserValue.Value);
 			}
 		}
-
-		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
 	}
 
 	Coral::ManagedObject ScriptingEngineNet::GetEntityScript(const Entity& entity)
