@@ -413,7 +413,7 @@ namespace Nuake
 	void ScriptingEngineNet::CopyNuakeNETAssemblies(const std::string& path)
 	{
 		// Create .Net directory in projects folder.
-		const auto netDirectionPath = '/' + m_NetDirectory + '/';
+		const auto netDirectionPath = "/";
 		const auto netDir = path + netDirectionPath;
 		if (!FileSystem::DirectoryExists(netDirectionPath))
 		{

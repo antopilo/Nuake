@@ -65,10 +65,6 @@ project "Nuake"
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/src/Vendors/libmap/h/*.h",
         "%{prj.name}/src/Vendors/libmap/c/*.c",
-        "%{prj.name}/src/Vendors/msdfgen/**.h",
-        "%{prj.name}/src/Vendors/msdfgen/**.cpp",
-        "%{prj.name}/src/Vendors/msdf-atlas-gen/*.h",
-        "%{prj.name}/src/Vendors/msdf-atlas-gen/*.cpp",
         "%{prj.name}/src/Vendors/wren/src/vm/*.h",
         "%{prj.name}/src/Vendors/wren/src/vm/*.c",
         "%{prj.name}/src/Vendors/katana-parser/*.h",
@@ -85,24 +81,20 @@ project "Nuake"
         "%{prj.name}/dependencies/glfw/include",
         "%{prj.name}/dependencies/assimp/include",
         "%{prj.name}/dependencies/JoltPhysics",
-        "%{prj.name}/src/Vendors/msdfgen/include",
-        "%{prj.name}/src/Vendors/msdfgen/freetype/include",
-        "%{prj.name}/src/Vendors/msdfgen",
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/dependencies/build",
         "%{prj.name}/dependencies/soloud/include",
         "%{prj.name}/dependencies/Coral/Coral.Native/Include",
-	"%{prj.name}/dependencies/recastnavigation/DebugUtils/Include",
-	"%{prj.name}/dependencies/recastnavigation/Detour/Include",
-	"%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
-	"%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
-	"%{prj.name}/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/dependencies/recastnavigation/DebugUtils/Include",
+	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",
+	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
+	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
+	    "%{prj.name}/dependencies/recastnavigation/Recast/Include"
     }
 
     links
     {
-		"Freetype",
         "soloud"
     }
 
@@ -185,11 +177,7 @@ project "NuakeRuntime"
     libdirs
     {
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
-        "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
-        "%{prj.name}/../Nuake/dependencies/freetype/include",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/win64",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
@@ -202,7 +190,6 @@ project "NuakeRuntime"
         "GLFW",
         "glad",
         "assimp",
-		"Freetype",
 		"JoltPhysics",
         "soloud",
         "Coral.Native",
@@ -240,7 +227,7 @@ project "NuakeRuntime"
             "asound",
             "glib-2.0",
             "gtk-3",
-		"gobject-2.0"
+		    "gobject-2.0"
         }
 
         
@@ -311,27 +298,22 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/glfw/include",
         "%{prj.name}/../Nuake/dependencies/assimp/include",
         "%{prj.name}/../Nuake/dependencies/build",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
-	"%{prj.name}/../Nuake/dependencies/JoltPhysics",
+	    "%{prj.name}/../Nuake/dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/dependencies/build",
         "%{prj.name}/../Nuake/dependencies/soloud/include",
         "/usr/include/gtk-3.0/",
-	"%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
-	"%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
-	"%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
-	"%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	"%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
     }
     
     libdirs 
     { 
         "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
-        "%{prj.name}/../Nuake/dependencies/freetype-windows-binaries/release static/win64",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
-        "%{prj.name}/../Nuake/dependencies/freetype/include",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen/freetype/win64",
-        "%{prj.name}/../Nuake/src/Vendors/msdfgen",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
@@ -344,15 +326,14 @@ project "Editor"
         "glad", 
         "GLFW",
         "assimp",
-        "Freetype",
         "JoltPhysics",
         "soloud",
         "Coral.Native",
-	"DebugUtils",
-	"Detour",
-	"DetourCrowd",
-	"DetourTileCache",
-	"Recast"
+	    "DebugUtils",
+	    "Detour",
+	    "DetourCrowd",
+	    "DetourTileCache",
+	    "Recast"
     }
 
     filter "system:Windows"

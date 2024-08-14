@@ -21,8 +21,6 @@
 #include <src/Resource/FGD/FGDFile.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
-#include "src/UI/UserInterface.h"
-#include "src/NewEditor.h"
 #include <src/Scene/Components/BSPBrushComponent.h>
 
 #include "src/Actions/EditorSelection.h"

@@ -32,7 +32,6 @@
 #include <src/Scene/Components/PrefabComponent.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include "src/Rendering/Renderer.h"
-#include <src/Scene/Components/InterfaceComponent.h>
 #include "src/Core/Input.h"
 
 #include "../Actions/EditorSelection.h"
@@ -50,7 +49,7 @@
 #include <src/Audio/AudioManager.h>
 
 #include <src/UI/ImUI.h>
-
+#include "src/Core/FileSystem.h"
 #include <src/Resource/StaticResources.h>
 #include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Threading/JobSystem.h>
@@ -59,7 +58,6 @@
 
 namespace Nuake {
     
-    Ref<UI::UserInterface> userInterface;
     ImFont* normalFont;
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;

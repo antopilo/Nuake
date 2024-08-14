@@ -1,6 +1,7 @@
 #include "Commands.h"
 
 #include <Engine.h>
+#include "src/Core/FileSystem.h"
 
 namespace NuakeEditor
 {

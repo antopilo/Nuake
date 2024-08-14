@@ -9,10 +9,7 @@
 
 #include "EditorCamera.h"
 #include "src/Resource/Serializable.h"
-#include "src/UI/UserInterface.h"
-
 #include "src/Scene/Systems/System.h"
-
 #include "src/Resource/UUID.h"
 
 namespace Nuake 

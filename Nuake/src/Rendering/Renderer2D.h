@@ -2,7 +2,6 @@
 #include "src/Rendering/Shaders/Shader.h"
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
-#include "src/UI/Font/Font.h"
 
 namespace Nuake
 {
@@ -24,8 +23,6 @@ namespace Nuake
 		static void DrawRect(Vector2 position, Vector2 size, Color color, float borderRadius = 0.0f);
 
 		static Vector2 CalculateStringSize(const std::string& str, const TextStyle& style);
-		static void DrawString(const std::string& str, TextStyle style, Matrix4 model);
-		static void DrawChar(Char& letter, Ref<Font> font, Vector2 position, Vector2 size);
 		static void EndDraw();
 	};
 }

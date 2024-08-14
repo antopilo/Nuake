@@ -35,6 +35,7 @@
 
 #include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include <src/Scene/Components/ParentComponent.h>
+#include <cstdarg>
 
 namespace Nuake
 {
