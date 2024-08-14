@@ -3,6 +3,7 @@
 #include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Core/FileSystem.h>
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Scene/Entities/ImGuiHelper.h>
 
 void NetScriptPanel::Draw(Nuake::Entity entity)
 {
@@ -135,6 +136,46 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                     float currentValue = std::any_cast<float>(field.Value);
                     const std::string sliderName = "##" + field.Name + "slider";
                     ImGui::DragFloat(sliderName.c_str(), &currentValue);
+                    field.Value = currentValue;
+                }
+
+                if (field.Type == Nuake::NetScriptExposedVarType::Double)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    float currentValue = (float)std::any_cast<double>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGui::DragFloat(sliderName.c_str(), &currentValue);
+                    field.Value = (double)currentValue;
+                }
+
+                if (field.Type == Nuake::NetScriptExposedVarType::Bool)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    bool currentValue = std::any_cast<bool>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGui::Checkbox(sliderName.c_str(), &currentValue);
+                    field.Value = currentValue;
+                }
+
+                if (field.Type == Nuake::NetScriptExposedVarType::String)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    std::string currentValue = std::any_cast<std::string>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGui::InputText(sliderName.c_str(), &currentValue);
+
                     field.Value = currentValue;
                 }
 

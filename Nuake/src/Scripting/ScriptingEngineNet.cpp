@@ -207,6 +207,14 @@ namespace Nuake
 							{
 								varType = ExposedVarTypes::Double;
 							}
+							else if (typeName == "System.String")
+							{
+								varType = ExposedVarTypes::String;
+							}
+							else if (typeName == "System.Boolean")
+							{
+								varType = ExposedVarTypes::Bool;
+							}
 
 							exposedVar.Type = varType;
 
@@ -284,7 +292,12 @@ namespace Nuake
 				}
 				case ExposedVarTypes::String:
 				{
-					exposedVar.Value = classInstance.GetFieldValue<float>(varName);
+					exposedVar.Value = std::string(classInstance.GetFieldValue<Coral::String>(varName));
+					break;
+				}
+				case ExposedVarTypes::Bool:
+				{
+					exposedVar.Value = (bool)classInstance.GetFieldValue<int>(varName);
 					break;
 				}
 				case ExposedVarTypes::Entity:
@@ -295,12 +308,19 @@ namespace Nuake
 			}
 		}
 
-
-
 		// Override with user values set in the editor.
 		for (auto& exposedVarUserValue : component.ExposedVar)
 		{
-			classInstance.SetFieldValue(exposedVarUserValue.Name, exposedVarUserValue.Value);
+			if (exposedVarUserValue.Type == NetScriptExposedVarType::String)
+			{
+				std::string stringValue = std::any_cast<std::string>(exposedVarUserValue.Value);
+				Coral::String coralString = Coral::String::New(stringValue);
+				classInstance.SetFieldValue(exposedVarUserValue.Name, coralString);
+			}
+			else
+			{
+				classInstance.SetFieldValue(exposedVarUserValue.Name, exposedVarUserValue.Value);
+			}
 		}
 
 		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
