@@ -862,3 +862,5 @@ Nuake/dependencies/glad/glad.vcxproj
 Nuake/dependencies/glad/glad.vcxproj.filters
 *.vcxproj
 *.csproj
+*.filters
+cloc.exe

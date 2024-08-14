@@ -83,6 +83,7 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
         }
     }
     ImGui::End();
+
 }
 
 void EditorSelectionPanel::DrawNone()

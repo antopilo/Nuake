@@ -7,6 +7,7 @@
 #include <src/Rendering/Textures/MaterialManager.h>
 
 namespace Nuake {
+
     ModelComponent::ModelComponent()
     {
 

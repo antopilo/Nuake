@@ -124,9 +124,7 @@ namespace Nuake {
 
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
-        //this->filesystem = FileSystemUI();
     }
-
 
     ImVec2 LastSize = ImVec2();
     void EditorInterface::DrawViewport()

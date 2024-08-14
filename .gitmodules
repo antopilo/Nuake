@@ -10,18 +10,12 @@
 [submodule "Nuake/dependencies/glew"]
 	path = Nuake/dependencies/glew
 	url = https://github.com/nigels-com/glew.git
-[submodule "Nuake/dependencies/freetype"]
-	path = Nuake/dependencies/freetype
-	url = https://github.com/freetype/freetype.git
 [submodule "Nuake/dependencies/JoltPhysics"]
 	path = Nuake/dependencies/JoltPhysics
 	url = https://github.com/antopilo/JoltPhysics.git
 [submodule "Nuake/dependencies/soloud"]
 	path = Nuake/dependencies/soloud
 	url = https://github.com/antopilo/soloud.git
-[submodule "Nuake/dependencies/optick"]
-	path = Nuake/dependencies/optick
-	url = https://github.com/bombomby/optick.git
 [submodule "Nuake/dependencies/Coral"]
 	path = Nuake/dependencies/Coral
 	url = https://github.com/antopilo/Coral.git

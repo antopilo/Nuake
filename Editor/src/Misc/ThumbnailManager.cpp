@@ -44,8 +44,6 @@ Ref<Nuake::Texture> ThumbnailManager::GetThumbnail(const std::string& path)
 		return m_Thumbnails[path];
 	}
 
-	int i = 0;
-	std::string m = "masing" + std::to_string(i) + std::endl;
 	using namespace Nuake;
 
 	if (m_ThumbnailGeneratedThisFrame > MAX_THUMBNAIL_PER_FRAME)
