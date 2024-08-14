@@ -176,7 +176,12 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/src/Vendors/msdfgen",
 		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
         "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include"
+        "%{prj.name}/../Nuake/Dependencies/soloud/include",
+        "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
     }
 
     libdirs
@@ -203,6 +208,11 @@ project "NuakeRuntime"
 		"JoltPhysics",
         "soloud",
         "Coral.Native",
+        "DebugUtils",
+	    "Detour",
+	    "DetourCrowd",
+	    "DetourTileCache",
+	    "Recast"
     }
 
     filter "system:windows"
