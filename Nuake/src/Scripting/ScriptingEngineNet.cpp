@@ -445,10 +445,9 @@ namespace Nuake
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**/*.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NuakeNet\NuakeNet.csproj" />
+	<Reference Include="NuakeNet">
+		<HintPath>NuakeNet.dll</HintPath>
+	</Reference>
   </ItemGroup>
 </Project>
 )";
