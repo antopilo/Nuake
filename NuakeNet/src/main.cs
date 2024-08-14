@@ -12,7 +12,6 @@ namespace Nuake.Net
     /// This is the core Nuake.Net API. 
     /// All internal call should happen in this file.
     /// </summary>
-
     public class Engine
     {
         internal static unsafe delegate*<NativeString, void> LoggerLogIcall;
@@ -27,6 +26,12 @@ namespace Nuake.Net
         {
             unsafe { LoggerLogIcall(input); }
         }
+    }
+
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class ExposedAttribute : Attribute
+    {
     }
 
     public class Debug
@@ -47,6 +52,7 @@ namespace Nuake.Net
             }
         }
     }
+
     
 
 

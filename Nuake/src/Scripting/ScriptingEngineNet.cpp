@@ -96,6 +96,8 @@ namespace Nuake
 		m_NuakeAssembly.UploadInternalCalls();
 
 		m_IsInitialized = true;
+
+		m_GameEntityTypes.clear();
 	}
 
 	void ScriptingEngineNet::Uninitialize()
@@ -114,8 +116,31 @@ namespace Nuake
 
 		m_HostInstance->UnloadAssemblyLoadContext(m_LoadContext);
 
-		m_GameEntityTypes.clear();
+		
 		m_EntityToManagedObjects.clear();
+	}
+
+	std::vector<ExposedVar> ScriptingEngineNet::GetExposedVarForTypes(Entity entity)
+	{
+		if (!entity.HasComponent<NetScriptComponent>())
+		{
+			return std::vector<ExposedVar>();
+		}
+
+		auto& component = entity.GetComponent<NetScriptComponent>();
+		const auto& filePath = component.ScriptPath;
+		const std::string& className = FindClassNameInScript(filePath);
+
+		if (m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
+		{
+			// The class name parsed in the file was not found in the game's DLL.
+			const std::string& msg = "Skipped .net entity script: \n Class: " +
+				className + " not found in " + std::string(m_GameAssembly.GetName());
+			Logger::Log(msg, ".net", CRITICAL);
+			return std::vector<ExposedVar>();
+		}
+
+		return m_GameEntityTypes[className].exposedVars;
 	}
 
 	void ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
@@ -149,6 +174,8 @@ namespace Nuake
 		const std::string absoluteAssemblyPath = FileSystem::Root + assemblyPath;
 		m_GameAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
 
+		auto& exposedFieldAttributeType = m_GameAssembly.GetType("Nuake.Net.ExposedAttribute");
+
 		for (auto& type : m_GameAssembly.GetTypes())
 		{
 			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
@@ -156,7 +183,40 @@ namespace Nuake
 			{
 				auto typeSplits = String::Split(type->GetFullName(), '.');
 				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
-				m_GameEntityTypes[shortenedTypeName] = type; // We have found an entity script.
+
+				NetGameScriptObject gameScriptObject;
+				gameScriptObject.coralType = type;
+				gameScriptObject.exposedVars = std::vector<ExposedVar>();
+
+				for (auto& f : type->GetFields())
+				{
+					for (auto& a : f.GetAttributes())
+					{
+						if (a.GetType() == exposedFieldAttributeType)
+						{
+							ExposedVar exposedVar;
+							exposedVar.Name = f.GetName();
+
+							auto typeName = f.GetType().GetFullName();
+							ExposedVarTypes varType = ExposedVarTypes::Float;
+							if (typeName == "System.Single")
+							{
+								varType = ExposedVarTypes::Float;
+							}
+							else if (typeName == "System.Double")
+							{
+								varType = ExposedVarTypes::Double;
+							}
+
+							exposedVar.Type = varType;
+
+							gameScriptObject.exposedVars.push_back(exposedVar);
+							Logger::Log("Exposed field detected: " + std::string(f.GetName()) + " of type " + std::string(f.GetType().GetFullName()) );
+						}
+					}
+				}
+
+				m_GameEntityTypes[shortenedTypeName] = gameScriptObject;
 			}
 		}
 	}
@@ -181,6 +241,7 @@ namespace Nuake
 		}
 
 		auto& component = entity.GetComponent<NetScriptComponent>();
+
 		const auto& filePath = component.ScriptPath;
 		
 		const std::string& className = FindClassNameInScript(filePath);
@@ -194,12 +255,53 @@ namespace Nuake
 			return;
 		}
 
-		auto classInstance = m_GameEntityTypes[className]->CreateInstance();
+		auto classInstance = m_GameEntityTypes[className].coralType->CreateInstance();
 
 		int handle = entity.GetHandle();
 		int id = entity.GetID();
 		classInstance.SetPropertyValue("ECSHandle", handle);
 		classInstance.SetPropertyValue("ID", id);
+
+		std::vector<std::string> detectedExposedVar;
+		detectedExposedVar.reserve(std::size(m_GameEntityTypes[className].exposedVars));
+		// Update new default values if they have changed in the code.
+		for (auto& exposedVar : m_GameEntityTypes[className].exposedVars)
+		{
+			const std::string varName = exposedVar.Name;
+			detectedExposedVar.push_back(varName);
+
+			switch (exposedVar.Type)
+			{
+				case ExposedVarTypes::Float:
+				{
+					exposedVar.Value = classInstance.GetFieldValue<float>(varName);
+					break;
+				}
+				case ExposedVarTypes::Double:
+				{
+					exposedVar.Value = classInstance.GetFieldValue<double>(varName);
+					break;
+				}
+				case ExposedVarTypes::String:
+				{
+					exposedVar.Value = classInstance.GetFieldValue<float>(varName);
+					break;
+				}
+				case ExposedVarTypes::Entity:
+				{
+					exposedVar.Value = classInstance.GetFieldValue<int>(varName);
+					break;
+				}
+			}
+		}
+
+
+
+		// Override with user values set in the editor.
+		for (auto& exposedVarUserValue : component.ExposedVar)
+		{
+			classInstance.SetFieldValue(exposedVarUserValue.Name, exposedVarUserValue.Value);
+		}
 
 		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
 	}
@@ -356,7 +458,7 @@ namespace NuakeShowcase
 )";
 	}
 
-	std::string ScriptingEngineNet::FindClassNameInScript(const std::string & filePath)
+	std::string ScriptingEngineNet::FindClassNameInScript(const std::string& filePath)
 	{
 		if (filePath.empty())
 		{
@@ -375,6 +477,11 @@ namespace NuakeShowcase
 		// of the file. IT MIGHT CRASH HERE. POTENTIALLY - I have not tested.
 		// -----------------------------------------------------
 		std::string fileContent = FileSystem::ReadFile(filePath);
+		if (fileContent.empty())
+		{
+			return "";
+		}
+
 		fileContent = fileContent.substr(3, fileContent.size());
 		fileContent = String::RemoveWhiteSpace(fileContent);
 

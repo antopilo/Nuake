@@ -3,6 +3,7 @@
 #include "src/Scene/Entities/Entity.h"
 
 #include "src/Scripting/NetModules/NetAPIModule.h"
+#include <any>
 
 namespace Coral
 {
@@ -15,6 +16,31 @@ namespace Coral
 namespace Nuake {
 
 	class Project;
+
+	enum class ExposedVarTypes
+	{
+		Bool,
+		Float,
+		Double,
+		String,
+		Entity,
+		Vector2,
+		Vector3,
+		Vector4
+	};
+
+	struct ExposedVar
+	{
+		ExposedVarTypes Type;
+		std::any Value;
+		std::string Name;
+	};
+
+	struct NetGameScriptObject 
+	{
+		Coral::Type* coralType;
+		std::vector<ExposedVar> exposedVars;
+	};
 
 	class ScriptingEngineNet
 	{
@@ -39,7 +65,7 @@ namespace Nuake {
 		// This is filled when loading the game's assembly.
 
 		// This is a map that contains all the instances of entity scripts.
-		std::unordered_map<std::string, Coral::Type*> m_GameEntityTypes;
+		std::unordered_map<std::string, NetGameScriptObject> m_GameEntityTypes;
 		std::unordered_map<uint32_t, Coral::ManagedObject> m_EntityToManagedObjects;
 
 		ScriptingEngineNet();
@@ -50,6 +76,10 @@ namespace Nuake {
 
 		void Initialize();
 		void Uninitialize();
+
+		bool IsInitialized() const { return m_IsInitialized; }
+
+		std::vector<ExposedVar> GetExposedVarForTypes(Entity entity);
 
 		void BuildProjectAssembly(Ref<Project> project);
 		void LoadProjectAssembly(Ref<Project> project);

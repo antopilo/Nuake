@@ -2,6 +2,7 @@
 #include "../Windows/FileSystemUI.h"
 #include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Core/FileSystem.h>
+#include <src/Scripting/ScriptingEngineNet.h>
 
 void NetScriptPanel::Draw(Nuake::Entity entity)
 {
@@ -77,9 +78,71 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
 
             ComponentTableReset(component.ScriptPath, "");
         }
-        //ImGui::TableNextColumn();
-        //{
-        //    ImGui::Text("Module");
+
+        std::vector<std::string> detectedExposedVar;
+        for (auto& e : Nuake::ScriptingEngineNet::Get().GetExposedVarForTypes(entity))
+        {
+            bool found = false;
+            for (auto& c : component.ExposedVar)
+            {
+                if (e.Name == c.Name)
+                {
+                    c.Type = (Nuake::NetScriptExposedVarType)e.Type;
+                    c.DefaultValue = e.Value;
+                    found = true;
+                }
+            }
+
+            detectedExposedVar.push_back(e.Name);
+
+            if (!found)
+            {
+                Nuake::NetScriptExposedVar exposedVar;
+                exposedVar.Name = e.Name;
+                exposedVar.Value = e.Value;
+                exposedVar.DefaultValue = e.Value;
+                exposedVar.Type = (Nuake::NetScriptExposedVarType)e.Type;
+                component.ExposedVar.push_back(exposedVar);
+            }
+        }
+
+        // If we havent loaded the DLL, we cant trust the exposed var returned my the engine.
+        if (Nuake::ScriptingEngineNet::Get().IsInitialized())
+        {
+            // Erase all exposed var from the component that dont exist in the DLL anymore.
+            std::erase_if(component.ExposedVar,
+                [&](Nuake::NetScriptExposedVar& var)
+                {
+                        return std::find(detectedExposedVar.begin(), detectedExposedVar.end(), var.Name) == detectedExposedVar.end();
+                }
+            );
+        }
+
+        for (auto& field : component.ExposedVar)
+        {
+            ImGui::TableNextColumn();
+            {
+                ImGui::Text(field.Name.c_str());
+                ImGui::TableNextColumn();
+
+                if (field.Type == Nuake::NetScriptExposedVarType::Float)
+                {
+                    if (!field.Value.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    float currentValue = std::any_cast<float>(field.Value);
+                    const std::string sliderName = "##" + field.Name + "slider";
+                    ImGui::DragFloat(sliderName.c_str(), &currentValue);
+                    field.Value = currentValue;
+                }
+
+                ImGui::TableNextColumn();
+            }
+        }
+        
+        //    
         //    ImGui::TableNextColumn();
         //
         //    // Here we create a dropdown for every modules
@@ -97,7 +160,6 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
         //        static int currentModule = (int)component.mModule;
         //        ImGui::Combo("##WrenModule", &currentModule, &modulesC[0], modules.size());
         //        component.mModule = currentModule;
-        //    }
         //
         //    ImGui::TableNextColumn();
         //    //ComponentTableReset(component.Class, "");
