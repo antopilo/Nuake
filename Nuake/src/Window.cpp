@@ -191,15 +191,15 @@ namespace Nuake
 
     void Window::SetSize(const Vector2& size)
     {
-        m_Width = size.x;
-        m_Height = size.y;
-        glfwSetWindowSize(m_Window, size.x, size.y);
+        m_Width = static_cast<int32_t>(size.x);
+        m_Height = static_cast<int32_t>(size.y);
+        glfwSetWindowSize(m_Window, m_Width, m_Height);
     }
 
     void Window::SetPosition(const Vector2& position)
     {
         m_Position = position;
-        glfwSetWindowPos(m_Window, position.x, position.y);
+        glfwSetWindowPos(m_Window, static_cast<int>(position.x), static_cast<int>(position.y));
     }
 
     void Window::SetMonitor(int monitorIdx)
@@ -220,8 +220,8 @@ namespace Nuake
             glfwGetMonitorPhysicalSize(monitor, &monitorWidth, &monitorHeight);
 
             // Convert physical size to pixels (assuming a DPI scale factor of 1.0)
-            monitorWidth = monitorWidth * 96 / 25.4;
-            monitorHeight = monitorHeight * 96 / 25.4;
+            monitorWidth = static_cast<int>(monitorWidth * 96.0f / 25.4f);
+            monitorHeight = static_cast<int>(monitorHeight * 96.0f / 25.4f);
 
             // Center the window on the new monitor
             int windowX = monitorX + (monitorWidth - m_Width) / 2;
@@ -349,7 +349,7 @@ namespace Nuake
         colors[ImGuiCol_FrameBgHovered] = ImVec4(0.09f, 0.09f, 0.09f, 1.00f);
         colors[ImGuiCol_FrameBgActive] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
         colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
-        colors[ImGuiCol_TitleBgActive] = ImVec4(0.078, 0.078, 0.078, 1.00f);
+        colors[ImGuiCol_TitleBgActive] = ImVec4(0.078f, 0.078f, 0.078f, 1.00f);
         colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
         colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
         colors[ImGuiCol_ScrollbarBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.00f);

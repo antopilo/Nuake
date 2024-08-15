@@ -509,7 +509,7 @@ namespace Nuake
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 		{
-			std::async(std::launch::async, [&]() {
+			auto returnValue = std::async(std::launch::async, [&]() {
 					entities.push_back(e.Serialize());
 			});
 		}

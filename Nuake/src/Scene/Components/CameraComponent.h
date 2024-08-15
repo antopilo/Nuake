@@ -14,8 +14,6 @@ namespace Nuake
 
 		CameraComponent();
 
-		void DrawEditor();
-
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();

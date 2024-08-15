@@ -12,7 +12,7 @@ class dtNavMeshQuery;
 
 namespace Nuake {
 
-	struct RecastConfig;
+	class RecastConfig;
 
 	struct MeshTransformKeyPair
 	{

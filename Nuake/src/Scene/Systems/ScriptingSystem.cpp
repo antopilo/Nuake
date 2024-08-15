@@ -181,7 +181,7 @@ namespace Nuake
 				if (wren.mWrenScript != nullptr)
 					wren.mWrenScript->CallExit();
 			}
-			catch (std::exception* e)
+			catch (std::exception* /*e*/)
 			{
 			}
 		}

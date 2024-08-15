@@ -187,7 +187,7 @@ namespace Nuake
             m_Indices.push_back(i);
         }
 
-        m_IndicesCount = m_Indices.size();
+        m_IndicesCount = static_cast<uint32_t>(m_Indices.size());
 
         std::vector<Vertex> vertices;
        

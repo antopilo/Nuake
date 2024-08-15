@@ -6,7 +6,7 @@ namespace Nuake
 {
 	Animator::Animator(std::vector<SkeletalAnimation>& animations)
 	{
-		m_AnimationCount = animations.size();
+		m_AnimationCount = static_cast<uint32_t>(animations.size());
 		m_CurrentAnimation = 0;
 
 		m_Animations = animations;

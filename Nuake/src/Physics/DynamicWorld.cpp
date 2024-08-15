@@ -551,7 +551,7 @@ namespace Nuake
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
 						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ()),
-						layer
+						static_cast<float>(layer)
 					};
 
 					shapecastResults.push_back(std::move(result));
@@ -680,7 +680,7 @@ namespace Nuake
 #ifdef NK_DEBUG
 				//Logger::Log("Large step detected: " + std::to_string(ts), "physics", WARNING);
 #endif
-				collisionSteps = static_cast<float>(ts) / minStepDuration;
+				collisionSteps = static_cast<int>(static_cast<float>(ts) / minStepDuration);
 			}
 
 #ifdef NK_DEBUG

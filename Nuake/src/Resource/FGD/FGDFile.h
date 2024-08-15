@@ -65,28 +65,32 @@ namespace Nuake {
 			return true;
 		}
 
-		FGDBrushEntity& GetBrushEntity(const std::string& name)
+		FGDBrushEntity* GetBrushEntity(const std::string& name)
 		{
 			for (auto& b : BrushEntities)
 			{
 				if (String::ToLower(name) == String::ToLower(b.Name))
-					return b;
+					return &b;
 			}
 
 			assert(false && "Brush entity not found!");
+
+			return nullptr;
 		}
 
-		FGDPointEntity& GetPointEntity(const std::string& name)
+		FGDPointEntity* GetPointEntity(const std::string& name)
 		{
 			for (auto& p : PointEntities)
 			{
 				if (String::ToLower(name) == String::ToLower(p.Name))
 				{
-					return p;
+					return &p;
 				}
 			}
 
 			assert(false && "Point entity not found!");
+
+			return nullptr;
 		}
 
 		EntityType GetTypeOfEntity(const std::string& className)

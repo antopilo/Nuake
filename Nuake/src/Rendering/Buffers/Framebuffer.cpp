@@ -17,7 +17,7 @@ namespace Nuake
 		{
 			glGenRenderbuffers(1, &m_RenderBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
 		}
 		else
@@ -74,7 +74,7 @@ namespace Nuake
 
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
 
-		glViewport(0, 0, m_Size.x, m_Size.y);
+		glViewport(0, 0, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
 	}
 
 	void FrameBuffer::Unbind()
@@ -118,7 +118,7 @@ namespace Nuake
 		{
 			glGenRenderbuffers(1, &m_RenderBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_Size.x, m_Size.y);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
 		}
 

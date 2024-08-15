@@ -56,6 +56,7 @@ namespace Nuake {
 			auto instance = scriptingEngine.GetEntityScript(entity);
 			return instance;
 		}
+
 	}
 
 	Coral::ManagedObject GetEntityScriptFromHandle(int entityHandle)
@@ -87,7 +88,7 @@ namespace Nuake {
 		return prefab->Root.GetHandle();
 	}
 
-	static enum ComponentTypes
+	enum ComponentTypes
 	{
 		Unknown = -1,
 		PARENT = 0,
@@ -314,7 +315,7 @@ namespace Nuake {
 				auto waypoints = navMesh->FindStraightPath(startPosition, endPosition);
 
 				// Convert Vector3 array into float array
-				Coral::Array<float> returnResult = Coral::Array<float>::New(waypoints.size() * 3);
+				Coral::Array<float> returnResult = Coral::Array<float>::New(static_cast<int32_t>(waypoints.size()) * 3);
 				for (int i = 0; i < waypoints.size(); i++)
 				{
 					returnResult[i * 3 + 0] = waypoints[i].x;

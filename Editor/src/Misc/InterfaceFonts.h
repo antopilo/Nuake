@@ -6,7 +6,7 @@ enum Fonts {
 	Normal, Bold, LargeBold, Icons, BigIcon, Title, SubTitle
 };
 
-class ImFont;
+struct ImFont;
 
 // Help class that automatically push and pops itself when
 // Reaching end of scope

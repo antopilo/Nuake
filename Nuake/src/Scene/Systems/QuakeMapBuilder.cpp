@@ -416,8 +416,8 @@ namespace Nuake {
             
             std::string target = "";
             std::string targetname = "";
-            FGDBrushEntity fgdBrush;
-            FGDPointEntity pointEntity;
+            FGDBrushEntity* fgdBrush;
+            FGDPointEntity* pointEntity;
             bool isEntity = false;
             bool isWorldSpawn = false;
             bool isPointEntity = false;
@@ -449,7 +449,7 @@ namespace Nuake {
                         {
                             fgdBrush = file->GetBrushEntity(value);
 
-                            if(fgdBrush.Name != "")
+                            if(fgdBrush->Name != "")
                                 isEntity = true;
                             else
                                 isWorldSpawn = true;
@@ -486,19 +486,19 @@ namespace Nuake {
             {
                 if (isPointEntity)
                 {
-                    if (pointEntities.find(pointEntity.Name) == pointEntities.end())
+                    if (pointEntities.find(pointEntity->Name) == pointEntities.end())
                     {
-                        Entity pointEntityParent = Engine::GetCurrentScene()->CreateEntity(pointEntity.Name);
-                        pointEntities[pointEntity.Name] = pointEntityParent;
+                        Entity pointEntityParent = Engine::GetCurrentScene()->CreateEntity(pointEntity->Name);
+                        pointEntities[pointEntity->Name] = pointEntityParent;
                         ent.AddChild(pointEntityParent);
                     }
 
-                    Entity newPrefab = Engine::GetCurrentScene()->CreateEntity(pointEntity.Name);
+                    Entity newPrefab = Engine::GetCurrentScene()->CreateEntity(pointEntity->Name);
 
-                    pointEntities[pointEntity.Name].AddChild(newPrefab);
+                    pointEntities[pointEntity->Name].AddChild(newPrefab);
 
                     auto& prefabComponent = newPrefab.AddComponent<PrefabComponent>();
-                    prefabComponent.SetPrefab(Prefab::New(pointEntity.Prefab));
+                    prefabComponent.SetPrefab(Prefab::New(pointEntity->Prefab));
                     newPrefab.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
 
                     for (auto& e : prefabComponent.PrefabInstance->Entities)

@@ -60,7 +60,7 @@ namespace Nuake {
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, IconButtonPadding);
 
-			const float height = ImGui::GetTextLineHeight() + ButtonPadding.y * 2.0;
+			const float height = ImGui::GetTextLineHeight() + ButtonPadding.y * 2.0f;
 			const bool isPressed = ImGui::Button(icon.c_str(), ImVec2(height, height));
 
 			ImGui::PopStyleVar(2);
@@ -89,7 +89,7 @@ namespace Nuake {
 
 		bool CheckBox(const std::string& name, bool& value)
 		{
-			const float height = ImGui::GetTextLineHeight() + ButtonPadding.y * 2.0;
+			const float height = ImGui::GetTextLineHeight() + ButtonPadding.y * 2.0f;
 
 			if (!value)
 			{

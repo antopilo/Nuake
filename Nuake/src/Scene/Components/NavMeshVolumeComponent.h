@@ -67,7 +67,7 @@ namespace Nuake
 
 		bool Deserialize(const json& j)
 		{
-			if (j.contains("VolumeSize"));
+			if (j.contains("VolumeSize"))
 			{
 				DESERIALIZE_VEC3(j["VolumeSize"], VolumeSize);
 			}

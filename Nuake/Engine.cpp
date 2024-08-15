@@ -76,7 +76,7 @@ namespace Nuake
 			Input::Update();
 		}
 
-		
+
 	}
 
 	void Engine::EnterPlayMode()

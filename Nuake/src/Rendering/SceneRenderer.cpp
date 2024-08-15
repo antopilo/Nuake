@@ -227,7 +227,7 @@ namespace Nuake
 			shader->SetUniform1i("autofocus", sceneEnv->DOFAutoFocus);
 			shader->SetUniform1i("samples", sceneEnv->DOFSamples);
 			shader->SetUniform1i("manualdof", sceneEnv->DOFManualFocus);
-			shader->SetUniform1f("rings", sceneEnv->DOFrings);
+			shader->SetUniform1f("rings", static_cast<float>(sceneEnv->DOFrings));
 			shader->SetUniform1f("ndofstart", sceneEnv->DOFStart);
 			shader->SetUniform1f("ndofdist", sceneEnv->DOFDist);
 			shader->SetUniform1f("fdofstart", sceneEnv->DOFStart);
@@ -242,8 +242,8 @@ namespace Nuake
 			shader->SetUniform1f("dbsize", sceneEnv->DOFDbSize);
 			shader->SetUniform1f("feather", sceneEnv->DOFFeather);
 			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
-			shader->SetUniform1f("height", finalOutput->GetHeight());
-			shader->SetUniform1f("width", finalOutput->GetWidth());
+			shader->SetUniform1f("height", static_cast<float>(finalOutput->GetHeight()));
+			shader->SetUniform1f("width", static_cast<float>(finalOutput->GetWidth()));
 			shader->SetUniformTex("depthTex", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 0);
 			shader->SetUniformTex("renderTex", finalOutput.get(), 1);
 			Renderer::DrawQuad();

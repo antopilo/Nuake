@@ -56,7 +56,7 @@ namespace Nuake {
 				indices.push_back(currentVertexOffset + index);
 			}
 
-			currentVertexOffset = std::size(vertices);
+			currentVertexOffset = static_cast<uint32_t>(std::size(vertices));
 		}
 
 		float bmin[3] = { config.Position.x - config.Bound.x, config.Position.y - config.Bound.y, config.Position.z - config.Bound.z };
@@ -64,16 +64,16 @@ namespace Nuake {
 		rcConfig recastConfig;
 		recastConfig.cs = config.CellSize;
 		recastConfig.ch = config.CellHeight;
-		recastConfig.tileSize = config.TileSize;
+		recastConfig.tileSize = static_cast<int>(config.TileSize);
 		recastConfig.walkableSlopeAngle = config.WalkableSlopeAngle;
-		recastConfig.maxEdgeLen = config.MaxEdgeLength;
-		recastConfig.maxVertsPerPoly = config.MaxVertsPerPoly;
-		recastConfig.walkableHeight = config.WalkableHeight;
-		recastConfig.walkableClimb = config.WalkableClimb;
-		recastConfig.walkableRadius = config.WalkableRadius;
+		recastConfig.maxEdgeLen = static_cast<int>(config.MaxEdgeLength);
+		recastConfig.maxVertsPerPoly = static_cast<int>(config.MaxVertsPerPoly);
+		recastConfig.walkableHeight = static_cast<int>(config.WalkableHeight);
+		recastConfig.walkableClimb = static_cast<int>(config.WalkableClimb);
+		recastConfig.walkableRadius = static_cast<int>(config.WalkableRadius);
 		recastConfig.maxSimplificationError = config.MaxSimplificationError;
-		recastConfig.minRegionArea = config.MinRegionArea;
-		recastConfig.mergeRegionArea = config.MergeRegionArea;
+		recastConfig.minRegionArea = static_cast<int>(config.MinRegionArea);
+		recastConfig.mergeRegionArea = static_cast<int>(config.MergeRegionArea);
 		recastConfig.detailSampleDist = config.DetailSampleDistance;
 		recastConfig.detailSampleMaxError = config.DetailsampleMaxError;
 		
@@ -101,8 +101,8 @@ namespace Nuake {
 
 		float* verts = reinterpret_cast<float*>(vertices.data());
 		int* tris = reinterpret_cast<int*>(indices.data());
-		rcMarkWalkableTriangles(m_RecastContext.get(), config.WalkableSlopeAngle, verts, std::size(vertices), tris, std::size(indices) / 3, m_triareas);
-		if (!rcRasterizeTriangles(m_RecastContext.get(), verts, std::size(vertices), tris, m_triareas, std::size(indices) / 3, *voxelHeightField, recastConfig.walkableClimb))
+		rcMarkWalkableTriangles(m_RecastContext.get(), config.WalkableSlopeAngle, verts, static_cast<int>(std::size(vertices)), tris, static_cast<int>(std::size(indices)) / 3, m_triareas);
+		if (!rcRasterizeTriangles(m_RecastContext.get(), verts, static_cast<int>(std::size(vertices)), tris, m_triareas, static_cast<int>(std::size(indices)) / 3, *voxelHeightField, recastConfig.walkableClimb))
 		{
 			Logger::Log("buildNavigation: Could not rasterize triangles.", "NavManager", CRITICAL);
 		}

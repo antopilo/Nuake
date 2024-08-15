@@ -10,7 +10,7 @@ namespace Nuake
 		Matrix4 Transform;
 		Matrix4 Offset;
 		std::string Name;
-		int ChildrenCount;
+		uint32_t ChildrenCount;
 		std::vector<SkeletonNode> Children;
 		Matrix4 FinalTransform = Matrix4(1.0f);
 		int32_t Id = -1;

@@ -24,6 +24,7 @@
 #include <chrono>
 #include <imgui/imgui.h>
 #include <Subprocess.hpp>
+#include <codecvt>
 
 namespace Nuake {
 
@@ -119,7 +120,8 @@ namespace Nuake {
 		if (SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, appDataPath) >= 0)
 		{
 			std::wstring wideString(appDataPath);
-			path = std::string(wideString.begin(), wideString.end());
+			auto wideStringPath = std::filesystem::path(wideString);
+			path = wideStringPath.string();
 			// Now, 'appDataPath' contains the path to the AppData folder
 			path.erase(std::remove_if(path.begin(), path.end(), [](char c)
 				{

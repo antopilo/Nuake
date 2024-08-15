@@ -78,7 +78,7 @@ namespace Nuake
 
 		// Delete all dead particles.
 		int shiftOffset = 0;
-		for (int d = deletionQueue.size() - 1; d > 0; d--)
+		for (int d = static_cast<int>(deletionQueue.size()) - 1; d > 0; d--)
 		{
 			// Erase shifts the elements
 			const auto it = d;
