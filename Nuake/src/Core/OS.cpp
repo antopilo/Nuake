@@ -168,7 +168,7 @@ namespace Nuake {
 		
 		struct subprocess_s subprocess;
 		char output[1024];
-		int result = subprocess_create(command_line.data(), 0, &subprocess);
+		int result = subprocess_create(command_line.data(), subprocess_option_inherit_environment, &subprocess);
 		if (0 != result) {
 			// an error occurred!
 		}
@@ -180,15 +180,24 @@ namespace Nuake {
 		}
 
 		FILE* p_stdout = subprocess_stdout(&subprocess);
-		fgets(output, 1024, p_stdout);
 
+		std::string stdout_output;
+		fgets(output, 1024, p_stdout);
+		while (fgets(output, sizeof(output), p_stdout)) 
+		{
+			stdout_output += output;
+		}
 
 		FILE* p_stderr = subprocess_stderr(&subprocess);
+		std::string stderr_output;
 		char errOutput[1024];
-		fgets(errOutput, 1024, p_stderr);
+		while (fgets(errOutput, sizeof(errOutput), p_stderr)) 
+		{
+			stderr_output += errOutput;
+		}
 
-		out = std::string(output);
-		err = std::string(errOutput);
+		out = stdout_output;
+		err = stderr_output;
 
 		return result;
 	}
