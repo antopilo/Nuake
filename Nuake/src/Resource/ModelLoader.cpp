@@ -95,8 +95,8 @@ namespace Nuake
 				aiAnimation* aiAnim = scene->mAnimations[i];
 
 				const std::string animationName = aiAnim->mName.data;
-				const float animationDuration = aiAnim->mDuration;
-				const float animationTicksPerSecond = aiAnim->mTicksPerSecond;
+				const float animationDuration = static_cast<float>(aiAnim->mDuration);
+				const float animationTicksPerSecond = static_cast<float>(aiAnim->mTicksPerSecond);
 				auto animation = CreateRef<SkeletalAnimation>(animationName, animationDuration, animationTicksPerSecond);
 
 				// Here we iterate over every channel(each channel represents a bone) and fill the SkeletalAnimation
@@ -114,7 +114,7 @@ namespace Nuake
 					for (uint32_t p = 0; p < animChannel->mNumPositionKeys; p++)
 					{
 						aiVectorKey positionKey = animChannel->mPositionKeys[p];
-						const float keyTime = positionKey.mTime;
+						const float keyTime = static_cast<float>(positionKey.mTime);
 						const aiVector3D assimpKeyValue = positionKey.mValue;
 						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
 
@@ -125,7 +125,7 @@ namespace Nuake
 					for (uint32_t r = 0; r < animChannel->mNumRotationKeys; r++)
 					{
 						aiQuatKey rotationKey = animChannel->mRotationKeys[r];
-						const float keyTime = rotationKey.mTime;
+						const float keyTime = static_cast<float>(rotationKey.mTime);
 						const aiQuaterniont assimpKeyValue = rotationKey.mValue;
 						const Quat keyValue = Quat(assimpKeyValue.w, assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
 
@@ -136,7 +136,7 @@ namespace Nuake
 					for (uint32_t s = 0; s < animChannel->mNumScalingKeys; s++)
 					{
 						aiVectorKey scaleKey = animChannel->mScalingKeys[s];
-						const float keyTime = scaleKey.mTime;
+						const float keyTime = static_cast<float>(scaleKey.mTime);
 						const aiVector3D assimpKeyValue = scaleKey.mValue;
 						const Vector3 keyValue = Vector3(assimpKeyValue.x, assimpKeyValue.y, assimpKeyValue.z);
 
@@ -528,12 +528,12 @@ namespace Nuake
 			if (aitexture->mHeight == 0)
 			{
 				// We are using a compression like jpeg, where width is the size of the buffer in bytes.
-				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, aitexture->mWidth);
+				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, static_cast<int>(aitexture->mWidth));
 			}
 			else
 			{
 				Vector2 textureSize = Vector2(aitexture->mWidth, aitexture->mHeight);
-				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, textureSize.x);
+				nuakeTexture = CreateRef<Texture>((unsigned char*)aitexture->pcData, static_cast<int>(textureSize.x));
 			}
 			
 			return nuakeTexture;

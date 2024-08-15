@@ -148,5 +148,7 @@ namespace Nuake
 	{
 		if (j.contains("Path"))
 			return false;
+
+		return true;
 	}
 }

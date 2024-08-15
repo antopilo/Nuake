@@ -84,7 +84,7 @@ namespace Nuake
     {
         m_VertexArray = CreateScope<VertexArray>();
         m_VertexArray->Bind();
-        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
+        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), static_cast<uint32>t(m_Vertices.size() * sizeof(Vertex)));
         m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
 
         VertexBufferLayout bufferLayout = VertexBufferLayout();
@@ -191,7 +191,7 @@ namespace Nuake
 
         std::vector<Vertex> vertices;
        
-        std::async(std::launch::async, [&]()
+        auto asyncResult = std::async(std::launch::async, [&]()
             {
                 for (auto& v : j["Vertices"])
                 {
@@ -199,7 +199,7 @@ namespace Nuake
                     try {
                         DESERIALIZE_VEC2(v["UV"], vertex.uv)
                     }
-                    catch (std::exception& e) {
+                    catch (std::exception& /*e*/) {
                         vertex.uv = { 0.0, 0.0 };
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)

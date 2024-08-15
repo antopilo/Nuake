@@ -105,7 +105,7 @@ namespace Nuake
 			m_Meshes = otherModel->GetMeshes();
 			m_Animations = otherModel->GetAnimations();
 			m_SkeletonRoot = otherModel->GetSkeletonRootNode();
-			m_NumAnimation = m_Animations.size();
+			m_NumAnimation = static_cast<uint32_t>(m_Animations.size());
 			m_CurrentAnimation = 0;
 
 			if (j.contains("SkeletonNode"))
