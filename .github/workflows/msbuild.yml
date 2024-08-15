@@ -44,6 +44,9 @@ jobs:
 
     - name: Copy Coral Assembly
       run: xcopy Editor\Coral.Managed.dll bin\Release-windows-x86_64\Editor\ /I /E 
+
+    - name: Copy Runtime Config
+      run: xcopy Editor\Coral.Managed.runtimeconfig.json bin\Release-windows-x86_64\Editor\ /I /E
     
     - name: Zip
       uses: papeloto/action-zip@v1
