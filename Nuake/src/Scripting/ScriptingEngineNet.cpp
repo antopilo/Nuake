@@ -21,9 +21,8 @@
 void ExceptionCallback(std::string_view InMessage)
 {
 	const std::string message = std::string("Unhandled native exception: ") + std::string(InMessage);
-	Nuake::Logger::Log(message, ".net", Nuake::CRITICAL);
+	Nuake::Logger::Log(message, ".net", Nuake::COMPILATION);
 }
-
 
 namespace Nuake
 {
@@ -483,40 +482,6 @@ EndGlobal
 		FileSystem::BeginWriteFile(slnFilePath);
 		FileSystem::WriteLine(slnFileContent);
 		FileSystem::EndWriteFile();
-
-//		// Generate premake5 templates
-//		// ----------------------------------------
-//		const std::string cleanProjectName = String::Sanitize(projectName);
-//		const std::string premakeScript = R"(
-//workspace ")" + cleanProjectName + R"("
-//configurations { "Debug", "Release" }
-//	project ")" + cleanProjectName + R"("
-//		language "C#"
-//		dotnetframework "net8.0"
-//		kind "SharedLib"
-//			clr "Unsafe"
-//	
-//		-- Don't specify architecture here. (see https://github.com/premake/premake-core/issues/1758)
-//
-//		files 
-//		{
-//			"**.cs"
-//		}
-//    
-//		links 
-//		{
-//			".net/NuakeNet"
-//		}
-//)";
-//
-//		// Writting premake5 templates in project's directory
-//		// ----------------------------------------
-//		FileSystem::BeginWriteFile("premake5.lua");
-//		FileSystem::WriteLine(premakeScript);
-//		FileSystem::EndWriteFile();
-//
-//		// Execute premake script, generating .sln
-//		OS::ExecuteCommand("cd " + path + " && premake5 vs2022");
 
 		// Open solution file in visual studio
 		OS::OpenIn(path + cleanProjectName + ".sln");

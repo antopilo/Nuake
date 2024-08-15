@@ -66,4 +66,9 @@ namespace Nuake
 	{
 		return m_Logs;
 	}
+
+	void Logger::ClearLogs()
+	{
+		m_Logs.clear();
+	}
 }

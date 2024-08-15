@@ -8,7 +8,8 @@ namespace Nuake
 	{
 		VERBOSE,
 		WARNING,
-		CRITICAL
+		CRITICAL,
+		COMPILATION
 	};
 
 	struct LogEntry
@@ -29,5 +30,7 @@ namespace Nuake
 	public:
 		static void Log(const std::string& log, const std::string& logger = "main", LOG_TYPE type = VERBOSE);
 		static std::vector<LogEntry> GetLogs();
+		static void ClearLogs();
+		static size_t GetLogCount() { return m_Logs.size(); }
 	};
 }

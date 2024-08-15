@@ -2044,6 +2044,13 @@ namespace Nuake {
     {
         if (ImGui::Begin("Logger"))
         {
+            if (ImGui::Button("Clear Logs"))
+            {
+                Logger::ClearLogs();
+                SetStatusMessage("Logs cleared.");
+            }
+
+            ImGui::SameLine();
             ImGui::Checkbox("Errors", &LogErrors);
             ImGui::SameLine();
             ImGui::Checkbox("Warning", &LogWarnings);
@@ -2104,7 +2111,7 @@ namespace Nuake {
                     std::string displayMessage = l.message; 
                     if (l.count > 0)
                     {
-                        displayMessage + "(" + std::to_string(l.count) + ")";
+                        displayMessage += "(" + std::to_string(l.count) + ")";
                     } 
 
                     ImGui::TextWrapped(displayMessage.c_str());
@@ -2546,6 +2553,14 @@ namespace Nuake {
 
         DrawMenuBar();
         DrawMenuBars();
+
+        int i = 0;
+        if (Logger::GetLogCount() > 0 && Logger::GetLogs()[Logger::GetLogCount() - 1].type == COMPILATION)
+        {
+            SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
+        }
+
+
         DrawStatusBar();
 
 		pInterface.DrawEntitySettings();
