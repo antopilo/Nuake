@@ -24,6 +24,9 @@ namespace Nuake.Net
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
         internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
         internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
+        internal static unsafe delegate*<int, NativeString> EntityGetNameIcall;
+        internal static unsafe delegate*<int, NativeString, void> EntitySetNameIcall;
+
         public enum ComponentTypes
         {
             Unknown = -1,
@@ -55,6 +58,37 @@ namespace Nuake.Net
         public int ID { get; set; }
         public int ECSHandle { get; set; }
 
+        public string Name
+        {
+            get
+            {
+                unsafe
+                {
+                    NativeString name = EntityGetNameIcall(ECSHandle);
+                    return name;
+                }
+            }
+            set
+            {
+                if(String.IsNullOrEmpty(value))
+                {
+                    Engine.Log("Invalid entity name: cannot be empty.");
+                    return;
+                }
+
+                unsafe
+                {
+                    EntitySetNameIcall(ECSHandle, value);
+                }
+            }
+        }
+
+        public Entity() { }
+        public Entity(int handle)
+        {
+            ECSHandle = handle;
+        }
+
         public virtual void OnInit() { }
         public virtual void OnUpdate(float dt) { }
         public virtual void OnFixedUpdate(float dt) { }
@@ -78,7 +112,7 @@ namespace Nuake.Net
                 }
                 else
                 {
-                    entityInstance = new Entity { ECSHandle = entity };
+                    entityInstance = new Entity(ECSHandle);
                 }
             }
 
@@ -144,7 +178,7 @@ namespace Nuake.Net
                 }
                 else
                 {
-                    entityInstance = new Entity { ECSHandle = entityHandle };
+                    entityInstance = new Entity(entityHandle);
                 }
             }
 

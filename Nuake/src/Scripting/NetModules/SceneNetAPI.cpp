@@ -177,6 +177,29 @@ namespace Nuake {
 		return scene->GetRelativeEntityFromPath(entity, input).GetHandle();
 	}
 
+	Coral::String EntityGetName(int handle)
+	{
+		Entity entity = { (entt::entity)(handle), Engine::GetCurrentScene().get() };
+		if (!entity.IsValid())
+		{
+			return Coral::String();
+		}
+
+		return Coral::String::New(entity.GetComponent<NameComponent>().Name);
+	}
+
+	void EntitySetName(int handle, Coral::String newName)
+	{
+		Entity entity = { (entt::entity)(handle), Engine::GetCurrentScene().get() };
+		if (!entity.IsValid())
+		{
+			return;
+		}
+
+		const std::string newEntityName = Engine::GetCurrentScene()->GetUniqueEntityName(newName);
+		entity.GetComponent<NameComponent>().Name = newEntityName;
+	}
+
 	void TransformSetPosition(int entityId, float x, float y, float z)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -336,25 +359,33 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
 		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
 		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
+		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
+		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
 
 		// Scene
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
 		RegisterMethod("Scene.GetEntityScriptFromNameIcall", &GetEntityScriptFromName);
 		RegisterMethod("Scene.GetEntityScriptFromHandleIcall", &GetEntityScriptFromHandle);
 		RegisterMethod("Scene.InstancePrefabIcall", &InstancePrefab);
+
 		// Components
+		// Transform
 		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
 		RegisterMethod("TransformComponent.GetPositionIcall", &TransformGetPosition);
 		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
 
+		// Camera
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
 
+		// Character Controller
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
 
+		// Skinned 
 		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 
+		// Navigation Mesh
 		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", &NavMeshComponentFindPath);
 	}
 

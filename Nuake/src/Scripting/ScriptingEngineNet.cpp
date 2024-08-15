@@ -367,9 +367,7 @@ namespace Nuake
 					else
 					{
 						// In the case where the entity doesnt have an instance, we create one
-						auto newEntity = m_BaseEntityType.CreateInstance();
-						newEntity.SetPropertyValue("ECSHandle", scriptEntity.GetHandle());
-						newEntity.SetPropertyValue("ID", scriptEntity.GetID());
+						auto newEntity = m_BaseEntityType.CreateInstance(scriptEntity.GetHandle());
 						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
 					}
 				}

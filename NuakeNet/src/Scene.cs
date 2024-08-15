@@ -49,10 +49,7 @@ namespace Nuake.Net
                 throw new Exception("Entity not found");
             }
 
-            Entity entity = new Entity
-            {
-                ECSHandle = handle
-            };
+            Entity entity = new Entity(handle);
 
             return entity;
         }
@@ -76,10 +73,7 @@ namespace Nuake.Net
             //    return entity as T;
             //}
 
-            Entity entity = new Entity
-            {
-                ECSHandle = handle
-            };
+            Entity entity = new Entity(handle);
 
             return entity;
         }
