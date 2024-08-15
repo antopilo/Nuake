@@ -571,7 +571,11 @@ namespace Nuake
 
 			auto entity = Entity{ e, this };
 			auto parentEntity = GetEntityByID(parentComponent.ParentID);
-			parentEntity.AddChild(entity);
+
+			if (entity.IsValid())
+			{
+				parentEntity.AddChild(entity);
+			}
 		}
 
 		// This will turn the deserialized entity ids into actual Entities.

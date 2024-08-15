@@ -24,6 +24,11 @@ namespace Nuake
 {
 	void Entity::AddChild(Entity ent)
 	{
+		if(!IsValid())
+		{
+			return;
+		}
+
 		if ((int)m_EntityHandle != ent.GetHandle())
 		{
 			ent.GetComponent<ParentComponent>().HasParent = true;

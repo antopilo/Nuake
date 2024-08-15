@@ -188,13 +188,12 @@ namespace Nuake.Net
 
         public static implicit operator bool(Entity entity)
         {
-            bool isValid = false;
-
-            if(object.ReferenceEquals(entity, null))
+            if (object.ReferenceEquals(entity, null))
             {
                 return false;
             }
 
+            bool isValid;
             unsafe
             {
                 isValid = EntityIsValidIcall(entity.ECSHandle);

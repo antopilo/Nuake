@@ -24,6 +24,12 @@ void ExceptionCallback(std::string_view InMessage)
 	Nuake::Logger::Log(message, ".net", Nuake::COMPILATION);
 }
 
+
+void MessageCallback(std::string_view message, Coral::MessageLevel level)
+{
+	Nuake::Logger::Log(std::string(message), ".net", Nuake::VERBOSE);
+}
+
 namespace Nuake
 {
 	ScriptingEngineNet::ScriptingEngineNet()
@@ -33,7 +39,8 @@ namespace Nuake
 		Coral::HostSettings settings =
 		{
 			.CoralDirectory = "",
-			.ExceptionCallback = ExceptionCallback
+			.MessageCallback = MessageCallback,
+			.ExceptionCallback = ExceptionCallback,
 		};
 
 		m_HostInstance = new Coral::HostInstance();
@@ -334,7 +341,6 @@ namespace Nuake
 						int32_t handle;
 					};
 
-					//exposedVar.Value = classInstance.GetFieldValue<EntityWrapper>(varName).id;
 					break;
 				}
 			}
@@ -353,27 +359,30 @@ namespace Nuake
 			}
 			else if (exposedVarUserValue.Type == NetScriptExposedVarType::Entity)
 			{
-				int entityId = std::any_cast<int>(exposedVarUserValue.Value);
-				Entity scriptEntity = entity.GetScene()->GetEntityByID(entityId);
-				if (scriptEntity.IsValid())
+				if (exposedVarUserValue.Value.has_value())
 				{
-					if (HasEntityScriptInstance(scriptEntity))
+					int entityId = std::any_cast<int>(exposedVarUserValue.Value);
+					Entity scriptEntity = entity.GetScene()->GetEntityByID(entityId);
+					if (scriptEntity.IsValid())
 					{
-						// In the case the entity has a script & instance, we pass that.
-						// This gives access to the objects scripts.
-						auto scriptInstance = GetEntityScript(scriptEntity);
-						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, scriptInstance);
+						if (HasEntityScriptInstance(scriptEntity))
+						{
+							// In the case the entity has a script & instance, we pass that.
+							// This gives access to the objects scripts.
+							auto scriptInstance = GetEntityScript(scriptEntity);
+							classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, scriptInstance);
+						}
+						else
+						{
+							// In the case where the entity doesnt have an instance, we create one
+							auto newEntity = m_BaseEntityType.CreateInstance(scriptEntity.GetHandle());
+							classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
+						}
 					}
 					else
 					{
-						// In the case where the entity doesnt have an instance, we create one
-						auto newEntity = m_BaseEntityType.CreateInstance(scriptEntity.GetHandle());
-						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
+						Logger::Log("Invalid entity exposed variable set", ".net", CRITICAL);
 					}
-				}
-				else
-				{
-					Logger::Log("Invalid entity exposed variable set", ".net", CRITICAL);
 				}
 			}
 			else

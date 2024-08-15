@@ -224,7 +224,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                     auto entity = Nuake::Engine::GetCurrentScene()->GetEntityByID(entityId);
                     bool invalid = !entity.IsValid();
                     std::string buttonLabel;
-                    if (invalid)
+                    if (entityId == -1)
+                    {
+                        buttonLabel = "No Entity";
+                    }
+                    else if (invalid)
                     {
                         buttonLabel = "Invalid Entity";
                     }
@@ -245,9 +249,18 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                         }
                         ImGui::EndDragDropTarget();
                     }
+
                 }
 
                 ImGui::TableNextColumn();
+
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                std::string resetLabel = std::string(ICON_FA_UNDO) + "##Reset" + field.Name;
+                if (ImGui::Button(resetLabel.c_str()))
+                {
+                    field.Value = field.DefaultValue;
+                }
+                ImGui::PopStyleColor();
             }
         }
         
