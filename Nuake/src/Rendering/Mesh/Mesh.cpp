@@ -189,10 +189,9 @@ namespace Nuake
 
         m_IndicesCount = static_cast<uint32_t>(m_Indices.size());
 
-        std::vector<Vertex> vertices;
-       
-        auto asyncResult = std::async(std::launch::async, [&]()
+        auto result = std::async(std::launch::async, [&]()
             {
+                std::vector<Vertex> vertices;
                 for (auto& v : j["Vertices"])
                 {
                     Vertex vertex;
@@ -208,10 +207,12 @@ namespace Nuake
                     DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
                     vertices.push_back(vertex);
                 }
+
+                return vertices;
             }
         );
 
-        m_Vertices = vertices;
+        m_Vertices = result.get();
 
 		SetupMesh();
         return true;
