@@ -39,8 +39,11 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild -verbosity:m /m  /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
     
-    - name: Bundle Resources
-      run: xcopy Editor\resources bin\Release-windows-x86_64\Editor\resources /I /E 
+    - name: Copy Nuake.Net Assembly
+      run: xcopy Editor\NuakeNet.dll bin\Release-windows-x86_64\Editor\ /I /E 
+
+    - name: Copy Coral Assembly
+      run: xcopy Editor\Coral.Managed.dll bin\Release-windows-x86_64\Editor\ /I /E 
     
     - name: Zip
       uses: papeloto/action-zip@v1
