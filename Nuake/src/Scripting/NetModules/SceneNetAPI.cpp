@@ -200,6 +200,12 @@ namespace Nuake {
 		entity.GetComponent<NameComponent>().Name = newEntityName;
 	}
 
+	bool EntityIsValid(int handle)
+	{
+		Entity entity = { (entt::entity)(handle), Engine::GetCurrentScene().get() };
+		return entity.IsValid();
+	}
+
 	void TransformSetPosition(int entityId, float x, float y, float z)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -361,6 +367,7 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
 		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
 		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
+		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
 
 		// Scene
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);

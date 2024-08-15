@@ -26,6 +26,7 @@ namespace Nuake.Net
         internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
         internal static unsafe delegate*<int, NativeString> EntityGetNameIcall;
         internal static unsafe delegate*<int, NativeString, void> EntitySetNameIcall;
+        internal static unsafe delegate*<int, bool> EntityIsValidIcall;
 
         public enum ComponentTypes
         {
@@ -56,7 +57,7 @@ namespace Nuake.Net
 
 
         public int ID { get; set; }
-        public int ECSHandle { get; set; }
+        public int ECSHandle { get; set; } = -1;
 
         public string Name
         {
@@ -183,6 +184,23 @@ namespace Nuake.Net
             }
 
             return entityInstance as T;
+        }
+
+        public static implicit operator bool(Entity entity)
+        {
+            bool isValid = false;
+
+            if(object.ReferenceEquals(entity, null))
+            {
+                return false;
+            }
+
+            unsafe
+            {
+                isValid = EntityIsValidIcall(entity.ECSHandle);
+            }
+
+            return isValid;
         }
     }
 }

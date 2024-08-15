@@ -210,19 +210,23 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
 
                 if (field.Type == Nuake::NetScriptExposedVarType::Entity)
                 {
-                    if (!field.Value.has_value())
+                    if (!field.Value.has_value() && field.DefaultValue.has_value())
                     {
                         field.Value = field.DefaultValue;
                     }
 
+                    int entityId = -1;
+                    if (field.Value.has_value())
+                    {
+                        entityId = std::any_cast<int>(field.Value);
+                    }
 
-                    int entityId = std::any_cast<int>(field.Value);
                     auto entity = Nuake::Engine::GetCurrentScene()->GetEntityByID(entityId);
                     bool invalid = !entity.IsValid();
                     std::string buttonLabel;
                     if (invalid)
                     {
-                        buttonLabel = "Invalid Entity*";
+                        buttonLabel = "Invalid Entity";
                     }
                     else
                     {
