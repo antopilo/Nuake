@@ -20,5 +20,7 @@ namespace Nuake
 		static void OpenURL(const std::string& url);
 		static std::string GetConfigFolderPath();
 		static void CompileSln(const std::string& slnPath);
+
+		static int Subprocess(const std::string& command, std::string& out, std::string& err);
 	};
 }

@@ -23,6 +23,7 @@
 
 #include <chrono>
 #include <imgui/imgui.h>
+#include <Subprocess.hpp>
 
 namespace Nuake {
 
@@ -141,12 +142,55 @@ namespace Nuake {
 
 	void OS::CompileSln(const std::string& slnPath)
 	{
-		int result = system(std::string("dotnet build " + slnPath).c_str());
+		std::string output = "";
+		std::string err = "";
+		int result = Subprocess("dotnet build " + slnPath, output, err);
 
 		if (result != 0)
 		{
 			Logger::Log("Failed to execute `dotnet build` command.", "OS", CRITICAL);
+			Logger::Log(err.c_str(), ".NET", LOG_TYPE::COMPILATION);
 		}
+		
+		Logger::Log(output.c_str(), ".NET");
+	}
+
+	int OS::Subprocess(const std::string& command, std::string& out, std::string& err)
+	{
+		auto splits = String::Split(command, ' ');
+		std::vector<const char*> command_line(splits.size() + 1);
+		for (int i = 0; i < splits.size(); i++)
+		{
+			command_line[i] = splits[i].c_str();
+		}
+
+		command_line.back() = nullptr;
+		
+		struct subprocess_s subprocess;
+		char output[1024];
+		int result = subprocess_create(command_line.data(), 0, &subprocess);
+		if (0 != result) {
+			// an error occurred!
+		}
+
+		int process_return;
+		result = subprocess_join(&subprocess, &process_return);
+		if (0 != result) {
+			// an error occurred!
+		}
+
+		FILE* p_stdout = subprocess_stdout(&subprocess);
+		fgets(output, 1024, p_stdout);
+
+
+		FILE* p_stderr = subprocess_stderr(&subprocess);
+		char errOutput[1024];
+		fgets(errOutput, 1024, p_stderr);
+
+		out = std::string(output);
+		err = std::string(errOutput);
+
+		return result;
 	}
 
 	void OS::OpenURL(const std::string& url)

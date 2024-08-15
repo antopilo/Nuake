@@ -2070,6 +2070,7 @@ namespace Nuake {
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                 ImGui::TableNextColumn();
                 ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 4));
+
                 for (auto& l : Logger::GetLogs())
                 {
                     if (l.type == LOG_TYPE::VERBOSE && !LogDebug)
@@ -2559,7 +2560,6 @@ namespace Nuake {
         {
             SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
         }
-
 
         DrawStatusBar();
 
