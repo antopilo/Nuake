@@ -84,7 +84,7 @@ namespace Nuake
     {
         m_VertexArray = CreateScope<VertexArray>();
         m_VertexArray->Bind();
-        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), static_cast<uint32>t(m_Vertices.size() * sizeof(Vertex)));
+        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(Vertex)));
         m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
 
         VertexBufferLayout bufferLayout = VertexBufferLayout();
