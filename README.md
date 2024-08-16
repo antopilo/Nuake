@@ -8,7 +8,7 @@
 ## More info & News!
 You can visit the website for more information about the project and read the blog post about the project. 
 
-[Devlog posts 📰](https://nuake.antopilo.dev/news) 
+[Devlog posts 📰](https://nuake.antopilo.dev/blog) 
 
 You can also join the discord server for updates and screenshots: 
 
