@@ -25,6 +25,9 @@ namespace Nuake
 		m_Registry.emplace(Resources_Gizmos_light_directional_png_path, CreateRef<Texture>(Resources_Gizmos_light_directional_png, Resources_Gizmos_light_directional_png_len));
 		m_Registry.emplace(Resources_Gizmos_light_spot_png_path, CreateRef<Texture>(Resources_Gizmos_light_spot_png, Resources_Gizmos_light_spot_png_len));
 		m_Registry.emplace(Resources_Gizmos_player_png_path, CreateRef<Texture>(Resources_Gizmos_player_png, Resources_Gizmos_player_png_len));
+		m_Registry.emplace(Resources_Gizmos_particles_png_path, CreateRef<Texture>(Resources_Gizmos_particles_png, Resources_Gizmos_particles_png_len));
+		m_Registry.emplace(Resources_Gizmos_rigidbody_png_path, CreateRef<Texture>(Resources_Gizmos_rigidbody_png, Resources_Gizmos_rigidbody_png_len));
+		m_Registry.emplace(Resources_Gizmos_sound_emitter_png_path, CreateRef<Texture>(Resources_Gizmos_sound_emitter_png, Resources_Gizmos_sound_emitter_png_len));
 
 		m_Registry.emplace(Resources_Images_nuake_logo_png_path, CreateRef<Texture>(Resources_Images_nuake_logo_png, Resources_Images_nuake_logo_png_len));
 		m_Registry.emplace(Resources_Images_logo_white_png_path, CreateRef<Texture>(Resources_Images_logo_white_png, Resources_Images_logo_white_png_len));
