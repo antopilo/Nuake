@@ -142,7 +142,7 @@ namespace Nuake {
 		return path;
 	}
 
-	void OS::CompileSln(const std::string& slnPath)
+	std::string OS::CompileSln(const std::string& slnPath)
 	{
 		std::string output = "";
 		std::string err = "";
@@ -154,8 +154,10 @@ namespace Nuake {
 			Logger::Log(err.c_str(), ".NET", LOG_TYPE::COMPILATION);
 		}
 		
-		Logger::Log(output.c_str(), ".NET");
+		return output;
 	}
+
+
 
 	int OS::Subprocess(const std::string& command, std::string& out, std::string& err)
 	{

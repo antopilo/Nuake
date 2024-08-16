@@ -66,6 +66,55 @@ namespace Nuake
 		m_HostInstance->Shutdown();
 	}
 
+	std::vector<CompilationError> ScriptingEngineNet::ExtractErrors(const std::string& output)
+	{
+		std::vector<CompilationError> errors;
+
+		std::istringstream stream(output);
+		std::string line;
+
+		while (std::getline(stream, line)) 
+		{
+			auto trimmed = String::RemoveWhiteSpace(line);
+			auto parenSplit = String::Split(trimmed, '(');
+			if (parenSplit.size() > 1)
+			{
+				const std::string filePath = parenSplit[0];
+				const std::string restOfLine = parenSplit[1];
+
+				auto numbersString = String::Split(restOfLine, ')');
+				if (numbersString.size() > 1)
+				{
+					auto lineCharNums = String::Split(numbersString[0], ',');
+
+					int lineNum = std::stoi(lineCharNums[0]);
+					int charNum = std::stoi(lineCharNums[1]);
+
+					// error message
+					std::string errMesg = "";
+					int i = 0;
+					for (auto s : String::Split(line, ':'))
+					{
+						if (i >= 3)
+						{
+							errMesg += s;
+						}
+						i++;
+					}
+
+					CompilationError compilationError;
+					compilationError.message = errMesg;
+					compilationError.file = filePath;
+					compilationError.line = lineNum;
+					errors.push_back(compilationError);
+				}
+			}
+
+		}
+
+		return errors;
+	}
+
 	ScriptingEngineNet& ScriptingEngineNet::Get()
 	{
 		static ScriptingEngineNet instance;
@@ -149,16 +198,26 @@ namespace Nuake
 		return m_GameEntityTypes[className].exposedVars;
 	}
 
-	void ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
+	std::vector<CompilationError> ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
 	{
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
 		if (!FileSystem::FileExists(sanitizedProjectName + ".sln"))
 		{
 			Logger::Log("Couldn't find .net solution. Have you created a solution?", ".net", CRITICAL);
-			return;
+			return std::vector<CompilationError>();
 		}
 
-		OS::CompileSln(FileSystem::Root + sanitizedProjectName + ".sln");
+		std::string result = OS::CompileSln(FileSystem::Root + sanitizedProjectName + ".sln");
+
+		return ExtractErrors(result);
+		//if (errors.size() > 0)
+		//{
+		//	Logger::Log("Build failed!", ".net", CRITICAL);
+		//	for (auto& err : errors)
+		//	{
+		//		Logger::Log(err.file + " line " + std::to_string(err.line) + " : " + err.message, ".net", CRITICAL);
+		//	}
+		//}
 	}
 
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)

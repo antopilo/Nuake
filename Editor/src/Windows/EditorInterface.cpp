@@ -497,21 +497,37 @@ namespace Nuake {
 
                             std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
                             SetStatusMessage(statusMessage);
+
+                            
                             auto job = [this]()
                             {
-                                ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                                this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                             };
 
                             Selection = EditorSelection();
 
                             JobSystem::Get().Dispatch(job, [this]()
                             {
-                                SetStatusMessage("Entering play mode...");
-                                    
-                                PushCommand(SetGameState(GameState::Playing));
+                                if (errors.size() > 0)
+                                {
+                                    SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
 
-                                std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                                SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                                    Logger::Log("Build FAILED.", ".net", CRITICAL);
+                                    for (CompilationError error : errors)
+                                    {
+                                        const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                        Logger::Log(errorMessage, ".net", CRITICAL);
+                                    }
+                                }
+                                else
+                                {
+                                    SetStatusMessage("Entering play mode...");
+
+                                    PushCommand(SetGameState(GameState::Playing));
+
+                                    std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                                    SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                                }
                             });
                         }
                     }
@@ -608,11 +624,31 @@ namespace Nuake {
 
                 if (ImGui::Button(ICON_FA_HAMMER, ImVec2(30, 30)))
                 {
-                    JobSystem::Get().Dispatch([]()
+                    SetStatusMessage(std::string(ICON_FA_HAMMER)+ " Building solution...", { 0.1f, 0.1f, 1.0f, 1.0f });
+
+                    auto job = [this]()
                         {
-                            Nuake::ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                        }, []() {}
-                        );
+                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                        };
+
+                    JobSystem::Get().Dispatch(job, [this]()
+                    {
+                        if (errors.size() > 0)
+                        {
+                            SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
+
+                            Logger::Log("Build FAILED.", ".net", CRITICAL);
+                            for (CompilationError error : errors)
+                            {
+                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                Logger::Log(errorMessage, ".net", CRITICAL);
+                            }
+                        }
+                        else
+                        {
+                            SetStatusMessage("Build succesful!");
+                        }
+                    });
                 }
 
                 if (ImGui::BeginItemTooltip())
@@ -2088,6 +2124,8 @@ namespace Nuake {
                     else
                         severityText = "critical";
 
+                    ImVec4 redColor = ImVec4(0.6, 0.1f, 0.1f, 0.2f);
+                    ImVec4 yellowColor = ImVec4(0.6, 0.6f, 0.1f, 0.2f);
                     ImVec4 colorGreen = ImVec4(0.59, 0.76, 0.47, 1.0);
                     ImGui::PushStyleColor(ImGuiCol_Text, colorGreen);
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.59, 0.76, 0.47, 0.2)), -1);
@@ -2107,7 +2145,19 @@ namespace Nuake {
 
                     ImVec4 color = ImVec4(1, 1, 1, 1.0);
                     ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
+
+                    if (l.type == CRITICAL)
+                    {
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(redColor), -1);
+                    }
+                    else if (l.type == WARNING)
+                    {
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(yellowColor), -1);
+                    }
+                    else
+                    {
+                        ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.0)), -1);
+                    }
 
                     std::string displayMessage = l.message; 
                     if (l.count > 0)
