@@ -364,9 +364,10 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
 				shader->Bind();
 
-				shader->SetUniform1i("u_EntityID", mOutlineEntityID + 1);
+				shader->SetUniform1i("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
 				shader->SetUniformTex("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
 				shader->SetUniform4f("u_OutlineColor", 97.0f / 255.0f, 0, 1.0f, 1.0f);
+				shader->SetUniformTex("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT), 1);
 				Renderer::DrawQuad();
 			}
 			mOutlineBuffer->Unbind();
@@ -573,6 +574,9 @@ namespace Nuake
 						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
 						if (mesh.ModelResource != nullptr && visibility.Visible)
 						{
+							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
+							SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
+
 							for (auto& m : mesh.ModelResource->GetMeshes())
 							{
 								m->Draw(gBufferSkinnedMeshShader, false);
