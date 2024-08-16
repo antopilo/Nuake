@@ -787,6 +787,11 @@ namespace Nuake {
             m_IsRenaming = true;
         }
 
+        if (!m_IsRenaming && Selection.Type == EditorSelectionType::Entity && Input::IsKeyPressed(Key::DELETE))
+        {
+            QueueDeletion = Selection.Entity;
+        }
+
         if (ImGui::BeginPopupContextItem())
         {
             Selection = EditorSelection(e);
@@ -804,7 +809,7 @@ namespace Nuake {
                 }
                 ImGui::Separator();
             }
-
+            
             if (ImGui::Selectable("Remove"))
             {
                 QueueDeletion = e;
