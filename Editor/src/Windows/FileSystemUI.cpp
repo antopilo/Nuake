@@ -92,7 +92,7 @@ namespace Nuake
                 m_CurrentDirectory = directory;
             }
 
-            Editor->Selection = EditorSelection(directory);
+            //Editor->Selection = EditorSelection(directory);
         }
 
         if (ImGui::IsItemHovered())
@@ -709,7 +709,7 @@ namespace Nuake
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 8);
             if (ImGui::BeginChild("Tree browser", ImVec2(sz1, avail.y), true))
             {
-                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_FramePadding;
+                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_FramePadding;
 
                 bool is_selected = m_CurrentDirectory == FileSystem::RootDirectory;
                 if (is_selected)
@@ -724,13 +724,10 @@ namespace Nuake
                 }
                 ImGui::PopFont();
 
-                if (open)
-                {
-                    for(auto& d : rootDirectory->Directories)
-                        EditorInterfaceDrawFiletree(d);
+                for(auto& d : rootDirectory->Directories)
+                    EditorInterfaceDrawFiletree(d);
 
-                    ImGui::TreePop();
-                }
+                ImGui::TreePop();
 
             }
             ImGui::PopStyleVar();
