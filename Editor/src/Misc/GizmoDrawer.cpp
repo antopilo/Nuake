@@ -163,6 +163,20 @@ bool GizmoDrawer::IsEntityInSelection(Nuake::Entity entity)
 	return false;
 }
 
+float GizmoDrawer::GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
+{
+	float distance = Distance(camPosition, position);
+
+	constexpr float ClosestDistance = 3.5f;
+	if (distance < ClosestDistance)
+	{
+		float fraction = distance / ClosestDistance;
+		return fraction;
+	}
+
+	return 1.0f;
+}
+
 void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 {
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
@@ -171,7 +185,9 @@ void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 		m_LineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
 		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
 		m_LineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
+		m_LineShader->SetUniformVec4("u_Color", {0.0f, 0.0f, 0.0f, 0.0f});
 		m_AxisLineBuffer->Bind();
+		glLineWidth(1.0f);
 		Nuake::RenderCommand::DrawLines(0, 6);
 	}
 }
@@ -432,6 +448,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	gizmoShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
 	RenderCommand::Disable(RendererEnum::FACE_CULL);
 
+	const Vector3& cameraPosition = scene->m_EditorCamera->GetTranslation();
+
 	// Camera
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
@@ -448,7 +466,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -487,7 +505,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -509,7 +527,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, Vector3(0.5, 0.5, 0.5));
+		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -531,18 +549,18 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		// Translation
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
-		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1));
+		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1) * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
 	}
 
 	
-
+	// Sound emitter
 	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/speaker.png").get());
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/sound_emitter.png").get());
 		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transformComponent, audioEmitterComponent] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
@@ -551,15 +569,55 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		transform = glm::inverse(scene->m_EditorCamera->GetTransform());
 
 		// Translation
-		const Vector3& globalPosition = transformComponent.GetGlobalPosition();
+		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
 		transform[3] = initialTransform[3];
-		transform = glm::scale(transform, Vector3(0.5f, 0.5f, 0.5f));
+		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, transform);
 		renderList.Flush(gizmoShader, true);
 	}
 
-	
+	// Rigid body
+	auto rigidbodyView = scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
+	for (auto e : rigidbodyView)
+	{
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/rigidbody.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		auto [transformComponent, rigidbodyComponent] = scene->m_Registry.get<TransformComponent, RigidBodyComponent>(e);
+
+		auto initialTransform = transformComponent.GetGlobalTransform();
+		Matrix4 transform = initialTransform;
+		transform = glm::inverse(scene->m_EditorCamera->GetTransform());
+
+		// Translation
+		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
+		transform[3] = initialTransform[3];
+		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, transform);
+		renderList.Flush(gizmoShader, true);
+	}
+
+	// Particle Emitter
+	auto particleEmitterView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
+	for (auto e : particleEmitterView)
+	{
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/particles.png").get());
+		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		auto [transformComponent, particleEmitter] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
+
+		auto initialTransform = transformComponent.GetGlobalTransform();
+		Matrix4 transform = initialTransform;
+		transform = glm::inverse(scene->m_EditorCamera->GetTransform());
+
+		// Translation
+		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
+		transform[3] = initialTransform[3];
+		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+
+		renderList.AddToRenderList(Renderer::QuadMesh, transform);
+		renderList.Flush(gizmoShader, true);
+	}
 	
 	// Revert to default depth testing
 	//glDepthFunc(GL_LESS);
