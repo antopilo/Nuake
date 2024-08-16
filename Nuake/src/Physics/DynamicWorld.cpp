@@ -753,7 +753,24 @@ namespace Nuake
 					}
 				}
 
-				_JoltPhysicsSystem->Update(ts, collisionSteps, joltTempAllocator.get(), _JoltJobSystem);
+				auto error = _JoltPhysicsSystem->Update(ts, collisionSteps, joltTempAllocator.get(), _JoltJobSystem);
+				if (error != JPH::EPhysicsUpdateError::None)
+				{
+					std::string errMsg = "";
+					switch (error)
+					{
+					case JPH::EPhysicsUpdateError::ManifoldCacheFull:
+						errMsg = "Manifold cache full";
+						break;
+					case JPH::EPhysicsUpdateError::BodyPairCacheFull:
+						errMsg = "Body pair cache full";
+						break;
+					case JPH::EPhysicsUpdateError::ContactConstraintsFull:
+						errMsg = "contact constraints full";
+						break;
+					}
+					Logger::Log("Jolt physics encountered an error: " + errMsg, "jolt", CRITICAL);
+				}
 			}
 			catch (...)
 			{
