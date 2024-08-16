@@ -70,4 +70,5 @@ private:
 	void DrawMaterialPanel(Ref<Nuake::Material> material);
 	void DrawProjectPanel(Ref<Nuake::Project> project);
 	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
+	void DrawNetScriptPanel(Ref<Nuake::File> file);
 };

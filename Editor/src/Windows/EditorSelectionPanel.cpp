@@ -209,6 +209,11 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 			DrawWrenScriptPanel(CreateRef<WrenScript>(file, true));
 			break;
 		}
+		case FileType::NetScript:
+		{
+			DrawNetScriptPanel(file);
+			break;
+		}
 		case FileType::Prefab:
 		{
 			//Ref<Prefab> prefab = CreateRef<Prefab>(file->GetRelativePath());
@@ -483,6 +488,26 @@ void EditorSelectionPanel::DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile)
 	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetWindowWidth());
 	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
 	
+	ImGui::PopTextWrapPos();
+}
+
+void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
+{
+	auto filePath = file->GetRelativePath();
+	std::string fileContent = Nuake::FileSystem::ReadFile(filePath);
+
+	ImGui::Text("Content");
+	ImGui::SameLine(ImGui::GetWindowWidth() - 90);
+	if (ImGui::Button("Open..."))
+	{
+		Nuake::OS::OpenIn(file->GetAbsolutePath());
+	}
+
+	ImGui::Separator();
+
+	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetWindowWidth());
+	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
+
 	ImGui::PopTextWrapPos();
 }
 
