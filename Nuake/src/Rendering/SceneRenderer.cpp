@@ -28,6 +28,7 @@ namespace Nuake
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
+		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT); // Depth
 
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
@@ -56,8 +57,21 @@ namespace Nuake
 			0, 1
 		};
 
+		// Debug shapes
 		mLineMesh = CreateRef<Mesh>();
 		mLineMesh->AddSurface(lineVertices, lineIndices);
+
+		mBoxGizmo = CreateRef<BoxGizmo>();
+		mBoxGizmo->CreateMesh();
+
+		mSphereGizmo = CreateRef<SphereGizmo>();
+		mSphereGizmo->CreateMesh();
+
+		mCylinderGizmo = CreateRef<CylinderGizmo>();
+		mCylinderGizmo->CreateMesh();
+
+		mCapsuleGizmo = CreateRef<CapsuleGizmo>();
+		mCapsuleGizmo->CreateMesh();
 	}
 
 	void SceneRenderer::Cleanup()
@@ -66,9 +80,25 @@ namespace Nuake
 
 	void SceneRenderer::Update(const Timestep time)
 	{
+		// Delete debug shapes that are dead
+		std::erase_if(mDebugLines, [](const DebugLine& line)
+			{
+				return line.Life < 0.0f;
+			});
+
+		std::erase_if(mDebugShapes, [](const DebugShape& shape)
+			{
+				return shape.Life < 0.0f;
+			});
+
 		for (auto& line : mDebugLines)
 		{
 			line.Life -= time;
+		}
+
+		for (auto& shape : mDebugShapes)
+		{
+			shape.Life -= time;
 		}
 	}
 
@@ -106,6 +136,17 @@ namespace Nuake
 
 		mShadingBuffer->QueueResize(framebuffer.GetSize());
 		ShadingPass(scene);
+
+		// Blit depth buffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetRenderID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mShadingBuffer->GetRenderID());
+
+		glBlitFramebuffer(
+			0, 0, mShadingBuffer->GetSize().x, mShadingBuffer->GetSize().y, // Source rectangle (x0, y0, x1, y1)
+			0, 0, mShadingBuffer->GetSize().x, mShadingBuffer->GetSize().y, // Destination rectangle (x0, y0, x1, y1)
+			GL_DEPTH_BUFFER_BIT, // Bitmask indicating which buffers to copy
+			GL_NEAREST // Filtering mode (NEAREST or LINEAR)
+		);
 
 		DebugRendererPass(scene);
 
@@ -379,18 +420,33 @@ namespace Nuake
 		mTempModels[name] = TemporaryModels{ model, transform };
 	}
 
-	void SceneRenderer::DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color, float life)
+	void SceneRenderer::DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color, float life, float width)
 	{
 		DebugLine debugLine = {
 			.Start = start,
 			.End = end,
 			.LineColor = color,
 			.Life = life,
-			.Width = 2.0f,
+			.Width = width,
 			.DepthTest = true
 		};
 
 		mDebugLines.push_back(debugLine);
+	}
+
+	void SceneRenderer::DrawDebugShape(const Vector3& position, const Quat& rotation, Ref<Physics::PhysicShape> shape, const Color& color, float life, float width)
+	{
+		DebugShape debugShape = {
+			.Position = position,
+			.Rotation = rotation,
+			.LineColor = color,
+			.Life = life,
+			.Width = width,
+			.DepthTest = true,
+			.Shape = shape,
+		};
+
+		mDebugShapes.push_back(debugShape);
 	}
 	
 	void SceneRenderer::ShadowPass(Scene& scene)
@@ -865,18 +921,96 @@ namespace Nuake
 				RenderCommand::DrawLines(0, 2);
 			}
 
-			std::erase_if(mDebugLines, [](const DebugLine& line) 
-				{
-					return line.Life <= 0.0f;
-				});
+			
 
 			shader->Unbind();
 
-			// Cubes
+			shader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
+			shader->Bind();
+			shader->SetUniform1f("u_Opacity", 0.5f);
+			shader->SetUniformMat4f("u_Projection", mProjection);
 
-			// Spheres
+			for (auto& shape : mDebugShapes)
+			{
+				if(shape.DepthTest)
+				{
+					glEnable(GL_DEPTH_TEST);
+				}
+				else
+				{
+					RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+				}
 
-			// Quads
+				shader->SetUniformVec4("u_Color", shape.LineColor);
+
+				glLineWidth(shape.Width);
+				Matrix4 view = mView;
+				Physics::RigidbodyShapes shapeType = shape.Shape->GetType();
+				switch (shapeType)
+				{
+					case Physics::RigidbodyShapes::BOX:
+					{
+						const Quat& globalRotation = glm::normalize(shape.Rotation);
+						const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+						view = glm::translate(view, shape.Position) * rotationMatrix;
+						view = glm::scale(view, reinterpret_cast<Physics::Box*>(shape.Shape.get())->GetSize());
+						
+						shader->SetUniformMat4f("u_View", view);
+						
+
+						mBoxGizmo->Bind();
+						RenderCommand::DrawLines(0, 26);
+						break;
+					}
+					case Physics::RigidbodyShapes::SPHERE:
+					{
+						const Quat& globalRotation = glm::normalize(shape.Rotation);
+						const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+						view = glm::translate(view, shape.Position) * rotationMatrix;
+						view = glm::scale(view, Vector3(reinterpret_cast<Physics::Sphere*>(shape.Shape.get())->GetRadius()));
+						shader->SetUniformMat4f("u_View", view);
+
+						mSphereGizmo->Bind();
+						RenderCommand::DrawLines(0, 128);
+						break;
+					}
+					case Physics::RigidbodyShapes::CAPSULE:
+					{
+						const Quat& globalRotation = glm::normalize(shape.Rotation);
+						const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+						view = glm::translate(view, shape.Position) * rotationMatrix;
+
+						shader->SetUniformMat4f("u_View", view);
+
+						const Physics::Capsule* capsule = reinterpret_cast<Physics::Capsule*>(shape.Shape.get());
+						mCapsuleGizmo->UpdateShape(capsule->GetRadius(), capsule->GetHeight());
+						mCapsuleGizmo->Bind();
+						Nuake::RenderCommand::DrawLines(0, 264);
+						break;
+					}
+					case Physics::RigidbodyShapes::CYLINDER:
+					{
+						const Quat& globalRotation = glm::normalize(shape.Rotation);
+						const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+						view = glm::translate(view, shape.Position) * rotationMatrix;
+
+						const Physics::Cylinder* cylinder = reinterpret_cast<Physics::Cylinder*>(shape.Shape.get());
+
+						shader->SetUniformMat4f("u_View", view);
+
+						mCylinderGizmo->Bind();
+						mCylinderGizmo->UpdateShape(cylinder->GetRadius(), cylinder->GetHeight());
+						Nuake::RenderCommand::DrawLines(0, 264);
+						break;
+					}
+				}
+			}
+
+			
 		}
 		mShadingBuffer->Unbind();
 	}

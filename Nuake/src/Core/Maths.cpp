@@ -62,6 +62,11 @@ namespace Nuake
         rot = glm::quat_cast(rotMtx);
     }
 
+    float Distance(const Vector3& a, const Vector3& b)
+    {
+        return glm::distance(a, b);
+    }
+
     const Matrix4& TransformToCameraTransform(const Matrix4& mat)
     {
         return mat;

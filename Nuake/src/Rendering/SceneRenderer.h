@@ -7,25 +7,24 @@
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
 #include "src/Rendering/PostFX/SSR.h"
+#include "Shapes/BoxGizmo.h"
+#include "Shapes/SphereGizmo.h"
+#include "Shapes/CapsuleGizmo.h"
+#include "Shapes/CylinderGizmo.h"
 
 namespace Nuake 
 {
 	class SceneRenderer 
 	{
-		struct DebugSphere
+		struct DebugShape
 		{
 			Vector3 Position;
-			float Radius;
-			Color SphereColor;
+			Quat Rotation;
+			Color LineColor;
 			float Life;
-		};
-
-		struct DebugQuad
-		{
-			Vector3 Position;
-			Vector3 Size;
-			Color SphereColor;
-			float Life;
+			float Width;
+			bool DepthTest = true;
+			Ref<Physics::PhysicShape> Shape;
 		};
 
 		struct DebugLine
@@ -64,7 +63,9 @@ namespace Nuake
 		}
 
 		void DrawTemporaryModel(const std::string& name, Ref<Model> model, Matrix4 transform);
-		void DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color = Color(1, 0, 0, 1), float life = 0.0f);
+		void DrawDebugLine(const Vector3& start, const Vector3& end, const Color& color = Color(1, 0, 0, 1), float life = 0.0f, float width = 1.0f);
+		void DrawDebugShape(const Vector3& position, const Quat& rotation, Ref<Physics::PhysicShape> shape, const Color& color = Color(1, 0, 0, 1), float life = 0.0f, float width = 1.0f);
+
 		void ClearTemporaryModels()
 		{
 			mTempModels.clear();
@@ -83,11 +84,17 @@ namespace Nuake
 		Scope<FrameBuffer> mDOFBuffer;
 		Scope<FrameBuffer> mOutlineBuffer;
 
-		Ref<Mesh> mLineMesh;
+		// Shapes
+		Ref<BoxGizmo> mBoxGizmo;
+		Ref<SphereGizmo> mSphereGizmo;
+		Ref<CapsuleGizmo> mCapsuleGizmo;
+		Ref<CylinderGizmo> mCylinderGizmo;
 
+		Ref<Mesh> mLineMesh;
 
 		std::map<std::string, TemporaryModels> mTempModels;
 		std::vector<DebugLine> mDebugLines;
+		std::vector<DebugShape> mDebugShapes;
 
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);

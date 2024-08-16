@@ -26,6 +26,8 @@ namespace Nuake
 	Vector3 QuatToDirection(const Quat& quat);
 	void Decompose(const Matrix4& m, Vector3& pos, Quat& rot, Vector3& scale);
 
+	float Distance(const Vector3& a, const Vector3& b);
+
 	const Matrix4& TransformToCameraTransform(const Matrix4& mat);
 
 	// Returns a random number [0..1]

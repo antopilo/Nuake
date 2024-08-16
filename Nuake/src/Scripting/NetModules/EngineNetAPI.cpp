@@ -35,6 +35,26 @@ namespace Nuake {
 		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugLine(start, end, color, life);
 	}
 
+	void DrawShapeBox(Vector3 position, Quat rotation, Vector3 box, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Box>(box.x, box.y, box.z), color, life, width);
+	}
+
+	void DrawShapeSphere(Vector3 position, Quat rotation, float radius, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Sphere>(radius), color, life, width);
+	}
+
+	void DrawShapeCylinder(Vector3 position, Quat rotation, float radius, float height, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Cylinder>(radius, height), color, life, width);
+	}
+
+	void DrawShapeCapsule(Vector3 position, Quat rotation, float radius, float height, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Capsule>(radius, height), color, life, width);
+	}
+
 	Coral::Array<float> ConvertHitsToArray(const std::vector<ShapeCastResult> hits)
 	{
 		std::vector<float> results;
@@ -76,7 +96,13 @@ namespace Nuake {
 	void EngineNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
+
+		// Debug renderer
 		RegisterMethod("Debug.DrawLineIcall", &DrawLine);
+		RegisterMethod("Debug.DrawShapeBoxIcall", &DrawShapeBox);
+		RegisterMethod("Debug.DrawShapeSphereIcall", &DrawShapeSphere);
+		RegisterMethod("Debug.DrawShapeCapsuleIcall", &DrawShapeCapsule);
+		RegisterMethod("Debug.DrawShapeCylinderIcall", &DrawShapeCylinder);
 
 		RegisterMethod("Physic.ShapeCastCapsuleIcall", &ShapeCastCapsule);
 		RegisterMethod("Physic.ShapeCastBoxIcall", &ShapeCastBox);

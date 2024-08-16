@@ -26,9 +26,18 @@ layout(location = 1) out int gEntityID;
 
 uniform float u_Opacity;
 uniform int u_EntityID;
+uniform vec4 u_Color;
 
 void main()
 {
-    FragColor = LineColor * vec4(1, 1, 1, u_Opacity);
+    if(u_Color == vec4(0, 0, 0, 0))
+    {
+        FragColor = LineColor * vec4(1, 1, 1, u_Opacity);
+    }
+    else
+    {
+        FragColor = u_Color;
+    }
+    
     gEntityID = int(u_EntityID);
 }
