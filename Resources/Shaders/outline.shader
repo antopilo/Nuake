@@ -49,12 +49,12 @@ void main()
 		
 		// We dont want to sample outside the viewport
 		vec2 sampleUv = uv + offset;
-		sampleUv.x = clamp(sampleUv.x, 0.0, 1.0);
-		sampleUv.y = clamp(sampleUv.y, 0.0, 1.0);
+		sampleUv.x = clamp(sampleUv.x, 0.0, 0.999);
+		sampleUv.y = clamp(sampleUv.y, 0.0, 0.999);
 
 		uint col = texture(u_EntityTexture, sampleUv).r;
 		float depthTarget = texture(u_Depth, sampleUv).r;
-		if(col == target && depthTarget < depth)
+		if(col == target && depthTarget != 0.0f && depthTarget < depth)
 		{
 			hasHit = 1.0f;
 		}
