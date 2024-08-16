@@ -202,4 +202,46 @@ namespace Nuake.Net
             return isValid;
         }
     }
+
+    public class Prefab
+    {
+        internal static unsafe delegate*<NativeString, Vector3, float, float, float, float, int> PrefabInstanceIcall;
+
+        string Path {  get; set; }
+
+        public Prefab()
+        {
+
+        }
+
+        public Prefab(string path)
+        {
+            Path = path;
+            Engine.Log("Prefab instance created with path: " + path);
+        }
+
+        public Entity? Instance(Vector3 position = default, Quaternion quat = default)
+        {
+            int handle;
+            unsafe { handle = PrefabInstanceIcall(Path, position, quat.X, quat.Y, quat.Z, quat.W); }
+
+            if (handle == -1)
+            {
+                return null;
+            }
+
+            Entity entity = new Entity(handle);
+            return entity;
+        }
+
+        public static implicit operator bool(Prefab prefab)
+        {
+            if (object.ReferenceEquals(prefab, null))
+            {
+                return false;
+            }
+
+            return prefab.Path != string.Empty;
+        }
+    }
 }

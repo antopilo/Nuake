@@ -252,6 +252,59 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
 
                 }
 
+                if (field.Type == Nuake::NetScriptExposedVarType::Prefab)
+                {
+                    if (!field.Value.has_value() && field.DefaultValue.has_value())
+                    {
+                        field.Value = field.DefaultValue;
+                    }
+
+                    std::string prefabPath = "";
+                    if (field.Value.has_value())
+                    {
+                        prefabPath = std::any_cast<std::string>(field.Value);
+                    }
+
+                    std::string buttonLabel;
+                    if (!Nuake::FileSystem::FileExists(prefabPath))
+                    {
+                        buttonLabel = "File doesn't exist";
+                    }
+                    else if (prefabPath.empty())
+                    {
+                        buttonLabel = "Empty";
+                    }
+                    else
+                    {
+                        buttonLabel = prefabPath;
+                    }
+
+                    if (ImGui::Button(buttonLabel.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+                    {
+                        const std::string& newPath = Nuake::FileDialog::OpenFile("Prefab file\0*.prefab");
+
+                        const std::string& relativePath = Nuake::FileSystem::AbsoluteToRelative(newPath);
+                        if (Nuake::FileSystem::FileExists(relativePath))
+                        {
+                            field.Value = relativePath;
+                        }
+                    }
+
+                    if (ImGui::BeginDragDropTarget())
+                    {
+                        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Prefab"))
+                        {
+                            char* file = (char*)payload->Data;
+                            const std::string filePath = Nuake::FileSystem::AbsoluteToRelative(std::string(file, 512));
+                            if (Nuake::FileSystem::FileExists(filePath))
+                            {
+                                field.Value = filePath;
+                            }
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                }
+
                 ImGui::TableNextColumn();
 
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));

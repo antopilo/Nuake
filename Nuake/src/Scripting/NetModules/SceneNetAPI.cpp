@@ -206,6 +206,23 @@ namespace Nuake {
 		return entity.IsValid();
 	}
 
+	int PrefabInstance(Coral::String path, Vector3 position, float qx, float qy, float qz, float qw)
+	{
+		if (!FileSystem::FileExists(path))
+		{
+			Logger::Log("Prefab path doesn't exist", ".net", CRITICAL);
+		}
+
+		const auto& prefab = Prefab::New(path);
+
+		Entity root = prefab->Root;
+		TransformComponent& transformComponent = root.GetComponent<TransformComponent>();
+		transformComponent.SetLocalPosition(position);
+		transformComponent.SetLocalRotation(Quat(qw, qx, qy, qz));
+
+		return root.GetHandle();
+	}
+
 	void TransformSetPosition(int entityId, float x, float y, float z)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -368,6 +385,9 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
 		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
 		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
+
+		// Prefab
+		RegisterMethod("Prefab.PrefabInstanceIcall", &PrefabInstance);
 
 		// Scene
 		RegisterMethod("Scene.GetEntityIcall", &GetEntity);

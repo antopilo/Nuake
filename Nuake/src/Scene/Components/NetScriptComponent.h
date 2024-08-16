@@ -16,6 +16,7 @@ namespace Nuake {
 		Double,
 		String,
 		Entity,
+		Prefab,
 		Vector2,
 		Vector3,
 		Vector4
@@ -71,6 +72,21 @@ namespace Nuake {
 						varJ["Value"] = std::any_cast<std::string>(e.Value);
 						varJ["DefaultValue"] = std::any_cast<std::string>(e.DefaultValue);
 						break;
+					case NetScriptExposedVarType::Prefab:
+					{
+						if (e.Value.has_value())
+						{
+							varJ["Value"] = std::any_cast<std::string>(e.Value);
+							varJ["DefaultValue"] = std::any_cast<std::string>(e.DefaultValue);
+						}
+						else
+						{
+							varJ["Value"] = "";
+							varJ["DefaultValue"] = "";
+						}
+
+						break;
+					}
 					case NetScriptExposedVarType::Vector2:
 					{
 						Vector2 value = std::any_cast<Vector2>(e.Value);
@@ -97,13 +113,17 @@ namespace Nuake {
 					}
 					case NetScriptExposedVarType::Entity:
 					{
-						int value = std::any_cast<int>(e.Value);
+						int value = -1;
+						if (e.Value.has_value())
+						{
+							value = std::any_cast<int>(e.Value);
+						}
+						
 						varJ["Value"] = value;
-
-						value = std::any_cast<int>(e.DefaultValue);
 						varJ["DefaultValue"] = value;
 						break;
 					}
+					
 					default:
 						varJ["Value"] = 0;
 						break;
@@ -151,6 +171,12 @@ namespace Nuake {
 						exposedVar.Value = (double)exposedVarJson["Value"];
 						exposedVar.DefaultValue = (double)exposedVarJson["DefaultValue"];
 						break;
+					case NetScriptExposedVarType::Prefab:
+					{
+						exposedVar.Value = (std::string)exposedVarJson["Value"];
+						exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
+						break;
+					}
 					case NetScriptExposedVarType::String:
 						exposedVar.Value = (std::string)exposedVarJson["Value"];
 						exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];

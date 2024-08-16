@@ -122,7 +122,7 @@ namespace Nuake
 			}
 		}
 
-		Entity currentEntity;
+		Entity currentEntity = Entity({(entt::entity)-1, this});
 		uint32_t currentSplitIndex = 1;
 		while (currentSplitIndex < splits.size())
 		{
@@ -143,6 +143,12 @@ namespace Nuake
 						continue;
 					}
 				}
+			}
+
+			// Not found
+			if (!currentEntity.IsValid())
+			{
+				return Entity({(entt::entity)-1, this});
 			}
 
 			// Then look through child of root entity
@@ -571,11 +577,7 @@ namespace Nuake
 
 			auto entity = Entity{ e, this };
 			auto parentEntity = GetEntityByID(parentComponent.ParentID);
-
-			if (entity.IsValid())
-			{
-				parentEntity.AddChild(entity);
-			}
+			parentEntity.AddChild(entity);
 		}
 
 		// This will turn the deserialized entity ids into actual Entities.

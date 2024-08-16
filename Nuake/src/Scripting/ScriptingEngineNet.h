@@ -24,6 +24,7 @@ namespace Nuake {
 		Double,
 		String,
 		Entity,
+		Prefab,
 		Vector2,
 		Vector3,
 		Vector4,
@@ -52,6 +53,7 @@ namespace Nuake {
 		const std::string m_ContextName = "NuakeEngineContext";
 
 		Coral::Type m_BaseEntityType;
+		Coral::Type m_PrefabType;
 		bool m_IsInitialized = false;
 
 		Coral::HostInstance* m_HostInstance;

@@ -180,6 +180,7 @@ namespace Nuake
 		const std::string absoluteAssemblyPath = FileSystem::Root + assemblyPath;
 		m_GameAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
 
+		m_PrefabType = m_GameAssembly.GetType("Nuake.Net.Prefab");
 		auto& exposedFieldAttributeType = m_GameAssembly.GetType("Nuake.Net.ExposedAttribute");
 
 		for (auto& type : m_GameAssembly.GetTypes())
@@ -234,6 +235,10 @@ namespace Nuake
 							else if (typeName == "Nuake.Net.Entity")
 							{
 								varType = ExposedVarTypes::Entity;
+							}
+							else if (typeName == "Nuake.Net.Prefab")
+							{
+								varType = ExposedVarTypes::Prefab;
 							}
 
 							if (varType != ExposedVarTypes::Unsupported)
@@ -343,6 +348,11 @@ namespace Nuake
 
 					break;
 				}
+				case ExposedVarTypes::Prefab:
+				{
+
+					break;
+				}
 			}
 		}
 
@@ -382,6 +392,23 @@ namespace Nuake
 					else
 					{
 						Logger::Log("Invalid entity exposed variable set", ".net", CRITICAL);
+					}
+				}
+			}
+			else if (exposedVarUserValue.Type == NetScriptExposedVarType::Prefab)
+			{
+				if (exposedVarUserValue.Value.has_value())
+				{
+					std::string path = std::any_cast<std::string>(exposedVarUserValue.Value);
+					if (FileSystem::FileExists(path))
+					{
+						// In the case where the entity doesnt have an instance, we create one
+						auto newPrefab = m_PrefabType.CreateInstance(Coral::String::New(path));
+						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newPrefab);
+					}
+					else
+					{
+						Logger::Log("Invalid prefab exposed variable set", ".net", CRITICAL);
 					}
 				}
 			}
