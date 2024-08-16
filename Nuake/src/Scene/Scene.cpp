@@ -302,6 +302,12 @@ namespace Nuake
 				allEntities.push_back(newEntity);
 			}
 		}
+
+		// Temporary fix to prevent order of tree to change randomly until actual order is implemented.
+		std::sort(allEntities.begin(), allEntities.end(), [](Entity a, Entity b) {
+			return a.GetComponent<NameComponent>().Name < b.GetComponent<NameComponent>().Name;
+		});
+
 		return allEntities;
 	}
 
