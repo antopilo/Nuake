@@ -331,6 +331,20 @@ namespace Nuake
 				const auto& capsuleColliderComponent = entity.GetComponent<BoxColliderComponent>();
 				shape = capsuleColliderComponent.Box;
 			}
+			else if (entity.HasComponent<SphereColliderComponent>())
+			{
+				const auto& capsuleColliderComponent = entity.GetComponent<SphereColliderComponent>();
+				shape = capsuleColliderComponent.Sphere;
+			}
+			else if (entity.HasComponent<CylinderColliderComponent>())
+			{
+				const auto& cylinderColliderComponent = entity.GetComponent<CylinderColliderComponent>();
+				shape = cylinderColliderComponent.Cylinder;
+			}
+			else
+			{
+				continue;
+			}
 
 			Physics::CharacterControllerSettings settings
 			{
