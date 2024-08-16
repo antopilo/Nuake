@@ -15,6 +15,8 @@
 #include "../Commands/ICommand.h"
 #include "MapImporterWindow.h"
 
+#include <src/Scripting/ScriptingEngineNet.h>
+
 using namespace NuakeEditor;
 
 namespace Nuake
@@ -25,6 +27,7 @@ namespace Nuake
 	class EditorInterface
 	{
 	private:
+		std::vector<CompilationError> errors;
 		Ref<Scene> SceneSnapshot;
 		NuakeEditor::CommandBuffer* mCommandBuffer;
 
@@ -36,6 +39,8 @@ namespace Nuake
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
 		bool m_IsViewportFocused = false;
+		bool m_IsRenaming = false;
+		bool m_ShouldUnfoldEntityTree = false;
 		bool m_ShowTrenchbroomConfigurator = false;
 		bool m_ShowMapImporter = false;
 

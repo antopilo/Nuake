@@ -74,6 +74,8 @@ namespace Nuake
 		Entity GetEntityFromPath(const std::string& path);
 		Entity GetRelativeEntityFromPath(Entity entity, const std::string& path);
 
+		bool EntityIsParent(Entity entity, Entity parent);
+
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src);
 

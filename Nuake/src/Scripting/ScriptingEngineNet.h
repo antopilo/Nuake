@@ -44,6 +44,13 @@ namespace Nuake {
 		std::vector<ExposedVar> exposedVars;
 	};
 
+	struct CompilationError
+	{
+		std::string file;
+		int line;
+		std::string message;
+	};
+
 	class ScriptingEngineNet
 	{
 	private:
@@ -75,6 +82,8 @@ namespace Nuake {
 		ScriptingEngineNet();
 		~ScriptingEngineNet();
 
+		std::vector<CompilationError> ExtractErrors(const std::string& input);
+
 	public:
 		static ScriptingEngineNet& Get();
 
@@ -85,7 +94,7 @@ namespace Nuake {
 
 		std::vector<ExposedVar> GetExposedVarForTypes(Entity entity);
 
-		void BuildProjectAssembly(Ref<Project> project);
+		std::vector<CompilationError> BuildProjectAssembly(Ref<Project> project);
 		void LoadProjectAssembly(Ref<Project> project);
 
 		void RegisterEntityScript(Entity& entity);

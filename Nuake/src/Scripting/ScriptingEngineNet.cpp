@@ -16,6 +16,7 @@
 #include <Coral/Array.hpp>
 #include <Coral/Attribute.hpp>
 #include <random>
+#include <regex>
 
 
 void ExceptionCallback(std::string_view InMessage)

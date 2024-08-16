@@ -213,6 +213,31 @@ namespace Nuake
 		return currentEntity;
 	}
 
+	bool Scene::EntityIsParent(Entity entity, Entity parent)
+	{
+		if (!entity.IsValid())
+			return false;
+
+		if (entity.GetComponent<ParentComponent>().HasParent && entity.GetComponent<ParentComponent>().Parent == parent)
+		{
+			return true;
+		}
+
+		Entity current = entity;
+		while (current.GetComponent<ParentComponent>().HasParent && current != parent)
+		{
+			current = current.GetComponent<ParentComponent>().Parent;
+
+			if (current == parent)
+			{
+				return true;
+			}
+		}
+
+
+		return false;
+	}
+
 	bool Scene::OnInit()
 	{
 		for (auto& system : m_Systems)

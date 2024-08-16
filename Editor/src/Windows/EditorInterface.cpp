@@ -51,7 +51,6 @@
 #include <src/UI/ImUI.h>
 #include "src/Core/FileSystem.h"
 #include <src/Resource/StaticResources.h>
-#include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Threading/JobSystem.h>
 #include "../Commands/Commands/Commands.h"
 #include <src/Resource/ModelLoader.h>
@@ -345,6 +344,7 @@ namespace Nuake {
                         if (ent.IsValid())
                         {
                             Selection = EditorSelection(ent);
+                            foundSomethingToSelect = true;
                         }
                     }
                     else
@@ -353,6 +353,11 @@ namespace Nuake {
                     }
 
                     gbuffer.Unbind();
+                }
+
+                if (foundSomethingToSelect = true)
+                {
+                    m_ShouldUnfoldEntityTree = true;
                 }
             }
         }
@@ -701,15 +706,40 @@ namespace Nuake {
         {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         }
-        
+
+        if (!m_IsRenaming && m_ShouldUnfoldEntityTree && Selection.Type == EditorSelectionType::Entity && e.GetScene()->EntityIsParent(Selection.Entity, e))
+        {
+            ImGui::SetNextItemOpen(true);
+        }
+
+        auto cursorPos = ImGui::GetCursorPos();
+
+        ImGui::SetNextItemAllowOverlap();
+
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
+
+        if (m_IsRenaming)
+        {
+            if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
+            {
+                ImGui::SetCursorPosY(cursorPos.y);
+                ImGui::Indent();
+                ImGui::InputText("##renamingEntity", &name);
+                ImGui::Unindent();
+                if (Input::IsKeyDown(Key::ENTER))
+                {
+                    nameComponent.Name = name;
+                    m_IsRenaming = false;
+                }
+            }
+        }
 
         bool isDragging = false;
         if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
         {
 			ImGui::PopStyleColor();
         }
-		else if (ImGui::BeginDragDropSource())
+		else if (!m_IsRenaming && ImGui::BeginDragDropSource())
 		{ 
 			ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
 			ImGui::Text(name.c_str());
@@ -742,7 +772,20 @@ namespace Nuake {
         }
 
         if (!isDragging && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+        {
+            // We selected another another that we werent renaming
+            if (Selection.Entity != e)
+            {
+                m_IsRenaming = false;
+            }
+
             Selection = EditorSelection(e);
+        }
+
+        if (!isDragging && (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) || Input::IsKeyPressed(Key::F2))
+        {
+            m_IsRenaming = true;
+        }
 
         if (ImGui::BeginPopupContextItem())
         {
