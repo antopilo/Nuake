@@ -77,7 +77,7 @@ namespace Nuake {
 						if (e.Value.has_value())
 						{
 							varJ["Value"] = std::any_cast<std::string>(e.Value);
-							varJ["DefaultValue"] = std::any_cast<std::string>(e.DefaultValue);
+							varJ["DefaultValue"] = "";
 						}
 						else
 						{
