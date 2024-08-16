@@ -1,14 +1,16 @@
-# Nuake
 ![Nuake](Resources/Images/logo.png)
 
-## Quake inspired game engine
-Nuake is a game engine currently in developement that focuses on fast level design iteration time that integrates with quake level editing software. 
+[Nuake](https://nuake.antopilo.dev) is a *boutique* game engine inspired by Quake. It focuses on fast level design iteration time that integrates with quake level editing software. 
+
+![Nuake](https://cdn.antopilo.dev/images/imageeditor.png)
 > It is currently in developement and is not feature complete. We are currently aiming for an alpha release with basic features and a demo level.
 
-![Nuake](Resources/Images/screenshot.png)
+## More info & News!
+You can visit the website for more information about the project and read the blog post about the project. 
 
+[Devlog posts 📰](https://nuake.antopilo.dev/news) 
 
-You can join the discord server for updates and screenshots or if you want to contribute:
+You can also join the discord server for updates and screenshots: 
 
 [![Join Server](https://img.shields.io/discord/852625335236558868.svg?label=Discord&logo=Discord&colorB=7289da&style=for-the-badge)](https://discord.gg/kuF4efPK7Y)
 
@@ -17,19 +19,22 @@ You can join the discord server for updates and screenshots or if you want to co
 - ECS system
 - Modern physic engine (Jolt physic) 
 - PBR Renderer
-- Post processing effects(Bloom, SSAO, SSR, Volumetrics, Procedural Sky)
-- Wren Scripting
+- Post processing effects(Bloom, SSAO, SSR, Volumetrics, Procedural Sky, Barrel Distortion, DOF)
+- C# & Wren Scripting
+- Skeletal animation
+- Particles
+- Navigation Mesh Volumes(Recast&Detour)
 - Trenchbroom integration
-- WAD converter
+- WAD to Material converter 
+- Quake map loader
 - Spatialized audio
+- Runtime 
 
 ## Planned features
-- C# Scripting
 - Custom Shaders
 - NuakeUI integration
 - Dynamic global illumination
 - Asset packing
-- Terrain editor
 
 ## Contributing
 We are currently looking for contributors, feel free to join the discord if you are looking to help the project.
@@ -40,8 +45,6 @@ We are currently looking for contributors, feel free to join the discord if you 
 3. Open `Nuake.sln`
 4. Build and run
 
-# Documentation and demos
-> The current documentation is not up to date.
-
-You can access the current documentation [here](https://nuake.readthedocs.io/en/latest/index.html).
-
+# Documentation
+Coming soon! 🕒
+> Due to the constant change in the API and general refactors. It is hard to keep an up-to-date documentation before alpha release.
