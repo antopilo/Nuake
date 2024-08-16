@@ -457,9 +457,27 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	// Lights
 	for (auto e : lightView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/light.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+
+		// Change icon depending on light type
+		std::string texturePath ;
+		switch (light.Type)
+		{
+		case LightType::Point:
+			texturePath = "Resources/Gizmos/light.png";
+			break;
+		case LightType::Directional:
+			texturePath = "Resources/Gizmos/light_directional.png";
+			break;
+		case LightType::Spot:
+			texturePath = "Resources/Gizmos/light_spot.png";
+			break;
+		default:
+			texturePath = "Resources/Gizmos/light.png";
+		}
+
+		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture(texturePath).get());
+		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 
 		auto initialTransform = transform.GetGlobalTransform();
 		Matrix4 particleTransform = initialTransform;
