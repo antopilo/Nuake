@@ -129,7 +129,6 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 	mCylinderColliderPanel.Draw(entity);
     mMeshColliderPanel.Draw(entity);
     mCharacterControllerPanel.Draw(entity);
-	mAudioEmitterPanel.Draw(entity);
 	mNavMeshVolumePanel.Draw(entity);
 
 	using namespace Nuake;
