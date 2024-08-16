@@ -18,6 +18,7 @@ void main()
 uniform int u_EntityID;
 uniform usampler2D u_EntityTexture;
 uniform vec4 u_OutlineColor;
+uniform sampler2D u_Depth;
 
 out vec4 FragColor;
 
@@ -34,7 +35,8 @@ void main()
     
 	// sample middle
 	uint middleSample = texture(u_EntityTexture, uv).r;
-
+	float depth = texture(u_Depth, uv).r;
+	
     // Correct aspect ratio
     vec2 aspect = 1.0 / vec2(textureSize(u_EntityTexture, 0));
     
@@ -44,9 +46,15 @@ void main()
     {
 		// Sample image in a circular pattern
         vec2 offset = vec2(sin(i), cos(i)) * aspect * radius;
-		uint col = texture(u_EntityTexture, uv + offset).r;
 		
-		if(col == target)
+		// We dont want to sample outside the viewport
+		vec2 sampleUv = uv + offset;
+		sampleUv.x = clamp(sampleUv.x, 0.0, 1.0);
+		sampleUv.y = clamp(sampleUv.y, 0.0, 1.0);
+
+		uint col = texture(u_EntityTexture, sampleUv).r;
+		float depthTarget = texture(u_Depth, sampleUv).r;
+		if(col == target && depthTarget < depth)
 		{
 			hasHit = 1.0f;
 		}

@@ -34,7 +34,7 @@ public:
 		Type = None;
 		if (const auto& scene = Nuake::Engine::GetCurrentScene(); scene)
 		{
-			Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = 0;
+			Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = -1;
 		}
 	}
 
@@ -48,21 +48,21 @@ public:
 	EditorSelection(const Ref<Nuake::File>& file)
 	{
 		Type = EditorSelectionType::File;
-		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = 0;
+		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = -1;
 		File = file;
 	}
 
 	EditorSelection(const Ref<Nuake::Directory>& dir)
 	{
 		Type = EditorSelectionType::Directory;
-		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = 0;
+		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = -1;
 		Directory = dir;
 	}
 
 	EditorSelection(const Nuake::Resource& resource)
 	{
 		Type = EditorSelectionType::Resource;
-		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = 0;
+		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = -1;
 		Resource = resource;
 	}
 

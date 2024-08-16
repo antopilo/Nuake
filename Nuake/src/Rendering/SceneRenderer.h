@@ -71,11 +71,12 @@ namespace Nuake
 			mTempModels.clear();
 		}
 
-		uint32_t mOutlineEntityID = 0;
+		int mOutlineEntityID = 0;
 	private:
 		Matrix4 mProjection, mView;
 		Vector3 mCamPos;
 
+		// GBuffer
 		Scope<FrameBuffer> mGBuffer;
 		Scope<FrameBuffer> mShadingBuffer;
 		Scope<FrameBuffer> mToneMapBuffer;
