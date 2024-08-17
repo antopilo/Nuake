@@ -2243,7 +2243,7 @@ namespace Nuake {
             {
                 ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_FramePadding;
 
-                bool is_selected = settingCategoryIndex == FileSystem::RootDirectory;
+                bool is_selected = settingCategoryIndex == 1;
                 if (is_selected)
                     base_flags |= ImGuiTreeNodeFlags_Selected;
 
