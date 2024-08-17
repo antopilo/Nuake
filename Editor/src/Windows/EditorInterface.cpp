@@ -2231,6 +2231,93 @@ namespace Nuake {
         ImGui::End();
     }
 
+    void EditorInterface::DrawProjectSettings()
+    {
+        static int settingCategoryIndex = 0;
+        if (ImGui::Begin("Project Settings", &m_ShowProjectSettings, ImGuiWindowFlags_NoDocking))
+        {
+            ImVec4* colors = ImGui::GetStyle().Colors;
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 8);
+            ImGui::BeginChild("ProjectSettingsLeft", { 200, ImGui::GetContentRegionAvail().y }, true);
+            {
+                ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_FramePadding;
+
+                bool is_selected = settingCategoryIndex == FileSystem::RootDirectory;
+                if (is_selected)
+                    base_flags |= ImGuiTreeNodeFlags_Selected;
+
+                ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+                ImGui::PushFont(FontManager::GetFont(Bold));
+                ImGui::TreeNodeEx("General", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 0;
+                }
+
+                ImGui::TreePop();
+
+                ImGui::TreeNodeEx("Viewport", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 1;
+                }
+
+                ImGui::TreePop();
+                ImGui::TreeNodeEx("Rendering", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 2;
+                }
+
+                ImGui::TreePop();
+                ImGui::TreeNodeEx("Audio", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 3;
+                }
+
+                ImGui::TreePop();
+                ImGui::TreeNodeEx("C#", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 4;
+                }
+
+                ImGui::TreePop();
+                ImGui::TreeNodeEx("Trenchbroom", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 5;
+                }
+
+                ImGui::TreePop();
+                ImGui::TreeNodeEx("Plugins", base_flags);
+                if (ImGui::IsItemClicked())
+                {
+                    settingCategoryIndex = 6;
+                }
+
+                ImGui::PopStyleVar();
+                ImGui::TreePop();
+                ImGui::PopFont();
+            }
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor();
+
+            ImGui::EndChild();
+
+            ImGui::SameLine();
+
+            ImGui::BeginChild("ProjectSettingsRight", ImGui::GetContentRegionAvail(), ImGuiChildFlags_Border);
+            {
+                ImGui::Text("Right side");
+            }
+            ImGui::EndChild();
+        }
+        ImGui::End();
+    }
+
     void EditorInterface::Overlay()
     {
         // FIXME-VIEWPORT: Select a default viewport
@@ -2384,7 +2471,7 @@ namespace Nuake {
 
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Save", "CTRL+S"))
+                if (ImGui::MenuItem("Save Project", "CTRL+S"))
                 {
                     PushCommand(SaveProjectCommand(Engine::GetProject()));
 
@@ -2393,7 +2480,7 @@ namespace Nuake {
                     SetStatusMessage("Project saved.");
 
                 }
-                if (ImGui::MenuItem("Save as...", "CTRL+SHIFT+S"))
+                if (ImGui::MenuItem("Save Project as...", "CTRL+SHIFT+S"))
                 {
                     std::string savePath = FileDialog::SaveFile("*.project");
                     Engine::GetProject()->SaveAs(savePath);
@@ -2439,9 +2526,10 @@ namespace Nuake {
                 if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
                 if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
                 ImGui::Separator();
-                if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-                if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-                if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+                if (ImGui::MenuItem("Project Settings", "")) 
+                {
+                    m_ShowProjectSettings = true;
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
@@ -2666,6 +2754,11 @@ namespace Nuake {
         DrawSceneTree();
         SelectionPanel.Draw(Selection);
         DrawLogger();
+
+        if (m_ShowProjectSettings)
+        {
+            DrawProjectSettings();
+        }
 
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();

@@ -46,25 +46,16 @@ void EditorLayer::OnUpdate()
                 if (m_EditorInterface->ShouldDrawAxis())
                 {
                     m_GizmoDrawer->DrawAxis(currentScene, false);
-                    glDepthFunc(GL_GREATER);
-
-                    m_GizmoDrawer->DrawAxis(currentScene, true);
-                    glDepthFunc(GL_LESS);
                 }
 
                 if (m_EditorInterface->ShouldDrawNavMesh())
                 {
-                    
                     m_GizmoDrawer->DrawNavMesh(currentScene, true);
                 }
 
                 if (m_EditorInterface->ShouldDrawCollision())
                 {
                     m_GizmoDrawer->DrawGizmos(currentScene, false);
-                    //glDepthFunc(GL_GREATER);
-
-                    //m_GizmoDrawer->DrawGizmos(currentScene, true);
-                    //glDepthFunc(GL_LESS);
                 }
 
                 
