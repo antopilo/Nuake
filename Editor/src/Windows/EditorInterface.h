@@ -16,6 +16,7 @@
 #include "MapImporterWindow.h"
 
 #include <src/Scripting/ScriptingEngineNet.h>
+#include "ProjectSettings/ProjectSettingsWindow.h"
 
 using namespace NuakeEditor;
 
@@ -29,7 +30,7 @@ namespace Nuake
 	private:
 		std::vector<CompilationError> errors;
 		Ref<Scene> SceneSnapshot;
-		NuakeEditor::CommandBuffer* mCommandBuffer;
+		static NuakeEditor::CommandBuffer* mCommandBuffer;
 
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
@@ -66,6 +67,8 @@ namespace Nuake
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 		MapImporterWindow m_MapImporter;
 
+		ProjectSettingsWindow* m_ProjectSettingsWindow;
+
 		EditorInterface(CommandBuffer& commandBuffer);
 
 		static ImFont* bigIconFont;
@@ -90,8 +93,8 @@ namespace Nuake
 		bool ShouldDrawNavMesh() const { return m_DrawNavMesh; }
 		bool LoadProject(const std::string& projectPath);
 
-	private:
+	public:
 		std::string GetEntityTypeName(const Entity& entity) const;
-		void PushCommand(ICommand&& command);
+		static void PushCommand(ICommand&& command);
 	};
 }

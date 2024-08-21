@@ -52,7 +52,7 @@ namespace Nuake {
 			volumetricShader->SetUniform1i("u_StepCount", mStepCount);
 			volumetricShader->SetUniform1f("u_FogAmount", mFogAmount);
 			volumetricShader->SetUniform1i("u_LightCount", static_cast<int>(lights.size()));
-
+			volumetricShader->SetUniform1f("u_Exponant", mFogExponant);
 			for (uint16_t i = 0; i < lights.size(); i++)
 			{
 				LightComponent& light = lights[i];

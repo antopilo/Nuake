@@ -46,6 +46,8 @@ namespace Nuake
 		bool IsRunning() { return m_IsRunning; }
 		void Step(Timestep ts);
 
+		void ReInit() { m_World->ReInit(); }
+
 		void Reset();
 
 		std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);

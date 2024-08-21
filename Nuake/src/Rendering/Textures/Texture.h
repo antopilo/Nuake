@@ -25,6 +25,8 @@ namespace Nuake
 		int m_Height;
 		int m_BPP; // byte per pixel.
 
+		GLenum m_Filtering;
+
 	public:
 		Texture(const std::string& path); // Load texture from file
 		Texture(unsigned char* data, int len); // Used to load texture from a memory buffer

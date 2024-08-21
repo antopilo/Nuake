@@ -12,7 +12,7 @@ namespace Nuake {
 		uint32_t mStepCount = 50;
 		float mRenderRatio = 0.75f;
 		float mFogAmount = 0.4f;
-
+		float mFogExponant = 4.0f;
 		Vector2 mSize;
 		Texture* mDepth;
 
@@ -30,6 +30,9 @@ namespace Nuake {
 		inline int GetStepCount() const { return mStepCount;}
 
 		inline void SetStepCount(unsigned int amount) { mStepCount = amount; }
+
+		void SetFogExponant(float expo) { mFogExponant = expo; }
+		float GetFogExponant() const { return mFogExponant; }
 
 		inline float GetFogAmount() const { return mFogAmount; }
 		void SetFogAmount(float amount) 

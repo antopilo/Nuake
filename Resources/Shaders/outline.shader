@@ -20,6 +20,7 @@ uniform usampler2D u_EntityTexture;
 uniform vec4 u_OutlineColor;
 uniform sampler2D u_Depth;
 
+uniform float u_Radius;
 out vec4 FragColor;
 
 in vec2 a_UV;
@@ -30,7 +31,7 @@ void main()
     const float TAU = 6.28318530;
 	const float steps = 32.0;
     
-	float radius = 4.f;
+	float radius = u_Radius;
 	vec2 uv = a_UV;
     
 	// sample middle

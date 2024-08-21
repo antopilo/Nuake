@@ -248,14 +248,61 @@ namespace Nuake
 			_registeredCharacters = std::map<uint32_t, CharacterGhostPair>();
 
 			// Initialize Jolt Physics
-			const uint32_t MaxBodies = 4096;
+			ProjectSettings settings;
+			if (Engine::GetProject())
+			{
+				settings = Engine::GetProject()->Settings;
+			}
+
+			const uint32_t MaxBodies = settings.MaxPhysicsBodies;
 			const uint32_t NumBodyMutexes = 0;
-			const uint32_t MaxBodyPairs = 2048;
-			const uint32_t MaxContactConstraints = 2048;
+			const uint32_t MaxBodyPairs = settings.MaxPhysicsBodyPair;
+			const uint32_t MaxContactConstraints = settings.MaxPhysicsContactConstraints;
 
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, JoltObjectVSBroadphaseLayerFilter, JoltObjectVSObjectLayerFilter);
+			// A body activation listener gets notified when bodies activate and go to sleep
+			// Note that this is called from a job so whatever you do here needs to be thread safe.
+			// Registering one is entirely optional.
+			_bodyActivationListener = CreateScope<MyBodyActivationListener>();
+			_JoltPhysicsSystem->SetBodyActivationListener(_bodyActivationListener.get());
 
+			// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
+			// Note that this is called from a job so whatever you do here needs to be thread safe.
+			// Registering one is entirely optional.
+			_contactListener = CreateScope<MyContactListener>(this);
+			_JoltPhysicsSystem->SetContactListener(_contactListener.get());
+
+			// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
+			// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
+			_JoltBodyInterface = &_JoltPhysicsSystem->GetBodyInterface();
+
+			// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
+			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
+			// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
+			_JoltPhysicsSystem->OptimizeBroadPhase();
+			const uint32_t availableThreads = std::thread::hardware_concurrency() - 1;
+			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, availableThreads);
+		}
+
+		void DynamicWorld::ReInit()
+		{
+			_registeredCharacters = std::map<uint32_t, CharacterGhostPair>();
+
+			// Initialize Jolt Physics
+			ProjectSettings settings;
+			if (Engine::GetProject())
+			{
+				settings = Engine::GetProject()->Settings;
+			}
+
+			const uint32_t MaxBodies = settings.MaxPhysicsBodies;
+			const uint32_t NumBodyMutexes = 0;
+			const uint32_t MaxBodyPairs = settings.MaxPhysicsBodyPair;
+			const uint32_t MaxContactConstraints = settings.MaxPhysicsContactConstraints;
+
+			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
+			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, JoltObjectVSBroadphaseLayerFilter, JoltObjectVSObjectLayerFilter);
 			// A body activation listener gets notified when bodies activate and go to sleep
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
 			// Registering one is entirely optional.
@@ -460,7 +507,7 @@ namespace Nuake
 			}
 		}
 
-		void DynamicWorld::SetCharacterControllerPosition(const Entity & entity, const Vector3 & position)
+		void DynamicWorld::SetCharacterControllerPosition(const Entity& entity, const Vector3 & position)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
 			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
@@ -672,8 +719,8 @@ namespace Nuake
 			// If you take larger steps than 1 / 90th of a second you need to do multiple collision steps in order to keep the simulation stable.
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
-			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 32;
+			const float minStepDuration = 1.0f / static_cast<float>(Engine::GetProject()->Settings.PhysicsStep);
+			const int maxStepCount = Engine::GetProject()->Settings.MaxPhysicsSubStep;
 
 			if(ts > minStepDuration)
 			{

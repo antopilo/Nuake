@@ -61,6 +61,8 @@ namespace Nuake {
     ImFont* boldFont;
     ImFont* EditorInterface::bigIconFont;
     
+    NuakeEditor::CommandBuffer* EditorInterface::mCommandBuffer;
+
     glm::vec3 DepthToWorldPosition(const glm::vec2& pixelPos, float depth, const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, const glm::vec2& viewportSize)
     {
         // Convert pixel position to normalized device coordinates (NDC)
@@ -93,14 +95,16 @@ namespace Nuake {
         return worldPos;
     }
 
-    EditorInterface::EditorInterface(CommandBuffer& commandBuffer) :
-        mCommandBuffer(&commandBuffer)
+    EditorInterface::EditorInterface(CommandBuffer& commandBuffer)
     {
+        mCommandBuffer = &commandBuffer;
+
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
 
         _WelcomeWindow = new WelcomeWindow(this);
         _audioWindow = new AudioWindow();
+        m_ProjectSettingsWindow = new ProjectSettingsWindow();
 
         Logger::Log("Building fonts", "window", VERBOSE);
         BuildFonts();
@@ -140,8 +144,8 @@ namespace Nuake {
             Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
             Ref<FrameBuffer> framebuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
-            if (framebuffer->GetSize() != viewportPanelSize)
-                framebuffer->QueueResize(viewportPanelSize);
+            if (framebuffer->GetSize() != viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale)
+                framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
 
             Ref<Texture> texture = framebuffer->GetTexture();
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
@@ -315,10 +319,9 @@ namespace Nuake {
 
             if (!Engine::IsPlayMode() && ImGui::GetIO().WantCaptureMouse && m_IsHoveringViewport && Input::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_1) && !ImGuizmo::IsUsing() && m_IsViewportFocused)
             {
-                
-                
+                const float resolutionScale = Engine::GetProject()->Settings.ResolutionScale;
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
-                auto pixelPos = Input::GetMousePosition() - windowPosNuake;
+                auto pixelPos = (Input::GetMousePosition() - windowPosNuake) * resolutionScale;
                 pixelPos.y = gbuffer.GetSize().y - pixelPos.y; // imgui coords are inverted on the Y axis
 
                 auto gizmoBuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
@@ -454,7 +457,8 @@ namespace Nuake {
 
                 if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, { 97.0 / 255.0, 0, 1, 1 });
+                    Color color = Engine::GetProject()->Settings.PrimaryColor;
+                    ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
                     if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
                     {
                         Engine::SetGameState(GameState::Paused);
@@ -475,7 +479,8 @@ namespace Nuake {
                     std::string tooltip;
                     if (Engine::GetGameState() == GameState::Paused)
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, { 97.0 / 255.0, 0, 1, 1 });
+                        Color color = Engine::GetProject()->Settings.PrimaryColor;
+                        ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
                         playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F6);
                         ImGui::PopStyleColor();
 
@@ -493,8 +498,9 @@ namespace Nuake {
                         {
                             PushCommand(SetGameState(GameState::Playing));
 
+                            Color color = Engine::GetProject()->Settings.PrimaryColor;
                             std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                            SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                            SetStatusMessage(statusMessage.c_str(), { color.r, color.g, color.b, 1.0f });
                         }
                         else
                         {
@@ -531,7 +537,7 @@ namespace Nuake {
                                     PushCommand(SetGameState(GameState::Playing));
 
                                     std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                                    SetStatusMessage(statusMessage.c_str(), { 97.0 / 255.0, 0, 1, 1 });
+                                    SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
                                 }
                             });
                         }
@@ -984,7 +990,7 @@ namespace Nuake {
 
                             Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
                             ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
-                            env->ProceduralSkybox->SunDirection = glm::normalize(sunDirection);
+                            env->ProceduralSkybox->SunDirection = glm::mix(env->ProceduralSkybox->GetSunDirection(), glm::normalize(sunDirection), 0.1f);
                             ImGui::TableNextColumn();
 
                             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
@@ -1219,6 +1225,24 @@ namespace Nuake {
                         // Reset button
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
                         std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Volumetric Strength");
+                        ImGui::TableNextColumn();
+
+                        float fogAmount = env->mVolumetric->GetFogExponant();
+                        ImGui::DragFloat("##Volumetric Strength", &fogAmount, .001f, 0.f, 1.0f);
+                        env->mVolumetric->SetFogExponant(fogAmount);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetFogExpo");
                         if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
                         ImGui::PopStyleColor();
                     }
@@ -2528,7 +2552,7 @@ namespace Nuake {
                 ImGui::Separator();
                 if (ImGui::MenuItem("Project Settings", "")) 
                 {
-                    m_ShowProjectSettings = true;
+                    m_ProjectSettingsWindow->m_DisplayWindow = true;
                 }
                 ImGui::EndMenu();
             }
@@ -2721,8 +2745,14 @@ namespace Nuake {
             _WelcomeWindow->Draw();
             return;
         }
+        else
+        {
+            m_ProjectSettingsWindow->Init(Engine::GetProject());
+        }
 
         pInterface.m_CurrentProject = Engine::GetProject();
+
+        m_ProjectSettingsWindow->Draw();
 
         m_DemoWindow.Draw();
 
@@ -2754,11 +2784,6 @@ namespace Nuake {
         DrawSceneTree();
         SelectionPanel.Draw(Selection);
         DrawLogger();
-
-        if (m_ShowProjectSettings)
-        {
-            DrawProjectSettings();
-        }
 
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();

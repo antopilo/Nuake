@@ -445,6 +445,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 	const Vector3& cameraPosition = scene->m_EditorCamera->GetTranslation();
 
+	const Vector3 gizmoSize = Vector3(Engine::GetProject()->Settings.GizmoSize);
+
 	// Camera
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
@@ -461,7 +463,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		particleTransform = glm::scale(particleTransform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -500,7 +502,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		particleTransform = glm::scale(particleTransform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -522,7 +524,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
 
-		particleTransform = glm::scale(particleTransform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		particleTransform = glm::scale(particleTransform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -544,7 +546,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		// Translation
 		const Vector3& particleGlobalPosition = transform.GetGlobalPosition();
 		particleTransform[3] = initialTransform[3];
-		particleTransform = glm::scale(particleTransform, Vector3(0.1, 0.1, 0.1) * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		particleTransform = glm::scale(particleTransform, (gizmoSize / 2.0f) * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, particleTransform);
 		renderList.Flush(gizmoShader, true);
@@ -566,7 +568,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		// Translation
 		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
 		transform[3] = initialTransform[3];
-		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		transform = glm::scale(transform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, transform);
 		renderList.Flush(gizmoShader, true);
@@ -587,7 +589,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		// Translation
 		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
 		transform[3] = initialTransform[3];
-		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		transform = glm::scale(transform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, transform);
 		renderList.Flush(gizmoShader, true);
@@ -608,7 +610,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		// Translation
 		const Vector3& particleGlobalPosition = transformComponent.GetGlobalPosition();
 		transform[3] = initialTransform[3];
-		transform = glm::scale(transform, m_GizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
+		transform = glm::scale(transform, gizmoSize * GetGizmoScale(cameraPosition, particleGlobalPosition));
 
 		renderList.AddToRenderList(Renderer::QuadMesh, transform);
 		renderList.Flush(gizmoShader, true);

@@ -1,5 +1,6 @@
 #include "ImUI.h"
 #include <imgui/imgui_internal.h>
+#include <Engine.h>
 
 namespace Nuake {
 
@@ -17,9 +18,15 @@ namespace Nuake {
 
 		bool PrimaryButton(const std::string& name, const Vector2& size)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(97, 0, 255, 255));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(97, 0, 255, 255));
+			Color color = Color(97.0f / 255.0f, 0, 1.0f, 1.0f);
+			if (Nuake::Engine::GetProject())
+			{
+				color = Nuake::Engine::GetProject()->Settings.PrimaryColor;
+			}
+			
+			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 200));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ButtonPadding);
@@ -36,9 +43,15 @@ namespace Nuake {
 
 		bool SecondaryButton(const std::string& name, const Vector2& size)
 		{
+			Color color = Color(97.0f / 255.0f, 0, 1.0f, 1.0f);
+			if (Nuake::Engine::GetProject())
+			{
+				color = Nuake::Engine::GetProject()->Settings.PrimaryColor;
+			}
+
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(97, 0, 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 200));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
 			ImGui::PushStyleColor(ImGuiCol_Border, PrimaryCol);
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);

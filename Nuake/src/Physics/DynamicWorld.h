@@ -65,6 +65,8 @@ namespace Nuake
 		public:
 			DynamicWorld();
 
+			void ReInit();
+
 			void DrawDebug();
 
 			void SetGravity(const Vector3& g);

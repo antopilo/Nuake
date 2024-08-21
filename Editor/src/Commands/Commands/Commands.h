@@ -60,4 +60,18 @@ namespace NuakeEditor {
 
 		bool Execute() override;
 	};
+
+	class SetVSync : public ICommand
+	{
+	private:
+		bool value;
+
+	public:
+		SetVSync(bool value) : value(value)
+		{
+		}
+
+		bool Execute() override;
+	};
+
 }

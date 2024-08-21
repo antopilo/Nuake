@@ -119,7 +119,8 @@ namespace Nuake
 		// Renders all shadow maps
 		ShadowPass(scene);
 
-		mGBuffer->QueueResize(framebuffer.GetSize());
+		const Vector2 framebufferResolution = framebuffer.GetSize();
+		mGBuffer->QueueResize(framebufferResolution);
 		GBufferPass(scene);
 
 		// SSAO
@@ -134,7 +135,7 @@ namespace Nuake
 			sceneEnv->mSSAO->Clear();
 		}
 
-		mShadingBuffer->QueueResize(framebuffer.GetSize());
+		mShadingBuffer->QueueResize(framebufferResolution);
 		ShadingPass(scene);
 
 		// Blit depth buffer
@@ -191,7 +192,6 @@ namespace Nuake
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
-			
 		}
 		else
 		{
@@ -209,7 +209,7 @@ namespace Nuake
 		finalOutput = framebuffer.GetTexture();
 
 		// Copy final output to target framebuffer
-		mToneMapBuffer->QueueResize(framebuffer.GetSize());
+		mToneMapBuffer->QueueResize(framebufferResolution);
 		mToneMapBuffer->Bind();
 		{
 			RenderCommand::Clear();
@@ -223,9 +223,50 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
+		ProjectSettings projectSettings = Engine::GetProject()->Settings;
+
+		mOutlineBuffer->QueueResize(framebufferResolution);
+		mOutlineBuffer->Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
+			shader->Bind();
+
+			shader->SetUniform1i("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
+			shader->SetUniformTex("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
+			shader->SetUniformVec4("u_OutlineColor", projectSettings.PrimaryColor);
+			shader->SetUniformTex("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT), 1);
+			shader->SetUniform1f("u_Radius", projectSettings.OutlineRadius);
+			Renderer::DrawQuad();
+		}
+		mOutlineBuffer->Unbind();
+
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+			shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
+			Renderer::DrawQuad();
+		}
+		framebuffer.Unbind();
+
+		mToneMapBuffer->Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", framebuffer.GetTexture().get(), 1);
+			Renderer::DrawQuad();
+		}
+		mToneMapBuffer->Unbind();
+
 		if (sceneEnv->SSREnabled)
 		{
-			sceneEnv->mSSR->Resize(framebuffer.GetSize());
+			sceneEnv->mSSR->Resize(framebufferResolution);
 			sceneEnv->mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
 
 			framebuffer.Bind();
@@ -254,7 +295,7 @@ namespace Nuake
 			framebuffer.Unbind();
 		}
 
-		mDOFBuffer->QueueResize(framebuffer.GetSize());
+		mDOFBuffer->QueueResize(framebufferResolution);
 		mDOFBuffer->Bind();
 		{
 			RenderCommand::Clear();
@@ -293,7 +334,7 @@ namespace Nuake
 
 		if (sceneEnv->BarrelDistortionEnabled)
 		{
-			mBarrelDistortionBuffer->QueueResize(framebuffer.GetSize());
+			mBarrelDistortionBuffer->QueueResize(framebufferResolution);
 			mBarrelDistortionBuffer->Bind();
 			{
 				RenderCommand::Clear();
@@ -330,7 +371,7 @@ namespace Nuake
 			framebuffer.Unbind();
 		}
 
-		mVignetteBuffer->QueueResize(framebuffer.GetSize());
+		mVignetteBuffer->QueueResize(framebufferResolution);
 		mVignetteBuffer->Bind();
 		{
 			RenderCommand::Clear();
@@ -344,6 +385,23 @@ namespace Nuake
 		}
 		mVignetteBuffer->Unbind();
 
+
+		ImGui::Begin("normals");
+		ImGui::Image((void*)mToneMapBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::End();
+
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+			shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
+			Renderer::DrawQuad();
+		}
+		framebuffer.Unbind();
+
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
@@ -355,40 +413,6 @@ namespace Nuake
 		}
 		framebuffer.Unbind();
 
-
-		{
-			mOutlineBuffer->QueueResize(framebuffer.GetSize());
-			mOutlineBuffer->Bind();
-			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
-				shader->Bind();
-
-				shader->SetUniform1i("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
-				shader->SetUniformTex("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
-				shader->SetUniform4f("u_OutlineColor", 97.0f / 255.0f, 0, 1.0f, 1.0f);
-				shader->SetUniformTex("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT), 1);
-				Renderer::DrawQuad();
-			}
-			mOutlineBuffer->Unbind();
- 
-			ImGui::Begin("normals");
-			ImGui::Image((void*)mGBuffer->GetTexture(GL_COLOR_ATTACHMENT1)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-			ImGui::End();
-
-			framebuffer.Bind();
-			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
-				shader->Bind();
-				
-				shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
-
-				shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 1);
-				Renderer::DrawQuad();
-			}
-			framebuffer.Unbind();
-		}
 		glDepthMask(true);
 
 		// Barrel distortion

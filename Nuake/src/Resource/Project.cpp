@@ -4,6 +4,8 @@
 #include <fstream>
 #include <streambuf>
 #include "../Core/Logger.h"
+#include "Engine.h"
+#include <src/Audio/AudioManager.h>
 
 namespace Nuake
 {
@@ -85,7 +87,21 @@ namespace Nuake
 		if (j.contains("Description"))
 			description = j["Description"];
 
-		return CreateRef<Project>(projectName, description, path);
+
+		Ref<Project> project = CreateRef<Project>(projectName, description, path);
+
+		project->Settings = ProjectSettings();
+
+		if (j.contains("Settings"))
+		{
+			project->Settings.Deserialize(j["Settings"]);
+
+			Engine::SetPhysicsStep(project->Settings.PhysicsStep);
+
+			AudioManager::Get().SetGlobalVolume(project->Settings.GlobalVolume);
+		}
+
+		return project;
 	}
 
 	json Project::Serialize()
@@ -100,6 +116,10 @@ namespace Nuake
 		if(EntityDefinitionsFile)
 			SERIALIZE_VAL_LBL("EntityDefinition", EntityDefinitionsFile->Path);
 		SERIALIZE_VAL(TrenchbroomPath);
+
+		// Project Settings
+		j["Settings"] = Settings.Serialize();
+
 		END_SERIALIZE();
 	}
 
@@ -123,6 +143,17 @@ namespace Nuake
 		if (j.contains("TrenchbroomPath"))
 		{
 			this->TrenchbroomPath = j["TrenchbroomPath"];
+		}
+
+		if (j.contains("Settings"))
+		{
+			Settings = ProjectSettings();
+			Settings.Deserialize(j["Settings"]);
+			Engine::GetCurrentWindow()->SetVSync(Settings.VSync);
+
+			Engine::SetPhysicsStep(Settings.PhysicsStep);
+
+			AudioManager::Get().SetGlobalVolume(Settings.GlobalVolume);
 		}
 
 		DefaultScene = Scene::New();
@@ -149,6 +180,56 @@ namespace Nuake
 		Logger::Log("Loaded scene: " + scenePath);
 
 		return true; // Success
+	}
+
+	json ProjectSettings::Serialize()
+	{
+		BEGIN_SERIALIZE();
+
+		SERIALIZE_VAL(VSync);
+		SERIALIZE_VAL(ShowGizmos);
+		SERIALIZE_VAL(ShowAxis);
+		SERIALIZE_VAL(ResolutionScale);
+		SERIALIZE_VAL(GizmoSize);
+		SERIALIZE_VAL(OutlineRadius);
+		SERIALIZE_VEC4(PrimaryColor);
+		SERIALIZE_VAL(SmoothCamera);
+		SERIALIZE_VAL(SmoothCameraSpeed);
+		SERIALIZE_VAL(PhysicsStep);
+		SERIALIZE_VAL(MaxPhysicsSubStep);
+		SERIALIZE_VAL(MaxPhysicsBodies);
+		SERIALIZE_VAL(MaxPhysicsBodyPair);
+		SERIALIZE_VAL(MaxPhysicsContactConstraints);
+		SERIALIZE_VAL(GlobalVolume);
+		SERIALIZE_VAL(MaxActiveVoiceCount);
+		END_SERIALIZE();
+	}
+
+	bool ProjectSettings::Deserialize(const json& j)
+	{
+		DESERIALIZE_VAL(VSync);
+		DESERIALIZE_VAL(ShowGizmos);
+		DESERIALIZE_VAL(ShowAxis);
+		DESERIALIZE_VAL(ResolutionScale);
+		DESERIALIZE_VAL(OutlineRadius);
+		DESERIALIZE_VAL(GizmoSize);
+		DESERIALIZE_VAL(SmoothCamera);
+		DESERIALIZE_VAL(SmoothCameraSpeed);
+		DESERIALIZE_VAL(PhysicsStep);
+		DESERIALIZE_VAL(MaxPhysicsSubStep);
+		DESERIALIZE_VAL(MaxPhysicsBodies);
+		DESERIALIZE_VAL(MaxPhysicsBodyPair);
+		DESERIALIZE_VAL(MaxPhysicsContactConstraints);
+
+		DESERIALIZE_VAL(GlobalVolume);
+		DESERIALIZE_VAL(MaxActiveVoiceCount);
+
+		if (j.contains("PrimaryColor"))
+		{
+			DESERIALIZE_VEC4(j["PrimaryColor"], PrimaryColor);
+		}
+
+		return true;
 	}
 }
 

@@ -35,6 +35,7 @@ uniform sampler2D u_Depth;
 uniform vec3 u_CamPosition;
 uniform int u_StepCount;
 uniform float u_FogAmount;
+uniform float u_Exponant;
 
 const int MAX_LIGHT = 20;
 uniform int u_LightCount;
@@ -59,7 +60,7 @@ const float PI = 3.141592653589793f;
 float ComputeScattering(float lightDotView)
 {
     float result = 1.0f - u_FogAmount ;
-    result /= (4.0f * PI * pow(1.0f + u_FogAmount * u_FogAmount - (2.0f * u_FogAmount) * lightDotView, 1.5f));
+    result /= (4.0f * PI * pow(1.0f + u_FogAmount * u_FogAmount - (1.0f * u_FogAmount) * lightDotView, 1.5f));
     return result;
 }
 
@@ -69,8 +70,8 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     vec3 rayVector = FragPos - startPosition;  // Ray Direction
 
     float rayLength = length(rayVector);            // Length of the raymarched
-    //if(rayLength > 1000.0)
-    //    return vec3(1.0, 1.0, 1.0);
+    if(rayLength > 1000.0)
+        return vec3(0.0);
     float stepLength = rayLength / u_StepCount;        // Step length
     vec3 rayDirection = rayVector / rayLength;
     vec3 step = rayDirection * stepLength;          // Normalized to step length direction
@@ -93,7 +94,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
         if (closestDepth > currentDepth && closestDepth < 999)
         {
             //accumFog = vec3(light.color);
-            accumFog += (ComputeScattering(dot(rayDirection, light.direction)).xxx * light.color );
+            accumFog += (ComputeScattering(dot(rayDirection, light.direction)).xxx * light.color);
             //accumFog = vec3(projCoords.x, projCoords.y, 1.0);
             
         }
@@ -102,7 +103,7 @@ vec3 ComputeVolumetric(vec3 FragPos, Light light)
     }
     accumFog /= u_StepCount;
 
-    return accumFog * 4.0;
+    return accumFog;
 }
 
 // Converts depth to World space coords.
@@ -128,7 +129,7 @@ void main()
     vec3 fog = vec3(0, 0, 0);
     for (int i = 0; i < u_LightCount; i++)
     {
-        fog += ComputeVolumetric(globalFragmentPosition, u_Lights[i]);
+        fog += ComputeVolumetric(globalFragmentPosition, u_Lights[i]) * u_Exponant;
     }
 
     FragColor = vec4(fog, 1.0);

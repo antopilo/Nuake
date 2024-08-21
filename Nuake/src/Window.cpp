@@ -101,7 +101,12 @@ namespace Nuake
         // Create viewports
         const Vector2 defaultResolution = Vector2(1, 1);
         m_Framebuffer = CreateRef<FrameBuffer>(true, defaultResolution);
-        m_Framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB));
+
+        Ref<Texture> outputTexture = CreateRef<Texture>(defaultResolution, GL_RGB);
+        outputTexture->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        outputTexture->SetParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        m_Framebuffer->SetTexture(outputTexture);
         m_Framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT1); // Entity ID
 
         InitImgui();
@@ -142,7 +147,8 @@ namespace Nuake
 
         cam->AspectRatio = size.x / size.y;
 
-        m_Scene->m_EditorCamera->OnWindowResize(size.x, size.y);
+        float resolutionScale = glm::clamp(Engine::GetProject()->Settings.ResolutionScale, 0.5f, 2.0f);
+        m_Scene->m_EditorCamera->OnWindowResize(size.x * resolutionScale, size.y * resolutionScale);
 
         if (Engine::IsPlayMode())
         {

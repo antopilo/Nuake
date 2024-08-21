@@ -90,6 +90,8 @@ namespace Nuake
 			return;
 		}
 
+		PhysicsManager::Get().ReInit();
+
 		if (GetCurrentScene()->OnInit())
 		{
 			SetGameState(GameState::Playing);

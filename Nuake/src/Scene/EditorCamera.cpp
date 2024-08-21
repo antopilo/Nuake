@@ -5,6 +5,7 @@
 
 #include "src/Core/Logger.h"
 #include <src/Vendors/imgui/imgui.h>
+#include <Engine.h>
 
 namespace Nuake
 {
@@ -49,8 +50,10 @@ namespace Nuake
 			}
 		}
 
-		Yaw = glm::mix(Yaw, TargetYaw, 1.0f);
-		Pitch = glm::mix(Pitch, TargetPitch, 1.0f);
+		const bool smoothCamera = Engine::GetProject()->Settings.SmoothCamera;
+		const float smoothCameraSpeed = Engine::GetProject()->Settings.SmoothCameraSpeed;
+		Yaw = glm::mix(Yaw, TargetYaw, smoothCamera ? smoothCameraSpeed : 1.0f);
+		Pitch = glm::mix(Pitch, TargetPitch, smoothCamera ? smoothCameraSpeed : 1.0f);
 
 		if (!controlled)
 		{

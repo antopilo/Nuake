@@ -50,6 +50,8 @@ namespace Nuake
 		if (format2 != 0)
 			m_Format2 = format2;
 
+		m_Filtering = GL_LINEAR;
+
 		m_Format3 = GL_UNSIGNED_BYTE;
 		if (format3 != 0)
 			m_Format3 = format3;
@@ -104,8 +106,8 @@ namespace Nuake
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
 		glTexImage2D(GL_TEXTURE_2D, 0, m_Format2, size.x, size.y, 0, m_Format, m_Format3, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_Filtering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_Filtering);
 	}
 
 	Texture::~Texture() 
@@ -131,8 +133,13 @@ namespace Nuake
 
 	void Texture::SetParameter(const GLenum& param, const GLenum& value)
 	{
+		if (param == GL_TEXTURE_MIN_FILTER)
+		{
+			m_Filtering = value;
+		}
+
 		Bind();
-		glTextureParameteri(GL_TEXTURE_2D, param, value);
+		glTexParameteri(GL_TEXTURE_2D, param, value);
 		Unbind();
 	}
 

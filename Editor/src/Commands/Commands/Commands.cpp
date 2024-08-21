@@ -139,4 +139,11 @@ namespace NuakeEditor
         }
 		return true;
 	}
+
+    bool SetVSync::Execute()
+    {
+        Engine::GetCurrentWindow()->SetVSync(value);
+
+        return true;
+    }
 }
