@@ -277,6 +277,18 @@ namespace Nuake {
 		}
 	}
 
+	float LightGetIntensity(int entityId)
+	{
+		Logger::Log("Get light intensity with id: " + std::to_string(entityId));
+
+		return -10.0f;
+	}
+
+	void LightSetIntensity(int entityId, float intensity)
+	{
+		Logger::Log("Set light intensity with id: " + std::to_string(intensity));
+	}
+
 	Coral::Array<float> CameraGetDirection(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -401,6 +413,10 @@ namespace Nuake {
 		RegisterMethod("TransformComponent.GetPositionIcall", &TransformGetPosition);
 		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
+
+		// Lights
+		RegisterMethod("LightComponent.GetLightIntensityIcall", &LightGetIntensity);
+		RegisterMethod("LightComponent.SetLightIntensityIcall", &LightSetIntensity);
 
 		// Camera
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);

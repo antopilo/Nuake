@@ -11,10 +11,7 @@
 #include "NetModules/InputNetAPI.h"
 #include "NetModules/SceneNetAPI.h"
 
-#include <Coral/HostInstance.hpp>
-#include <Coral/GC.hpp>
-#include <Coral/Array.hpp>
-#include <Coral/Attribute.hpp>
+
 #include <random>
 #include <regex>
 
@@ -60,6 +57,17 @@ namespace Nuake
 		{
 			m->RegisterMethods();
 		}
+
+		// Check if we have an .sln in the project.
+		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
+
+		if (!FileSystem::FileExists(m_EngineAssemblyName, true))
+		{
+			m_IsInitialized = false;
+			return;
+		}
+
+
 	}
 
 	ScriptingEngineNet::~ScriptingEngineNet()
@@ -122,21 +130,9 @@ namespace Nuake
 		return instance;
 	}
 
-	void ScriptingEngineNet::Initialize()
+	Coral::ManagedAssembly ScriptingEngineNet::ReloadEngineAPI(Coral::AssemblyLoadContext& context)
 	{
-		// Check if we have an .sln in the project.
-		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
-
-		if (!FileSystem::FileExists(m_EngineAssemblyName, true))
-		{
-			m_IsInitialized = false;
-			return;
-		}
-
-		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
-
-		// Load Nuake assembly DLL
-		m_NuakeAssembly = m_LoadContext.LoadAssembly(m_EngineAssemblyName);
+		auto assembly = context.LoadAssembly(m_EngineAssemblyName);
 
 		// Upload internal calls for each module
 		// --------------------------------------------------
@@ -145,11 +141,20 @@ namespace Nuake
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
 				auto namespaceClassSplit = String::Split(methodName, '.');
-				m_NuakeAssembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+				assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
 			}
 		}
 
-		m_NuakeAssembly.UploadInternalCalls();
+		assembly.UploadInternalCalls();
+
+		return assembly;
+	}
+
+	void ScriptingEngineNet::Initialize()
+	{
+		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
+
+		m_NuakeAssembly = ReloadEngineAPI(m_LoadContext);
 
 		m_IsInitialized = true;
 
@@ -170,9 +175,8 @@ namespace Nuake
 
 		Coral::GC::Collect();
 
-		m_HostInstance->UnloadAssemblyLoadContext(m_LoadContext);
+		GetHostInstance()->UnloadAssemblyLoadContext(m_LoadContext);
 
-		
 		m_EntityToManagedObjects.clear();
 	}
 

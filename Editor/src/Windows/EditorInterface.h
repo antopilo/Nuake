@@ -62,7 +62,7 @@ namespace Nuake
 		WelcomeWindow* _WelcomeWindow;
 		AudioWindow* _audioWindow;
 		FileSystemUI* filesystem;
-		EditorSelection Selection;
+		static EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 		MapImporterWindow m_MapImporter;

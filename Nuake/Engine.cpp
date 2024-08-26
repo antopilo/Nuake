@@ -9,7 +9,9 @@
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
 #include "src/Scripting/ScriptingEngine.h"
+#include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
+
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -139,7 +141,12 @@ namespace Nuake
 
 	Ref<Scene> Engine::GetCurrentScene()
 	{
-		return s_CurrentWindow->GetScene();
+		if (s_CurrentWindow)
+		{
+			return s_CurrentWindow->GetScene();
+		}
+
+		return nullptr;
 	}
 
 	bool Engine::LoadScene(Ref<Scene> scene)

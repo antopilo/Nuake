@@ -54,6 +54,7 @@
 #include <src/Threading/JobSystem.h>
 #include "../Commands/Commands/Commands.h"
 #include <src/Resource/ModelLoader.h>
+#include "../ScriptingContext/ScriptingContext.h"
 
 namespace Nuake {
     
@@ -62,6 +63,7 @@ namespace Nuake {
     ImFont* EditorInterface::bigIconFont;
     
     NuakeEditor::CommandBuffer* EditorInterface::mCommandBuffer;
+    EditorSelection EditorInterface::Selection;
 
     glm::vec3 DepthToWorldPosition(const glm::vec2& pixelPos, float depth, const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, const glm::vec2& viewportSize)
     {
@@ -112,6 +114,8 @@ namespace Nuake {
         Logger::Log("Loading imgui from mem", "window", VERBOSE);
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
+
+        ScriptingContext::Get().Initialize();
     }
 
     void EditorInterface::Init()

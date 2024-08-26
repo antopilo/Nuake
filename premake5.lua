@@ -38,7 +38,7 @@ group "Dependencies"
 group ""
 
 include "NuakeNet/premake5.lua"
-
+include "EditorNet/premake5.lua"
 
 project "Nuake"
     location "Nuake"
@@ -140,7 +140,6 @@ project "Nuake"
         runtime "Release"
         optimize "on"
         
-
 project "NuakeRuntime"
     location "Runtime"
     kind "ConsoleApp"
@@ -269,7 +268,6 @@ project "NuakeRuntime"
             "NK_DIST",
             "WIN32_LEAN_AND_MEAN"
         }
-
 
 project "Editor"
     location "Editor"

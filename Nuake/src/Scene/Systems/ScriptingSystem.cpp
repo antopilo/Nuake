@@ -41,6 +41,7 @@ namespace Nuake
 		}
 
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		scriptingEngineNet.Uninitialize();
 		scriptingEngineNet.Initialize();
 		scriptingEngineNet.LoadProjectAssembly(Engine::GetProject());
 

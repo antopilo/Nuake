@@ -11,6 +11,10 @@ namespace Coral
 	class Type;
 }
 
+#include <Coral/HostInstance.hpp>
+#include <Coral/GC.hpp>
+#include <Coral/Array.hpp>
+#include <Coral/Attribute.hpp>
 #include <Coral/Assembly.hpp>
 
 namespace Nuake {
@@ -87,6 +91,11 @@ namespace Nuake {
 	public:
 		static ScriptingEngineNet& Get();
 
+		Coral::HostInstance* GetHostInstance() { return m_HostInstance; }
+		Coral::AssemblyLoadContext& GetLoadContext() { return m_LoadContext; }
+
+		Coral::ManagedAssembly ReloadEngineAPI(Coral::AssemblyLoadContext & context);
+
 		void Initialize();
 		void Uninitialize();
 
@@ -106,6 +115,8 @@ namespace Nuake {
 		void CreateEntityScript(const std::string& path, const std::string& entityName);
 
 		std::string FindClassNameInScript(const std::string& filePath);
+
+		Coral::ManagedAssembly GetNuakeAssembly() const { return m_NuakeAssembly; }
 
 	private:
 		std::string GenerateGUID();
