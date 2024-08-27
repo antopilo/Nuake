@@ -2353,25 +2353,93 @@ namespace Nuake {
         int corner = 0;
         ImGuiIO& io = ImGui::GetIO();
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
-        if (corner != -1)
-        {
-            window_flags |= ImGuiWindowFlags_NoMove;
-            ImGuiViewport* viewport = ImGui::GetWindowViewport();
-            ImVec2 work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
-            ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
-            ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
-            ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
-            ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
-            ImGui::SetNextWindowViewport(viewport->ID);
-        }
-        int corner2 = 1;
 
         window_flags |= ImGuiWindowFlags_NoMove;
         ImGuiViewport* viewport = ImGui::GetWindowViewport();
         ImVec2 work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
         ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
-        ImVec2 window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
-        ImVec2 window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
+        ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+        ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+        ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+        if (ImGui::Begin("ActionBar", &m_ShowOverlay, window_flags))
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+            
+            bool selectedMode = CurrentOperation == ImGuizmo::OPERATION::TRANSLATE;
+            if (selectedMode)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::W))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+            }
+
+            if (selectedMode)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+
+            selectedMode = CurrentOperation == ImGuizmo::OPERATION::ROTATE;
+            if (selectedMode)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::E))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+            }
+
+            if (selectedMode)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+
+            selectedMode = CurrentOperation == ImGuizmo::OPERATION::SCALE;
+            if (selectedMode)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::R))
+            {
+                CurrentOperation = ImGuizmo::OPERATION::SCALE;
+            }
+
+            if (selectedMode)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::PopStyleVar();
+        ImGui::End();
+
+        int corner2 = 1;
+        work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+        work_area_size = ImGui::GetCurrentWindow()->Size;
+        window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+        window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
         ImGui::SetNextWindowPos(window_pos + ImVec2(0, 30), ImGuiCond_Always, window_pos_pivot);
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
