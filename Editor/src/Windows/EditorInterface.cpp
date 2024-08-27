@@ -264,7 +264,8 @@ namespace Nuake {
                     glm::value_ptr(cameraView),
                     glm::value_ptr(cameraProjection),
                     CurrentOperation, CurrentMode, 
-                    glm::value_ptr(transform)
+                    glm::value_ptr(transform), NULL,
+                    UseSnapping ? &CurrentSnapping.x : NULL
                 );
 
                 if (ImGuizmo::IsUsing())
@@ -2425,6 +2426,54 @@ namespace Nuake {
             if (selectedMode)
             {
                 ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+            
+            selectedMode = CurrentMode == ImGuizmo::MODE::WORLD;
+            if (selectedMode)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_GLOBE, ImVec2(30, 28)))
+            {
+                CurrentMode = ImGuizmo::MODE::WORLD;
+            }
+
+            if (selectedMode)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+
+            selectedMode = CurrentMode == ImGuizmo::MODE::LOCAL;
+            if (selectedMode)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_CUBE, ImVec2(30, 28)))
+            {
+                CurrentMode = ImGuizmo::MODE::LOCAL;
+            }
+
+            if (selectedMode)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+
+            ImGui::Checkbox("Snapping", &UseSnapping);
+
+            if (UseSnapping)
+            {
+                ImGui::SameLine();
+                ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
             }
 
             ImGui::PopStyleVar();
