@@ -16,7 +16,7 @@ void ScriptingContext::Initialize()
 	}
 
 	// Load Nuake assembly DLL
-	auto m_LoadContext2 = Nuake::ScriptingEngineNet::Get().GetHostInstance()->CreateAssemblyLoadContext("NuakeEditorContext");
+	/*auto m_LoadContext2 = Nuake::ScriptingEngineNet::Get().GetHostInstance()->CreateAssemblyLoadContext("NuakeEditorContext");
 	m_NuakeAssembly = Nuake::ScriptingEngineNet::Get().ReloadEngineAPI(m_LoadContext2);
 	m_EditorAssembly = m_LoadContext2.LoadAssembly("EditorNet.dll");
 
@@ -30,7 +30,7 @@ void ScriptingContext::Initialize()
 	}
 
 	m_EditorAssembly.UploadInternalCalls();
-	m_EditorAssembly.GetType("Nuake.Editor").InvokeStaticMethod("Initialize");
+	m_EditorAssembly.GetType("Nuake.Editor").InvokeStaticMethod("Initialize");*/
 }
 
 void ScriptingContext::PushCommand(const std::string & command, const std::string & arg)

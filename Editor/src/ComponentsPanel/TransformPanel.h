@@ -45,16 +45,41 @@ public:
                     CompononentPropertyName("Rotation");
                     ImGui::TableNextColumn();
 
-                    Vector3 eulerAngles = glm::eulerAngles(component.GetLocalRotation());
-                    Vector3 eulerDegrees = Vector3(glm::degrees(eulerAngles.x), glm::degrees(eulerAngles.y), glm::degrees(eulerAngles.z));
-                    ImGuiHelper::DrawVec3("Rotation", &eulerDegrees);
-                    Vector3 eulerAnglesDelta = Vector3(glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y), glm::radians(eulerDegrees.z));
+                    // Get the current local rotation as a quaternion
+                    Quat currentRotation = component.GetLocalRotation();
 
-                    float delta = glm::length(eulerAngles - eulerAnglesDelta);
-                    if (delta > 0.f)
+                    // Convert quaternion to Euler angles in degrees
+                    Vector3 eulerDegreesOld = glm::degrees(glm::eulerAngles(currentRotation));
+
+                    // Draw the ImGui widget for rotation
+                    ImGuiHelper::DrawVec3("Rotation", &eulerDegreesOld);
+
+                    // Calculate the delta in Euler angles
+                    Vector3 eulerDelta = eulerDegreesOld - glm::degrees(glm::eulerAngles(currentRotation));
+
+                    // Apply a small threshold to ignore minor changes
+                    if (fabs(eulerDelta.x) < 0.01) eulerDelta.x = 0.0f;
+                    if (fabs(eulerDelta.y) < 0.01) eulerDelta.y = 0.0f;
+                    if (fabs(eulerDelta.z) < 0.01) eulerDelta.z = 0.0f;
+
+                    // Check if there was a significant rotation change
+                    if (glm::length(eulerDelta) > 0.001f)
                     {
-                        Quat rotation = QuatFromEuler(eulerAnglesDelta.x, eulerAnglesDelta.y, eulerAnglesDelta.z);
-                        //component.SetLocalRotation(rotation);
+                        // Convert delta back to radians
+                        Vector3 eulerAnglesDelta = glm::radians(eulerDelta);
+
+                        // Calculate the new rotation quaternion by applying the delta to the current rotation
+                        // Apply changes only to the axis that was modified
+                        Quat deltaRotation = glm::quat(eulerAnglesDelta);
+                        Quat deltaRotationX = glm::angleAxis(eulerAnglesDelta.x, Vector3(1.0f, 0.0f, 0.0f));
+                        Quat deltaRotationY = glm::angleAxis(eulerAnglesDelta.y, Vector3(0.0f, 1.0f, 0.0f));
+                        Quat deltaRotationZ = glm::angleAxis(eulerAnglesDelta.z, Vector3(0.0f, 0.0f, 1.0f));
+
+                        // Combine the rotations: only the modified axis is affected
+                        Quat newRotation = deltaRotationZ * deltaRotationY * deltaRotationX * currentRotation;
+
+                        // Set the new rotation
+                        component.SetLocalRotation(newRotation);
                     }
                     ImGui::TableNextColumn();
 
