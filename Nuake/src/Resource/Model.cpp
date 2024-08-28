@@ -26,6 +26,17 @@ namespace Nuake
 		return m_Meshes;
 	}
 
+	json Model::SerializeData()
+	{
+		BEGIN_SERIALIZE();
+		j["UUID"] = static_cast<uint64_t>(ID);
+		for (uint32_t i = 0; i < std::size(m_Meshes); i++)
+		{
+			j["Meshes"][i] = m_Meshes[i]->Serialize();
+		}
+		END_SERIALIZE();
+	}
+
 	json Model::Serialize()
 	{
 		BEGIN_SERIALIZE();
@@ -36,6 +47,7 @@ namespace Nuake
 		}
 		else
 		{
+			j["UUID"] = static_cast<uint64_t>(ID);
 			for (uint32_t i = 0; i < std::size(m_Meshes); i++)
 			{
 				j["Meshes"][i] = m_Meshes[i]->Serialize();
@@ -58,6 +70,11 @@ namespace Nuake
 		}
 		else
 		{
+			if (j.contains("UUID"))
+			{
+				ID = UUID(j["UUID"]);
+			}
+
 			if (j.contains("Meshes"))
 			{
 				for (auto& m : j["Meshes"])

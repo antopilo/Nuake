@@ -1,10 +1,12 @@
 #pragma once
-#include <vector>
 
-#include "src/Resource/Serializable.h"
 #include "src/Resource/Model.h"
+#include "src/Resource/ResourceLoader.h"
+#include "src/Resource/Serializable.h"
 
 #include <string>
+#include <vector>
+
 
 namespace Nuake
 {
@@ -35,10 +37,17 @@ namespace Nuake
             ModelPath = j["ModelPath"];
             ModelResource = CreateRef<Model>();
 
-            if (j.contains("ModelResource"))
+            if (ModelPath.empty() || !String::EndsWith(ModelPath, ".mesh"))
             {
-                auto& res = j["ModelResource"];
-                ModelResource->Deserialize(res);
+                if (j.contains("ModelResource"))
+                {
+                    auto& res = j["ModelResource"];
+                    ModelResource->Deserialize(res);
+                }
+            }
+            else
+            {
+                ModelResource = ResourceLoader::LoadModel(ModelPath);
             }
 
             return true;

@@ -4,6 +4,7 @@
 #include "src/Resource/Resource.h"
 #include "src/Resource/ResourceManager.h"
 #include "src/Rendering/Textures/Material.h"
+#include "src/Resource/Model.h"
 
 namespace Nuake
 {
@@ -60,6 +61,50 @@ namespace Nuake
 
 			return material;
 		}
+
+		static Ref<Model> LoadModel(const std::string& path)
+		{
+			const std::string FILE_NOT_FOUND = "[Resource Loader] File doesn't exists. \n ";
+			const std::string WRONG_EXTENSION = "[Resource Loader] Resource type mismatch file extension. \n expected: ";
+			const std::string MESH_EXT = ".mesh";
+			if (path.empty())
+			{
+				Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
+				return nullptr;
+			}
+
+			if (!FileSystem::FileExists(path))
+			{
+				Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
+				return nullptr;
+			}
+
+			if (!String::EndsWith(path, MESH_EXT))
+			{
+				std::string message = WRONG_EXTENSION + MESH_EXT + " actual: " + path;
+				Logger::Log(message, "resource", LOG_TYPE::WARNING);
+			}
+
+			std::string content = FileSystem::ReadFile(path);
+			json j = json::parse(content);
+
+			UUID uuid = ReadUUID(j);
+
+			// Check if resource is already loaded.
+			if (ResourceManager::IsResourceLoaded(uuid))
+			{
+				return ResourceManager::GetResource<Model>(uuid);
+			}
+
+			Ref<Model> model = CreateRef<Model>();
+			model->ID = uuid;
+			model->Path = path;
+			model->Deserialize(j);
+			ResourceManager::RegisterResource(model);
+
+			return model;
+		}
+
 	private:
 		static UUID ReadUUID(json j)
 		{

@@ -19,6 +19,7 @@ namespace Nuake
 		void AddMesh(Ref<Mesh> mesh);
 		std::vector<Ref<Mesh>>& GetMeshes();
 
+		json SerializeData();
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 	};
