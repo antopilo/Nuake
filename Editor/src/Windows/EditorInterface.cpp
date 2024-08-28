@@ -215,7 +215,7 @@ namespace Nuake {
 
                     }
 
-                    Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugLine(dragnDropWorldPos, dragnDropWorldPos + Vector3{0, 5, 0}, Vector4(1, 0, 1, 1));
+                    // Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugLine(dragnDropWorldPos, dragnDropWorldPos + Vector3{0, 5, 0}, Vector4(1, 0, 1, 1), -1.0f);
                 }
                 gizmoBuffer->Unbind();
 
@@ -2370,7 +2370,6 @@ namespace Nuake {
         {
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
             
             bool selectedMode = CurrentOperation == ImGuizmo::OPERATION::TRANSLATE;

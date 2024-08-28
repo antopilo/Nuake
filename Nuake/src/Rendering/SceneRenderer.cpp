@@ -78,18 +78,24 @@ namespace Nuake
 	{
 	}
 
-	void SceneRenderer::Update(const Timestep time)
+	void SceneRenderer::Update(const Timestep time, bool isEditorUpdate)
 	{
+		if (isEditorUpdate)
+		{
+			return;
+		}
+
 		// Delete debug shapes that are dead
 		std::erase_if(mDebugLines, [](const DebugLine& line)
-			{
-				return line.Life < 0.0f;
-			});
+		{
+			return line.Life < 0.0f;
+		});
 
 		std::erase_if(mDebugShapes, [](const DebugShape& shape)
-			{
-				return shape.Life < 0.0f;
-			});
+		{
+			return shape.Life < 0.0f;
+		});
+
 
 		for (auto& line : mDebugLines)
 		{
@@ -917,7 +923,6 @@ namespace Nuake
 
 	void SceneRenderer::PostProcessPass(const Scene& scene)
 	{
-
 	}
 
 	void SceneRenderer::DebugRendererPass(Scene& scene)

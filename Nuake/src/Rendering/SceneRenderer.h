@@ -47,7 +47,7 @@ namespace Nuake
 		void Init();
 		void Cleanup();
 
-		void Update(const Timestep time);
+		void Update(const Timestep time, bool isEditorUpdate = false);
 
 		void BeginRenderScene(const Matrix4& projection, const Matrix4& view, const Vector3& camPos);
 		void RenderScene(Scene& scene, FrameBuffer& framebuffer);
