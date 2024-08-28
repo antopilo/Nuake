@@ -2385,6 +2385,8 @@ namespace Nuake {
                 CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             }
 
+            
+            UI::Tooltip("Translate");
             if (selectedMode)
             {
                 ImGui::PopStyleColor();
@@ -2403,6 +2405,8 @@ namespace Nuake {
             {
                 CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             }
+
+            UI::Tooltip("Rotate");
 
             if (selectedMode)
             {
@@ -2423,6 +2427,8 @@ namespace Nuake {
                 CurrentOperation = ImGuizmo::OPERATION::SCALE;
             }
 
+            UI::Tooltip("Scale");
+
             if (selectedMode)
             {
                 ImGui::PopStyleColor();
@@ -2441,6 +2447,8 @@ namespace Nuake {
             {
                 CurrentMode = ImGuizmo::MODE::WORLD;
             }
+
+            UI::Tooltip("Global Transformation");
 
             if (selectedMode)
             {
@@ -2461,6 +2469,8 @@ namespace Nuake {
                 CurrentMode = ImGuizmo::MODE::LOCAL;
             }
 
+            UI::Tooltip("Local Transformation");
+
             if (selectedMode)
             {
                 ImGui::PopStyleColor();
@@ -2468,13 +2478,14 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            ImGui::Checkbox("Snapping", &UseSnapping);
+            ImGui::SameLine();
+            ImGui::PushItemWidth(75);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
+            ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
+            ImGui::PopStyleVar();
 
-            if (UseSnapping)
-            {
-                ImGui::SameLine();
-                ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
-            }
+            ImGui::PopItemWidth();
+            UI::Tooltip("Snapping");
 
             ImGui::PopStyleVar();
             ImGui::PopStyleVar();
