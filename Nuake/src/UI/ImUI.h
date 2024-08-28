@@ -31,5 +31,7 @@ namespace Nuake
 		bool CheckBox(const std::string& name, bool& value);
 
 		void ToggleButton(const char* str_id, bool* v);
+
+		void Tooltip(const std::string& message);
 	}
 }

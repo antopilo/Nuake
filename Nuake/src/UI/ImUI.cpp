@@ -174,5 +174,21 @@ namespace Nuake {
 				draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * 0.50f);
 			draw_list->AddCircleFilled(ImVec2(p.x + radius + (*v ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
 		}
+
+		void Tooltip(const std::string& message)
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+			{
+				ImGui::BeginTooltip();
+				ImGui::PushTextWrapPos(450.0f);
+				ImGui::TextUnformatted(message.c_str());
+				ImGui::PopTextWrapPos();
+				ImGui::EndTooltip();
+			}
+
+			ImGui::PopStyleVar();
+		}
 	}
 }
