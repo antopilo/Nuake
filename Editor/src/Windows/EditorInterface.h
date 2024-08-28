@@ -51,7 +51,7 @@ namespace Nuake
 
 		ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
 		ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
-		bool UseSnapping = false;
+		bool UseSnapping = true;
 		Vector3 CurrentSnapping = { 0.0f, 0.0f, 0.0f };
 		Ref<Material> m_SelectedMaterial;
 		Ref<Directory> m_CurrentDirectory;

@@ -536,13 +536,13 @@ namespace Nuake
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();
-            if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
+            if (!scene->Deserialize(json::parse(FileSystem::ReadFile(projectPath, true))))
             {
                 Logger::Log("Failed loading scene: " + projectPath,"editor", CRITICAL);
+                ImGui::PopFont();
                 return;
             }
 
-            FileSystem::SetRootDirectory(projectPath + "/");
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
             Engine::LoadScene(scene);
         }
