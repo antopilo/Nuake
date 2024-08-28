@@ -58,6 +58,7 @@ namespace Nuake
 		Unkown,
 		Image,
 		Material,
+		Mesh,
 		Script,
 		NetScript,
 		Project,
@@ -140,9 +141,15 @@ namespace Nuake
 			{
 				return FileType::NetScript;
 			}
+
 			if (ext == ".sln")
 			{
 				return FileType::Solution;
+			}
+
+			if (ext == ".mesh")
+			{
+				return FileType::Mesh;
 			}
 
 			return FileType::Unkown;

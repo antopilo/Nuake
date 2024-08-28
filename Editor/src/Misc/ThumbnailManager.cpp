@@ -155,6 +155,38 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//}
 		//m_ShadedFramebuffer->Unbind();
 	}
+	else if (file->GetFileType() == FileType::Mesh)
+	{
+		Ref<Scene> scene = Scene::New();
+		Ref<Environment> env = scene->GetEnvironment();
+		env->CurrentSkyType = SkyType::ClearColor;
+		env->ProceduralSkybox->SunDirection = { 0.88f, 0.34f, -0.14f };
+
+		Entity camera = scene->CreateEntity("Camera");
+		TransformComponent& camTransform = camera.GetComponent<TransformComponent>();
+		camTransform.SetLocalPosition({ 0.0f, 0.5f, 2.0f });
+
+		CameraComponent& camComponent = camera.AddComponent<CameraComponent>();
+		camComponent.CameraInstance->Fov = 45.0f;
+		camComponent.CameraInstance->AspectRatio = 1.0f;
+
+		LightComponent& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
+		previewLight.SetCastShadows(false);
+		previewLight.Type = LightType::Directional;
+		previewLight.Strength = 5.0f;
+		previewLight.SyncDirectionWithSky = true;
+
+		m_ShadedFramebuffer->SetTexture(texture);
+
+		ModelComponent& modelComp = scene->CreateEntity("Mesh").AddComponent<ModelComponent>();
+		modelComp.ModelResource = ResourceLoader::LoadModel(file->GetRelativePath());
+
+		AABB aabb = modelComp.ModelResource->GetMeshes()[0]->GetAABB();
+		Vector3 middlePoint = aabb.Max / 2.0f;
+
+		scene->Update(0.01f);
+		scene->Draw(*m_ShadedFramebuffer.get());
+	}
 	else if (file->GetFileType() == FileType::Material)
 	{
 		// Gbuffer pass

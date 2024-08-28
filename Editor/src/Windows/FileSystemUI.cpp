@@ -365,6 +365,14 @@ namespace Nuake
                 textureImage = image;
             }
         }
+        else if (fileType == FileType::Mesh)
+        {
+            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            if (image)
+            {
+                textureImage = image;
+            }
+        }
 
         ImGui::SetCursorPos(prevCursor);
         ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));

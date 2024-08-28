@@ -242,7 +242,7 @@ namespace Nuake
 			shader->SetUniformTex("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
 			shader->SetUniformVec4("u_OutlineColor", projectSettings.PrimaryColor);
 			shader->SetUniformTex("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT), 1);
-			shader->SetUniform1f("u_Radius", projectSettings.OutlineRadius);
+			shader->SetUniform1f("u_Radius", projectSettings.OutlineRadius * projectSettings.ResolutionScale);
 			Renderer::DrawQuad();
 		}
 		mOutlineBuffer->Unbind();

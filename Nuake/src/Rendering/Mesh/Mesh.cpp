@@ -213,6 +213,7 @@ namespace Nuake
         );
 
         m_Vertices = result.get();
+        CalculateAABB();
 
 		SetupMesh();
         return true;
