@@ -45,6 +45,9 @@ namespace Nuake
 		mOutlineBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mOutlineBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 
+		mDisplayDepthBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mDisplayDepthBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
 		// Generate debug meshes
 		std::vector<Vertex> lineVertices
 		{
@@ -496,19 +499,100 @@ namespace Nuake
 		for (auto l : view)
 		{
 			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
-			if (light.Type != LightType::Directional || !light.CastShadows || !visibility.Visible)
+			if (!light.CastShadows || !visibility.Visible)
 			{
 				continue;
 			}
 
-			light.CalculateViewProjection(mView, mProjection);
-
-			for (int i = 0; i < CSM_AMOUNT; i++)
+			if (light.Type == LightType::Directional)
 			{
-				light.m_Framebuffers[i]->Bind();
-				light.m_Framebuffers[i]->Clear();
+				light.CalculateViewProjection(mView, mProjection);
+
+				for (int i = 0; i < CSM_AMOUNT; i++)
 				{
-					shader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+					light.m_Framebuffers[i]->Bind();
+					light.m_Framebuffers[i]->Clear();
+					{
+						shader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+						for (auto e : meshView)
+						{
+							auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+							if (mesh.ModelResource != nullptr && visibility.Visible)
+							{
+								for (auto& m : mesh.ModelResource->GetMeshes())
+									Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+							}
+						}
+
+						for (auto e : quakeView)
+						{
+							auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
+
+							if (model.IsTransparent || !visibility.Visible)
+								continue;
+
+							for (Ref<Mesh>& m : model.Meshes)
+							{
+								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+							}
+						}
+						Renderer::Flush(shader, true);
+
+						auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
+						for (auto e : spriteView)
+						{
+							auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
+
+							if (!visibility.Visible || !sprite.SpriteMesh)
+								continue;
+
+							auto finalQuadTransform = transform.GetGlobalTransform();
+							if (sprite.Billboard)
+							{
+								if (sprite.PositionFacing)
+								{
+									const Matrix4& invView = glm::inverse(mView);
+									const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+									const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+									const Vector3& direction = cameraPosition - spritePosition;
+									finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+								}
+								else
+								{
+									finalQuadTransform = glm::inverse(mView);
+
+								}
+
+								if (sprite.LockYRotation)
+								{
+									// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
+									finalQuadTransform[1] = Vector4(0, 1, 0, 0);
+									finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
+									finalQuadTransform = finalQuadTransform;
+								}
+
+								finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
+
+								// Scale
+								finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
+							}
+
+							Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
+						}
+
+						Renderer::Flush(shader, true);
+					}
+				}
+			}
+			else if (light.Type == LightType::Spot)
+			{
+				glCullFace(GL_FRONT);
+				light.m_Framebuffers[0]->Bind();
+				light.m_Framebuffers[0]->Clear();
+				{
+					Matrix4 spotLightTransform = lightTransform.GetGlobalTransform();
+					spotLightTransform = glm::rotate(spotLightTransform, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * spotLightTransform);
 					for (auto e : meshView)
 					{
 						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
@@ -822,8 +906,6 @@ namespace Nuake
 		}
 
 		RenderCommand::Enable(RendererEnum::BLENDING);
-
-
 	}
 
 	void SceneRenderer::ShadingPass(Scene& scene)

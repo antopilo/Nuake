@@ -51,6 +51,9 @@ struct Light {
     vec3 Direction;
     float OuterAngle;
     float InnerAngle;
+    int CastShadow; // For SpotLight for now
+    int ShadowMapID;
+    mat4 Transform;
 };
 
 struct DirectionalLight
@@ -65,6 +68,7 @@ struct DirectionalLight
 };
 
 uniform sampler2D ShadowMaps[4];
+uniform sampler2D SpotShadowMaps[8];
 
 uniform Light Lights[MaxLight];
 uniform DirectionalLight u_DirectionalLight;
@@ -220,6 +224,28 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
    
 }
 
+float ShadowCalculationSpot(vec3 FragPos, vec3 normal, Light light)
+{
+    // Get Depth
+    float depth = length(FragPos - u_EyePosition);
+    vec4 fragPosLightSpace = light.Transform * vec4(FragPos, 1.0f);
+
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = 0.0;
+    float bias = max(0.00005 * (1.0 - dot(normal, -light.Direction)), 0.00005);
+    //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
+
+    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth);
+    return texture(SpotShadowMaps[light.ShadowMapID], projCoords.xy).r;
+}
+
 void main()
 {
     vec3 worldPos = WorldPosFromDepth(texture(m_Depth, UV).r);
@@ -326,7 +352,10 @@ void main()
             float theta = dot(L, normalize(-Lights[i].Direction));
             float epsilon   = Lights[i].InnerAngle - Lights[i].OuterAngle;
             float intensity = clamp((theta - Lights[i].OuterAngle) / epsilon, 0.0, 1.0);    
-            radiance = Lights[i].Color * intensity;
+
+            shadow += ShadowCalculationSpot(worldPos, N, Lights[i]);
+            
+            radiance = Lights[i].Color * intensity * shadow;
         }
 
         // Cook-Torrance BRDF

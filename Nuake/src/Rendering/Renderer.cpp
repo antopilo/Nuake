@@ -16,6 +16,7 @@
 #include "Buffers/VertexBufferLayout.h"
 #include "src/Rendering/Textures/MaterialManager.h"
 #include "src/Rendering/Vertex.h"
+#include <imgui/imgui.h>
 
 namespace Nuake
 {
@@ -271,6 +272,8 @@ namespace Nuake
         Vector3 pos = transform.GetGlobalPosition();
         Quat lightRotation = transform.GetGlobalRotation();
 
+        int spotShadowMapCount = 0;
+        const int MaxSpotShadowMap = 8;
         if (light.Type == Directional)
         {
             int shadowmapAmount = 0;
@@ -310,12 +313,30 @@ namespace Nuake
             deferredShader->SetUniform3f(uniformAccessor + "Position", pos.x, pos.y, pos.z);
             deferredShader->SetUniform3f(uniformAccessor + "Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
             deferredShader->SetUniform1i(uniformAccessor + "Type", static_cast<int>(light.Type));
+            deferredShader->SetUniform1i(uniformAccessor + "CastShadow", static_cast<int>(light.CastShadows));
 
             if (light.Type == Spot)
             {
                 deferredShader->SetUniform3f(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
                 deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
                 deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
+
+                if (light.CastShadows && spotShadowMapCount < MaxSpotShadowMap)
+                {
+                    int shadowMapTextureSlot = 22 + spotShadowMapCount;
+                    deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", shadowMapTextureSlot);
+                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * transform.GetGlobalTransform());
+
+                    if (ImGui::Begin("DebugShadowMap"))
+                    {
+                        ImGui::Image((void*)light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
+                        ImGui::End();
+                    }
+
+                    light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(shadowMapTextureSlot);
+                    deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
+                    spotShadowMapCount++;
+                }
             }
 
             deferredShader->SetUniform1i("LightCount", static_cast<int>(idx));

@@ -156,7 +156,6 @@ namespace Nuake
             }
         }
 
-
         json Serialize()
         {
             BEGIN_SERIALIZE();
