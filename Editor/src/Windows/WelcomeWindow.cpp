@@ -119,7 +119,7 @@ namespace Nuake
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(32.0f, 32.0f));
-		ImGui::Begin("Welcome Screen", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
+		if(ImGui::Begin("Welcome Screen", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize))
 		{
 			// Draw Nuake logo
 			{
@@ -145,8 +145,9 @@ namespace Nuake
 			DrawRightControls();
 			ImGui::SameLine();
 			DrawRecentProjectsSection();
+
+			ImGui::End();
 		}
-		ImGui::End();
 		ImGui::PopStyleVar(2);
 	}
 
@@ -266,7 +267,9 @@ namespace Nuake
 		const float buttonHeight = 36.0f;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 16.0f);
-		if (ImGui::BeginChild("Controls", ImVec2(250.0f, ImGui::GetContentRegionAvail().y), false))
+
+		bool opened = ImGui::BeginChild("Controls", ImVec2(250.0f, ImGui::GetContentRegionAvail().y), false);
+		if (opened)
 		{
 			ImGui::PopStyleVar();
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
@@ -355,6 +358,11 @@ namespace Nuake
 				OS::OpenURL("https://nuake.readthedocs.io/en/latest/index.html");
 			}
 			ImGui::PopStyleVar(2);
+		}
+
+		if (!opened)
+		{
+			ImGui::PopStyleVar();
 		}
 
 		ImGui::EndChild();
