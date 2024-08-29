@@ -409,7 +409,6 @@ namespace Nuake
 		m_EntitiesIDMap[id] = entity;
 		m_EntitiesNameMap[entityName] = entity;
 
-		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
 	}
 

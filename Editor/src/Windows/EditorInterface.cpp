@@ -65,6 +65,8 @@ namespace Nuake {
     NuakeEditor::CommandBuffer* EditorInterface::mCommandBuffer;
     EditorSelection EditorInterface::Selection;
 
+    int SelectedViewport = 0;
+
     glm::vec3 DepthToWorldPosition(const glm::vec2& pixelPos, float depth, const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, const glm::vec2& viewportSize)
     {
         // Convert pixel position to normalized device coordinates (NDC)
@@ -152,6 +154,19 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
 
             Ref<Texture> texture = framebuffer->GetTexture();
+            if (SelectedViewport == 1)
+            {
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT0);
+            }
+            else if (SelectedViewport == 2)
+            {
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT1);
+            }
+            else if (SelectedViewport == 3)
+            {
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT);
+            }
+
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -2494,16 +2509,65 @@ namespace Nuake {
         ImGui::PopStyleVar();
         ImGui::End();
 
+		corner = 1;
+		window_flags |= ImGuiWindowFlags_NoMove;
+		viewport = ImGui::GetWindowViewport();
+		work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+		work_area_size = ImGui::GetCurrentWindow()->Size;
+		window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+		window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+		ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+		if (ImGui::Begin("GraphicsBar", &m_ShowOverlay, window_flags))
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
+            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth"};
+            ImGui::SetNextItemWidth(128);
+			if (ImGui::BeginCombo("##Output", items[SelectedViewport]))
+			{
+				// Loop through each item and create a selectable item
+				for (int i = 0; i < IM_ARRAYSIZE(items); i++)
+				{
+					bool is_selected = (SelectedViewport == i);  // Check if the current item is selected
+					if (ImGui::Selectable(items[i], is_selected))
+					{
+                        SelectedViewport = i;  // Update the selected item
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+
+			UI::Tooltip("Output");
+
+            ImGui::PopStyleVar(2);
+            ImGui::PopStyleColor(4);
+		}
+
+		ImGui::PopStyleVar();
+		ImGui::End();
+
         int corner2 = 1;
         work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
         work_area_size = ImGui::GetCurrentWindow()->Size;
         window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
         window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
-        ImGui::SetNextWindowPos(window_pos + ImVec2(0, 30), ImGuiCond_Always, window_pos_pivot);
+        ImGui::SetNextWindowPos(window_pos + ImVec2(0, 40), ImGuiCond_Always, window_pos_pivot);
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
-        ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 30.0));
+        ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
         if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
         {
             const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
@@ -2515,9 +2579,9 @@ namespace Nuake {
 
             ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0) ;
             ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
-            ImVec2 startOffset = ImVec2(start.x , end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 15.0)));
+            ImVec2 startOffset = ImVec2(start.x , end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
 
-            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 15.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
             ImGui::PopStyleVar();
         }
