@@ -309,7 +309,7 @@ void main()
 
         if(u_DirectionalLight.Shadow > 0.1f)
         {
-            shadow = ShadowCalculation(worldPos, N);
+            shadow += ShadowCalculation(worldPos, N);
         }
 
         vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;

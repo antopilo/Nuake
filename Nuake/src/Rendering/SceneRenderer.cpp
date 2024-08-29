@@ -1001,13 +1001,16 @@ namespace Nuake
 			{
 				auto [transform, light, parent] = view.get<TransformComponent, LightComponent, ParentComponent>(l);
 
-				if (light.Type == Directional && light.SyncDirectionWithSky)
+				if (light.Type == Directional)
 				{
-					light.Direction = env->ProceduralSkybox->GetSunDirection();
-				}
-				else
-				{
-					light.Direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
+					if (light.SyncDirectionWithSky)
+					{
+						light.Direction = env->ProceduralSkybox->GetSunDirection();
+					}
+					else
+					{
+						light.Direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
+					}
 				}
 
 				Vector3 lightPosition = transform.GetGlobalPosition();
