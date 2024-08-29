@@ -318,6 +318,7 @@ namespace Nuake
 
             if (light.Type == Spot)
             {
+                direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
                 deferredShader->SetUniform3f(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
                 deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
                 deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
@@ -326,23 +327,7 @@ namespace Nuake
                 {
                     int shadowMapTextureSlot = 22 + spotShadowMapCount;
                     deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", spotShadowMapCount);
-
-                    Matrix4 spotLightTransform = Matrix4(1.0f);
-                    Vector3 pos = transform.GetGlobalPosition();
-                    pos.y *= -1.0f;
-                    pos.x *= -1.0f;
-                    pos.z *= -1.0f;
-                    spotLightTransform = glm::translate(spotLightTransform, pos);
-
-                    Vector3 direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
-                    auto lookatAt = lookAt(Vector3(), direction, Vector3(0, 1, 0));
-                    Quat offset = QuatFromEuler(0, -90.0f, 0);
-                    Quat offset2 = QuatFromEuler(180.0f, 0.0f, 0);
-
-                    const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
-                    const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-
-                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * lookatAt * spotLightTransform);
+                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
 
                     if (ImGui::Begin(("DebugShadowMap" + std::to_string(idx)).c_str()))
                     {
