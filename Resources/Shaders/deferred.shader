@@ -333,8 +333,6 @@ void main()
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
 
-    shadow = 0.0f;
-
     for (int i = 0; i < LightCount; i++)
     {
         Light light = Lights[i];
@@ -376,7 +374,7 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     /// ambient lighting (we now use IBL as the ambient term)

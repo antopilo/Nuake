@@ -251,6 +251,7 @@ namespace Nuake
         m_Shader->SetUniform3f("u_EyePosition", camera->GetTranslation().x, camera->GetTranslation().y, camera->GetTranslation().z);
     }
 
+    int spotShadowMapCount = 0;
     void Renderer::EndDraw()
     {
         Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
@@ -258,6 +259,7 @@ namespace Nuake
         deferredShader->SetUniform1i("LightCount", 0);
 
         m_Lights.clear();
+        spotShadowMapCount = 0;
     }
 
     // List of all lights queued to be used for rendering this frame.
@@ -272,7 +274,6 @@ namespace Nuake
         Vector3 pos = transform.GetGlobalPosition();
         Quat lightRotation = transform.GetGlobalRotation();
 
-        int spotShadowMapCount = 0;
         const int MaxSpotShadowMap = 8;
         if (light.Type == Directional)
         {
@@ -324,7 +325,7 @@ namespace Nuake
                 if (light.CastShadows && spotShadowMapCount < MaxSpotShadowMap)
                 {
                     int shadowMapTextureSlot = 22 + spotShadowMapCount;
-                    deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", shadowMapTextureSlot);
+                    deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", spotShadowMapCount);
 
                     Matrix4 spotLightTransform = Matrix4(1.0f);
                     Vector3 pos = transform.GetGlobalPosition();
@@ -343,7 +344,7 @@ namespace Nuake
 
                     deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * lookatAt * spotLightTransform);
 
-                    if (ImGui::Begin("DebugShadowMap"))
+                    if (ImGui::Begin(("DebugShadowMap" + std::to_string(idx)).c_str()))
                     {
                         ImGui::Image((void*)light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
                         ImGui::End();

@@ -678,10 +678,7 @@ namespace Nuake
 					Renderer::Flush(shader, true);
 				}
 
-
 				lightDebug = light;
-
-				
 			}
 		}
 
