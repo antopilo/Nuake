@@ -239,11 +239,10 @@ float ShadowCalculationSpot(vec3 FragPos, vec3 normal, Light light)
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
     float shadow = 0.0;
-    float bias = max(0.00005 * (1.0 - dot(normal, -light.Direction)), 0.00005);
+    float bias = max(0.0005 * (1.0 - dot(normal, light.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
-    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth);
-    return texture(SpotShadowMaps[light.ShadowMapID], projCoords.xy).r;
+    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth - bias);
 }
 
 void main()
@@ -310,7 +309,7 @@ void main()
 
         if(u_DirectionalLight.Shadow > 0.1f)
         {
-            shadow += ShadowCalculation(worldPos, N);
+            shadow = ShadowCalculation(worldPos, N);
         }
 
         vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;
@@ -333,6 +332,8 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
+
+    shadow = 0.0f;
 
     for (int i = 0; i < LightCount; i++)
     {
@@ -375,7 +376,7 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;// note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
     /// ambient lighting (we now use IBL as the ambient term)

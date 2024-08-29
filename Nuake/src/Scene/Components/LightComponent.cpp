@@ -49,8 +49,7 @@ namespace Nuake
         }
         else if(Type == LightType::Spot)
         {
-            return glm::perspective(glm::radians(90.0f), 1.0f, 0.01f, 1.5f);
-            return glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
+            return glm::perspectiveFov(glm::radians(OuterCutoff * 2.0f), 1.0f, 1.0f, 0.01f, 100.5f);
         }
     }
 

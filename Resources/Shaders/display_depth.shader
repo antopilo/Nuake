@@ -17,11 +17,11 @@ void main()
 
 uniform sampler2D u_Source;
 
-float u_NearPlane = 0.1f;
+float u_NearPlane = 0.01f;
 float u_FarPlane = 25.5f;
 in vec2 UV;
 
-out float3 FragColor;
+out vec4 FragColor;
 
 float LinearizeDepth(float depth)
 {
@@ -34,5 +34,5 @@ void main()
     float depthValue = texture(u_Source, UV).r;
     float linearDepth = LinearizeDepth(depthValue) / u_FarPlane; // Normalize to [0, 1] range
     vec3 color = vec3(linearDepth);
-    gl_FragColor = vec4(color, 1.0);
+    FragColor = vec4(color, 1.0);
 }

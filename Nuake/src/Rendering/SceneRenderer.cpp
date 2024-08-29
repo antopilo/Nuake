@@ -496,6 +496,8 @@ namespace Nuake
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
 		auto view = scene.m_Registry.view<TransformComponent, LightComponent, VisibilityComponent>();
+		LightComponent lightDebug;
+
 		for (auto l : view)
 		{
 			auto [lightTransform, light, visibility] = view.get<TransformComponent, LightComponent, VisibilityComponent>(l);
@@ -586,13 +588,27 @@ namespace Nuake
 			}
 			else if (light.Type == LightType::Spot)
 			{
-				glCullFace(GL_FRONT);
+				RenderCommand::Disable(RendererEnum::FACE_CULL);
+
 				light.m_Framebuffers[0]->Bind();
 				light.m_Framebuffers[0]->Clear();
 				{
-					Matrix4 spotLightTransform = lightTransform.GetGlobalTransform();
-					spotLightTransform = glm::rotate(spotLightTransform, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * spotLightTransform);
+					Matrix4 spotLightTransform = Matrix4(1.0f);
+					Vector3 pos = lightTransform.GetGlobalPosition();
+					pos.y *= -1.0f;
+					pos.x *= -1.0f;
+					pos.z *= -1.0f;
+					spotLightTransform = glm::translate(spotLightTransform, pos);
+
+					Vector3 direction = lightTransform.GetGlobalRotation() * Vector3(0, 0, 1);
+					auto lookatAt = lookAt(Vector3(), direction, Vector3(0, 1, 0));
+					Quat offset = QuatFromEuler(0, -90.0f, 0);
+					Quat offset2 = QuatFromEuler(180.0f, 0.0f, 0);
+					
+					const Quat& globalRotation = glm::normalize(lightTransform.GetGlobalRotation());
+					const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * lookatAt * spotLightTransform);
 					for (auto e : meshView)
 					{
 						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
@@ -661,6 +677,11 @@ namespace Nuake
 
 					Renderer::Flush(shader, true);
 				}
+
+
+				lightDebug = light;
+
+				
 			}
 		}
 
@@ -700,6 +721,30 @@ namespace Nuake
 				}
 			}
 		}
+
+		if (lightDebug.m_Framebuffers[0])
+		{
+			mDisplayDepthBuffer->QueueResize(lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
+
+			mDisplayDepthBuffer->Bind();
+			mDisplayDepthBuffer->Clear();
+			Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
+			displayDepthShader->Bind();
+
+			lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+			displayDepthShader->SetUniform1i("u_Source", 5);
+
+			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+			Renderer::DrawQuad(Matrix4(1.0f));
+			RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+			mDisplayDepthBuffer->Unbind();
+
+			ImGui::SetNextWindowSize({ 800, 800 });
+			ImGui::Begin("Debug ShadowMap");
+			ImGui::Image((void*)mDisplayDepthBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
+			ImGui::End();
+		}
+		
 	}
 
 	void SceneRenderer::GBufferPass(Scene& scene)
@@ -791,6 +836,7 @@ namespace Nuake
 					}
 					else
 					{
+
 						finalQuadTransform = glm::inverse(mView);
 						
 					}
