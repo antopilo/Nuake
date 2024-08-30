@@ -258,6 +258,21 @@ namespace Nuake
         deferredShader->Bind();
         deferredShader->SetUniform1i("LightCount", 0);
 
+        for (int i = 0; i < m_Lights.size(); i++)
+        {
+            const std::string uniformAccessor = "Lights[" + std::to_string(i) + "].";
+            deferredShader->SetUniform3f(uniformAccessor + "Position", 0, 0, 0);
+            deferredShader->SetUniform3f(uniformAccessor + "Color", 0, 0, 0);
+            deferredShader->SetUniform1i(uniformAccessor + "Type", -1);
+            deferredShader->SetUniform1i(uniformAccessor + "CastShadow", 0);
+            deferredShader->SetUniform1i(uniformAccessor + "ShadowMapID", -1);
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(i) + "]", 0);
+        }
+
         m_Lights.clear();
         spotShadowMapCount = 0;
     }
@@ -271,7 +286,7 @@ namespace Nuake
         deferredShader->Bind();
         
         Vector3 direction = light.GetDirection();
-        Vector3 pos = transform.GetGlobalPosition();
+        Vector3 pos = transform.GetGlobalTransform()[3];
         Quat lightRotation = transform.GetGlobalRotation();
 
         const int MaxSpotShadowMap = 8;
@@ -318,31 +333,16 @@ namespace Nuake
 
             if (light.Type == Spot)
             {
+                direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
                 deferredShader->SetUniform3f(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
                 deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
                 deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
 
                 if (light.CastShadows && spotShadowMapCount < MaxSpotShadowMap)
                 {
-                    int shadowMapTextureSlot = 22 + spotShadowMapCount;
-                    deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", spotShadowMapCount);
-
-                    Matrix4 spotLightTransform = Matrix4(1.0f);
-                    Vector3 pos = transform.GetGlobalPosition();
-                    pos.y *= -1.0f;
-                    pos.x *= -1.0f;
-                    pos.z *= -1.0f;
-                    spotLightTransform = glm::translate(spotLightTransform, pos);
-
-                    Vector3 direction = transform.GetGlobalRotation() * Vector3(0, 0, 1);
-                    auto lookatAt = lookAt(Vector3(), direction, Vector3(0, 1, 0));
-                    Quat offset = QuatFromEuler(0, -90.0f, 0);
-                    Quat offset2 = QuatFromEuler(180.0f, 0.0f, 0);
-
-                    const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
-                    const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-
-                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * lookatAt * spotLightTransform);
+                    int shadowMapTextureSlot = 21 + spotShadowMapCount;
+                    deferredShader->SetUniform1i(uniformAccessor + "ShadowMapID", spotShadowMapCount);
+                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
 
                     if (ImGui::Begin(("DebugShadowMap" + std::to_string(idx)).c_str()))
                     {
@@ -354,6 +354,13 @@ namespace Nuake
                     deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
                     spotShadowMapCount++;
                 }
+            }
+            else
+            {
+                deferredShader->SetUniform3f(uniformAccessor + "Direction", 0, 0, 0);
+                deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
+                deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
+                deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", -1);
             }
 
             deferredShader->SetUniform1i("LightCount", static_cast<int>(idx));

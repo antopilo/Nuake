@@ -608,7 +608,7 @@ namespace Nuake
 					const Quat& globalRotation = glm::normalize(lightTransform.GetGlobalRotation());
 					const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * lookatAt * spotLightTransform);
+					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * glm::inverse(lightTransform.GetGlobalTransform()));
 					for (auto e : meshView)
 					{
 						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);

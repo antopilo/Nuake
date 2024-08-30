@@ -366,7 +366,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 			Matrix4 gizmoPosition = Matrix4(1.0f);
 			gizmoPosition = glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3]));
 			gizmoPosition = gizmoPosition * rotationMatrix;
-			gizmoPosition = glm::translate(gizmoPosition, { 0, cylinderLength / 2.0, 0 });
+			gizmoPosition = glm::translate(gizmoPosition, { 0, -cylinderLength / 2.0, 0 });
 
 			m_LineShader->Bind();
 			m_LineShader->SetUniform1f("u_Opacity", 1.0f);
