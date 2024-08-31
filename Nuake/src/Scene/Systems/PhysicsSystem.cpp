@@ -131,6 +131,7 @@ namespace Nuake
 				const Quat& startRotation = transformComponent.GetGlobalRotation();
 				const auto collisionShape = CreateRef<Physics::ConvexHullShape>(hull);
 
+
 				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity);
 				brushComponent.Rigidbody.push_back(rigidBody);
 				rigidBody->SetIsTrigger(brushComponent.IsTrigger);
@@ -321,6 +322,7 @@ namespace Nuake
 			}
 
 			Ref<Physics::PhysicShape> shape;
+			bool hasValidShape = true;
 			if (entity.HasComponent<CapsuleColliderComponent>())
 			{
 				const auto& capsuleColliderComponent = entity.GetComponent<CapsuleColliderComponent>();
@@ -343,7 +345,9 @@ namespace Nuake
 			}
 			else
 			{
-				continue;
+				hasValidShape = false;
+				Logger::Log("No shape was provided for character controller. Default one was provided.", "physics", WARNING);
+				shape = CreateRef<Physics::Capsule>(1.0f, 0.5f);
 			}
 
 			Physics::CharacterControllerSettings settings

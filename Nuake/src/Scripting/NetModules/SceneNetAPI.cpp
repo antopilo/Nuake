@@ -126,7 +126,7 @@ namespace Nuake {
 			return false;
 		}
 
-		switch (static_cast<ComponentTypes>(componentEnumValue))
+		switch (static_cast<ComponentTypes>(componentType))
 		{
 			case PARENT:				return entity.HasComponent<ParentComponent>();
 			case NAME:					return entity.HasComponent<NameComponent>();

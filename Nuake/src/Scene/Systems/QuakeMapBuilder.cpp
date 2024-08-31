@@ -244,6 +244,8 @@ namespace Nuake {
         TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
         BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
 
+        std::map<std::string, Ref<Material>> m_Materials;
+
         bsp.IsSolid = !fgdBrush.IsTrigger;
         bsp.IsTransparent = !fgdBrush.Visible;
         bsp.IsFunc = true;
@@ -298,6 +300,37 @@ namespace Nuake {
                 texture->width = tex->GetWidth();
             }
 
+            Ref<Material> currentMaterial;
+            if (std::string(texture->name) != "__TB_empty")
+            {
+                std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
+
+                if (const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
+                    FileSystem::FileExists(materialPath))
+                {
+                    Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
+                    m_Materials[path] = material;
+                }
+                else
+                {
+                    if (m_Materials.find(path) == m_Materials.end())
+                    {
+                        m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+                    }
+                }
+
+                currentMaterial = m_Materials[path];
+                texture->height = currentMaterial->m_Albedo->GetHeight();
+                texture->width = currentMaterial->m_Albedo->GetWidth();
+            }
+            else
+            {
+                continue;
+
+                currentMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
+                texture->height = texture->width = 1;
+            }
+
             face_geometry* face_geo_inst = &brush_inst->faces[f];
 
             for (int i = 0; i < face_geo_inst->vertex_count; ++i)
@@ -344,8 +377,7 @@ namespace Nuake {
 
                     if (std::string(texture->name) != "__TB_empty")
                     {
-                        Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
-                        mesh->SetMaterial(material);
+                        mesh->SetMaterial(currentMaterial);
                     }
 
                     bsp.Meshes.push_back(mesh);

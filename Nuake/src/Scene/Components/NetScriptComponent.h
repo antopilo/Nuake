@@ -169,8 +169,11 @@ namespace Nuake {
 						exposedVar.DefaultValue = (bool)exposedVarJson["DefaultValue"];
 						break;
 					case NetScriptExposedVarType::Float:
-						exposedVar.Value = (float)exposedVarJson["Value"];
-						exposedVar.DefaultValue = (float)exposedVarJson["DefaultValue"];
+						if (exposedVarJson.contains("Value"))
+						{
+							exposedVar.Value = (float)exposedVarJson["Value"];
+						}
+						exposedVar.DefaultValue = 0.0f;
 						break;
 					case NetScriptExposedVarType::Double:
 						exposedVar.Value = (double)exposedVarJson["Value"];
@@ -183,8 +186,8 @@ namespace Nuake {
 						break;
 					}
 					case NetScriptExposedVarType::String:
-						exposedVar.Value = (std::string)exposedVarJson["Value"];
-						exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
+						//exposedVar.Value = (std::string)exposedVarJson["Value"];
+						//exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
 						break;
 					case NetScriptExposedVarType::Vector2:
 					{

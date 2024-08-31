@@ -280,7 +280,7 @@ namespace Nuake
 	{
 		if (!m_IsInitialized)
 		{
-			Initialize();
+			return;
 		}
 
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
@@ -522,6 +522,11 @@ namespace Nuake
 		// Override with user values set in the editor.
 		for (auto& exposedVarUserValue : component.ExposedVar)
 		{
+			if (!exposedVarUserValue.Value.has_value())
+			{
+				continue;
+			}
+
 			if (exposedVarUserValue.Type == NetScriptExposedVarType::String)
 			{
 				std::string stringValue = std::any_cast<std::string>(exposedVarUserValue.Value);

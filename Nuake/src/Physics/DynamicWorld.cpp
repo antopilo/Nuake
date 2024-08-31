@@ -400,23 +400,15 @@ namespace Nuake
 				bodySettings.mMassPropertiesOverride.mMass = mass;
 			}
 			
-			if (rb->GetEntity().GetID() == 0)
+			if (int entityId = rb->GetEntity().GetHandle(); rb->GetEntity().IsValid())
 			{
-				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
+				bodySettings.mUserData = rb->GetEntity().GetHandle();
+
+				// Create the actual rigid body
+				JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+				uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
+				_registeredBodies.push_back(bodyIndex);
 			}
-
-			int entityId = rb->GetEntity().GetHandle();
-
-			if (entityId == 0)
-			{
-				Logger::Log("ERROR");
-			}
-
-			bodySettings.mUserData = entityId;
-			// Create the actual rigid body
-			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
-			_registeredBodies.push_back(bodyIndex);
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -501,7 +493,9 @@ namespace Nuake
 					if (newPosition != currentPosition || currentRotation != newRotation)
 					{
 						std::string name = entity.GetComponent<NameComponent>().Name;
+
 						_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+						//_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, 0.0f);
 					}
 				}
 			}

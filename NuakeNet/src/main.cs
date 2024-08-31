@@ -49,6 +49,19 @@ namespace Nuake.Net
         }
     }
 
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class PointScript : Attribute
+    {
+        public string Description = "";
+        public bool IsTrigger = false;
+
+        public PointScript(string description = "")
+        {
+            Description = description;
+            IsTrigger = isTrigger;
+        }
+    }
+
     public class Debug
     {
         internal static unsafe delegate*</* start */ float, float, float,

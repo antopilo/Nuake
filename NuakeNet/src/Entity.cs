@@ -201,7 +201,7 @@ namespace Nuake.Net
                 return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
             }
 
-            return null;
+            throw new Exception("Component not found: " + typeof(T).GetType().Name);
         }
 
         public T? GetEntity<T>(string path) where T : Entity
