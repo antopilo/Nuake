@@ -116,8 +116,8 @@ Nuake::Application* Nuake::CreateApplication(int argc, char** argv)
     ApplicationSpecification specification
     {
         .Name = "Editor",
-        .WindowWidth = 1600,
-        .WindowHeight = 900,
+        .WindowWidth = 1100,
+        .WindowHeight = 630,
         .VSync = true
     };
 

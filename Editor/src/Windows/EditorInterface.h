@@ -9,6 +9,7 @@
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"
 #include "WelcomeWindow.h"
+#include "NewProjectWindow.h"
 #include "AudioWindow.h"
 #include "../Windows/TrenchbroomConfiguratorWindow.h"
 #include "../Commands/CommandBuffer.h"
@@ -17,6 +18,7 @@
 
 #include <src/Scripting/ScriptingEngineNet.h>
 #include "ProjectSettings/ProjectSettingsWindow.h"
+
 
 using namespace NuakeEditor;
 
@@ -45,7 +47,6 @@ namespace Nuake
 		bool m_ShowTrenchbroomConfigurator = false;
 		bool m_ShowProjectSettings = false;
 		bool m_ShowMapImporter = false;
-
 		Vector2 m_ViewportPos = {0, 0};
 		Vector2 m_ViewportSize = {};
 
@@ -62,6 +63,9 @@ namespace Nuake
 		Color m_StatusBarColor = Color(0.08f, 0.08f, 0.08f, 1.0f);
 	public:
 		WelcomeWindow* _WelcomeWindow;
+		NewProjectWindow* _NewProjectWindow;
+		static bool isCreatingNewProject;
+
 		AudioWindow* _audioWindow;
 		FileSystemUI* filesystem;
 		static EditorSelection Selection;

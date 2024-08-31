@@ -107,6 +107,7 @@ namespace Nuake {
         filesystem = new FileSystemUI(this);
 
         _WelcomeWindow = new WelcomeWindow(this);
+        _NewProjectWindow = new NewProjectWindow(this);
         _audioWindow = new AudioWindow();
         m_ProjectSettingsWindow = new ProjectSettingsWindow();
 
@@ -2875,12 +2876,18 @@ namespace Nuake {
 
     bool isLoadingProject = false;
     bool isLoadingProjectQueue = false;
+    bool EditorInterface::isCreatingNewProject = false;
     UIDemoWindow m_DemoWindow;
 
     int frameCount = 2;
     void EditorInterface::Draw()
     {
         Init();
+
+        if (isCreatingNewProject && !_NewProjectWindow->HasCreatedProject())
+        {
+            _NewProjectWindow->Draw();
+        }
 
         if (isLoadingProjectQueue)
         {
@@ -2889,7 +2896,7 @@ namespace Nuake {
 
             auto window = Window::Get();
             window->SetDecorated(true);
-            window->SetSize({ 1900, 1000 });
+            window->SetSize({ 1100, 1000 });
             window->Maximize();
             window->Center();
             frameCount = 0;

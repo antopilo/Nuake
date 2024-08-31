@@ -278,43 +278,46 @@ namespace Nuake
 			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + "  New Game Project...";
 			if (Nuake::UI::PrimaryButton(buttonLabel.c_str(), { buttonSize.x, buttonSize.y }))
 			{
-				std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-					
-				if (!selectedProject.empty())
-				{
-					if(!String::EndsWith(selectedProject, ".project"))
-						selectedProject += ".project";
-						
-					auto backslashSplits = String::Split(selectedProject, '\\');
-					auto fileName = backslashSplits[backslashSplits.size() - 1];
+				_Editor->isCreatingNewProject = true;
+				//
 
-					std::string finalPath = String::Split(selectedProject, '.')[0];
+				//std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
+				//	
+				//if (!selectedProject.empty())
+				//{
+				//	if(!String::EndsWith(selectedProject, ".project"))
+				//		selectedProject += ".project";
+				//		
+				//	auto backslashSplits = String::Split(selectedProject, '\\');
+				//	auto fileName = backslashSplits[backslashSplits.size() - 1];
 
-					if (String::EndsWith(fileName, ".project"))
-					{
-						// We need to create a folder
-						if (const auto& dirPath = finalPath;
-							!std::filesystem::create_directory(dirPath))
-						{
-							// Should we continue?
-							Logger::Log("Failed creating project directory: " + dirPath);
-						}
+				//	std::string finalPath = String::Split(selectedProject, '.')[0];
 
-						finalPath += "\\" + fileName;
-					}
+				//	if (String::EndsWith(fileName, ".project"))
+				//	{
+				//		// We need to create a folder
+				//		if (const auto& dirPath = finalPath;
+				//			!std::filesystem::create_directory(dirPath))
+				//		{
+				//			// Should we continue?
+				//			Logger::Log("Failed creating project directory: " + dirPath);
+				//		}
 
-					auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
-					Engine::LoadProject(project);
-					Engine::LoadScene(Scene::New());
-					project->Save();
+				//		finalPath += "\\" + fileName;
+				//	}
 
-					auto projectPreview = ProjectPreview();
-					projectPreview.Name = project->Name;
-					projectPreview.Description = project->Description;
-					projectPreview.Path = project->FullPath;
-					projectPreview.ProjectIcon = nullptr;
-					_Projects.push_back(projectPreview);
-				}
+				//	auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
+				//	Engine::LoadProject(project);
+				//	Engine::LoadScene(Scene::New());
+				//	project->Save();
+
+				//	auto projectPreview = ProjectPreview();
+				//	projectPreview.Name = project->Name;
+				//	projectPreview.Description = project->Description;
+				//	projectPreview.Path = project->FullPath;
+				//	projectPreview.ProjectIcon = nullptr;
+				//	_Projects.push_back(projectPreview);
+				//}
 			}
 			ImGui::PopStyleVar(2);
 			ImGui::Separator();

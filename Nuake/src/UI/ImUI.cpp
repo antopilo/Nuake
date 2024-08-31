@@ -16,9 +16,8 @@ namespace Nuake {
 			ImGui::End();
 		}
 
-		bool PrimaryButton(const std::string& name, const Vector2& size)
+		bool PrimaryButton(const std::string& name, const Vector2& size, Color color)
 		{
-			Color color = Color(97.0f / 255.0f, 0, 1.0f, 1.0f);
 			if (Nuake::Engine::GetProject())
 			{
 				color = Nuake::Engine::GetProject()->Settings.PrimaryColor;
@@ -178,7 +177,7 @@ namespace Nuake {
 		void Tooltip(const std::string& message)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
 			if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
 			{
 				ImGui::BeginTooltip();
@@ -188,7 +187,7 @@ namespace Nuake {
 				ImGui::EndTooltip();
 			}
 
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 		}
 	}
 }
