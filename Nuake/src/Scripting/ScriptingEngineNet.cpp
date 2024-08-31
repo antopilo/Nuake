@@ -273,7 +273,7 @@ namespace Nuake
 	{
 		if (!m_IsInitialized)
 		{
-			return;
+			Initialize();
 		}
 
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
@@ -444,8 +444,6 @@ namespace Nuake
 		if (entity.HasComponent<BSPBrushComponent>())
 		{
 			BSPBrushComponent& brushComponent = entity.GetComponent<BSPBrushComponent>();
-			classInstance.SetPropertyValue("TargetName", brushComponent.TargetName);
-			classInstance.SetPropertyValue("Target", brushComponent.target);
 		}
 
 		std::vector<std::string> detectedExposedVar;
