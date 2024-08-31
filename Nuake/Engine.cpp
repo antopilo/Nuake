@@ -169,6 +169,8 @@ namespace Nuake
 		}
 
 		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
+		ScriptingEngineNet::Get().LoadProjectAssembly(project);
+
 		return true;
 	}
 

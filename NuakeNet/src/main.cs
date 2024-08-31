@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Nuake.Net
@@ -33,6 +34,19 @@ namespace Nuake.Net
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ExposedAttribute : Attribute
     {
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class BrushScript : Attribute
+    {
+        public string Description = "";
+        public bool IsTrigger = false;
+
+        public BrushScript(string description = "", bool isTrigger = false)
+        {
+            Description = description;
+            IsTrigger = isTrigger;
+        }
     }
 
     public class Debug

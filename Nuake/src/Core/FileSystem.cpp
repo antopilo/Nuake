@@ -19,6 +19,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <ShlObj.h>
 
 namespace Nuake
 {
@@ -42,6 +43,7 @@ namespace Nuake
 		{
 			filePath = std::string(ofn.lpstrFile);
 		}
+
 #endif
 
 #ifdef NK_LINUX
@@ -139,6 +141,55 @@ namespace Nuake
 #endif
 
 		return std::string();
+	}
+
+	std::string FileDialog::OpenFolder()
+	{
+		std::string folderPath;
+
+#ifdef NK_WIN
+		BROWSEINFOA bi;
+		CHAR szFolder[260] = { 0 };
+		ZeroMemory(&bi, sizeof(BROWSEINFO));
+		bi.lpszTitle = "Select a Folder";
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+		bi.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
+		bi.pszDisplayName = szFolder;
+		LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
+		if (pidl != NULL)
+		{
+			SHGetPathFromIDListA(pidl, szFolder);
+			folderPath = std::string(szFolder);
+			CoTaskMemFree(pidl);
+		}
+#endif
+
+#ifdef NK_LINUX
+		GtkWidget* dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+		gint res;
+
+		dialog = gtk_file_chooser_dialog_new("Select Folder",
+			NULL,
+			action,
+			"_Cancel",
+			GTK_RESPONSE_CANCEL,
+			"_Select",
+			GTK_RESPONSE_ACCEPT,
+			NULL);
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (res == GTK_RESPONSE_ACCEPT) {
+			char* foldername = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			folderPath = foldername;
+			g_free(foldername);
+		}
+
+		gtk_widget_destroy(dialog);
+#endif
+
+		return folderPath;
 	}
 
 	std::string FileSystem::Root = "";

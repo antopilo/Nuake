@@ -206,6 +206,45 @@ namespace Nuake {
 		return entity.IsValid();
 	}
 
+	Coral::String EntityGetTarget(int handle)
+	{
+		Entity entity = { (entt::entity)(handle), Engine::GetCurrentScene().get() };
+		if (entity.IsValid())
+		{
+			if (entity.HasComponent<BSPBrushComponent>())
+			{
+				return Coral::String::New(entity.GetComponent<BSPBrushComponent>().target);
+			}
+		}
+
+		return Coral::String::New("");
+	}
+
+	Coral::Array<int> EntityGetTargets(Coral::String target)
+	{
+		std::vector<int> targetsFound = std::vector<int>();
+
+		if (target == "")
+		{
+			return Coral::Array<int>::New(targetsFound);
+		}
+
+		Ref<Scene> scene = Engine::GetCurrentScene();
+		auto brushView = scene->m_Registry.view<BSPBrushComponent>();
+		for (auto e : brushView)
+		{
+			BSPBrushComponent& brushComponent = brushView.get<BSPBrushComponent>(e);
+			if (brushComponent.TargetName == target)
+			{
+				Entity entity = { (entt::entity)(e), scene.get() };
+				
+				targetsFound.push_back(entity.GetHandle());
+			}
+		}
+
+		return Coral::Array<int>::New(targetsFound);
+	}
+
 	int PrefabInstance(Coral::String path, Vector3 position, float qx, float qy, float qz, float qw)
 	{
 		if (!FileSystem::FileExists(path))
@@ -397,7 +436,8 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
 		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
 		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
-
+		RegisterMethod("Entity.EntityGetTargetsIcall", &EntityGetTargets);
+		RegisterMethod("Entity.EntityGetTargetIcall", &EntityGetTarget);
 		// Prefab
 		RegisterMethod("Prefab.PrefabInstanceIcall", &PrefabInstance);
 

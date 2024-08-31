@@ -112,8 +112,19 @@ namespace Nuake {
 			line += "(";
 			if (p.type == ClassPropertyType::Integer)
 				line += "integer";
+			if (p.type == ClassPropertyType::String)
+				line += "string";
 			line += ") : ";
 			line += "\"" + p.description + "\"";
+			line += " : ";
+			if (p.type == ClassPropertyType::String)
+			{
+				line += " \"" + p.value + "\" ";
+			}
+			else if (p.type == ClassPropertyType::Integer)
+			{
+				line += p.value;
+			}
 			line += "\n";
 
 		}

@@ -28,6 +28,8 @@ extern "C" {
 #include <vector>
 #include <map>
 #include <src/Resource/ResourceLoader.h>
+#include <src/Scene/Components/NetScriptComponent.h>
+#include <src/Scripting/ScriptingEngineNet.h>
 
 namespace Nuake {
     struct ProcessedMesh
@@ -228,7 +230,7 @@ namespace Nuake {
 
     void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
                                             Scene* scene, Entity& parent, 
-        const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush)
+        const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush, std::map<std::string, std::string> props)
     {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -246,20 +248,27 @@ namespace Nuake {
         bsp.IsTransparent = !fgdBrush.Visible;
         bsp.IsFunc = true;
         bsp.IsTrigger = fgdBrush.IsTrigger;
-        if (fgdBrush.Script != "" && fgdBrush.Class != "")
+        if (fgdBrush.Script != "")
         {
-            auto& wrenScript = brushEntity.AddComponent<WrenScriptComponent>();
-            wrenScript.Script = fgdBrush.Script;
-            wrenScript.mModule = 0; // TODO
-        }
-
-        if (bsp.IsTrigger)
-        {
-            TriggerZone& trigger = brushEntity.AddComponent<TriggerZone>();
-            trigger.target = target;
+            NetScriptComponent& netScript = brushEntity.AddComponent<NetScriptComponent>();
+            netScript.ScriptPath = fgdBrush.Script;
+            
+            ScriptingEngineNet::Get().UpdateEntityWithExposedVar(brushEntity);
+            for (auto& ev : netScript.ExposedVar)
+            {
+                if (props.find(ev.Name) != props.end())
+                {
+                    if (ev.Type == NetScriptExposedVarType::String)
+                    {
+                        ev.Value = props[ev.Name];
+                        ev.DefaultValue = ev.Value;
+                    }
+                }
+            }
         }
 
         bsp.target = target;
+        bsp.TargetName = targetname;
 
         parent.AddChild(brushEntity);
 
@@ -271,7 +280,7 @@ namespace Nuake {
         int index_offset = 0;
         int lastTextureID = -1;
         std::string lastTexturePath = "";
-
+        std::vector<Vector3> pointsInBrush;
         for (int f = 0; f < brush->face_count; ++f)
         {
             face* face = &brush->faces[f];
@@ -302,6 +311,8 @@ namespace Nuake {
                     (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
                 );
 
+
+                pointsInBrush.push_back(vertexPos);
                 Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
                 Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
                 Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
@@ -354,6 +365,7 @@ namespace Nuake {
                 index_offset += (face_geo_inst->vertex_count);
             }
         }
+        bsp.Hulls.push_back(std::move(pointsInBrush));
 
         if (bsp.IsTrigger)
         {
@@ -372,6 +384,12 @@ namespace Nuake {
             Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
             mesh->SetMaterial(material);
             bsp.Meshes.push_back(mesh);
+
+            ModelComponent& modelComponent = brushEntity.AddComponent<ModelComponent>();
+
+            Ref<Model> model = CreateRef<Model>();
+            model->AddMesh(mesh);
+            modelComponent.ModelResource = model;
         }
             
     }
@@ -422,11 +440,14 @@ namespace Nuake {
             bool isWorldSpawn = false;
             bool isPointEntity = false;
             Vector3 brushLocalPosition = { 0, 0, 0 };
+            std::map<std::string, std::string> properties;
             for (int i = 0; i < entity_inst->property_count; i++)
             {
                 property* prop = &(entity_inst->properties)[i];
+
                 std::string key = prop->key;
                 std::string value = prop->value;
+                properties[key] = value;
 
                 if (key == "origin")
                 {
@@ -515,8 +536,8 @@ namespace Nuake {
                     brush* brush_inst = &entity_inst->brushes[b];
                     brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
 
-                    //if (isEntity)
-                    //    CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
+                    if (isEntity)
+                        CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, worldspawnEntity, target, targetname, *fgdBrush, properties);
                     //else
                     //    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
                 }

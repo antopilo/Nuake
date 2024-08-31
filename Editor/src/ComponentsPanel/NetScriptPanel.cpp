@@ -169,6 +169,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = std::string();
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 

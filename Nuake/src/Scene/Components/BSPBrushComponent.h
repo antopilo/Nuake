@@ -17,6 +17,7 @@ namespace Nuake {
 		std::vector<Ref<Physics::RigidBody>> Rigidbody;
 
 		std::string target = "";
+		std::string TargetName = "";
 		std::vector<Entity> Targets;
 
 		bool IsSolid = true;
@@ -50,6 +51,8 @@ namespace Nuake {
 				j["Hulls"][i] = hullPointsJson;
 			}
 
+			SERIALIZE_VAL(target);
+			SERIALIZE_VAL(TargetName);
 			j["IsSolid"] = IsSolid;
 			END_SERIALIZE();
 		}
@@ -77,6 +80,9 @@ namespace Nuake {
 					Hulls.push_back(hull);
 				}
 			}
+
+			DESERIALIZE_VAL(target);
+			DESERIALIZE_VAL(TargetName);
 
 			return true;
 		}

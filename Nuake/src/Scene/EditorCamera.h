@@ -14,9 +14,9 @@ namespace Nuake
 		
 		EditorCamera()
 		{
-			Yaw = 0.0f;
-			Translation = Vector3(10, 10, 10);
-			SetDirection(Vector3(-1, -1, -1));
+			SetYaw(-90.0f - 45.0f);
+			SetPitch(-45.0f);
+			Translation = Vector3(2, 2, 2);
 		}
 
 		void Update(Timestep ts, const bool hover);

@@ -112,13 +112,13 @@ namespace Nuake
 
 	void PhysicsSystem::InitializeQuakeMap()
 	{
-		auto quakeBrushesView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, ModelComponent>();
+		auto quakeBrushesView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
 		for (auto e : quakeBrushesView)
 		{
-			const auto [transformComponent, brushComponent, modelComponent] = quakeBrushesView.get<TransformComponent, BSPBrushComponent, ModelComponent>(e);
+			const auto [transformComponent, brushComponent] = quakeBrushesView.get<TransformComponent, BSPBrushComponent>(e);
 
 			// Doesn't apply to non-solid brushes
-			if (!brushComponent.IsSolid)
+			if ((!brushComponent.IsSolid && !brushComponent.IsTrigger))
 			{
 				continue;
 			}
@@ -133,7 +133,7 @@ namespace Nuake
 
 				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity);
 				brushComponent.Rigidbody.push_back(rigidBody);
-
+				rigidBody->SetIsTrigger(brushComponent.IsTrigger);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 		}

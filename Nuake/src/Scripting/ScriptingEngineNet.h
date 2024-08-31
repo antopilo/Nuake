@@ -32,6 +32,7 @@ namespace Nuake {
 		Vector2,
 		Vector3,
 		Vector4,
+		Int,
 		Unsupported
 	};
 
@@ -46,6 +47,9 @@ namespace Nuake {
 	{
 		Coral::Type* coralType;
 		std::vector<ExposedVar> exposedVars;
+
+		bool isTrigger = false;
+		std::string Description = "";
 	};
 
 	struct CompilationError
@@ -81,6 +85,7 @@ namespace Nuake {
 
 		// This is a map that contains all the instances of entity scripts.
 		std::unordered_map<std::string, NetGameScriptObject> m_GameEntityTypes;
+		std::unordered_map<std::string, NetGameScriptObject> m_BrushEntityTypes;
 		std::unordered_map<uint32_t, Coral::ManagedObject> m_EntityToManagedObjects;
 
 		ScriptingEngineNet();
@@ -99,8 +104,10 @@ namespace Nuake {
 		void Initialize();
 		void Uninitialize();
 
+
 		bool IsInitialized() const { return m_IsInitialized; }
 
+		void UpdateEntityWithExposedVar(Entity entity);
 		std::vector<ExposedVar> GetExposedVarForTypes(Entity entity);
 
 		std::vector<CompilationError> BuildProjectAssembly(Ref<Project> project);
@@ -118,6 +125,7 @@ namespace Nuake {
 
 		Coral::ManagedAssembly GetNuakeAssembly() const { return m_NuakeAssembly; }
 
+		std::unordered_map<std::string, NetGameScriptObject> GetBrushEntities() const { return m_BrushEntityTypes; }
 	private:
 		std::string GenerateGUID();
 	};
