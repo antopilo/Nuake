@@ -130,6 +130,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = 0.0f;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -143,6 +148,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = 0.0;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -156,6 +166,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = false;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -188,6 +203,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = Nuake::Vector2(0, 0);
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -203,6 +223,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = Nuake::Vector3(0, 0, 0);
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 

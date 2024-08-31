@@ -1,3 +1,4 @@
+
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
@@ -54,8 +55,10 @@ namespace Nuake {
 				varJ["Name"] = e.Name;
 				varJ["Type"] = e.Type;
 
-				switch (e.Type)
+				if (e.Value.has_value() || e.DefaultValue.has_value())
 				{
+					switch (e.Type)
+					{
 					case NetScriptExposedVarType::Bool:
 						varJ["Value"] = std::any_cast<bool>(e.Value);
 						varJ["DefaultValue"] = std::any_cast<bool>(e.DefaultValue);
@@ -118,17 +121,19 @@ namespace Nuake {
 						{
 							value = std::any_cast<int>(e.Value);
 						}
-						
+
 						varJ["Value"] = value;
 						varJ["DefaultValue"] = value;
 						break;
 					}
-					
+
 					default:
 						varJ["Value"] = 0;
 						break;
-				}
+					}
 
+				}
+				
 				exposedVarJson[i] = varJ;
 				i++;
 			}

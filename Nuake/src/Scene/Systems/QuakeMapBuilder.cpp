@@ -244,7 +244,7 @@ namespace Nuake {
         TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
         BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
 
-        bsp.IsSolid = fgdBrush.Solid;
+        bsp.IsSolid = !fgdBrush.IsTrigger;
         bsp.IsTransparent = !fgdBrush.Visible;
         bsp.IsFunc = true;
         bsp.IsTrigger = fgdBrush.IsTrigger;

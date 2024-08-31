@@ -761,6 +761,8 @@ namespace Nuake
 						const auto& LayerFilter = _JoltPhysicsSystem->GetDefaultLayerFilter(Layers::CHARACTER);
 						const auto& joltGravity = _JoltPhysicsSystem->GetGravity();
 						auto& tempAllocatorPtr = *(joltTempAllocator);
+
+						c.second.Character->UpdateGroundVelocity();
 						if (characterController->AutoStepping)
 						{
 							// Create update settings from character controller
@@ -769,7 +771,7 @@ namespace Nuake
 							joltUpdateSettings.mWalkStairsStepUp = CreateJoltVec3(characterController->StepUp);
 							joltUpdateSettings.mWalkStairsStepForwardTest = characterController->StepDistance;
 							joltUpdateSettings.mWalkStairsMinStepForward = characterController->StepMinDistance;
-
+							
 							c.second.Character->ExtendedUpdate(ts, joltGravity, joltUpdateSettings, broadPhaseLayerFilter, LayerFilter, { }, { }, tempAllocatorPtr);
 						}
 						else

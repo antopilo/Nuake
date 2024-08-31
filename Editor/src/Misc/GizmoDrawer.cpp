@@ -23,6 +23,7 @@
 #include <src/Scene/Components/BoneComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
 #include <DetourDebugDraw.h>
+#include <src/Scene/Components/BSPBrushComponent.h>
 
 
 GizmoDrawer::GizmoDrawer(EditorInterface* editor)
@@ -375,6 +376,35 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 			m_CylinderGizmo[entityId]->Bind();
 			Nuake::RenderCommand::DrawLines(0, 264);
+		}
+	}
+
+	auto bspView = scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
+	for (auto e : bspView)
+	{
+		auto [transform, brush] = scene->m_Registry.get<TransformComponent, BSPBrushComponent>(e);
+
+		if (brush.target.empty())
+		{
+			continue;
+		}
+
+		auto bspView2 = scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
+		for (auto e2 : bspView2)
+		{
+			auto [transform2, brush2] = scene->m_Registry.get<TransformComponent, BSPBrushComponent>(e2);
+			if (brush2.TargetName.empty())
+			{
+				continue;
+			}
+
+			if (brush.target == brush2.TargetName)
+			{
+				Vector3 from = transform.GetGlobalTransform()[3];
+				Vector3 to = transform2.GetGlobalTransform()[3];
+
+				scene->m_SceneRenderer->DrawDebugLine(from, to, Color(1, 0, 0, 1), 0.f, 1.0f);
+			}
 		}
 	}
 

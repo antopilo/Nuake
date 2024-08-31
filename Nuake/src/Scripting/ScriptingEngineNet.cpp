@@ -213,6 +213,13 @@ namespace Nuake
 				component.ExposedVar.push_back(exposedVar);
 			}
 		}
+
+		std::erase_if(component.ExposedVar,
+			[&](Nuake::NetScriptExposedVar& var)
+			{
+				return std::find(detectedExposedVar.begin(), detectedExposedVar.end(), var.Name) == detectedExposedVar.end();
+			}
+		);
 	}
 
 	std::vector<ExposedVar> ScriptingEngineNet::GetExposedVarForTypes(Entity entity)
@@ -305,7 +312,7 @@ namespace Nuake
 				}
 
 				brushDescription = attribute.GetFieldValue<Coral::String>("Description");
-				isTrigger = attribute.GetFieldValue<bool>("IsTrigger");
+				isTrigger = attribute.GetFieldValue<Coral::Bool32>("IsTrigger");
 
 				isBrushScript = true;
 			}

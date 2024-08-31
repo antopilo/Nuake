@@ -275,6 +275,11 @@ namespace Nuake {
 			{
 				PhysicsManager::Get().SetCharacterControllerPosition(entity, { x, y, z });
 			}
+
+			if (entity.HasComponent<BSPBrushComponent>())
+			{
+				PhysicsManager::Get().SetBodyTransform(entity, { x, y, z }, component.GetGlobalRotation());
+			}
 		}
 	}
 

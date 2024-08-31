@@ -83,11 +83,6 @@ namespace Nuake
 
 	void SceneRenderer::Update(const Timestep time, bool isEditorUpdate)
 	{
-		if (isEditorUpdate)
-		{
-			return;
-		}
-
 		// Delete debug shapes that are dead
 		std::erase_if(mDebugLines, [](const DebugLine& line)
 		{
@@ -98,7 +93,6 @@ namespace Nuake
 		{
 			return shape.Life < 0.0f;
 		});
-
 
 		for (auto& line : mDebugLines)
 		{
@@ -1081,8 +1075,6 @@ namespace Nuake
 				glLineWidth(l.Width);
 				RenderCommand::DrawLines(0, 2);
 			}
-
-			
 
 			shader->Unbind();
 
