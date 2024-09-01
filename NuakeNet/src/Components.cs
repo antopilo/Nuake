@@ -157,13 +157,25 @@ namespace Nuake.Net
     public class CameraComponent : IComponent
     {
         internal static unsafe delegate*<int, NativeArray<float>> GetDirectionIcall;
+        internal static unsafe delegate*<int, float, void> SetCameraFOVIcall;
+        internal static unsafe delegate*<int, float> GetCameraFOVIcall;
 
         public CameraComponent(int entityId)
         {
             EntityID = entityId;
         }
 
-        public float FOV { get; set; }
+        public float FOV 
+        {
+            get
+            {
+                unsafe { return GetCameraFOVIcall(EntityID); }
+            }
+            set
+            {
+                unsafe { SetCameraFOVIcall(EntityID, value); }
+            }
+        }
 
         public Vector3 Direction
         {
@@ -181,6 +193,9 @@ namespace Nuake.Net
 
     public class AudioEmitterComponent : IComponent
     {
+        internal static unsafe delegate*<int, bool> GetIsPlayingIcall;
+        internal static unsafe delegate*<int, bool, void> SetIsPlayingIcall;
+
         public AudioEmitterComponent(int entityId)
         {
             EntityID = entityId;
@@ -190,7 +205,11 @@ namespace Nuake.Net
 
         public bool Loop { get; set; }
         public bool Spatialized { get; set; }
-        public bool Playing { get; set; }
+        public bool Playing 
+        {
+            get { unsafe { return GetIsPlayingIcall(EntityID); } }
+            set { unsafe { SetIsPlayingIcall(EntityID, value); } }
+        }
     }
 
     public class ModelComponent : IComponent

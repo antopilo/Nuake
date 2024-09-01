@@ -1,11 +1,15 @@
 #include "Project.h"
-#include "../Core/FileSystem.h"
+#include "src/Core/FileSystem.h"
+#include "Engine.h"
+#include "src/Core/Logger.h"
+#include "src/Audio/AudioManager.h"
+#include "src/Scripting/ScriptingEngineNet.h"
+
 #include <json/json.hpp>
+
 #include <fstream>
 #include <streambuf>
-#include "../Core/Logger.h"
-#include "Engine.h"
-#include <src/Audio/AudioManager.h>
+
 
 namespace Nuake
 {
@@ -102,6 +106,73 @@ namespace Nuake
 		}
 
 		return project;
+	}
+
+	void Project::ExportEntitiesToTrenchbroom()
+	{
+		Ref<FGDFile> file = EntityDefinitionsFile;
+
+		file->BrushEntities.clear();
+		for (auto& [name, type] : ScriptingEngineNet::Get().GetBrushEntities())
+		{
+			FGDBrushEntity brushEntity = FGDBrushEntity(name);
+			brushEntity.Script = name;
+			brushEntity.Description = type.Description;
+			brushEntity.IsTrigger = type.isTrigger;
+			for (auto& t : type.exposedVars)
+			{
+				ClassProperty classProp;
+				classProp.name = t.Name;
+				classProp.type = ClassPropertyType::String;
+				if (t.Type == ExposedVarTypes::String && t.Value.has_value())
+				{
+					classProp.value = std::any_cast<std::string>(t.Value);
+				}
+				else if (t.Type == ExposedVarTypes::Int)
+				{
+					classProp.value = std::to_string(std::any_cast<int>(t.Value));
+				}
+				else
+				{
+					classProp.value = "";
+				}
+				brushEntity.Properties.push_back(classProp);
+			}
+
+			file->BrushEntities.push_back(brushEntity);
+		}
+
+		file->PointEntities.clear();
+		for (auto& [name, type] : ScriptingEngineNet::Get().GetPointEntities()) 
+		{
+			FGDPointEntity pointEntity = FGDPointEntity(name);
+			pointEntity.Script = name;
+			pointEntity.Description = type.Description;
+			for (auto& t : type.exposedVars)
+			{
+				ClassProperty classProp;
+				classProp.name = t.Name;
+				classProp.type = ClassPropertyType::String;
+				if (t.Type == ExposedVarTypes::String && t.Value.has_value())
+				{
+					classProp.value = std::any_cast<std::string>(t.Value);
+				}
+				else if (t.Type == ExposedVarTypes::Int)
+				{
+					classProp.value = std::to_string(std::any_cast<int>(t.Value));
+				}
+				else
+				{
+					classProp.value = "";
+				}
+
+				pointEntity.Properties.push_back(classProp);
+			}
+
+			file->PointEntities.push_back(pointEntity);
+		}
+
+		file->Export();
 	}
 
 	json Project::Serialize()

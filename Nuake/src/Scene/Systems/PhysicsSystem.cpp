@@ -131,8 +131,7 @@ namespace Nuake
 				const Quat& startRotation = transformComponent.GetGlobalRotation();
 				const auto collisionShape = CreateRef<Physics::ConvexHullShape>(hull);
 
-
-				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity);
+				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity, Vector3{ 0, 0, 0 }, brushComponent.IsFunc);
 				brushComponent.Rigidbody.push_back(rigidBody);
 				rigidBody->SetIsTrigger(brushComponent.IsTrigger);
 				PhysicsManager::Get().RegisterBody(rigidBody);

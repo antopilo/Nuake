@@ -57,7 +57,7 @@ namespace Nuake
 		return m_World->CastShape(from, to, shape);
 	}
 
-	const std::vector<Physics::CollisionData>& PhysicsManager::GetCollisions()
+	const std::vector<Physics::CollisionData> PhysicsManager::GetCollisions()
 	{
 		return m_World->GetCollisionsData();
 	}

@@ -75,6 +75,9 @@ namespace Nuake
 
 		mCapsuleGizmo = CreateRef<CapsuleGizmo>();
 		mCapsuleGizmo->CreateMesh();
+
+		mDebugLines = std::vector<DebugLine>();
+		mDebugShapes = std::vector<DebugShape>();
 	}
 
 	void SceneRenderer::Cleanup()
@@ -84,24 +87,30 @@ namespace Nuake
 	void SceneRenderer::Update(const Timestep time, bool isEditorUpdate)
 	{
 		// Delete debug shapes that are dead
-		std::erase_if(mDebugLines, [](const DebugLine& line)
+		if (mDebugLines.size() > 0)
 		{
-			return line.Life < 0.0f;
-		});
+			std::erase_if(mDebugLines, [](const DebugLine& line)
+				{
+					return line.Life < 0.0f;
+				});
 
-		std::erase_if(mDebugShapes, [](const DebugShape& shape)
-		{
-			return shape.Life < 0.0f;
-		});
-
-		for (auto& line : mDebugLines)
-		{
-			line.Life -= time;
+			for (auto& line : mDebugLines)
+			{
+				line.Life -= time;
+			}
 		}
 
-		for (auto& shape : mDebugShapes)
+		if (mDebugShapes.size() > 0)
 		{
-			shape.Life -= time;
+			std::erase_if(mDebugShapes, [](const DebugShape& shape)
+				{
+					return shape.Life < 0.0f;
+				});
+
+			for (auto& shape : mDebugShapes)
+			{
+				shape.Life -= time;
+			}
 		}
 	}
 
@@ -527,10 +536,7 @@ namespace Nuake
 							if (model.IsTransparent || !visibility.Visible)
 								continue;
 
-							for (Ref<Mesh>& m : model.Meshes)
-							{
-								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-							}
+							
 						}
 						Renderer::Flush(shader, true);
 
@@ -620,10 +626,7 @@ namespace Nuake
 						if (model.IsTransparent || !visibility.Visible)
 							continue;
 
-						for (Ref<Mesh>& m : model.Meshes)
-						{
-							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-						}
+						
 					}
 					Renderer::Flush(shader, true);
 
@@ -795,10 +798,7 @@ namespace Nuake
 				if (model.IsTransparent || !visibility.Visible)
 					continue;
 
-				for (auto& b : model.Meshes)
-				{
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
-				}
+				
 			}
 			glEnable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);

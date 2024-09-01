@@ -59,6 +59,8 @@ namespace Nuake
 		static Ref<Project> New();
 		static Ref<Project> Load(std::string& path);
 
+		void ExportEntitiesToTrenchbroom();
+
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 	};

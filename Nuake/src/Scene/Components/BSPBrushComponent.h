@@ -10,7 +10,7 @@ namespace Nuake {
 	class BSPBrushComponent
 	{
 	public:
-		std::vector<Ref<Mesh>> Meshes;
+		//std::vector<Ref<Mesh>> Meshes;
 		std::vector<std::vector<Vector3>> Hulls;
 
 		std::vector<Ref<Material>> Materials;
@@ -27,7 +27,7 @@ namespace Nuake {
 
 		BSPBrushComponent() 
 		{
-			Meshes = std::vector<Ref<Mesh>>();
+			//Meshes = std::vector<Ref<Mesh>>();
 			Materials = std::vector<Ref<Material>>();
 			Rigidbody = std::vector<Ref<Physics::RigidBody>>();
 			Hulls = std::vector<std::vector<Vector3>>();

@@ -118,7 +118,7 @@ namespace Nuake {
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
 
-        ScriptingContext::Get().Initialize();
+        //ScriptingContext::Get().Initialize();
     }
 
     void EditorInterface::Init()
@@ -511,6 +511,7 @@ namespace Nuake {
                     {
                         playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5);
                         tooltip = "Build & Play (F5)";
+
                     }
                    
                     if (playButtonPressed)
@@ -527,6 +528,7 @@ namespace Nuake {
                         {
                             this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
 
+                            
                             std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
                             SetStatusMessage(statusMessage);
 
@@ -553,6 +555,8 @@ namespace Nuake {
                                 }
                                 else
                                 {
+                                    Engine::GetProject()->ExportEntitiesToTrenchbroom();
+
                                     SetStatusMessage("Entering play mode...");
 
                                     PushCommand(SetGameState(GameState::Playing));

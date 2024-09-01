@@ -50,6 +50,7 @@ namespace Nuake {
 
 		bool isTrigger = false;
 		std::string Description = "";
+		AABB aabb = AABB({0, 0, 0}, { 1, 1, 1 });
 	};
 
 	struct CompilationError
@@ -86,6 +87,7 @@ namespace Nuake {
 		// This is a map that contains all the instances of entity scripts.
 		std::unordered_map<std::string, NetGameScriptObject> m_GameEntityTypes;
 		std::unordered_map<std::string, NetGameScriptObject> m_BrushEntityTypes;
+		std::unordered_map<std::string, NetGameScriptObject> m_PointEntityTypes;
 		std::unordered_map<uint32_t, Coral::ManagedObject> m_EntityToManagedObjects;
 
 		ScriptingEngineNet();
@@ -126,6 +128,7 @@ namespace Nuake {
 		Coral::ManagedAssembly GetNuakeAssembly() const { return m_NuakeAssembly; }
 
 		std::unordered_map<std::string, NetGameScriptObject> GetBrushEntities() const { return m_BrushEntityTypes; }
+		std::unordered_map<std::string, NetGameScriptObject> GetPointEntities() const { return m_PointEntityTypes; }
 	private:
 		std::string GenerateGUID();
 	};

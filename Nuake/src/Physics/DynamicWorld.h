@@ -91,7 +91,7 @@ namespace Nuake
 			void ClearCollisionData();
 
 			void RegisterCollisionCallback(const CollisionData& data);
-			const std::vector<CollisionData>& GetCollisionsData();
+			const std::vector<CollisionData> GetCollisionsData();
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();

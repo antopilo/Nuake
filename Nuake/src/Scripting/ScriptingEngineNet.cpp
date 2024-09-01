@@ -95,26 +95,38 @@ namespace Nuake
 				{
 					auto lineCharNums = String::Split(numbersString[0], ',');
 
-					int lineNum = std::stoi(lineCharNums[0]);
-					int charNum = std::stoi(lineCharNums[1]);
-
-					// error message
-					std::string errMesg = "";
-					int i = 0;
-					for (auto s : String::Split(line, ':'))
+					if (lineCharNums.size() == 1)
 					{
-						if (i >= 3)
-						{
-							errMesg += s;
-						}
-						i++;
+						CompilationError compilationError;
+						compilationError.message = "";
+						compilationError.file = filePath;
+						compilationError.line = 0;
+						errors.push_back(compilationError);
 					}
+					else
+					{
+						int lineNum = std::stoi(lineCharNums[0]);
+						int charNum = std::stoi(lineCharNums[1]);
 
-					CompilationError compilationError;
-					compilationError.message = errMesg;
-					compilationError.file = filePath;
-					compilationError.line = lineNum;
-					errors.push_back(compilationError);
+						// error message
+						std::string errMesg = "";
+						int i = 0;
+						for (auto s : String::Split(line, ':'))
+						{
+							if (i >= 3)
+							{
+								errMesg += s;
+							}
+							i++;
+						}
+
+						CompilationError compilationError;
+						compilationError.message = errMesg;
+						compilationError.file = filePath;
+						compilationError.line = lineNum;
+						errors.push_back(compilationError);
+					}
+					
 				}
 			}
 
@@ -173,6 +185,7 @@ namespace Nuake
 		}
 
 		Coral::GC::Collect();
+		Coral::GC::WaitForPendingFinalizers();
 
 		GetHostInstance()->UnloadAssemblyLoadContext(m_LoadContext);
 
@@ -298,23 +311,33 @@ namespace Nuake
 		m_PrefabType = m_GameAssembly.GetType("Nuake.Net.Prefab");
 		auto& exposedFieldAttributeType = m_GameAssembly.GetType("Nuake.Net.ExposedAttribute");
 		auto& brushScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.BrushScript");
+		auto& pointScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.PointScript");
 
 		for (auto& type : m_GameAssembly.GetTypes())
 		{
+			// Brush
 			bool isBrushScript = false;
 			std::string brushDescription;
 			bool isTrigger = false;
+
+			// Point
+			bool isPointScript = false;
+			std::string pointDescription;
+
 			for (auto& attribute : type->GetAttributes())
 			{
-				if (attribute.GetType() != brushScriptAttributeType)
+				if (attribute.GetType() == brushScriptAttributeType)
 				{
-					continue;
+					brushDescription = attribute.GetFieldValue<Coral::String>("Description");
+					isTrigger = attribute.GetFieldValue<Coral::Bool32>("IsTrigger");
+					isBrushScript = true;
 				}
 
-				brushDescription = attribute.GetFieldValue<Coral::String>("Description");
-				isTrigger = attribute.GetFieldValue<Coral::Bool32>("IsTrigger");
-
-				isBrushScript = true;
+				if (attribute.GetType() == pointScriptAttributeType)
+				{
+					pointDescription = attribute.GetFieldValue<Coral::String>("Description");
+					isPointScript = true;
+				}
 			}
 
 			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
@@ -395,6 +418,11 @@ namespace Nuake
 				m_BrushEntityTypes[shortenedTypeName] = gameScriptObject;
 			}
 
+			if (isPointScript)
+			{
+				gameScriptObject.Description = pointDescription;
+				m_PointEntityTypes[shortenedTypeName] = gameScriptObject;
+			}
 			m_GameEntityTypes[shortenedTypeName] = gameScriptObject;
 		}
 	}

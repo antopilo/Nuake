@@ -494,8 +494,20 @@ namespace Nuake
 					{
 						std::string name = entity.GetComponent<NameComponent>().Name;
 
-						_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
-						//_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, 0.0f);
+						JPH::EMotionType bodyType = _JoltBodyInterface->GetMotionType(bodyId);
+						switch (bodyType)
+						{
+							case JPH::EMotionType::Kinematic:
+							{
+								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, 0.0f);
+								break;
+							}
+							case JPH::EMotionType::Static:
+							{
+								_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+								break;
+							}
+						}
 					}
 				}
 			}
@@ -864,7 +876,7 @@ namespace Nuake
 			_CollisionCallbacks.push_back(std::move(data));
 		}
 
-		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()
+		const std::vector<CollisionData> DynamicWorld::GetCollisionsData()
 		{
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
 			return _CollisionCallbacks;

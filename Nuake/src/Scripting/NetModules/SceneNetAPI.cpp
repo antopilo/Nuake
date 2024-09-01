@@ -234,6 +234,7 @@ namespace Nuake {
 		for (auto e : brushView)
 		{
 			BSPBrushComponent& brushComponent = brushView.get<BSPBrushComponent>(e);
+			auto targets = brushComponent.Targets;
 			if (brushComponent.TargetName == target)
 			{
 				Entity entity = { (entt::entity)(e), scene.get() };
@@ -345,6 +346,29 @@ namespace Nuake {
 		}
 	}
 
+	float CameraGetFOV(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CameraComponent>())
+		{
+			auto& component = entity.GetComponent<CameraComponent>();
+			return component.CameraInstance->Fov;
+		}
+	}
+
+	void CameraSetFOV(int entityId, float fov)
+	{
+		float safeFov = glm::clamp(fov, 1.0f, 180.0f);
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CameraComponent>())
+		{
+			auto& component = entity.GetComponent<CameraComponent>();
+			component.CameraInstance->Fov = safeFov;
+		}
+	}
+
 	void MoveAndSlide(int entityId, float vx, float vy, float vz)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -432,6 +456,30 @@ namespace Nuake {
 		return {};
 	}
 
+	bool AudioEmitterGetIsPlaying(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<AudioEmitterComponent>())
+		{
+			auto& audioEmitter = entity.GetComponent<AudioEmitterComponent>();
+			return audioEmitter.IsPlaying;
+		}
+
+		return false;
+	}
+
+	void AudioEmitterSetIsPlaying(int entityId, Coral::Bool32 isPlaying)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<AudioEmitterComponent>())
+		{
+			auto& audioEmitter = entity.GetComponent<AudioEmitterComponent>();
+			audioEmitter.IsPlaying = isPlaying;
+		}
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
@@ -443,6 +491,7 @@ namespace Nuake {
 		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
 		RegisterMethod("Entity.EntityGetTargetsIcall", &EntityGetTargets);
 		RegisterMethod("Entity.EntityGetTargetIcall", &EntityGetTarget);
+
 		// Prefab
 		RegisterMethod("Prefab.PrefabInstanceIcall", &PrefabInstance);
 
@@ -465,6 +514,8 @@ namespace Nuake {
 
 		// Camera
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
+		RegisterMethod("CameraComponent.GetCameraFOVIcall", &CameraGetFOV);
+		RegisterMethod("CameraComponent.SetCameraFOVIcall", &CameraSetFOV);
 
 		// Character Controller
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
@@ -475,6 +526,10 @@ namespace Nuake {
 
 		// Navigation Mesh
 		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", &NavMeshComponentFindPath);
+
+		// Audio Emitter
+		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", &AudioEmitterGetIsPlaying);
+		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", &AudioEmitterSetIsPlaying);
 	}
 
 }

@@ -30,6 +30,23 @@ namespace Nuake.Net
         }
     }
 
+    public struct AABB
+    {
+        public Vector3 A;
+        public Vector3 B;
+
+        public AABB(Vector3 a, Vector3 b)
+        {
+            A = a;
+            B = b;
+        }
+
+        public AABB(float ax, float ay, float az, float bx, float by, float bz)
+        {
+            A = new Vector3(ax, ay, az);
+            B = new Vector3(bx, by, bz);
+        }
+    }
 
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ExposedAttribute : Attribute
@@ -53,12 +70,30 @@ namespace Nuake.Net
     public sealed class PointScript : Attribute
     {
         public string Description = "";
-        public bool IsTrigger = false;
+        public Vector3 AABBA;
+        public Vector2 AABBB;
+
+        public List<float> AABBData = new();
+        public List<float> ColorData = new();
+
+        public Color Color
+        {
+            get { return Color; }
+            set
+            {
+                ColorData.Add(value.R);
+                ColorData.Add(value.G);
+                ColorData.Add(value.B);
+            }
+        }
+
+        string Model;
+        float ModelScale = 1.0f;
+        string Sprite;
 
         public PointScript(string description = "")
         {
             Description = description;
-            IsTrigger = isTrigger;
         }
     }
 

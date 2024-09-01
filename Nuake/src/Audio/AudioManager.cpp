@@ -153,7 +153,7 @@ namespace Nuake {
 
 	void AudioManager::LoadWavAudio(const std::string& filePath)
 	{
-		const bool STREAMING = true;
+		const bool STREAMING = false;
 		if (STREAMING)
 		{
 			Ref<SoLoud::WavStream> wavStream = CreateRef<SoLoud::WavStream>();
