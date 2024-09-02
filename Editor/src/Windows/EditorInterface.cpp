@@ -166,7 +166,7 @@ namespace Nuake {
             }
             else if (SelectedViewport == 3)
             {
-                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT);
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetScaledDepthTexture();
             }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();

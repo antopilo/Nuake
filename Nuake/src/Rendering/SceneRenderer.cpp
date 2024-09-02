@@ -397,11 +397,6 @@ namespace Nuake
 		}
 		mVignetteBuffer->Unbind();
 
-
-		ImGui::Begin("normals");
-		ImGui::Image((void*)mToneMapBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::End();
-
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
@@ -716,29 +711,20 @@ namespace Nuake
 			}
 		}
 
-		if (lightDebug.m_Framebuffers[0])
-		{
-			mDisplayDepthBuffer->QueueResize(lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
+		mDisplayDepthBuffer->QueueResize(GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
 
-			mDisplayDepthBuffer->Bind();
-			mDisplayDepthBuffer->Clear();
-			Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
-			displayDepthShader->Bind();
+		mDisplayDepthBuffer->Bind();
+		mDisplayDepthBuffer->Clear();
+		Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
+		displayDepthShader->Bind();
 
-			lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
-			displayDepthShader->SetUniform1i("u_Source", 5);
+		GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+		displayDepthShader->SetUniform1i("u_Source", 5);
 
-			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-			Renderer::DrawQuad(Matrix4(1.0f));
-			RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-			mDisplayDepthBuffer->Unbind();
-
-			ImGui::SetNextWindowSize({ 800, 800 });
-			ImGui::Begin("Debug ShadowMap");
-			ImGui::Image((void*)mDisplayDepthBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
-			ImGui::End();
-		}
-		
+		RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+		Renderer::DrawQuad(Matrix4(1.0f));
+		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+		mDisplayDepthBuffer->Unbind();
 	}
 
 	void SceneRenderer::GBufferPass(Scene& scene)

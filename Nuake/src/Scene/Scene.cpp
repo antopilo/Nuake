@@ -277,7 +277,6 @@ namespace Nuake
 				}
 			}
 		}
-		
 
 		for (auto& system : m_Systems)
 		{

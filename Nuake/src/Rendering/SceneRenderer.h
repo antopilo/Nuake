@@ -11,6 +11,7 @@
 #include "Shapes/SphereGizmo.h"
 #include "Shapes/CapsuleGizmo.h"
 #include "Shapes/CylinderGizmo.h"
+#include <glad/glad.h>
 
 namespace Nuake 
 {
@@ -55,6 +56,11 @@ namespace Nuake
 		FrameBuffer& GetGBuffer() const
 		{
 			return *mGBuffer;
+		}
+
+		Ref<Texture> GetScaledDepthTexture()
+		{
+			return mDisplayDepthBuffer->GetTexture(GL_COLOR_ATTACHMENT0);
 		}
 
 		bool IsTempModelLoaded(const std::string& name) const
