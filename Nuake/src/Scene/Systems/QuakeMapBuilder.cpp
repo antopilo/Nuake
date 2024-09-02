@@ -199,6 +199,12 @@ namespace Nuake {
                                     ev.Value = properties[ev.Name];
                                     ev.DefaultValue = ev.Value;
                                 }
+                                else if (ev.Type == NetScriptExposedVarType::Float)
+                                {
+                                    float value = atof(properties[ev.Name].c_str());
+                                    ev.Value = value;
+                                    ev.DefaultValue = ev.Value;
+                                }
                             }
                         }
                     }

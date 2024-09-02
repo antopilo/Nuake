@@ -160,13 +160,41 @@ namespace Nuake
 				ClassProperty classProp;
 				classProp.name = t.Name;
 				classProp.type = ClassPropertyType::String;
-				if (t.Type == ExposedVarTypes::String && t.Value.has_value())
+				if (t.Type == ExposedVarTypes::String)
 				{
-					classProp.value = std::any_cast<std::string>(t.Value);
+					if (t.Value.has_value())
+					{
+						classProp.value = std::any_cast<std::string>(t.Value);
+					}
+
+					classProp.type = ClassPropertyType::String;
 				}
 				else if (t.Type == ExposedVarTypes::Int)
 				{
-					classProp.value = std::to_string(std::any_cast<int>(t.Value));
+					if (t.Value.has_value())
+					{
+						classProp.value = std::to_string(std::any_cast<int>(t.Value));
+					}
+
+					classProp.type = ClassPropertyType::Integer;
+				}
+				else if (t.Type == ExposedVarTypes::Float)
+				{
+					if (t.Value.has_value())
+					{
+						classProp.value = std::to_string(std::any_cast<float>(t.Value));
+					}
+
+					classProp.type = ClassPropertyType::Float;
+				}
+				else if (t.Type == ExposedVarTypes::Bool)
+				{
+					if (t.Value.has_value())
+					{
+						classProp.value = std::to_string(std::any_cast<bool>(t.Value));
+					}
+
+					classProp.type = ClassPropertyType::Float;
 				}
 				else
 				{
