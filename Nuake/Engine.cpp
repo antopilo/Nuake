@@ -51,6 +51,8 @@ namespace Nuake
 	{
 		JobSystem::Get().Update();
 
+		AudioManager::Get().AudioUpdate();
+
 		s_Time = static_cast<float>(glfwGetTime());
 		s_TimeStep = s_Time - s_LastFrameTime;
 		s_LastFrameTime = s_Time;

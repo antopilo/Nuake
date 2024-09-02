@@ -39,10 +39,7 @@ namespace Nuake
 
 		Ref<SoLoud::Soloud> m_Soloud;
 
-		bool m_AudioThreadRunning;
-		std::thread m_AudioThread;
-		std::mutex m_AudioQueueMutex;
-		std::atomic<bool> m_AudioQueued = { false };
+		bool m_AudioQueued = false;
 		std::queue<AudioRequest> m_AudioQueue;
 
 		Vector3 m_ListenerPosition;
@@ -87,8 +84,9 @@ namespace Nuake
 		bool IsVoiceActive(const std::string & voice) const;
 		void LoadWavAudio(const std::string& filePath);
 
+		void AudioUpdate();
+
 	private:
-		void AudioThreadLoop();
 
 		void CleanupInactiveVoices();
 	};
