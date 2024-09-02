@@ -366,9 +366,15 @@ namespace Nuake
 
 						auto typeName = f.GetType().GetFullName();
 						ExposedVarTypes varType = ExposedVarTypes::Unsupported;
+						bool hasDefaultValue = a.GetFieldValue<Coral::Bool32>("HasDefaultvalue");
 						if (typeName == "System.Single")
 						{
 							varType = ExposedVarTypes::Float;
+
+							if (hasDefaultValue)
+							{
+								exposedVar.Value = a.GetFieldValue<float>("DefaultValueInternalFloat");
+							}
 						}
 						else if (typeName == "System.Double")
 						{
@@ -377,10 +383,20 @@ namespace Nuake
 						else if (typeName == "System.String")
 						{
 							varType = ExposedVarTypes::String;
+
+							if (hasDefaultValue)
+							{
+								exposedVar.Value = a.GetFieldValue<Coral::String>("DefaultValueInternalString");
+							}
 						}
 						else if (typeName == "System.Boolean")
 						{
 							varType = ExposedVarTypes::Bool;
+
+							if (hasDefaultValue)
+							{
+								exposedVar.Value = a.GetFieldValue<Coral::Bool32>("DefaultValueInternalBool");
+							}
 						}
 						else if (typeName == "System.Numerics.Vector2")
 						{
@@ -493,12 +509,10 @@ namespace Nuake
 			{
 				case ExposedVarTypes::Float:
 				{
-					exposedVar.Value = classInstance.GetFieldValue<float>(varName);
 					break;
 				}
 				case ExposedVarTypes::Double:
 				{
-					exposedVar.Value = classInstance.GetFieldValue<double>(varName);
 					break;
 				}
 				case ExposedVarTypes::String:
@@ -514,17 +528,14 @@ namespace Nuake
 				}
 				case ExposedVarTypes::Bool:
 				{
-					exposedVar.Value = (bool)classInstance.GetFieldValue<int>(varName);
 					break;
 				}
 				case ExposedVarTypes::Vector2:
 				{
-					exposedVar.Value = (Vector2)classInstance.GetFieldValue<Vector2>(varName);
 					break;
 				}
 				case ExposedVarTypes::Vector3:
 				{
-					exposedVar.Value = (Vector3)classInstance.GetFieldValue<Vector3>(varName);
 					break;
 				}
 				case ExposedVarTypes::Entity:

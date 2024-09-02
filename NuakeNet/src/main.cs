@@ -51,6 +51,37 @@ namespace Nuake.Net
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ExposedAttribute : Attribute
     {
+        private bool HasDefaultValue = false;
+        private int DefaultValueInternalInt;
+        private float DefaultValueInternalFloat;
+        private bool DefaultValueInternalBool;
+        private string DefaultValueInternalString;
+
+        public ExposedAttribute(int DefaultValue)
+        {
+            DefaultValueInternalInt = DefaultValue;
+            HasDefaultValue = true;
+        }
+
+        public ExposedAttribute(float DefaultValue)
+        {
+            this.DefaultValueInternalFloat = DefaultValue;
+            HasDefaultValue = true;
+        }
+
+        public ExposedAttribute(string DefaultValue)
+        {
+            this.DefaultValueInternalString = DefaultValue;
+            HasDefaultValue = true;
+        }
+
+        public ExposedAttribute(bool DefaultValue)
+        {
+            this.DefaultValueInternalBool = DefaultValue;
+            HasDefaultValue = true;
+        }
+
+        public ExposedAttribute() { }
     }
 
     [AttributeUsage(AttributeTargets.Class)]

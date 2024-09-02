@@ -196,6 +196,7 @@ namespace Nuake
 	std::string FileSystem::Root = "";
 
 	Ref<Directory> FileSystem::RootDirectory;
+	Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
 
 	File::File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
 	{
@@ -207,16 +208,7 @@ namespace Nuake
 
 		if (GetFileType() != FileType::Unkown)
 		{
-			this->Water = CreateRef<filewatch::FileWatch<std::string>>(
-			AbsolutePath, [&](const std::string& path, const filewatch::Event& event)
-				{
-					std::cout << path << ' ' << filewatch::event_to_string(event) << '\n';
-					if (event == filewatch::Event::modified)
-					{
-						SetHasBeenModified(true);
-					}
-				}
-			);
+			
 		}
 	}
 
@@ -261,12 +253,40 @@ namespace Nuake
 	bool FileSystem::FileExists(const std::string& path, bool absolute)
 	{
 		std::string fullPath = absolute ? path : FileSystem::Root + path;
-		return std::filesystem::exists(fullPath);
+		return std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath);
 	}
 
 	void FileSystem::SetRootDirectory(const std::string path)
 	{
 		Root = path;
+		RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
+			path, [&](const std::string& path, const filewatch::Event& event)
+				{
+					std::string normalizedPath = String::ReplaceSlash(path);
+
+					// Detect if its a file and not a folder.
+					if (!FileSystem::FileExists(normalizedPath))
+					{
+						return;
+					}
+
+					if(Ref<File> file = GetFile(normalizedPath); file)
+					{
+						if (file->GetFileType() == FileType::Unkown)
+						{
+							return;
+						}
+
+						Logger::Log(normalizedPath + " event: " + filewatch::event_to_string(event), "filewatcher", VERBOSE);
+
+						if (event == filewatch::Event::modified)
+						{
+							file->SetHasBeenModified(true);
+						}
+					}
+					
+				}
+		);
 		Scan();
 	}
 

@@ -33,6 +33,13 @@ namespace Nuake {
 		line += "\n [ \n";
 		for (auto& p : fgdClass.Properties)
 		{
+			if (p.type != ClassPropertyType::Integer ||
+				p.type != ClassPropertyType::String ||
+				p.type != ClassPropertyType::Float)
+			{
+				continue;
+			}
+
 			// E.g: myProp(integer) : "description"
 			line += "    "; // Tabulation
 			line += p.name;
@@ -66,22 +73,42 @@ namespace Nuake {
 		}
 
 		// Properties here.
-		line += "\n [ \n";
+		line += "\n[ \n";
 		for (auto& p : fgdPoint.Properties)
 		{
+			if (p.type != ClassPropertyType::Integer &&
+				p.type != ClassPropertyType::String &&
+				p.type != ClassPropertyType::Float)
+			{
+				continue;
+			}
+
 			// E.g: myProp(integer) : "description"
 			line += "    "; // Tabulation
 			line += p.name;
 			line += "(";
 			if (p.type == ClassPropertyType::Integer)
 				line += "integer";
+			if (p.type == ClassPropertyType::String)
+				line += "string";
+			if (p.type == ClassPropertyType::Float)
+				line += "float";
 			line += ") : ";
 			line += "\"" + p.description + "\"";
+			line += " : ";
+			if (p.type == ClassPropertyType::String)
+			{
+				line += " \"" + p.value + "\" ";
+			}
+			else if (p.type == ClassPropertyType::Integer || p.type == ClassPropertyType::Float)
+			{
+				line += p.value;
+			}
 			line += "\n";
 
 		}
 
-		line += "]";
+		line += "] \n";
 
 		FileSystem::WriteLine(line);
 
@@ -106,6 +133,13 @@ namespace Nuake {
 		line += "\n [ \n";
 		for (auto& p : fgdClass.Properties)
 		{
+			if (p.type != ClassPropertyType::Integer ||
+				p.type != ClassPropertyType::String ||
+				p.type != ClassPropertyType::Float)
+			{
+				continue;
+			}
+
 			// E.g: myProp(integer) : "description"
 			line += "    "; // Tabulation
 			line += p.name;
@@ -114,6 +148,8 @@ namespace Nuake {
 				line += "integer";
 			if (p.type == ClassPropertyType::String)
 				line += "string";
+			if (p.type == ClassPropertyType::Float)
+				line += "float";
 			line += ") : ";
 			line += "\"" + p.description + "\"";
 			line += " : ";
@@ -121,7 +157,7 @@ namespace Nuake {
 			{
 				line += " \"" + p.value + "\" ";
 			}
-			else if (p.type == ClassPropertyType::Integer)
+			else if (p.type == ClassPropertyType::Integer || p.type == ClassPropertyType::Float)
 			{
 				line += p.value;
 			}

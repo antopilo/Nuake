@@ -32,6 +32,7 @@ namespace Nuake
 		static std::string Root;
 
 		static Ref<Directory> RootDirectory;
+		static Ref<filewatch::FileWatch<std::string>> RootFileWatch;
 
 		static void SetRootDirectory(const std::string path);
 

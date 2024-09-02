@@ -124,9 +124,15 @@ namespace Nuake
 				ClassProperty classProp;
 				classProp.name = t.Name;
 				classProp.type = ClassPropertyType::String;
+
 				if (t.Type == ExposedVarTypes::String && t.Value.has_value())
 				{
 					classProp.value = std::any_cast<std::string>(t.Value);
+				}
+				else if (t.Type == ExposedVarTypes::Float && t.Value.has_value())
+				{
+					classProp.value = std::any_cast<float>(t.Value);
+					classProp.type = ClassPropertyType::Float;
 				}
 				else if (t.Type == ExposedVarTypes::Int)
 				{
@@ -136,6 +142,7 @@ namespace Nuake
 				{
 					classProp.value = "";
 				}
+
 				brushEntity.Properties.push_back(classProp);
 			}
 
