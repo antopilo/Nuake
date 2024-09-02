@@ -55,6 +55,7 @@ namespace Nuake {
 			SERIALIZE_VAL(TargetName);
 			j["IsSolid"] = IsSolid;
 			SERIALIZE_VAL(IsTrigger);
+			SERIALIZE_VAL(IsFunc);
 			END_SERIALIZE();
 		}
 
@@ -84,6 +85,7 @@ namespace Nuake {
 
 			DESERIALIZE_VAL(target);
 			DESERIALIZE_VAL(TargetName);
+			DESERIALIZE_VAL(IsFunc);
 			DESERIALIZE_VAL(IsTrigger);
 			return true;
 		}

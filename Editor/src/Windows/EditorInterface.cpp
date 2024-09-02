@@ -55,6 +55,7 @@
 #include "../Commands/Commands/Commands.h"
 #include <src/Resource/ModelLoader.h>
 #include "../ScriptingContext/ScriptingContext.h"
+#include <src/Scene/Components/BSPBrushComponent.h>
 
 namespace Nuake {
     
@@ -746,6 +747,10 @@ namespace Nuake {
         {
             ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         }
+        else if (e.HasComponent<BSPBrushComponent>())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 120));
+        }
 
         if (!m_IsRenaming && m_ShouldUnfoldEntityTree && Selection.Type == EditorSelectionType::Entity && e.GetScene()->EntityIsParent(Selection.Entity, e))
         {
@@ -775,7 +780,7 @@ namespace Nuake {
         }
 
         bool isDragging = false;
-        if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>())
+        if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>() || e.HasComponent<BSPBrushComponent>())
         {
 			ImGui::PopStyleColor();
         }
