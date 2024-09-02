@@ -9,6 +9,7 @@
 
 #include <random>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 
 namespace Nuake 
 {
@@ -32,6 +33,8 @@ namespace Nuake
 
 	void SSAO::Resize(const Vector2& size)
 	{
+		ZoneScoped;
+
 		if (_size == size)
 			return;
 
@@ -42,6 +45,8 @@ namespace Nuake
 
 	void SSAO::Clear()
 	{
+		ZoneScoped;
+
 		_ssaoBlurFramebuffer->Bind();
 		{
 			RenderCommand::SetClearColor({ 1, 1, 1, 1});
@@ -96,6 +101,8 @@ namespace Nuake
 
 	void SSAO::Draw(FrameBuffer* gBuffer, const Matrix4& projection, const Matrix4& view)
 	{
+		ZoneScoped;
+
 		_ssaoFramebuffer->Bind();
 		{
 			_ssaoFramebuffer->Clear();

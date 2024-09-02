@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include <src/Scene/Components/SkinnedModelComponent.h>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 
 
 namespace Nuake 
@@ -128,6 +129,8 @@ namespace Nuake
 	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
 	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer)
 	{
+		ZoneScoped;
+
 		// Renders all shadow maps
 		ShadowPass(scene);
 
@@ -483,6 +486,8 @@ namespace Nuake
 	
 	void SceneRenderer::ShadowPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
 		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
@@ -729,6 +734,8 @@ namespace Nuake
 
 	void SceneRenderer::GBufferPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mGBuffer->Bind();
 		mGBuffer->Clear();
 		{
@@ -933,6 +940,8 @@ namespace Nuake
 
 	void SceneRenderer::ShadingPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mShadingBuffer->Bind();
 		mShadingBuffer->Clear();
 		{
@@ -1035,6 +1044,8 @@ namespace Nuake
 
 	void SceneRenderer::DebugRendererPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mShadingBuffer->Bind();
 		{
 			// Lines

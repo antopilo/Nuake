@@ -34,6 +34,7 @@
 #include <future>
 #include <streambuf>
 #include <chrono>
+#include <Tracy.hpp>
 
 
 namespace Nuake 
@@ -261,6 +262,8 @@ namespace Nuake
 
 	void Scene::Update(Timestep ts)
 	{
+		ZoneScoped;
+
 		const auto& view = m_Registry.view<QuakeMapComponent>();
 		for (const auto& e : view)
 		{
@@ -280,6 +283,7 @@ namespace Nuake
 
 		for (auto& system : m_Systems)
 		{
+			ZoneScopedN("System Update");
 			system->Update(ts);
 		}
 
@@ -301,6 +305,8 @@ namespace Nuake
 
 	void Scene::Draw(FrameBuffer& framebuffer)
 	{
+		ZoneScoped;
+
 		Ref<Camera> cam = nullptr;
 		const auto& view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
 		for (const auto& e : view)

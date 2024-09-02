@@ -22,3 +22,6 @@
 [submodule "Nuake/dependencies/recastnavigation"]
 	path = Nuake/dependencies/recastnavigation
 	url = https://github.com/antopilo/recastnavigation.git
+[submodule "Nuake/dependencies/tracy"]
+	path = Nuake/dependencies/tracy
+	url = https://github.com/wolfpld/tracy.git

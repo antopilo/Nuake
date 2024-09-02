@@ -15,6 +15,7 @@
 
 #include "src/Scene/Systems/WadConverter.h"
 #include "../Misc/ThumbnailManager.h"
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -64,6 +65,8 @@ namespace Nuake
 
     void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
+        ZoneScoped;
+
         ImGui::PushFont(FontManager::GetFont(Icons));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
@@ -226,6 +229,8 @@ namespace Nuake
 
     void FileSystemUI::DrawFile(Ref<File> file, uint32_t drawId)
     {
+        ZoneScoped;
+
         ImGui::PushFont(EditorInterface::bigIconFont);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {0.f, 0.f});

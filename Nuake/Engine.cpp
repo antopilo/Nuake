@@ -15,6 +15,7 @@
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -49,6 +50,8 @@ namespace Nuake
 
 	void Engine::Tick()
 	{
+		ZoneScoped;
+
 		JobSystem::Get().Update();
 
 
@@ -120,12 +123,18 @@ namespace Nuake
 
 	void Engine::Draw()
 	{
+		ZoneScoped;
+
 		RenderCommand::Clear();
 
 		// Start imgui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		{
+			ZoneScopedN("ImGui New Frame");
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
 
 		// Draw scene
 		Window::Get()->Draw();
@@ -133,6 +142,7 @@ namespace Nuake
 
 	void Engine::EndDraw()
 	{
+		ZoneScoped;
 		Window::Get()->EndDraw();
 	}
 

@@ -3,6 +3,8 @@
 
 #include <filesystem>
 
+#include <Tracy.hpp>
+
 namespace Nuake {
 
 	Application::Application(const ApplicationSpecification& appSpecification)
@@ -33,8 +35,11 @@ namespace Nuake {
 	{
 		while (!m_Window->ShouldClose())
 		{
+			ZoneScoped;
+
 			for (auto& layer : m_LayerStack)
 			{
+				ZoneScopedN("Layer Update");
 				layer->OnUpdate();
 			}
 
@@ -42,9 +47,12 @@ namespace Nuake {
 			{
 				for (auto& layer : m_LayerStack)
 				{
+					ZoneScopedN("Layer Draw");
 					layer->OnDraw();
 				}
 			}
+
+			FrameMark;
 		}
 	}
 

@@ -56,6 +56,7 @@
 #include <src/Resource/ModelLoader.h>
 #include "../ScriptingContext/ScriptingContext.h"
 #include <src/Scene/Components/BSPBrushComponent.h>
+#include <Tracy.hpp>
 
 namespace Nuake {
     
@@ -2900,6 +2901,8 @@ namespace Nuake {
     int frameCount = 2;
     void EditorInterface::Draw()
     {
+		ZoneScoped;
+
         Init();
 
         if (isCreatingNewProject && !_NewProjectWindow->HasCreatedProject())
@@ -3014,6 +3017,8 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
+		ZoneScoped;
+
         if (!Engine::GetCurrentScene() || Engine::IsPlayMode())
         {
             return;

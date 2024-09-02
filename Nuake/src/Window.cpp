@@ -17,6 +17,7 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <Tracy.hpp>
 
 namespace Nuake 
 {
@@ -127,6 +128,8 @@ namespace Nuake
 
     void Window::Draw()
     {
+        ZoneScoped;
+
         // Dont render if no scene is loaded.
         if (!m_Scene)
         {
@@ -152,10 +155,12 @@ namespace Nuake
 
         if (Engine::IsPlayMode())
         {
+            ZoneScopedN("PIE Draw");
             m_Scene->Draw(*m_Framebuffer.get());
         }
         else
         {
+            ZoneScopedN("Non-playmode Draw");
             m_Scene->Draw(*m_Framebuffer.get(), m_Scene->m_EditorCamera->GetPerspective(), m_Scene->m_EditorCamera->GetTransform());
         }
 
@@ -165,8 +170,15 @@ namespace Nuake
 
     void Window::EndDraw()
     {
-        ImGui::EndFrame();
-        ImGui::Render();
+        {
+            ZoneScopedN("ImGui::EndFrame");
+            ImGui::EndFrame();
+        }
+
+        {
+            ZoneScopedN("ImGui::Render");
+            ImGui::Render();
+        }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -178,8 +190,12 @@ namespace Nuake
             glfwMakeContextCurrent(backup_current_context);
         }
 
+        {
+            ZoneScopedN("SwapBuffers");
+            glfwSwapBuffers(m_Window);
+        }
 
-        glfwSwapBuffers(m_Window);
+        ZoneScopedN("glfwPollEvents");
         glfwPollEvents();
     }
 

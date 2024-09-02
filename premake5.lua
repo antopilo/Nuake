@@ -43,6 +43,10 @@ workspace "Nuake"
         architecture "x64"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+local globalDefines = {
+    "TRACY_ENABLE",
+    "TRACY_ON_DEMAND"
+}
 
 group "Dependencies"
     include "Nuake/dependencies/glfw_p5.lua"
@@ -52,6 +56,7 @@ group "Dependencies"
     include "Nuake/dependencies/soloud_p5.lua"
     include "Nuake/dependencies/coral_p5.lua"
     include "Nuake/dependencies/recastnavigation_p5.lua"
+    include "Nuake/dependencies/tracy_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
@@ -79,8 +84,10 @@ project "Nuake"
    
     defines
     {
+		table.unpack(globalDefines),
+
         "_MBCS",
-		"IMGUI_DEFINE_MATH_OPERATORS"
+		"IMGUI_DEFINE_MATH_OPERATORS",
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -152,12 +159,15 @@ project "Nuake"
 	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
     
     links
     {
-        "soloud"
+        "soloud",
+        "tracy"
     }
 
     filter "system:linux"
@@ -193,6 +203,8 @@ project "Nuake"
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"
@@ -231,7 +243,9 @@ project "NuakeRuntime"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
 
     libdirs
@@ -257,7 +271,12 @@ project "NuakeRuntime"
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:windows"
@@ -308,6 +327,8 @@ project "NuakeRuntime"
         {
             "NK_DEBUG"
         }
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         kind "WindowedApp"
@@ -365,7 +386,9 @@ project "Editor"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
     
     libdirs 
@@ -392,7 +415,12 @@ project "Editor"
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:Windows"
@@ -460,6 +488,8 @@ project "Editor"
             "WIN32_LEAN_AND_MEAN",
             "IMGUI_DEFINE_MATH_OPERATORS"
         }
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"
