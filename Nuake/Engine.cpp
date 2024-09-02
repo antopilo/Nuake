@@ -11,7 +11,7 @@
 #include "src/Scripting/ScriptingEngine.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
-
+#include "src/Modules/Modules.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -43,6 +43,8 @@ namespace Nuake
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");
+
+		Modules::StartupModules();
 	}
 
 	void Engine::Tick()
