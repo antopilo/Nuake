@@ -70,7 +70,8 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.h",
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
-        "%{prj.name}/src/Vendors/incbin/*.h"
+        "%{prj.name}/src/Vendors/incbin/*.h",
+        "%{prj.name}/src/Vendors/filewatch/*.hpp"
     }
 
     includedirs

@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <ShlObj.h>
+#include "filewatch/FileWatch.hpp"
 
 namespace Nuake
 {
@@ -195,6 +196,29 @@ namespace Nuake
 	std::string FileSystem::Root = "";
 
 	Ref<Directory> FileSystem::RootDirectory;
+
+	File::File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
+	{
+		AbsolutePath = absolutePath;
+		Parent = parentDir;
+		RelativePath = FileSystem::AbsoluteToRelative(absolutePath);
+		Name = name;
+		Type = type;
+
+		if (GetFileType() != FileType::Unkown)
+		{
+			this->Water = CreateRef<filewatch::FileWatch<std::string>>(
+			AbsolutePath, [&](const std::string& path, const filewatch::Event& event)
+				{
+					std::cout << path << ' ' << filewatch::event_to_string(event) << '\n';
+					if (event == filewatch::Event::modified)
+					{
+						SetHasBeenModified(true);
+					}
+				}
+			);
+		}
+	}
 
 	void FileSystem::ScanDirectory(Ref<Directory> directory)
 	{

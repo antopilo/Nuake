@@ -7,6 +7,12 @@
 #include <iostream>
 #include <fstream>
 
+namespace filewatch
+{
+	template<typename T>
+	class FileWatch;
+}
+
 namespace Nuake
 {
 	class FileDialog
@@ -80,6 +86,9 @@ namespace Nuake
 		std::string RelativePath;
 		std::string AbsolutePath;
 		Ref<Directory> Parent;
+		bool Modified = false;
+
+		Ref<filewatch::FileWatch<std::string>> Water;
 	public:
 
 		std::string GetExtension() const { return Type; }
@@ -155,7 +164,8 @@ namespace Nuake
 
 			return FileType::Unkown;
 		}
-
+		bool GetHasBeenModified() const { return Modified; }
+		void SetHasBeenModified(bool value) { Modified = value; }
 		std::string GetFileTypeAsString() const
 		{
 			std::string ext = GetExtension();
@@ -222,14 +232,7 @@ namespace Nuake
 			return FileSystem::FileExists(AbsolutePath, true);
 		}
 
-		File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
-		{
-			AbsolutePath = absolutePath;
-			Parent = parentDir;
-			RelativePath = FileSystem::AbsoluteToRelative(absolutePath);
-			Name = name;
-			Type = type;
-		}
+		File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type);
 	};
 
 	class Directory

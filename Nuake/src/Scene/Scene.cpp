@@ -261,6 +261,24 @@ namespace Nuake
 
 	void Scene::Update(Timestep ts)
 	{
+		const auto& view = m_Registry.view<QuakeMapComponent>();
+		for (const auto& e : view)
+		{
+			auto& map = view.get<QuakeMapComponent>(e);
+			if (map.AutoRebuild && !map.Path.empty())
+			{
+				if (auto file = FileSystem::GetFile(map.Path); file->IsValid() && file->GetHasBeenModified())
+				{
+					file->SetHasBeenModified(false);
+
+					Entity entity = Entity(e, this);
+					QuakeMapBuilder builder;
+					builder.BuildQuakeMap(entity, map.HasCollisions);
+				}
+			}
+		}
+		
+
 		for (auto& system : m_Systems)
 		{
 			system->Update(ts);

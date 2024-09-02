@@ -818,7 +818,7 @@ namespace Nuake {
             m_IsRenaming = true;
         }
 
-        if (!m_IsRenaming && Selection.Type == EditorSelectionType::Entity && Input::IsKeyPressed(Key::DELETE))
+        if (!m_IsRenaming && Selection.Type == EditorSelectionType::Entity && Input::IsKeyPressed(Key::DELETE_KEY))
         {
             QueueDeletion = Selection.Entity;
         }
