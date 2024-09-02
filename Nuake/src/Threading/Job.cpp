@@ -1,4 +1,5 @@
 #include "Job.h"
+#include <Tracy.hpp>
 
 namespace Nuake {
 
@@ -10,6 +11,7 @@ namespace Nuake {
 
 		m_Thread = std::thread([this, job]()
 		{
+			ZoneScoped;
 			job();
 			m_IsDone = true;
 		});

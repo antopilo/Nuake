@@ -3,6 +3,7 @@
 #include "src/Rendering/Renderer.h"
 #include <glad/glad.h>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 namespace Nuake {
 	Volumetric::Volumetric()
 	{
@@ -37,6 +38,8 @@ namespace Nuake {
 
 	void Volumetric::Draw(Matrix4 projection, Matrix4 view, const Vector3& camPos, std::vector<LightComponent>& lights)
 	{
+		ZoneScoped;
+
 		mVolumetricFramebuffer->Bind();
 		{
 			mVolumetricFramebuffer->Clear();
