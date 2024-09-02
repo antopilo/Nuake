@@ -145,7 +145,6 @@ namespace Nuake {
 			wav->load(filePath.c_str());
 			m_WavSamples[filePath] = wav;
 		}
-		
 	}
 
 	void AudioManager::AudioUpdate()
