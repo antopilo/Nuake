@@ -17,6 +17,7 @@
 #include "src/Rendering/Textures/MaterialManager.h"
 #include "src/Rendering/Vertex.h"
 #include <imgui/imgui.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -254,6 +255,8 @@ namespace Nuake
     int spotShadowMapCount = 0;
     void Renderer::EndDraw()
     {
+        ZoneScoped;
+
         Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
         deferredShader->Bind();
         deferredShader->SetUniform1i("LightCount", 0);
@@ -418,6 +421,8 @@ namespace Nuake
 
     void Renderer::DrawQuad(Matrix4 transform)
     {
+		ZoneScoped;
+
         QuadMesh->Bind();
         RenderCommand::DrawArrays(0, 6);
     }

@@ -3,6 +3,7 @@
 
 //#include <dependencies/GLEW/include/GL/glew.h>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 
 #include <string>
 #include <src/Rendering/Renderer2D.h>
@@ -158,6 +159,8 @@ int ApplicationMain(int argc, char* argv[])
         ImGui::PopStyleVar(2);
 
         Engine::EndDraw();
+
+        FrameMark;
     }
 }
 

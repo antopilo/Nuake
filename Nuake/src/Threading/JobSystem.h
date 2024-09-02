@@ -24,20 +24,6 @@ namespace Nuake {
 			m_Jobs.push_back(std::make_unique<Job>(job, end));
 		}
 
-		void Update()
-		{
-			for (auto it = m_Jobs.begin(); it != m_Jobs.end();)
-			{
-				if (it->get()->IsDone()) 
-				{
-					it->get()->End();
-					it = m_Jobs.erase(it);
-				}
-				else 
-				{
-					++it;
-				}
-			}
-		}
+		void Update();
 	};
 }
