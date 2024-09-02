@@ -352,6 +352,12 @@ namespace Nuake
 				layer = Layers::MOVING;
 			}
 
+			if (rb->GetForceKinematic())
+			{
+				motionType = JPH::EMotionType::Kinematic;
+				layer = Layers::MOVING;
+			}
+
 			const std::string name = rb->GetEntity().GetComponent<NameComponent>().Name;
 			if (rb->IsTrigger())
 			{
@@ -474,6 +480,35 @@ namespace Nuake
 			return false;
 		}
 
+		Vector3 DynamicWorld::GetCharacterGroundVelocity(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				characterController->UpdateGroundVelocity();
+				const auto groundVelocity = characterController->GetGroundVelocity();
+
+				return Vector3(groundVelocity.GetX(), groundVelocity.GetY(), groundVelocity.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
+		Vector3 DynamicWorld::GetCharacterGroundNormal(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				const auto groundNormal = characterController->GetGroundNormal();
+
+				return Vector3(groundNormal.GetX(), groundNormal.GetY(), groundNormal.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
 		void DynamicWorld::SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation)
 		{
 			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
@@ -499,7 +534,7 @@ namespace Nuake
 						{
 							case JPH::EMotionType::Kinematic:
 							{
-								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, 0.0f);
+								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, Engine::GetFixedTimeStep());
 								break;
 							}
 							case JPH::EMotionType::Static:
@@ -627,7 +662,7 @@ namespace Nuake
 						continue;
 					}
 
-					JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
+					JPH::Vec3 position = bodyInterface.GetPosition(bodyId);
 					JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 					JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
 					const auto bodyRotation = bodyInterface.GetRotation(bodyId);

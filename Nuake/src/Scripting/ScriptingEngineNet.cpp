@@ -323,7 +323,7 @@ namespace Nuake
 			// Point
 			bool isPointScript = false;
 			std::string pointDescription;
-
+			std::string pointBase;
 			for (auto& attribute : type->GetAttributes())
 			{
 				if (attribute.GetType() == brushScriptAttributeType)
@@ -336,6 +336,7 @@ namespace Nuake
 				if (attribute.GetType() == pointScriptAttributeType)
 				{
 					pointDescription = attribute.GetFieldValue<Coral::String>("Description");
+					pointBase = attribute.GetFieldValue<Coral::String>("Base");
 					isPointScript = true;
 				}
 			}
@@ -354,7 +355,7 @@ namespace Nuake
 			NetGameScriptObject gameScriptObject;
 			gameScriptObject.coralType = type;
 			gameScriptObject.exposedVars = std::vector<ExposedVar>();
-
+			gameScriptObject.Base = baseTypeName;
 			for (auto& f : type->GetFields())
 			{
 				for (auto& a : f.GetAttributes())

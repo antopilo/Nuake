@@ -311,6 +311,8 @@ namespace Nuake.Net
     {
         internal static unsafe delegate*<int, float, float, float, void> MoveAndSlideIcall;
         internal static unsafe delegate*<int, bool> IsOnGroundIcall;
+        internal static unsafe delegate*<int, NativeArray<float>> GetGroundVelocityIcall;
+        internal static unsafe delegate*<int, NativeArray<float>> GetGroundNormalIcall;
 
         public CharacterControllerComponent(int entityId)
         {
@@ -325,6 +327,24 @@ namespace Nuake.Net
         public bool IsOnGround()
         {
             unsafe { return IsOnGroundIcall(EntityID); }
+        }
+
+        public Vector3 GetGroundNormal()
+        {
+            unsafe
+            {
+                NativeArray<float> resultArray = GetGroundNormalIcall(EntityID);
+                return new(resultArray[0], resultArray[1], resultArray[2]);
+            }
+        }
+
+        public Vector3 GetGroundVelocity()
+        {
+            unsafe
+            {
+                NativeArray<float> resultArray = GetGroundVelocityIcall(EntityID);
+                return new(resultArray[0], resultArray[1], resultArray[2]);
+            }
         }
     }
 

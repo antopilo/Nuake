@@ -399,6 +399,52 @@ namespace Nuake {
 		return false;
 	}
 
+	Coral::Array<float> GetGroundVelocity(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		Coral::Array<float> resultArray = Coral::Array<float>::New(3);
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
+			Vector3 groundVelocity = PhysicsManager::Get().GetWorld()->GetCharacterGroundVelocity(entity);
+
+			resultArray[0] = groundVelocity.x;
+			resultArray[1] = groundVelocity.y;
+			resultArray[2] = groundVelocity.z;
+			
+			return resultArray;
+		}
+
+		resultArray[0] = 0.0f;
+		resultArray[1] = 0.0f;
+		resultArray[2] = 0.0f;
+		return resultArray;
+	}
+
+	Coral::Array<float> GetGroundNormal(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		Coral::Array<float> resultArray = Coral::Array<float>::New(3);
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
+			Vector3 groundVelocity = PhysicsManager::Get().GetWorld()->GetCharacterGroundNormal(entity);
+
+			resultArray[0] = groundVelocity.x;
+			resultArray[1] = groundVelocity.y;
+			resultArray[2] = groundVelocity.z;
+
+			return resultArray;
+		}
+
+		resultArray[0] = 0.0f;
+		resultArray[1] = 0.0f;
+		resultArray[2] = 0.0f;
+		return resultArray;
+	}
+
 	void Play(int entityId, Coral::String animation)
 	{
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
@@ -520,7 +566,8 @@ namespace Nuake {
 		// Character Controller
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
-
+		RegisterMethod("CharacterControllerComponent.GetGroundVelocityIcall", &GetGroundVelocity);
+		RegisterMethod("CharacterControllerComponent.GetGroundNormalIcall", &GetGroundNormal);
 		// Skinned 
 		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 

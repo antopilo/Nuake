@@ -48,6 +48,7 @@ namespace Nuake {
 		Coral::Type* coralType;
 		std::vector<ExposedVar> exposedVars;
 
+		std::string Base = "";
 		bool isTrigger = false;
 		std::string Description = "";
 		AABB aabb = AABB({0, 0, 0}, { 1, 1, 1 });

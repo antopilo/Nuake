@@ -75,6 +75,9 @@ namespace Nuake
 			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
+			Vector3 GetCharacterGroundVelocity(const Entity& entity);
+			Vector3 GetCharacterGroundNormal(const Entity& entity);
+
 			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
 
 			void SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation);

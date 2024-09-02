@@ -150,6 +150,7 @@ namespace Nuake
 		}
 
 		file->PointEntities.clear();
+		std::vector<std::string> bases;
 		for (auto& [name, type] : ScriptingEngineNet::Get().GetPointEntities()) 
 		{
 			FGDPointEntity pointEntity = FGDPointEntity(name);
@@ -205,6 +206,13 @@ namespace Nuake
 			}
 
 			file->PointEntities.push_back(pointEntity);
+		}
+
+		for (auto& b : bases)
+		{
+			FGDBaseEntity baseEntity;
+			baseEntity.Name = b;
+			file->BaseEntities.push_back(baseEntity);
 		}
 
 		file->Export();

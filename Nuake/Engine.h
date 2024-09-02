@@ -53,6 +53,7 @@ namespace Nuake
 		static inline float GetTime() { return s_Time; }
 		static inline Timestep GetTimestep() { return s_TimeStep; } 
 		static inline void SetPhysicsStep(int amount) { s_FixedUpdateRate = 1.0f / static_cast<float>(amount); }
+		static inline float GetFixedTimeStep() { return s_FixedUpdateRate; }
 		static inline void SetTimeScale(float timeScale) { s_TimeScale = timeScale; }
 		static inline float GetTimeScale() { return s_TimeScale; }
 
@@ -63,6 +64,7 @@ namespace Nuake
 
 		static bool LoadProject(Ref<Project> project);
 		static Ref<Project> GetProject();
+
 	};
 }
 
