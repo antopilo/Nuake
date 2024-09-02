@@ -56,6 +56,7 @@ group ""
 
 include "NuakeNet/premake5.lua"
 include "EditorNet/premake5.lua"
+include "Nuake/src/Modules/Modules.lua"
 
 project "Nuake"
     location "Nuake"
@@ -64,6 +65,17 @@ project "Nuake"
 
     language "C++"
     cppdialect "C++20"
+    
+    local moduleSources = {}
+	
+	if _ACTION then
+        local modulesDir = "Nuake/src/Modules"
+        local outputFilePath = path.join(modulesDir, "Modules.cpp")
+
+        -- Load and generate the modules file
+        local modules = loadModules(modulesDir)
+        moduleSources = generateModulesFile(modules, outputFilePath, "Nuake/src/Modules")
+    end
    
     defines
     {
@@ -76,10 +88,37 @@ project "Nuake"
 
     files
     {
+        -- Main Sources
         "%{prj.name}/Engine.h",
         "%{prj.name}/Engine.cpp",
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/*.h",
+        "%{prj.name}/src/*.cpp",
+        "%{prj.name}/src/AI/**.h",
+        "%{prj.name}/src/AI/**.cpp",
+        "%{prj.name}/src/Application/**.h",
+        "%{prj.name}/src/Application/**.cpp",
+        "%{prj.name}/src/Audio/**.h",
+        "%{prj.name}/src/Audio/**.cpp",
+        "%{prj.name}/src/Core/**.h",
+        "%{prj.name}/src/Core/**.cpp",
+        "%{prj.name}/src/Physics/**.h",
+        "%{prj.name}/src/Physics/**.cpp",
+        "%{prj.name}/src/Rendering/**.h",
+        "%{prj.name}/src/Rendering/**.cpp",
+        "%{prj.name}/src/Resource/**.h",
+        "%{prj.name}/src/Resource/**.cpp",
+        "%{prj.name}/src/Scene/**.h",
+        "%{prj.name}/src/Scene/**.cpp",
+        "%{prj.name}/src/Scripting/**.h",
+        "%{prj.name}/src/Scripting/**.cpp",
+        "%{prj.name}/src/Threading/**.h",
+        "%{prj.name}/src/Threading/**.cpp",
+        "%{prj.name}/src/UI/**.h",
+        "%{prj.name}/src/UI/**.cpp",
+        "%{prj.name}/src/Vendors/**.h",
+        "%{prj.name}/src/Vendors/**.cpp",
+        
+        -- Vendor Sources
         "%{prj.name}/src/Vendors/libmap/h/*.h",
         "%{prj.name}/src/Vendors/libmap/c/*.c",
         "%{prj.name}/src/Vendors/wren/src/vm/*.h",
@@ -88,7 +127,12 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
         "%{prj.name}/src/Vendors/incbin/*.h",
-        "%{prj.name}/src/Vendors/filewatch/*.hpp"
+        "%{prj.name}/src/Vendors/filewatch/*.hpp",
+        
+        -- Modules System
+        "%{prj.name}/src/Modules/Modules.h",
+        "%{prj.name}/src/Modules/Modules.cpp",
+        table.unpack(moduleSources)
     }
 
     includedirs
@@ -110,7 +154,7 @@ project "Nuake"
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
 	    "%{prj.name}/dependencies/recastnavigation/Recast/Include"
     }
-
+    
     links
     {
         "soloud"
