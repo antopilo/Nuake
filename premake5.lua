@@ -110,7 +110,7 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
         "%{prj.name}/src/Vendors/incbin/*.h",
-        "%{prj.name}/src/Vendors/filewatch/*.hpp"
+        "%{prj.name}/src/Vendors/filewatch/*.hpp",
         
         -- Modules System
         "%{prj.name}/src/Modules/Modules.h",
