@@ -1,3 +1,20 @@
+-- ╔═══════════════════════════════════════╗
+-- ║               ACTIONS                 ║
+-- ╚═══════════════════════════════════════╝
+
+include "build/BuildAssets.lua"
+newaction {
+   trigger     = "build-assets",
+   description = "",
+   execute     = function ()
+      generateStaticResources("Resources", "Nuake/src/Resource/StaticResources.h", "Nuake/src/Resource/StaticResources.cpp")
+   end
+}
+
+
+-- ╔═══════════════════════════════════════╗
+-- ║               WORKSPACE               ║
+-- ╚═══════════════════════════════════════╝
 workspace "Nuake"
     conformancemode "On"
     configurations
