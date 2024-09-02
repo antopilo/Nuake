@@ -101,6 +101,7 @@ namespace Nuake.Net
     public sealed class PointScript : Attribute
     {
         public string Description = "";
+        public string Base = "";
         public Vector3 AABBA;
         public Vector2 AABBB;
 
