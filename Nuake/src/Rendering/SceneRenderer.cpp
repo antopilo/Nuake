@@ -596,6 +596,8 @@ namespace Nuake
 				light.m_Framebuffers[0]->Clear();
 				{
 					Matrix4 spotLightTransform = Matrix4(1.0f);
+
+
 					Vector3 pos = lightTransform.GetGlobalPosition();
 					pos.y *= -1.0f;
 					pos.x *= -1.0f;
