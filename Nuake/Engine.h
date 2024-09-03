@@ -1,5 +1,4 @@
 #pragma once
-#include "NuakePCH.h"
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Window.h"
