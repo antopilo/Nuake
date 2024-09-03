@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Components/AudioEmitterComponent.h"
 #include "Components/BaseComponent.h"
 #include "Components/BoneComponent.h"
@@ -20,6 +21,8 @@
 #include "Components/QuakeMap.h"
 #include "Components/RigidbodyComponent.h"
 #include "Components/SkinnedModelComponent.h"
+#include "Components/SphereCollider.h"
 #include "Components/SpriteComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/WrenScriptComponent.h"
 

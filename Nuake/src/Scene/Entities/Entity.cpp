@@ -1,24 +1,7 @@
 #include "Entity.h"
 
-#include "src/Scene/Components/ParentComponent.h"
-#include "src/Scene/Components/NameComponent.h"
-#include "src/Scene/Components/TransformComponent.h"
-#include "src/Scene/Components/CameraComponent.h"
-#include "src/Scene/Components/QuakeMap.h"
-#include "src/Scene/Components/LightComponent.h"
-#include "src/Scene/Components/QuakeMap.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
-#include "src/Scene/Components/CharacterControllerComponent.h"
-#include "src/Scene/Components/RigidbodyComponent.h"
-#include "src/Scene/Components/BSPBrushComponent.h"
-#include "src/Scene/Components/Components.h"
-#include "src/Scene/Components/BoxCollider.h"
-#include "src/Scene/Components/CapsuleColliderComponent.h"
-#include "src/Scene/Components/SpriteComponent.h"
-#include "src/Scene/Components/ParticleEmitterComponent.h"
-#include "src/Scene/Components/BoneComponent.h"
-#include "src/Scene/Components/SkinnedModelComponent.h"
-#include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include "src/Scene/Components.h"
+
 
 namespace Nuake
 {

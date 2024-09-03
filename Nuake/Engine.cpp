@@ -19,18 +19,17 @@
 
 namespace Nuake
 {
+	Ref<Project> Engine::currentProject;
+	Ref<Window> Engine::currentWindow;
 
-	Ref<Project> Engine::s_CurrentProject;
-	Ref<Window> Engine::s_CurrentWindow;
+	GameState Engine::gameState = GameState::Stopped;
 
-	GameState Engine::s_GameState = GameState::Stopped;
-
-	float Engine::s_LastFrameTime = 0.0f;
-	float Engine::s_FixedUpdateRate = 1.0f / 90.0f;
-	float Engine::s_FixedUpdateDifference = 0.f;
-	float Engine::s_Time = 0.f;
-	Timestep Engine::s_TimeStep = 0.f;
-	float Engine::s_TimeScale = 1.0f;
+	float Engine::lastFrameTime = 0.0f;
+	float Engine::fixedUpdateRate = 1.0f / 90.0f;
+	float Engine::fixedUpdateDifference = 0.f;
+	float Engine::time = 0.f;
+	Timestep Engine::timeStep = 0.f;
+	float Engine::timeScale = 1.0f;
 
 	void Engine::Init()
 	{
@@ -39,7 +38,7 @@ namespace Nuake
 		NavManager::Get().Initialize();
 
 		// Creates the window
-		s_CurrentWindow = Window::Get();
+		currentWindow = Window::Get();
 
 		Input::Init();
 		Renderer2D::Init();
@@ -54,15 +53,15 @@ namespace Nuake
 
 		JobSystem::Get().Update();
 
-		s_Time = static_cast<float>(glfwGetTime());
-		s_TimeStep = s_Time - s_LastFrameTime;
-		s_LastFrameTime = s_Time;
+		time = static_cast<float>(glfwGetTime());
+		timeStep = time - lastFrameTime;
+		lastFrameTime = time;
 
 		// Dont update if no scene is loaded.
-		if (s_CurrentWindow->GetScene())
+		if (currentWindow->GetScene())
 		{
-			float scaledTimeStep = s_TimeStep * s_TimeScale;
-			s_CurrentWindow->Update(scaledTimeStep);
+			float scaledTimeStep = timeStep * timeScale;
+			currentWindow->Update(scaledTimeStep);
 
 			// Play mode update all the entities, Editor does not.
 			if (!Engine::IsPlayMode())
@@ -70,14 +69,14 @@ namespace Nuake
 				GetCurrentScene()->EditorUpdate(scaledTimeStep);
 			}
 
-			s_FixedUpdateDifference += s_TimeStep;
+			fixedUpdateDifference += timeStep;
 
 			// Fixed update
-			while (s_FixedUpdateDifference >= s_FixedUpdateRate)
+			while (fixedUpdateDifference >= fixedUpdateRate)
 			{
-				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate * s_TimeScale);
+				currentWindow->FixedUpdate(fixedUpdateRate * timeScale);
 
-				s_FixedUpdateDifference -= s_FixedUpdateRate;
+				fixedUpdateDifference -= fixedUpdateRate;
 			}
 
 			Input::Update();
@@ -87,7 +86,7 @@ namespace Nuake
 
 	void Engine::EnterPlayMode()
 	{
-		s_LastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
+		lastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
 		if (GetGameState() == GameState::Playing)
@@ -112,11 +111,11 @@ namespace Nuake
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (s_GameState != GameState::Stopped)
+		if (gameState != GameState::Stopped)
 		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();
-			s_GameState = GameState::Stopped;
+			gameState = GameState::Stopped;
 		}
 	}
 
@@ -152,9 +151,9 @@ namespace Nuake
 
 	Ref<Scene> Engine::GetCurrentScene()
 	{
-		if (s_CurrentWindow)
+		if (currentWindow)
 		{
-			return s_CurrentWindow->GetScene();
+			return currentWindow->GetScene();
 		}
 
 		return nullptr;
@@ -162,19 +161,19 @@ namespace Nuake
 
 	bool Engine::LoadScene(Ref<Scene> scene)
 	{
-		return s_CurrentWindow->SetScene(scene);
+		return currentWindow->SetScene(scene);
 	}
 
 	Ref<Project> Engine::GetProject()
 	{
-		return s_CurrentProject;
+		return currentProject;
 	}
 
 	bool Engine::LoadProject(Ref<Project> project)
 	{
-		s_CurrentProject = project;
+		currentProject = project;
 
-		if (!Engine::LoadScene(s_CurrentProject->DefaultScene))
+		if (!Engine::LoadScene(currentProject->DefaultScene))
 		{
 			return false;
 		}
@@ -188,6 +187,6 @@ namespace Nuake
 
 	Ref<Window> Engine::GetCurrentWindow()
 	{
-		return s_CurrentWindow;
+		return currentWindow;
 	}
 }
