@@ -1,3 +1,20 @@
+-- ╔═══════════════════════════════════════╗
+-- ║               ACTIONS                 ║
+-- ╚═══════════════════════════════════════╝
+
+include "build/BuildAssets.lua"
+newaction {
+   trigger     = "build-assets",
+   description = "",
+   execute     = function ()
+      generateStaticResources("Resources", "Nuake/src/Resource/StaticResources.h", "Nuake/src/Resource/StaticResources.cpp")
+   end
+}
+
+
+-- ╔═══════════════════════════════════════╗
+-- ║               WORKSPACE               ║
+-- ╚═══════════════════════════════════════╝
 workspace "Nuake"
     conformancemode "On"
     configurations
@@ -26,6 +43,10 @@ workspace "Nuake"
         architecture "x64"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+local globalDefines = {
+    "TRACY_ENABLE",
+    "TRACY_ON_DEMAND"
+}
 
 group "Dependencies"
     include "Nuake/dependencies/glfw_p5.lua"
@@ -35,10 +56,12 @@ group "Dependencies"
     include "Nuake/dependencies/soloud_p5.lua"
     include "Nuake/dependencies/coral_p5.lua"
     include "Nuake/dependencies/recastnavigation_p5.lua"
+    include "Nuake/dependencies/tracy_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
 include "EditorNet/premake5.lua"
+include "Nuake/src/Modules/Modules.lua"
 
 project "Nuake"
     location "Nuake"
@@ -47,11 +70,24 @@ project "Nuake"
 
     language "C++"
     cppdialect "C++20"
+    
+    local moduleSources = {}
+	
+	if _ACTION then
+        local modulesDir = "Nuake/src/Modules"
+        local outputFilePath = path.join(modulesDir, "Modules.cpp")
+
+        -- Load and generate the modules file
+        local modules = loadModules(modulesDir)
+        moduleSources = generateModulesFile(modules, outputFilePath, "Nuake/src/Modules")
+    end
    
     defines
     {
+		table.unpack(globalDefines),
+
         "_MBCS",
-		"IMGUI_DEFINE_MATH_OPERATORS"
+		"IMGUI_DEFINE_MATH_OPERATORS",
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -59,10 +95,37 @@ project "Nuake"
 
     files
     {
+        -- Main Sources
         "%{prj.name}/Engine.h",
         "%{prj.name}/Engine.cpp",
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/*.h",
+        "%{prj.name}/src/*.cpp",
+        "%{prj.name}/src/AI/**.h",
+        "%{prj.name}/src/AI/**.cpp",
+        "%{prj.name}/src/Application/**.h",
+        "%{prj.name}/src/Application/**.cpp",
+        "%{prj.name}/src/Audio/**.h",
+        "%{prj.name}/src/Audio/**.cpp",
+        "%{prj.name}/src/Core/**.h",
+        "%{prj.name}/src/Core/**.cpp",
+        "%{prj.name}/src/Physics/**.h",
+        "%{prj.name}/src/Physics/**.cpp",
+        "%{prj.name}/src/Rendering/**.h",
+        "%{prj.name}/src/Rendering/**.cpp",
+        "%{prj.name}/src/Resource/**.h",
+        "%{prj.name}/src/Resource/**.cpp",
+        "%{prj.name}/src/Scene/**.h",
+        "%{prj.name}/src/Scene/**.cpp",
+        "%{prj.name}/src/Scripting/**.h",
+        "%{prj.name}/src/Scripting/**.cpp",
+        "%{prj.name}/src/Threading/**.h",
+        "%{prj.name}/src/Threading/**.cpp",
+        "%{prj.name}/src/UI/**.h",
+        "%{prj.name}/src/UI/**.cpp",
+        "%{prj.name}/src/Vendors/**.h",
+        "%{prj.name}/src/Vendors/**.cpp",
+        
+        -- Vendor Sources
         "%{prj.name}/src/Vendors/libmap/h/*.h",
         "%{prj.name}/src/Vendors/libmap/c/*.c",
         "%{prj.name}/src/Vendors/wren/src/vm/*.h",
@@ -70,7 +133,13 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.h",
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
-        "%{prj.name}/src/Vendors/incbin/*.h"
+        "%{prj.name}/src/Vendors/incbin/*.h",
+        "%{prj.name}/src/Vendors/filewatch/*.hpp",
+        
+        -- Modules System
+        "%{prj.name}/src/Modules/Modules.h",
+        "%{prj.name}/src/Modules/Modules.cpp",
+        table.unpack(moduleSources)
     }
 
     includedirs
@@ -90,12 +159,15 @@ project "Nuake"
 	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
-
+    
     links
     {
-        "soloud"
+        "soloud",
+        "tracy"
     }
 
     filter "system:linux"
@@ -131,6 +203,8 @@ project "Nuake"
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"
@@ -169,7 +243,9 @@ project "NuakeRuntime"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
 
     libdirs
@@ -195,7 +271,12 @@ project "NuakeRuntime"
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:windows"
@@ -246,6 +327,8 @@ project "NuakeRuntime"
         {
             "NK_DEBUG"
         }
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         kind "WindowedApp"
@@ -303,7 +386,9 @@ project "Editor"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+	    
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
     }
     
     libdirs 
@@ -330,7 +415,12 @@ project "Editor"
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:Windows"
@@ -398,6 +488,8 @@ project "Editor"
             "WIN32_LEAN_AND_MEAN",
             "IMGUI_DEFINE_MATH_OPERATORS"
         }
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"

@@ -11,7 +11,7 @@
 void EditorApplication::OnInit()
 {
     using namespace Nuake;
-    
+
     Engine::Init();
     m_Window = Engine::GetCurrentWindow();
     m_Window->SetSize({ m_Specification.WindowWidth, m_Specification.WindowHeight });

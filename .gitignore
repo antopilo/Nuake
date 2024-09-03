@@ -864,3 +864,4 @@ Nuake/dependencies/glad/glad.vcxproj.filters
 *.csproj
 *.filters
 cloc.exe
+Nuake/src/Modules/Modules.cpp

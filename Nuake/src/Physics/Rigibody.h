@@ -20,6 +20,7 @@ namespace Nuake
 			Quat _rotation;
 			Entity _entity;
 
+			bool _ForceKinematic = false;
 			bool _isTrigger = false;
 			bool m_LockXAxis = false;
 			bool m_LockYAxis = false;
@@ -29,7 +30,7 @@ namespace Nuake
 
 			RigidBody();
 			RigidBody(Vector3 position, Entity handle);
-			RigidBody(float mass, Vector3 position, Quat rotation, Matrix4 transform, Ref<PhysicShape> shape, Entity entity, Vector3 initialVel = Vector3(0, 0, 0));
+			RigidBody(float mass, Vector3 position, Quat rotation, Matrix4 transform, Ref<PhysicShape> shape, Entity entity, Vector3 initialVel = Vector3(0, 0, 0), bool forceKinematic = false);
 
 			void UpdateTransform();
 
@@ -43,6 +44,7 @@ namespace Nuake
 			void SetLockXAxis(bool lock) { m_LockXAxis = lock; }
 			void SetLockYAxis(bool lock) { m_LockYAxis = lock; }
 			void SetLockZAxis(bool lock) { m_LockZAxis = lock; }
+			bool GetForceKinematic() const { return _ForceKinematic; }
 
 			void SetEntityID(Entity ent);
 			Vector3 GetPosition() const { return _position; }

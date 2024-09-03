@@ -155,7 +155,7 @@ int GetCSMDepth(float depth)
 
 float SampleShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
-    return step(compare, texture(shadowMap, coords.xy).r);
+    return compare < texture(shadowMap, coords.xy).r ? 1.0f : 0.0f;
 }
 
 float SampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
@@ -242,7 +242,7 @@ float ShadowCalculationSpot(vec3 FragPos, vec3 normal, Light light)
     float bias = max(0.0005 * (1.0 - dot(normal, light.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
-    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth - bias);
+    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth - 0.000005);
 }
 
 void main()
@@ -292,7 +292,7 @@ void main()
 
     vec3 Lo = vec3(0.0);
     vec3 fog = vec3(0.0);
-    float shadow = 0.0f;
+    float shadow = 1.0f;
     
     if (u_DirectionalLight.Shadow < 0.1f)
     {
@@ -309,10 +309,10 @@ void main()
 
         if(u_DirectionalLight.Shadow > 0.1f)
         {
-            shadow += ShadowCalculation(worldPos, N);
+            shadow *= ShadowCalculation(worldPos, N);
         }
 
-        vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;
+        vec3 radiance = u_DirectionalLight.Color * attenuation;
 
         vec3 H = normalize(V + L);
         float NDF = DistributionGGX(N, H, roughness);
@@ -330,9 +330,10 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
     }
 
+    shadow = 1.0f;
     for (int i = 0; i < LightCount; i++)
     {
         Light light = Lights[i];
@@ -352,9 +353,13 @@ void main()
             float epsilon   = Lights[i].InnerAngle - Lights[i].OuterAngle;
             float intensity = clamp((theta - Lights[i].OuterAngle) / epsilon, 0.0, 1.0);    
 
-            shadow += ShadowCalculationSpot(worldPos, N, Lights[i]);
+            float shadow2 = 1.0f;
+            if(light.CastShadow > 0 && light.ShadowMapID >= 0)
+            {
+                shadow2 = ShadowCalculationSpot(worldPos, N, Lights[i]);
+            }
             
-            radiance = Lights[i].Color * intensity * shadow;
+            radiance = Lights[i].Color * intensity * shadow2;
         }
 
         // Cook-Torrance BRDF
@@ -385,7 +390,7 @@ void main()
     kD *= 1.0 - metallic;
 
     vec3 ambient = (albedo) * ao * ssao * u_AmbientTerm;
-    vec3 color = (ambient) + Lo;
+    vec3 color = (ambient) + Lo ;
 
     // Display CSM splits..
     /*float depth = length(worldPos - u_EyePosition);

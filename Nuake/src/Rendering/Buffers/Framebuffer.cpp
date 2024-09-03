@@ -1,5 +1,6 @@
 #include "Framebuffer.h"
 #include <glad/glad.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -84,6 +85,8 @@ namespace Nuake
 
 	void FrameBuffer::QueueResize(Vector2 size)
 	{
+		ZoneScoped;
+
 		if (size == m_Size)
 			return;
 

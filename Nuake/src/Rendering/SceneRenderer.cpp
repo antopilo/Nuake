@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include <src/Scene/Components/SkinnedModelComponent.h>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 
 
 namespace Nuake 
@@ -75,6 +76,9 @@ namespace Nuake
 
 		mCapsuleGizmo = CreateRef<CapsuleGizmo>();
 		mCapsuleGizmo->CreateMesh();
+
+		mDebugLines = std::vector<DebugLine>();
+		mDebugShapes = std::vector<DebugShape>();
 	}
 
 	void SceneRenderer::Cleanup()
@@ -83,31 +87,31 @@ namespace Nuake
 
 	void SceneRenderer::Update(const Timestep time, bool isEditorUpdate)
 	{
-		if (isEditorUpdate)
-		{
-			return;
-		}
-
 		// Delete debug shapes that are dead
-		std::erase_if(mDebugLines, [](const DebugLine& line)
+		if (mDebugLines.size() > 0)
 		{
-			return line.Life < 0.0f;
-		});
+			std::erase_if(mDebugLines, [](const DebugLine& line)
+				{
+					return line.Life < 0.0f;
+				});
 
-		std::erase_if(mDebugShapes, [](const DebugShape& shape)
-		{
-			return shape.Life < 0.0f;
-		});
-
-
-		for (auto& line : mDebugLines)
-		{
-			line.Life -= time;
+			for (auto& line : mDebugLines)
+			{
+				line.Life -= time;
+			}
 		}
 
-		for (auto& shape : mDebugShapes)
+		if (mDebugShapes.size() > 0)
 		{
-			shape.Life -= time;
+			std::erase_if(mDebugShapes, [](const DebugShape& shape)
+				{
+					return shape.Life < 0.0f;
+				});
+
+			for (auto& shape : mDebugShapes)
+			{
+				shape.Life -= time;
+			}
 		}
 	}
 
@@ -125,6 +129,8 @@ namespace Nuake
 	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
 	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer)
 	{
+		ZoneScoped;
+
 		// Renders all shadow maps
 		ShadowPass(scene);
 
@@ -394,11 +400,6 @@ namespace Nuake
 		}
 		mVignetteBuffer->Unbind();
 
-
-		ImGui::Begin("normals");
-		ImGui::Image((void*)mToneMapBuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::End();
-
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
@@ -485,6 +486,8 @@ namespace Nuake
 	
 	void SceneRenderer::ShadowPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
 		Shader* shader = ShaderManager::GetShader("Resources/Shaders/shadowMap.shader");
@@ -533,10 +536,7 @@ namespace Nuake
 							if (model.IsTransparent || !visibility.Visible)
 								continue;
 
-							for (Ref<Mesh>& m : model.Meshes)
-							{
-								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-							}
+							
 						}
 						Renderer::Flush(shader, true);
 
@@ -628,10 +628,7 @@ namespace Nuake
 						if (model.IsTransparent || !visibility.Visible)
 							continue;
 
-						for (Ref<Mesh>& m : model.Meshes)
-						{
-							Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-						}
+						
 					}
 					Renderer::Flush(shader, true);
 
@@ -721,33 +718,26 @@ namespace Nuake
 			}
 		}
 
-		if (lightDebug.m_Framebuffers[0])
-		{
-			mDisplayDepthBuffer->QueueResize(lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
+		mDisplayDepthBuffer->QueueResize(GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
 
-			mDisplayDepthBuffer->Bind();
-			mDisplayDepthBuffer->Clear();
-			Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
-			displayDepthShader->Bind();
+		mDisplayDepthBuffer->Bind();
+		mDisplayDepthBuffer->Clear();
+		Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
+		displayDepthShader->Bind();
 
-			lightDebug.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
-			displayDepthShader->SetUniform1i("u_Source", 5);
+		GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
+		displayDepthShader->SetUniform1i("u_Source", 5);
 
-			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
-			Renderer::DrawQuad(Matrix4(1.0f));
-			RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-			mDisplayDepthBuffer->Unbind();
-
-			ImGui::SetNextWindowSize({ 800, 800 });
-			ImGui::Begin("Debug ShadowMap");
-			ImGui::Image((void*)mDisplayDepthBuffer->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
-			ImGui::End();
-		}
-		
+		RenderCommand::Disable(RendererEnum::DEPTH_TEST);
+		Renderer::DrawQuad(Matrix4(1.0f));
+		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+		mDisplayDepthBuffer->Unbind();
 	}
 
 	void SceneRenderer::GBufferPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mGBuffer->Bind();
 		mGBuffer->Clear();
 		{
@@ -803,10 +793,7 @@ namespace Nuake
 				if (model.IsTransparent || !visibility.Visible)
 					continue;
 
-				for (auto& b : model.Meshes)
-				{
-					Renderer::SubmitMesh(b, transform.GetGlobalTransform(), (uint32_t)e);
-				}
+				
 			}
 			glEnable(GL_DEPTH_TEST);
 			glDisable(GL_CULL_FACE);
@@ -955,6 +942,8 @@ namespace Nuake
 
 	void SceneRenderer::ShadingPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mShadingBuffer->Bind();
 		mShadingBuffer->Clear();
 		{
@@ -1057,6 +1046,8 @@ namespace Nuake
 
 	void SceneRenderer::DebugRendererPass(Scene& scene)
 	{
+		ZoneScoped;
+
 		mShadingBuffer->Bind();
 		{
 			// Lines
@@ -1083,8 +1074,6 @@ namespace Nuake
 				glLineWidth(l.Width);
 				RenderCommand::DrawLines(0, 2);
 			}
-
-			
 
 			shader->Unbind();
 

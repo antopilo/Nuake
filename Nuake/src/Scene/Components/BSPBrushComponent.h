@@ -10,13 +10,14 @@ namespace Nuake {
 	class BSPBrushComponent
 	{
 	public:
-		std::vector<Ref<Mesh>> Meshes;
+		//std::vector<Ref<Mesh>> Meshes;
 		std::vector<std::vector<Vector3>> Hulls;
 
 		std::vector<Ref<Material>> Materials;
 		std::vector<Ref<Physics::RigidBody>> Rigidbody;
 
 		std::string target = "";
+		std::string TargetName = "";
 		std::vector<Entity> Targets;
 
 		bool IsSolid = true;
@@ -26,7 +27,7 @@ namespace Nuake {
 
 		BSPBrushComponent() 
 		{
-			Meshes = std::vector<Ref<Mesh>>();
+			//Meshes = std::vector<Ref<Mesh>>();
 			Materials = std::vector<Ref<Material>>();
 			Rigidbody = std::vector<Ref<Physics::RigidBody>>();
 			Hulls = std::vector<std::vector<Vector3>>();
@@ -50,7 +51,11 @@ namespace Nuake {
 				j["Hulls"][i] = hullPointsJson;
 			}
 
+			SERIALIZE_VAL(target);
+			SERIALIZE_VAL(TargetName);
 			j["IsSolid"] = IsSolid;
+			SERIALIZE_VAL(IsTrigger);
+			SERIALIZE_VAL(IsFunc);
 			END_SERIALIZE();
 		}
 
@@ -78,6 +83,10 @@ namespace Nuake {
 				}
 			}
 
+			DESERIALIZE_VAL(target);
+			DESERIALIZE_VAL(TargetName);
+			DESERIALIZE_VAL(IsFunc);
+			DESERIALIZE_VAL(IsTrigger);
 			return true;
 		}
 	};

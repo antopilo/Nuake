@@ -112,13 +112,13 @@ namespace Nuake
 
 	void PhysicsSystem::InitializeQuakeMap()
 	{
-		auto quakeBrushesView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent, ModelComponent>();
+		auto quakeBrushesView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();
 		for (auto e : quakeBrushesView)
 		{
-			const auto [transformComponent, brushComponent, modelComponent] = quakeBrushesView.get<TransformComponent, BSPBrushComponent, ModelComponent>(e);
+			const auto [transformComponent, brushComponent] = quakeBrushesView.get<TransformComponent, BSPBrushComponent>(e);
 
 			// Doesn't apply to non-solid brushes
-			if (!brushComponent.IsSolid)
+			if ((!brushComponent.IsSolid && !brushComponent.IsTrigger))
 			{
 				continue;
 			}
@@ -131,9 +131,9 @@ namespace Nuake
 				const Quat& startRotation = transformComponent.GetGlobalRotation();
 				const auto collisionShape = CreateRef<Physics::ConvexHullShape>(hull);
 
-				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity);
+				auto rigidBody = CreateRef<Physics::RigidBody>(0.0f, startPosition, startRotation, startTransform, collisionShape, entity, Vector3{ 0, 0, 0 }, brushComponent.IsFunc);
 				brushComponent.Rigidbody.push_back(rigidBody);
-
+				rigidBody->SetIsTrigger(brushComponent.IsTrigger);
 				PhysicsManager::Get().RegisterBody(rigidBody);
 			}
 		}
@@ -321,6 +321,7 @@ namespace Nuake
 			}
 
 			Ref<Physics::PhysicShape> shape;
+			bool hasValidShape = true;
 			if (entity.HasComponent<CapsuleColliderComponent>())
 			{
 				const auto& capsuleColliderComponent = entity.GetComponent<CapsuleColliderComponent>();
@@ -343,7 +344,9 @@ namespace Nuake
 			}
 			else
 			{
-				continue;
+				hasValidShape = false;
+				Logger::Log("No shape was provided for character controller. Default one was provided.", "physics", WARNING);
+				shape = CreateRef<Physics::Capsule>(1.0f, 0.5f);
 			}
 
 			Physics::CharacterControllerSettings settings

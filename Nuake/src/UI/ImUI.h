@@ -21,7 +21,7 @@ namespace Nuake
 
 		void EndWindow();
 
-		bool PrimaryButton(const std::string& name, const Vector2& size = {0, 0});
+		bool PrimaryButton(const std::string& name, const Vector2& size = { 0, 0 }, Color color = Color(97.0f / 255.0f, 0, 1.0f, 1.0f));
 		bool SecondaryButton(const std::string& name, const Vector2& size = { 0, 0 });
 
 		bool IconButton(const std::string& icon);

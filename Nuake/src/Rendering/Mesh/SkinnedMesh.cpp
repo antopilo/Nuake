@@ -179,7 +179,7 @@ namespace Nuake
                     try {
                         DESERIALIZE_VEC2(v["UV"], vertex.uv)
                     }
-                    catch (std::exception& e) {
+                    catch (std::exception& /*e*/) {
                         vertex.uv = { 0.0, 0.0 };
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)

@@ -352,6 +352,12 @@ namespace Nuake
 				layer = Layers::MOVING;
 			}
 
+			if (rb->GetForceKinematic())
+			{
+				motionType = JPH::EMotionType::Kinematic;
+				layer = Layers::MOVING;
+			}
+
 			const std::string name = rb->GetEntity().GetComponent<NameComponent>().Name;
 			if (rb->IsTrigger())
 			{
@@ -400,23 +406,15 @@ namespace Nuake
 				bodySettings.mMassPropertiesOverride.mMass = mass;
 			}
 			
-			if (rb->GetEntity().GetID() == 0)
+			if (int entityId = rb->GetEntity().GetHandle(); rb->GetEntity().IsValid())
 			{
-				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
+				bodySettings.mUserData = rb->GetEntity().GetHandle();
+
+				// Create the actual rigid body
+				JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+				uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
+				_registeredBodies.push_back(bodyIndex);
 			}
-
-			int entityId = rb->GetEntity().GetHandle();
-
-			if (entityId == 0)
-			{
-				Logger::Log("ERROR");
-			}
-
-			bodySettings.mUserData = entityId;
-			// Create the actual rigid body
-			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
-			_registeredBodies.push_back(bodyIndex);
 		}
 
 		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
@@ -482,6 +480,35 @@ namespace Nuake
 			return false;
 		}
 
+		Vector3 DynamicWorld::GetCharacterGroundVelocity(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				characterController->UpdateGroundVelocity();
+				const auto groundVelocity = characterController->GetGroundVelocity();
+
+				return Vector3(groundVelocity.GetX(), groundVelocity.GetY(), groundVelocity.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
+		Vector3 DynamicWorld::GetCharacterGroundNormal(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				const auto groundNormal = characterController->GetGroundNormal();
+
+				return Vector3(groundNormal.GetX(), groundNormal.GetY(), groundNormal.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
 		void DynamicWorld::SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation)
 		{
 			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
@@ -501,7 +528,21 @@ namespace Nuake
 					if (newPosition != currentPosition || currentRotation != newRotation)
 					{
 						std::string name = entity.GetComponent<NameComponent>().Name;
-						_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+
+						JPH::EMotionType bodyType = _JoltBodyInterface->GetMotionType(bodyId);
+						switch (bodyType)
+						{
+							case JPH::EMotionType::Kinematic:
+							{
+								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, Engine::GetFixedTimeStep());
+								break;
+							}
+							case JPH::EMotionType::Static:
+							{
+								_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+								break;
+							}
+						}
 					}
 				}
 			}
@@ -621,7 +662,7 @@ namespace Nuake
 						continue;
 					}
 
-					JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
+					JPH::Vec3 position = bodyInterface.GetPosition(bodyId);
 					JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 					JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
 					const auto bodyRotation = bodyInterface.GetRotation(bodyId);
@@ -761,6 +802,8 @@ namespace Nuake
 						const auto& LayerFilter = _JoltPhysicsSystem->GetDefaultLayerFilter(Layers::CHARACTER);
 						const auto& joltGravity = _JoltPhysicsSystem->GetGravity();
 						auto& tempAllocatorPtr = *(joltTempAllocator);
+
+						c.second.Character->UpdateGroundVelocity();
 						if (characterController->AutoStepping)
 						{
 							// Create update settings from character controller
@@ -769,7 +812,7 @@ namespace Nuake
 							joltUpdateSettings.mWalkStairsStepUp = CreateJoltVec3(characterController->StepUp);
 							joltUpdateSettings.mWalkStairsStepForwardTest = characterController->StepDistance;
 							joltUpdateSettings.mWalkStairsMinStepForward = characterController->StepMinDistance;
-
+							
 							c.second.Character->ExtendedUpdate(ts, joltGravity, joltUpdateSettings, broadPhaseLayerFilter, LayerFilter, { }, { }, tempAllocatorPtr);
 						}
 						else
@@ -868,7 +911,7 @@ namespace Nuake
 			_CollisionCallbacks.push_back(std::move(data));
 		}
 
-		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()
+		const std::vector<CollisionData> DynamicWorld::GetCollisionsData()
 		{
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
 			return _CollisionCallbacks;

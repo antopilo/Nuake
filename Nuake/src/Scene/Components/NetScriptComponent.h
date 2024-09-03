@@ -1,3 +1,4 @@
+
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
@@ -54,8 +55,10 @@ namespace Nuake {
 				varJ["Name"] = e.Name;
 				varJ["Type"] = e.Type;
 
-				switch (e.Type)
+				if (e.Value.has_value() || e.DefaultValue.has_value())
 				{
+					switch (e.Type)
+					{
 					case NetScriptExposedVarType::Bool:
 						varJ["Value"] = std::any_cast<bool>(e.Value);
 						varJ["DefaultValue"] = std::any_cast<bool>(e.DefaultValue);
@@ -118,17 +121,19 @@ namespace Nuake {
 						{
 							value = std::any_cast<int>(e.Value);
 						}
-						
+
 						varJ["Value"] = value;
 						varJ["DefaultValue"] = value;
 						break;
 					}
-					
+
 					default:
 						varJ["Value"] = 0;
 						break;
-				}
+					}
 
+				}
+				
 				exposedVarJson[i] = varJ;
 				i++;
 			}
@@ -164,8 +169,11 @@ namespace Nuake {
 						exposedVar.DefaultValue = (bool)exposedVarJson["DefaultValue"];
 						break;
 					case NetScriptExposedVarType::Float:
-						exposedVar.Value = (float)exposedVarJson["Value"];
-						exposedVar.DefaultValue = (float)exposedVarJson["DefaultValue"];
+						if (exposedVarJson.contains("Value"))
+						{
+							exposedVar.Value = (float)exposedVarJson["Value"];
+						}
+						exposedVar.DefaultValue = 0.0f;
 						break;
 					case NetScriptExposedVarType::Double:
 						exposedVar.Value = (double)exposedVarJson["Value"];
@@ -178,8 +186,8 @@ namespace Nuake {
 						break;
 					}
 					case NetScriptExposedVarType::String:
-						exposedVar.Value = (std::string)exposedVarJson["Value"];
-						exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
+						//exposedVar.Value = (std::string)exposedVarJson["Value"];
+						//exposedVar.DefaultValue = (std::string)exposedVarJson["DefaultValue"];
 						break;
 					case NetScriptExposedVarType::Vector2:
 					{

@@ -16,6 +16,7 @@ namespace Nuake {
 		bool LockX = false;
 		bool LockY = false;
 		bool LockZ = false;
+		bool HasBeenMoved = false;
 		Ref<Physics::RigidBody> Rigidbody;
 
 		Vector3 QueuedForce = Vector3();

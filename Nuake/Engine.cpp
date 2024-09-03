@@ -11,10 +11,11 @@
 #include "src/Scripting/ScriptingEngine.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
-
+#include "src/Modules/Modules.h"
 
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -43,10 +44,14 @@ namespace Nuake
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");
+
+		Modules::StartupModules();
 	}
 
 	void Engine::Tick()
 	{
+		ZoneScoped;
+
 		JobSystem::Get().Update();
 
 		s_Time = static_cast<float>(glfwGetTime());
@@ -76,9 +81,8 @@ namespace Nuake
 			}
 
 			Input::Update();
+			AudioManager::Get().AudioUpdate();
 		}
-
-
 	}
 
 	void Engine::EnterPlayMode()
@@ -118,12 +122,18 @@ namespace Nuake
 
 	void Engine::Draw()
 	{
+		ZoneScoped;
+
 		RenderCommand::Clear();
 
 		// Start imgui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		{
+			ZoneScopedN("ImGui New Frame");
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
 
 		// Draw scene
 		Window::Get()->Draw();
@@ -131,6 +141,7 @@ namespace Nuake
 
 	void Engine::EndDraw()
 	{
+		ZoneScoped;
 		Window::Get()->EndDraw();
 	}
 
@@ -169,6 +180,9 @@ namespace Nuake
 		}
 
 		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
+		ScriptingEngineNet::Get().Initialize();
+		ScriptingEngineNet::Get().LoadProjectAssembly(project);
+
 		return true;
 	}
 

@@ -75,6 +75,9 @@ namespace Nuake
 			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
+			Vector3 GetCharacterGroundVelocity(const Entity& entity);
+			Vector3 GetCharacterGroundNormal(const Entity& entity);
+
 			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
 
 			void SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation);
@@ -91,7 +94,7 @@ namespace Nuake
 			void ClearCollisionData();
 
 			void RegisterCollisionCallback(const CollisionData& data);
-			const std::vector<CollisionData>& GetCollisionsData();
+			const std::vector<CollisionData> GetCollisionsData();
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();

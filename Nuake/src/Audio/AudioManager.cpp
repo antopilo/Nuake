@@ -11,17 +11,13 @@
 
 namespace Nuake {
 
-	AudioManager::AudioManager() : 
-		m_AudioThreadRunning(true)
+	AudioManager::AudioManager()
 	{
 	}
 
 	AudioManager::~AudioManager()
 	{
 		Deinitialize();
-
-		m_AudioThreadRunning = false;
-		m_AudioThread.join();
 
 		m_Soloud->deinit();
 	}
@@ -36,15 +32,6 @@ namespace Nuake {
 #else
 		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA);
 #endif
-
-		if (m_AudioThread.joinable())
-		{
-			m_AudioThreadRunning = false;
-			m_AudioThread.join();
-		}
-
-		m_AudioThreadRunning = true;
-		m_AudioThread = std::thread(&AudioManager::AudioThreadLoop, this);
 
 		Logger::Log("Audio manager initialized", "audio", VERBOSE);
 	}
@@ -79,9 +66,6 @@ namespace Nuake {
 
 	void AudioManager::QueueWavAudio(const AudioRequest& request)
 	{
-		// Acquire mutex lock and push to queue
-		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
-
 		// Check if file exists and load
 		const bool fileExists = FileSystem::FileExists(request.audioFile, true);
 		if (fileExists && !IsWavLoaded(request.audioFile))
@@ -94,9 +78,6 @@ namespace Nuake {
 
 	void AudioManager::UpdateVoice(const AudioRequest& request)
 	{
-		// Acquire mutex lock
-		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
-
 		auto& audioClip = m_ActiveClips[request.audioFile];
 		if (IsVoiceActive(request.audioFile))
 		{
@@ -125,8 +106,6 @@ namespace Nuake {
 
 	void AudioManager::StopVoice(const std::string& filePath)
 	{
-		const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
-
 		if (!IsVoiceActive(filePath))
 		{
 			return; // We can't stop a voice that isn't active.
@@ -153,7 +132,7 @@ namespace Nuake {
 
 	void AudioManager::LoadWavAudio(const std::string& filePath)
 	{
-		const bool STREAMING = true;
+		const bool STREAMING = false;
 		if (STREAMING)
 		{
 			Ref<SoLoud::WavStream> wavStream = CreateRef<SoLoud::WavStream>();
@@ -166,44 +145,37 @@ namespace Nuake {
 			wav->load(filePath.c_str());
 			m_WavSamples[filePath] = wav;
 		}
-		
 	}
 
-	void AudioManager::AudioThreadLoop()
+	void AudioManager::AudioUpdate()
 	{
-		while(m_AudioThreadRunning)
+		// Check if we have audio queued
+		while (!m_AudioQueue.empty())
 		{
-			// Acquire mutex lock
-			const std::lock_guard<std::mutex> lock(m_AudioQueueMutex);
+			AudioRequest& audioRequest = m_AudioQueue.front();
+			Ref<SoLoud::AudioSource> audio = m_WavSamples[audioRequest.audioFile];
 
-			// Check if we have audio queued
-			while (!m_AudioQueue.empty())
+			SoLoud::handle soloudHandle;
+			if (!audioRequest.spatialized)
 			{
-				AudioRequest& audioRequest = m_AudioQueue.front();
-				Ref<SoLoud::AudioSource> audio = m_WavSamples[audioRequest.audioFile];
-
-				SoLoud::handle soloudHandle;
-				if (!audioRequest.spatialized)
-				{
-					soloudHandle = m_Soloud->play(*audio);
-					m_Soloud->setVolume(soloudHandle, audioRequest.volume);
-					m_Soloud->setPan(soloudHandle, audioRequest.pan);
-				}
-				else
-				{
-					const Vector3& position = audioRequest.position;
-					soloudHandle = m_Soloud->play3d(*audio, position.x, position.y, position.z);
-					m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
-					m_Soloud->set3dSourceAttenuation(soloudHandle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
-				}
-				
-				m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
-				m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
-
-				m_ActiveClips[audioRequest.audioFile] = soloudHandle;
-
-				m_AudioQueue.pop();
+				soloudHandle = m_Soloud->play(*audio);
+				m_Soloud->setVolume(soloudHandle, audioRequest.volume);
+				m_Soloud->setPan(soloudHandle, audioRequest.pan);
 			}
+			else
+			{
+				const Vector3& position = audioRequest.position;
+				soloudHandle = m_Soloud->play3d(*audio, position.x, position.y, position.z);
+				m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
+				m_Soloud->set3dSourceAttenuation(soloudHandle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
+			}
+				
+			m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
+			m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+
+			m_ActiveClips[audioRequest.audioFile] = soloudHandle;
+
+			m_AudioQueue.pop();
 		}
 	}
 

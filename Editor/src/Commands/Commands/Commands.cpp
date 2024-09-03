@@ -69,8 +69,8 @@ namespace NuakeEditor
                 "name": "Trigger",
                 "attribs": [ "transparent" ],
                 "match": "classname",
-                "pattern": "trigger_*",
-                "texture": "trigger"
+                "pattern": "Trigger*",
+                "texture": "trigger.png"
             }
         ],
         "brushface": [
@@ -135,7 +135,7 @@ namespace NuakeEditor
         // Copy Icon.png
         if (FileSystem::FileExists("icon.png"))
         {
-            std::filesystem::copy_file(FileSystem::RelativeToAbsolute("icon.png"), gameConfigFolderPath + "Icon.png");
+            std::filesystem::copy_file(FileSystem::RelativeToAbsolute("icon.png"), gameConfigFolderPath + "Icon.png", std::filesystem::copy_options::overwrite_existing);
         }
 		return true;
 	}

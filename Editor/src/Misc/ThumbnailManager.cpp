@@ -5,6 +5,7 @@
 #include <src/Resource/ResourceLoader.h>
 #include <glad/glad.h>
 #include <src/Resource/Prefab.h>
+#include <Tracy.hpp>
 
 
 ThumbnailManager::ThumbnailManager()
@@ -39,6 +40,8 @@ bool ThumbnailManager::IsThumbnailLoaded(const std::string& path) const
 
 Ref<Nuake::Texture> ThumbnailManager::GetThumbnail(const std::string& path)
 {
+	ZoneScoped;
+
 	if (IsThumbnailLoaded(path))
 	{
 		return m_Thumbnails[path];
@@ -71,6 +74,9 @@ void ThumbnailManager::MarkThumbnailAsDirty(const std::string & path)
 
 Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path, Ref<Nuake::Texture> texture)
 {
+	ZoneScopedN("GenerateThumbnail");
+	ZoneText(path.c_str(), path.size());
+
 	using namespace Nuake;
 
 	const Matrix4 ortho = glm::orthoLH(-0.6f, 0.6f, -0.6f, 0.6f, -100.0f, 100.0f);

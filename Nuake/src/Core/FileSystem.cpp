@@ -19,6 +19,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <ShlObj.h>
+#include "filewatch/FileWatch.hpp"
 
 namespace Nuake
 {
@@ -42,6 +44,7 @@ namespace Nuake
 		{
 			filePath = std::string(ofn.lpstrFile);
 		}
+
 #endif
 
 #ifdef NK_LINUX
@@ -141,9 +144,73 @@ namespace Nuake
 		return std::string();
 	}
 
+	std::string FileDialog::OpenFolder()
+	{
+		std::string folderPath;
+
+#ifdef NK_WIN
+		BROWSEINFOA bi;
+		CHAR szFolder[260] = { 0 };
+		ZeroMemory(&bi, sizeof(BROWSEINFO));
+		bi.lpszTitle = "Select a Folder";
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+		bi.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
+		bi.pszDisplayName = szFolder;
+		LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
+		if (pidl != NULL)
+		{
+			SHGetPathFromIDListA(pidl, szFolder);
+			folderPath = std::string(szFolder);
+			CoTaskMemFree(pidl);
+		}
+#endif
+
+#ifdef NK_LINUX
+		GtkWidget* dialog;
+		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+		gint res;
+
+		dialog = gtk_file_chooser_dialog_new("Select Folder",
+			NULL,
+			action,
+			"_Cancel",
+			GTK_RESPONSE_CANCEL,
+			"_Select",
+			GTK_RESPONSE_ACCEPT,
+			NULL);
+
+		res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (res == GTK_RESPONSE_ACCEPT) {
+			char* foldername = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			folderPath = foldername;
+			g_free(foldername);
+		}
+
+		gtk_widget_destroy(dialog);
+#endif
+
+		return folderPath;
+	}
+
 	std::string FileSystem::Root = "";
 
 	Ref<Directory> FileSystem::RootDirectory;
+	Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
+
+	File::File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
+	{
+		AbsolutePath = absolutePath;
+		Parent = parentDir;
+		RelativePath = FileSystem::AbsoluteToRelative(absolutePath);
+		Name = name;
+		Type = type;
+
+		if (GetFileType() != FileType::Unkown)
+		{
+			
+		}
+	}
 
 	void FileSystem::ScanDirectory(Ref<Directory> directory)
 	{
@@ -186,12 +253,40 @@ namespace Nuake
 	bool FileSystem::FileExists(const std::string& path, bool absolute)
 	{
 		std::string fullPath = absolute ? path : FileSystem::Root + path;
-		return std::filesystem::exists(fullPath);
+		return std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath);
 	}
 
 	void FileSystem::SetRootDirectory(const std::string path)
 	{
 		Root = path;
+		RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
+			path, [&](const std::string& path, const filewatch::Event& event)
+				{
+					std::string normalizedPath = String::ReplaceSlash(path);
+
+					// Detect if its a file and not a folder.
+					if (!FileSystem::FileExists(normalizedPath))
+					{
+						return;
+					}
+
+					if(Ref<File> file = GetFile(normalizedPath); file)
+					{
+						if (file->GetFileType() == FileType::Unkown)
+						{
+							return;
+						}
+
+						Logger::Log(normalizedPath + " event: " + filewatch::event_to_string(event), "filewatcher", VERBOSE);
+
+						if (event == filewatch::Event::modified)
+						{
+							file->SetHasBeenModified(true);
+						}
+					}
+					
+				}
+		);
 		Scan();
 	}
 

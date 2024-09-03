@@ -19,7 +19,7 @@ namespace Nuake
 		bool SmoothCamera = false;
 		float SmoothCameraSpeed = 0.2f;
 		Color PrimaryColor = Color(97.0f / 255.0f, 0, 1.0f, 1.0f);
-		int PhysicsStep = 90.0f;
+		int PhysicsStep = 90;
 		int MaxPhysicsSubStep = 32;
 		int MaxPhysicsBodies = 4096;
 		int MaxPhysicsContactConstraints = 2048;
@@ -58,6 +58,8 @@ namespace Nuake
 		static Ref<Project> New(const std::string& Name, const std::string& Description, const std::string& FullPath);
 		static Ref<Project> New();
 		static Ref<Project> Load(std::string& path);
+
+		void ExportEntitiesToTrenchbroom();
 
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
