@@ -1,27 +1,34 @@
 #pragma once
-#include "src/Core/Maths.h"
-#include "Shaders/Shader.h"
-#include "src/Scene/Components/Components.h"
-#include "src/Core/Core.h"
-#include "Buffers/VertexArray.h"
 #include "RenderList.h"
+
+#include "src/Core/Core.h"
+#include "src/Core/Maths.h"
+
+#include "src/Rendering/Camera.h"
+#include "src/Scene/Components/LightComponent.h"
+#include "src/Scene/Components/TransformComponent.h"
+
+#include "Shaders/Shader.h"
 #include "Buffers/UniformBuffer.h"
+#include "Buffers/VertexArray.h"
+
 
 namespace Nuake
 {
-	struct Light 
+	struct TransformComponent;
+	struct LightComponent;
+
+	struct Light
 	{
 		TransformComponent transform;
 		LightComponent light;
 	};
 
-	const int MAX_LIGHT = 64;
-
 	struct LightData
 	{
-		int ShadowMapsIDs[CSM_AMOUNT];
-		float CascadeDepth[CSM_AMOUNT];
-		Matrix4 LightTransforms[CSM_AMOUNT];
+		int ShadowMapsIDs[4];
+		float CascadeDepth[4];
+		Matrix4 LightTransforms[4];
 		int Type;
 		Vector3 Position;
 		Vector3 Direction;

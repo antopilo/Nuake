@@ -2,6 +2,10 @@
 
 #include <src/Vendors/glm/ext/matrix_clip_space.hpp>
 #include <src/Rendering/SceneRenderer.h>
+
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Scene/Components/ModelComponent.h>
+
 #include <src/Resource/ResourceLoader.h>
 #include <glad/glad.h>
 #include <src/Resource/Prefab.h>

@@ -5,15 +5,13 @@
 #include <src/Core/Input.h>
 #include <src/Scene/Scene.h>
 #include <src/Scene/Entities/Entity.h>
-#include <src/Scene/Components/Components.h>
+#include <src/Scene/Components.h>
 
 #include "src/Windows/EditorInterface.h"
 
-#include <src/Scene/Components/QuakeMap.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include <src/Physics/PhysicsManager.h>
-#include "src/Scene/Components/BoxCollider.h"
 
 #include <GLFW/glfw3.h>
 #include <src/Vendors/glm/trigonometric.hpp>
@@ -21,7 +19,6 @@
 #include <src/Resource/FGD/FGDFile.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
-#include <src/Scene/Components/BSPBrushComponent.h>
 
 #include "src/Actions/EditorSelection.h"
 #include "src/Misc/GizmoDrawer.h"

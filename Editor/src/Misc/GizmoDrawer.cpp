@@ -22,6 +22,7 @@
 #include <src/Scene/Components/ParticleEmitterComponent.h>
 #include <src/Scene/Components/BoneComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
+#include <src/Scene/Components/ParentComponent.h>
 #include <DetourDebugDraw.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 

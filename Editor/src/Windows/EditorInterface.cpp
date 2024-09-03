@@ -23,13 +23,10 @@
 #include <glad/glad.h>
 
 #include "src/Scene/Scene.h"
-#include "src/Scene/Components/Components.h"
-#include "src/Scene/Components/BoxCollider.h"
+#include "src/Scene/Components.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
-#include "src/Scene/Components/LightComponent.h"
 #include "../UIComponents/Viewport.h"
 #include <src/Resource/Prefab.h>
-#include <src/Scene/Components/PrefabComponent.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include "src/Rendering/Renderer.h"
 #include "src/Core/Input.h"

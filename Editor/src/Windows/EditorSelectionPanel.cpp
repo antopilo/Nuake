@@ -2,7 +2,7 @@
 
 #include "EditorSelectionPanel.h"
 #include "../Misc/ImGuiTextHelper.h"
-#include <src/Scene/Components/Components.h>
+#include <src/Scene/Components.h>
 
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>

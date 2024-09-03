@@ -7,10 +7,13 @@
 #include "src/Rendering/PostFX/Bloom.h"
 #include "src/Rendering/PostFX/Volumetric.h"
 #include "src/Rendering/PostFX/SSR.h"
+
+#include "src/Physics/PhysicsShapes.h"
 #include "Shapes/BoxGizmo.h"
 #include "Shapes/SphereGizmo.h"
 #include "Shapes/CapsuleGizmo.h"
 #include "Shapes/CylinderGizmo.h"
+#include <src/Resource/Model.h>
 #include <glad/glad.h>
 
 namespace Nuake 

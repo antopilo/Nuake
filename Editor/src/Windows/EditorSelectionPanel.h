@@ -26,6 +26,9 @@
 #include "../ComponentsPanel/NetScriptPanel.h"
 #include "../ComponentsPanel/NavMeshVolumePanel.h"
 
+#include <src/Scene/Components/WrenScriptComponent.h>
+
+
 class EditorSelectionPanel 
 {
 private:

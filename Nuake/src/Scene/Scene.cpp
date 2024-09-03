@@ -23,7 +23,8 @@
 #include "Engine.h"
 #include "src/Core/Maths.h"
 #include "src/Core/FileSystem.h"
-#include "src/Scene/Components/Components.h"
+
+#include "src/Scene/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
