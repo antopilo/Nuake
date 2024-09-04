@@ -423,7 +423,7 @@ namespace Nuake
 
 				TriggerZone trigger = ent.GetComponent<TriggerZone>();
 
-				int count = trigger.GetOverLappingCount();
+				int count = 0;
 
 				wrenSetSlotDouble(vm, 0, count);
 			}
@@ -435,7 +435,7 @@ namespace Nuake
 
 				TriggerZone trigger = ent.GetComponent<TriggerZone>();
 
-				std::vector<Entity> entities = trigger.GetOverlappingBodies();
+				std::vector<Entity> entities = {};
 
 				wrenEnsureSlots(vm, static_cast<int>(entities.size()));
 

@@ -1,6 +1,8 @@
 #include "ImUI.h"
+#include "Engine.h"
+#include "src/Resource/Project.h"
+
 #include <imgui/imgui_internal.h>
-#include <Engine.h>
 
 namespace Nuake {
 

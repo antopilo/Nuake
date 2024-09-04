@@ -4,7 +4,8 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Core/Maths.h"
-#include <src/Physics/PhysicsShapes.h>
+#include "src/Resource/Project.h"
+#include "src/Physics/PhysicsShapes.h"
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/CharacterControllerComponent.h"
 
@@ -415,11 +416,6 @@ namespace Nuake
 				uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
 				_registeredBodies.push_back(bodyIndex);
 			}
-		}
-
-		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
-		{
-
 		}
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)

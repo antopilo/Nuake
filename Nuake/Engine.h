@@ -2,12 +2,13 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Window.h"
-#include "src/Scene/Scene.h"
-#include "src/Resource/Project.h"
 
 // Welcome to the Nuake source code.
 namespace Nuake
 {
+	class Project;
+	class Scene;
+
 	enum GameState
 	{
 		Playing,

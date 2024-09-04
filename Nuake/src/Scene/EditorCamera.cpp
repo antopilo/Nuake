@@ -6,6 +6,7 @@
 #include "src/Core/Logger.h"
 #include <src/Vendors/imgui/imgui.h>
 #include <Engine.h>
+#include "src/Resource/Project.h"
 
 namespace Nuake
 {

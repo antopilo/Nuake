@@ -2,6 +2,7 @@
 
 #include "Engine.h"
 #include "src/Core/OS.h"
+#include "src/Core/String.h"
 
 #include "Directory.h"
 #include "File.h"

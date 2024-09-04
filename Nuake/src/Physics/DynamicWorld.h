@@ -7,7 +7,6 @@
 #include <map>
 #include "RaycastResult.h"
 
-#include <src/Physics/GhostObject.h>
 #include "CharacterController.h"
 #include "CollisionData.h"
 
@@ -72,7 +71,6 @@ namespace Nuake
 			void SetGravity(const Vector3& g);
 			void AddRigidbody(Ref<RigidBody> rb);
 
-			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
 			Vector3 GetCharacterGroundVelocity(const Entity& entity);

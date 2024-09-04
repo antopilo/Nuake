@@ -1,10 +1,8 @@
 
 #include "Window.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "Engine.h"
+#include "src/Resource/Project.h"
 #include "src/Core/Maths.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
@@ -12,6 +10,8 @@
 
 #include "src/Resource/StaticResources.h"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <imgui/imgui.h>

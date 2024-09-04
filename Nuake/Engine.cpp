@@ -1,6 +1,8 @@
 #include "Engine.h"
+
+#include "src/Scene/Scene.h"
+#include "src/Resource/Project.h"
 #include "src/Physics/PhysicsManager.h"
-#include <GLFW/glfw3.h>
 
 #include "src/AI/NavManager.h"
 #include "src/Audio/AudioManager.h"
@@ -13,6 +15,7 @@
 #include "src/Threading/JobSystem.h"
 #include "src/Modules/Modules.h"
 
+#include <GLFW/glfw3.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>

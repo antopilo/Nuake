@@ -1,11 +1,12 @@
 #pragma once
-#include "src/Physics/GhostObject.h"
+
 #include <vector>
 
-namespace Nuake {
-	class TriggerZone {
+namespace Nuake 
+{
+	class TriggerZone 
+	{
 	public:
-		Ref<GhostObject> m_GhostObject;
 		std::string target = "";
 
 		std::vector<Entity> Targets;
@@ -16,23 +17,10 @@ namespace Nuake {
 			Targets = std::vector<Entity>();
 		}
 
-		int GetOverLappingCount()
+		std::vector<Entity> GetTargets() 
 		{
-			if (!Enabled) return 0;
-
-			return m_GhostObject->OverlappingCount();
-		}
-
-		std::vector<Entity> GetTargets() {
 			return Targets;
 		}
-
-		std::vector<Entity> GetOverlappingBodies()
-		{
-			if (!Enabled)
-				return std::vector<Entity>();
-
-			return m_GhostObject->GetOverlappingEntities();
-		}
+		
 	};
 }

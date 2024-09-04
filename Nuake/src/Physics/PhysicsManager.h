@@ -56,7 +56,6 @@ namespace Nuake
 		const std::vector<Physics::CollisionData> GetCollisions();
 
 		void RegisterBody(Ref<Physics::RigidBody> rb);
-		void RegisterGhostBody(Ref<GhostObject> rb);
 		void RegisterCharacterController(Ref<Physics::CharacterController> c);
 
 		void SetBodyTransform(const Entity& entity, const Vector3& position, const Quat& rotation);

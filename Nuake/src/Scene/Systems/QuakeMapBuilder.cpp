@@ -1,5 +1,8 @@
 #include "QuakeMapBuilder.h"
 
+#include "Engine.h"
+#include "src/Resource/Project.h"
+
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/FileSystem/FileSystem.h"
 #include "src/Core/String.h"
@@ -24,12 +27,14 @@ extern "C" {
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
 #include "src/Scene/Components/ModelComponent.h"
-
-#include <vector>
-#include <map>
 #include <src/Resource/ResourceLoader.h>
 #include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Resource/FGD/FGDFile.h>
+
+#include <vector>
+#include <map>
+
 
 namespace Nuake {
     struct ProcessedMesh

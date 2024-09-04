@@ -1,14 +1,15 @@
 #include "SceneRenderer.h"
-#include "src/Rendering/Shaders/ShaderManager.h"
 
+#include "src/Rendering/Shaders/ShaderManager.h"
+#include "src/Resource/Project.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/ModelComponent.h"
 #include "src/Scene/Components/ParentComponent.h"
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 #include "src/Scene/Components/SpriteComponent.h"
+#include <src/Scene/Components/SkinnedModelComponent.h>
 
 #include <glad/glad.h>
-#include <src/Scene/Components/SkinnedModelComponent.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <Tracy.hpp>
 

@@ -1,7 +1,9 @@
 ﻿#include "OS.h"
 
-#include "src/Window.h"
 #include "Engine.h"
+#include "src/Resource/Project.h"
+#include "src/Window.h"
+#include "src/Core/String.h"
 
 #ifdef NK_WIN
 #define GLFW_EXPOSE_NATIVE_WIN32
