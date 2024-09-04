@@ -30,7 +30,7 @@ namespace Nuake
 		static void Draw();    // Start new frame
 		static void EndDraw(); // Swap buffer
 
-		static void SetGameState(GameState gameState) { gameState = gameState; }
+		static void SetGameState(GameState state) { gameState = state; }
 		static GameState GetGameState() { return gameState; }
 		static bool IsPlayMode() { return gameState == GameState::Playing; }
 
