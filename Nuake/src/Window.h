@@ -17,6 +17,8 @@ namespace Nuake
 		~Window() = default;
 
 		static Ref<Window> Get(); // Get the window instance
+
+	public:
 		GLFWwindow* GetHandle();
 
 		bool ShouldClose();
@@ -49,20 +51,21 @@ namespace Nuake
 		void SetDecorated(bool enabled);
 		void SetFullScreen(bool enabled);
 		void Maximize();
+
 	private:
 		const std::string DEFAULT_TITLE = "Untitled Window";
 		const uint32_t DEFAULT_WIDTH = 1280;
 		const uint32_t DEFAULT_HEIGHT = 720;
 
-		GLFWwindow* m_Window;
+		GLFWwindow* window;
 
-		std::string m_Title;
-		uint32_t m_Width;
-		uint32_t m_Height;
-		Vector2 m_Position;
+		std::string title;
+		uint32_t width;
+		uint32_t height;
+		Vector2 position;
 
-		Ref<FrameBuffer> m_Framebuffer;
-		Ref<Scene> m_Scene;
+		Ref<FrameBuffer> framebuffer;
+		Ref<Scene> scene;
 
 		void InitImgui();
 	};

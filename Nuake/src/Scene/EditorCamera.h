@@ -1,7 +1,8 @@
 #pragma once
-#include "../Core/Timestep.h"
-#include "../Rendering/Camera.h"
 #include "src/Core/Core.h"
+#include "src/Core/Timestep.h"
+#include "src/Rendering/Camera.h"
+
 
 namespace Nuake
 {

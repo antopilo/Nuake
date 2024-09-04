@@ -2,23 +2,22 @@
 
 #include <Tracy.hpp>
 
-namespace Nuake {
+using namespace Nuake;
 
-	void JobSystem::Update()
+void JobSystem::Update()
+{
+	ZoneScoped;
+
+	for(auto it = jobs.begin(); it != jobs.end();)
 	{
-		ZoneScoped;
-
-		for(auto it = m_Jobs.begin(); it != m_Jobs.end();)
+		if(it->get()->IsDone())
 		{
-			if(it->get()->IsDone())
-			{
-				it->get()->End();
-				it = m_Jobs.erase(it);
-			}
-			else
-			{
-				++it;
-			}
+			it->get()->End();
+			it = jobs.erase(it);
+		}
+		else
+		{
+			++it;
 		}
 	}
 }
