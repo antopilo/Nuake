@@ -558,7 +558,7 @@ namespace Nuake
             }
 
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
-            Engine::LoadScene(scene);
+            Engine::SetCurrentScene(scene);
         }
 
         // Rename Popup
