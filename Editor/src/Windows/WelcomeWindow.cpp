@@ -309,7 +309,7 @@ namespace Nuake
 
 				//	auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
 				//	Engine::LoadProject(project);
-				//	Engine::LoadScene(Scene::New());
+				//	Engine::SetCurrentScene(Scene::New());
 				//	project->Save();
 
 				//	auto projectPreview = ProjectPreview();

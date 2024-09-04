@@ -231,7 +231,7 @@ namespace Nuake
 							Nuake::FileSystem::SetRootDirectory(projectParentPath);
 							auto project = Nuake::Project::New(projectTitle, description, finalLocation);
 							Nuake::Engine::LoadProject(project);
-							Nuake::Engine::LoadScene(Nuake::Scene::New());
+							Nuake::Engine::SetCurrentScene(Nuake::Scene::New());
 							project->Settings.PrimaryColor = Nuake::Color(primaryColor.x, primaryColor.y, primaryColor.z, primaryColor.w);
 							project->Save();
 

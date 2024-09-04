@@ -24,7 +24,7 @@ Ref<Scene> SceneManager::GetScene(const UUID& uuid) const
 	return Ref<Scene>();
 }
 
-Ref<Scene> SceneManager::LoadScene(Ref<File> file)
+Ref<Scene> SceneManager::SetCurrentScene(Ref<File> file)
 {
 
 	return Ref<Scene>();

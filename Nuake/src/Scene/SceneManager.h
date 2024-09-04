@@ -19,7 +19,7 @@ namespace Nuake
 		bool IsSceneLoaded(const UUID& uuid) const;
 		Ref<Scene> GetScene(const UUID& uuid) const;
 
-		Ref<Scene> LoadScene(Ref<File> file);
+		Ref<Scene> SetCurrentScene(Ref<File> file);
 		void UnloadScene(const UUID& uuid);
 
 	private:

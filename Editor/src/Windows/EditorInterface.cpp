@@ -598,7 +598,7 @@ namespace Nuake {
                 {
                     Engine::ExitPlayMode();
 
-                    Engine::LoadScene(SceneSnapshot);
+                    Engine::SetCurrentScene(SceneSnapshot);
                     Selection = EditorSelection();
                     SetStatusMessage("Ready");
                 }
@@ -2640,7 +2640,7 @@ namespace Nuake {
         
         Ref<Project> project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
         Engine::LoadProject(project);
-        Engine::LoadScene(Scene::New());
+        Engine::SetCurrentScene(Scene::New());
 
         Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name); 
     }
@@ -2689,7 +2689,7 @@ namespace Nuake {
         }
 
         scene->Path = FileSystem::AbsoluteToRelative(projectPath);
-        Engine::LoadScene(scene);
+        Engine::SetCurrentScene(scene);
     }
 
     void EditorInterface::DrawMenuBar()
@@ -2735,7 +2735,7 @@ namespace Nuake {
                 ImGui::Separator();
                 if (ImGui::MenuItem("New scene"))
                 {
-                    Engine::LoadScene(Scene::New());
+                    Engine::SetCurrentScene(Scene::New());
                     Selection = EditorSelection();
                     SetStatusMessage("New scene created.");
                 }

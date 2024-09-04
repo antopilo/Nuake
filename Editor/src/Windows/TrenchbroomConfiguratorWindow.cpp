@@ -1,10 +1,12 @@
 #include "TrenchbroomConfiguratorWindow.h"
 
 #include <Engine.h>
+#include <src/Resource/Project.h>
 #include <src/UI/ImUI.h>
 #include <src/Core/OS.h>
 #include <src/Rendering/Textures/TextureManager.h>
 #include <src/Resource/Prefab.h>
+
 
 void TrenchbroomConfiguratorWindow::Update()
 {
