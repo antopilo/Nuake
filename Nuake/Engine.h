@@ -17,7 +17,6 @@ namespace Nuake
 
 	class Engine 
 	{
-
 	public:
 		static void Init();  // Initialize the engine.
 		static void Tick();  // Updates everything, called every frame.
@@ -43,7 +42,7 @@ namespace Nuake
 
 		static Ref<Window> GetCurrentWindow();
 
-		static bool LoadScene(Ref<Scene> scene);
+		static bool SetCurrentScene(Ref<Scene> scene);
 		static Ref<Scene> GetCurrentScene();
 
 		static bool LoadProject(Ref<Project> project);

@@ -159,7 +159,7 @@ namespace Nuake
 		return nullptr;
 	}
 
-	bool Engine::LoadScene(Ref<Scene> scene)
+	bool Engine::SetCurrentScene(Ref<Scene> scene)
 	{
 		return currentWindow->SetScene(scene);
 	}
@@ -173,7 +173,7 @@ namespace Nuake
 	{
 		currentProject = project;
 
-		if (!Engine::LoadScene(currentProject->DefaultScene))
+		if (!Engine::SetCurrentScene(currentProject->DefaultScene))
 		{
 			return false;
 		}
