@@ -11,11 +11,11 @@ namespace Nuake
 {
 	namespace UI
 	{
-		static uint32_t PrimaryCol = IM_COL32(97, 0, 255, 255);
-		static uint32_t GrabCol = IM_COL32(97, 0, 255, 255);
+		uint32_t PrimaryCol = IM_COL32(97, 0, 255, 255);
+		uint32_t GrabCol = IM_COL32(97, 0, 255, 255);
 
-		static ImVec2 ButtonPadding = ImVec2(16.0f, 8.0f);
-		static ImVec2 IconButtonPadding = ImVec2(8.0f, 8.0f);
+		ImVec2 ButtonPadding = ImVec2(16.0f, 8.0f);
+		ImVec2 IconButtonPadding = ImVec2(8.0f, 8.0f);
 
 		void BeginWindow(const std::string& name);
 
