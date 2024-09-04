@@ -1,7 +1,7 @@
 ﻿#include "ScriptPanel.h"
 #include "../Windows/FileSystemUI.h"
 #include <src/Scene/Components/WrenScriptComponent.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 
 void ScriptPanel::Draw(Nuake::Entity entity)
 {

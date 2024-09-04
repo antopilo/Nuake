@@ -1,6 +1,6 @@
 #include "src/Core/Core.h"
 #include "Shader.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include <sstream>

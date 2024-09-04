@@ -2,7 +2,7 @@
 #include "ComponentPanel.h"
 #include <src/Scene/Components/QuakeMap.h>
 #include "src/Scene/Systems/QuakeMapBuilder.h"
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/AI/NavManager.h>
 #include <src/UI/ImUI.h>
 

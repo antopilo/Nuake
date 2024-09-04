@@ -4,7 +4,7 @@
 #include "src/Vendors/imgui/imgui.h"
 
 #include <src/Vendors/imgui/ImGuizmo.h>
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 
 #include "../Actions/EditorSelection.h"
 #include "EditorSelectionPanel.h"

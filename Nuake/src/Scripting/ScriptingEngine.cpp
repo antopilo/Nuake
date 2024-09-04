@@ -1,7 +1,7 @@
 
 #include "ScriptingEngine.h"
 #include "WrenScript.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 
 #include "src/Scripting/Modules/ScriptModule.h"
 #include "src/Scripting/Modules/EngineModule.h"

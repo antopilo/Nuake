@@ -1,6 +1,6 @@
 #include "FGDFile.h"
 #include <src/Resource/FGD/FDGSerializer.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include "Engine.h"
 
 namespace Nuake {

@@ -1,7 +1,7 @@
 #include "FileSystem.h"
 
 #include "Engine.h"
-#include "OS.h"
+#include "src/Core/OS.h"
 
 #include <GLFW/glfw3.h>
 
@@ -21,6 +21,9 @@
 #include <iostream>
 #include <ShlObj.h>
 #include "filewatch/FileWatch.hpp"
+
+#include "Directory.h"
+#include "File.h"
 
 namespace Nuake
 {
@@ -198,19 +201,7 @@ namespace Nuake
 	Ref<Directory> FileSystem::RootDirectory;
 	Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
 
-	File::File(Ref<Directory> parentDir, const std::string& absolutePath, const std::string& name, const std::string& type)
-	{
-		AbsolutePath = absolutePath;
-		Parent = parentDir;
-		RelativePath = FileSystem::AbsoluteToRelative(absolutePath);
-		Name = name;
-		Type = type;
-
-		if (GetFileType() != FileType::Unkown)
-		{
-			
-		}
-	}
+	
 
 	void FileSystem::ScanDirectory(Ref<Directory> directory)
 	{

@@ -58,7 +58,7 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
                     ResolveFile(selection.File);
                 }
 
-				if (!selection.File->IsValid())
+				if (!selection.File->Exist())
 				{
 					std::string text = "File is invalid";
 					auto windowWidth = ImGui::GetWindowSize().x;

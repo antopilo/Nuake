@@ -2,7 +2,7 @@
 #include "../Actions/EditorSelection.h"
 #include "src/Scene/Entities/Entity.h"
 
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include <src/Resource/Project.h>
 
 #include "../ComponentsPanel/TransformPanel.h"

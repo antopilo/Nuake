@@ -1,7 +1,7 @@
 #include "ProjectSettingsWindow.h"
 #include <imgui/imgui.h>
 #include "../../Misc/InterfaceFonts.h"
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include "../EditorInterface.h"
 #include "../../Commands/Commands/Commands.h"
 #include <src/Audio/AudioManager.h>

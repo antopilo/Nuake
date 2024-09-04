@@ -1,7 +1,7 @@
 #include "NetScriptPanel.h"
 #include "../Windows/FileSystemUI.h"
 #include <src/Scene/Components/NetScriptComponent.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
 

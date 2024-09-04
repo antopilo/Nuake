@@ -18,6 +18,8 @@
 #include <X11/Xlib.h>
 #endif
 
+#include "src/FileSystem/File.h"
+
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 

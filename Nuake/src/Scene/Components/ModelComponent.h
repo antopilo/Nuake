@@ -1,5 +1,6 @@
 #pragma once
 
+#include "src/Core/String.h"
 #include "src/Resource/Model.h"
 #include "src/Resource/ResourceLoader.h"
 #include "src/Resource/Serializable.h"

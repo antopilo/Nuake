@@ -8,6 +8,8 @@
 #include <src/Scene/Components/ModelComponent.h>
 
 #include <src/Resource/ResourceLoader.h>
+#include <src/Resource/ResourceManager.h>
+
 #include <src/Core/String.h>
 #include <src/Resource/ModelLoader.h>
 

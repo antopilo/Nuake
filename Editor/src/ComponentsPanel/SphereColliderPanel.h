@@ -1,7 +1,7 @@
 #pragma once
 #include "ComponentPanel.h"
 #include <src/Scene/Components/SphereCollider.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/Scene/Entities/ImGuiHelper.h>
 
 class SphereColliderPanel : ComponentPanel {

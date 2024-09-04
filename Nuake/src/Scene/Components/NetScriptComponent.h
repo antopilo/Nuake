@@ -2,7 +2,7 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 #include "src/Resource/Serializable.h"
 #include "src/Resource/File.h"

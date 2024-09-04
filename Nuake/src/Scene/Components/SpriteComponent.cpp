@@ -1,6 +1,6 @@
 #include "SpriteComponent.h"
 
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Rendering/Textures/TextureManager.h"
 #include "src/Rendering/Textures/MaterialManager.h"
 #include "src/Rendering/Textures/Material.h"

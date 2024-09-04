@@ -1,7 +1,7 @@
 #pragma once
 #include "ComponentPanel.h"
 #include <src/Scene/Components/CharacterControllerComponent.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 
 class CharacterControllerPanel : ComponentPanel {
 

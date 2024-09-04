@@ -7,7 +7,7 @@
 #include <src/Rendering/Textures/TextureManager.h>
 #include <src/Rendering/Textures/Texture.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/UI/ImUI.h>
 #include <src/Core/Logger.h>
 #include <src/Resource/Project.h>

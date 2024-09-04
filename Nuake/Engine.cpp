@@ -4,7 +4,7 @@
 
 #include "src/AI/NavManager.h"
 #include "src/Audio/AudioManager.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Input.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"

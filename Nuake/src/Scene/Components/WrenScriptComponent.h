@@ -1,7 +1,9 @@
 #pragma once
 #include "src/Scripting/WrenScript.h"
 #include "src/Resource/Serializable.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
+#include "src/FileSystem/File.h"
+
 #include "src/Core/Logger.h"
 
 namespace Nuake 

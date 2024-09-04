@@ -1,11 +1,16 @@
 #include "MapImporterWindow.h"
-#include <imgui/imgui.h>
+
 #include "../Misc/InterfaceFonts.h"
-#include <src/UI/ImUI.h>
-#include <src/Core/Logger.h>
-#include <regex>
-#include <src/Threading/JobSystem.h>
+
 #include <Engine.h>
+#include <src/Core/Logger.h>
+#include <src/FileSystem/File.h>
+#include <src/Threading/JobSystem.h>
+#include <src/UI/ImUI.h>
+
+#include <imgui/imgui.h>
+
+#include <regex>
 
 void MapImporterWindow::Draw()
 {

@@ -22,7 +22,7 @@
 
 #include "Engine.h"
 #include "src/Core/Maths.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 
 #include "src/Scene/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
@@ -271,7 +271,7 @@ namespace Nuake
 			auto& map = view.get<QuakeMapComponent>(e);
 			if (map.AutoRebuild && !map.Path.empty() && FileSystem::FileExists(map.Path))
 			{
-				if (auto file = FileSystem::GetFile(map.Path); file->IsValid() && file->GetHasBeenModified())
+				if (auto file = FileSystem::GetFile(map.Path); file->Exist() && file->GetHasBeenModified())
 				{
 					file->SetHasBeenModified(false);
 

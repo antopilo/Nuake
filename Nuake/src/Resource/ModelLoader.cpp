@@ -1,6 +1,6 @@
 #include "src/Resource/ModelLoader.h"
 
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include "src/Core/String.h"

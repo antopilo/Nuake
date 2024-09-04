@@ -1,7 +1,7 @@
 #include "ScriptingEngineNet.h"
 
 #include "src/Core/Logger.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/OS.h"
 #include "src/Threading/JobSystem.h"
 #include "src/Resource/Project.h"

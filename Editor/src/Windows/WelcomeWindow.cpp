@@ -5,7 +5,7 @@
 #include "../Misc/InterfaceFonts.h"
 
 #include <Engine.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/Resource/Project.h>
 #include <src/Core/Logger.h>
 #include <src/Rendering/Textures/TextureManager.h>

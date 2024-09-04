@@ -2,7 +2,8 @@
 
 #include "src/Core/Logger.h"
 #include "src/Core/String.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
+#include "src/FileSystem/File.h"
 
 #include <src/Vendors/wren/src/include/wren.h>
 

@@ -1,7 +1,7 @@
 #include "QuakeMapBuilder.h"
 
 #include "src/Rendering/Mesh/Mesh.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/String.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
