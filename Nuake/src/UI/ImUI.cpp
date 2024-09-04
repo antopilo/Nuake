@@ -4,9 +4,9 @@
 
 #include <imgui/imgui_internal.h>
 
-using namespace Nuake
+using namespace Nuake;
 
-using namespace UI
+using namespace UI;
 
 void BeginWindow(const std::string& name)
 {
