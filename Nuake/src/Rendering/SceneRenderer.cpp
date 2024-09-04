@@ -349,44 +349,41 @@ namespace Nuake
 		}
 		mDOFBuffer->Unbind();
 
-		if (sceneEnv->BarrelDistortionEnabled)
+		mBarrelDistortionBuffer->QueueResize(framebufferResolution);
+		mBarrelDistortionBuffer->Bind();
 		{
-			mBarrelDistortionBuffer->QueueResize(framebufferResolution);
-			mBarrelDistortionBuffer->Bind();
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/barrel_distortion.shader");
+			shader->Bind();
+
+			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
+			shader->SetUniform1f("u_DistortionEdge", sceneEnv->BarrelEdgeDistortion);
+			shader->SetUniform1f("u_Scale", sceneEnv->BarrelScale);
+
+			if (sceneEnv->DOFEnabled)
 			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/barrel_distortion.shader");
-				shader->Bind();
-
-				shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
-				shader->SetUniform1f("u_DistortionEdge", sceneEnv->BarrelEdgeDistortion);
-				shader->SetUniform1f("u_Scale", sceneEnv->BarrelScale);
-
-				if (sceneEnv->DOFEnabled)
-				{
-					shader->SetUniformTex("u_Source", mDOFBuffer->GetTexture().get(), 0);
-				}
-				else
-				{
-					shader->SetUniformTex("u_Source", finalOutput.get(), 0);
-				}
+				shader->SetUniformTex("u_Source", mDOFBuffer->GetTexture().get(), 0);
+			}
+			else
+			{
+				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+			}
 
 				
-				Renderer::DrawQuad();
-			}
-			mBarrelDistortionBuffer->Unbind();
-
-			framebuffer.Bind();
-			{
-				RenderCommand::Clear();
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
-				shader->Bind();
-
-				shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
-				Renderer::DrawQuad();
-			}
-			framebuffer.Unbind();
+			Renderer::DrawQuad();
 		}
+		mBarrelDistortionBuffer->Unbind();
+
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
+			Renderer::DrawQuad();
+		}
+		framebuffer.Unbind();
 
 		mVignetteBuffer->QueueResize(framebufferResolution);
 		mVignetteBuffer->Bind();
@@ -397,29 +394,29 @@ namespace Nuake
 
 			shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
 			shader->SetUniform1f("u_Extend", sceneEnv->VignetteEnabled ? sceneEnv->VignetteExtend : 0.0f);
-			shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+			shader->SetUniformTex("u_Source", framebuffer.GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		mVignetteBuffer->Unbind();
 
-		framebuffer.Bind();
-		{
-			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
-			shader->Bind();
-
-			shader->SetUniformTex("u_Source", finalOutput.get(), 0);
-			shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
-			Renderer::DrawQuad();
-		}
-		framebuffer.Unbind();
+		//framebuffer.Bind();
+		//{
+		//	RenderCommand::Clear();
+		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
+		//	shader->Bind();
+		//
+		//	shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+		//	shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
+		//	Renderer::DrawQuad();
+		//}
+		//framebuffer.Unbind();
 
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
-
+		
 			shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
@@ -1111,7 +1108,6 @@ namespace Nuake
 						view = glm::scale(view, reinterpret_cast<Physics::Box*>(shape.Shape.get())->GetSize());
 						
 						shader->SetUniformMat4f("u_View", view);
-						
 
 						mBoxGizmo->Bind();
 						RenderCommand::DrawLines(0, 26);
