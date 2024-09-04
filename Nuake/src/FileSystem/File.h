@@ -1,11 +1,13 @@
 #pragma once
 #include "src/Core/Core.h"
 
-#include "Directory.h"
+
 #include "FileTypes.h"
 
 namespace Nuake
 {
+	class Directory;
+
 	class File
 	{
 	public:

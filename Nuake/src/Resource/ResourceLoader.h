@@ -21,6 +21,7 @@ namespace Nuake
 
 		static Ref<Material> LoadMaterial(const std::string& path);
 		static Ref<Model> LoadModel(const std::string& path);
+		static Ref<Texture> LoadTexture(const std::string& path);
 
 	private:
 		static UUID ReadUUID(json j);

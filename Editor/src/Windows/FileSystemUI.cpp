@@ -13,6 +13,8 @@
 #include <src/Rendering/Textures/Material.h>
 #include "../Misc/PopupHelper.h"
 #include <src/FileSystem/FileDialog.h>
+#include <src/FileSystem/Directory.h>
+#include <src/FileSystem/File.h>
 #include "src/Scene/Systems/WadConverter.h"
 #include "../Misc/ThumbnailManager.h"
 
@@ -22,7 +24,6 @@ namespace Nuake
 {
     Ref<Directory> FileSystemUI::m_CurrentDirectory;
     
-    // TODO: add filetree in same panel
     void FileSystemUI::Draw()
     {
 

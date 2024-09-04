@@ -491,6 +491,7 @@ namespace Nuake
 
 			if (!cam)
 				cam = m_EditorCamera;
+
 			return cam;
 		}
 
