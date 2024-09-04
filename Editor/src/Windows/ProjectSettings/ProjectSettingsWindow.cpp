@@ -1,6 +1,7 @@
 #include "ProjectSettingsWindow.h"
 #include <imgui/imgui.h>
 #include "../../Misc/InterfaceFonts.h"
+#include <src/FileSystem/FileDialog.h>
 #include "src/FileSystem/FileSystem.h"
 #include "../EditorInterface.h"
 #include "../../Commands/Commands/Commands.h"

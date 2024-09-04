@@ -7,6 +7,8 @@
 
 #include <src/Vendors/wren/src/include/wren.h>
 
+#include <fstream>
+
 namespace Nuake 
 {
 	WrenScript::WrenScript(Ref<File> file, bool isEntityScript)

@@ -1,9 +1,13 @@
 #include "NetScriptPanel.h"
+
 #include "../Windows/FileSystemUI.h"
-#include <src/Scene/Components/NetScriptComponent.h>
+
+#include <src/FileSystem/FileDialog.h>
 #include "src/FileSystem/FileSystem.h"
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
+
 
 void NetScriptPanel::Draw(Nuake::Entity entity)
 {

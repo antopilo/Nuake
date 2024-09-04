@@ -5,6 +5,7 @@
 #include "../Misc/InterfaceFonts.h"
 
 #include <Engine.h>
+#include <src/FileSystem/FileDialog.h>
 #include "src/FileSystem/FileSystem.h"
 #include <src/Resource/Project.h>
 #include <src/Core/Logger.h>

@@ -7,6 +7,7 @@
 
 #include <json/json.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <streambuf>
 

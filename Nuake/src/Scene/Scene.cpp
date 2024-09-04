@@ -23,6 +23,7 @@
 #include "Engine.h"
 #include "src/Core/Maths.h"
 #include "src/FileSystem/FileSystem.h"
+#include "src/FileSystem/FileDialog.h"
 
 #include "src/Scene/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
@@ -31,12 +32,12 @@
 #include "src/Scene/Components/SkinnedModelComponent.h"
 #include "src/Scene/Components/BoneComponent.h"
 
+#include <Tracy.hpp>
+
 #include <fstream>
 #include <future>
 #include <streambuf>
 #include <chrono>
-#include <Tracy.hpp>
-
 
 namespace Nuake 
 {

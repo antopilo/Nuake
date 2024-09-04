@@ -12,9 +12,10 @@
 
 #include <src/Rendering/Textures/Material.h>
 #include "../Misc/PopupHelper.h"
-
+#include <src/FileSystem/FileDialog.h>
 #include "src/Scene/Systems/WadConverter.h"
 #include "../Misc/ThumbnailManager.h"
+
 #include <Tracy.hpp>
 
 namespace Nuake

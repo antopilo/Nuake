@@ -3,437 +3,250 @@
 #include "Engine.h"
 #include "src/Core/OS.h"
 
-#include <GLFW/glfw3.h>
-
-#ifdef NK_WIN
-#define GLFW_EXPOSE_NATIVE_WIN32
-
-#include "GLFW/glfw3native.h"
-#include <commdlg.h>
-
-#endif
-
-#ifdef NK_LINUX
-#include "gtk/gtk.h"
-#endif
-
-#include <fstream>
-#include <iostream>
-#include <ShlObj.h>
-#include "filewatch/FileWatch.hpp"
-
 #include "Directory.h"
 #include "File.h"
 
-namespace Nuake
-{
-	namespace fs = std::filesystem;
+#include "filewatch/FileWatch.hpp"
 
-	std::string FileDialog::OpenFile(const char* filter)
-	{
-		std::string filePath;
-#ifdef NK_WIN
-		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = filter;
-		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-		if (GetOpenFileNameA(&ofn) == TRUE)
-		{
-			filePath = std::string(ofn.lpstrFile);
-		}
+#include <filesystem>
 
-#endif
+using namespace Nuake;
 
-#ifdef NK_LINUX
-		GtkWidget *dialog;
-		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
-		gint res;
+std::string FileSystem::Root = "";
 
-		dialog = gtk_file_chooser_dialog_new("Open File",
-			NULL,
-			action,
-			"_Cancel",
-			GTK_RESPONSE_CANCEL,
-			"_Open",
-			GTK_RESPONSE_ACCEPT,
-			NULL);
-
-		gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-
-		if (filter) {
-			GtkFileFilter *file_filter = gtk_file_filter_new();
-			gtk_file_filter_set_name(file_filter, "Filter Name");
-			gtk_file_filter_add_pattern(file_filter, filter);
-			gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
-		}
-
-		res = gtk_dialog_run(GTK_DIALOG(dialog));
-
-		if (res == GTK_RESPONSE_ACCEPT) {
-			char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-			filePath = filename;
-			g_free(filename);
-		}
-
-		gtk_widget_destroy(dialog);
-#endif
-		return filePath;
-	}
-
-	std::string FileDialog::SaveFile(const char* filter)
-	{
-#ifdef NK_WIN
-		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
-		ZeroMemory(&ofn, sizeof(OPENFILENAME));
-		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
-		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = filter;
-		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT;
-		if (GetSaveFileNameA(&ofn) == TRUE)
-		{
-			return ofn.lpstrFile;
-		}
-#endif
-
-#ifdef NK_LINUX
-		GtkWidget *dialog;
-		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
-		gint res;
-
-		gtk_init(NULL, NULL);
-
-		dialog = gtk_file_chooser_dialog_new("Save File",
-											 NULL,
-											 action,
-											 "_Cancel",
-											 GTK_RESPONSE_CANCEL,
-											 "_Save",
-											 GTK_RESPONSE_ACCEPT,
-											 NULL);
-
-		GtkFileFilter *file_filter = gtk_file_filter_new();
-		gtk_file_filter_set_name(file_filter, filter);
-		gtk_file_filter_add_pattern(file_filter, "*.*"); // You can customize this pattern
-		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
-
-		res = gtk_dialog_run(GTK_DIALOG(dialog));
-		if (res == GTK_RESPONSE_ACCEPT)
-		{
-			char *filename;
-			GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
-			filename = gtk_file_chooser_get_filename(chooser);
-			std::string result(filename);
-			g_free(filename);
-			gtk_widget_destroy(dialog);
-			return result;
-		}
-		else
-		{
-			gtk_widget_destroy(dialog);
-			return std::string();
-		}
-#endif
-
-		return std::string();
-	}
-
-	std::string FileDialog::OpenFolder()
-	{
-		std::string folderPath;
-
-#ifdef NK_WIN
-		BROWSEINFOA bi;
-		CHAR szFolder[260] = { 0 };
-		ZeroMemory(&bi, sizeof(BROWSEINFO));
-		bi.lpszTitle = "Select a Folder";
-		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
-		bi.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
-		bi.pszDisplayName = szFolder;
-		LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
-		if (pidl != NULL)
-		{
-			SHGetPathFromIDListA(pidl, szFolder);
-			folderPath = std::string(szFolder);
-			CoTaskMemFree(pidl);
-		}
-#endif
-
-#ifdef NK_LINUX
-		GtkWidget* dialog;
-		GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-		gint res;
-
-		dialog = gtk_file_chooser_dialog_new("Select Folder",
-			NULL,
-			action,
-			"_Cancel",
-			GTK_RESPONSE_CANCEL,
-			"_Select",
-			GTK_RESPONSE_ACCEPT,
-			NULL);
-
-		res = gtk_dialog_run(GTK_DIALOG(dialog));
-
-		if (res == GTK_RESPONSE_ACCEPT) {
-			char* foldername = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-			folderPath = foldername;
-			g_free(foldername);
-		}
-
-		gtk_widget_destroy(dialog);
-#endif
-
-		return folderPath;
-	}
-
-	std::string FileSystem::Root = "";
-
-	Ref<Directory> FileSystem::RootDirectory;
-	Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
-
+Ref<Directory> FileSystem::RootDirectory;
+Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
 	
-
-	void FileSystem::ScanDirectory(Ref<Directory> directory)
+void FileSystem::ScanDirectory(Ref<Directory> directory)
+{
+	for (const auto& entry : std::filesystem::directory_iterator(directory->FullPath))
 	{
-		for (const auto& entry : std::filesystem::directory_iterator(directory->FullPath))
+		if (entry.is_directory())
 		{
-			if (entry.is_directory())
-			{
-				Ref<Directory> newDir = CreateRef<Directory>();
-				newDir->FullPath = entry.path().string();
-				newDir->Name = entry.path().filename().string();
+			Ref<Directory> newDir = CreateRef<Directory>();
+			newDir->FullPath = entry.path().string();
+			newDir->Name = entry.path().filename().string();
 
-				newDir->Parent = directory;
-				ScanDirectory(newDir);
-				directory->Directories.push_back(newDir);
-			}
-			else if (entry.is_regular_file())
-			{
-				std::filesystem::path currentPath = entry.path();
-				std::string absolutePath = currentPath.string();
-				std::string name = currentPath.filename().string();
-				std::string extension = currentPath.extension().string();
-				Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
-				directory->Files.push_back(newFile);
-			}
+			newDir->Parent = directory;
+			ScanDirectory(newDir);
+			directory->Directories.push_back(newDir);
+		}
+		else if (entry.is_regular_file())
+		{
+			std::filesystem::path currentPath = entry.path();
+			std::string absolutePath = currentPath.string();
+			std::string name = currentPath.filename().string();
+			std::string extension = currentPath.extension().string();
+			Ref<File> newFile = CreateRef<File>(directory, absolutePath, name, extension);
+			directory->Files.push_back(newFile);
 		}
 	}
+}
 
-	bool FileSystem::DirectoryExists(const std::string& path, bool absolute)
-	{
-		const std::string& finalPath = absolute ? path : Root + path;
+bool FileSystem::DirectoryExists(const std::string& path, bool absolute)
+{
+	const std::string& finalPath = absolute ? path : Root + path;
 
-		return std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath);
-	}
+	return std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath);
+}
 
-	bool FileSystem::MakeDirectory(const std::string& path, bool absolute)
-	{
-		return std::filesystem::create_directories(absolute ? path : FileSystem::Root + path);
-	}
+bool FileSystem::MakeDirectory(const std::string& path, bool absolute)
+{
+	return std::filesystem::create_directories(absolute ? path : FileSystem::Root + path);
+}
 
-	bool FileSystem::FileExists(const std::string& path, bool absolute)
-	{
-		std::string fullPath = absolute ? path : FileSystem::Root + path;
-		return std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath);
-	}
+bool FileSystem::FileExists(const std::string& path, bool absolute)
+{
+	std::string fullPath = absolute ? path : FileSystem::Root + path;
+	return std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath);
+}
 
-	void FileSystem::SetRootDirectory(const std::string path)
-	{
-		Root = path;
-		RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
-			path, [&](const std::string& path, const filewatch::Event& event)
+void FileSystem::SetRootDirectory(const std::string path)
+{
+	Root = path;
+	RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
+		path, [&](const std::string& path, const filewatch::Event& event)
+			{
+				std::string normalizedPath = String::ReplaceSlash(path);
+
+				// Detect if its a file and not a folder.
+				if (!FileSystem::FileExists(normalizedPath))
 				{
-					std::string normalizedPath = String::ReplaceSlash(path);
+					return;
+				}
 
-					// Detect if its a file and not a folder.
-					if (!FileSystem::FileExists(normalizedPath))
+				if(Ref<File> file = GetFile(normalizedPath); file)
+				{
+					if (file->GetFileType() == FileType::Unkown)
 					{
 						return;
 					}
 
-					if(Ref<File> file = GetFile(normalizedPath); file)
+					Logger::Log(normalizedPath + " event: " + filewatch::event_to_string(event), "filewatcher", VERBOSE);
+
+					if (event == filewatch::Event::modified)
 					{
-						if (file->GetFileType() == FileType::Unkown)
-						{
-							return;
-						}
-
-						Logger::Log(normalizedPath + " event: " + filewatch::event_to_string(event), "filewatcher", VERBOSE);
-
-						if (event == filewatch::Event::modified)
-						{
-							file->SetHasBeenModified(true);
-						}
+						file->SetHasBeenModified(true);
 					}
+				}
 					
-				}
-		);
-		Scan();
-	}
+			}
+	);
+	Scan();
+}
 
-	void FileSystem::Scan()
-	{
-		RootDirectory = CreateRef<Directory>(Root);
-		ScanDirectory(RootDirectory);
-	}
+void FileSystem::Scan()
+{
+	RootDirectory = CreateRef<Directory>(Root);
+	ScanDirectory(RootDirectory);
+}
 
-	std::string FileSystem::AbsoluteToRelative(const std::string& path)
-	{
-		const fs::path rootPath(Root);
-		const fs::path absolutePath(path);
-		return fs::relative(absolutePath, rootPath).generic_string();
-	}
+std::string FileSystem::AbsoluteToRelative(const std::string& path)
+{
+	const std::filesystem::path rootPath(Root);
+	const std::filesystem::path absolutePath(path);
+	return std::filesystem::relative(absolutePath, rootPath).generic_string();
+}
 
-	std::string FileSystem::RelativeToAbsolute(const std::string& path)
-	{
-		return Root + path;
-	}
+std::string FileSystem::RelativeToAbsolute(const std::string& path)
+{
+	return Root + path;
+}
 
-	std::string FileSystem::GetParentPath(const std::string& fullPath)
-	{
-		std::filesystem::path pathObj(fullPath);
-		auto returnvalue = pathObj.parent_path().string();
-		return returnvalue + "/";
-	}
+std::string FileSystem::GetParentPath(const std::string& fullPath)
+{
+	std::filesystem::path pathObj(fullPath);
+	auto returnvalue = pathObj.parent_path().string();
+	return returnvalue + "/";
+}
 
-	std::string FileSystem::ReadFile(const std::string& path, bool absolute)
-	{
-		std::string finalPath = path;
-		if (!absolute)
-			finalPath = Root + path;
+std::string FileSystem::ReadFile(const std::string& path, bool absolute)
+{
+	std::string finalPath = path;
+	if (!absolute)
+		finalPath = Root + path;
 
-		std::ifstream myReadFile(finalPath, std::ios::in | std::ios::binary);
-		std::string fileContent = "";
-		std::string allFile = "";
+	std::ifstream myReadFile(finalPath, std::ios::in | std::ios::binary);
+	std::string fileContent = "";
+	std::string allFile = "";
 		
-		char bom[3];
-		myReadFile.read(bom, 3);
+	char bom[3];
+	myReadFile.read(bom, 3);
 
-		// Check for UTF-8 BOM (EF BB BF)
-		if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF) 
+	// Check for UTF-8 BOM (EF BB BF)
+	if (bom[0] == 0xEF && bom[1] == 0xBB && bom[2] == 0xBF) 
+	{
+		myReadFile.seekg(3);
+	}
+	else
+	{
+		myReadFile.seekg(0);
+	}
+
+	// Use a while loop together with the getline() function to read the file line by line
+	while (getline(myReadFile, fileContent))
+	{
+		allFile.append(fileContent + "\n");
+	}
+
+	// Close the file
+	myReadFile.close();
+	return allFile;
+}
+
+std::ofstream FileSystem::fileWriter;
+bool FileSystem::BeginWriteFile(const std::string path, bool absolute)
+{
+	fileWriter = std::ofstream();
+	fileWriter.open(absolute ? path : FileSystem::Root + path);
+
+	return false;
+}
+
+bool FileSystem::WriteLine(const std::string line)
+{
+	fileWriter << line.c_str();
+
+	return true;
+}
+
+void FileSystem::EndWriteFile()
+{
+	fileWriter.close();
+}
+
+uintmax_t FileSystem::DeleteFileFromPath(const std::string& path)
+{
+	return std::remove(path.c_str());
+}
+
+uintmax_t FileSystem::DeleteFolder(const std::string& path)
+{
+	return std::filesystem::remove_all(path.c_str());
+}
+
+std::string FileSystem::GetConfigFolderPath()
+{
+	std::string subFolderPath = OS::GetConfigFolderPath().append("/Nuake/");
+	if (!DirectoryExists(subFolderPath, true))
+	{
+		MakeDirectory(subFolderPath);
+	}
+
+	return subFolderPath;
+}
+
+Ref<Directory> FileSystem::GetFileTree()
+{
+	return RootDirectory;
+}
+
+Ref<File> FileSystem::GetFile(const std::string& path)
+{
+	// Note, Might be broken on other platforms.
+	auto splits = String::Split(path, '/');
+
+	int currentDepth = -1;
+	std::string currentDirName = ".";
+	Ref<Directory> currentDirComparator = RootDirectory;
+	while (currentDirName == currentDirComparator->Name)
+	{
+		currentDepth++;
+		currentDirName = splits[currentDepth];
+
+		// Find next directory
+		for (auto& d : currentDirComparator->Directories)
 		{
-			myReadFile.seekg(3);
-		}
-		else
-		{
-			myReadFile.seekg(0);
-		}
-
-		// Use a while loop together with the getline() function to read the file line by line
-		while (getline(myReadFile, fileContent))
-		{
-			allFile.append(fileContent + "\n");
-		}
-
-		// Close the file
-		myReadFile.close();
-		return allFile;
-	}
-
-	std::ofstream FileSystem::fileWriter;
-	bool FileSystem::BeginWriteFile(const std::string path, bool absolute)
-	{
-		fileWriter = std::ofstream();
-		fileWriter.open(absolute ? path : FileSystem::Root + path);
-
-		return false;
-	}
-
-	bool FileSystem::WriteLine(const std::string line)
-	{
-		fileWriter << line.c_str();
-
-		return true;
-	}
-
-	void FileSystem::EndWriteFile()
-	{
-		fileWriter.close();
-	}
-
-	uintmax_t FileSystem::DeleteFileFromPath(const std::string& path)
-	{
-		return std::remove(path.c_str());
-	}
-
-	uintmax_t FileSystem::DeleteFolder(const std::string& path)
-	{
-		return std::filesystem::remove_all(path.c_str());
-	}
-
-	std::string FileSystem::GetConfigFolderPath()
-	{
-		std::string subFolderPath = OS::GetConfigFolderPath().append("/Nuake/");
-		if (!DirectoryExists(subFolderPath, true))
-		{
-			MakeDirectory(subFolderPath);
-		}
-
-		return subFolderPath;
-	}
-
-	Ref<Directory> FileSystem::GetFileTree()
-	{
-		return RootDirectory;
-	}
-
-	Ref<File> FileSystem::GetFile(const std::string& path)
-	{
-		// Note, Might be broken on other platforms.
-		auto splits = String::Split(path, '/');
-
-		int currentDepth = -1;
-		std::string currentDirName = ".";
-		Ref<Directory> currentDirComparator = RootDirectory;
-		while (currentDirName == currentDirComparator->Name)
-		{
-			currentDepth++;
-			currentDirName = splits[currentDepth];
-
-			// Find next directory
-			for (auto& d : currentDirComparator->Directories)
+			if (d->Name == currentDirName)
 			{
-				if (d->Name == currentDirName)
-				{
-					currentDirComparator = d;
-				}
-			}
-
-			// Find in files if can't find in directories.
-			for (auto& f : currentDirComparator->Files)
-			{
-				if (f->GetName() == currentDirName)
-				{
-					return f;
-				}
+				currentDirComparator = d;
 			}
 		}
 
-		return nullptr;
+		// Find in files if can't find in directories.
+		for (auto& f : currentDirComparator->Files)
+		{
+			if (f->GetName() == currentDirName)
+			{
+				return f;
+			}
+		}
 	}
 
-	std::string FileSystem::GetFileNameFromPath(const std::string& path)
-	{
-		const auto& split = String::Split(path, '/');
-		return String::Split(split[split.size() - 1], '.')[0];
-	}
+	return nullptr;
+}
+
+std::string FileSystem::GetFileNameFromPath(const std::string& path)
+{
+	const auto& split = String::Split(path, '/');
+	return String::Split(split[split.size() - 1], '.')[0];
+}
 
 
-	Directory::Directory(const std::string& path)
-	{
-		Files = std::vector<Ref<File>>();
-		Directories = std::vector<Ref<Directory>>();
-		Name = FileSystem::AbsoluteToRelative(path);
-		FullPath = path;
-	}
+Directory::Directory(const std::string& path)
+{
+	Files = std::vector<Ref<File>>();
+	Directories = std::vector<Ref<Directory>>();
+	Name = FileSystem::AbsoluteToRelative(path);
+	FullPath = path;
 }

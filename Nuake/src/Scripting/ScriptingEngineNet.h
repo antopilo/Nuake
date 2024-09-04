@@ -11,6 +11,7 @@ namespace Coral
 	class Type;
 }
 
+#include <filesystem>
 #include <Coral/HostInstance.hpp>
 #include <Coral/GC.hpp>
 #include <Coral/Array.hpp>

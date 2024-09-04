@@ -1,11 +1,5 @@
 #pragma once
 #include "src/Core/Core.h"
-#include "String.h"
-
-#include <string>
-#include <filesystem>
-#include <iostream>
-#include <fstream>
 
 namespace filewatch
 {
@@ -15,14 +9,6 @@ namespace filewatch
 
 namespace Nuake
 {
-	class FileDialog
-	{
-	public:
-		static std::string OpenFile(const char* filter);
-		static std::string SaveFile(const char* filter);
-		static std::string OpenFolder();
-	};
-
 	class Directory;
 	class File;
 

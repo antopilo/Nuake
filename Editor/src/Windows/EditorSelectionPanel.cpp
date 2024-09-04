@@ -8,6 +8,7 @@
 #include <src/Resource/ResourceLoader.h>
 #include <src/Resource/FontAwesome5.h>
 #include <src/Scripting/WrenScript.h>
+#include <src/FileSystem/FileDialog.h>
 
 #include <Engine.h>
 #include <src/Resource/Prefab.h>

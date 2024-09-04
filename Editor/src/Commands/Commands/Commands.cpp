@@ -1,7 +1,10 @@
 #include "Commands.h"
 
 #include <Engine.h>
+
 #include "src/FileSystem/FileSystem.h"
+
+#include <filesystem>
 
 namespace NuakeEditor
 {

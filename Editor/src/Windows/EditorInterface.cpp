@@ -53,6 +53,9 @@
 #include <src/Resource/ModelLoader.h>
 #include "../ScriptingContext/ScriptingContext.h"
 #include <src/Scene/Components/BSPBrushComponent.h>
+
+#include <src/FileSystem/FileDialog.h>
+
 #include <Tracy.hpp>
 
 namespace Nuake {
