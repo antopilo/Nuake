@@ -122,8 +122,8 @@ namespace Nuake {
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
 
-        virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 1280, 720 });
-        virtualCamera->SetTexture(CreateRef<Texture>(Vector2{ 1280, 720 }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT0);
+        virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 640, 360 });
+        virtualCamera->SetTexture(CreateRef<Texture>(Vector2{ 640, 360 }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT0);
         //ScriptingContext::Get().Initialize();
     }
 
@@ -2651,13 +2651,15 @@ namespace Nuake {
                 const Vector4& globalRight = rotationMatrix * right;
                 cam->Direction = globalForward;
                 cam->Right = globalRight;
+                cam->Translation = transform.GetGlobalPosition();
+                cam->SetTransform(glm::inverse(transform.GetGlobalTransform()));
 
                 auto sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
-                sceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), transform.GlobalTranslation);
+                sceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
                 sceneRenderer->RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get());
 
                 virtualCamera->Clear();
-                ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 1280, 720 }, { 0, 1 }, {1, 0});
+                ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 640, 360 }, { 0, 1 }, {1, 0});
 
                 ImGui::PopStyleVar(2);
                 ImGui::PopStyleColor(4);
