@@ -169,6 +169,18 @@ namespace Nuake
 
 		DebugRendererPass(scene);
 
+#ifdef AMD
+		framebuffer.Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
+
+			shader->SetUniformTex("u_Source", mShadingBuffer->GetTexture().get(), 0);
+			Renderer::DrawQuad();
+		}
+		framebuffer.Unbind();
+#else
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
@@ -187,7 +199,7 @@ namespace Nuake
 			if (lc.Type == Directional && lc.IsVolumetric && lc.CastShadows)
 				lightList.push_back(lc);
 		}
-		
+
 		glDepthMask(false);
 		if (sceneEnv->VolumetricEnabled)
 		{
@@ -198,7 +210,7 @@ namespace Nuake
 			//finalOutput = mVolumetric->GetFinalOutput().get();
 
 			// combine
-			
+
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
@@ -331,7 +343,7 @@ namespace Nuake
 			shader->SetUniform1f("ndofstart", sceneEnv->DOFStart);
 			shader->SetUniform1f("ndofdist", sceneEnv->DOFDist);
 			shader->SetUniform1f("fdofstart", sceneEnv->DOFStart);
-			shader->SetUniform1f("fdofdist", sceneEnv->DOFDist);	
+			shader->SetUniform1f("fdofdist", sceneEnv->DOFDist);
 			shader->SetUniform1f("CoC", sceneEnv->DOFCoc);
 			shader->SetUniform1f("maxblur", sceneEnv->DOFMaxBlue);
 			shader->SetUniform1f("threshold", sceneEnv->DOFThreshold);
@@ -370,7 +382,7 @@ namespace Nuake
 				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
 			}
 
-				
+
 			Renderer::DrawQuad();
 		}
 		mBarrelDistortionBuffer->Unbind();
@@ -417,11 +429,16 @@ namespace Nuake
 			RenderCommand::Clear();
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
-		
+
 			shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
+#endif
+
+		
+
+		
 
 		glDepthMask(true);
 
