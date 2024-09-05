@@ -3,6 +3,9 @@
 #include "Core/Maths.h"
 #include "Core/Timestep.h"
 
+#include <functional>
+
+
 struct GLFWwindow;
 
 namespace Nuake
