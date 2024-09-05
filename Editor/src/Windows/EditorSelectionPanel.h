@@ -27,7 +27,13 @@
 #include "../ComponentsPanel/NavMeshVolumePanel.h"
 
 #include <src/Scene/Components/WrenScriptComponent.h>
+#include <src/Resource/Prefab.h>
 
+
+namespace Nuake
+{
+	class Scene;
+}
 
 class EditorSelectionPanel 
 {
@@ -56,6 +62,7 @@ private:
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
 
+	Ref<Nuake::Scene> virtualScene;
 public:
 	EditorSelectionPanel();
 
@@ -67,7 +74,7 @@ public:
 
 	void DrawFile(Ref<Nuake::File> file);
 	void DrawResource(Nuake::Resource resource);
-
+	void DrawPrefabPanel(Ref<Nuake::Prefab> prefab);
 private:
 	void ResolveFile(Ref<Nuake::File> file);
 	void DrawMaterialPanel(Ref<Nuake::Material> material);

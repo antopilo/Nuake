@@ -122,7 +122,7 @@ ProjectSettingsCategoryWindowViewport::ProjectSettingsCategoryWindowViewport(Ref
 
 void ProjectSettingsCategoryWindowViewport::Draw()
 {
-    ImGui::DragFloat("Outline Radius", &m_Project->Settings.OutlineRadius, 0.1f, 1.0f, 10.0f);
+    ImGui::DragFloat("Outline Radius", &m_Project->Settings.OutlineRadius, 0.1f, 1.0f, 90.0f);
     ImGui::DragFloat("Gizmo Size", &m_Project->Settings.GizmoSize, 0.01f, 0.05f, 0.5f);
     ImGui::Separator();
     ImGui::Checkbox("Smooth Camera", &m_Project->Settings.SmoothCamera);

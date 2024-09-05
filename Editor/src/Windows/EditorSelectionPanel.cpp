@@ -13,8 +13,13 @@
 #include <Engine.h>
 #include <src/Resource/Prefab.h>
 
+using namespace Nuake;
+
 EditorSelectionPanel::EditorSelectionPanel()
 {
+	virtualScene = CreateRef<Scene>();
+	virtualScene->SetName("Virtual Scene");
+	virtualScene->CreateEntity("Camera").AddComponent<CameraComponent>();
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -226,6 +231,11 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 void EditorSelectionPanel::DrawResource(Nuake::Resource resource)
 {
 
+}
+
+void EditorSelectionPanel::DrawPrefabPanel(Ref<Nuake::Prefab> prefab)
+{
+	  
 }
 
 void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)

@@ -8,6 +8,8 @@
 #include <src/Threading/JobSystem.h>
 #include <src/UI/ImUI.h>
 #include <src/FileSystem/FileDialog.h>
+#include <src/Core/String.h>
+#include <src/Resource/Project.h>
 
 #include <imgui/imgui.h>
 
@@ -16,6 +18,7 @@
 #include <sstream>
 #include <regex>
 
+using namespace Nuake;
 
 void MapImporterWindow::Draw()
 {

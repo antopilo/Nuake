@@ -15,7 +15,7 @@ File::File(Ref<Directory> parentDir, const std::string& fullPath, const std::str
 
 FileType File::GetFileType() const
 {
-	const std::string_view ext = GetExtension();
+	const std::string ext = GetExtension();
 	if (ext == ".png" || ext == ".jpg")
 	{
 		return FileType::Image;

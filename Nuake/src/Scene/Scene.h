@@ -56,7 +56,7 @@ namespace Nuake
 		void Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view);
 
 		std::string GetName();
-		bool SetName(std::string& newName);
+		bool SetName(const std::string& newName);
 
 		Ref<Camera> GetCurrentCamera();
 

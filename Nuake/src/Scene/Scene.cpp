@@ -73,7 +73,7 @@ namespace Nuake
 		return this->Name;
 	}
 
-	bool Scene::SetName(std::string& newName)
+	bool Scene::SetName(const std::string& newName)
 	{
 		if (newName == "")
 			return false;
@@ -317,7 +317,6 @@ namespace Nuake
 			cam = camera.CameraInstance;
 
 			cam->Translation = transform.GetGlobalPosition();
-			break;
 		}
 
 		if (!cam)

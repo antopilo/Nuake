@@ -68,6 +68,8 @@ namespace Nuake {
     EditorSelection EditorInterface::Selection;
 
     int SelectedViewport = 0;
+    bool displayVirtualCameraOverlay = false;
+    Ref<FrameBuffer> virtualCamera;
 
     glm::vec3 DepthToWorldPosition(const glm::vec2& pixelPos, float depth, const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, const glm::vec2& viewportSize)
     {
@@ -120,6 +122,8 @@ namespace Nuake {
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
 
+        virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 1280, 720 });
+        virtualCamera->SetTexture(CreateRef<Texture>(Vector2{ 1280, 720 }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT0);
         //ScriptingContext::Get().Initialize();
     }
 
@@ -2608,6 +2612,60 @@ namespace Nuake {
 
         ImGui::PopStyleVar();
         ImGui::End();
+
+        corner = 2;
+
+        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>())
+        {
+            window_flags |= ImGuiWindowFlags_NoMove;
+            viewport = ImGui::GetWindowViewport();
+            work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+            work_area_size = ImGui::GetCurrentWindow()->Size;
+            window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+            window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+            ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+            ImGui::SetNextWindowViewport(viewport->ID);
+
+            ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+            if (ImGui::Begin("VirtualViewport", &m_ShowOverlay, window_flags))
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+                ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
+                ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
+                
+                CameraComponent& camera = Selection.Entity.GetComponent<CameraComponent>();
+                Ref<Camera> cam = camera.CameraInstance;
+                auto& transform = Selection.Entity.GetComponent<TransformComponent>();
+
+                const Quat& globalRotation = transform.GetGlobalRotation();
+                const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), transform.GetGlobalPosition());
+                const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+                const Vector4& forward = Vector4(0, 0, -1, 1);
+                const Vector4& globalForward = rotationMatrix * forward;
+
+                const Vector4& right = Vector4(1, 0, 0, 1);
+                const Vector4& globalRight = rotationMatrix * right;
+                cam->Direction = globalForward;
+                cam->Right = globalRight;
+
+                auto sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
+                sceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), transform.GlobalTranslation);
+                sceneRenderer->RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get());
+
+                virtualCamera->Clear();
+                ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 1280, 720 }, { 0, 1 }, {1, 0});
+
+                ImGui::PopStyleVar(2);
+                ImGui::PopStyleColor(4);
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::End();
+        }
     }
 
     void NewProject()
@@ -3025,7 +3083,6 @@ namespace Nuake {
         }
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-
         editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
@@ -3033,6 +3090,15 @@ namespace Nuake {
         {
             editorCam->IsMoving = true;
             editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();
+        }
+
+        if (entityIsSelected && Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>())
+        {
+            displayVirtualCameraOverlay = true;
+        }
+        else
+        {
+            displayVirtualCameraOverlay = false;
         }
 
         if (entityIsSelected && Input::IsKeyPressed(Key::ESCAPE))
