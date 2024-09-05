@@ -62,7 +62,17 @@ void main()
 
 		// Mix outline with background
 		float alpha = smoothstep(0.5, 0.9, int(col != target) * hasHit * 10.0f);
-		fragColor = mix(fragColor, u_OutlineColor, alpha);
+
+
+		vec4 outputColor = vec4(
+			mix(fragColor.r, u_OutlineColor.r, alpha),
+			mix(fragColor.g, u_OutlineColor.g, alpha),
+			mix(fragColor.b, u_OutlineColor.b, alpha),
+			mix(fragColor.a, u_OutlineColor.a, alpha)
+		);
+
+		fragColor = outputColor;
+;
 	}
 	
     if(fragColor.a > 0.1)
