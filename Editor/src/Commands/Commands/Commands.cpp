@@ -42,6 +42,12 @@ namespace NuakeEditor
 	{
         const std::string& cleanProjectName = String::Sanitize(mProject->Name);
         const std::string& gameConfigFolderPath = mProject->TrenchbroomPath + "/../games/" + cleanProjectName + "/";
+
+        if (!FileSystem::DirectoryExists(gameConfigFolderPath))
+        {
+            FileSystem::MakeDirectory(gameConfigFolderPath);
+        }
+
         const std::string& gameConfigFilePath = gameConfigFolderPath + "GameConfig.cfg";
         FileSystem::BeginWriteFile(gameConfigFilePath, true);
 

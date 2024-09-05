@@ -3055,10 +3055,10 @@ namespace Nuake {
         DrawMenuBars();
 
         int i = 0;
-        if (Logger::GetLogCount() > 0 && Logger::GetLogs()[Logger::GetLogCount() - 1].type == COMPILATION)
-        {
-            SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
-        }
+       //if (Logger::GetLogCount() > 0 && Logger::GetLogs()[Logger::GetLogCount() - 1].type == COMPILATION)
+       //{
+       //    SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
+       //}
 
         DrawStatusBar();
 

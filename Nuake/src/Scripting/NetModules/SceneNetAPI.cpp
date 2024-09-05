@@ -334,6 +334,17 @@ namespace Nuake {
 		Logger::Log("Set light intensity with id: " + std::to_string(intensity));
 	}
 
+	void LightSetColor(int entityId, float r, float g, float b)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			component.Color = Color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+		}
+	}
+
 	Coral::Array<float> CameraGetDirection(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -557,6 +568,7 @@ namespace Nuake {
 		// Lights
 		RegisterMethod("LightComponent.GetLightIntensityIcall", &LightGetIntensity);
 		RegisterMethod("LightComponent.SetLightIntensityIcall", &LightSetIntensity);
+		RegisterMethod("LightComponent.SetLightColorIcall", &LightSetColor);
 
 		// Camera
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
@@ -568,6 +580,7 @@ namespace Nuake {
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
 		RegisterMethod("CharacterControllerComponent.GetGroundVelocityIcall", &GetGroundVelocity);
 		RegisterMethod("CharacterControllerComponent.GetGroundNormalIcall", &GetGroundNormal);
+
 		// Skinned 
 		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 

@@ -311,6 +311,7 @@ namespace Nuake
 		m_GameAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
 
 		m_PrefabType = m_GameAssembly.GetType("Nuake.Net.Prefab");
+		auto entityScriptType = m_GameAssembly.GetType("Nuake.Net.Entity");
 		auto& exposedFieldAttributeType = m_GameAssembly.GetType("Nuake.Net.ExposedAttribute");
 		auto& brushScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.BrushScript");
 		auto& pointScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.PointScript");
@@ -343,7 +344,7 @@ namespace Nuake
 				}
 			}
 
-			if (type->GetBaseType())
+			if (type->IsSubclassOf(entityScriptType))
 			{
 				const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
 				if (baseTypeName != "Nuake.Net.Entity")

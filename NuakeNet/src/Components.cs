@@ -115,7 +115,7 @@ namespace Nuake.Net
     {
         internal static unsafe delegate*<int, float> GetLightIntensityIcall;
         internal static unsafe delegate*<int, float, void> SetLightIntensityIcall;
-
+        internal static unsafe delegate*<int, float, float, float, void> SetLightColorIcall;
         public enum LightType
         {
             Directional,
@@ -148,7 +148,15 @@ namespace Nuake.Net
             }
         }
 
-        public Color Color { get; set; }
+        public Color Color
+        {
+            get { return Color; }
+            set
+            {
+                unsafe { SetLightColorIcall(EntityID, (float)value.R, (float)value.G, (float)value.B); }
+            }
+        }
+
         public bool CastShadows { get; set; }
         public bool Volumetric { get; set; }
         public bool SyncWithSky { get; set; }
