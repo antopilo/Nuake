@@ -73,6 +73,14 @@ namespace Nuake {
 		return Coral::Array<float>::New(results);
 	}
 
+	Coral::Array<float> Raycast(float fromX, float fromY, float fromZ, float toX, float toY, float toZ)
+	{
+		const Vector3 from = { fromX, fromY, fromZ };
+		const Vector3 to = { toX, toY, toZ };
+		auto hits = PhysicsManager::Get().Raycast(from, to);
+		return ConvertHitsToArray(hits);
+	}
+
 	Coral::Array<float> ShapeCastCapsule(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, CapsuleInternal capsuleInternal)
 	{
 		auto capsule = CreateRef<Physics::Capsule>(capsuleInternal.Radius, capsuleInternal.Height);
@@ -104,6 +112,7 @@ namespace Nuake {
 		RegisterMethod("Debug.DrawShapeCapsuleIcall", &DrawShapeCapsule);
 		RegisterMethod("Debug.DrawShapeCylinderIcall", &DrawShapeCylinder);
 
+		RegisterMethod("Physic.RayCastIcall", &Raycast);
 		RegisterMethod("Physic.ShapeCastCapsuleIcall", &ShapeCastCapsule);
 		RegisterMethod("Physic.ShapeCastBoxIcall", &ShapeCastBox);
 	}

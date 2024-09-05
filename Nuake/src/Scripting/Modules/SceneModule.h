@@ -282,21 +282,6 @@ namespace Nuake
 
 				const auto& result = PhysicsManager::Get().GetWorld()->Raycast(from, to);
 
-				// We multiply by 3 since we have 3 floats per hit result: vector3.
-				wrenEnsureSlots(vm, static_cast<int>(result.size() * 3));
-				wrenSetSlotNewList(vm, 0);
-
-				uint32_t index = 1;
-				for (auto& r : result)
-				{
-					wrenSetSlotDouble(vm, index,	 r.WorldPosition.x);
-					wrenSetSlotDouble(vm, index + 1, r.WorldPosition.y);
-					wrenSetSlotDouble(vm, index + 2, r.WorldPosition.z);
-					wrenInsertInList(vm, 0, -1, index);
-					wrenInsertInList(vm, 0, -1, index + 1);
-					wrenInsertInList(vm, 0, -1, index + 2);
-					index += 3;
-				}
 			}
 
 			static void MoveAndSlide(WrenVM* vm)

@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Nuake.Net.Physic;
 
 namespace Nuake.Net
 {
@@ -118,10 +119,36 @@ namespace Nuake.Net
             SENSORS = 5
         }
 
+        internal static unsafe delegate*<float, float, float, float, float, float, NativeArray<float>> RayCastIcall;
         internal static unsafe delegate*<float, float, float, float, float, float, BoxInternal, NativeArray<float>> ShapeCastBoxIcall;
         internal static unsafe delegate*<float, float, float, float, float, float, float, NativeArray<float>> ShapeCastSphereIcall;
         internal static unsafe delegate*<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCapsuleIcall;
         internal static unsafe delegate*<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCylinderIcall;
+
+        public static List<ShapeCastResult> RayCast(Vector3 from, Vector3 to)
+        {
+            List<ShapeCastResult> result = [];
+            unsafe
+            {
+                NativeArray<float> resultICall = RayCastIcall(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
+                for (int i = 0; i < resultICall.Length / 7; i++)
+                {
+                    int index = i * 7;
+                    ShapeCastResult shapeCastResult = new()
+                    {
+                        ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
+                        ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
+                        Fraction = resultICall[index + 6],
+                        Layer = (Layers)resultICall[index + 7]
+                    };
+
+                    result.Add(shapeCastResult);
+                }
+
+                return result;
+            }
+        }
+
         public static List<ShapeCastResult> ShapeCast(Vector3 from, Vector3 to, Box box)
         {
             List<ShapeCastResult> result = [];

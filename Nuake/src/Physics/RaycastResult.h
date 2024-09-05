@@ -10,6 +10,8 @@ namespace Nuake
 	{
 		Vector3 WorldPosition;
 		float Fraction;
+		Vector3 ImpactNormal;
+		float Layer;
 	};
 
 	struct ShapeCastResult

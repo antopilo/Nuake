@@ -343,106 +343,109 @@ namespace Nuake
 				}
 			}
 
-			const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
-			if (baseTypeName != "Nuake.Net.Entity")
+			if (type->GetBaseType())
 			{
-				continue;
-			}
-
-			m_BaseEntityType = type->GetBaseType();
-
-			auto typeSplits = String::Split(type->GetFullName(), '.');
-			std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
-
-			NetGameScriptObject gameScriptObject;
-			gameScriptObject.coralType = type;
-			gameScriptObject.exposedVars = std::vector<ExposedVar>();
-			gameScriptObject.Base = baseTypeName;
-			for (auto& f : type->GetFields())
-			{
-				for (auto& a : f.GetAttributes())
+				const std::string baseTypeName = std::string(type->GetBaseType().GetFullName());
+				if (baseTypeName != "Nuake.Net.Entity")
 				{
-					if (a.GetType() == exposedFieldAttributeType)
+					continue;
+				}
+
+				m_BaseEntityType = type->GetBaseType();
+
+				auto typeSplits = String::Split(type->GetFullName(), '.');
+				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
+
+				NetGameScriptObject gameScriptObject;
+				gameScriptObject.coralType = type;
+				gameScriptObject.exposedVars = std::vector<ExposedVar>();
+				gameScriptObject.Base = baseTypeName;
+				for (auto& f : type->GetFields())
+				{
+					for (auto& a : f.GetAttributes())
 					{
-						ExposedVar exposedVar;
-						exposedVar.Name = f.GetName();
-
-						auto typeName = f.GetType().GetFullName();
-						ExposedVarTypes varType = ExposedVarTypes::Unsupported;
-						bool hasDefaultValue = a.GetFieldValue<Coral::Bool32>("HasDefaultvalue");
-						if (typeName == "System.Single")
+						if (a.GetType() == exposedFieldAttributeType)
 						{
-							varType = ExposedVarTypes::Float;
+							ExposedVar exposedVar;
+							exposedVar.Name = f.GetName();
 
-							if (hasDefaultValue)
+							auto typeName = f.GetType().GetFullName();
+							ExposedVarTypes varType = ExposedVarTypes::Unsupported;
+							bool hasDefaultValue = a.GetFieldValue<Coral::Bool32>("HasDefaultvalue");
+							if (typeName == "System.Single")
 							{
-								exposedVar.Value = a.GetFieldValue<float>("DefaultValueInternalFloat");
-							}
-						}
-						else if (typeName == "System.Double")
-						{
-							varType = ExposedVarTypes::Double;
-						}
-						else if (typeName == "System.String")
-						{
-							varType = ExposedVarTypes::String;
+								varType = ExposedVarTypes::Float;
 
-							if (hasDefaultValue)
+								if (hasDefaultValue)
+								{
+									exposedVar.Value = a.GetFieldValue<float>("DefaultValueInternalFloat");
+								}
+							}
+							else if (typeName == "System.Double")
 							{
-								exposedVar.Value = a.GetFieldValue<Coral::String>("DefaultValueInternalString");
+								varType = ExposedVarTypes::Double;
 							}
-						}
-						else if (typeName == "System.Boolean")
-						{
-							varType = ExposedVarTypes::Bool;
-
-							if (hasDefaultValue)
+							else if (typeName == "System.String")
 							{
-								exposedVar.Value = a.GetFieldValue<Coral::Bool32>("DefaultValueInternalBool");
+								varType = ExposedVarTypes::String;
+
+								if (hasDefaultValue)
+								{
+									exposedVar.Value = a.GetFieldValue<Coral::String>("DefaultValueInternalString");
+								}
 							}
-						}
-						else if (typeName == "System.Numerics.Vector2")
-						{
-							varType = ExposedVarTypes::Vector2;
-						}
-						else if (typeName == "System.Numerics.Vector3")
-						{
-							varType = ExposedVarTypes::Vector3;
-						}
-						else if (typeName == "Nuake.Net.Entity")
-						{
-							varType = ExposedVarTypes::Entity;
-						}
-						else if (typeName == "Nuake.Net.Prefab")
-						{
-							varType = ExposedVarTypes::Prefab;
-						}
+							else if (typeName == "System.Boolean")
+							{
+								varType = ExposedVarTypes::Bool;
 
-						if (varType != ExposedVarTypes::Unsupported)
-						{
-							exposedVar.Type = varType;
-							gameScriptObject.exposedVars.push_back(exposedVar);
-						}
+								if (hasDefaultValue)
+								{
+									exposedVar.Value = a.GetFieldValue<Coral::Bool32>("DefaultValueInternalBool");
+								}
+							}
+							else if (typeName == "System.Numerics.Vector2")
+							{
+								varType = ExposedVarTypes::Vector2;
+							}
+							else if (typeName == "System.Numerics.Vector3")
+							{
+								varType = ExposedVarTypes::Vector3;
+							}
+							else if (typeName == "Nuake.Net.Entity")
+							{
+								varType = ExposedVarTypes::Entity;
+							}
+							else if (typeName == "Nuake.Net.Prefab")
+							{
+								varType = ExposedVarTypes::Prefab;
+							}
 
-						Logger::Log("Exposed field detected: " + std::string(f.GetName()) + " of type " + std::string(f.GetType().GetFullName()) );
+							if (varType != ExposedVarTypes::Unsupported)
+							{
+								exposedVar.Type = varType;
+								gameScriptObject.exposedVars.push_back(exposedVar);
+							}
+
+							Logger::Log("Exposed field detected: " + std::string(f.GetName()) + " of type " + std::string(f.GetType().GetFullName()));
+						}
 					}
 				}
-			}
 
-			// Add to the brush map to retrieve when exporting FGD
-			if (isBrushScript)
-			{
-				gameScriptObject.Description = brushDescription;
-				gameScriptObject.isTrigger = isTrigger;
-				m_BrushEntityTypes[shortenedTypeName] = gameScriptObject;
-			}
+				// Add to the brush map to retrieve when exporting FGD
+				if (isBrushScript)
+				{
+					gameScriptObject.Description = brushDescription;
+					gameScriptObject.isTrigger = isTrigger;
+					m_BrushEntityTypes[shortenedTypeName] = gameScriptObject;
+				}
 
-			if (isPointScript)
-			{
-				gameScriptObject.Description = pointDescription;
-				m_PointEntityTypes[shortenedTypeName] = gameScriptObject;
+				if (isPointScript)
+				{
+					gameScriptObject.Description = pointDescription;
+					m_PointEntityTypes[shortenedTypeName] = gameScriptObject;
+				}
+				m_GameEntityTypes[shortenedTypeName] = gameScriptObject;
 			}
-			m_GameEntityTypes[shortenedTypeName] = gameScriptObject;
 		}
 	}
 

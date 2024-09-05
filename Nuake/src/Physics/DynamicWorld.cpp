@@ -554,7 +554,7 @@ namespace Nuake
 			}
 		}
 
-		std::vector<RaycastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
+		std::vector<ShapeCastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
 		{
 			// Create jolt ray
 			const auto& fromJolt = JPH::Vec3(from.x, from.y, from.z);
@@ -566,22 +566,24 @@ namespace Nuake
 			_JoltPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, JPH::RayCastSettings(), collector);
 
 			// Fetch results
-			std::vector<RaycastResult> raycastResults;
+			std::vector<ShapeCastResult> raycastResults;
 			if (collector.HadHit())
 			{
 				int num_hits = (int)collector.mHits.size();
 				JPH::BroadPhaseCastResult* results = collector.mHits.data();
-
 				// Format result
 				for (int i = 0; i < num_hits; ++i)
 				{
 					const float hitFraction = results[i].mFraction;
 					const JPH::Vec3& hitPosition = ray.GetPointOnRay(results[i].mFraction);
-
-					RaycastResult result
+					auto bodyId = static_cast<JPH::BodyID>(results[i].mBodyID);
+					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
+					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
-						hitFraction
+						hitFraction,
+						Vector3(0, 0, 0),
+						layer
 					};
 
 					raycastResults.push_back(std::move(result));

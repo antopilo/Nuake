@@ -84,7 +84,7 @@ namespace Nuake
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(Entity& entity, const Vector3& force);
 
-			std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
+			std::vector<ShapeCastResult> Raycast(const Vector3& from, const Vector3& to);
 			std::vector<ShapeCastResult> CastShape(const Vector3& from, const Vector3& to, const Ref<PhysicShape>& shape);
 			void StepSimulation(Timestep ts);
 			void Clear();

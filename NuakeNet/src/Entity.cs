@@ -88,8 +88,21 @@ namespace Nuake.Net
             }
         }
 
-        public string Target { get { unsafe { return EntityGetTargetIcall(ECSHandle);  } }}
+        protected TransformComponent internalTransform;
+        public TransformComponent Transform
+        {
+            get
+            {
+                if(internalTransform == null)
+                {
+                    internalTransform = GetComponent<TransformComponent>()!;
+                }
 
+                return internalTransform;
+            }
+        }
+
+        public string Target { get { unsafe { return EntityGetTargetIcall(ECSHandle);  } }}
         public int ID { get; set; }
         public int ECSHandle { get; set; } = -1;
 
