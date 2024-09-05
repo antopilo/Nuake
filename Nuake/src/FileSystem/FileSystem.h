@@ -16,7 +16,6 @@ namespace Nuake
 	{
 	public:
 		static std::string Root;
-
 		static Ref<Directory> RootDirectory;
 		static Ref<filewatch::FileWatch<std::string>> RootFileWatch;
 
@@ -28,6 +27,7 @@ namespace Nuake
 		static std::string GetParentPath(const std::string& fullPath);
 		static Ref<Directory> GetFileTree();
 		static Ref<File> GetFile(const std::string& path);
+		static Ref<Directory> GetDirectory(const std::string& path);
 		static std::string GetFileNameFromPath(const std::string& path);
 		static void ScanDirectory(Ref<Directory> directory);
 		static void GetDirectories();

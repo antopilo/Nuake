@@ -32,5 +32,7 @@ namespace Nuake {
 		bool DeletePopup();
 		void DrawContextMenu();
 		void RefreshFileBrowser();
+
+		void Scan();
 	};
 }

@@ -34,6 +34,8 @@
 #include "../Actions/EditorSelection.h"
 #include "FileSystemUI.h"
 
+#include <src/FileSystem/Directory.h>
+
 #include "../Misc/InterfaceFonts.h"
 
 #include "WelcomeWindow.h"
@@ -3175,6 +3177,12 @@ namespace Nuake {
     void EditorInterface::PushCommand(ICommand&& command)
     {
         mCommandBuffer->PushCommand(command);
+    }
+
+    void EditorInterface::OnWindowFocused()
+    {
+        filesystem->Scan();
+        
     }
 
 	bool EditorInterface::LoadProject(const std::string& projectPath)

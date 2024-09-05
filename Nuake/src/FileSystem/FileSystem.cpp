@@ -237,6 +237,39 @@ Ref<File> FileSystem::GetFile(const std::string& path)
 	return nullptr;
 }
 
+Ref<Directory> FileSystem::GetDirectory(const std::string& path)
+{
+	// Note, Might be broken on other platforms.
+	auto splits = String::Split(path, '/');
+
+	int currentDepth = -1;
+	std::string currentDirName = ".";
+	Ref<Directory> currentDirComparator = RootDirectory;
+	while (currentDirName == currentDirComparator->Name)
+	{
+		currentDepth++;
+
+		if (currentDepth >= splits.size())
+		{
+			return currentDirComparator;
+		}
+
+		currentDirName = splits[currentDepth];
+
+		// Find next directory
+		for (auto& d : currentDirComparator->Directories)
+		{
+			if (d->Name == currentDirName)
+			{
+				currentDirComparator = d;
+				continue;
+			}
+		}
+	}
+
+	return currentDirComparator;
+}
+
 std::string FileSystem::GetFileNameFromPath(const std::string& path)
 {
 	const auto& split = String::Split(path, '/');
@@ -250,4 +283,9 @@ Directory::Directory(const std::string& path)
 	Directories = std::vector<Ref<Directory>>();
 	Name = FileSystem::AbsoluteToRelative(path);
 	FullPath = path;
+}
+
+std::string Directory::GetName() const
+{
+	return Name;
 }

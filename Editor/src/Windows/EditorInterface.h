@@ -102,5 +102,8 @@ namespace Nuake
 	public:
 		std::string GetEntityTypeName(const Entity& entity) const;
 		static void PushCommand(ICommand&& command);
+
+	public:
+		void OnWindowFocused();
 	};
 }

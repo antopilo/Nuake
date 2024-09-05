@@ -19,5 +19,8 @@ namespace Nuake
 
 		Directory() = default;
 		~Directory() = default;
+
+		std::string GetName() const;
+		std::string GetFullPath() const;
 	};
 }

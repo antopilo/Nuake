@@ -76,3 +76,8 @@ void EditorLayer::OnDetach()
 {
 	delete m_EditorInterface;
 }
+
+void EditorLayer::OnWindowFocused()
+{
+    m_EditorInterface->OnWindowFocused();
+}

@@ -45,6 +45,32 @@ void EditorApplication::OnInit()
         }
     }
 
+    m_Window->SetOnWindowFocusedCallback([&](Window& window, bool focused)
+        {
+            if (!focused)
+            {
+                return;
+            }
+
+            for (auto& layer : m_LayerStack)
+            {
+                layer->OnWindowFocused();
+            }
+        }); 
+
+    m_Window->SetOnWindowClosedCallback([](Window& window)
+        {
+            if (Engine::GetProject())
+            {
+                Engine::GetProject()->Save();
+            }
+
+            if (Engine::GetCurrentScene())
+            {
+                Engine::GetCurrentScene()->Save();
+            }
+        });
+
     PushLayer(CreateScope<EditorLayer>());
 }
 

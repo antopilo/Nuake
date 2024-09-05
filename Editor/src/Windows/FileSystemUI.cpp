@@ -694,8 +694,28 @@ namespace Nuake
 
     void FileSystemUI::RefreshFileBrowser()
     {
+        Scan();
+    }
+
+    void FileSystemUI::Scan()
+    {
+        if (!m_CurrentDirectory)
+        {
+            return;
+        }
+
+        std::string previousPath = m_CurrentDirectory->FullPath;
+
         FileSystem::Scan();
-        m_CurrentDirectory = FileSystem::RootDirectory;
+
+        if (FileSystem::DirectoryExists(previousPath, true))
+        {
+            m_CurrentDirectory = FileSystem::GetDirectory(FileSystem::AbsoluteToRelative(previousPath));
+        }
+        else
+        {
+            m_CurrentDirectory = FileSystem::RootDirectory;
+        }
     }
 
     float h = 200;

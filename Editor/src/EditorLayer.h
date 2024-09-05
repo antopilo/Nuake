@@ -22,6 +22,8 @@ public:
 	virtual void OnUpdate() override;
 	virtual void OnDetach() override;
 
+	virtual void OnWindowFocused() override;
+
 private:
 	CommandBuffer mCommandBuffer;
 	Nuake::EditorInterface* m_EditorInterface;
