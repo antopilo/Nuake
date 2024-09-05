@@ -88,6 +88,20 @@ int Window::Init()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    glfwSetWindowUserPointer(window, this);
+
+    glfwSetWindowCloseCallback(window, [](GLFWwindow* nativeWindow) 
+        {
+            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+            window->OnWindowClosed(*window);
+        });
+
+    glfwSetWindowFocusCallback(window, [](GLFWwindow* nativeWindow, int focused)
+        {
+            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+            window->OnWindowFocused(*window, static_cast<bool>(focused));
+        });
+
     // TODO: have clear color in environnement.
     glClearColor(0.f, 0.f, 0.f, 1.0f);
 
@@ -322,6 +336,32 @@ void Window::Maximize()
     SetSize({mode->width, mode->height});
     Center();
     glfwMaximizeWindow(this->window);
+}
+
+void Window::SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback)
+{
+    onWindowFocusedCallback = callback;
+}
+
+void Window::SetOnWindowClosedCallback(std::function<void(Window& window)> callback)
+{
+    onWindowClosedCallback = callback;
+}
+
+void Window::OnWindowFocused(Window& window, bool focused)
+{
+    if (onWindowFocusedCallback)
+    {
+        onWindowFocusedCallback(window, focused);
+    }
+}
+
+void Window::OnWindowClosed(Window& window)
+{
+    if (onWindowClosedCallback)
+    {
+        onWindowClosedCallback(window);
+    }
 }
 
 void Window::InitImgui()

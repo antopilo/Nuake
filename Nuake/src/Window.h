@@ -52,6 +52,12 @@ namespace Nuake
 		void SetFullScreen(bool enabled);
 		void Maximize();
 
+		void OnWindowFocused(Window& window, bool focused);
+		void OnWindowClosed(Window& window);
+
+		void SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback);
+		void SetOnWindowClosedCallback(std::function<void(Window& window)> callback);
+
 	private:
 		const std::string DEFAULT_TITLE = "Untitled Window";
 		const uint32_t DEFAULT_WIDTH = 1280;
@@ -67,6 +73,13 @@ namespace Nuake
 		Ref<FrameBuffer> framebuffer;
 		Ref<Scene> scene;
 
+		// Callbacks
+		std::function<void(Window&)> onWindowClosedCallback;
+		std::function<void(Window&, bool)> onWindowFocusedCallback;
+
 		void InitImgui();
+
+	private:
+
 	};
 }
