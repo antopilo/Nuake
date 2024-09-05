@@ -108,6 +108,8 @@ project "Nuake"
         "%{prj.name}/src/Audio/**.cpp",
         "%{prj.name}/src/Core/**.h",
         "%{prj.name}/src/Core/**.cpp",
+        "%{prj.name}/src/FileSystem/**.h",
+        "%{prj.name}/src/FileSystem/**.cpp",
         "%{prj.name}/src/Physics/**.h",
         "%{prj.name}/src/Physics/**.cpp",
         "%{prj.name}/src/Rendering/**.h",
