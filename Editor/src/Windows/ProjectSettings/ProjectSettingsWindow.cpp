@@ -15,23 +15,24 @@ ProjectSettingsCategoryWindowGeneral::ProjectSettingsCategoryWindowGeneral(Ref<N
 
 void ProjectSettingsCategoryWindowGeneral::Draw()
 {
-    using namespace Nuake;
-    //ImGui::InputText("Project Name", &m_Project->Name);
-    //ImGui::InputTextMultiline("Project Description", &m_Project->Description);
+	ImGui::InputText("Project Name", &m_Project->Name);
 
-    if (ImGui::Button("Locate"))
-    {
-        const std::string& locationPath = Nuake::FileDialog::OpenFile("TrenchBroom (.exe)\0TrenchBroom.exe\0");
+	ImGui::InputTextMultiline("Project Description", &m_Project->Description);
+	
+	if (ImGui::Button("Locate"))
+	{
+		const std::string& locationPath = Nuake::FileDialog::OpenFile("TrenchBroom (.exe)\0TrenchBroom.exe\0");
 
-        if (!locationPath.empty())
-        {
-            m_Project->TrenchbroomPath = locationPath;
-        }
-    }
+		if (!locationPath.empty())
+		{
+			m_Project->TrenchbroomPath = locationPath;
+		}
+	}
 
-    ImGui::ColorEdit4("Primary Color", &m_Project->Settings.PrimaryColor.r);
-   
-    //ImGui::InputText("Trenchbroom Path", &m_Project->TrenchbroomPath);
+	ImGui::SameLine();
+    ImGui::InputText("Trenchbroom Path", &m_Project->TrenchbroomPath);
+
+	ImGui::ColorEdit4("Primary Color", &m_Project->Settings.PrimaryColor.r);
 }
 
 ProjectSettingsWindow::ProjectSettingsWindow()
@@ -64,7 +65,7 @@ void ProjectSettingsWindow::Draw()
         return;
     }
 
-    ImGui::SetNextWindowSizeConstraints({600, 300}, {1280, 720});
+    ImGui::SetNextWindowSizeConstraints({800, 400}, {1280, 720});
     if (ImGui::Begin("Project Settings", &m_DisplayWindow, ImGuiWindowFlags_NoDocking))
     {
         ImVec4* colors = ImGui::GetStyle().Colors;
