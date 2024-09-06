@@ -72,7 +72,6 @@ void main()
 		);
 
 		fragColor = outputColor;
-;
 	}
 	
     if(fragColor.a > 0.1)
@@ -80,5 +79,12 @@ void main()
         fragColor.a = 1.0f;
     }
     
-    FragColor = mix(vec4(0), fragColor, middleSample != target && hasHit > 0.0f);
+	float ratio = float(middleSample != target && hasHit > 0.0f);
+	vec4 finalColor = vec4(
+		mix(0, fragColor.r, ratio),
+		mix(0, fragColor.g, ratio),
+		mix(0, fragColor.b, ratio),
+		mix(0, fragColor.a, ratio),
+	);
+    FragColor = finalColor;
 }
