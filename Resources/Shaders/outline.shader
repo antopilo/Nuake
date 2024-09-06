@@ -84,7 +84,7 @@ void main()
 		mix(0, fragColor.r, ratio),
 		mix(0, fragColor.g, ratio),
 		mix(0, fragColor.b, ratio),
-		mix(0, fragColor.a, ratio),
+		mix(0, fragColor.a, ratio)
 	);
     FragColor = finalColor;
 }
