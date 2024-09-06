@@ -544,12 +544,10 @@ namespace Nuake {
                         else
                         {
                             this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
-
                             
                             std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
                             SetStatusMessage(statusMessage);
 
-                            
                             auto job = [this]()
                             {
                                 this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
@@ -699,6 +697,7 @@ namespace Nuake {
                         }
                         else
                         {
+                            Engine::GetProject()->ExportEntitiesToTrenchbroom();
                             SetStatusMessage("Build succesful!");
                         }
                     });
@@ -1996,44 +1995,54 @@ namespace Nuake {
 
             if (ImGui::BeginPopup("create_entity_popup"))
             {
+                Entity entity;
+                Ref<Scene> scene = Engine::GetCurrentScene();
                 if (ImGui::MenuItem("Empty"))
                 {
-                    Engine::GetCurrentScene()->CreateEntity("Empty");
+                    entity = scene->CreateEntity("Empty");
                 }
 
                 if(ImGui::BeginMenu("3D"))
                 {
                     if (ImGui::MenuItem("Camera"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Camera").AddComponent<CameraComponent>();
+                        entity = scene->CreateEntity("Camera");
+                        entity.AddComponent<CameraComponent>();
                     }
                     if (ImGui::MenuItem("Model"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Model").AddComponent<ModelComponent>();
+                        entity = scene->CreateEntity("Model");
+                        entity.AddComponent<ModelComponent>();
                     }
                     if (ImGui::MenuItem("Skinned Model"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Skinned Model").AddComponent<SkinnedModelComponent>();
+                        entity = scene->CreateEntity("Skinned Model");
+                        entity.AddComponent<SkinnedModelComponent>();
                     }
                     if (ImGui::MenuItem("Sprite"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Sprite").AddComponent<SpriteComponent>();
+                        entity = scene->CreateEntity("Sprite");
+                        entity.AddComponent<SpriteComponent>();
                     }
                     if (ImGui::MenuItem("Particle Emitter"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Particle Emitter").AddComponent<ParticleEmitterComponent>();
+                        entity = scene->CreateEntity("Particle Emitter");
+                        entity.AddComponent<ParticleEmitterComponent>();
                     }
                     if (ImGui::MenuItem("Light"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Light").AddComponent<LightComponent>();
+                        entity = scene->CreateEntity("Light");
+                        entity.AddComponent<LightComponent>();
                     }
                     if (ImGui::MenuItem("Quake Map"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Quake Map").AddComponent<QuakeMapComponent>();
+                        entity = scene->CreateEntity("Quake Map");
+                        entity.AddComponent<QuakeMapComponent>();
                     }
                     if (ImGui::MenuItem("NavMesh Volume"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("NavMesh Volume").AddComponent<NavMeshVolumeComponent>();
+                        entity = scene->CreateEntity("NavMesh Volume");
+                        entity.AddComponent<NavMeshVolumeComponent>();
                     }
                     ImGui::EndMenu();
                 }
@@ -2042,11 +2051,13 @@ namespace Nuake {
                 {
                     if (ImGui::MenuItem("Character Controller"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Character Controller").AddComponent<CharacterControllerComponent>();
+                        entity = scene->CreateEntity("Character Controller");
+                        entity.AddComponent<CharacterControllerComponent>();
                     }
                     if (ImGui::MenuItem("Rigid Body"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Rigid Body").AddComponent<RigidBodyComponent>();
+                        entity = scene->CreateEntity("Rigid Body");
+                        entity.AddComponent<RigidBodyComponent>();
                     }
                     ImGui::EndMenu();
                 }
@@ -2055,23 +2066,28 @@ namespace Nuake {
                 {
                     if (ImGui::MenuItem("Box Collider")) 
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Box Collider").AddComponent<BoxColliderComponent>();
+                        entity = scene->CreateEntity("Box Collider");
+                        entity.AddComponent<BoxColliderComponent>();
                     }
                     if (ImGui::MenuItem("Sphere Collider")) 
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Sphere Collider").AddComponent<SphereColliderComponent>();
+                        entity = scene->CreateEntity("Sphere Collider");
+                        entity.AddComponent<SphereColliderComponent>();
                     }
                     if (ImGui::MenuItem("Capsule Collider")) 
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Capsule Collider").AddComponent<CapsuleColliderComponent>();
+                        entity = scene->CreateEntity("Capsule Collider");
+                        entity.AddComponent<CapsuleColliderComponent>();
                     }
                     if (ImGui::MenuItem("Cylinder Collider")) 
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Cylinder Collider").AddComponent<CylinderColliderComponent>();
+                        entity = scene->CreateEntity("Cylinder Collider");
+                        entity.AddComponent<CylinderColliderComponent>();
                     }
                     if (ImGui::MenuItem("Mesh Collider")) 
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Mesh Collider").AddComponent<MeshColliderComponent>();
+                        entity = scene->CreateEntity("Mesh Collider");
+                        entity.AddComponent<MeshColliderComponent>();
                     }
                     ImGui::EndMenu();
                 }
@@ -2080,7 +2096,8 @@ namespace Nuake {
                 {
                     if (ImGui::MenuItem("Audio Emitter"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Audio Emitter").AddComponent<AudioEmitterComponent>();
+                        entity = scene->CreateEntity("Audio Emitter");
+                        entity.AddComponent<AudioEmitterComponent>();
                     }
                     ImGui::EndMenu();
                 }
@@ -2089,11 +2106,28 @@ namespace Nuake {
                 {
                     if (ImGui::MenuItem("Script"))
                     {
-                        Engine::GetCurrentScene()->CreateEntity("Script").AddComponent<WrenScriptComponent>();
+                        entity = scene->CreateEntity("Script");
+                        entity.AddComponent<WrenScriptComponent>();
                     }
                     ImGui::EndMenu();
                 }
                 
+                if (entity.IsValid())
+                {
+                    if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid())
+                    {
+                        Selection.Entity.AddChild(entity);
+                    }
+                    else
+                    {
+                        auto& camera = Engine::GetCurrentScene()->m_EditorCamera;
+                        Vector3 newEntityPos = camera->Translation + camera->Direction;
+                        entity.GetComponent<TransformComponent>().SetLocalPosition(newEntityPos);
+                    }
+
+                    Selection = EditorSelection(entity);
+                }
+
                 ImGui::EndPopup();
             }
 
@@ -2809,7 +2843,6 @@ namespace Nuake {
                 if (ImGui::MenuItem("Save scene", "CTR+SHIFT+L+S"))
                 {
                     Engine::GetCurrentScene()->Save();
-                    Selection = EditorSelection();
                     SetStatusMessage("Scene saved succesfully.");
                 }
                 if (ImGui::MenuItem("Save scene as...", "CTRL+SHIFT+S"))
@@ -2898,34 +2931,51 @@ namespace Nuake {
             {
                 if (ImGui::BeginMenu("Create new"))
                 {
+                    Entity entity;
                     if (ImGui::MenuItem("Empty"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Empty entity");
+                        entity = Engine::GetCurrentScene()->CreateEntity("Empty entity");
                     }
                     if (ImGui::MenuItem("Light"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Light");
-                        ent.AddComponent<LightComponent>();
+                        entity = Engine::GetCurrentScene()->CreateEntity("Light");
+                        entity.AddComponent<LightComponent>();
                     }
                     if (ImGui::MenuItem("Camera"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Camera");
-                        ent.AddComponent<CameraComponent>();
+                        entity = Engine::GetCurrentScene()->CreateEntity("Camera");
+                        entity.AddComponent<CameraComponent>();
                     }
                     if (ImGui::MenuItem("Rigidbody"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Rigidbody");
-                        ent.AddComponent<RigidBodyComponent>();
+                        entity = Engine::GetCurrentScene()->CreateEntity("Rigidbody");
+                        entity.AddComponent<RigidBodyComponent>();
                     }
                     if (ImGui::MenuItem("Trenchbroom map"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
-                        ent.AddComponent<QuakeMapComponent>();
+                        entity = Engine::GetCurrentScene()->CreateEntity("Trenchbroom map");
+                        entity.AddComponent<QuakeMapComponent>();
                     }
                     if (ImGui::MenuItem("Model"))
                     {
-                        auto ent = Engine::GetCurrentScene()->CreateEntity("Model");
-                        ent.AddComponent<ModelComponent>();
+                        entity = Engine::GetCurrentScene()->CreateEntity("Model");
+                        entity.AddComponent<ModelComponent>();
+                    }
+
+                    if (entity.IsValid())
+                    {
+                        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid())
+                        {
+                            Selection.Entity.AddChild(entity);
+                        }
+                        else
+                        {
+                            auto camera = Engine::GetCurrentScene()->m_EditorCamera;
+                            Vector3 newEntityPos = camera->Translation + camera->Direction;
+                            entity.GetComponent<TransformComponent>().SetLocalPosition(newEntityPos);
+                        }
+
+                        Selection = EditorSelection(entity);
                     }
                     ImGui::EndMenu();
                 }
@@ -2994,7 +3044,6 @@ namespace Nuake {
                 Engine::GetProject()->Save();
                 Engine::GetCurrentScene()->Save();
 
-                Selection = EditorSelection();
             }
             else if(ImGui::IsKeyPressed(ImGuiKey_O))
             {
