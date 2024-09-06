@@ -276,7 +276,6 @@ std::string FileSystem::GetFileNameFromPath(const std::string& path)
 	return String::Split(split[split.size() - 1], '.')[0];
 }
 
-
 Directory::Directory(const std::string& path)
 {
 	Files = std::vector<Ref<File>>();

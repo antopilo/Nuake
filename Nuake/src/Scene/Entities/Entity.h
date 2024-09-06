@@ -28,7 +28,7 @@ namespace Nuake
 
 		bool IsValid() const
 		{
-			return m_Scene->m_Registry.valid((entt::entity)GetHandle());
+			return m_EntityHandle != (entt::entity)-1 && m_Scene->m_Registry.valid((entt::entity)GetHandle());
 		}
 
 		template<typename T>
