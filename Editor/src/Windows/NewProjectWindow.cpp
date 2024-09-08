@@ -194,7 +194,12 @@ namespace Nuake
 
 					ImGui::Dummy({ 1, ImGui::GetContentRegionAvail().y - 42 });
 
-					ImGui::Dummy({ ImGui::GetContentRegionAvail().x - 130, 38 }); ImGui::SameLine();
+					ImGui::Dummy({ ImGui::GetContentRegionAvail().x - 230 - 16, 38}); ImGui::SameLine();
+					if (Nuake::UI::SecondaryButton("Cancel", { 100, 38 }))
+					{
+						m_Editor->isCreatingNewProject = false;
+					}
+					ImGui::SameLine();
 					if (Nuake::UI::PrimaryButton((ICON_FA_PLUS + std::string(" Create")).c_str(), Nuake::Vector2{ 120, 38 }, Nuake::Color(primaryColor.x, primaryColor.y, primaryColor.z, primaryColor.w)))
 					{
 						if (projectTitle.empty())
@@ -264,7 +269,6 @@ namespace Nuake
 	void NewProjectWindow::DrawProjectTemplate(uint32_t i, const std::string& title, const std::string& description)
 	{
 		opened = true;
-		ImGui::ShowDemoWindow(&opened);
 		ImGui::Dummy({ 4, 4 });
 		ImGui::SameLine();
 		opened = true;
