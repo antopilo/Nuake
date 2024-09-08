@@ -95,6 +95,13 @@ LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
                 launchSettings.monitor = stoi(arguments[i + 1]);
             }
         }
+        else if (argumentSize == 2 && Nuake::FileSystem::FileExists(arg))
+        {
+            if (Nuake::String::EndsWith(arg, ".project"))
+            {
+                launchSettings.projectPath = arg;
+            }
+        }
 
         i++;
     }
