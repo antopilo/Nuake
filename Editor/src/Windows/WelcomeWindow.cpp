@@ -81,6 +81,11 @@ namespace Nuake
 
 		ParseRecentFile();
 
+		if (_Projects.size() > 0)
+		{
+			SelectedProject = 0;
+		}
+
 		// Load Nuake logo
 		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
@@ -196,8 +201,10 @@ namespace Nuake
 
 	void WelcomeWindow::DrawProjectItem(const uint32_t itemIndex)
 	{
+		ImGui::Dummy({ 4, 4 });
+		ImGui::SameLine();
 		const ProjectPreview& project = _Projects[itemIndex];
-		const uint32_t itemHeight = 120;
+		const uint32_t itemHeight = 56;
 		const float cursorYStart = ImGui::GetCursorPosY();
 
 		const std::string selectableName = "##" + std::to_string(itemIndex);
@@ -211,7 +218,12 @@ namespace Nuake
 		draw_list->ChannelsSetCurrent(1);
 
 		//ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0, 0, 0, 0));
-		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetContentRegionAvail().x, itemHeight));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.25, 0.25, 0.5, 0.0));
+		ImGui::PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.25, 0.25, 0.5, 0.0));
+		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.25, 0.25, 0.5, 0.0));
+		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetContentRegionAvail().x - 12, itemHeight));
+		ImGui::PopStyleVar();
 		if (result)
 		{
 			SelectedProject = itemIndex;
@@ -224,9 +236,17 @@ namespace Nuake
 			queuedProjectPath = _Projects[SelectedProject].Path;
 		}
 
+		ImU32 color = IM_COL32(63, 63, 66, 128);
+		if (isSelected)
+		{
+			color = IM_COL32(63, 69, 79, 255);
+		}
+		else if (ImGui::IsItemHovered())
+		{
+			color = IM_COL32(20, 20, 20, 128);
+		}
+
 		//ImGui::PopStyleColor();
-		
-		draw_list->ChannelsMerge();
 
 		if (result)
 		{
@@ -234,33 +254,62 @@ namespace Nuake
 		}
 		//ImGui::PopStyleColor();
 
-		const ImVec2 padding = ImVec2(25.0f, 20.0f);
-		const ImVec2 iconSize = ImVec2(100, 100);
-		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(0, cursorYStart));
+		draw_list->ChannelsSetCurrent(0);
+		ImVec2 p_min = ImGui::GetItemRectMin();
+		ImVec2 p_max = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRectFilled(p_min, p_max, color, 4.0f);
+
+		draw_list->ChannelsMerge();
+
+		ImGui::PopStyleColor(3);
+
+		const ImVec2 padding = ImVec2(16.0f, 0.0f);
+		const ImVec2 iconSize = ImVec2(54, 54.0f);
+		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(4, cursorYStart));
 
 		if (project.ProjectIcon)
 		{
 			ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		}
+		else
+		{
+			ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+		}
 
 		ImGui::SameLine();
-		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
+		ImGui::SetCursorPosX(padding.x + iconSize.x);
 
-		ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
-		ImGui::SetCursorPosY(cursorYStart + padding.y);
+		ImGui::SetCursorPosY(cursorYStart + 8.0f);
 		{
-			UIFont boldfont = UIFont(Fonts::LargeBold);
-			ImGui::Text(project.Name.c_str());
+			UIFont boldfont = UIFont(Fonts::Normal);
+
+			if (isSelected)
+			{
+				ImGui::TextColored(ImVec4(119.0f / 255.0f, 187.0f / 255.0f, 1, 255.0f), project.Name.c_str());
+			}
+			else
+			{
+				ImGui::Text(project.Name.c_str());
+			}
 		}
 
-		ImGui::SetCursorPosY(cursorYStart + padding.y + 34.f);
+		ImGui::SetCursorPosY(cursorYStart + 28.f);
 		{
-			ImGui::SetCursorPosX(padding.x + iconSize.x + padding.x);
-			UIFont boldfont = UIFont(Fonts::Bold);
-			ImGui::Text(project.Description.c_str());
+			ImGui::SetCursorPosX(padding.x + iconSize.x);
+			UIFont boldfont = UIFont(Fonts::Normal);
+
+			if (isSelected)
+			{
+				ImGui::TextColored(ImVec4(119.0f / 255.0f, 187.0f / 255.0f, 1, 255.0f), (ICON_FA_INFO_CIRCLE + std::string(" ") + project.Description).c_str());
+			}
+			else
+			{
+				ImGui::TextColored(ImVec4(1, 1, 1, 0.4), (ICON_FA_INFO_CIRCLE + std::string(" ") + project.Description).c_str());
+			}
 		}
 
-		ImGui::SetCursorPosY(cursorYStart + itemHeight + 32.0f);
+		ImGui::SetCursorPosY(cursorYStart + itemHeight + 4.0f);
+		ImGui::Dummy({ 4, 2 });
 	}
 
 	void WelcomeWindow::DrawRightControls()
@@ -276,56 +325,17 @@ namespace Nuake
 			const ImVec2 buttonSize = ImVec2(ImGui::GetContentRegionAvail().x, buttonHeight);
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.14f, 0.5f));
-			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + "  New Game Project...";
+			const std::string buttonLabel = std::string(ICON_FA_FOLDER_PLUS) + " New Project...";
 			if (Nuake::UI::PrimaryButton(buttonLabel.c_str(), { buttonSize.x, buttonSize.y }))
 			{
 				_Editor->isCreatingNewProject = true;
-				//
-
-				//std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
-				//	
-				//if (!selectedProject.empty())
-				//{
-				//	if(!String::EndsWith(selectedProject, ".project"))
-				//		selectedProject += ".project";
-				//		
-				//	auto backslashSplits = String::Split(selectedProject, '\\');
-				//	auto fileName = backslashSplits[backslashSplits.size() - 1];
-
-				//	std::string finalPath = String::Split(selectedProject, '.')[0];
-
-				//	if (String::EndsWith(fileName, ".project"))
-				//	{
-				//		// We need to create a folder
-				//		if (const auto& dirPath = finalPath;
-				//			!std::filesystem::create_directory(dirPath))
-				//		{
-				//			// Should we continue?
-				//			Logger::Log("Failed creating project directory: " + dirPath);
-				//		}
-
-				//		finalPath += "\\" + fileName;
-				//	}
-
-				//	auto project = Project::New(String::Split(fileName, '.')[0], "no description", finalPath);
-				//	Engine::LoadProject(project);
-				//	Engine::SetCurrentScene(Scene::New());
-				//	project->Save();
-
-				//	auto projectPreview = ProjectPreview();
-				//	projectPreview.Name = project->Name;
-				//	projectPreview.Description = project->Description;
-				//	projectPreview.Path = project->FullPath;
-				//	projectPreview.ProjectIcon = nullptr;
-				//	_Projects.push_back(projectPreview);
-				//}
 			}
 			ImGui::PopStyleVar(2);
 			ImGui::Separator();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.16f, 0.5f));
-			const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + "  Load Selected Project";
+			const std::string buttonLabelOpen = std::string(ICON_FA_FOLDER_OPEN) + " Load Project";
 				
 			bool hasProjectSelected = false;
 			if (SelectedProject < std::size(_Projects) && SelectedProject >= 0)
@@ -356,10 +366,10 @@ namespace Nuake
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.09f, 0.5f));
-			const std::string buttonLabelDoc = std::string(ICON_FA_EXTERNAL_LINK_SQUARE_ALT) + "  Documentation";
+			const std::string buttonLabelDoc = std::string(ICON_FA_EXTERNAL_LINK_SQUARE_ALT) + " Documentation";
 			if (Nuake::UI::SecondaryButton(buttonLabelDoc, { buttonSize.x, buttonSize.y }))
 			{
-				OS::OpenURL("https://nuake.readthedocs.io/en/latest/index.html");
+				OS::OpenURL("https://docs.readthedocs.io/en/latest/index.html");
 			}
 			ImGui::PopStyleVar(2);
 		}
