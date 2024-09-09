@@ -356,11 +356,13 @@ project "NuakeRuntime"
 
 project "Editor"
     location "Editor"
+    targetname ("Nuake Engine")
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
     staticruntime "On"
 
+    dependson { "NuakeNet" } 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")

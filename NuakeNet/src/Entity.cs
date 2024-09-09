@@ -23,6 +23,7 @@ namespace Nuake.Net
     public class Entity
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
+        internal static unsafe delegate*<int, int, void> EntityAddComponentIcall;
         internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
         internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
         internal static unsafe delegate*<int, NativeString> EntityGetNameIcall;
@@ -205,6 +206,20 @@ namespace Nuake.Net
             }
 
             return false;
+        }
+
+        public T? AddComponent<T>() where T : IComponent
+        {
+            if(HasComponent<T>())
+            {
+                return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
+            }
+
+            unsafe 
+            {  
+                EntityAddComponentIcall(ECSHandle, (int)MappingTypeEnum[typeof(T)]);
+                return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
+            };
         }
 
         public T? GetComponent<T>() where T : IComponent
