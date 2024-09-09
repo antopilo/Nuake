@@ -347,12 +347,6 @@ namespace Nuake
                     deferredShader->SetUniform1i(uniformAccessor + "ShadowMapID", spotShadowMapCount);
                     deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
 
-                    if (ImGui::Begin(("DebugShadowMap" + std::to_string(idx)).c_str()))
-                    {
-                        ImGui::Image((void*)light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
-                        ImGui::End();
-                    }
-
                     light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(shadowMapTextureSlot);
                     deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
                     spotShadowMapCount++;
