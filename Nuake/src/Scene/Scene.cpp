@@ -266,19 +266,22 @@ namespace Nuake
 	{
 		ZoneScoped;
 
-		const auto& view = m_Registry.view<QuakeMapComponent>();
-		for (const auto& e : view)
+		if (!Engine::IsPlayMode())
 		{
-			auto& map = view.get<QuakeMapComponent>(e);
-			if (map.AutoRebuild && !map.Path.empty() && FileSystem::FileExists(map.Path))
+			const auto& view = m_Registry.view<QuakeMapComponent>();
+			for (const auto& e : view)
 			{
-				if (auto file = FileSystem::GetFile(map.Path); file->Exist() && file->GetHasBeenModified())
+				auto& map = view.get<QuakeMapComponent>(e);
+				if (map.AutoRebuild && !map.Path.empty() && FileSystem::FileExists(map.Path))
 				{
-					file->SetHasBeenModified(false);
+					if (auto file = FileSystem::GetFile(map.Path); file->Exist() && file->GetHasBeenModified())
+					{
+						file->SetHasBeenModified(false);
 
-					Entity entity = Entity(e, this);
-					QuakeMapBuilder builder;
-					builder.BuildQuakeMap(entity, map.HasCollisions);
+						Entity entity = Entity(e, this);
+						QuakeMapBuilder builder;
+						builder.BuildQuakeMap(entity, map.HasCollisions);
+					}
 				}
 			}
 		}
