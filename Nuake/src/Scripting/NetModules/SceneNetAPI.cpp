@@ -117,8 +117,6 @@ namespace Nuake {
 
 	bool EntityHasComponent(int id, int componentType)
 	{
-		uint32_t componentEnumValue = 3;
-		//Entity entity = Engine::GetCurrentScene()->GetEntityByID(id);
 		Entity entity = { (entt::entity)(id), Engine::GetCurrentScene().get()};
 
 		if (!entity.IsValid())
@@ -151,6 +149,41 @@ namespace Nuake {
 			case NAVMESH:				return entity.HasComponent<NavMeshVolumeComponent>();
 			default:
 				return false;
+		}
+	}
+
+	void EntityAddComponent(int id, int componentType)
+	{
+		Entity entity = { (entt::entity)(id), Engine::GetCurrentScene().get() };
+
+		if (!entity.IsValid())
+		{
+			return;
+		}
+
+		switch (static_cast<ComponentTypes>(componentType))
+		{
+		case PARENT:				entity.AddComponent<ParentComponent>(); break;
+			case NAME:					entity.AddComponent<NameComponent>(); break;
+			case PREFAB:				entity.AddComponent<PrefabComponent>(); break;
+			case TRANSFORM:				entity.AddComponent<TransformComponent>(); break;
+			case LIGHT:					entity.AddComponent<LightComponent>(); break;
+			case CAMERA:				entity.AddComponent<CameraComponent>(); break;
+			case AUDIO_EMITTER:			entity.AddComponent<AudioEmitterComponent>(); break;
+			case MODEL:					entity.AddComponent<ModelComponent>(); break;
+			case SKINNED_MODEL:			entity.AddComponent<SkinnedModelComponent>(); break;
+			case BONE:					entity.AddComponent<BoneComponent>(); break;
+			case BOX_COLLIDER:			entity.AddComponent<BoxColliderComponent>(); break;
+			case SPHERE_COLLIDER:		entity.AddComponent<SphereColliderComponent>(); break;
+			case CAPSULE_COLLIDER:		entity.AddComponent<CapsuleColliderComponent>(); break;
+			case CYLINDER_COLLIDER:		entity.AddComponent<CylinderColliderComponent>(); break;
+			case MESH_COLLIDER:			entity.AddComponent<MeshColliderComponent>(); break;
+			case CHARACTER_CONTROLLER:	entity.AddComponent<CharacterControllerComponent>(); break;
+			case PARTICLE_EMITTER:		entity.AddComponent<ParticleEmitterComponent>(); break;
+			case QUAKE_MAP:				entity.AddComponent<QuakeMapComponent>(); break;
+			case BSP_BRUSH:				entity.AddComponent<BSPBrushComponent>(); break;
+			case SPRITE:				entity.AddComponent<SpriteComponent>(); break;
+			case NAVMESH:				entity.AddComponent<NavMeshVolumeComponent>(); break;
 		}
 	}
 
@@ -324,14 +357,24 @@ namespace Nuake {
 
 	float LightGetIntensity(int entityId)
 	{
-		Logger::Log("Get light intensity with id: " + std::to_string(entityId));
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			return component.Strength;
+		}
 
-		return -10.0f;
+		return 0.0f;
 	}
 
 	void LightSetIntensity(int entityId, float intensity)
 	{
-		Logger::Log("Set light intensity with id: " + std::to_string(intensity));
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			component.Strength = intensity;
+		}
 	}
 
 	void LightSetColor(int entityId, float r, float g, float b)
@@ -541,6 +584,7 @@ namespace Nuake {
 	{
 		// Entity
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
+		RegisterMethod("Entity.EntityAddComponentIcall", &EntityAddComponent);
 		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
 		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
 		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
