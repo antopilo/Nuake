@@ -143,6 +143,11 @@ bool GizmoDrawer::IsEntityInSelection(Nuake::Entity entity)
 		return false;
 	}
 
+	if (!m_Editor->Selection.Entity.IsValid())
+	{
+		return false;
+	}
+
 	using namespace Nuake;
 	const Nuake::Entity selectedEntity = m_Editor->Selection.Entity;
 
