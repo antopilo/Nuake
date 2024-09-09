@@ -25,3 +25,9 @@
 [submodule "Nuake/dependencies/tracy"]
 	path = Nuake/dependencies/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "Nuake/dependencies/msdf-atlas-gen"]
+	path = Nuake/dependencies/msdf-atlas-gen
+	url = https://github.com/antopilo/msdf-atlas-gen.git
+[submodule "Nuake/dependencies/yoga"]
+	path = Nuake/dependencies/yoga
+	url = https://github.com/facebook/yoga.git

@@ -57,6 +57,7 @@ group "Dependencies"
     include "Nuake/dependencies/coral_p5.lua"
     include "Nuake/dependencies/recastnavigation_p5.lua"
     include "Nuake/dependencies/tracy_p5.lua"
+    include "Nuake/dependencies/yoga_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
@@ -136,8 +137,8 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
         "%{prj.name}/src/Vendors/incbin/*.h",
-        "%{prj.name}/src/Vendors/filewatch/*.hpp",
-        
+        "%{prj.name}/src/Vendors/nanosvg/*.h",
+
         -- Modules System
         "%{prj.name}/src/Modules/Modules.h",
         "%{prj.name}/src/Modules/Modules.cpp",
@@ -154,6 +155,7 @@ project "Nuake"
         "%{prj.name}/dependencies/JoltPhysics",
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
+        "%{prj.name}/src/Vendors/nanosvg",
         "%{prj.name}/dependencies/build",
         "%{prj.name}/dependencies/soloud/include",
         "%{prj.name}/dependencies/Coral/Coral.Native/Include",
@@ -169,7 +171,8 @@ project "Nuake"
     links
     {
         "soloud",
-        "tracy"
+        "tracy",
+        "yoga"
     }
 
     filter "system:linux"
@@ -421,6 +424,7 @@ project "Editor"
 	    "DetourTileCache",
 	    "Recast",
 	    "tracy",
+        "yoga"
     }
     
     defines {
