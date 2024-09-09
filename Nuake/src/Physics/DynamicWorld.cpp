@@ -206,7 +206,7 @@ namespace Nuake
 			case Layers::MOVING:
 				return true;
 			case Layers::SENSORS:
-				return inLayer2 == BroadPhaseLayers::MOVING;;
+				return inLayer2 == BroadPhaseLayers::MOVING;
 			default:
 				return false;
 			}
@@ -384,6 +384,11 @@ namespace Nuake
 				bodySettings.mCollideKinematicVsNonDynamic = true;
 			}
 
+			if (rb->GetForceKinematic())
+			{
+				bodySettings.mCollideKinematicVsNonDynamic = true;
+			}
+
 			bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::All);
 
 			if (rb->GetLockXAxis())
@@ -451,7 +456,7 @@ namespace Nuake
 			}
 
 			bodySettings.mUserData = cc->Owner.GetHandle();
-
+			bodySettings.mCollideKinematicVsNonDynamic = true;
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
 			uint32_t bodyIndex = body.GetIndexAndSequenceNumber();
