@@ -45,7 +45,7 @@ namespace NuakeEditor
 
         if (!FileSystem::DirectoryExists(gameConfigFolderPath))
         {
-            FileSystem::MakeDirectory(gameConfigFolderPath);
+            FileSystem::MakeDirectory(gameConfigFolderPath, true);
         }
 
         const std::string& gameConfigFilePath = gameConfigFolderPath + "GameConfig.cfg";
