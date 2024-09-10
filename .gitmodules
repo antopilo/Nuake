@@ -4,9 +4,6 @@
 [submodule "Nuake/dependencies/assimp"]
 	path = Nuake/dependencies/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "Nuake/dependencies/bullet3"]
-	path = Nuake/dependencies/bullet3
-	url = https://github.com/bulletphysics/bullet3.git
 [submodule "Nuake/dependencies/glew"]
 	path = Nuake/dependencies/glew
 	url = https://github.com/nigels-com/glew.git
@@ -31,9 +28,6 @@
 [submodule "Nuake/dependencies/yoga"]
 	path = Nuake/dependencies/yoga
 	url = https://github.com/facebook/yoga.git
-[submodule "Nuake/dependencies/--force"]
-	path = Nuake/dependencies/--force
-	url = https://github.com/freetype/freetype.git
 [submodule "Nuake/dependencies/freetype"]
 	path = Nuake/dependencies/freetype
 	url = https://github.com/freetype/freetype.git
