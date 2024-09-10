@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+#include "src/Core/Object/Object.h"
 #include "src/Resource/Serializable.h"
 #include "src/Resource/SkinnedModel.h"
 
@@ -11,6 +12,8 @@ namespace Nuake
 {
     struct SkinnedModelComponent
     {
+        NUAKECOMPONENT(SkinnedModelComponent, "Skinned Model")
+
         Ref<SkinnedModel> ModelResource;
         std::string ModelPath;
 

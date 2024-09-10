@@ -1,4 +1,7 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
+
 #include "TransformComponent.h"
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
@@ -6,8 +9,11 @@
 
 namespace Nuake
 {
+	
 	class CameraComponent 
 	{
+		NUAKECOMPONENT(CameraComponent, "Camera")
+		
 	public:
 		Ref<Camera> CameraInstance;
 		TransformComponent* transformComponent;

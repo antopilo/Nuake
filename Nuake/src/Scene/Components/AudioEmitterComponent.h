@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 
@@ -6,6 +8,8 @@ namespace Nuake {
 
 	class AudioEmitterComponent
 	{
+		NUAKECOMPONENT(AudioEmitterComponent, "Audio Emitter")
+
 	public:
 		std::string FilePath;
 

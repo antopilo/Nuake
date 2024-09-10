@@ -1,10 +1,14 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Physics/CharacterController.h"
 
 namespace Nuake 
 {
 	class CharacterControllerComponent
 	{
+		NUAKECOMPONENT(CharacterControllerComponent, "Character Controller")
+
 	private:
 		Ref<Physics::CharacterController>  m_CharacterController;
 

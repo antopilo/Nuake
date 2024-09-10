@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "src/Core/Object/Object.h"
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Resource/Serializable.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
@@ -12,6 +13,8 @@ namespace Nuake {
 
 	class QuakeMapComponent
 	{
+		NUAKECOMPONENT(QuakeMapComponent, "Quake Map")
+
 	public:
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::vector<Entity> m_Brushes;

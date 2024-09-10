@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "../Entities/Entity.h"
 #include "Engine.h"
 #include <src/AI/NavMesh.h>
@@ -7,6 +9,8 @@ namespace Nuake
 {
 	struct NavMeshVolumeComponent
 	{
+		NUAKECOMPONENT(NavMeshVolumeComponent, "Nav Mesh Volume")
+
 		Vector3 VolumeSize = { 1.0f, 1.0f, 1.0f };
 		bool OnlyIncludeMapGeometry = true;
 

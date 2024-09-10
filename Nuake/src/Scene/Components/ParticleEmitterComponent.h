@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 #include "src/Resource/Serializable.h"
@@ -10,6 +12,8 @@ namespace Nuake
 {
 	class ParticleEmitterComponent
 	{
+		NUAKECOMPONENT(ParticleEmitterComponent, "Particle Emitter")
+
 	public:
 		ParticleEmitterComponent() = default;
 		~ParticleEmitterComponent() = default;
