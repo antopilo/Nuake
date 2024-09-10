@@ -249,7 +249,7 @@ namespace Nuake
 				SetUniform(name, u.value.valueInt);
 				break;
 			case UniformTypes::Uint:
-				SetUniform(name, u.value.valueUInt);
+				SetUniformUint(name, u.value.valueUInt);
 				break;
 			case UniformTypes::Vec2:
 				SetUniform(name, u.value.valueVec2);
@@ -282,16 +282,16 @@ namespace Nuake
 		}
 	}
 
+	void Shader::SetUniformUint(const std::string& name, uint32_t v0)
+	{
+		int addr = FindUniformLocation(name);
+		glUniform1ui(addr, v0);
+	}
+
 	void Shader::SetUniform(const std::string& name, int v0)
 	{
 		int addr = FindUniformLocation(name);
 		glUniform1i(addr, v0);
-	}
-
-	void Shader::SetUniform(const std::string& name, unsigned int v0)
-	{
-		int addr = FindUniformLocation(name);
-		glUniform1ui(addr, v0);
 	}
 
 	void Shader::SetUniform(const std::string& name, Vector2 v0)
@@ -391,7 +391,7 @@ namespace Nuake
 		glUniformMatrix4fv(uniformSlot, 1, GL_FALSE, &value[0][0]);
 	}
 
-	void Shader::SetUniform(const std::string& uniformName, Texture* texture, uint32_t slot)
+	void Shader::SetUniform(const std::string& uniformName, Texture* texture, int slot)
 	{
 		SetUniform(uniformName, slot);
 		texture->Bind(slot);

@@ -301,10 +301,10 @@ namespace Nuake
 
             if (light.CastShadows)
             {
-                for (unsigned int i = 0; i < CSM_AMOUNT; i++)
+                for (int i = 0; i < CSM_AMOUNT; i++)
                 {
                     light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
-                    const uint32_t shadowMapId = shadowmapAmount + i;
+                    const int shadowMapId = shadowmapAmount + i;
                     deferredShader->SetUniform("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
                     deferredShader->SetUniform("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
                     deferredShader->SetUniform("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);

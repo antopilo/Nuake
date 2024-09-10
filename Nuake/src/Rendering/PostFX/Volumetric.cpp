@@ -52,7 +52,7 @@ namespace Nuake {
 			volumetricShader->SetUniform("u_View", view);
 			volumetricShader->SetUniform("u_Depth", mDepth, 1);
 			volumetricShader->SetUniform("u_CamPosition", camPos);
-			volumetricShader->SetUniform("u_StepCount", mStepCount);
+			volumetricShader->SetUniform("u_StepCount", static_cast<int>(mStepCount));
 			volumetricShader->SetUniform("u_FogAmount", mFogAmount);
 			volumetricShader->SetUniform("u_LightCount", static_cast<int>(lights.size()));
 			volumetricShader->SetUniform("u_Exponant", mFogExponant);
