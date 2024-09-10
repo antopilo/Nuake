@@ -85,20 +85,20 @@ namespace Nuake {
         m_HDRTexture->Bind(6);
 
         Renderer::m_SkyboxShader->Bind();
-        Renderer::m_SkyboxShader->SetUniformMat4f("projection", projection);
-        Renderer::m_SkyboxShader->SetUniformMat4f("view", view);
-        Renderer::m_SkyboxShader->SetUniform1i("convulate", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("prefilter", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("isHDR", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("equirectangularMap", 6);
-        Renderer::m_SkyboxShader->SetUniform1i("skybox", 5);
+        Renderer::m_SkyboxShader->SetUniform("projection", projection);
+        Renderer::m_SkyboxShader->SetUniform("view", view);
+        Renderer::m_SkyboxShader->SetUniform("convulate", 0);
+        Renderer::m_SkyboxShader->SetUniform("prefilter", 0);
+        Renderer::m_SkyboxShader->SetUniform("isHDR", 0);
+        Renderer::m_SkyboxShader->SetUniform("equirectangularMap", 6);
+        Renderer::m_SkyboxShader->SetUniform("skybox", 5);
 
         // ... set view and projection matrix
         glBindVertexArray(VAO);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glDepthMask(GL_TRUE);
-        //Renderer::m_Shader->SetUniform4f("u_AmbientColor", 1.0f, 1.0f, 1.0f, 1.0f);
+        //Renderer::m_Shader->SetUniform("u_AmbientColor", 1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     void SkyboxHDR::Push() {
@@ -112,13 +112,13 @@ namespace Nuake {
         glActiveTexture(GL_TEXTURE0 + 3);
         glBindTexture(GL_TEXTURE_2D, m_brdLut);
 
-        Renderer::m_Shader->SetUniform1i("u_IrradianceMap", 1);
-        Renderer::m_Shader->SetUniform1i("prefilterMap", 2);
-        Renderer::m_Shader->SetUniform1i("brdfLUT", 3);
+        Renderer::m_Shader->SetUniform("u_IrradianceMap", 1);
+        Renderer::m_Shader->SetUniform("prefilterMap", 2);
+        Renderer::m_Shader->SetUniform("brdfLUT", 3);
 
-        Renderer::m_DeferredShader->SetUniform1i("u_IrradianceMap", 1);
-        Renderer::m_DeferredShader->SetUniform1i("u_PrefilterMap", 2);
-        Renderer::m_DeferredShader->SetUniform1i("u_BrdfLUT", 3);
+        Renderer::m_DeferredShader->SetUniform("u_IrradianceMap", 1);
+        Renderer::m_DeferredShader->SetUniform("u_PrefilterMap", 2);
+        Renderer::m_DeferredShader->SetUniform("u_BrdfLUT", 3);
     }
 
     void SkyboxHDR::CreateHDRCubemap() {
@@ -160,11 +160,11 @@ namespace Nuake {
         m_HDRTexture->Bind(5);
         // convert HDR equirectangular environment map to cubemap equivalent
         Renderer::m_SkyboxShader->Bind();
-        Renderer::m_SkyboxShader->SetUniformMat4f("projection", captureProjection);
-        Renderer::m_SkyboxShader->SetUniform1i("isHDR", 1);
-        Renderer::m_SkyboxShader->SetUniform1i("prefilter", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("convulate", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("equirectangularMap", 5);
+        Renderer::m_SkyboxShader->SetUniform("projection", captureProjection);
+        Renderer::m_SkyboxShader->SetUniform("isHDR", 1);
+        Renderer::m_SkyboxShader->SetUniform("prefilter", 0);
+        Renderer::m_SkyboxShader->SetUniform("convulate", 0);
+        Renderer::m_SkyboxShader->SetUniform("equirectangularMap", 5);
 
         glActiveTexture(GL_TEXTURE0);
 
@@ -172,7 +172,7 @@ namespace Nuake {
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         for (unsigned int i = 0; i < 6; ++i)
         {
-            Renderer::m_SkyboxShader->SetUniformMat4f("view", captureViews[i]);
+            Renderer::m_SkyboxShader->SetUniform("view", captureViews[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_Cubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -224,18 +224,18 @@ namespace Nuake {
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_Cubemap);
 
         Renderer::m_SkyboxShader->Bind();
-        Renderer::m_SkyboxShader->SetUniformMat4f("projection", captureProjection);
-        Renderer::m_SkyboxShader->SetUniform1i("convulate", 1);
-        Renderer::m_SkyboxShader->SetUniform1i("prefilter", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("isHDR", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("equirectangularMap", 6);
-        Renderer::m_SkyboxShader->SetUniform1i("skybox", 5);
+        Renderer::m_SkyboxShader->SetUniform("projection", captureProjection);
+        Renderer::m_SkyboxShader->SetUniform("convulate", 1);
+        Renderer::m_SkyboxShader->SetUniform("prefilter", 0);
+        Renderer::m_SkyboxShader->SetUniform("isHDR", 0);
+        Renderer::m_SkyboxShader->SetUniform("equirectangularMap", 6);
+        Renderer::m_SkyboxShader->SetUniform("skybox", 5);
 
         glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         for (unsigned int i = 0; i < 6; ++i)
         {
-            Renderer::m_SkyboxShader->SetUniformMat4f("view", captureViews[i]);
+            Renderer::m_SkyboxShader->SetUniform("view", captureViews[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_ConvulatedCubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -281,12 +281,12 @@ namespace Nuake {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
         Renderer::m_SkyboxShader->Bind();
-        Renderer::m_SkyboxShader->SetUniformMat4f("projection", captureProjection);
-        Renderer::m_SkyboxShader->SetUniform1i("convulate", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("prefilter", 1);
-        Renderer::m_SkyboxShader->SetUniform1i("isHDR", 0);
-        Renderer::m_SkyboxShader->SetUniform1i("equirectangularMap", 6);
-        Renderer::m_SkyboxShader->SetUniform1i("skybox", 5);
+        Renderer::m_SkyboxShader->SetUniform("projection", captureProjection);
+        Renderer::m_SkyboxShader->SetUniform("convulate", 0);
+        Renderer::m_SkyboxShader->SetUniform("prefilter", 1);
+        Renderer::m_SkyboxShader->SetUniform("isHDR", 0);
+        Renderer::m_SkyboxShader->SetUniform("equirectangularMap", 6);
+        Renderer::m_SkyboxShader->SetUniform("skybox", 5);
 
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
         unsigned int maxMipLevels = 5;
@@ -300,10 +300,10 @@ namespace Nuake {
             glViewport(0, 0, mipWidth, mipHeight);
 
             float roughness = (float)mip / (float)(maxMipLevels - 1);
-            Renderer::m_SkyboxShader->SetUniform1f("roughness", roughness);
+            Renderer::m_SkyboxShader->SetUniform("roughness", roughness);
             for (unsigned int i = 0; i < 6; ++i)
             {
-                Renderer::m_SkyboxShader->SetUniformMat4f("view", captureViews[i]);
+                Renderer::m_SkyboxShader->SetUniform("view", captureViews[i]);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                     GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_SpecularCubemap, mip);
 

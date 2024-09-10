@@ -37,41 +37,41 @@ namespace Nuake
 	void ProceduralSky::Draw(Matrix4 projection, Matrix4 view) {
 		Shader* skyShader = ShaderManager::GetShader("Resources/Shaders/atmospheric_sky.shader");
 		skyShader->Bind();
-		skyShader->SetUniform1f("SurfaceRadius", SurfaceRadius);
-		skyShader->SetUniform1f("AtmosphereRadius", AtmosphereRadius);
-		skyShader->SetUniform1f("SunIntensity", SunIntensity);
+		skyShader->SetUniform("SurfaceRadius", SurfaceRadius);
+		skyShader->SetUniform("AtmosphereRadius", AtmosphereRadius);
+		skyShader->SetUniform("SunIntensity", SunIntensity);
 
-		skyShader->SetUniform3f("RayleighScattering",
+		skyShader->SetUniform("RayleighScattering",
 			RayleighScattering.r,
 			RayleighScattering.g,
 			RayleighScattering.b);
 
-		skyShader->SetUniform3f("MieScattering",
+		skyShader->SetUniform("MieScattering",
 			MieScattering.r,
 			MieScattering.g,
 			MieScattering.b);
 
-		skyShader->SetUniform3f("CenterPoint",
+		skyShader->SetUniform("CenterPoint",
 			CenterPoint.x,
 			CenterPoint.y,
 			CenterPoint.z);
 
-		skyShader->SetUniform3f("SunDirection",
+		skyShader->SetUniform("SunDirection",
 			SunDirection.x,
 			SunDirection.y,
 			SunDirection.z);
 
-		skyShader->SetUniformMat4f("Projection", projection);
-		skyShader->SetUniformMat4f("View", view);
+		skyShader->SetUniform("Projection", projection);
+		skyShader->SetUniform("View", view);
 		//glm::vec3 CamRight = cam->cameraRight;
-		//Renderer::m_ProceduralSkyShader->SetUniform3f("CamRight",
+		//Renderer::m_ProceduralSkyShader->SetUniform("CamRight",
 		//	CamRight.x,
 		//	CamRight.y,
 		//	CamRight.z);
 		//
 		//glm::vec3 CamUp = cam->cameraUp;//glm::normalize(glm::cross(CameraDirection, CamRight));
 
-		//Renderer::m_ProceduralSkyShader->SetUniform3f("CamUp",
+		//Renderer::m_ProceduralSkyShader->SetUniform("CamUp",
 		//	CamUp.x,
 		//	CamUp.y,
 		//	CamUp.z);

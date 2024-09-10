@@ -127,9 +127,9 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	shader->Bind();
 		//
 		//	auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-		//	shader->SetUniformMat4f("u_View", view);
-		//	shader->SetUniformMat4f("u_Projection", ortho);
-		//	shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+		//	shader->SetUniform("u_View", view);
+		//	shader->SetUniform("u_Projection", ortho);
+		//	shader->SetUniform("u_Model", Matrix4(1.0f));
 		//	Renderer::SphereMesh->Draw(shader, true);
 		//}
 		//m_Framebuffer->Unbind();
@@ -143,15 +143,15 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	RenderCommand::Disable(RendererEnum::FACE_CULL);
 		//	auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 		//	shader->Bind();
-		//	shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
-		//	shader->SetUniform1i("LightCount", 0);
+		//	shader->SetUniform("u_EyePosition", Vector3(1, 0, 0));
+		//	shader->SetUniform("LightCount", 0);
 		//	auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
-		//	shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
-		//	shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
-		//	shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
-		//	shader->SetUniform1i("u_DisableSSAO", 1);
-		//	shader->SetUniformMat4f("u_View", view);
-		//	shader->SetUniformMat4f("u_Projection", ortho);
+		//	shader->SetUniform("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+		//	shader->SetUniform("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+		//	shader->SetUniform("u_DirectionalLight.Shadow", 0);
+		//	shader->SetUniform("u_DisableSSAO", 1);
+		//	shader->SetUniform("u_View", view);
+		//	shader->SetUniform("u_Projection", ortho);
 		//
 		//	m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
@@ -159,11 +159,11 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 		//
-		//	shader->SetUniform1i("m_Depth", 5);
-		//	shader->SetUniform1i("m_Albedo", 6);
-		//	shader->SetUniform1i("m_Normal", 7);
-		//	shader->SetUniform1i("m_Material", 8);
-		//	shader->SetUniform1i("m_Emissive", 10);
+		//	shader->SetUniform("m_Depth", 5);
+		//	shader->SetUniform("m_Albedo", 6);
+		//	shader->SetUniform("m_Normal", 7);
+		//	shader->SetUniform("m_Material", 8);
+		//	shader->SetUniform("m_Emissive", 10);
 		//
 		//	Renderer::DrawQuad(Matrix4());
 		//}
@@ -215,9 +215,9 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			shader->Bind();
 
 			auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-			shader->SetUniformMat4f("u_View", view);
-			shader->SetUniformMat4f("u_Projection", ortho);
-			shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+			shader->SetUniform("u_View", view);
+			shader->SetUniform("u_Projection", ortho);
+			shader->SetUniform("u_Model", Matrix4(1.0f));
 			Ref<Material> material = ResourceLoader::LoadMaterial(path);
 			material->Bind(shader);
 			Renderer::SphereMesh->Draw(shader, false);
@@ -233,15 +233,15 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 			shader->Bind();
-			shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
-			shader->SetUniform1i("LightCount", 0);
+			shader->SetUniform("u_EyePosition", Vector3(1, 0, 0));
+			shader->SetUniform("LightCount", 0);
 			auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
-			shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
-			shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
-			shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
-			shader->SetUniform1i("u_DisableSSAO", 1);
-			shader->SetUniformMat4f("u_View", view);
-			shader->SetUniformMat4f("u_Projection", ortho);
+			shader->SetUniform("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+			shader->SetUniform("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+			shader->SetUniform("u_DirectionalLight.Shadow", 0);
+			shader->SetUniform("u_DisableSSAO", 1);
+			shader->SetUniform("u_View", view);
+			shader->SetUniform("u_Projection", ortho);
 
 			m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
@@ -249,11 +249,11 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 
-			shader->SetUniform1i("m_Depth", 5);
-			shader->SetUniform1i("m_Albedo", 6);
-			shader->SetUniform1i("m_Normal", 7);
-			shader->SetUniform1i("m_Material", 8);
-			shader->SetUniform1i("m_Emissive", 10);
+			shader->SetUniform("m_Depth", 5);
+			shader->SetUniform("m_Albedo", 6);
+			shader->SetUniform("m_Normal", 7);
+			shader->SetUniform("m_Material", 8);
+			shader->SetUniform("m_Emissive", 10);
 
 			Renderer::DrawQuad(Matrix4());
 		}

@@ -156,6 +156,13 @@ namespace Nuake
 		mShadingBuffer->QueueResize(framebufferResolution);
 		ShadingPass(scene);
 
+		ImGui::SetNextWindowSize({ 1280, 720 });
+		if (ImGui::Begin("Shaded"))
+		{
+			ImGui::Image((void*)(mShadingBuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
+		}
+		ImGui::End();
+
 		// Blit depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetRenderID());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mShadingBuffer->GetRenderID());
@@ -176,7 +183,7 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Source", mShadingBuffer->GetTexture().get(), 0);
+			shader->SetUniform("u_Source", mShadingBuffer->GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -217,8 +224,8 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
 
-				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
-				shader->SetUniformTex("u_Source2", sceneEnv->mVolumetric->GetFinalOutput().get(), 1);
+				shader->SetUniform("u_Source", finalOutput.get(), 0);
+				shader->SetUniform("u_Source2", sceneEnv->mVolumetric->GetFinalOutput().get(), 1);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
@@ -231,7 +238,7 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
-				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				shader->SetUniform("u_Source", finalOutput.get(), 0);
 				Renderer::DrawQuad();
 			}
 		}
@@ -246,9 +253,9 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/tonemap.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("u_Exposure", sceneEnv->Exposure);
-			shader->SetUniform1f("u_Gamma", sceneEnv->Gamma);
-			shader->SetUniformTex("u_Source", finalOutput.get());
+			shader->SetUniform("u_Exposure", sceneEnv->Exposure);
+			shader->SetUniform("u_Gamma", sceneEnv->Gamma);
+			shader->SetUniform("u_Source", finalOutput.get());
 			Renderer::DrawQuad();
 		}
 		mToneMapBuffer->Unbind();
@@ -262,11 +269,11 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
 			shader->Bind();
 
-			shader->SetUniform1i("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
-			shader->SetUniformTex("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
-			shader->SetUniformVec4("u_OutlineColor", projectSettings.PrimaryColor);
-			shader->SetUniformTex("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT), 1);
-			shader->SetUniform1f("u_Radius", projectSettings.OutlineRadius * projectSettings.ResolutionScale);
+			shader->SetUniform("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
+			shader->SetUniform("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
+			shader->SetUniform("u_OutlineColor", projectSettings.PrimaryColor);
+			shader->SetUniform("u_Depth", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 1);
+			shader->SetUniform("u_Radius", projectSettings.OutlineRadius * projectSettings.ResolutionScale);
 			Renderer::DrawQuad();
 		}
 		mOutlineBuffer->Unbind();
@@ -277,8 +284,8 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-			shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
+			shader->SetUniform("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+			shader->SetUniform("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -289,7 +296,7 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Source", framebuffer.GetTexture().get(), 1);
+			shader->SetUniform("u_Source", framebuffer.GetTexture().get(), 1);
 			Renderer::DrawQuad();
 		}
 		mToneMapBuffer->Unbind();
@@ -305,8 +312,8 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/combine.shader");
 				shader->Bind();
 
-				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
-				shader->SetUniformTex("u_Source2", sceneEnv->mSSR->OutputFramebuffer->GetTexture().get(), 1);
+				shader->SetUniform("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_Source2", sceneEnv->mSSR->OutputFramebuffer->GetTexture().get(), 1);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
@@ -319,7 +326,7 @@ namespace Nuake
 				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 				shader->Bind();
 
-				shader->SetUniformTex("u_Source", mToneMapBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_Source", mToneMapBuffer->GetTexture().get(), 0);
 				Renderer::DrawQuad();
 			}
 			framebuffer.Unbind();
@@ -332,32 +339,32 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/dof.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("focalDepth", sceneEnv->DOFFocalDepth);
-			shader->SetUniform1f("focalLength", sceneEnv->DOFFocalLength);
-			shader->SetUniform1f("fstop", sceneEnv->DOFFstop);
-			shader->SetUniform1i("showFocus", sceneEnv->DOFShowFocus);
-			shader->SetUniform1i("autofocus", sceneEnv->DOFAutoFocus);
-			shader->SetUniform1i("samples", sceneEnv->DOFSamples);
-			shader->SetUniform1i("manualdof", sceneEnv->DOFManualFocus);
-			shader->SetUniform1f("rings", static_cast<float>(sceneEnv->DOFrings));
-			shader->SetUniform1f("ndofstart", sceneEnv->DOFStart);
-			shader->SetUniform1f("ndofdist", sceneEnv->DOFDist);
-			shader->SetUniform1f("fdofstart", sceneEnv->DOFStart);
-			shader->SetUniform1f("fdofdist", sceneEnv->DOFDist);
-			shader->SetUniform1f("CoC", sceneEnv->DOFCoc);
-			shader->SetUniform1f("maxblur", sceneEnv->DOFMaxBlue);
-			shader->SetUniform1f("threshold", sceneEnv->DOFThreshold);
-			shader->SetUniform1f("gain", sceneEnv->DOFGain);
-			shader->SetUniform1f("bias", sceneEnv->DOFBias);
-			shader->SetUniform1f("fringe", sceneEnv->DOFFringe);
-			shader->SetUniform1f("namount", sceneEnv->DOFNAmmount);
-			shader->SetUniform1f("dbsize", sceneEnv->DOFDbSize);
-			shader->SetUniform1f("feather", sceneEnv->DOFFeather);
-			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
-			shader->SetUniform1f("height", static_cast<float>(finalOutput->GetHeight()));
-			shader->SetUniform1f("width", static_cast<float>(finalOutput->GetWidth()));
-			shader->SetUniformTex("depthTex", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 0);
-			shader->SetUniformTex("renderTex", finalOutput.get(), 1);
+			shader->SetUniform("focalDepth", sceneEnv->DOFFocalDepth);
+			shader->SetUniform("focalLength", sceneEnv->DOFFocalLength);
+			shader->SetUniform("fstop", sceneEnv->DOFFstop);
+			shader->SetUniform("showFocus", sceneEnv->DOFShowFocus);
+			shader->SetUniform("autofocus", sceneEnv->DOFAutoFocus);
+			shader->SetUniform("samples", sceneEnv->DOFSamples);
+			shader->SetUniform("manualdof", sceneEnv->DOFManualFocus);
+			shader->SetUniform("rings", static_cast<float>(sceneEnv->DOFrings));
+			shader->SetUniform("ndofstart", sceneEnv->DOFStart);
+			shader->SetUniform("ndofdist", sceneEnv->DOFDist);
+			shader->SetUniform("fdofstart", sceneEnv->DOFStart);
+			shader->SetUniform("fdofdist", sceneEnv->DOFDist);
+			shader->SetUniform("CoC", sceneEnv->DOFCoc);
+			shader->SetUniform("maxblur", sceneEnv->DOFMaxBlue);
+			shader->SetUniform("threshold", sceneEnv->DOFThreshold);
+			shader->SetUniform("gain", sceneEnv->DOFGain);
+			shader->SetUniform("bias", sceneEnv->DOFBias);
+			shader->SetUniform("fringe", sceneEnv->DOFFringe);
+			shader->SetUniform("namount", sceneEnv->DOFNAmmount);
+			shader->SetUniform("dbsize", sceneEnv->DOFDbSize);
+			shader->SetUniform("feather", sceneEnv->DOFFeather);
+			shader->SetUniform("u_Distortion", sceneEnv->BarrelDistortion);
+			shader->SetUniform("height", static_cast<float>(finalOutput->GetHeight()));
+			shader->SetUniform("width", static_cast<float>(finalOutput->GetWidth()));
+			shader->SetUniform("depthTex", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 0);
+			shader->SetUniform("renderTex", finalOutput.get(), 1);
 			Renderer::DrawQuad();
 		}
 		mDOFBuffer->Unbind();
@@ -369,17 +376,17 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/barrel_distortion.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("u_Distortion", sceneEnv->BarrelDistortion);
-			shader->SetUniform1f("u_DistortionEdge", sceneEnv->BarrelEdgeDistortion);
-			shader->SetUniform1f("u_Scale", sceneEnv->BarrelScale);
+			shader->SetUniform("u_Distortion", sceneEnv->BarrelDistortion);
+			shader->SetUniform("u_DistortionEdge", sceneEnv->BarrelEdgeDistortion);
+			shader->SetUniform("u_Scale", sceneEnv->BarrelScale);
 
 			if (sceneEnv->DOFEnabled)
 			{
-				shader->SetUniformTex("u_Source", mDOFBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_Source", mDOFBuffer->GetTexture().get(), 0);
 			}
 			else
 			{
-				shader->SetUniformTex("u_Source", finalOutput.get(), 0);
+				shader->SetUniform("u_Source", finalOutput.get(), 0);
 			}
 
 
@@ -393,7 +400,7 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
+			shader->SetUniform("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -405,9 +412,9 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
 			shader->Bind();
 
-			shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
-			shader->SetUniform1f("u_Extend", sceneEnv->VignetteEnabled ? sceneEnv->VignetteExtend : 0.0f);
-			shader->SetUniformTex("u_Source", framebuffer.GetTexture().get(), 0);
+			shader->SetUniform("u_Intensity", sceneEnv->VignetteIntensity);
+			shader->SetUniform("u_Extend", sceneEnv->VignetteEnabled ? sceneEnv->VignetteExtend : 0.0f);
+			shader->SetUniform("u_Source", framebuffer.GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		mVignetteBuffer->Unbind();
@@ -418,8 +425,8 @@ namespace Nuake
 		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
 		//	shader->Bind();
 		//
-		//	shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
-		//	shader->SetUniformTex("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
+		//	shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+		//	shader->SetUniform("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
 		//	Renderer::DrawQuad();
 		//}
 		//framebuffer.Unbind();
@@ -430,7 +437,7 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+			shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -449,9 +456,9 @@ namespace Nuake
 		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
 		//	shader->Bind();
 		//
-		//	shader->SetUniform1f("u_Intensity", sceneEnv->VignetteIntensity);
-		//	shader->SetUniform1f("u_Extend", sceneEnv->VignetteExtend);
-		//	shader->SetUniformTex("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
+		//	shader->SetUniform("u_Intensity", sceneEnv->VignetteIntensity);
+		//	shader->SetUniform("u_Extend", sceneEnv->VignetteExtend);
+		//	shader->SetUniform("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
 		//	Renderer::DrawQuad();
 		//}
 		//mVignetteBuffer->Unbind();
@@ -535,7 +542,7 @@ namespace Nuake
 					light.m_Framebuffers[i]->Bind();
 					light.m_Framebuffers[i]->Clear();
 					{
-						shader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+						shader->SetUniform("u_LightTransform", light.mViewProjections[i]);
 						for (auto e : meshView)
 						{
 							auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
@@ -627,7 +634,7 @@ namespace Nuake
 					const Quat& globalRotation = glm::normalize(lightTransform.GetGlobalRotation());
 					const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
-					shader->SetUniformMat4f("u_LightTransform", light.GetProjection() * glm::inverse(lightTransform.GetGlobalTransform()));
+					shader->SetUniform("u_LightTransform", light.GetProjection() * glm::inverse(lightTransform.GetGlobalTransform()));
 					for (auto e : meshView)
 					{
 						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
@@ -701,7 +708,7 @@ namespace Nuake
 		Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("Resources/Shaders/shadowMap_skinned.shader");
 		gBufferSkinnedMeshShader->Bind();
 		const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
-		gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
+		gBufferSkinnedMeshShader->SetUniform(modelMatrixUniformLocation, Matrix4(1.0f));
 		
 		auto skinnedView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
 		for (auto l : view)
@@ -716,7 +723,7 @@ namespace Nuake
 			{
 				light.m_Framebuffers[i]->Bind();
 				{
-					gBufferSkinnedMeshShader->SetUniformMat4f("u_LightTransform", light.mViewProjections[i]);
+					gBufferSkinnedMeshShader->SetUniform("u_LightTransform", light.mViewProjections[i]);
 					for (auto e : skinnedView)
 					{
 						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
@@ -743,7 +750,7 @@ namespace Nuake
 		displayDepthShader->Bind();
 
 		GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
-		displayDepthShader->SetUniform1i("u_Source", 5);
+		displayDepthShader->SetUniform("u_Source", 5);
 
 		RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 		Renderer::DrawQuad(Matrix4(1.0f));
@@ -766,8 +773,8 @@ namespace Nuake
 			Shader* gBufferSkinnedMeshShader = ShaderManager::GetShader("Resources/Shaders/gbuffer_skinned.shader");
 
 			gBufferShader->Bind();
-			gBufferShader->SetUniformMat4f("u_Projection", mProjection);
-			gBufferShader->SetUniformMat4f("u_View", mView);
+			gBufferShader->SetUniform("u_Projection", mProjection);
+			gBufferShader->SetUniform("u_View", mView);
 
 			// Models
 			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
@@ -923,15 +930,15 @@ namespace Nuake
 
 			// Skinned mesh at the end because we switch shader
 			gBufferSkinnedMeshShader->Bind();
-			gBufferSkinnedMeshShader->SetUniformMat4f("u_Projection", mProjection);
-			gBufferSkinnedMeshShader->SetUniformMat4f("u_View", mView);
+			gBufferSkinnedMeshShader->SetUniform("u_Projection", mProjection);
+			gBufferSkinnedMeshShader->SetUniform("u_View", mView);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 			// Skinned Models
 			const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
 			const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
-			gBufferSkinnedMeshShader->SetUniformMat4f(modelMatrixUniformLocation, Matrix4(1.0f));
+			gBufferSkinnedMeshShader->SetUniform(modelMatrixUniformLocation, Matrix4(1.0f));
 			auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
 			for (auto e : skinnedModelView)
 			{
@@ -947,7 +954,7 @@ namespace Nuake
 					{
 						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
 						
-						gBufferSkinnedMeshShader->SetUniform1i(entityIdUniformLocation, (uint32_t)e + 1);
+						gBufferSkinnedMeshShader->SetUniform(entityIdUniformLocation, (uint32_t)e + 1);
 						m->Draw(gBufferSkinnedMeshShader, true);
 					}
 				}
@@ -984,11 +991,11 @@ namespace Nuake
 
 			Shader* shadingShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 			shadingShader->Bind();
-			shadingShader->SetUniformMat4f("u_Projection", mProjection);
-			shadingShader->SetUniformMat4f("u_View", mView);
-			shadingShader->SetUniformVec3("u_EyePosition", scene.GetCurrentCamera()->Translation);
-			shadingShader->SetUniform1f("u_AmbientTerm", environment->AmbientTerm);
-			shadingShader->SetUniformTex("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
+			shadingShader->SetUniform("u_Projection", mProjection);
+			shadingShader->SetUniform("u_View", mView);
+			shadingShader->SetUniform("u_EyePosition", scene.GetCurrentCamera()->Translation);
+			shadingShader->SetUniform("u_AmbientTerm", environment->AmbientTerm);
+			shadingShader->SetUniform("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
 
 			Ref<Environment> env = scene.GetEnvironment();
 
@@ -1045,11 +1052,11 @@ namespace Nuake
 			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 			mGBuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 
-			shadingShader->SetUniform1i("m_Depth", 5);
-			shadingShader->SetUniform1i("m_Albedo", 6);
-			shadingShader->SetUniform1i("m_Normal", 7);
-			shadingShader->SetUniform1i("m_Material", 8);
-			shadingShader->SetUniform1i("m_Emissive", 10);
+			shadingShader->SetUniform("m_Depth", 5);
+			shadingShader->SetUniform("m_Albedo", 6);
+			shadingShader->SetUniform("m_Normal", 7);
+			shadingShader->SetUniform("m_Material", 8);
+			shadingShader->SetUniform("m_Emissive", 10);
 
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 
@@ -1073,15 +1080,15 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/debugLine.shader");
 			shader->Bind();
 
-			shader->SetUniformMat4f("u_Projection", mProjection);
-			shader->SetUniformMat4f("u_View", mView);
+			shader->SetUniform("u_Projection", mProjection);
+			shader->SetUniform("u_View", mView);
 
 			bool depthTestState = true;
 			for (auto& l : mDebugLines)
 			{
-				shader->SetUniformVec4("u_Color", l.LineColor);
-				shader->SetUniformVec3("u_StartPos", l.Start);
-				shader->SetUniformVec3("u_EndPos", l.End);
+				shader->SetUniform("u_Color", l.LineColor);
+				shader->SetUniform("u_StartPos", l.Start);
+				shader->SetUniform("u_EndPos", l.End);
 
 				if (l.DepthTest)
 				{
@@ -1096,8 +1103,8 @@ namespace Nuake
 
 			shader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
 			shader->Bind();
-			shader->SetUniform1f("u_Opacity", 0.5f);
-			shader->SetUniformMat4f("u_Projection", mProjection);
+			shader->SetUniform("u_Opacity", 0.5f);
+			shader->SetUniform("u_Projection", mProjection);
 
 			for (auto& shape : mDebugShapes)
 			{
@@ -1110,7 +1117,7 @@ namespace Nuake
 					RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 				}
 
-				shader->SetUniformVec4("u_Color", shape.LineColor);
+				shader->SetUniform("u_Color", shape.LineColor);
 
 				glLineWidth(shape.Width);
 				Matrix4 view = mView;
@@ -1125,7 +1132,7 @@ namespace Nuake
 						view = glm::translate(view, shape.Position) * rotationMatrix;
 						view = glm::scale(view, reinterpret_cast<Physics::Box*>(shape.Shape.get())->GetSize());
 						
-						shader->SetUniformMat4f("u_View", view);
+						shader->SetUniform("u_View", view);
 
 						mBoxGizmo->Bind();
 						RenderCommand::DrawLines(0, 26);
@@ -1138,7 +1145,7 @@ namespace Nuake
 
 						view = glm::translate(view, shape.Position) * rotationMatrix;
 						view = glm::scale(view, Vector3(reinterpret_cast<Physics::Sphere*>(shape.Shape.get())->GetRadius()));
-						shader->SetUniformMat4f("u_View", view);
+						shader->SetUniform("u_View", view);
 
 						mSphereGizmo->Bind();
 						RenderCommand::DrawLines(0, 128);
@@ -1151,7 +1158,7 @@ namespace Nuake
 
 						view = glm::translate(view, shape.Position) * rotationMatrix;
 
-						shader->SetUniformMat4f("u_View", view);
+						shader->SetUniform("u_View", view);
 
 						const Physics::Capsule* capsule = reinterpret_cast<Physics::Capsule*>(shape.Shape.get());
 						mCapsuleGizmo->UpdateShape(capsule->GetRadius(), capsule->GetHeight());
@@ -1168,7 +1175,7 @@ namespace Nuake
 
 						const Physics::Cylinder* cylinder = reinterpret_cast<Physics::Cylinder*>(shape.Shape.get());
 
-						shader->SetUniformMat4f("u_View", view);
+						shader->SetUniform("u_View", view);
 
 						mCylinderGizmo->Bind();
 						mCylinderGizmo->UpdateShape(cylinder->GetRadius(), cylinder->GetHeight());
@@ -1190,7 +1197,7 @@ namespace Nuake
 			if (auto entity = scene.GetEntity(child.Name); entity.GetHandle() != -1)
 			{
 				const std::string boneMatrixUniformName = "u_FinalBonesMatrice[" + std::to_string(child.Id) + "]";
-				shader->SetUniformMat4f(boneMatrixUniformName, child.FinalTransform);
+				shader->SetUniform(boneMatrixUniformName, child.FinalTransform);
 			}
 
 			SetSkeletonBoneTransformRecursive(scene, child, shader);

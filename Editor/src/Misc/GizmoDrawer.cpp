@@ -189,10 +189,10 @@ void GizmoDrawer::DrawAxis(Ref<Scene> scene, bool occluded)
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 	{
 		m_LineShader->Bind();
-		m_LineShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-		m_LineShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 0.5f);
-		m_LineShader->SetUniformVec4("u_Color", {0.0f, 0.0f, 0.0f, 0.0f});
+		m_LineShader->SetUniform("u_View", scene->m_EditorCamera->GetTransform());
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", occluded ? 0.1f : 0.5f);
+		m_LineShader->SetUniform("u_Color", {0.0f, 0.0f, 0.0f, 0.0f});
 		m_AxisLineBuffer->Bind();
 		glLineWidth(1.0f);
 		Nuake::RenderCommand::DrawLines(0, 6);
@@ -234,9 +234,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.f);
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_BoxBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 26);
@@ -256,9 +256,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 0.9f);
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, volume.VolumeSize));
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 0.9f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, volume.VolumeSize));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_BoxBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 26);
@@ -269,9 +269,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	{
 		auto [transform, sphere] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.f);
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(sphere.Radius)));
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(sphere.Radius)));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
@@ -290,14 +290,14 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 		Vector3 globalPosition = Vector3(transform.GetGlobalTransform()[3]);
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.f);
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MaxDistance)));
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MaxDistance)));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
 
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MinDistance)));
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), globalPosition), Vector3(emitter.MinDistance)));
 		Nuake::RenderCommand::DrawLines(0, 128);
 	}
 
@@ -318,9 +318,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.f);
-		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_CapsuleGizmo[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
@@ -343,9 +343,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.0f);
-		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.0f);
+		m_LineShader->SetUniform("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_CylinderGizmo[entityId]->Bind();
 		Nuake::RenderCommand::DrawLines(0, 264);
@@ -376,9 +376,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 			gizmoPosition = glm::translate(gizmoPosition, { 0, -cylinderLength / 2.0, 0 });
 
 			m_LineShader->Bind();
-			m_LineShader->SetUniform1f("u_Opacity", 1.0f);
-			m_LineShader->SetUniformMat4f("u_View", gizmoPosition);
-			m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+			m_LineShader->SetUniform("u_Opacity", 1.0f);
+			m_LineShader->SetUniform("u_View", gizmoPosition);
+			m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 			m_CylinderGizmo[entityId]->Bind();
 			Nuake::RenderCommand::DrawLines(0, 264);
@@ -419,9 +419,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	{
 		auto [transform, particle] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
 		m_LineShader->Bind();
-		m_LineShader->SetUniform1f("u_Opacity", 1.f);
-		m_LineShader->SetUniformMat4f("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(particle.Radius)));
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])), Vector3(particle.Radius)));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_CircleBuffer->Bind();
 		Nuake::RenderCommand::DrawLines(0, 128);
@@ -450,8 +450,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
 
 		m_LineShader->Bind();
-		m_LineShader->SetUniformMat4f("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
-		m_LineShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
+		m_LineShader->SetUniform("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix);
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		meshes[mesh.SubMesh]->Bind();
@@ -461,9 +461,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 	auto flatShader = ShaderManager::GetShader("Resources/Shaders/flat.shader");
 	flatShader->Bind();
-	flatShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
-	flatShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-	flatShader->SetUniform4f("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
+	flatShader->SetUniform("u_View", scene->m_EditorCamera->GetTransform());
+	flatShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
+	flatShader->SetUniform("u_Color", 0.5f, 0.5f, 0.5f, 1.0f);
 	
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 	RenderCommand::Enable(RendererEnum::FACE_CULL);
@@ -474,9 +474,9 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 
 	auto gizmoShader = ShaderManager::GetShader("Resources/Shaders/gizmo.shader");
 	gizmoShader->Bind();
-	gizmoShader->SetUniformMat4f("u_View", scene->m_EditorCamera->GetTransform());
-	gizmoShader->SetUniformMat4f("u_Projection", scene->m_EditorCamera->GetPerspective());
-	gizmoShader->SetUniform1f("u_Opacity", occluded ? 0.1f : 1.f);
+	gizmoShader->SetUniform("u_View", scene->m_EditorCamera->GetTransform());
+	gizmoShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
+	gizmoShader->SetUniform("u_Opacity", occluded ? 0.1f : 1.f);
 	RenderCommand::Disable(RendererEnum::FACE_CULL);
 
 	const Vector3& cameraPosition = scene->m_EditorCamera->GetTranslation();
@@ -487,8 +487,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/camera.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/camera.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -527,8 +527,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 			texturePath = "Resources/Gizmos/light.png";
 		}
 
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture(texturePath).get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture(texturePath).get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 
 		auto initialTransform = transform.GetGlobalTransform();
 		Matrix4 particleTransform = initialTransform;
@@ -548,8 +548,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto characterControllerView = scene->m_Registry.view<TransformComponent, CharacterControllerComponent>();
 	for (auto e : characterControllerView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/player.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/player.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transform, characterControllerComponent] = scene->m_Registry.get<TransformComponent, CharacterControllerComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -571,8 +571,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto boneView = scene->m_Registry.view<TransformComponent, BoneComponent>();
 	for (auto e : boneView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/bone.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/bone.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transform, boneComponent] = scene->m_Registry.get<TransformComponent, BoneComponent>(e);
 
 		auto initialTransform = transform.GetGlobalTransform();
@@ -593,8 +593,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/sound_emitter.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/sound_emitter.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transformComponent, audioEmitterComponent] = scene->m_Registry.get<TransformComponent, AudioEmitterComponent>(e);
 
 		auto initialTransform = transformComponent.GetGlobalTransform();
@@ -614,8 +614,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto rigidbodyView = scene->m_Registry.view<TransformComponent, RigidBodyComponent>();
 	for (auto e : rigidbodyView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/rigidbody.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/rigidbody.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transformComponent, rigidbodyComponent] = scene->m_Registry.get<TransformComponent, RigidBodyComponent>(e);
 
 		auto initialTransform = transformComponent.GetGlobalTransform();
@@ -635,8 +635,8 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	auto particleEmitterView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent>();
 	for (auto e : particleEmitterView)
 	{
-		gizmoShader->SetUniformTex("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/particles.png").get());
-		gizmoShader->SetUniform1i("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
+		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/particles.png").get());
+		gizmoShader->SetUniform("u_EntityID", ((int32_t)(uint32_t)(e)) + 1);
 		auto [transformComponent, particleEmitter] = scene->m_Registry.get<TransformComponent, ParticleEmitterComponent>(e);
 
 		auto initialTransform = transformComponent.GetGlobalTransform();

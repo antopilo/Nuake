@@ -243,13 +243,13 @@ namespace Nuake
     {
         Shader* lineShader = ShaderManager::GetShader("Resources/Shaders/line.shader");
         lineShader->Bind();
-        lineShader->SetUniformMat4f("u_Projection", camera->GetPerspective());
-        lineShader->SetUniformMat4f("u_View", camera->GetTransform());
+        lineShader->SetUniform("u_Projection", camera->GetPerspective());
+        lineShader->SetUniform("u_View", camera->GetTransform());
 
         m_Shader->Bind();
-        m_Shader->SetUniformMat4f("u_Projection", camera->GetPerspective());
-        m_Shader->SetUniformMat4f("u_View", camera->GetTransform());
-        m_Shader->SetUniform3f("u_EyePosition", camera->GetTranslation().x, camera->GetTranslation().y, camera->GetTranslation().z);
+        m_Shader->SetUniform("u_Projection", camera->GetPerspective());
+        m_Shader->SetUniform("u_View", camera->GetTransform());
+        m_Shader->SetUniform("u_EyePosition", camera->GetTranslation().x, camera->GetTranslation().y, camera->GetTranslation().z);
     }
 
     int spotShadowMapCount = 0;
@@ -259,21 +259,21 @@ namespace Nuake
 
         Shader* deferredShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
         deferredShader->Bind();
-        deferredShader->SetUniform1i("LightCount", 0);
+        deferredShader->SetUniform("LightCount", 0);
 
         for (int i = 0; i < m_Lights.size(); i++)
         {
             const std::string uniformAccessor = "Lights[" + std::to_string(i) + "].";
-            deferredShader->SetUniform3f(uniformAccessor + "Position", 0, 0, 0);
-            deferredShader->SetUniform3f(uniformAccessor + "Color", 0, 0, 0);
-            deferredShader->SetUniform1i(uniformAccessor + "Type", -1);
-            deferredShader->SetUniform1i(uniformAccessor + "CastShadow", 0);
-            deferredShader->SetUniform1i(uniformAccessor + "ShadowMapID", -1);
+            deferredShader->SetUniform(uniformAccessor + "Position", 0, 0, 0);
+            deferredShader->SetUniform(uniformAccessor + "Color", 0, 0, 0);
+            deferredShader->SetUniform(uniformAccessor + "Type", -1);
+            deferredShader->SetUniform(uniformAccessor + "CastShadow", 0);
+            deferredShader->SetUniform(uniformAccessor + "ShadowMapID", -1);
         }
 
         for (int i = 0; i < 8; i++)
         {
-            deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(i) + "]", 0);
+            deferredShader->SetUniform("SpotShadowMaps[" + std::to_string(i) + "]", 0);
         }
 
         m_Lights.clear();
@@ -297,7 +297,7 @@ namespace Nuake
         {
             int shadowmapAmount = 0;
 
-            deferredShader->SetUniform1i("u_DirectionalLight.Shadow", light.CastShadows);
+            deferredShader->SetUniform("u_DirectionalLight.Shadow", light.CastShadows);
 
             if (light.CastShadows)
             {
@@ -305,16 +305,16 @@ namespace Nuake
                 {
                     light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
                     const uint32_t shadowMapId = shadowmapAmount + i;
-                    deferredShader->SetUniform1i("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
-                    deferredShader->SetUniform1i("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
-                    deferredShader->SetUniform1f("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
-                    deferredShader->SetUniformMat4f("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
+                    deferredShader->SetUniform("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
+                    deferredShader->SetUniform("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
+                    deferredShader->SetUniform("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
+                    deferredShader->SetUniform("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
                 }
             }
 
-            deferredShader->SetUniform3f("u_DirectionalLight.Direction", direction.x, direction.y, direction.z);
-            deferredShader->SetUniform1i("u_DirectionalLight.Volumetric", light.IsVolumetric);
-            deferredShader->SetUniform3f("u_DirectionalLight.Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+            deferredShader->SetUniform("u_DirectionalLight.Direction", direction.x, direction.y, direction.z);
+            deferredShader->SetUniform("u_DirectionalLight.Volumetric", light.IsVolumetric);
+            deferredShader->SetUniform("u_DirectionalLight.Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
 
             shadowmapAmount += CSM_AMOUNT;
         }
@@ -329,38 +329,38 @@ namespace Nuake
             size_t idx = m_Lights.size();
 
             const std::string uniformAccessor = "Lights[" + std::to_string(idx - 1) + "].";
-            deferredShader->SetUniform3f(uniformAccessor + "Position", pos.x, pos.y, pos.z);
-            deferredShader->SetUniform3f(uniformAccessor + "Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
-            deferredShader->SetUniform1i(uniformAccessor + "Type", static_cast<int>(light.Type));
-            deferredShader->SetUniform1i(uniformAccessor + "CastShadow", static_cast<int>(light.CastShadows));
+            deferredShader->SetUniform(uniformAccessor + "Position", pos.x, pos.y, pos.z);
+            deferredShader->SetUniform(uniformAccessor + "Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
+            deferredShader->SetUniform(uniformAccessor + "Type", static_cast<int>(light.Type));
+            deferredShader->SetUniform(uniformAccessor + "CastShadow", static_cast<int>(light.CastShadows));
 
             if (light.Type == Spot)
             {
                 direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
-                deferredShader->SetUniform3f(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
-                deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
-                deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
+                deferredShader->SetUniform(uniformAccessor + "Direction", direction.x, direction.y, direction.z);
+                deferredShader->SetUniform(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
+                deferredShader->SetUniform(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
 
                 if (light.CastShadows && spotShadowMapCount < MaxSpotShadowMap)
                 {
                     int shadowMapTextureSlot = 21 + spotShadowMapCount;
-                    deferredShader->SetUniform1i(uniformAccessor + "ShadowMapID", spotShadowMapCount);
-                    deferredShader->SetUniformMat4f(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
+                    deferredShader->SetUniform(uniformAccessor + "ShadowMapID", spotShadowMapCount);
+                    deferredShader->SetUniform(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
 
                     light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(shadowMapTextureSlot);
-                    deferredShader->SetUniform1i("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
+                    deferredShader->SetUniform("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
                     spotShadowMapCount++;
                 }
             }
             else
             {
-                deferredShader->SetUniform3f(uniformAccessor + "Direction", 0, 0, 0);
-                deferredShader->SetUniform1f(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
-                deferredShader->SetUniform1f(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
-                deferredShader->SetUniform1f(uniformAccessor + "ShadowMapID", -1);
+                deferredShader->SetUniform(uniformAccessor + "Direction", 0, 0, 0);
+                deferredShader->SetUniform(uniformAccessor + "OuterAngle", glm::cos(Rad(light.OuterCutoff)));
+                deferredShader->SetUniform(uniformAccessor + "InnerAngle", glm::cos(Rad(light.Cutoff)));
+                deferredShader->SetUniform(uniformAccessor + "ShadowMapID", -1);
             }
 
-            deferredShader->SetUniform1i("LightCount", static_cast<int>(idx));
+            deferredShader->SetUniform("LightCount", static_cast<int>(idx));
         }
         
         m_LightsUniformBuffer->Bind();
@@ -370,8 +370,8 @@ namespace Nuake
     {
         Shader* shader = ShaderManager::GetShader("Resources/Shaders/line.shader");
         shader->Bind();
-        shader->SetUniformMat4f("u_Model", transform);
-        shader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
+        shader->SetUniform("u_Model", transform);
+        shader->SetUniform("u_Color", color.r, color.g, color.b, color.a);
         
         std::vector<Vertex> vertices
         {
@@ -394,14 +394,14 @@ namespace Nuake
     {
 
         //m_DebugShader->Bind();
-        //m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
+        //m_DebugShader->SetUniform("u_Color", color.r, color.g, color.b, color.a);
     }
 
     void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
     {
         //glDisable(GL_DEPTH_TEST);
-        m_DebugShader->SetUniformMat4f("u_Model", transform.GetGlobalTransform());
-        m_DebugShader->SetUniform4f("u_Color", color.r, color.g, color.b, color.a);
+        m_DebugShader->SetUniform("u_Model", transform.GetGlobalTransform());
+        m_DebugShader->SetUniform("u_Color", color.r, color.g, color.b, color.a);
 
         CubeMesh->Bind();
         RenderCommand::DrawArrays(0, 36);

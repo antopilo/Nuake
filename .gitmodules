@@ -31,3 +31,9 @@
 [submodule "Nuake/dependencies/yoga"]
 	path = Nuake/dependencies/yoga
 	url = https://github.com/facebook/yoga.git
+[submodule "Nuake/dependencies/--force"]
+	path = Nuake/dependencies/--force
+	url = https://github.com/freetype/freetype.git
+[submodule "Nuake/dependencies/freetype"]
+	path = Nuake/dependencies/freetype
+	url = https://github.com/freetype/freetype.git

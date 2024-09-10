@@ -58,10 +58,10 @@ namespace Nuake
 				{
 					if (!depthOnly)
 					{
-						shader->SetUniform1i(entityIdUniformLocation, m.entityId + 1);
+						shader->SetUniform(entityIdUniformLocation, m.entityId + 1);
 					}
 
-					shader->SetUniformMat4f(modelMatrixUniformLocation, m.transform);
+					shader->SetUniform(modelMatrixUniformLocation, m.transform);
 					m.mesh->Draw(shader, false);
 				}
 			}

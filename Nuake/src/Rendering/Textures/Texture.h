@@ -30,7 +30,7 @@ namespace Nuake
 	public:
 		Texture(const std::string& path); // Load texture from file
 		Texture(unsigned char* data, int len); // Used to load texture from a memory buffer
-
+		Texture(Vector2 size, void* data);
 		Texture(Vector2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0, void* data = 0); // Used to load texture from memeory with known size
 		~Texture();
 

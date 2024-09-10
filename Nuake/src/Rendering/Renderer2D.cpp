@@ -50,7 +50,7 @@ namespace Nuake
 		glDisable(GL_CULL_FACE);
 		Projection = glm::ortho(0.f, size.x, size.y, 0.f, -1.f, 1000.0f);
 		UIShader->Bind();
-		UIShader->SetUniformMat4f("projection", Projection);
+		UIShader->SetUniform("projection", Projection);
 	}
 
 	void Renderer2D::DrawRect()
@@ -69,9 +69,9 @@ namespace Nuake
 		glm::decompose(transform, scale, rotation, translation, skew, perspective);
 
 		BeginDraw({ 1920.0f, 1080.0f });
-		UIShader->SetUniformMat4f("model", transform);
-		UIShader->SetUniform1f("u_border_radius", borderRadius);
-		UIShader->SetUniform2f("u_size", scale.x, scale.y);
+		UIShader->SetUniform("model", transform);
+		UIShader->SetUniform("u_border_radius", borderRadius);
+		UIShader->SetUniform("u_size", scale.x, scale.y);
 
 		glBindVertexArray(Renderer2D::VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -83,10 +83,10 @@ namespace Nuake
 		model = glm::translate(model, Vector3(position.x, position.y, 0.f));
 		model = glm::scale(model, Vector3(size.x, size.y, 1.f));
 
-		UIShader->SetUniformMat4f("model", model);
-		UIShader->SetUniform1f("u_BorderRadius", borderRadius);
-		UIShader->SetUniform2f("u_Size", size.x, size.y);
-		UIShader->SetUniform4f("u_BackgroundColor", color.r, color.g, color.b, color.a);
+		UIShader->SetUniform("model", model);
+		UIShader->SetUniform("u_BorderRadius", borderRadius);
+		UIShader->SetUniform("u_Size", size.x, size.y);
+		UIShader->SetUniform("u_BackgroundColor", color.r, color.g, color.b, color.a);
 		
 		glBindVertexArray(Renderer2D::VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);

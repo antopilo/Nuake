@@ -58,6 +58,8 @@ group "Dependencies"
     include "Nuake/dependencies/recastnavigation_p5.lua"
     include "Nuake/dependencies/tracy_p5.lua"
     include "Nuake/dependencies/yoga_p5.lua"
+    include "Nuake/dependencies/msdf-atlas-gen_p5.lua"
+    include "Nuake/dependencies/freetype_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
@@ -164,8 +166,13 @@ project "Nuake"
 	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
 	    "%{prj.name}/dependencies/recastnavigation/Recast/Include",
-	    
+	    "%{prj.name}/dependencies/yoga",
+        "%{prj.name}/dependencies/msdf-atlas-gen",
+        "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+
     }
     
     links
@@ -381,6 +388,7 @@ project "Editor"
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
+        "%{prj.name}/../Nuake/src/Vendors/nanosvg",
         "%{prj.name}/../Nuake/dependencies/glad/include",
         "%{prj.name}/../Nuake/dependencies/glfw/include",
         "%{prj.name}/../Nuake/dependencies/assimp/include",
@@ -394,8 +402,13 @@ project "Editor"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
-	    
+        "%{prj.name}/../Nuake/dependencies/yoga",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+
     }
     
     libdirs 
@@ -406,7 +419,8 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/",
+        "%{prj.name}/../Nuake/dependencies/freetype/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Freetype"
     }
 
     links
@@ -424,7 +438,10 @@ project "Editor"
 	    "DetourTileCache",
 	    "Recast",
 	    "tracy",
-        "yoga"
+        "yoga",
+        "msdf-gen",
+        "msdf-atlas-gen",
+        "Freetype"
     }
     
     defines {

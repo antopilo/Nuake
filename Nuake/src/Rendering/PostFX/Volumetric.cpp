@@ -48,25 +48,25 @@ namespace Nuake {
 			auto cameraPosition = Vector3(view[3]);
 			Shader* volumetricShader = ShaderManager::GetShader("Resources/Shaders/volumetric.shader");
 			volumetricShader->Bind();
-			volumetricShader->SetUniformMat4f("u_Projection", projection);
-			volumetricShader->SetUniformMat4f("u_View", view);
-			volumetricShader->SetUniformTex("u_Depth", mDepth, 1);
-			volumetricShader->SetUniformVec3("u_CamPosition", camPos);
-			volumetricShader->SetUniform1i("u_StepCount", mStepCount);
-			volumetricShader->SetUniform1f("u_FogAmount", mFogAmount);
-			volumetricShader->SetUniform1i("u_LightCount", static_cast<int>(lights.size()));
-			volumetricShader->SetUniform1f("u_Exponant", mFogExponant);
+			volumetricShader->SetUniform("u_Projection", projection);
+			volumetricShader->SetUniform("u_View", view);
+			volumetricShader->SetUniform("u_Depth", mDepth, 1);
+			volumetricShader->SetUniform("u_CamPosition", camPos);
+			volumetricShader->SetUniform("u_StepCount", mStepCount);
+			volumetricShader->SetUniform("u_FogAmount", mFogAmount);
+			volumetricShader->SetUniform("u_LightCount", static_cast<int>(lights.size()));
+			volumetricShader->SetUniform("u_Exponant", mFogExponant);
 			for (uint16_t i = 0; i < lights.size(); i++)
 			{
 				LightComponent& light = lights[i];
 
 				std::string u_light = "u_Lights[" + std::to_string(i) + "].";
-				volumetricShader->SetUniformMat4f(u_light + "transform", light.mViewProjections[0]);
-				volumetricShader->SetUniformVec3(u_light + "color", light.Color);
-				volumetricShader->SetUniformVec3(u_light + "direction", light.GetDirection());
+				volumetricShader->SetUniform(u_light + "transform", light.mViewProjections[0]);
+				volumetricShader->SetUniform(u_light + "color", light.Color);
+				volumetricShader->SetUniform(u_light + "direction", light.GetDirection());
 
-				volumetricShader->SetUniformTex(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 5 + i);
-				volumetricShader->SetUniform1f(u_light + "strength", light.Strength);
+				volumetricShader->SetUniform(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 5 + i);
+				volumetricShader->SetUniform(u_light + "strength", light.Strength);
 			}
 
 			Renderer::DrawQuad();
@@ -79,8 +79,8 @@ namespace Nuake {
 			mFinalFramebuffer->Clear();
 			Shader* blurShader = ShaderManager::GetShader("Resources/Shaders/blur.shader");
 			blurShader->Bind();
-			//blurShader->SetUniformTex("u_Depth", mDepth, 1);
-			blurShader->SetUniformTex("u_Input", mVolumetricFramebuffer->GetTexture().get());
+			//blurShader->SetUniform("u_Depth", mDepth, 1);
+			blurShader->SetUniform("u_Input", mVolumetricFramebuffer->GetTexture().get());
 
 			Renderer::DrawQuad();
 		}

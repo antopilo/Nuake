@@ -18,6 +18,8 @@ project 'yoga'
 	files {
 		'yoga/yoga/*.cpp',
 		'yoga/yoga/*.h',
+		'yoga/yoga/**/*.cpp',
+		'yoga/yoga/**/*.h',
 	}
 
 	defines {

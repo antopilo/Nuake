@@ -115,7 +115,7 @@ namespace Nuake
     void Mesh::DebugDraw()
     {
         Renderer::m_DebugShader->Bind();
-        Renderer::m_DebugShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
+        Renderer::m_DebugShader->SetUniform("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
 
         m_VertexArray->Bind();
         RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
