@@ -39,8 +39,8 @@ namespace NuakeUI
 		Renderer();
 		~Renderer() = default;
 
-		std::shared_ptr<Shader> mShader;
-		std::shared_ptr<Shader> mSDFShader;
+		Shader* mShader;
+		Shader* mSDFShader;
 		std::shared_ptr<VertexArray> mVertexArray;
 		std::shared_ptr<VertexBuffer> mVertexBuffer;
 	};

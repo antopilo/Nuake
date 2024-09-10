@@ -45,6 +45,8 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_debugLine_shader);
 		LoadEmbeddedShader(Resources_Shaders_add_shader);
 		LoadEmbeddedShader(Resources_Shaders_display_depth_shader);
+		LoadEmbeddedShader(Resources_Shaders_ui_panel_shader);
+		LoadEmbeddedShader(Resources_Shaders_ui_text_shader);
 	}
 
 	Shader* ShaderManager::GetShader(const std::string& path)

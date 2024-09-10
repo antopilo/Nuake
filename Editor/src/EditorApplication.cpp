@@ -72,16 +72,6 @@ void EditorApplication::OnInit()
                 Engine::GetCurrentScene()->Save();
             }
         });
-
-    NuakeUI::CanvasParser parser;
-    Ref<NuakeUI::Canvas> canvas = parser.Parse("test.html");
-
-    static MyInputManager inputManager(*m_Window);
-
-    canvas->SetInputManager(&inputManager);
-    canvas->ComputeLayout({1920, 1080});
-    canvas->Tick();
-    canvas->Draw();
     
     PushLayer(CreateScope<EditorLayer>());
 }

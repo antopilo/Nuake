@@ -57,10 +57,9 @@ void EditorLayer::OnUpdate()
                 {
                     m_GizmoDrawer->DrawGizmos(currentScene, false);
                 }
-
-                
             }
         }
+
         sceneFramebuffer->Unbind();
     }
 

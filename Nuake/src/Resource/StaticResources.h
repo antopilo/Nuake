@@ -233,6 +233,12 @@ namespace Nuake {
         extern const std::string Resources_Shaders_ui_shader_path;
         extern unsigned int Resources_Shaders_ui_shader_len;
         extern unsigned char Resources_Shaders_ui_shader[];
+        extern const std::string Resources_Shaders_ui_panel_shader_path;
+        extern unsigned int Resources_Shaders_ui_panel_shader_len;
+        extern unsigned char Resources_Shaders_ui_panel_shader[];
+        extern const std::string Resources_Shaders_ui_text_shader_path;
+        extern unsigned int Resources_Shaders_ui_text_shader_len;
+        extern unsigned char Resources_Shaders_ui_text_shader[];
         extern const std::string Resources_Shaders_vignette_shader_path;
         extern unsigned int Resources_Shaders_vignette_shader_len;
         extern unsigned char Resources_Shaders_vignette_shader[];
