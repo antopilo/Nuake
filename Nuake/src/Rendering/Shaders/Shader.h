@@ -130,22 +130,23 @@ namespace Nuake
 		void SetUniforms(const std::vector<UniformVariable>& uniforms);
 
 		void SetUniform(const std::string& name, float v0);
+		void SetUniform(const std::string& name, float v0, float v1);
+		void SetUniform(const std::string& name, float v0, float v1, float v3);
+		void SetUniform(const std::string& name, float v0, float v1, float v3, float v4);
 		void SetUniform(const std::string& name, int v0);
 		void SetUniform(const std::string& name, unsigned int v0);
-		void SetUniform(const std::string& name, float v0, float v1);
+		void SetUniformv(const std::string& name, int size, int* value);
 		void SetUniform(const std::string& name, Vector2 v0);
-		void SetUniform(const std::string& name, float v0, float v1, float v3);
 		void SetUniform(const std::string& name, Vector3 v0);
-		void SetUniform(const std::string& name, float v0, float v1, float v3, float v4);
 		void SetUniform(const std::string& name, Vector4 v0);
 		void SetUniform(const std::string& name, Matrix3 v0);
 		void SetUniform(const std::string& name, Matrix4 v0);
-		void SetUniformv(const std::string& name, int size, int* value);
 		void SetUniform(const std::string& name, int size, float* value);
 		void SetUniform(const std::string& name, bool value);
+		void SetUniform(const std::string& name, Texture* texture, uint32_t slot = 0);
+
 		void SetUniform(uint32_t uniformSlot, int value);
 		void SetUniform(uint32_t uniformSlot, Matrix4 value);
-		void SetUniform(const std::string& name, Texture* texture, uint32_t slot);
 
 		int FindUniformLocation(std::string uniform);
 

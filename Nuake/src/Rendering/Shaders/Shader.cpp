@@ -22,7 +22,7 @@ namespace Nuake
 				Source = ParseShader(fileContent);
 				programId = CreateProgram(Source);
 				return;
-			}
+			} 
 		}
 
 		Logger::Log("Shader source file not found: " + filePath, "shader", CRITICAL);
@@ -378,7 +378,7 @@ namespace Nuake
 
 	void Shader::SetUniform(const std::string& name, bool value)
 	{
-		SetUniform(name, value);
+		SetUniform(name, static_cast<int>(value));
 	}
 
 	void Shader::SetUniform(uint32_t uniformSlot, int value)

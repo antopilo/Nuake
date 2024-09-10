@@ -269,6 +269,17 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
 			shader->Bind();
 
+			//mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3)->Bind(0);
+			//mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(1);
+			//shader->SetUniforms(
+			//{
+			//	{"u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1},
+			//	{"u_EntityTexture", 0},
+			//	{"u_OutlineColor", projectSettings.PrimaryColor},
+			//	{"u_Depth", 1},
+			//	{"u_Radius", projectSettings.OutlineRadius * projectSettings.ResolutionScale},
+			//});
+
 			shader->SetUniform("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
 			shader->SetUniform("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
 			shader->SetUniform("u_OutlineColor", projectSettings.PrimaryColor);
