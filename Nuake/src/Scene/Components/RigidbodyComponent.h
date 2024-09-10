@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "TransformComponent.h"
 #include "BaseComponent.h"
 #include "src/Core/Core.h"
@@ -11,6 +13,8 @@ namespace Nuake {
 
 	class RigidBodyComponent
 	{
+		NUAKECOMPONENT(RigidBodyComponent, "Rigid Body")
+
 	public:
 		float Mass;
 		bool LockX = false;

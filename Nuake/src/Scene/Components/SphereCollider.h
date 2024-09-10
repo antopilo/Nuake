@@ -1,10 +1,14 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
 namespace Nuake {
 	class SphereColliderComponent
 	{
+		NUAKECOMPONENT(SphereColliderComponent, "Sphere Component")
+
 	public:
 		Ref<Physics::PhysicShape> Sphere;
 

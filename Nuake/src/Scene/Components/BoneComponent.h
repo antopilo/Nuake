@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 
@@ -7,6 +9,8 @@ namespace Nuake
 {
 	class BoneComponent
 	{
+        NUAKECOMPONENT(BoneComponent, "Bone")
+
 	public:
 		BoneComponent() = default;
 		~BoneComponent() = default;

@@ -1,5 +1,6 @@
-
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 #include "src/FileSystem/FileSystem.h"
@@ -7,6 +8,8 @@
 #include "src/Resource/Serializable.h"
 #include "src/Resource/File.h"
 #include <any>
+
+#include "src/Core/Object/Object.h"
 
 namespace Nuake {
 
@@ -33,6 +36,8 @@ namespace Nuake {
 
 	class NetScriptComponent
 	{
+		NUAKECOMPONENT(NetScriptComponent, "Net Script")
+		
 	public:
 		std::string ScriptPath;
 		std::string Class;

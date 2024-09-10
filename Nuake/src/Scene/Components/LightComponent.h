@@ -1,4 +1,7 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
+
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include "TransformComponent.h"
@@ -19,6 +22,8 @@ namespace Nuake
     const int CSM_AMOUNT = 4;
     class LightComponent 
     {
+        NUAKECOMPONENT(LightComponent, "Light")
+
     public:
         LightType Type = Point;
         Vector3 Direction;

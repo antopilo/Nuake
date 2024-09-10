@@ -13,6 +13,8 @@
 #include <Engine.h>
 #include <src/Resource/Prefab.h>
 
+#include <entt/entt.hpp>
+
 using namespace Nuake;
 
 EditorSelectionPanel::EditorSelectionPanel()
@@ -151,32 +153,19 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
 	if (ImGui::BeginPopup("ComponentPopup"))
 	{
-		MenuItemComponent("Wren Script", WrenScriptComponent);
-		MenuItemComponent("C# Script", NetScriptComponent);
-		MenuItemComponent("Camera", CameraComponent);
-		MenuItemComponent("Light", LightComponent);
-		ImGui::Separator();
-		MenuItemComponent("Model", ModelComponent);
-		MenuItemComponent("Skinned Model", SkinnedModelComponent);
-		MenuItemComponent("Bone", BoneComponent)
-			ImGui::Separator();
-		MenuItemComponent("Sprite", SpriteComponent)
-			MenuItemComponent("Particle Emitter", ParticleEmitterComponent)
-			ImGui::Separator();
-		MenuItemComponent("Character Controller", CharacterControllerComponent)
-			MenuItemComponent("Rigid body", RigidBodyComponent)
-			ImGui::Separator();
-		MenuItemComponent("Box collider", BoxColliderComponent)
-			MenuItemComponent("Capsule collider", CapsuleColliderComponent)
-			MenuItemComponent("Cylinder collider", CylinderColliderComponent)
-			MenuItemComponent("Sphere collider", SphereColliderComponent)
-			MenuItemComponent("Mesh collider", MeshColliderComponent)
-			ImGui::Separator();
-		MenuItemComponent("Quake map", QuakeMapComponent);
-		ImGui::Separator();
-		MenuItemComponent("Audio Emitter", AudioEmitterComponent);
-		ImGui::Separator();
-		MenuItemComponent("NavMesh Volume", NavMeshVolumeComponent);
+		for(entt::meta_type t : entt::resolve())
+		{
+			if (entt::meta_func func = t.func(HashedFnName::GetComponentName))
+			{
+				entt::meta_any ret = func.invoke(t);
+				std::string className = ret.cast<std::string>();
+				if (ImGui::MenuItem(className.c_str()))
+				{
+					entity.AddComponent(t);
+				}
+			}
+		}
+		
 		ImGui::EndPopup();
 	}
 

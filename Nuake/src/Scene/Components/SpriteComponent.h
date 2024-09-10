@@ -1,4 +1,6 @@
 #pragma once
+
+#include "src/Core/Object/Object.h"
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Textures/Texture.h"
@@ -8,6 +10,8 @@ namespace Nuake
 {
 	class SpriteComponent
 	{
+		NUAKECOMPONENT(SpriteComponent, "Sprite")
+
 	public:
 		bool Billboard;
 		bool LockYRotation;

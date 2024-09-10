@@ -1,5 +1,6 @@
 #pragma once
 
+#include "src/Core/Object/Object.h"
 #include "src/Core/String.h"
 #include "src/Resource/Model.h"
 #include "src/Resource/ResourceLoader.h"
@@ -13,6 +14,8 @@ namespace Nuake
 {
     struct ModelComponent
     {
+        NUAKECOMPONENT(ModelComponent, "Model")
+
         Ref<Model> ModelResource;
         std::string ModelPath;
 
