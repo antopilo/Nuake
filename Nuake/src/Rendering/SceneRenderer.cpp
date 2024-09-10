@@ -156,13 +156,6 @@ namespace Nuake
 		mShadingBuffer->QueueResize(framebufferResolution);
 		ShadingPass(scene);
 
-		ImGui::SetNextWindowSize({ 1280, 720 });
-		if (ImGui::Begin("Shaded"))
-		{
-			ImGui::Image((void*)(mShadingBuffer->GetTexture()->GetID()), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
-		}
-		ImGui::End();
-
 		// Blit depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetRenderID());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mShadingBuffer->GetRenderID());
