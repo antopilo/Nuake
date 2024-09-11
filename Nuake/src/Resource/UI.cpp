@@ -34,6 +34,7 @@ void UIResource::Draw()
 {
 	framebuffer->Bind();
 	{
+		RenderCommand::SetClearColor({ 0, 0, 0, 0 });
 		RenderCommand::Clear();
 
 		if (canvas)

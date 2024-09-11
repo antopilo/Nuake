@@ -19,12 +19,14 @@ namespace Nuake
 		{
 			BEGIN_SERIALIZE();
 			SERIALIZE_VAL(UIFilePath);
+			SERIALIZE_VAL(IsWorldSpace);
 			END_SERIALIZE();
 		}
 
 		bool Deserialize(const json& j)
 		{
 			DESERIALIZE_VAL(UIFilePath);
+			DESERIALIZE_VAL(IsWorldSpace);
 			return true;
 		}
 	};

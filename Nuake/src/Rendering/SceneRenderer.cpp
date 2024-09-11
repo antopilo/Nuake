@@ -16,6 +16,7 @@
 #include <glad/glad.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <Tracy.hpp>
+#include <src/UI/Renderer.h>
 
 
 namespace Nuake 
@@ -436,20 +437,23 @@ namespace Nuake
 				continue;
 			}
 
-			// Fetch resource from resource manager using UUID
-			Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
-			uiResource->Resize(framebuffer.GetSize());
-
-			// Copy UI onto final viewport
-			framebuffer.Bind();
+			if (!uiComponent.IsWorldSpace)
 			{
-				Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
-				shader->Bind();
-				shader->SetUniform("u_Source", mTempFrameBuffer->GetTexture().get(), 0);
-				shader->SetUniform("u_Source2", uiResource->GetOutputTexture().get(), 1);
-				Renderer::DrawQuad();
+				// Fetch resource from resource manager using UUID
+				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+				uiResource->Resize(framebuffer.GetSize());
+
+				// Copy UI onto final viewport
+				framebuffer.Bind();
+				{
+					Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
+					shader->Bind();
+					shader->SetUniform("u_Source", mTempFrameBuffer->GetTexture().get(), 0);
+					shader->SetUniform("u_Source2", uiResource->GetOutputTexture().get(), 1);
+					Renderer::DrawQuad();
+				}
+				framebuffer.Unbind();
 			}
-			framebuffer.Unbind();
 		}
 
 		glDepthMask(true);
@@ -909,14 +913,25 @@ namespace Nuake
 				Renderer::QuadMesh->SetMaterial(previousMaterial);
 			}
 
+			auto uiView = scene.m_Registry.view<TransformComponent, UIComponent>();
+			for (auto e : uiView)
+			{
+				auto [transform, uiComponent] = uiView.get<TransformComponent, UIComponent>(e);
+				if (!uiComponent.IsWorldSpace)
+				{
+					continue;
+				}
 
-			// Temp models
-
-
-
-
+				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+				Matrix4 finalTransform = transform.GetGlobalTransform();
+				Renderer::QuadMesh->GetMaterial()->SetAlbedo(uiResource->GetOutputTexture());
+				Renderer::SubmitMesh(Renderer::QuadMesh, finalTransform, (uint32_t)e);
+				Renderer::Flush(gBufferShader, false);
+				//Renderer::DrawQuad(finalTransform);
+			}
+			
 			// Reset material on quadmesh
-			// Renderer::QuadMesh->SetMaterial(previousMaterial);
+			Renderer::QuadMesh->SetMaterial(previousMaterial);
 
 			// Skinned mesh at the end because we switch shader
 			gBufferSkinnedMeshShader->Bind();

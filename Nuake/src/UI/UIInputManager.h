@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputManager.h"
+#include "src/Core/Input.h"
 
 #include <src/Window.h>
 
@@ -16,45 +17,39 @@ namespace Nuake
 		{
 			mWindow = window.GetHandle();
 
-			glfwSetScrollCallback(mWindow, MyInputManager::scroll_callback);
-			glfwSetCharCallback(mWindow, MyInputManager::char_callback);
-			glfwSetKeyCallback(mWindow, MyInputManager::key_callback);
+			//glfwSetScrollCallback(mWindow, MyInputManager::scroll_callback);
+			//glfwSetCharCallback(mWindow, MyInputManager::char_callback);
+			//glfwSetKeyCallback(mWindow, MyInputManager::key_callback);
 		}
 
 		bool IsMouseInputDown() override
 		{
-			auto state = glfwGetMouseButton(mWindow, GLFW_MOUSE_BUTTON_1);
-			return state == GLFW_PRESS;
+			return Input::IsMouseButtonDown(1);
 		}
 
 		bool IsKeyPressed(uint32_t key) override
 		{
-			auto states = glfwGetKey(mWindow, key);
-			return states == GLFW_PRESS;
+			return Input::IsKeyPressed((Nuake::Key)key);
 		}
 
 		float GetMouseX() override
 		{
-			double xpos, ypos;
-			glfwGetCursorPos(mWindow, &xpos, &ypos);
-			return (float)xpos;
+			return Input::GetMouseX();
 		}
 
 		float GetMouseY() override
 		{
-			double xpos, ypos;
-			glfwGetCursorPos(mWindow, &xpos, &ypos);
-			return (float)ypos;
+			return Input::GetMouseY();
 		}
 
 		float GetScrollX() override
 		{
-			return ScrollX;
+			return 0.0f;
 		}
 
 		float GetScrollY() override
 		{
-			return ScrollY;
+			return 0.0f;
 		}
 
 		static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

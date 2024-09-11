@@ -56,8 +56,8 @@ p = j[#p]; \
 	} \
 }
 
-#define SERIALIZE_OBJECT(v) j[#v] = v->Serialize();
-#define SERIALIZE_OBJECT_REF(v) j[#v] = v.Serialize();
+#define SERIALIZE_OBJECT(v)				 j[#v] = v->Serialize();
+#define SERIALIZE_OBJECT_REF(v)			 j[#v] = v.Serialize();
 #define SERIALIZE_OBJECT_REF_LBL(lbl, v) j[lbl] = v.Serialize();
 #define END_SERIALIZE() return j;
 #define DUMP_SERIALIZE() j.dump(4);
