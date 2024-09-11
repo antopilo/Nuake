@@ -1,5 +1,6 @@
 #include "Node.h"
 #include "../Renderer.h"
+#include "src/FileSystem/FileSystem.h"
 
 #include "NodeState.h"
 #include "../StringHelper.h"
@@ -480,7 +481,7 @@ namespace NuakeUI
 							}
 							else
 							{
-								auto texture = std::make_shared<Texture>(value.string);
+								auto texture = CreateRef<Texture>(value.string);
 								ComputedStyle.BackgroundImage = texture;
 							}
 						}

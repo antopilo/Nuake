@@ -270,7 +270,6 @@ namespace Nuake
                         OS::OpenIn(file->GetAbsolutePath());
                         break;
                 }
-                
             }
             
             Editor->Selection = EditorSelection(file);
@@ -319,6 +318,10 @@ namespace Nuake
             else if (fileExtension == ".wav" || fileExtension == ".ogg")
             {
                 dragType = "_AudioFile";
+            }
+            else if (fileExtension == ".html")
+            {
+                dragType = "_UIFile";
             }
 
             ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));

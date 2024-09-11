@@ -5,6 +5,7 @@
 #include "src/Resource/ResourceManager.h"
 #include "src/Rendering/Textures/Material.h"
 #include "src/Resource/Model.h"
+#include "src/Resource/UI.h"
 
 using namespace Nuake;
 
@@ -92,6 +93,13 @@ Ref<Model> ResourceLoader::LoadModel(const std::string& path)
 	ResourceManager::RegisterResource(model);
 
 	return model;
+}
+
+Ref<UIResource> ResourceLoader::LoadUI(const std::string& path)
+{
+	auto uiResource = CreateRef<UIResource>(path);
+	uiResource->ID = UUID();
+	return uiResource;
 }
 
 UUID ResourceLoader::ReadUUID(json j)

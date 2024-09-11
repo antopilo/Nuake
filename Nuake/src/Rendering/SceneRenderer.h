@@ -94,6 +94,7 @@ namespace Nuake
 		Scope<FrameBuffer> mDOFBuffer;
 		Scope<FrameBuffer> mOutlineBuffer;
 		Scope<FrameBuffer> mDisplayDepthBuffer;
+		Scope<FrameBuffer> mTempFrameBuffer;
 
 		// Shapes
 		Ref<BoxGizmo> mBoxGizmo;

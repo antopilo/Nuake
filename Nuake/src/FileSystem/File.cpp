@@ -79,6 +79,11 @@ FileType File::GetFileType() const
 		return FileType::Mesh;
 	}
 
+	if (ext == ".html")
+	{
+		return FileType::UI;
+	}
+
 	return FileType::Unkown;
 }
 

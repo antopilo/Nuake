@@ -25,6 +25,7 @@
 #include "../ComponentsPanel/AudioEmitterPanel.h"
 #include "../ComponentsPanel/NetScriptPanel.h"
 #include "../ComponentsPanel/NavMeshVolumePanel.h"
+#include "../ComponentsPanel/UIPanel.h"
 
 #include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Resource/Prefab.h>
@@ -58,6 +59,7 @@ private:
 	BonePanel mBonePanel;
 	AudioEmitterPanel mAudioEmitterPanel;
 	NavMeshVolumePanel mNavMeshVolumePanel;
+	UIPanel mUiPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

@@ -12,7 +12,8 @@
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Systems/ParticleSystem.h"
 #include "src/Scene/Systems/AnimationSystem.h"
-#include <src/Scene/Systems/AudioSystem.h>
+#include "src/Scene/Systems/AudioSystem.h"
+#include "src/Scene/Systems/UISystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "src/Rendering/Renderer.h"
@@ -54,6 +55,7 @@ namespace Nuake
 
 		// Adding systems - Order is important
 		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+		m_Systems.push_back(CreateRef<UISystem>(this));
 		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
@@ -236,7 +238,6 @@ namespace Nuake
 				return true;
 			}
 		}
-
 
 		return false;
 	}

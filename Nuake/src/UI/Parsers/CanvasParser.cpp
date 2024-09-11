@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <charconv>
+#include <thread>
 
 namespace NuakeUI
 {
@@ -249,12 +250,25 @@ namespace NuakeUI
 		}
 	}
 
-	CanvasPtr CanvasParser::Parse(const std::string& path)
+	Ref<Canvas> CanvasParser::Parse(const std::string& path)
 	{
 		_parsingPath = path;
 
 		tinyxml2::XMLDocument doc;
-		if (tinyxml2::XMLError error = doc.LoadFile(path.c_str()))
+		tinyxml2::XMLError error;
+		bool fileLoaded = false;
+		for (int i = 0; i < 5; ++i) {  // Try 5 times
+			error = doc.LoadFile(path.c_str());
+			if (error == tinyxml2::XML_SUCCESS) {
+				fileLoaded = true;
+				break;
+			}
+			else if (error == tinyxml2::XML_ERROR_FILE_NOT_FOUND) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));  // Wait before retrying
+			}
+		}
+
+		if (error)
 		{
 			doc.PrintError();
 			return nullptr;

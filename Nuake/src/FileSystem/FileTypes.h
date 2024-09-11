@@ -17,6 +17,7 @@ namespace Nuake
 		Map,
 		Assembly,
 		Solution,
-		Audio
+		Audio,
+		UI
 	};
 }

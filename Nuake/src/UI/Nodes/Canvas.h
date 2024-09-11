@@ -10,7 +10,7 @@
 namespace NuakeUI
 {
 	class Canvas;
-	typedef std::shared_ptr<Canvas> CanvasPtr;
+	using CanvasPtr = std::shared_ptr<Canvas>;
 	
 	class Canvas
 	{

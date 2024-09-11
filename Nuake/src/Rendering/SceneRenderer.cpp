@@ -2,12 +2,16 @@
 
 #include "src/Rendering/Shaders/ShaderManager.h"
 #include "src/Resource/Project.h"
+#include "src/Resource/ResourceManager.h"
+#include "src/Resource/UI.h"
+
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/ModelComponent.h"
 #include "src/Scene/Components/ParentComponent.h"
 #include "src/Scene/Components/ParticleEmitterComponent.h"
 #include "src/Scene/Components/SpriteComponent.h"
 #include <src/Scene/Components/SkinnedModelComponent.h>
+#include "src/Scene/Components/UIComponent.h"
 
 #include <glad/glad.h>
 #include <src/Vendors/imgui/imgui.h>
@@ -33,6 +37,9 @@ namespace Nuake
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT); // Depth
+
+		mTempFrameBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
+		mTempFrameBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT0);
 
 		mToneMapBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mToneMapBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
@@ -141,6 +148,8 @@ namespace Nuake
 		mGBuffer->QueueResize(framebufferResolution);
 		GBufferPass(scene);
 
+		mTempFrameBuffer->QueueResize(framebuffer.GetSize());
+
 		// SSAO
 		const auto& sceneEnv = scene.GetEnvironment();
 		if (sceneEnv->SSAOEnabled)
@@ -169,18 +178,6 @@ namespace Nuake
 
 		DebugRendererPass(scene);
 
-#ifdef AMD
-		framebuffer.Bind();
-		{
-			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
-			shader->Bind();
-
-			shader->SetUniform("u_Source", mShadingBuffer->GetTexture().get(), 0);
-			Renderer::DrawQuad();
-		}
-		framebuffer.Unbind();
-#else
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
 		{
@@ -207,10 +204,7 @@ namespace Nuake
 			sceneEnv->mVolumetric->SetDepth(mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get());
 			sceneEnv->mVolumetric->Draw(mProjection, mView, mCamPos, lightList);
 
-			//finalOutput = mVolumetric->GetFinalOutput().get();
-
 			// combine
-
 			framebuffer.Bind();
 			{
 				RenderCommand::Clear();
@@ -261,18 +255,6 @@ namespace Nuake
 			RenderCommand::Clear();
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/outline.shader");
 			shader->Bind();
-
-			//mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3)->Bind(0);
-			//mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(1);
-			//shader->SetUniforms(
-			//{
-			//	{"u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1},
-			//	{"u_EntityTexture", 0},
-			//	{"u_OutlineColor", projectSettings.PrimaryColor},
-			//	{"u_Depth", 1},
-			//	{"u_Radius", projectSettings.OutlineRadius * projectSettings.ResolutionScale},
-			//});
-
 			shader->SetUniform("u_EntityID", mOutlineEntityID == -1 ? -1 : mOutlineEntityID + 1);
 			shader->SetUniform("u_EntityTexture", mGBuffer->GetTexture(GL_COLOR_ATTACHMENT3).get(), 0);
 			shader->SetUniform("u_OutlineColor", projectSettings.PrimaryColor);
@@ -423,18 +405,6 @@ namespace Nuake
 		}
 		mVignetteBuffer->Unbind();
 
-		//framebuffer.Bind();
-		//{
-		//	RenderCommand::Clear();
-		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
-		//	shader->Bind();
-		//
-		//	shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
-		//	shader->SetUniform("u_Source2", mOutlineBuffer->GetTexture().get(), 1);
-		//	Renderer::DrawQuad();
-		//}
-		//framebuffer.Unbind();
-
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
@@ -445,28 +415,44 @@ namespace Nuake
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
-#endif
 
-		
+		mTempFrameBuffer->Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
 
-		
+			shader->SetUniform("u_Source", framebuffer.GetTexture().get(), 0);
+			Renderer::DrawQuad();
+		}
+		mTempFrameBuffer->Unbind();
+
+		const auto uiView = scene.m_Registry.view<UIComponent>();
+		for (auto ui : uiView)
+		{
+			const UIComponent& uiComponent = uiView.get<UIComponent>(ui);
+			if (!ResourceManager::IsResourceLoaded(uiComponent.UIResource))
+			{
+				continue;
+			}
+
+			// Fetch resource from resource manager using UUID
+			Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+			uiResource->Resize(framebuffer.GetSize());
+
+			// Copy UI onto final viewport
+			framebuffer.Bind();
+			{
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/add.shader");
+				shader->Bind();
+				shader->SetUniform("u_Source", mTempFrameBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_Source2", uiResource->GetOutputTexture().get(), 1);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+		}
 
 		glDepthMask(true);
-
-		// Barrel distortion
-		//mVignetteBuffer->Bind();
-		//{
-		//	RenderCommand::Clear();
-		//	Shader* shader = ShaderManager::GetShader("Resources/Shaders/vignette.shader");
-		//	shader->Bind();
-		//
-		//	shader->SetUniform("u_Intensity", sceneEnv->VignetteIntensity);
-		//	shader->SetUniform("u_Extend", sceneEnv->VignetteExtend);
-		//	shader->SetUniform("u_Source", mBarrelDistortionBuffer->GetTexture().get(), 0);
-		//	Renderer::DrawQuad();
-		//}
-		//mVignetteBuffer->Unbind();
-
 
 		RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 		Renderer::EndDraw();

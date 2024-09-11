@@ -1,4 +1,5 @@
 #pragma once
+#include "src/Core/Core.h"
 #include "../Nodes/Canvas.h"
 
 #include <functional>
@@ -31,7 +32,7 @@ namespace NuakeUI
 		bool HasNodeType(const std::string& name) const;
 		refNew GetNodeType(const std::string& name) const;
 
-		CanvasPtr Parse(const std::string& file);
+		Ref<Canvas> Parse(const std::string& file);
 	private:
 		void ScanFragment(tinyxml2::XMLElement* e, NodePtr node);
 		void WriteValueFromString(std::variant<int, float, bool, std::string, char>& var, const std::string& str);
