@@ -26,7 +26,7 @@ ImGui::Text(##name);
     bool removed = false;                                                               \
     bool headerOpened = ImGui::CollapsingHeader(#name, ImGuiTreeNodeFlags_DefaultOpen); \
     ImGui::PopStyleVar();                                                               \
-     if (#name != "TRANSFORM" && ImGui::BeginPopupContextItem())                        \
+     if (strcmp(#name, "TRANSFORM") != 0 && ImGui::BeginPopupContextItem())             \
      {                                                                                  \
         if (ImGui::Selectable("Remove")) { removed = true; }                            \
         ImGui::EndPopup();                                                              \
@@ -42,7 +42,7 @@ ImGui::Text(##name);
     {                                                                                   \
         delete boldFont;                                                                \
         ImGui::PopStyleVar();                                                           \
-        ImGui::Indent();    \
+        ImGui::Indent();                                                                \
         if (ImGui::BeginTable(#name, 3, ImGuiTableFlags_SizingStretchProp))             \
         {                                                                               \
             ImGui::TableSetupColumn("name", 0, 0.25f);                                  \

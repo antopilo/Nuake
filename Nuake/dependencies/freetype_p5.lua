@@ -60,7 +60,14 @@ project "Freetype"
 	
 	
 	filter "system:windows"
-	systemversion "latest"
+	    systemversion "latest"
+	    
+	    -- warning C4244: 'function': conversion from '__int64' to 'const unsigned int', possible loss of data
+	    -- warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead
+	    -- warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead.
+	    -- warning C4267: '=': conversion from 'size_t' to 'FT_Int', possible loss of data
+	    -- warning C4312: 'type cast': conversion from 'unsigned long' to 'void *' of greater size
+ 	    disablewarnings { "4996", "4267", "4244", "4312" }
 	
 	defines
 	{

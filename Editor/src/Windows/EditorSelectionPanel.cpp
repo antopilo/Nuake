@@ -77,7 +77,7 @@ void EditorSelectionPanel::Draw(EditorSelection selection)
 					ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
 					ImGui::SetCursorPosY((windowHeight - textHeight) * 0.5f);
 
-					ImGui::TextColored({1, 0.1, 0.1, 1.0}, text.c_str());
+					ImGui::TextColored({1.f, 0.1f, 0.1f, 1.0f}, text.c_str());
 				}
 
                 DrawFile(selection.File);

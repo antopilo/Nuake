@@ -210,7 +210,12 @@ project "Nuake"
         {
             "NK_WIN"
         }
-    
+        
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
     
     filter "configurations:Debug"
         runtime "Debug"
@@ -306,6 +311,12 @@ project "NuakeRuntime"
     
         postbuildcommands {
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
+        }
+
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
         }
 
     filter "system:linux"
@@ -471,6 +482,11 @@ project "Editor"
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
         }
 
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
 
     filter "system:linux"
         links

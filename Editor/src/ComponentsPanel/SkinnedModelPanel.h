@@ -129,7 +129,7 @@ public:
                     auto animations = model->GetAnimations();
                     if (ImGui::BeginCombo("Type", model->GetCurrentAnimation()->GetName().c_str()))
                     {
-                        for (int n = 0; n < model->GetAnimationsCount(); n++)
+                        for (uint32_t n = 0; n < model->GetAnimationsCount(); n++)
                         {
                             bool is_selected = (animIndex == n);
                             std::string animName = animations[n]->GetName();

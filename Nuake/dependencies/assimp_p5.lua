@@ -119,6 +119,13 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_3MF_EXPORTER',
 		'ASSIMP_BUILD_NO_ASSJSON_EXPORTER'
 	}
+	
+    -- When building any Visual Studio solution
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
 
 	filter "configurations:Debug"
 		runtime "Debug"

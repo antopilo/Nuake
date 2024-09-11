@@ -15,9 +15,6 @@
 
 namespace Nuake
 {
-	struct TransformComponent;
-	struct LightComponent;
-
 	struct Light
 	{
 		TransformComponent transform;

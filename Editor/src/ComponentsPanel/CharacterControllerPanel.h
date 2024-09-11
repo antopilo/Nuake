@@ -50,7 +50,7 @@ public:
                 {
                     ImGui::Text("Stick to floor step down");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StickToFloorStepDown", &component.StickToFloorStepDown.y, -10.0f, 0.01, 0.0f);
+                    ImGui::DragFloat("##StickToFloorStepDown", &component.StickToFloorStepDown.y, -10.0f, 0.01f, 0.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.StickToFloorStepDown.y, -0.5f);
                 }
@@ -58,7 +58,7 @@ public:
                 {
                     ImGui::Text("Step down extra");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StepDownExtra", &component.StepDownExtra.y, -10.0f, 0.01, 0.0f);
+                    ImGui::DragFloat("##StepDownExtra", &component.StepDownExtra.y, -10.0f, 0.01f, 0.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.StepDownExtra.y, 0.0f);
                 }
@@ -66,7 +66,7 @@ public:
                 {
                     ImGui::Text("Step up");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StepUp", &component.SteppingStepUp.y, 0.0f, 0.01, 10.0f);
+                    ImGui::DragFloat("##StepUp", &component.SteppingStepUp.y, 0.0f, 0.01f, 10.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.SteppingStepUp.y, 0.4f);
                 }
