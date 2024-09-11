@@ -20,17 +20,18 @@ void main() {
 #shader fragment
 #version 460 core
 
-
 in sample vec2 v_UV;
 out vec4 FragColor;
 
 uniform sampler2D u_Atlas;
 uniform sample vec2 u_TexturePos;
 uniform vec2 u_TextureScale;
-
 uniform vec4 u_FontColor;
-
 uniform float u_PxRange;
+
+uniform float u_SubpixelThreshold;
+uniform float u_CurveTolerance;
+uniform float u_SubpixelAmount;
 
 float screenPxRange(vec2 coord) {
     vec2 unitRange = vec2(u_PxRange) / vec2(textureSize(u_Atlas, 0));
@@ -59,11 +60,12 @@ void main() {
     vec2 uv = vec2(mix(u_TexturePos.x / textSize.x, u_TextureScale.x / textSize.x, v_UV.x),
                    mix(u_TextureScale.y / textSize.y, u_TexturePos.y / textSize.y, 1.0 - v_UV.y));
 
-    const float subPixelAmount = 1.333;
+    float subPixelAmount = u_SubpixelAmount;
     vec2 unitRange = 1.0 / textSize;
     vec2 uvLeft = uv - vec2(unitRange.x * subPixelAmount, 0);
     vec2 uvRight = uv + vec2(unitRange.x * subPixelAmount, 0);
     vec2 uvUp = uv + vec2(0, unitRange.y * subPixelAmount);
+
     float middle = opacity(texture(u_Atlas, uv));
     float left = opacity(texture(u_Atlas, uvLeft));
     float right = opacity(texture(u_Atlas, uvRight));
@@ -73,11 +75,11 @@ void main() {
     bool direction = false;
    
     const float ratio = 1.6666;
-    const float curve_tolerance = 1.0;
+    float curve_tolerance = u_CurveTolerance;
     const float h_tolerance = 0;
     
     const bool subpixel = false;
-    const float subpixel_threshold = 1;
+    float subpixel_threshold = u_SubpixelThreshold;
     float curveAmount = up - middle;
     bool mid = middle < (subpixel_threshold);
     bool leftt = left < subpixel_threshold;
