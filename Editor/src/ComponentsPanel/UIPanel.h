@@ -45,6 +45,16 @@ public:
 
                 ComponentTableReset(component.UIFilePath, "");
             }
+            ImGui::TableNextColumn();
+            {
+                ImGui::Text("Worldspace");
+                ImGui::TableNextColumn();
+
+                ImGui::Checkbox("##WorldSpace", &component.IsWorldSpace);
+                ImGui::TableNextColumn();
+
+                ComponentTableReset(component.IsWorldSpace, false);
+            }
         }
         EndComponentTable();
     }
