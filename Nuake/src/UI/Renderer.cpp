@@ -19,6 +19,9 @@ namespace NuakeUI
 	};
 
 	std::shared_ptr<Font> Renderer::mDefaultFont;
+	float Renderer::subpixelAmount = 1.3333f ;
+	float Renderer::curveTolerance = 1.0f;
+	float Renderer::subpixelThreshold = 0.5f;
 
 	Renderer::Renderer()
 	{
@@ -162,7 +165,10 @@ namespace NuakeUI
 			{ "u_SDF_BorderSize", 0.0f},
 			{ "u_FontColor", nodeStyle.FontColor },
 			{ "u_PxRange",   fontSize },
-			{ "u_SDF_BorderSize", {1.0, 1.0}}
+			{ "u_SDF_BorderSize", {1.0, 1.0}},
+			{ "u_SubpixelThreshold", subpixelThreshold},
+			{ "u_CurveTolerance", curveTolerance},
+			{ "u_SubpixelAmount", subpixelAmount}
 		});
 		
 		mVertexArray->Bind();

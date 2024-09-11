@@ -32,12 +32,20 @@ namespace NuakeUI
 
 		void ReloadShaders();
 		static std::shared_ptr<Font> mDefaultFont;
+
+		static float subpixelAmount;
+		static float curveTolerance;
+		static float subpixelThreshold;
+
+		Renderer();
+		~Renderer() = default;
+
 	private:
 		Vector2 mSize;
 		Matrix4 mView;
 
-		Renderer();
-		~Renderer() = default;
+
+
 
 		Shader* mShader;
 		Shader* mSDFShader;
