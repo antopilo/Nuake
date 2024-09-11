@@ -53,7 +53,7 @@ namespace Nuake
 					ImGui::PopStyleVar();
 				}
 
-				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1, 0.1, 0.1, 0.2f));
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 0.2f));
 				ImGui::BeginChild("TemplateContainer", { ImGui::GetContentRegionAvail().x - 64.0f, ImGui::GetContentRegionAvail().y }, true, ImGuiChildFlags_AlwaysUseWindowPadding);
 				{
 					ImGui::Dummy({ 4, 4 });
@@ -94,7 +94,7 @@ namespace Nuake
 					if (showTitleEmptyWarning && projectTitle.empty())
 					{
 						ImGui::SameLine();
-						ImGui::TextColored({ 1.0, 0.1, 0.1, 1.0 }, ICON_FA_EXCLAMATION_TRIANGLE);
+						ImGui::TextColored({ 1.0f, 0.1f, 0.1f, 1.0f }, ICON_FA_EXCLAMATION_TRIANGLE);
 
 						Nuake::UI::Tooltip("Title required");
 					}

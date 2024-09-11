@@ -36,6 +36,14 @@ project 'JoltPhysics'
 		prebuildcommands {
 			"cp %{prj.location}./Jolt.cpp %{prj.location}/"
 		}
+		
+    -- When building any Visual Studio solution
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
+		
 	filter "configurations:Debug"
 		cppdialect "C++17"
 		runtime "Debug"

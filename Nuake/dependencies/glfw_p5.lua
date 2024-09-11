@@ -40,6 +40,8 @@ project "GLFW"
         {
             "_GLFW_WIN32",
         }
+        
+        disablewarnings { "4996" }
 
 
     filter "system:linux"

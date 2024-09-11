@@ -645,12 +645,12 @@ namespace Nuake {
                 float frameTime = 1000.0f / io.Framerate;
                 int fps = (int)io.Framerate;
                 ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1, 0.1, 0.1, 1));
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
                 ImGui::BeginChild("FPS", ImVec2(70, 30), false);
 
                 std::string text = std::to_string(fps) + " fps";
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
-                    - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25f - ImGui::CalcTextSize(text.c_str()).x
+                    - ImGui::GetScrollX() - 2.f * ImGui::GetStyle().ItemSpacing.x);
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
                 ImGui::Text(text.c_str());
 
@@ -953,9 +953,9 @@ namespace Nuake {
             BEGIN_COLLAPSE_HEADER(SKY);
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
 
                     ImGui::TableNextColumn();
                     {
@@ -1169,9 +1169,9 @@ namespace Nuake {
             BEGIN_COLLAPSE_HEADER(BLOOM)
                 if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
 
                     ImGui::TableNextColumn();
                     {
@@ -1236,9 +1236,9 @@ namespace Nuake {
             BEGIN_COLLAPSE_HEADER(VOLUMETRIC)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
 
                     ImGui::TableNextColumn();
                     {
@@ -1318,9 +1318,9 @@ namespace Nuake {
             BEGIN_COLLAPSE_HEADER(SSAO)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
 
                     ImGui::TableNextColumn();
                     {
@@ -1810,9 +1810,9 @@ namespace Nuake {
                 BEGIN_COLLAPSE_HEADER(BARREL_DISTORTION)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
                     
                     {
                         ImGui::TableNextColumn();

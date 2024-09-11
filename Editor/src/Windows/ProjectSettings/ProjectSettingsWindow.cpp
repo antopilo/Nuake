@@ -184,11 +184,11 @@ void ProjectSettingsCategoryPhysics::Draw()
         Engine::SetPhysicsStep(Engine::GetProject()->Settings.PhysicsStep);
     }
 
-    ImGui::DragInt("Maximum SubSteps", &Engine::GetProject()->Settings.MaxPhysicsSubStep, 1.0f, 8.0f, 128);
+    ImGui::DragInt("Maximum SubSteps", &Engine::GetProject()->Settings.MaxPhysicsSubStep, 1, 8, 128);
 
-    ImGui::DragInt("Maximum Bodies", &Engine::GetProject()->Settings.MaxPhysicsBodies, 1.0f, 256.0f, 8000);
-    ImGui::DragInt("Maximum Body Pair", &Engine::GetProject()->Settings.MaxPhysicsBodyPair, 1.0f, 256.0f, 4096.0f);
-    ImGui::DragInt("Maximum Contact Constraint", &Engine::GetProject()->Settings.MaxPhysicsContactConstraints, 1.0f, 256.0f, 4096.0f);
+    ImGui::DragInt("Maximum Bodies", &Engine::GetProject()->Settings.MaxPhysicsBodies, 1.0f, 256, 8000);
+    ImGui::DragInt("Maximum Body Pair", &Engine::GetProject()->Settings.MaxPhysicsBodyPair, 1.0f, 256, 4096);
+    ImGui::DragInt("Maximum Contact Constraint", &Engine::GetProject()->Settings.MaxPhysicsContactConstraints, 1.0f, 256, 4096);
 }
 
 ProjectSettingsCategoryAudio::ProjectSettingsCategoryAudio(Ref<Nuake::Project> project) :

@@ -32,6 +32,13 @@ project 'msdf-gen'
 	defines {
 
 	}
+	
+    -- When building any Visual Studio solution
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
 
 	filter "configurations:Debug"
 		runtime "Debug"
