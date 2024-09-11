@@ -65,6 +65,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("NetScriptComponent", GetComponent<NetScriptComponent>())
 		if (HasComponent<NavMeshVolumeComponent>())
 			SERIALIZE_OBJECT_REF_LBL("NavMeshVolumeComponent", GetComponent<NavMeshVolumeComponent>())
+		if (HasComponent<UIComponent>())
+			SERIALIZE_OBJECT_REF_LBL("UIComponent", GetComponent<UIComponent>())
 
 		END_SERIALIZE();
 	}
@@ -99,6 +101,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(AudioEmitterComponent);
 		DESERIALIZE_COMPONENT(NetScriptComponent);
 		DESERIALIZE_COMPONENT(NavMeshVolumeComponent);
+		DESERIALIZE_COMPONENT(UIComponent);
 		return true;
 	}
 

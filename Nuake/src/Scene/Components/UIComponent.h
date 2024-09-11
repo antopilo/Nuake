@@ -1,6 +1,7 @@
 #pragma once
 #include "src/Core/Object/Object.h"
 #include "src/Resource/UUID.h"
+#include "src/Resource/Serializable.h"
 
 namespace Nuake
 {
@@ -13,5 +14,18 @@ namespace Nuake
 		std::string UIFilePath;
 		bool IsWorldSpace;
 		// TODO: Z-Ordering
+
+		json Serialize()
+		{
+			BEGIN_SERIALIZE();
+			SERIALIZE_VAL(UIFilePath);
+			END_SERIALIZE();
+		}
+
+		bool Deserialize(const json& j)
+		{
+			DESERIALIZE_VAL(UIFilePath);
+			return true;
+		}
 	};
 }
