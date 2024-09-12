@@ -16,8 +16,6 @@ namespace Nuake {
 
 		static void InitializeComponentClass()
 		{
-			BindComponentField<&AudioEmitterComponent::File>("FilePath", "File Path");
-			
 			BindComponentField<&AudioEmitterComponent::FilePath>("FilePath", "File Path");
 				ResourceFileRestriction("_AudioFile");
 			
@@ -42,7 +40,6 @@ namespace Nuake {
 		}
 
 	public:
-		Ref<File> File;
 		ResourceFile FilePath;
 
 		bool IsPlaying = false;
