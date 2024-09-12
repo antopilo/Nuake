@@ -3,6 +3,7 @@
 #include "EditorSelectionPanel.h"
 #include "../Misc/ImGuiTextHelper.h"
 #include <src/Scene/Components.h>
+#include "src/Scene/Components/FieldTypes.h"
 
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>
@@ -14,6 +15,7 @@
 #include <src/Resource/Prefab.h>
 
 #include <entt/entt.hpp>
+
 
 #define REGISTER_TYPE_DRAWER(forType, fn) \
 	FieldTypeDrawers[entt::type_id<forType>().hash()] = std::bind(&fn, this, std::placeholders::_1, std::placeholders::_2);
@@ -29,6 +31,8 @@ EditorSelectionPanel::EditorSelectionPanel()
 	REGISTER_TYPE_DRAWER(bool, EditorSelectionPanel::DrawFieldTypeBool);
 	REGISTER_TYPE_DRAWER(float, EditorSelectionPanel::DrawFieldTypeFloat);
 	REGISTER_TYPE_DRAWER(Vector3, EditorSelectionPanel::DrawFieldTypeVector3);
+	REGISTER_TYPE_DRAWER(std::string, EditorSelectionPanel::DrawFieldTypeString);
+	REGISTER_TYPE_DRAWER(ResourceFile, EditorSelectionPanel::DrawFieldTypeResourceFile);
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -700,6 +704,77 @@ void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::me
 		}
 
 		ImGui::PopID();
+	}
+
+	ImGui::TableNextRow();
+}
+
+void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::meta_any& component)
+{
+	auto prop = field.prop(HashedName::DisplayName);
+	auto propVal = prop.value();
+	const char* displayName = *propVal.try_cast<const char*>();
+		
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		std::string* fieldValPtr = fieldVal.try_cast<std::string>();
+		if (fieldValPtr != nullptr)
+		{
+			std::string fieldValProxy = *fieldValPtr;
+			std::string controlId = std::string("##") + displayName;
+			ImGui::InputText(controlId.c_str(), &fieldValProxy);
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+
+	ImGui::TableNextRow();
+}
+
+void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, entt::meta_any& component)
+{
+	const char* resourceRestrictedType = nullptr;
+	if (auto prop = field.prop(HashedFieldPropName::ResourceFileType))
+		resourceRestrictedType = *prop.value().try_cast<const char*>();
+	
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		auto fieldValPtr = fieldVal.try_cast<ResourceFile>();
+		if (fieldValPtr != nullptr)
+		{
+			auto fieldValProxy = *fieldValPtr;
+			std::string filePath = fieldValProxy.file == nullptr ? "" : fieldValProxy.file->GetRelativePath();
+			std::string controlName = filePath + std::string("##") + displayName;
+			ImGui::Button(controlName.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(resourceRestrictedType))
+				{
+					const char* payloadFilePath = static_cast<char*>(payload->Data);
+					const std::string fullPath = std::string(payloadFilePath, 256);
+					const Ref<Nuake::File> file = FileSystem::GetFile(FileSystem::AbsoluteToRelative(fullPath));
+					field.set(component, ResourceFile{ file });
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
 	}
 
 	ImGui::TableNextRow();

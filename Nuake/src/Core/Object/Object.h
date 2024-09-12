@@ -18,6 +18,8 @@ namespace Nuake
         NK_HASHED_STATIC_STR(FloatStep)
         NK_HASHED_STATIC_STR(FloatMin)
         NK_HASHED_STATIC_STR(FloatMax)
+        
+        NK_HASHED_STATIC_STR(ResourceFileType)
     };
 
     struct HashedName
@@ -50,72 +52,78 @@ namespace Nuake
     }
 }
 
-#define NUAKECOMPONENT(klass, componentName)                                      \
-public:                                                                           \
-    static std::string ClassName()                                                \
-    {                                                                             \
-        static std::string className = #klass;                                    \
-        return className;                                                         \
-    }                                                                             \
-                                                                                  \
-    static std::string ComponentName()                                            \
-    {                                                                             \
-        static std::string name = componentName;                                  \
-        return name;                                                              \
-    }                                                                             \
-                                                                                  \
-    static void AddToEntity(entt::entity entity, entt::registry* enttRegistry)    \
-    {                                                                             \
-        enttRegistry->emplace_or_replace<klass>(entity);                          \
-    }                                                                             \
-                                                                                  \
-                                                                                  \
-    static void (*GetInitializeComponentClass())()                                \
-    {                                                                             \
-        return &klass::InitializeComponentClass;                                  \
-    }                                                                             \
-                                                                                  \
-    inline static auto ComponentFactory = entt::meta<klass>(); \
-    static void InternalInitializeClass()                                         \
-    {                                                                             \
-        static bool initialized = false;                                          \
-        if (initialized)                                                          \
-            return;                                                               \
-                                                                                  \
-        ComponentFactory.type(entt::hashed_string(#klass)) \
-            .traits(ComponentTypeTrait::InspectorExposed);                                    \
-        ComponentFactory.func<&klass::ComponentName>(HashedFnName::GetComponentName);          \
-        ComponentFactory.func<&klass::AddToEntity>(HashedFnName::AddToEntity);                \
- \
-        if (klass::GetInitializeComponentClass() != Component::GetInitializeComponentClass()) \
-        { \
-            GetInitializeComponentClass()(); \
-        } \
-                                                                                  \
-        initialized = true;                                                       \
-        \
-    }\
-\
-    template<auto Data>  \
-    static auto BindComponentField(const char* varName, const char* displayName)  \
-    {  \
-        return ComponentFactory  \
-            .data<Data>(entt::hashed_string(varName))  \
-            .prop(HashedName::DisplayName, displayName);  \
-    }  \
+#define NUAKECOMPONENT(klass, componentName)                                                                                                                                             \
+public:                                                                                                                                                                                  \
+    static std::string ClassName()                                                                \
+    {                                                                                             \
+        static std::string className = #klass;                                                    \
+        return className;                                                                         \
+    }                                                                                             \
+                                                                                                  \
+    static std::string ComponentName()                                                            \
+    {                                                                                             \
+        static std::string name = componentName;                                                  \
+        return name;                                                                              \
+    }                                                                                             \
+                                                                                                  \
+    static void AddToEntity(entt::entity entity, entt::registry* enttRegistry)                    \
+    {                                                                                             \
+        enttRegistry->emplace_or_replace<klass>(entity);                                          \
+    }                                                                                             \
+                                                                                                  \
+                                                                                                  \
+    static void (*GetInitializeComponentClass())()                                                \
+    {                                                                                             \
+        return &klass::InitializeComponentClass;                                                  \
+    }                                                                                             \
+                                                                                                  \
+    inline static auto ComponentFactory = entt::meta<klass>();                                    \
+    static void InternalInitializeClass()                                                         \
+    {                                                                                             \
+        static bool initialized = false;                                                          \
+        if (initialized)                                                                          \
+            return;                                                                               \
+                                                                                                  \
+        ComponentFactory.type(entt::hashed_string(#klass))                                        \
+            .traits(ComponentTypeTrait::InspectorExposed);                                        \
+        ComponentFactory.func<&klass::ComponentName>(HashedFnName::GetComponentName);             \
+        ComponentFactory.func<&klass::AddToEntity>(HashedFnName::AddToEntity);                    \
+                                                                                                  \
+        if (klass::GetInitializeComponentClass() != Component::GetInitializeComponentClass())     \
+        {                                                                                         \
+            GetInitializeComponentClass()();                                                      \
+        }                                                                                         \
+                                                                                                  \
+        initialized = true;                                                                       \
+                                                                                                  \
+    }                                                                                             \
+                                                                                                  \
+    template<auto Data>                                                                           \
+    static auto BindComponentField(const char* varName, const char* displayName)                  \
+    {                                                                                             \
+        return ComponentFactory                                                                   \
+            .data<Data>(entt::hashed_string(varName))                                             \
+            .prop(HashedName::DisplayName, displayName);                                          \
+    }                                                                                             \
+                                                                                                  \
+    template<auto Getter, auto Setter>                                                            \
+    static auto BindComponentProperty(const char* varName, const char* displayName)               \
+    {                                                                                             \
+        return ComponentFactory                                                                   \
+            .data<Getter, Setter>(entt::hashed_string(varName))                                   \
+            .prop(HashedName::DisplayName, displayName);                                          \
+    }                                                                                             \
+                                                                                                  \
+    static auto FloatFieldLimits(float stepSize, float min, float max)                            \
+    {                                                                                             \
+        return ComponentFactory                                                                   \
+            .prop(HashedFieldPropName::FloatStep, stepSize)                                       \
+            .prop(HashedFieldPropName::FloatMin, min)                                             \
+            .prop(HashedFieldPropName::FloatMax, max);                                            \
+    }                                                                                             \
     \
-    template<auto Getter, auto Setter>  \
-    static auto BindComponentProperty(const char* varName, const char* displayName)  \
+    static auto ResourceFileRestriction(const char* fileType)  \
     {  \
         return ComponentFactory  \
-            .data<Getter, Setter>(entt::hashed_string(varName))  \
-            .prop(HashedName::DisplayName, displayName);  \
-    }  \
-    \
-    static auto FloatFieldLimits(float stepSize, float min, float max)  \
-    {  \
-        return ComponentFactory  \
-            .prop(HashedFieldPropName::FloatStep, stepSize)  \
-            .prop(HashedFieldPropName::FloatMin, min)  \
-            .prop(HashedFieldPropName::FloatMax, max);  \
+            .prop(HashedFieldPropName::ResourceFileType, fileType);  \
     }

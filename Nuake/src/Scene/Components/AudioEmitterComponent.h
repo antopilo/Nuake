@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Component.h"
+#include "FieldTypes.h"
 
 #include "src/Core/Core.h"
+#include "src/FileSystem/File.h"
+#include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 
 namespace Nuake {
@@ -13,6 +16,11 @@ namespace Nuake {
 
 		static void InitializeComponentClass()
 		{
+			BindComponentField<&AudioEmitterComponent::File>("FilePath", "File Path");
+			
+			BindComponentField<&AudioEmitterComponent::FilePath>("FilePath", "File Path");
+				ResourceFileRestriction("_AudioFile");
+			
 			BindComponentField<&AudioEmitterComponent::IsPlaying>("IsPlaying", "Is Playing");
 			BindComponentField<&AudioEmitterComponent::Loop>("Loop", "Loop");
 
@@ -34,7 +42,8 @@ namespace Nuake {
 		}
 
 	public:
-		std::string FilePath;
+		Ref<File> File;
+		ResourceFile FilePath;
 
 		bool IsPlaying = false;
 		bool Loop = false;
