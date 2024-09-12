@@ -124,6 +124,8 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
     DrawAddComponentMenu(entity);
 
+	mTransformPanel.Draw(entity);
+
 	entt::registry& registry = entity.GetScene()->m_Registry;
 	for (auto&& [componentTypeId, storage] : registry.storage())
 	{
@@ -148,27 +150,26 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
 
     // Draw each component properties panels.
-    mTransformPanel.Draw(entity);
-    mLightPanel.Draw(entity);
-    mScriptPanel.Draw(entity);
-	mNetScriptPanel.Draw(entity);
-	mAudioEmitterPanel.Draw(entity);
-	mParticleEmitterPanel.Draw(entity);
-    mSpritePanel.Draw(entity);
-    mMeshPanel.Draw(entity);
-	mSkinnedModelPanel.Draw(entity);
-	mBonePanel.Draw(entity);
-    mQuakeMapPanel.Draw(entity);
-    mCameraPanel.Draw(entity);
-    mRigidbodyPanel.Draw(entity);
-    mBoxColliderPanel.Draw(entity);
-    mSphereColliderPanel.Draw(entity);
-	mCapsuleColliderPanel.Draw(entity);
-	mCylinderColliderPanel.Draw(entity);
-    mMeshColliderPanel.Draw(entity);
-    mCharacterControllerPanel.Draw(entity);
-	mNavMeshVolumePanel.Draw(entity);
-	mUiPanel.Draw(entity);
+ //    mLightPanel.Draw(entity);
+ //    mScriptPanel.Draw(entity);
+	// mNetScriptPanel.Draw(entity);
+	// mAudioEmitterPanel.Draw(entity);
+	// mParticleEmitterPanel.Draw(entity);
+ //    mSpritePanel.Draw(entity);
+ //    mMeshPanel.Draw(entity);
+	// mSkinnedModelPanel.Draw(entity);
+	// mBonePanel.Draw(entity);
+ //    mQuakeMapPanel.Draw(entity);
+ //    mCameraPanel.Draw(entity);
+ //    mRigidbodyPanel.Draw(entity);
+ //    mBoxColliderPanel.Draw(entity);
+ //    mSphereColliderPanel.Draw(entity);
+	// mCapsuleColliderPanel.Draw(entity);
+	// mCylinderColliderPanel.Draw(entity);
+ //    mMeshColliderPanel.Draw(entity);
+ //    mCharacterControllerPanel.Draw(entity);
+	// mNavMeshVolumePanel.Draw(entity);
+	// mUiPanel.Draw(entity);
 
 	using namespace Nuake;
 	
@@ -607,7 +608,43 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 
 void EditorSelectionPanel::DrawFieldTypeFloat(entt::meta_data& field, entt::meta_any& component)
 {
-	ImGui::Text("Hello World!!!");
+	float stepSize = 1.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatStep))
+		stepSize = *prop.value().try_cast<float>();
+	
+	float min = 0.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatMin))
+		min = *prop.value().try_cast<float>();
+	
+	float max = 0.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatMax))
+		max = *prop.value().try_cast<float>();
+
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		float* floatPtr = fieldVal.try_cast<float>();
+		if (floatPtr != nullptr)
+		{
+			float floatProxy = *floatPtr;
+			const std::string controlId = std::string("##") + displayName;
+			if (ImGui::DragFloat(controlId.c_str(), &floatProxy, stepSize, min, max))
+			{
+				field.set(component, floatProxy);
+			}
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+
+	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_any& component)
@@ -626,7 +663,8 @@ void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_
 		if (boolPtr != nullptr)
 		{
 			bool boolProxy = *boolPtr;
-			if (ImGui::Checkbox("##isTrigger", &boolProxy))
+			std::string controlId = std::string("##") + displayName;
+			if (ImGui::Checkbox(controlId.c_str(), &boolProxy))
 			{
 				field.set(component, boolProxy);
 			}
@@ -635,9 +673,9 @@ void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_
 		{
 			ImGui::Text("ERR");
 		}
-
-		ImGui::TableNextColumn();
 	}
+
+	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::meta_any& component)
@@ -653,12 +691,17 @@ void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::me
 
 		auto fieldVal = field.get(component);
 		Vector3* vec3Ptr = fieldVal.try_cast<Vector3>();
+		std::string controlId = std::string("##") + displayName;
+		ImGui::PushID(controlId.c_str());
+		
 		if (ImGuiHelper::DrawVec3("BoxSize", vec3Ptr, 0.5f, 100.0, 0.01f))
 		{
 			field.set(component, *vec3Ptr);
 		}
 
-		ImGui::TableNextColumn();
+		ImGui::PopID();
 	}
+
+	ImGui::TableNextRow();
 }
 

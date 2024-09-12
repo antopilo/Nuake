@@ -13,11 +13,8 @@ namespace Nuake
 
         static void InitializeComponentClass()
         {
-            BINDCOMPONENTFIELD(BoxColliderComponent::IsTrigger, "Is Trigger");
-
-            ComponentFactory
-                .data<&BoxColliderComponent::SetSize, &BoxColliderComponent::GetSize>(entt::hashed_string("size"))
-                .prop(HashedName::DisplayName, "Size");
+            BindComponentField<&BoxColliderComponent::IsTrigger>("IsTrigger", "Is Trigger");
+            BindComponentProperty<&BoxColliderComponent::SetSize, &BoxColliderComponent::GetSize>("Size", "Size");
         }
 
     public:

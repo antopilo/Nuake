@@ -13,6 +13,13 @@ namespace Nuake
         NK_HASHED_STATIC_STR(AddToEntity)
     };
 
+    struct HashedFieldPropName
+    {
+        NK_HASHED_STATIC_STR(FloatStep)
+        NK_HASHED_STATIC_STR(FloatMin)
+        NK_HASHED_STATIC_STR(FloatMax)
+    };
+
     struct HashedName
     {
         NK_HASHED_STATIC_STR(DisplayName)
@@ -86,9 +93,29 @@ public:                                                                         
         } \
                                                                                   \
         initialized = true;                                                       \
+        \
+    }\
+\
+    template<auto Data>  \
+    static auto BindComponentField(const char* varName, const char* displayName)  \
+    {  \
+        return ComponentFactory  \
+            .data<Data>(entt::hashed_string(varName))  \
+            .prop(HashedName::DisplayName, displayName);  \
+    }  \
+    \
+    template<auto Getter, auto Setter>  \
+    static auto BindComponentProperty(const char* varName, const char* displayName)  \
+    {  \
+        return ComponentFactory  \
+            .data<Getter, Setter>(entt::hashed_string(varName))  \
+            .prop(HashedName::DisplayName, displayName);  \
+    }  \
+    \
+    static auto FloatFieldLimits(float stepSize, float min, float max)  \
+    {  \
+        return ComponentFactory  \
+            .prop(HashedFieldPropName::FloatStep, stepSize)  \
+            .prop(HashedFieldPropName::FloatMin, min)  \
+            .prop(HashedFieldPropName::FloatMax, max);  \
     }
-
-#define BINDCOMPONENTFIELD(field, displayName) \
-    ComponentFactory \
-        .data<&field>(entt::hashed_string(#field)) \
-        .prop(HashedName::DisplayName, displayName)
