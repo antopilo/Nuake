@@ -6,6 +6,7 @@
 
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Physics/PhysicsManager.h"
+#include <src/UI/Parsers/CanvasParser.h>
 
 namespace Nuake 
 {
@@ -61,6 +62,13 @@ namespace Nuake
 			netScriptComponent.Initialized = true;
 		}
 
+		// Instantiate UI widgets
+		for (auto& uiWidget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			scriptingEngineNet.RegisterCustomWidgetInstance(uiWidget.first, uiWidget.second);
+		}
+
+		// Call OnInit on entity script instances
 		for (auto& e : netEntities)
 		{
 			auto entity = Entity{ e, m_Scene };
@@ -70,6 +78,17 @@ namespace Nuake
 				// We can now call on init on it.
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 				scriptInstance.InvokeMethod("OnInit");
+			}
+		}
+		
+		// Call OnInit on UI widgets
+		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			const UUID& widgetInstanceUUID = widget.first;
+			if (scriptingEngineNet.HasCustomWidgetInstance(widgetInstanceUUID))
+			{
+				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(widgetInstanceUUID);
+				widgetInstance.InvokeMethod("OnInit");
 			}
 		}
 

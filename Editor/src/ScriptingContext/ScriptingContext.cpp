@@ -5,22 +5,22 @@
 
 void ScriptingContext::Initialize()
 {
-	m_Modules =
+	modules =
 	{
 		CreateRef<EditorNetAPI>()
 	};
 
-	for (auto& m : m_Modules)
+	for (auto& m : modules)
 	{
 		m->RegisterMethods();
 	}
 
 	// Load Nuake assembly DLL
-	/*auto m_LoadContext2 = Nuake::ScriptingEngineNet::Get().GetHostInstance()->CreateAssemblyLoadContext("NuakeEditorContext");
-	m_NuakeAssembly = Nuake::ScriptingEngineNet::Get().ReloadEngineAPI(m_LoadContext2);
-	m_EditorAssembly = m_LoadContext2.LoadAssembly("EditorNet.dll");
+	/*auto loadContext2 = Nuake::ScriptingEngineNet::Get().GetHostInstance()->CreateAssemblyLoadContext("NuakeEditorContext");
+	nuakeAssembly = Nuake::ScriptingEngineNet::Get().ReloadEngineAPI(loadContext2);
+	m_EditorAssembly = loadContext2.LoadAssembly("EditorNet.dll");
 
-	for (const auto& netModule : m_Modules)
+	for (const auto& netModule : modules)
 	{
 		for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 		{

@@ -24,7 +24,7 @@ namespace Nuake
 
 		bool IsMouseInputDown() override
 		{
-			return Input::IsMouseButtonDown(1);
+			return Input::IsMouseButtonDown(0);
 		}
 
 		bool IsKeyPressed(uint32_t key) override

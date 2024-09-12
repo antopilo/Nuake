@@ -35,7 +35,7 @@ namespace Nuake
 				if (s == "class" && i + 1 < splits.size() && !hasFoundModule)
 				{
 					std::string moduleFound = splits[i + 1];
-					m_Modules.push_back(moduleFound);
+					modules.push_back(moduleFound);
 					hasFoundModule = true;
 				}
 			}
@@ -46,7 +46,7 @@ namespace Nuake
 
 	std::vector<std::string> WrenScript::GetModules() const
 	{
-		return m_Modules;
+		return modules;
 	}
 
 	void WrenScript::Build(unsigned int moduleId, bool isEntity)

@@ -44,19 +44,19 @@ namespace Nuake
 			.ExceptionCallback = ExceptionCallback,
 		};
 
-		m_HostInstance = new Coral::HostInstance();
-		m_HostInstance->Initialize(settings);
+		hostInstance = new Coral::HostInstance();
+		hostInstance->Initialize(settings);
 
 		// Initialize API modules
 		// ----------------------------------
-		m_Modules =
+		modules =
 		{
 			CreateRef<EngineNetAPI>(),
 			CreateRef<InputNetAPI>(),
 			CreateRef<SceneNetAPI>()
 		};
 
-		for (auto& m : m_Modules)
+		for (auto& m : modules)
 		{
 			m->RegisterMethods();
 		}
@@ -66,14 +66,14 @@ namespace Nuake
 
 		if (!FileSystem::FileExists(m_EngineAssemblyName, true))
 		{
-			m_IsInitialized = false;
+			isInitialized = false;
 			return;
 		}
 	}
 
 	ScriptingEngineNet::~ScriptingEngineNet()
 	{
-		m_HostInstance->Shutdown();
+		hostInstance->Shutdown();
 	}
 
 	std::vector<CompilationError> ScriptingEngineNet::ExtractErrors(const std::string& output)
@@ -149,7 +149,7 @@ namespace Nuake
 
 		// Upload internal calls for each module
 		// --------------------------------------------------
-		for (const auto& netModule : m_Modules)
+		for (const auto& netModule : modules)
 		{
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
@@ -165,23 +165,31 @@ namespace Nuake
 
 	void ScriptingEngineNet::Initialize()
 	{
-		m_LoadContext = m_HostInstance->CreateAssemblyLoadContext(m_ContextName);
+		loadContext = hostInstance->CreateAssemblyLoadContext(m_ContextName);
 
-		m_NuakeAssembly = ReloadEngineAPI(m_LoadContext);
+		nuakeAssembly = ReloadEngineAPI(loadContext);
 
-		m_IsInitialized = true;
+		isInitialized = true;
 
-		m_GameEntityTypes.clear();
+		gameEntityTypes.clear();
+		brushEntityTypes.clear();
+		pointEntityTypes.clear();
+		uiWidgets.clear();
 	}
 
 	void ScriptingEngineNet::Uninitialize()
 	{
-		if (!m_IsInitialized)
+		if (!isInitialized)
 		{
 			return;
 		}
 
-		for (auto& [entity, managedObject] : m_EntityToManagedObjects)
+		for (auto& [entity, managedObject] : entityToManagedObjects)
+		{
+			managedObject.Destroy();
+		}
+
+		for (auto& [widgetUUID, managedObject] : widgetUUIDToManagedObjects)
 		{
 			managedObject.Destroy();
 		}
@@ -189,9 +197,10 @@ namespace Nuake
 		Coral::GC::Collect();
 		Coral::GC::WaitForPendingFinalizers();
 
-		GetHostInstance()->UnloadAssemblyLoadContext(m_LoadContext);
+		GetHostInstance()->UnloadAssemblyLoadContext(loadContext);
 
-		m_EntityToManagedObjects.clear();
+		entityToManagedObjects.clear();
+		widgetUUIDToManagedObjects.clear();
 	}
 
 	void ScriptingEngineNet::UpdateEntityWithExposedVar(Entity entity)
@@ -257,16 +266,59 @@ namespace Nuake
 			className = filePath;
 		}
 
-		if (m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
+		if (gameEntityTypes.find(className) == gameEntityTypes.end())
 		{
 			// The class name parsed in the file was not found in the game's DLL.
 			const std::string& msg = "Skipped .net entity script: \n Class: " +
-				className + " not found in " + std::string(m_GameAssembly.GetName());
+				className + " not found in " + std::string(gameAssembly.GetName());
 			Logger::Log(msg, ".net", CRITICAL);
 			return std::vector<ExposedVar>();
 		}
 
-		return m_GameEntityTypes[className].exposedVars;
+		return gameEntityTypes[className].exposedVars;
+	}
+
+	bool ScriptingEngineNet::HasUIWidget(const std::string& widgetName)
+	{
+		return uiWidgets.contains(widgetName);
+	}
+
+	UIWidgetObject& ScriptingEngineNet::GetUIWidget(const std::string& widgetName)
+	{
+		ASSERT(HasUIWidget(widgetName));
+		return uiWidgets[widgetName];
+	}
+
+	void ScriptingEngineNet::RegisterCustomWidgetInstance(const UUID& uuid, const std::string& widgetTypeName)
+	{
+		if (uiWidgets.find(widgetTypeName) == uiWidgets.end())
+		{
+			// The class name parsed in the file was not found in the game's DLL.
+			const std::string& msg = "Skipped .net widget script: \n Class: " +
+				widgetTypeName + " not found in " + std::string(gameAssembly.GetName());
+			Logger::Log(msg, ".net", CRITICAL);
+			return;
+		}
+
+		auto classInstance = uiWidgets[widgetTypeName].coralType->CreateInstance();
+		classInstance.SetPropertyValue("ID", uuid);
+		widgetUUIDToManagedObjects[uuid] = classInstance;
+	}
+
+	bool ScriptingEngineNet::HasCustomWidgetInstance(const UUID& uuid)
+	{
+		return widgetUUIDToManagedObjects.contains(uuid);
+	}
+
+	Coral::ManagedObject ScriptingEngineNet::GetCustomWidgetInstance(const UUID& uuid)
+	{
+		if (!HasCustomWidgetInstance(uuid))
+		{
+			Logger::Log("Failed to get custom widget .Net script instance, doesn't exist", ".net", CRITICAL);
+			return Coral::ManagedObject();
+		}
+
+		return widgetUUIDToManagedObjects[uuid];
 	}
 
 	std::vector<CompilationError> ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
@@ -293,7 +345,7 @@ namespace Nuake
 
 	void ScriptingEngineNet::LoadProjectAssembly(Ref<Project> project)
 	{
-		if (!m_IsInitialized)
+		if (!isInitialized)
 		{
 			return;
 		}
@@ -308,15 +360,17 @@ namespace Nuake
 		}
 
 		const std::string absoluteAssemblyPath = FileSystem::Root + assemblyPath;
-		m_GameAssembly = m_LoadContext.LoadAssembly(absoluteAssemblyPath);
+		gameAssembly = loadContext.LoadAssembly(absoluteAssemblyPath);
 
-		m_PrefabType = m_GameAssembly.GetType("Nuake.Net.Prefab");
-		auto entityScriptType = m_GameAssembly.GetType("Nuake.Net.Entity");
-		auto& exposedFieldAttributeType = m_GameAssembly.GetType("Nuake.Net.ExposedAttribute");
-		auto& brushScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.BrushScript");
-		auto& pointScriptAttributeType = m_GameAssembly.GetType("Nuake.Net.PointScript");
+		prefabType = gameAssembly.GetType("Nuake.Net.Prefab");
+		auto entityScriptType = gameAssembly.GetType("Nuake.Net.Entity");
+		auto& exposedFieldAttributeType = gameAssembly.GetType("Nuake.Net.ExposedAttribute");
+		auto& brushScriptAttributeType = gameAssembly.GetType("Nuake.Net.BrushScript");
+		auto& pointScriptAttributeType = gameAssembly.GetType("Nuake.Net.PointScript");
+		auto& uiWidgetType = gameAssembly.GetType("Nuake.Net.UIWidget");
+		auto& uiWidgetExternalLayoutType = gameAssembly.GetType("Nuake.Net.ExternalHTML");
 
-		for (auto& type : m_GameAssembly.GetTypes())
+		for (auto& type : gameAssembly.GetTypes())
 		{
 			// Brush
 			bool isBrushScript = false;
@@ -352,7 +406,7 @@ namespace Nuake
 					continue;
 				}
 
-				m_BaseEntityType = type->GetBaseType();
+				baseEntityType = type->GetBaseType();
 
 				auto typeSplits = String::Split(type->GetFullName(), '.');
 				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
@@ -437,22 +491,43 @@ namespace Nuake
 				{
 					gameScriptObject.Description = brushDescription;
 					gameScriptObject.isTrigger = isTrigger;
-					m_BrushEntityTypes[shortenedTypeName] = gameScriptObject;
+					brushEntityTypes[shortenedTypeName] = gameScriptObject;
 				}
 
 				if (isPointScript)
 				{
 					gameScriptObject.Description = pointDescription;
-					m_PointEntityTypes[shortenedTypeName] = gameScriptObject;
+					pointEntityTypes[shortenedTypeName] = gameScriptObject;
 				}
-				m_GameEntityTypes[shortenedTypeName] = gameScriptObject;
+				gameEntityTypes[shortenedTypeName] = gameScriptObject;
+			}
+
+			if (type->IsSubclassOf(uiWidgetType))
+			{
+				auto typeSplits = String::Split(type->GetFullName(), '.');
+				std::string shortenedTypeName = typeSplits[typeSplits.size() - 1];
+				for (auto& attribute : type->GetAttributes())
+				{
+					if (attribute.GetType() == uiWidgetExternalLayoutType)
+					{
+						Coral::String htmlPath = attribute.GetFieldValue<Coral::String>("HTMLPath");
+						if (FileSystem::FileExists(htmlPath))
+						{
+							uiWidgets[shortenedTypeName] = { type, htmlPath };
+						}
+						else
+						{
+							Logger::Log("Couldn't register UI Widget: " + shortenedTypeName + " \nExternal HTML file doesn't exist with path: " + std::string(htmlPath), "UI", WARNING);
+						}
+					}
+				}
 			}
 		}
 	}
 
 	void ScriptingEngineNet::RegisterEntityScript(Entity& entity)
 	{
-		if (!m_IsInitialized)
+		if (!isInitialized)
 		{
 			return;
 		}
@@ -483,16 +558,16 @@ namespace Nuake
 			className = filePath;
 		}
 
-		if(m_GameEntityTypes.find(className) == m_GameEntityTypes.end())
+		if(gameEntityTypes.find(className) == gameEntityTypes.end())
 		{
 			// The class name parsed in the file was not found in the game's DLL.
 			const std::string& msg = "Skipped .net entity script: \n Class: " + 
-				className + " not found in " + std::string(m_GameAssembly.GetName());
+				className + " not found in " + std::string(gameAssembly.GetName());
 			Logger::Log(msg, ".net", CRITICAL);
 			return;
 		}
 
-		auto classInstance = m_GameEntityTypes[className].coralType->CreateInstance();
+		auto classInstance = gameEntityTypes[className].coralType->CreateInstance();
 
 		int handle = entity.GetHandle();
 		int id = entity.GetID();
@@ -505,9 +580,9 @@ namespace Nuake
 		}
 
 		std::vector<std::string> detectedExposedVar;
-		detectedExposedVar.reserve(std::size(m_GameEntityTypes[className].exposedVars));
+		detectedExposedVar.reserve(std::size(gameEntityTypes[className].exposedVars));
 		// Update new default values if they have changed in the code.
-		for (auto& exposedVar : m_GameEntityTypes[className].exposedVars)
+		for (auto& exposedVar : gameEntityTypes[className].exposedVars)
 		{
 			const std::string varName = exposedVar.Name;
 			detectedExposedVar.push_back(varName);
@@ -563,7 +638,7 @@ namespace Nuake
 			}
 		}
 
-		m_EntityToManagedObjects.emplace(entity.GetID(), classInstance);
+		entityToManagedObjects.emplace(entity.GetID(), classInstance);
 
 		// Override with user values set in the editor.
 		for (auto& exposedVarUserValue : component.ExposedVar)
@@ -597,7 +672,7 @@ namespace Nuake
 						else
 						{
 							// In the case where the entity doesnt have an instance, we create one
-							auto newEntity = m_BaseEntityType.CreateInstance(scriptEntity.GetHandle());
+							auto newEntity = baseEntityType.CreateInstance(scriptEntity.GetHandle());
 							classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newEntity);
 						}
 					}
@@ -615,7 +690,7 @@ namespace Nuake
 					if (FileSystem::FileExists(path))
 					{
 						// In the case where the entity doesnt have an instance, we create one
-						auto newPrefab = m_PrefabType.CreateInstance(Coral::String::New(path));
+						auto newPrefab = prefabType.CreateInstance(Coral::String::New(path));
 						classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, newPrefab);
 					}
 					else
@@ -641,17 +716,17 @@ namespace Nuake
 			return Coral::ManagedObject();
 		}
 
-		return m_EntityToManagedObjects[entity.GetID()];
+		return entityToManagedObjects[entity.GetID()];
 	}
 
 	bool ScriptingEngineNet::HasEntityScriptInstance(const Entity& entity)
 	{
-		if (!m_IsInitialized)
+		if (!isInitialized)
 		{
 			return false;
 		}
 
-		return m_EntityToManagedObjects.find(entity.GetID()) != m_EntityToManagedObjects.end();
+		return entityToManagedObjects.find(entity.GetID()) != entityToManagedObjects.end();
 	}
 
 	void ScriptingEngineNet::CopyNuakeNETAssemblies(const std::string& path)

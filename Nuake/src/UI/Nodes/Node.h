@@ -1,21 +1,23 @@
 #pragma once
 #include "NodeState.h"
 
-#include "../DataBinding/DataBindObject.h"
-#include "../DataBinding/DataModelOperations.h"
+#include "src/UI/DataBinding/DataBindObject.h"
+#include "src/UI/DataBinding/DataModelOperations.h"
+#include "src/UI/Styles/StyleSheet.h"
+#include "src/UI/Nodes/NodeStyle.h"
+#include "src/UI/InputManager.h"
 
-#include "../Styles/StyleSheet.h"
-#include "../Nodes/NodeStyle.h"
+#include "src/Core/Maths.h"
+#include "src/Resource/UUID.h"
+#include "src/Scripting/ScriptingEngineNet.h"
 
-#include "../InputManager.h"
-
-#include <src/Core/Maths.h>
 #include <yoga/yoga.h>
 
 #include <any>
 #include <map>
 #include <string>
 #include <vector>
+
 
 #define SetLength(name) \
 if (ComputedStyle.##name.type == LengthType::Auto)  \
@@ -75,18 +77,24 @@ break;\
 break; \
 
 
+using namespace NuakeUI;
+
 namespace NuakeUI
 {
 	class Node;
-	typedef std::shared_ptr<Node> NodePtr;
-	class Renderer;
 	class CanvasParser;
+	class Renderer;
+
+	typedef std::shared_ptr<Node> NodePtr;
+
 	class Node
 	{
-		friend CanvasParser;
-		friend Renderer;
+		friend NuakeUI::CanvasParser;
+		friend NuakeUI::Renderer;
+
 	private:
 		static Node* mFocused;
+		UUID scriptingId;
 
 	protected:
 		float ScrollDelta = 0.0f;
@@ -102,7 +110,7 @@ namespace NuakeUI
 
 		bool mHasBeenInitialized = false;
 		void InitializeNode();
-		
+
 	public:
 		bool CanGrabFocus = false;
 		std::any UserData;
@@ -126,21 +134,32 @@ namespace NuakeUI
 		virtual void Tick(InputManager* manager);
 		virtual void Calculate();
 
-		virtual void OnMouseHover(InputManager* inputManager)  {};
-		virtual void OnMouseExit(InputManager* inputManager) {};
-		virtual void OnClick(InputManager* inputManager) {};
-		virtual void OnTick(InputManager* manager) {};
-		virtual void OnClickReleased(InputManager* inputManager) {};
-		virtual void OnScroll(InputManager* inputManager) {};
+		void OnMouseHover(InputManager* inputManager) {};
+		void OnMouseExit(InputManager* inputManager) {};
+		void OnClick(InputManager* inputManager) 
+		{
+			if (ScriptingEngineNet::Get().HasCustomWidgetInstance(scriptingId))
+			{
+				ScriptingEngineNet::Get().GetCustomWidgetInstance(scriptingId).InvokeMethod("OnClick");
+			}
+		};
+		void OnTick(InputManager* manager) {};
+		void OnClickReleased(InputManager* inputManager) {};
+		void OnScroll(InputManager* inputManager) {};
+
+		void SetScriptingID(const UUID& uuid)
+		{
+			scriptingId = uuid;
+		}
 
 		bool HasFocus() const;
 		void GrabFocus();
 		void ReleaseFocus();
 
 		void ApplyStyleProperties(std::map<StyleProperties, PropValue> properties);
-		
-		void AddClass(const std::string& c) 
-		{ 
+
+		void AddClass(const std::string& c)
+		{
 			bool containClass = false;
 			for (auto& classe : Classes)
 			{
@@ -169,7 +188,7 @@ namespace NuakeUI
 				i++;
 			}
 
-			if(found)
+			if (found)
 				Classes.erase(Classes.begin() + i);
 
 		}

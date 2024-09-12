@@ -13,13 +13,13 @@ namespace Coral
 class ScriptingContext
 {
 private:
-	Coral::HostInstance* m_HostInstance;
-	Coral::AssemblyLoadContext m_LoadContext;
+	Coral::HostInstance* hostInstance;
+	Coral::AssemblyLoadContext loadContext;
 
-	std::unordered_map<std::string, Coral::AssemblyLoadContext*> m_LoadedAssemblies;
-	std::vector<Ref<Nuake::NetAPIModule>> m_Modules;
+	std::unordered_map<std::string, Coral::AssemblyLoadContext*> loadedAssemblies;
+	std::vector<Ref<Nuake::NetAPIModule>> modules;
 
-	Coral::ManagedAssembly m_NuakeAssembly; // Nuake DLL
+	Coral::ManagedAssembly nuakeAssembly; // Nuake DLL
 	Coral::ManagedAssembly m_EditorAssembly; // Editor DLL
 public:
 	static ScriptingContext& Get()

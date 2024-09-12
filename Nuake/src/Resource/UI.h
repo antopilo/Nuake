@@ -20,6 +20,7 @@ namespace Nuake
 		UIResource(const std::string& path);
 		~UIResource() = default;
 
+		void Tick();
 		void Draw();
 		void Resize(const Vector2& size);
 		void Reload();

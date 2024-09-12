@@ -15,7 +15,7 @@ namespace Nuake
 	private:
 		bool m_HasCompiledSuccesfully;
 		bool m_IsEntityScript = false;
-		std::vector<std::string> m_Modules;
+		std::vector<std::string> modules;
 
 		Ref<File> mFile;
 

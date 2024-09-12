@@ -1,5 +1,6 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "src/Resource/UUID.h"
 #include "../Nodes/Canvas.h"
 
 #include <functional>
@@ -18,11 +19,20 @@ namespace NuakeUI
 	private:
 		std::map<std::string, refNew> NodeTypes;
 		std::string _parsingPath;
+		std::vector<std::pair<UUID, std::string>> customWidgetIDs;
 
 	public:
+		static CanvasParser& Get()
+		{
+			static CanvasParser instance;
+			return instance;
+		}
+
+	private:
 		CanvasParser();
 		~CanvasParser() = default;
 
+	public:
 		/// <summary>
 		/// Register a custom node type.
 		/// </summary>
@@ -33,8 +43,13 @@ namespace NuakeUI
 		refNew GetNodeType(const std::string& name) const;
 
 		Ref<Canvas> Parse(const std::string& file);
+
+		std::vector<std::pair<UUID, std::string>> GetAllCustomWidgetInstance() { return customWidgetIDs; }
+
 	private:
 		void ScanFragment(tinyxml2::XMLElement* e, NodePtr node);
+		void ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node);
+
 		void WriteValueFromString(std::variant<int, float, bool, std::string, char>& var, const std::string& str);
 		void IterateOverElement(tinyxml2::XMLElement* e, NodePtr node);
 		NodePtr CreateNodeFromXML(tinyxml2::XMLElement* xml, const std::string& id = "Node");

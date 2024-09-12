@@ -24,10 +24,17 @@ UIResource::UIResource(const std::string& path) :
 		inputManager = new MyInputManager(*Engine::GetCurrentWindow());
 	}
 
-	CanvasParser parser;
-	canvas = parser.Parse(FileSystem::RelativeToAbsolute(path));
+	canvas = CanvasParser::Get().Parse(FileSystem::RelativeToAbsolute(path));
 	canvas->SetInputManager(inputManager);
 	canvas->ComputeLayout(defaultSize);
+}
+
+void UIResource::Tick()
+{
+	if (canvas)
+	{
+		canvas->Tick();
+	}
 }
 
 void UIResource::Draw()
@@ -58,8 +65,7 @@ void UIResource::Reload()
 		return;
 	}
 
-	CanvasParser parser;
-	canvas = parser.Parse(FileSystem::RelativeToAbsolute(filePath));
+	canvas = CanvasParser::Get().Parse(FileSystem::RelativeToAbsolute(filePath));
 	if (canvas)
 	{
 		canvas->SetInputManager(inputManager);

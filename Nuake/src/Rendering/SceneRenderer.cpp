@@ -177,6 +177,8 @@ namespace Nuake
 			GL_NEAREST // Filtering mode (NEAREST or LINEAR)
 		);
 
+		// World Space UI
+
 		DebugRendererPass(scene);
 
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
@@ -427,6 +429,15 @@ namespace Nuake
 			Renderer::DrawQuad();
 		}
 		mTempFrameBuffer->Unbind();
+
+		//ImGui::Begin("SDF Params");
+		//{
+		//	static auto renderer = NuakeUI::Renderer::Get();
+		//	ImGui::DragFloat("Subpixel threshold", &renderer.subpixelThreshold, 0.01f, 0.0f);
+		//	ImGui::DragFloat("Subpixel curve tolerance", &renderer.curveTolerance, 0.01f, 0.0f);
+		//	ImGui::DragFloat("Subpixel amount", &renderer.subpixelAmount, 0.01f, 0.0f);
+		//}
+		//ImGui::End();
 
 		const auto uiView = scene.m_Registry.view<UIComponent>();
 		for (auto ui : uiView)
