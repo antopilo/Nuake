@@ -469,7 +469,6 @@ namespace Nuake
 		}
 
 		entity.Destroy();
-		m_Registry.shrink_to_fit();
 	}
 
 	bool Scene::EntityExists(const std::string& name)
@@ -638,11 +637,12 @@ namespace Nuake
 
 		// This will turn the deserialized entity ids into actual Entities.
 		// This has to be done after the whole scene has been deserialized 
-		// to make sure we can fetch  the id in the scene. Otherwise, we could 
-		m_Registry.each([this](auto e) {
+		// to make sure we can fetch  the id in the scene. Otherwise, we could
+		for (const entt::entity& e : m_Registry.view<entt::entity>())
+		{
 			auto entity = Entity{ e, this };
 			entity.PostDeserialize();
-		});
+		};
 
 		return true;
 	}
