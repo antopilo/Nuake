@@ -158,6 +158,9 @@ namespace Nuake {
             ImVec2 regionAvail = ImGui::GetContentRegionAvail();
             Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
+            // This is important for make UI mouse coord relative to viewport
+            Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
+
             Ref<FrameBuffer> framebuffer = Engine::GetCurrentWindow()->GetFrameBuffer();
             if (framebuffer->GetSize() != viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale)
                 framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
