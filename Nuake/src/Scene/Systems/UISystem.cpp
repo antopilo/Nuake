@@ -1,4 +1,6 @@
 #include "UISystem.h"
+
+#include "Engine.h"
 #include "src/Resource/ResourceManager.h"
 #include "src/Resource/ResourceLoader.h"
 #include "src/Resource/UI.h"
@@ -48,6 +50,11 @@ namespace Nuake
 					{
 						uis[uiViewComponent.UIResource]->Reload();
 						file->SetHasBeenModified(false);
+					}
+
+					if (Engine::IsPlayMode())
+					{
+						uis[uiViewComponent.UIResource]->Tick();
 					}
 
 					uis[uiViewComponent.UIResource]->Draw();
