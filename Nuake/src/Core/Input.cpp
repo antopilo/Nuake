@@ -12,7 +12,9 @@ namespace Nuake
 	bool Input::m_MouseButtons[5] = { false, false, false, false, false };
 	float Input::XScroll = 0.0f;
 	float Input::YScroll = 0.0f;
-
+	
+	Vector2 Input::ViewportPosition = Vector2(0, 0);;
+	Vector2 Input::ViewportSize = Vector2(0, 0);
 	void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		XScroll = (float)xoffset;
@@ -154,6 +156,27 @@ namespace Nuake
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetCursorPos(window, position.x, position.y);
+	}
+
+	float Input::GetViewportMouseY() 
+	{
+		return glm::clamp(GetMouseY() - ViewportPosition.y, 0.0f, ViewportSize.y);
+	}
+
+	float Input::GetViewportMouseX() 
+	{
+		return glm::clamp(GetMouseX() - ViewportPosition.x, 0.0f, ViewportSize.x);
+	}
+
+	Vector2 Input::GetViewportMousePosition()
+	{
+		return glm::clamp(GetMousePosition() - ViewportPosition, { 0, 0 }, ViewportSize);
+	}
+
+	void Input::SetViewportDimensions(const Vector2& pos, const Vector2& size)
+	{
+		ViewportPosition = pos;
+		ViewportSize = size;
 	}
 
 #pragma endregion

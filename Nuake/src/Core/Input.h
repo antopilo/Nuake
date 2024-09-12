@@ -137,6 +137,9 @@ namespace Nuake
 	private:
 		static bool m_MouseButtons[5];
 		static std::map<int, bool> m_Keys;
+		static Vector2 ViewportPosition;
+		static Vector2 ViewportSize;
+
 	public:
 		static bool IsKeyPressed(Key keycode);
 		static bool IsKeyDown(Key keycode);
@@ -153,10 +156,18 @@ namespace Nuake
 		static bool IsMouseButtonDown(int button);
 		static bool IsMouseButtonReleased(int button);
 
+		// Get mouse position relative to window
 		static float GetMouseX();
 		static float GetMouseY();
 		static Vector2 GetMousePosition();
 		static void SetMousePosition(const Vector2& position);
+
+		// Get mouse position relative to viewport
+		static float GetViewportMouseY();
+		static float GetViewportMouseX();
+		static Vector2 GetViewportMousePosition();
+		static void SetViewportDimensions(const Vector2& pos, const Vector2& size);
+
 
 		static bool Init();
 		static void Update();

@@ -224,12 +224,12 @@ void CanvasParser::ScanFragment(tinyxml2::XMLElement* e, NodePtr node)
 	}
 }
 
-void CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
+bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 {
 	const std::string nodeTypeName = e->Value();
 	if (!ScriptingEngineNet::Get().HasUIWidget(nodeTypeName))
 	{
-		return; 
+		return false; 
 	}
 
 	// Is template file valid?
@@ -237,13 +237,8 @@ void CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 	if (!FileSystem::FileExists(customWidget.htmlPath))
 	{
 		Logger::Log("Custom widget html file doesnt exist: " + nodeTypeName + " with HTML path: " + customWidget.htmlPath, "ui", CRITICAL);
-		return;
+		return false;
 	}
-
-	// Allow to link between C# script and node using a UUID
-	UUID scriptingId = UUID();
-	node->SetScriptingID(scriptingId);
-	customWidgetIDs.push_back(std::make_pair(scriptingId, nodeTypeName));
 
 	// Parse load HTML file now
 	const std::string& absoluteFilePath = FileSystem::RelativeToAbsolute(customWidget.htmlPath);
@@ -256,6 +251,8 @@ void CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 	// Let's parse the file
 	auto firstNode = doc.FirstChildElement();
 	IterateOverElement(firstNode, node);
+
+	return true;
 }
 
 void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
@@ -275,13 +272,19 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
 		// Let's keep fragments for now as they remove 
 		// the need to create a C# class for simple templating.
 		ScanFragment(current, node);
+		bool hasScript = ScanCustomWidgets(current, node);
 		
 		// Let's add custom widgets to the DOM.
-		ScanCustomWidgets(current, node);
-
 		NodePtr newNode = CreateNodeFromXML(current, id);
 		if (newNode)
 		{
+			if (hasScript)
+			{
+				UUID scriptingId = UUID();
+				node->SetScriptingID(scriptingId);
+				customWidgetIDs.push_back(std::make_pair(scriptingId, current->Value()));
+			}
+
 			AddClassesToNode(current, newNode);
 			AddModelIfToNode(current, newNode);
 			AddModelClasses(current, newNode);
@@ -338,7 +341,7 @@ Ref<Canvas> CanvasParser::Parse(const std::string& path)
 	if (styleSheet)
 	{
 		std::string relativePath = path + "/../" + styleSheet->Value();
-		if (FileSystem::FileExists(relativePath))
+		if (FileSystem::FileExists(relativePath, true))
 		{
 			auto styleSheet = StyleSheetParser::Get().Parse(relativePath);
 			canvas->SetStyleSheet(styleSheet);

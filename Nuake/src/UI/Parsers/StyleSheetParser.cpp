@@ -11,11 +11,11 @@ using namespace NuakeUI;
 
 std::shared_ptr<StyleSheet> StyleSheetParser::Parse(const std::string& path)
 {
-	assert(FileSystem::FileExists(path));
+	assert(FileSystem::FileExists(path, true));
 
 	_parsingPath = path;
 
-	std::string fileContent = FileSystem::ReadFile(path);
+	std::string fileContent = FileSystem::ReadFile(path, true);
 	auto data = katana_parse(fileContent.c_str(), fileContent.length(), KatanaParserModeStylesheet);
 
 	auto styleSheet = StyleSheet::New();

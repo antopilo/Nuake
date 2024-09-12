@@ -48,7 +48,7 @@ namespace NuakeUI
 
 	private:
 		void ScanFragment(tinyxml2::XMLElement* e, NodePtr node);
-		void ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node);
+		bool ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node);
 
 		void WriteValueFromString(std::variant<int, float, bool, std::string, char>& var, const std::string& str);
 		void IterateOverElement(tinyxml2::XMLElement* e, NodePtr node);

@@ -34,12 +34,12 @@ namespace Nuake
 
 		float GetMouseX() override
 		{
-			return Input::GetMouseX();
+			return Input::GetViewportMouseX();
 		}
 
 		float GetMouseY() override
 		{
-			return Input::GetMouseY();
+			return Input::GetViewportMouseY();
 		}
 
 		float GetScrollX() override
