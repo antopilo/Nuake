@@ -1,6 +1,7 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Textures/Texture.h"
@@ -8,7 +9,7 @@
 
 namespace Nuake 
 {
-	class SpriteComponent
+	class SpriteComponent : public Component
 	{
 		NUAKECOMPONENT(SpriteComponent, "Sprite")
 

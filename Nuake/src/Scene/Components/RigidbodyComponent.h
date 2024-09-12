@@ -1,8 +1,9 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "TransformComponent.h"
-#include "BaseComponent.h"
+#include "VisibilityComponent.h"
 #include "src/Core/Core.h"
 
 namespace Nuake {
@@ -11,7 +12,7 @@ namespace Nuake {
 		class RigidBody;
 	};
 
-	class RigidBodyComponent
+	class RigidBodyComponent : public Component
 	{
 		NUAKECOMPONENT(RigidBodyComponent, "Rigid Body")
 

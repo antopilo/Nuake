@@ -1,16 +1,16 @@
 #pragma once
-#include <vector>
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Resource/Serializable.h"
 #include "src/Resource/SkinnedModel.h"
 
 #include <string>
-
+#include <vector>
 
 namespace Nuake
 {
-    struct SkinnedModelComponent
+    class SkinnedModelComponent : public Component
     {
         NUAKECOMPONENT(SkinnedModelComponent, "Skinned Model")
 

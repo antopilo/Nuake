@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Component.h"
+
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 
@@ -7,7 +10,7 @@
 #include "src/Physics/Rigibody.h"
 
 namespace Nuake {
-	class BSPBrushComponent
+	class BSPBrushComponent : public Component
 	{
 	public:
 		//std::vector<Ref<Mesh>> Meshes;

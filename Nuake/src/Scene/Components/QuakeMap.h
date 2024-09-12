@@ -1,17 +1,19 @@
 #pragma once
-#include <string>
-#include <vector>
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Resource/Serializable.h"
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Entities/Entity.h"
 #include "Engine.h"
 
+#include <string>
+#include <vector>
+
 namespace Nuake {
 
-	class QuakeMapComponent
+	class QuakeMapComponent : public Component
 	{
 		NUAKECOMPONENT(QuakeMapComponent, "Quake Map")
 

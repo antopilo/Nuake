@@ -4,7 +4,6 @@
 
 #include "src/Core/Logger.h"
 #include "../Scene.h"
-#include "../Components/BaseComponent.h"
 #include "../Resource/Serializable.h"
 #include "../Components/NameComponent.h"
 

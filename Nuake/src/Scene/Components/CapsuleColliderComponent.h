@@ -1,12 +1,13 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
 namespace Nuake
 {
-	class CapsuleColliderComponent
+	class CapsuleColliderComponent : public Component
 	{
 		NUAKECOMPONENT(CapsuleColliderComponent, "Capsule Collider")
 

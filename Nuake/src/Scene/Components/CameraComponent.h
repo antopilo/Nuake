@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
 
 #include "TransformComponent.h"
 #include "src/Core/Core.h"
@@ -10,7 +10,7 @@
 namespace Nuake
 {
 	
-	class CameraComponent 
+	class CameraComponent : public Component
 	{
 		NUAKECOMPONENT(CameraComponent, "Camera")
 		

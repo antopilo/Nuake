@@ -13,12 +13,15 @@
 #include "src/Scripting/ScriptingEngine.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
+#include "src/Core/RegisterCoreTypes.h"
 #include "src/Modules/Modules.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
+
+
 
 namespace Nuake
 {
@@ -47,6 +50,8 @@ namespace Nuake
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");
+
+		RegisterCoreTypes::RegisterCoreComponents();
 
 		Modules::StartupModules();
 	}

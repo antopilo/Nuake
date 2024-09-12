@@ -1,13 +1,14 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "../Entities/Entity.h"
 #include "Engine.h"
 #include <src/AI/NavMesh.h>
 
 namespace Nuake
 {
-	struct NavMeshVolumeComponent
+	struct NavMeshVolumeComponent : public Component
 	{
 		NUAKECOMPONENT(NavMeshVolumeComponent, "Nav Mesh Volume")
 

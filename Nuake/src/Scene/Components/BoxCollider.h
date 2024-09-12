@@ -1,22 +1,41 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
-namespace Nuake {
+namespace Nuake
+{
+    class BoxColliderComponent : public Component
+    {
+        NUAKECOMPONENT(BoxColliderComponent, "Box Collider")
 
-	class BoxColliderComponent
-	{
-		NUAKECOMPONENT(BoxColliderComponent, "Box Collider")
+        static void InitializeComponentClass()
+        {
+            BINDCOMPONENTFIELD(BoxColliderComponent::IsTrigger, "Is Trigger");
 
-	public:
-		Ref<Physics::PhysicShape> Box;
-		Vector3 Size = Vector3(0.5f, 0.5f, 0.5f);
-		bool IsTrigger = false;
+            ComponentFactory
+                .data<&BoxColliderComponent::SetSize, &BoxColliderComponent::GetSize>(entt::hashed_string("size"))
+                .prop(HashedName::DisplayName, "Size");
+        }
 
-		json Serialize();
-		bool Deserialize(const json& j);
-	};
+    public:
+        Ref<Physics::PhysicShape> Box;
+        Vector3 Size = Vector3(0.5f, 0.5f, 0.5f);
+        bool IsTrigger = true;
+
+        void SetSize(const Vector3& newSize)
+        {
+            Size = newSize;
+        }
+
+        Vector3 GetSize()
+        {
+            return Size;
+        }
+
+        json Serialize();
+        bool Deserialize(const json& j);
+    };
 }
- 
