@@ -171,7 +171,8 @@ project "Nuake"
         "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen",
         "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen/include",
         "%{prj.name}/dependencies/freetype/include",
-	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+	    "%{prj.name}/dependencies/tracy/public/tracy",
+        "%{prj.name}/dependencies/entt/src",
 
     }
     
@@ -263,6 +264,7 @@ project "NuakeRuntime"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
 	    
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+        "%{prj.name}/../Nuake/dependencies/entt/src",
     }
 
     libdirs
@@ -313,7 +315,7 @@ project "NuakeRuntime"
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
         }
 
-    filter { "system:windows", "action:vs*"}
+    filter { "system:windows", "action:vs*" }
         flags
         {
             "MultiProcessorCompile",
@@ -393,7 +395,10 @@ project "Editor"
     {
         "%{prj.name}/Editor.cpp",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/src/**.h"
+        "%{prj.name}/src/**.h",
+        
+        -- This isn't ideal, but it works...needs a proper way of doing this, but that's for another time
+        "Nuake/dependencies/entt/natvis/entt/*.natvis"
     }
 
     includedirs 
@@ -420,6 +425,7 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen/include",
         "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+        "%{prj.name}/../Nuake/dependencies/entt/src",
 
     }
     

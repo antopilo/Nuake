@@ -31,3 +31,6 @@
 [submodule "Nuake/dependencies/freetype"]
 	path = Nuake/dependencies/freetype
 	url = https://github.com/freetype/freetype.git
+[submodule "Nuake/dependencies/entt"]
+	path = Nuake/dependencies/entt
+	url = https://github.com/skypjack/entt.git
