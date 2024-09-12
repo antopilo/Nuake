@@ -38,6 +38,8 @@ namespace Nuake
 
 class EditorSelectionPanel 
 {
+	using DrawFieldTypeFn = std::function<void(entt::meta_data&, entt::meta_any&)>;
+	
 private:
 	TransformPanel mTransformPanel;
 	LightPanel mLightPanel;
@@ -77,10 +79,22 @@ public:
 	void DrawFile(Ref<Nuake::File> file);
 	void DrawResource(Nuake::Resource resource);
 	void DrawPrefabPanel(Ref<Nuake::Prefab> prefab);
+
+protected:
+	// List of functions to call for each type that needs to be drawn
+	std::unordered_map<entt::id_type, DrawFieldTypeFn> FieldTypeDrawers;
+	
 private:
 	void ResolveFile(Ref<Nuake::File> file);
 	void DrawMaterialPanel(Ref<Nuake::Material> material);
 	void DrawProjectPanel(Ref<Nuake::Project> project);
 	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
 	void DrawNetScriptPanel(Ref<Nuake::File> file);
+
+	void DrawComponent(const Nuake::Entity& entity, entt::meta_any& component);
+	void DrawComponentContent(entt::meta_any& component);
+
+	void DrawFieldTypeFloat(entt::meta_data& field, entt::meta_any& component);
+	void DrawFieldTypeBool(entt::meta_data& field, entt::meta_any& component);
+	void DrawFieldTypeVector3(entt::meta_data& field, entt::meta_any& component);
 };
