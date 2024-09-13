@@ -147,10 +147,17 @@ namespace Nuake
 		ShadowPass(scene);
 
 		const Vector2 framebufferResolution = framebuffer.GetSize();
-		mGBuffer->QueueResize(framebufferResolution);
+
+		if (renderUI)
+		{
+			mGBuffer->QueueResize(framebufferResolution);
+		}
 		GBufferPass(scene);
 
-		mTempFrameBuffer->QueueResize(framebuffer.GetSize());
+		if(renderUI)
+		{
+			mTempFrameBuffer->QueueResize(framebuffer.GetSize());
+		}
 
 		// SSAO
 		const auto& sceneEnv = scene.GetEnvironment();
@@ -164,7 +171,10 @@ namespace Nuake
 			sceneEnv->mSSAO->Clear();
 		}
 
-		mShadingBuffer->QueueResize(framebufferResolution);
+		if (renderUI)
+		{
+			mShadingBuffer->QueueResize(framebufferResolution);
+		}
 		ShadingPass(scene);
 
 		// Blit depth buffer
@@ -239,7 +249,11 @@ namespace Nuake
 		finalOutput = framebuffer.GetTexture();
 
 		// Copy final output to target framebuffer
-		mToneMapBuffer->QueueResize(framebufferResolution);
+		if (renderUI)
+		{
+			mToneMapBuffer->QueueResize(framebufferResolution);
+		}
+
 		mToneMapBuffer->Bind();
 		{
 			RenderCommand::Clear();
@@ -397,7 +411,10 @@ namespace Nuake
 		}
 		framebuffer.Unbind();
 
-		mVignetteBuffer->QueueResize(framebufferResolution);
+		if (renderUI)
+		{
+			mVignetteBuffer->QueueResize(framebufferResolution);
+		}
 		mVignetteBuffer->Bind();
 		{
 			RenderCommand::Clear();
@@ -753,7 +770,6 @@ namespace Nuake
 		}
 
 		mDisplayDepthBuffer->QueueResize(GetGBuffer().GetTexture(GL_DEPTH_ATTACHMENT)->GetSize());
-
 		mDisplayDepthBuffer->Bind();
 		mDisplayDepthBuffer->Clear();
 		Shader* displayDepthShader = ShaderManager::GetShader("Resources/Shaders/display_depth.shader");
@@ -787,28 +803,34 @@ namespace Nuake
 			gBufferShader->SetUniform("u_View", mView);
 
 			// Models
-			auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
-			for (auto e : view)
 			{
-				auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-				
-				if (mesh.ModelResource && visibility.Visible)
+				ZoneScopedN("Render Models");
+				auto view = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+				for (auto e : view)
 				{
-					for (auto& m : mesh.ModelResource->GetMeshes())
+					auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+
+					if (mesh.ModelResource && visibility.Visible)
 					{
-						Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e);
+						for (auto& m : mesh.ModelResource->GetMeshes())
+						{
+							Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e);
+						}
 					}
 				}
+				Renderer::Flush(gBufferShader, false);
 			}
-			Renderer::Flush(gBufferShader, false);
-
-			for (auto& mesh : mTempModels)
+			
 			{
-				if (mesh.second.ModelResource)
+				ZoneScopedN("Render Temp Models");
+				for (auto& mesh : mTempModels)
 				{
-					for (auto& m : mesh.second.ModelResource->GetMeshes())
+					if (mesh.second.ModelResource)
 					{
-						Renderer::SubmitMesh(m, mesh.second.Transform, (uint32_t)-1);
+						for (auto& m : mesh.second.ModelResource->GetMeshes())
+						{
+							Renderer::SubmitMesh(m, mesh.second.Transform, (uint32_t)-1);
+						}
 					}
 				}
 			}
@@ -819,164 +841,183 @@ namespace Nuake
 			glDepthMask(GL_TRUE);
 
 			// Quake BSPs
-			auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
-			for (auto e : quakeView)
 			{
-				auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
+				ZoneScopedN("Render Trenchbroom Brushes");
+				auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();
+				for (auto e : quakeView)
+				{
+					auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
 
-				if (model.IsTransparent || !visibility.Visible)
-					continue;
+					if (model.IsTransparent || !visibility.Visible)
+						continue;
 
-				
+
+				}
+				glEnable(GL_DEPTH_TEST);
+				glDisable(GL_CULL_FACE);
+				glCullFace(GL_FRONT);
+				Renderer::Flush(gBufferShader, true);
 			}
-			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
-			glCullFace(GL_FRONT);
-			Renderer::Flush(gBufferShader, true);
 
 			// Sprites
-			auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
-			for (auto& e : spriteView)
 			{
-				auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
-
-				if (!visibility.Visible || !sprite.SpriteMesh)
-					continue;
-
-				auto finalQuadTransform = transform.GetGlobalTransform();
-				if (sprite.Billboard)
+				ZoneScopedN("Render Sprites");
+				auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
+				for (auto& e : spriteView)
 				{
-					if (sprite.PositionFacing)
+					auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
+
+					if (!visibility.Visible || !sprite.SpriteMesh)
+						continue;
+
+					auto finalQuadTransform = transform.GetGlobalTransform();
+					if (sprite.Billboard)
 					{
-						const Matrix4& invView = glm::inverse(mView);
-						const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
-						const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
-						const Vector3& direction = cameraPosition - spritePosition;
-						finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+						if (sprite.PositionFacing)
+						{
+							const Matrix4& invView = glm::inverse(mView);
+							const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+							const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+							const Vector3& direction = cameraPosition - spritePosition;
+							finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+						}
+						else
+						{
+
+							finalQuadTransform = glm::inverse(mView);
+
+						}
+
+						if (sprite.LockYRotation)
+						{
+							// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
+							finalQuadTransform[1] = Vector4(0, 1, 0, 0);
+							finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
+							finalQuadTransform = finalQuadTransform;
+						}
+
+						finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
+
+						// Scale
+						finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
 					}
-					else
-					{
 
-						finalQuadTransform = glm::inverse(mView);
-						
-					}
-
-					if (sprite.LockYRotation)
-					{
-						// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
-						finalQuadTransform[1] = Vector4(0, 1, 0, 0);
-						finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
-						finalQuadTransform = finalQuadTransform;
-					}
-
-					finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
-
-					// Scale
-					finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
+					Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
 				}
-
-				Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
+				Renderer::Flush(gBufferShader, false);
 			}
-			Renderer::Flush(gBufferShader, false);
+			
 
 			// Particles
-			Ref<Material> previousMaterial = Renderer::QuadMesh->GetMaterial();
-
-			auto particleEmitterView = scene.m_Registry.view<TransformComponent, ParticleEmitterComponent, VisibilityComponent>();
-			for (auto& e : particleEmitterView)
 			{
-				auto [transform, emitterComponent, visibility] = particleEmitterView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
+				ZoneScopedN("Render Particles");
+				Ref<Material> previousMaterial = Renderer::QuadMesh->GetMaterial();
 
-				if (!visibility.Visible || !emitterComponent.ParticleMaterial)
-					continue;
-
-				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
-
-				Vector3 oldColor = Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor;
-				auto initialTransform = transform.GetGlobalTransform();
-				for (auto& p : emitterComponent.Emitter.Particles)
+				auto particleEmitterView = scene.m_Registry.view<TransformComponent, ParticleEmitterComponent, VisibilityComponent>();
+				for (auto& e : particleEmitterView)
 				{
-					Matrix4 particleTransform = initialTransform;
-					particleTransform = glm::inverse(mView);
+					auto [transform, emitterComponent, visibility] = particleEmitterView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
 
-					// Translation
-					Vector3 particleGlobalPosition;
-					if (emitterComponent.GlobalSpace)
-					{
-						particleGlobalPosition = p.Position;
-					}
-					else
-					{
-						particleGlobalPosition = Vector3(initialTransform[3]) + p.Position;
-					}
-					particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+					if (!visibility.Visible || !emitterComponent.ParticleMaterial)
+						continue;
 
-					// Scale
-					Vector3 finalScale = emitterComponent.ParticleScale;
-					if (p.Scale != 1.0f)
+					Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
+
+					Vector3 oldColor = Renderer::QuadMesh->GetMaterial()->data.m_AlbedoColor;
+					auto initialTransform = transform.GetGlobalTransform();
+					for (auto& p : emitterComponent.Emitter.Particles)
 					{
-						finalScale += emitterComponent.ParticleScale * p.Scale;
+						Matrix4 particleTransform = initialTransform;
+						particleTransform = glm::inverse(mView);
+
+						// Translation
+						Vector3 particleGlobalPosition;
+						if (emitterComponent.GlobalSpace)
+						{
+							particleGlobalPosition = p.Position;
+						}
+						else
+						{
+							particleGlobalPosition = Vector3(initialTransform[3]) + p.Position;
+						}
+						particleTransform[3] = Vector4(particleGlobalPosition, 1.0f);
+
+						// Scale
+						Vector3 finalScale = emitterComponent.ParticleScale;
+						if (p.Scale != 1.0f)
+						{
+							finalScale += emitterComponent.ParticleScale * p.Scale;
+						}
+
+						particleTransform = glm::scale(particleTransform, finalScale);
+
+						Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
 					}
 
-					particleTransform = glm::scale(particleTransform, finalScale);
-					
-					Renderer::SubmitMesh(Renderer::QuadMesh, particleTransform, (uint32_t)e);
+					Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
+					Renderer::Flush(gBufferShader, false);
+
+					Renderer::QuadMesh->SetMaterial(previousMaterial);
+				}
+			}
+			
+			{
+				ZoneScopedN("Render UI Worldspace");
+
+				Ref<Material> previousMaterial = Renderer::QuadMesh->GetMaterial();
+				auto uiView = scene.m_Registry.view<TransformComponent, UIComponent>();
+				for (auto e : uiView)
+				{
+					auto [transform, uiComponent] = uiView.get<TransformComponent, UIComponent>(e);
+					if (!uiComponent.IsWorldSpace)
+					{
+						continue;
+					}
+
+					Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+					Matrix4 finalTransform = transform.GetGlobalTransform();
+					Renderer::QuadMesh->GetMaterial()->SetAlbedo(uiResource->GetOutputTexture());
+					Renderer::SubmitMesh(Renderer::QuadMesh, finalTransform, (uint32_t)e);
+					Renderer::Flush(gBufferShader, false);
+					//Renderer::DrawQuad(finalTransform);
 				}
 
-				Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
-				Renderer::Flush(gBufferShader, false);
-
+				// Reset material on quadmesh
 				Renderer::QuadMesh->SetMaterial(previousMaterial);
 			}
 
-			auto uiView = scene.m_Registry.view<TransformComponent, UIComponent>();
-			for (auto e : uiView)
 			{
-				auto [transform, uiComponent] = uiView.get<TransformComponent, UIComponent>(e);
-				if (!uiComponent.IsWorldSpace)
+				ZoneScopedN("Render Skinned mesh");
+
+				// Skinned mesh at the end because we switch shader
+				gBufferSkinnedMeshShader->Bind();
+				gBufferSkinnedMeshShader->SetUniform("u_Projection", mProjection);
+				gBufferSkinnedMeshShader->SetUniform("u_View", mView);
+
+				RenderCommand::Disable(RendererEnum::FACE_CULL);
+
+				// Skinned Models
+				const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
+				const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
+				gBufferSkinnedMeshShader->SetUniform(modelMatrixUniformLocation, Matrix4(1.0f));
+				auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
+				for (auto e : skinnedModelView)
 				{
-					continue;
-				}
+					auto [transform, mesh, visibility] = skinnedModelView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+					auto& meshResource = mesh.ModelResource;
 
-				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
-				Matrix4 finalTransform = transform.GetGlobalTransform();
-				Renderer::QuadMesh->GetMaterial()->SetAlbedo(uiResource->GetOutputTexture());
-				Renderer::SubmitMesh(Renderer::QuadMesh, finalTransform, (uint32_t)e);
-				Renderer::Flush(gBufferShader, false);
-				//Renderer::DrawQuad(finalTransform);
-			}
-			
-			// Reset material on quadmesh
-			Renderer::QuadMesh->SetMaterial(previousMaterial);
-
-			// Skinned mesh at the end because we switch shader
-			gBufferSkinnedMeshShader->Bind();
-			gBufferSkinnedMeshShader->SetUniform("u_Projection", mProjection);
-			gBufferSkinnedMeshShader->SetUniform("u_View", mView);
-
-			RenderCommand::Disable(RendererEnum::FACE_CULL);
-
-			// Skinned Models
-			const uint32_t entityIdUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_EntityID");
-			const uint32_t modelMatrixUniformLocation = gBufferSkinnedMeshShader->FindUniformLocation("u_Model");
-			gBufferSkinnedMeshShader->SetUniform(modelMatrixUniformLocation, Matrix4(1.0f));
-			auto skinnedModelView = scene.m_Registry.view<TransformComponent, SkinnedModelComponent, VisibilityComponent>();
-			for (auto e : skinnedModelView)
-			{
-				auto [transform, mesh, visibility] = skinnedModelView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
-				auto& meshResource = mesh.ModelResource;
-
-				if (meshResource && visibility.Visible)
-				{
-					auto& rootBoneNode = meshResource->GetSkeletonRootNode();
-					SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
-
-					for (auto& m : mesh.ModelResource->GetMeshes())
+					if (meshResource && visibility.Visible)
 					{
-						m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
-						
-						gBufferSkinnedMeshShader->SetUniform(entityIdUniformLocation, (uint32_t)e + 1);
-						m->Draw(gBufferSkinnedMeshShader, true);
+						auto& rootBoneNode = meshResource->GetSkeletonRootNode();
+						SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
+
+						for (auto& m : mesh.ModelResource->GetMeshes())
+						{
+							m->GetMaterial()->Bind(gBufferSkinnedMeshShader);
+
+							gBufferSkinnedMeshShader->SetUniform(entityIdUniformLocation, (uint32_t)e + 1);
+							m->Draw(gBufferSkinnedMeshShader, true);
+						}
 					}
 				}
 			}

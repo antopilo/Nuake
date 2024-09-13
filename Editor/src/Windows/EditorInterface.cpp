@@ -2654,7 +2654,7 @@ namespace Nuake {
 
         corner = 2;
 
-        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>())
+        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>() && !Engine::IsPlayMode())
         {
             window_flags |= ImGuiWindowFlags_NoMove;
             viewport = ImGui::GetWindowViewport();

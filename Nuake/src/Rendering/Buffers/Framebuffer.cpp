@@ -65,11 +65,13 @@ namespace Nuake
 
 	void FrameBuffer::Clear()
 	{
+		ZoneScoped;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void FrameBuffer::Bind()
 	{
+		ZoneScoped;
 		if (ResizeQueued)
 			UpdateSize(m_Size);
 
@@ -96,6 +98,7 @@ namespace Nuake
 
 	void FrameBuffer::UpdateSize(Vector2 size)
 	{
+		ZoneScoped;
 		m_Size = size;
 		ResizeQueued = false;
 
