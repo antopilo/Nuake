@@ -598,8 +598,15 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 	entt::meta_type componentMeta = component.type();
 	for (auto [fst, dataType] : componentMeta.data())
 	{
+		const ComponentFieldTrait fieldTraits = dataType.traits<ComponentFieldTrait>();
+		// Field marked as internal and thus not exposed to the inspector
+		if ((fieldTraits & ComponentFieldTrait::Internal) == ComponentFieldTrait::Internal)
+		{
+			continue;
+		}
+
 		ImGui::TableNextColumn();
-		
+
 		// Search for the appropriate drawer for the type
 		entt::id_type dataId = dataType.type().id();
 		if (FieldTypeDrawers.contains(dataId))
@@ -607,6 +614,12 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 			auto drawerFn = FieldTypeDrawers[dataId];
 			drawerFn(dataType, component);
 		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+
+		ImGui::TableNextRow();
 	}
 }
 
@@ -647,8 +660,6 @@ void EditorSelectionPanel::DrawFieldTypeFloat(entt::meta_data& field, entt::meta
 			ImGui::Text("ERR");
 		}
 	}
-
-	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_any& component)
@@ -678,8 +689,6 @@ void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_
 			ImGui::Text("ERR");
 		}
 	}
-
-	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::meta_any& component)
@@ -705,8 +714,6 @@ void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::me
 
 		ImGui::PopID();
 	}
-
-	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::meta_any& component)
@@ -733,8 +740,6 @@ void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::met
 			ImGui::Text("ERR");
 		}
 	}
-
-	ImGui::TableNextRow();
 }
 
 void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, entt::meta_any& component)
@@ -776,7 +781,5 @@ void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, ent
 			ImGui::Text("ERR");
 		}
 	}
-
-	ImGui::TableNextRow();
 }
 

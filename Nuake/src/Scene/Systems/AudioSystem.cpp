@@ -4,11 +4,10 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/AudioEmitterComponent.h"
-
+#include "src/FileSystem/File.h"
 #include "src/Audio/AudioManager.h"
 
 #include <future>
-
 
 namespace Nuake
 {

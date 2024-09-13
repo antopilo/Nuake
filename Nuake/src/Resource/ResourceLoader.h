@@ -8,6 +8,7 @@ namespace Nuake
 	class Material;
 	class Model;
 	class UIResource;
+	class File;
 
 	class ResourceLoader
 	{
@@ -23,6 +24,7 @@ namespace Nuake
 		static Ref<Material> LoadMaterial(const std::string& path);
 		static Ref<Model> LoadModel(const std::string& path);
 		static Ref<UIResource> LoadUI(const std::string& path);
+		static Ref<UIResource> LoadUI(const Ref<File>& file);
 
 	private:
 		static UUID ReadUUID(json j);

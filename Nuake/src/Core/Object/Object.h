@@ -5,6 +5,17 @@
 
 #define NK_HASHED_STATIC_STR(name) inline static constexpr entt::hashed_string name = entt::hashed_string(#name);
 
+#define NK_ENUM_BITWISE_IMPL(enumClassName) \
+    inline enumClassName operator|(enumClassName lhs, enumClassName rhs) \
+    { \
+        return static_cast<enumClassName>(ToUnderlying(lhs) | ToUnderlying(rhs)); \
+    } \
+ \
+    inline enumClassName operator&(enumClassName lhs, enumClassName rhs) \
+    { \
+        return static_cast<enumClassName>(ToUnderlying(lhs) & ToUnderlying(rhs)); \
+    }
+
 namespace Nuake
 {
     struct HashedFnName
@@ -18,7 +29,7 @@ namespace Nuake
         NK_HASHED_STATIC_STR(FloatStep)
         NK_HASHED_STATIC_STR(FloatMin)
         NK_HASHED_STATIC_STR(FloatMax)
-        
+
         NK_HASHED_STATIC_STR(ResourceFileType)
     };
 
@@ -57,6 +68,16 @@ namespace Nuake
     inline ComponentTypeTrait operator&(ComponentTypeTrait lhs, ComponentTypeTrait rhs)
     {
         return static_cast<ComponentTypeTrait>(ToUnderlying(lhs) & ToUnderlying(rhs));
+    }
+
+    inline ComponentFieldTrait operator|(ComponentFieldTrait lhs, ComponentFieldTrait rhs)
+    {
+        return static_cast<ComponentFieldTrait>(ToUnderlying(lhs) | ToUnderlying(rhs));
+    }
+
+    inline ComponentFieldTrait operator&(ComponentFieldTrait lhs, ComponentFieldTrait rhs)
+    {
+        return static_cast<ComponentFieldTrait>(ToUnderlying(lhs) & ToUnderlying(rhs));
     }
 }
 
@@ -140,7 +161,5 @@ public:                                                                         
     static auto SetFlags(Enums... enums) \
     { \
         static_assert((std::is_enum_v<Enums> && ...), "All arguments must be of enum class type"); \
-        return ComponentFactory.traits((static_cast<uint16_t>(enums) | ...)); \
+        return ComponentFactory.traits((enums | ...)); \
     }
-
-

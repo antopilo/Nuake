@@ -1,6 +1,7 @@
 #include "ResourceLoader.h"
 #include "src/Core/Logger.h"
 #include "src/Core/String.h"
+#include "src/FileSystem/File.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/ResourceManager.h"
 #include "src/Rendering/Textures/Material.h"
@@ -99,6 +100,16 @@ Ref<UIResource> ResourceLoader::LoadUI(const std::string& path)
 {
 	auto uiResource = CreateRef<UIResource>(path);
 	return uiResource;
+}
+
+Ref<UIResource> ResourceLoader::LoadUI(const Ref<File>& file)
+{
+	if (file == nullptr || !file->Exist())
+	{
+		return nullptr;
+	}
+	
+	return LoadUI(file->GetRelativePath());
 }
 
 UUID ResourceLoader::ReadUUID(json j)

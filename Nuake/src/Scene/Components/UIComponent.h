@@ -19,7 +19,7 @@ namespace Nuake
         {
             BindComponentField<&UIComponent::UIResource>("UIResource", "UIResource");
                 SetFlags(ComponentFieldTrait::Internal, ComponentFieldTrait::Transient);
-
+            
             BindComponentField<&UIComponent::UIFilePath>("UIFilePath", "File Path");
             BindComponentField<&UIComponent::IsWorldSpace>("IsWorldspace", "Is Worldspace");
         }
@@ -34,12 +34,14 @@ namespace Nuake
         {
             BEGIN_SERIALIZE();
             SERIALIZE_RES_FILE(UIFilePath);
+            SERIALIZE_VAL(IsWorldSpace);
             END_SERIALIZE();
         }
 
         bool Deserialize(const json& j)
         {
             DESERIALIZE_RES_FILE(UIFilePath);
+            DESERIALIZE_VAL(IsWorldSpace);
             return true;
         }
     };
