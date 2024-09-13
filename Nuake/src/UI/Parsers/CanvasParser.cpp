@@ -240,9 +240,23 @@ bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 		return false;
 	}
 
+	currentParsingCanvas->AddSourceFile(FileSystem::GetFile(customWidget.htmlPath));
+
 	// Parse load HTML file now
 	const std::string& absoluteFilePath = FileSystem::RelativeToAbsolute(customWidget.htmlPath);
+
+	// This is a workaround in case the file is locked by a code editor, retry 5 times.
 	tinyxml2::XMLDocument doc;
+	tinyxml2::XMLError error;
+	int attempt = 0;
+	error = doc.LoadFile(absoluteFilePath.c_str());
+	while (error && attempt < 5)
+	{
+		error = doc.LoadFile(absoluteFilePath.c_str());
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		attempt++;
+	}
+
 	if (tinyxml2::XMLError error = doc.LoadFile(absoluteFilePath.c_str()))
 	{
 		doc.PrintError();
@@ -308,6 +322,8 @@ Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 
 	_parsingPath = path;
 
+	currentParsingCanvas = canvas;
+
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError error;
 	bool fileLoaded = false;
@@ -340,10 +356,11 @@ Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 	auto styleSheet = firstNode->FindAttribute("stylesheet");
 	if (styleSheet)
 	{
-		std::string relativePath = path + "/../" + styleSheet->Value();
-		if (FileSystem::FileExists(relativePath, true))
+		std::string relativePath = styleSheet->Value();
+		if (FileSystem::FileExists(relativePath))
 		{
 			auto styleSheet = StyleSheetParser::Get().Parse(relativePath);
+			currentParsingCanvas->AddSourceFile(FileSystem::GetFile(relativePath));
 			canvas->SetStyleSheet(styleSheet);
 		}
 	}

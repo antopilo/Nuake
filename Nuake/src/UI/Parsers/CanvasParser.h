@@ -17,6 +17,7 @@ namespace NuakeUI
 	class CanvasParser
 	{
 	private:
+		Ref<Canvas> currentParsingCanvas;
 		std::map<std::string, refNew> NodeTypes;
 		std::string _parsingPath;
 		std::vector<std::pair<std::pair<UUID, UUID>, std::string>>  customWidgetIDs;

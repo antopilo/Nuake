@@ -10,6 +10,11 @@
 #include <memory>
 
 
+namespace Nuake
+{
+	class File;
+}
+
 namespace NuakeUI
 {
 	class Canvas;
@@ -33,6 +38,7 @@ namespace NuakeUI
 		
 		bool mDirty;
 
+		std::vector<Ref<Nuake::File>> sourceFiles;
 
 	public:
 		static CanvasPtr New();
@@ -65,5 +71,8 @@ namespace NuakeUI
 		}
 
 		Ref<Node> GetNodeByUUID(const UUID& uuid);
+
+		void AddSourceFile(Ref<Nuake::File> file);
+		std::vector<Ref<Nuake::File>> GetSourceFiles() const;
 	};
 }

@@ -84,6 +84,11 @@ FileType File::GetFileType() const
 		return FileType::UI;
 	}
 
+	if (ext == ".css")
+	{
+		return FileType::CSS;
+	}
+
 	return FileType::Unkown;
 }
 
@@ -138,6 +143,16 @@ std::string File::GetFileTypeAsString() const
 	if (ext == ".cs")
 	{
 		return "C# Script";
+	}
+
+	if (ext == ".html")
+	{
+		return "UI Layout";
+	}
+
+	if (ext == ".css")
+	{
+		return "StyleSheet";
 	}
 
 	return "File";

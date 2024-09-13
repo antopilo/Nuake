@@ -1,10 +1,12 @@
 #include "Canvas.h"
+
+#include "src/UI/Renderer.h"
+#include "src/FileSystem/File.h"
+#include "Node.h"
+
 #include <yoga/Yoga.h>
 #include <yoga/YGConfig.h>
 
-#include "../Renderer.h"
-
-#include "Node.h"
 
 namespace NuakeUI
 {
@@ -187,5 +189,14 @@ namespace NuakeUI
 		}
 
 		return nodeCache[uuid];
+	}
+	void Canvas::AddSourceFile(Ref<File> file)
+	{
+		sourceFiles.push_back(file);
+	}
+
+	std::vector<Ref<File>> Canvas::GetSourceFiles() const
+	{
+		return sourceFiles;
 	}
 }

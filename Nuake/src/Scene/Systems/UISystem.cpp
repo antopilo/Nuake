@@ -5,6 +5,7 @@
 #include "src/Resource/ResourceLoader.h"
 #include "src/Resource/UI.h"
 #include "src/Scene/Scene.h"
+#include "src/UI/Nodes/Canvas.h"
 #include "src/FileSystem/File.h"
 #include "src/Scene/Components/UIComponent.h"
 #include "src/FileSystem/FileSystem.h"
@@ -45,11 +46,21 @@ namespace Nuake
 			{
 				if (FileSystem::FileExists(filePath))
 				{
-					Ref<File> file = FileSystem::GetFile(filePath);
-					if (file->GetHasBeenModified())
+					auto ui = ResourceManager::GetResource<UIResource>(uiViewComponent.UIResource);
+					bool sourceHasChanged = false;
+					for (auto& fileAssociated : ui->GetCanvas()->GetSourceFiles())
+					{
+						// Re-fetching the file object because the Scan might have invalided the pointer.
+						if (FileSystem::GetFile(fileAssociated->GetRelativePath())->GetHasBeenModified())
+						{
+							sourceHasChanged = true;
+							FileSystem::GetFile(fileAssociated->GetRelativePath())->SetHasBeenModified(false);
+						}
+					}
+
+					if (sourceHasChanged)
 					{
 						uis[uiViewComponent.UIResource]->Reload();
-						file->SetHasBeenModified(false);
 					}
 
 					if (Engine::IsPlayMode())

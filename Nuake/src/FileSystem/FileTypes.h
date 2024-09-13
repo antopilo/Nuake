@@ -18,6 +18,7 @@ namespace Nuake
 		Assembly,
 		Solution,
 		Audio,
-		UI
+		UI,
+		CSS
 	};
 }
