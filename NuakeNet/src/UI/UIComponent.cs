@@ -71,12 +71,19 @@ namespace Nuake.Net
 
     public class Node
     {
-        internal static unsafe delegate*<NativeString, NativeString, NativeString, NativeString, ulong> FindChildByIDICall;
+        internal static unsafe delegate*<NativeString, NativeString, NativeString, NativeString> FindChildByIDICall;
         internal static unsafe delegate*<NativeString, NativeString, NativeString, bool> HasNativeInstanceICall;
         internal static unsafe delegate*<NativeString, NativeString, NativeInstance<Node>> GetNativeInstanceNodeICall;
 
         public string UUID;
         public string CanvasUUID;
+
+        public Node() { }
+        public Node(string handle, string canvasHandle )
+        {
+            UUID = handle;
+            CanvasUUID = canvasHandle; 
+        }
 
         public string ID { get; set; } = "";
         public List<string> Classes { get; set; } = new();
@@ -94,13 +101,13 @@ namespace Nuake.Net
             {
                 Engine.Log("Calling FindChildByIDICall with params: " + CanvasUUID + " , " + UUID + " , " + id);
 
-                ulong uuid = FindChildByIDICall(CanvasUUID, CanvasUUID, UUID, id);
-                if (uuid == 0)
+                NativeString uuid = FindChildByIDICall(CanvasUUID, UUID, id);
+                if (uuid.ToString() == "0")
                 {
                     throw new Exception("Node not found");
                 }
 
-                Node? newNode = null;
+                T? newNode = null;
                 //if (HasNativeInstanceICall(CanvasUUID, CanvasUUID, UUID))
                 //{
                 //    NativeInstance<Node> handle;
@@ -110,11 +117,9 @@ namespace Nuake.Net
 
                 if(newNode == null)
                 {
-                    newNode = new Node()
-                    {
-                        UUID = uuid.ToString(),
-                        CanvasUUID = CanvasUUID
-                    };
+                    newNode = Activator.CreateInstance<T>();
+                    newNode.UUID = uuid;
+                    newNode.CanvasUUID = CanvasUUID;
 
                     return newNode as T;
                 }

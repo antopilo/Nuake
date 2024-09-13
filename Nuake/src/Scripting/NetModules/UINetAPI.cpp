@@ -18,12 +18,12 @@ UUID UUIDFromString(const std::string& input)
 	return std::stoull(input);
 }
 
-uint64_t FindChildByIDIcall(const Coral::String& canvasUUID, const Coral::String& id, const Coral::String& id2)
+Coral::String FindChildByIDIcall(const Coral::String& canvasUUID, const Coral::String& id, const Coral::String& id2)
 {
 	if (!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
 	{
 		Logger::Log("Error finding child, canvas is not loaded.", ".net/ui", CRITICAL);
-		return UUID(0);
+		return Coral::String::New(std::to_string(0));
 	}
 
 	Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(UUIDFromString(canvasUUID));
@@ -32,13 +32,13 @@ uint64_t FindChildByIDIcall(const Coral::String& canvasUUID, const Coral::String
 		searchNode != nullptr)
 	{
 		Ref<Node> foundNode;
-		if (foundNode->FindChildByID(id2, foundNode))
+		if (searchNode->FindChildByID(id2, foundNode))
 		{
-			return foundNode->GetScriptingID();
+			return Coral::String::New(std::to_string(foundNode->GetScriptingID()));
 		}
 	}
 
-	return UUID(0);
+	return Coral::String::New(std::to_string(0));
 }
 
 bool HasNativeInstanceICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID, const Coral::String& nodeUUID2)
