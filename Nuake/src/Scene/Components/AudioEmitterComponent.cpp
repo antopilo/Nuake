@@ -1,5 +1,6 @@
 #include "AudioEmitterComponent.h"
 
+#include "src/FileSystem/File.h"
 #include "src/FileSystem/FileSystem.h"
 
 namespace Nuake {
