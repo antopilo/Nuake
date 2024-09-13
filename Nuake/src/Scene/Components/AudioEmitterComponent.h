@@ -4,7 +4,6 @@
 #include "FieldTypes.h"
 
 #include "src/Core/Core.h"
-#include "src/FileSystem/File.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 
@@ -23,20 +22,20 @@ namespace Nuake {
 			BindComponentField<&AudioEmitterComponent::Loop>("Loop", "Loop");
 
 			BindComponentField<&AudioEmitterComponent::Volume>("Volume", "Volume");
-				FloatFieldLimits(0.001f, 0.0f, 2.0f);
+				FieldFloatLimits(0.001f, 0.0f, 2.0f);
 			BindComponentField<&AudioEmitterComponent::Pan>("Pan", "Pan");
-				FloatFieldLimits(0.01f, -1.0f, 1.0f);
+				FieldFloatLimits(0.01f, -1.0f, 1.0f);
 			BindComponentField<&AudioEmitterComponent::PlaybackSpeed>("PlaybackSpeed", "Playback Speed");
-				FloatFieldLimits(0.01f, 0.0001f, 0.f);
+				FieldFloatLimits(0.01f, 0.0001f, 0.f);
 			
 			BindComponentField<&AudioEmitterComponent::Spatialized>("Spatialized", "Spatialized");
 			
 			BindComponentField<&AudioEmitterComponent::MinDistance>("MinDistance", "Min Distance");
-				FloatFieldLimits(0.001f, 0.f, 0.f);
+				FieldFloatLimits(0.001f, 0.f, 0.f);
 			BindComponentField<&AudioEmitterComponent::MaxDistance>("MaxDistance", "Max Distance");
-				FloatFieldLimits(0.001f, 0.f, 0.f);
+				FieldFloatLimits(0.001f, 0.f, 0.f);
 			BindComponentField<&AudioEmitterComponent::AttenuationFactor>("AttenuationFactor", "Attenuation Factor");
-				FloatFieldLimits(0.001f, 0.f, 0.f);
+				FieldFloatLimits(0.001f, 0.f, 0.f);
 		}
 
 	public:

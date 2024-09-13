@@ -30,9 +30,17 @@ namespace Nuake
     enum class ComponentTypeTrait : uint16_t
     {
         None = 0,
+        // Exposes the component to be added via the inspector
         InspectorExposed = 1 << 0,
+    };
 
-        
+    enum class ComponentFieldTrait : uint16_t
+    {
+        None = 0,
+        // Stops field from showing up in the editor inspector
+        Internal = 1 << 0,
+        // Marks the field as temporary (ie, do not serialize)
+        Transient = 1 << 1,
     };
 
     template <typename Enum>
@@ -114,7 +122,7 @@ public:                                                                         
             .prop(HashedName::DisplayName, displayName);                                          \
     }                                                                                             \
                                                                                                   \
-    static auto FloatFieldLimits(float stepSize, float min, float max)                            \
+    static auto FieldFloatLimits(float stepSize, float min, float max)                            \
     {                                                                                             \
         return ComponentFactory                                                                   \
             .prop(HashedFieldPropName::FloatStep, stepSize)                                       \
@@ -126,4 +134,13 @@ public:                                                                         
     {  \
         return ComponentFactory  \
             .prop(HashedFieldPropName::ResourceFileType, fileType);  \
+    } \
+    \
+    template <typename... Enums> \
+    static auto SetFlags(Enums... enums) \
+    { \
+        static_assert((std::is_enum_v<Enums> && ...), "All arguments must be of enum class type"); \
+        return ComponentFactory.traits((static_cast<uint16_t>(enums) | ...)); \
     }
+
+

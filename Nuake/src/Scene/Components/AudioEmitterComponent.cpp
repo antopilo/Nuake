@@ -7,14 +7,7 @@ namespace Nuake {
 	json AudioEmitterComponent::Serialize()
 	{
 		BEGIN_SERIALIZE();
-
-		bool validFile = FilePath.file != nullptr && FilePath.file->Exist();
-		j["validFile"] = validFile;
-		if (validFile)
-		{
-			j["file"] = FilePath.file->GetRelativePath();
-		}
-		
+		SERIALIZE_RES_FILE(FilePath);
 		SERIALIZE_VAL(IsPlaying);
 		SERIALIZE_VAL(Volume);
 		SERIALIZE_VAL(Pan);
@@ -29,16 +22,7 @@ namespace Nuake {
 
 	bool AudioEmitterComponent::Deserialize(const json& j)
 	{
-		if (j.contains("validFile"))
-		{
-			bool validFile = j["validFile"];
-			if (validFile)
-			{
-				std::string filePath = j["file"];
-				FilePath.file = FileSystem::GetFile(filePath);
-			}
-		}
-		
+		DESERIALIZE_RES_FILE(FilePath);
 		DESERIALIZE_VAL(Volume);
 		DESERIALIZE_VAL(IsPlaying);
 		DESERIALIZE_VAL(Pan);
