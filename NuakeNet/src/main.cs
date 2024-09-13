@@ -17,8 +17,13 @@ namespace Nuake.Net
     public class Engine
     {
         internal static unsafe delegate*<NativeString, void> LoggerLogIcall;
-
+        internal static unsafe delegate*<NativeString, void> LoadSceneIcall;
         public Engine() { }
+
+        public static void LoadScene(string path)
+        {
+            unsafe { LoadSceneIcall(path); }
+        }
 
         /// <summary>
         /// Prints a message to the console log

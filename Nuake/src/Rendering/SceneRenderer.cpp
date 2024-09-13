@@ -18,6 +18,7 @@
 #include <Tracy.hpp>
 #include <src/UI/Renderer.h>
 
+#include "src/UI/Inspector.h"
 
 namespace Nuake 
 {
@@ -464,6 +465,8 @@ namespace Nuake
 					Renderer::DrawQuad();
 				}
 				framebuffer.Unbind();
+
+				NuakeUI::DrawInspector(uiResource->GetCanvas());
 			}
 		}
 

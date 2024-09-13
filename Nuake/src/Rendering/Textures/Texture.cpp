@@ -1,8 +1,10 @@
 #include "Texture.h"
 #include "src/Core/Logger.h"
-#include <glad/glad.h>
 #include <iostream>
 #include "src/FileSystem/FileSystem.h"
+
+#include <glad/glad.h>
+
 
 namespace Nuake
 {
@@ -41,21 +43,18 @@ namespace Nuake
 		}
 	}
 
-	Texture::Texture(Vector2 size, void* data)
+	Texture::Texture(const TextureFlags& flags, Vector2 size, void* data)
 	{
 		m_Width = size.x;
 		m_Height = size.y;
+
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		//glGenerateMipmap(GL_TEXTURE_2D);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
-		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)GL_RGBA, size.x, size.y, 0, (GLenum)GL_RGBA, (GLenum)GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)flags.pixelFormat, size.x, size.y, 0, (GLenum)flags.pixelFormat, (GLenum)flags.pixelDataType, data);
+		
+		SetMagnificationFilter(flags.magFilter);
+		SetMinificationFilter(flags.minFilter);
+		SetWrapping(flags.wrapping);
 	}
 
 	Texture::Texture(Vector2 size, GLenum format, GLenum format2, GLenum format3, void* data)
@@ -95,11 +94,6 @@ namespace Nuake
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
 		glGenerateMipmap(GL_TEXTURE_2D);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -158,6 +152,25 @@ namespace Nuake
 		Bind();
 		glTexParameteri(GL_TEXTURE_2D, param, value);
 		Unbind();
+	}
+
+	void Texture::SetMagnificationFilter(const SamplerFilter& filter)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filter);
+	}
+
+	void Texture::SetMinificationFilter(const SamplerFilter& filter)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filter);
+	}
+
+	void Texture::SetWrapping(const SamplerWrapping& wrapping)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)wrapping);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)wrapping);
 	}
 
 	json Texture::Serialize()

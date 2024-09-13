@@ -24,6 +24,7 @@ namespace Nuake
 {
 	Ref<Project> Engine::currentProject;
 	Ref<Window> Engine::currentWindow;
+	std::string Engine::queuedScene = "";
 
 	GameState Engine::gameState = GameState::Stopped;
 
@@ -59,6 +60,33 @@ namespace Nuake
 		time = static_cast<float>(glfwGetTime());
 		timeStep = time - lastFrameTime;
 		lastFrameTime = time;
+
+		if (Engine::IsPlayMode())
+		{
+			if (!queuedScene.empty())
+			{
+				Ref<Scene> nextScene = Scene::New();
+				if (FileSystem::FileExists(queuedScene))
+				{
+					const std::string& fileContent = FileSystem::ReadFile(queuedScene);
+					nextScene->Path = queuedScene;
+					nextScene->Deserialize(json::parse(fileContent));
+
+					// Uninit current scene
+					GetCurrentScene()->OnExit();
+
+					// Set new scene
+					SetCurrentScene(nextScene);
+
+					// Init new scene
+					PhysicsManager::Get().ReInit();
+					GetCurrentScene()->OnInit();
+
+					queuedScene = "";
+				}
+				
+			}
+		}
 
 		// Dont update if no scene is loaded.
 		if (currentWindow->GetScene())
@@ -165,6 +193,18 @@ namespace Nuake
 	bool Engine::SetCurrentScene(Ref<Scene> scene)
 	{
 		return currentWindow->SetScene(scene);
+	}
+
+	bool Engine::QueueSceneSwitch(const std::string& scenePath)
+	{
+		if (!IsPlayMode())
+		{
+			return false;
+		}
+
+		queuedScene = scenePath;
+
+		return true;
 	}
 
 	Ref<Project> Engine::GetProject()

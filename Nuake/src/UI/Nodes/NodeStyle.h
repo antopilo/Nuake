@@ -3,6 +3,9 @@
 
 #include <src/Core/Maths.h>
 #include <src/Rendering/Textures/Texture.h>
+#include "src/UI/Renderer.h"
+#include "src/UI/Font/Font.h"
+
 
 using namespace Nuake;
 namespace NuakeUI
@@ -52,6 +55,7 @@ namespace NuakeUI
 		float BorderRadius = 0.f;
 		Color BorderColor = Color(0, 0, 0, 0);
 		float FontSize = 64.0f;
+		Ref<Font> FontFamily = Renderer::Get().mDefaultFont;
 		TextAlignType TextAlign = TextAlignType::Left;
 		Color FontColor = Color(1, 1, 1, 1);
 		OverflowType Overflow = OverflowType::Show;

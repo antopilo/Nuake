@@ -190,7 +190,7 @@ namespace Nuake
 		{
 			managedObject.Destroy();
 		}
-
+		
 		for (auto& [widgetUUID, managedObject] : widgetUUIDToManagedObjects)
 		{
 			managedObject.Destroy();

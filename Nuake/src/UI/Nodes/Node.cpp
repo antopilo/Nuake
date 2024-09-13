@@ -8,6 +8,7 @@
 
 #include <nanosvg.h>
 #include <nanosvgrast.h>
+#include <src/UI/Font/FontManager.h>
 
 
 namespace NuakeUI
@@ -463,6 +464,12 @@ namespace NuakeUI
 					break;
 				case StyleProperties::ZIndex:
 					ComputedStyle.ZIndex = value.value.Number;
+					break;
+				case StyleProperties::Font:
+					if (FileSystem::FileExists(value.string, true))
+					{
+						ComputedStyle.FontFamily = FontManager::Get().GetFont(value.string);
+					}
 					break;
 				case StyleProperties::BackgroundImage:
 					{

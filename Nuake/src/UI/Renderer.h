@@ -3,8 +3,7 @@
 #include <src/Rendering/Buffers/VertexBuffer.h>
 #include <src/Rendering/Buffers/VertexArray.h>
 
-#include "Nodes/Node.h"
-#include "Nodes/Text.h"
+
 #include "Font/Font.h"
 
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
@@ -14,6 +13,10 @@
 
 namespace NuakeUI
 {
+	class Node;
+	class NodeStyle;
+	class Text;
+
 	class Renderer
 	{
 	public:

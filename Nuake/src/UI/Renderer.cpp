@@ -8,12 +8,13 @@
 #include "src/Rendering/Buffers/VertexBufferLayout.h"
 #include "src/Rendering/Shaders/ShaderManager.h"
 #include "src/Rendering/Vertex.h"
+#include "Nodes/Node.h"
+#include "Nodes/Text.h"
 
 #include <glad/glad.h>
 
 
 using namespace NuakeUI;
-
 
 
 std::shared_ptr<Font> Renderer::mDefaultFont;
@@ -168,7 +169,7 @@ void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::
 		{ "u_Scale", 1.0f},
 		{ "u_SDF_BorderSize", 0.0f},
 		{ "u_FontColor", nodeStyle.FontColor },
-		{ "u_PxRange",   fontSize },
+		{ "u_PxRange",   4.0f },
 		{ "u_SDF_BorderSize", {1.0, 1.0}},
 		{ "u_SubpixelThreshold", subpixelThreshold},
 		{ "u_CurveTolerance", curveTolerance},
@@ -200,7 +201,6 @@ void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::
 			{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
 			{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
 		});
-		
 		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}

@@ -72,7 +72,7 @@ namespace Nuake.Net
     public class Node
     {
         internal static unsafe delegate*<NativeString, NativeString, NativeString, NativeString> FindChildByIDICall;
-        internal static unsafe delegate*<NativeString, NativeString, NativeString, bool> HasNativeInstanceICall;
+        internal static unsafe delegate*<NativeString, NativeString, bool> HasNativeInstanceICall;
         internal static unsafe delegate*<NativeString, NativeString, NativeInstance<Node>> GetNativeInstanceNodeICall;
 
         public string UUID;
@@ -107,24 +107,21 @@ namespace Nuake.Net
                     throw new Exception("Node not found");
                 }
 
-                T? newNode = null;
-                //if (HasNativeInstanceICall(CanvasUUID, CanvasUUID, UUID))
-                //{
-                //    NativeInstance<Node> handle;
-                //    unsafe { handle = GetNativeInstanceNodeICall(CanvasUUID, UUID); }
-                //    newNode = handle.Get();
-                //}
-
-                if(newNode == null)
+                if (HasNativeInstanceICall(CanvasUUID, uuid))
                 {
-                    newNode = Activator.CreateInstance<T>();
-                    newNode.UUID = uuid;
-                    newNode.CanvasUUID = CanvasUUID;
-
-                    return newNode as T;
+                    NativeInstance<Node> handle;
+                    unsafe { handle = GetNativeInstanceNodeICall(CanvasUUID, uuid); }
+                    Node? newNodeInstance = handle.Get();
+                    if(newNodeInstance != null && newNodeInstance is T)
+                    {
+                        return newNodeInstance as T;
+                    }
                 }
 
-                return null;
+                T? newNode = Activator.CreateInstance<T>();
+                newNode.UUID = uuid;
+                newNode.CanvasUUID = CanvasUUID;
+                return newNode as T;
             }
         }
     }

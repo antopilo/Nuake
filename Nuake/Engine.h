@@ -44,6 +44,7 @@ namespace Nuake
 		static Ref<Window> GetCurrentWindow();
 
 		static bool SetCurrentScene(Ref<Scene> scene);
+		static bool QueueSceneSwitch(const std::string& scene);
 		static Ref<Scene> GetCurrentScene();
 
 		static bool LoadProject(Ref<Project> project);
@@ -53,6 +54,7 @@ namespace Nuake
 		static Ref<Window> currentWindow;
 		static Ref<Project> currentProject;
 		static Ref<Scene> currentScene;
+		static std::string queuedScene;
 
 		static GameState gameState;
 

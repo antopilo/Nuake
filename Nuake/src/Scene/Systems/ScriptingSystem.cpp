@@ -227,10 +227,13 @@ namespace Nuake
 			if (netScriptComponent.ScriptPath.empty())
 				continue;
 
-			// Creates an instance of the entity script in C#
 			auto entity = Entity{ e, m_Scene };
-			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnDestroy");
+			if (entity.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity))
+			{
+				Logger::Log(entity.GetComponent<NameComponent>().Name);
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+				scriptInstance.InvokeMethod("OnDestroy");
+			}
 		}
 
 		ScriptingEngine::Close();

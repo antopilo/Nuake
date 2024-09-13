@@ -57,9 +57,10 @@ namespace NuakeUI
 			// Create bitmap
 			msdfgen::BitmapConstRef<T, N> bitmap = (msdfgen::BitmapConstRef<T, N>) generator.atlasStorage();
 
-			// Creat1e Texture from bitmap
-			//msdf_atlas::exportJSON(fonts.data(), fonts.size(), config.emSize, config.pxRange, config.width, config.height, config.imageType, config.yDirection, "yayayayya.json", config.kerning);
-			font->mAtlas = std::make_shared<Texture>(Vector2(config.width, config.height), (void*)bitmap.pixels);
+			TextureFlags flags;
+			flags.minFilter = SamplerFilter::LINEAR;
+			flags.magFilter = SamplerFilter::LINEAR;
+			font->mAtlas = std::make_shared<Texture>(flags, Vector2(config.width, config.height), (void*)bitmap.pixels);
 
 			// Create Char structure
 			return true;
@@ -71,7 +72,7 @@ namespace NuakeUI
 
 			// Create atlas settings
 			Config config{};
-			config.pxRange = 3;
+			config.pxRange = 8.0;
 			config.emSize = 0.0;
 			config.coloringSeed = 125155;
 			config.imageType = msdf_atlas::ImageType::MTSDF;
@@ -92,7 +93,7 @@ namespace NuakeUI
 			msdf_atlas::Charset charset = msdf_atlas::Charset::ASCII;
 
 			// Load Create charset
-			float fontScale = 36;
+			float fontScale = 36.0f;
 
 			bool preprocess = false;
 			int loaded = fontGeometry.loadCharset(font->GetFontHandle(), fontScale, charset, config.preprocessGeometry, config.kerning);
@@ -110,7 +111,6 @@ namespace NuakeUI
 			msdf_atlas::ImageType imageType = msdf_atlas::ImageType::MTSDF;
 			atlasPacker.setPadding(imageType == msdf_atlas::ImageType::MSDF || imageType == msdf_atlas::ImageType::MTSDF ? 0 : -1);
 			atlasPacker.setPixelRange(config.pxRange);
-			atlasPacker.setUnitRange(config.emSize);
 			atlasPacker.setMiterLimit(config.miterLimit);
 
 			// Pack atlas

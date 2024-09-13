@@ -156,6 +156,7 @@ StyleProperties GetPropFromString(const std::string& prop)
 	else if (prop == "left")				return StyleProperties::Left;
 	else if (prop == "right")				return StyleProperties::Right;
 	else if (prop == "background-image")	return StyleProperties::BackgroundImage;
+	else if (prop == "font")				return StyleProperties::Font;
 	return StyleProperties::None;
 }
 
@@ -230,9 +231,9 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 				case KatanaValueUnit::KATANA_VALUE_STRING:
 					{
 						std::string stringValue = value->string;
-						if (propType == StyleProperties::BackgroundImage)
+						if (propType == StyleProperties::BackgroundImage || propType == StyleProperties::Font)
 						{
-							stringValue = _parsingPath + "/../" + stringValue;
+							stringValue = FileSystem::RelativeToAbsolute(stringValue);
 						}
 						propValue.string = stringValue;
 						propValue.type = PropValueType::String;

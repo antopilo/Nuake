@@ -11,6 +11,41 @@ namespace Nuake
 {
 	typedef unsigned int GLenum;
 
+	enum class PixelFormat
+	{	// TODO: ADD MORE FORMATS
+		RGB8 = 0x1907,
+		RGBA8 = 0x1908
+	};
+
+	enum class PixelDataType
+	{	// TODO: ADD MORE FORMATS
+		UBYTE = 0x1401,
+		FLOAT = 0x1406
+	};
+
+	enum class SamplerFilter
+	{	// TODO: ADD MORE FILTERS
+		LINEAR = 0x2601,
+		NEAREST = 0x2600
+	};
+
+	enum class SamplerWrapping
+	{	// TODO: ADD MORE WRAPPING
+		CLAMP_TO_EDGE = 0x2900,
+		REPEAT = 0x2901
+	};
+
+	struct TextureFlags
+	{
+		PixelFormat pixelFormat = PixelFormat::RGBA8;
+		PixelDataType pixelDataType = PixelDataType::UBYTE;
+
+		SamplerFilter minFilter = SamplerFilter::LINEAR;
+		SamplerFilter magFilter = SamplerFilter::LINEAR;
+		SamplerWrapping wrapping = SamplerWrapping::REPEAT;
+		bool flipVertical = false;
+	};
+
 	class Texture : ISerializable
 	{
 	private:
@@ -30,7 +65,7 @@ namespace Nuake
 	public:
 		Texture(const std::string& path); // Load texture from file
 		Texture(unsigned char* data, int len); // Used to load texture from a memory buffer
-		Texture(Vector2 size, void* data);
+		Texture(const TextureFlags& flags, Vector2 size, void* data);
 		Texture(Vector2 size, GLenum format, GLenum format2 = 0, GLenum format3 = 0, void* data = 0); // Used to load texture from memeory with known size
 		~Texture();
 
@@ -41,6 +76,10 @@ namespace Nuake
 		void Unbind() const;
 
 		void SetParameter(const GLenum& param, const GLenum& value);
+
+		void SetMagnificationFilter(const SamplerFilter& filter);
+		void SetMinificationFilter(const SamplerFilter& filter);
+		void SetWrapping(const SamplerWrapping& wrapping);
 
 		unsigned int GetID() const { return m_RendererId; }
 		inline std::string GetPath() { return m_FilePath; }

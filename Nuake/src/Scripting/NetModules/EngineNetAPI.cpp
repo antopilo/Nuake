@@ -101,8 +101,20 @@ namespace Nuake {
 		return ConvertHitsToArray(hits);
 	}
 
+	void LoadScene(Coral::String path)
+	{
+		if (!FileSystem::FileExists(path))
+		{
+			Logger::Log("Failed to load scene with path: " + std::string(path), ".net/scene", CRITICAL);
+			return;
+		}
+
+		Engine::QueueSceneSwitch(std::string(path));
+	}
+
 	void EngineNetAPI::RegisterMethods()
 	{
+		RegisterMethod("Engine.LoadSceneIcall", &LoadScene);
 		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
 
 		// Debug renderer

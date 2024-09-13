@@ -21,7 +21,7 @@ namespace NuakeUI
 		JustifyContent, AlignContent, LayoutDirection,
 		BorderSize, BorderRadius, BorderColor,
 		BackgroundColor, TextAlign, Color, Overflow, FontSize, Visibility, ZIndex, 
-		BackgroundImage
+		BackgroundImage, Font
 	};
 	enum class PositionType { Relative, Absolute };
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };

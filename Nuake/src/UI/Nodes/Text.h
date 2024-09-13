@@ -24,8 +24,9 @@ namespace NuakeUI
 		std::string GetText() const;
 
 		void Calculate() override;
-		void UpdateInput(InputManager* manager) override {};
 		void Draw(int z) override;
+
+		void SetFont(const std::string& fontPath);
 
 		float CalculateWidth();
 	private:

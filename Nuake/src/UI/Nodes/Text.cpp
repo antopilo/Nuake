@@ -3,6 +3,8 @@
 #include "../Renderer.h"
 
 #include "src/Rendering/Renderer.h"
+#include "src/UI/Font/FontManager.h"
+
 #include <sstream>
 
 namespace NuakeUI
@@ -61,7 +63,7 @@ namespace NuakeUI
 		float y = YGNodeLayoutGetTop(mNode);
 
 		// Centers the text in the line height.
-		y += (mFont->LineHeight / 64.0f) * (ComputedStyle.FontSize) / 2.0f;
+		y += (ComputedStyle.FontFamily->LineHeight / 64.0f) * (ComputedStyle.FontSize) / 2.0f;
 
 		x += YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
 		y += YGNodeLayoutGetPadding(mNode, YGEdgeTop);
@@ -98,12 +100,12 @@ namespace NuakeUI
 			//glScissor(clipX, clipY, clipWidth, clipHeight);
 		}
 
-		const float lineYOffset = (mFont->LineHeight / 32.0f) * (ComputedStyle.FontSize);
+		const float lineYOffset = (ComputedStyle.FontFamily->LineHeight / 32.0f) * (ComputedStyle.FontSize);
 		// Draw each line and offset the Y of the position by the line height.
 		for(int i = 0; i < Lines.size(); i++)
 		{
 			// Draw the first line
-			Renderer::Get().DrawString(Lines[i], ComputedStyle, mFont, position);
+			Renderer::Get().DrawString(Lines[i], ComputedStyle, ComputedStyle.FontFamily, position);
 			// Update the Y position to the next line.
 			position.y += lineYOffset;
 		}
@@ -142,7 +144,7 @@ namespace NuakeUI
 
 	void Text::Calculate()
 	{
-		const float halfLineHeight = mFont->LineHeight / 32.f;
+		const float halfLineHeight = ComputedStyle.FontFamily->LineHeight / 32.f;
 		const float linesHeight = Lines.size() * ComputedStyle.FontSize;
 		YGNodeStyleSetHeight(mNode, halfLineHeight * linesHeight);
 		YGNodeStyleSetWidth(mNode, CalculateWidth());

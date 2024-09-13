@@ -4,8 +4,8 @@
 #include "Styles/StyleSheet.h"
 
 #include <memory>
+#include <imgui/imgui.h>
 
-#include <Dependencies/NuakeRenderer/NuakeRenderer/NuakeRenderer.h>
 
 namespace NuakeUI
 {
@@ -97,17 +97,13 @@ namespace NuakeUI
 
 	static void DrawInspector(std::shared_ptr<Canvas> canvas)
 	{
-		NuakeRenderer::BeginImGuiFrame();
-
-		ImGui::ShowDemoWindow();
-
 		if (ImGui::Begin("Inspector"))
 		{
 			if (ImGui::BeginTabBar("MyTabBar"))
 			{
 				if (ImGui::BeginTabItem("Tree"))
 				{
-					const float treeWidth = ImGui::GetWindowContentRegionWidth();
+					const float treeWidth = ImGui::GetContentRegionAvail().x;
 					const float availHeight = ImGui::GetContentRegionAvail().y;
 					const ImVec2 size = ImVec2(treeWidth * 0.5f, availHeight);
 					const ImVec2 size2 = ImVec2(treeWidth * 0.5f, availHeight);
@@ -218,7 +214,5 @@ namespace NuakeUI
 			}
 		}
 		ImGui::End();
-
-		NuakeRenderer::EndImGuiFrame();
 	}
 }
