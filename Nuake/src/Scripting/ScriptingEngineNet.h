@@ -102,9 +102,9 @@ namespace Nuake
 
 		bool HasUIWidget(const std::string& widgetName);
 		UIWidgetObject& GetUIWidget(const std::string& widgetName);
-		void RegisterCustomWidgetInstance(const UUID& uuid, const std::string& widgetTypeName);
-		bool HasCustomWidgetInstance(const UUID& uuid);
-		Coral::ManagedObject GetCustomWidgetInstance(const UUID& uuid);
+		void RegisterCustomWidgetInstance(const UUID& canvasUUID, const UUID& nodeUUID, const std::string& widgetTypeName);
+		bool HasCustomWidgetInstance(const UUID& canvasUUID, const UUID& uuid);
+		Coral::ManagedObject GetCustomWidgetInstance(const UUID& canvasUUID, const UUID& uuid);
 
 		std::unordered_map<std::string, NetGameScriptObject> GetBrushEntities() const { return brushEntityTypes; }
 		std::unordered_map<std::string, NetGameScriptObject> GetPointEntities() const { return pointEntityTypes; }
@@ -139,7 +139,8 @@ namespace Nuake
 		std::unordered_map<std::string, UIWidgetObject> uiWidgets;
 
 		std::unordered_map<uint32_t, Coral::ManagedObject> entityToManagedObjects;
-		std::unordered_map<UUID, Coral::ManagedObject> widgetUUIDToManagedObjects;
+		std::map<std::pair<UUID, UUID>, Coral::ManagedObject> widgetUUIDToManagedObjects;
+		
 		ScriptingEngineNet();
 		~ScriptingEngineNet();
 

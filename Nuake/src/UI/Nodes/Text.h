@@ -21,6 +21,7 @@ namespace NuakeUI
 		~Text() = default;
 
 		void SetText(const std::string& text);
+		std::string GetText() const;
 
 		void Calculate() override;
 		void UpdateInput(InputManager* manager) override {};

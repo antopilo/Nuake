@@ -65,7 +65,7 @@ namespace Nuake
 		// Instantiate UI widgets
 		for (auto& uiWidget : CanvasParser::Get().GetAllCustomWidgetInstance())
 		{
-			scriptingEngineNet.RegisterCustomWidgetInstance(uiWidget.first, uiWidget.second);
+			scriptingEngineNet.RegisterCustomWidgetInstance(uiWidget.first.first, uiWidget.first.second, uiWidget.second);
 		}
 
 		// Call OnInit on entity script instances
@@ -84,10 +84,11 @@ namespace Nuake
 		// Call OnInit on UI widgets
 		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
 		{
-			const UUID& widgetInstanceUUID = widget.first;
-			if (scriptingEngineNet.HasCustomWidgetInstance(widgetInstanceUUID))
+			const UUID& canvasInstanceUUID = widget.first.first;
+			const UUID& widgetInstanceUUID = widget.first.second;
+			if (scriptingEngineNet.HasCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID))
 			{
-				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(widgetInstanceUUID);
+				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID);
 				widgetInstance.InvokeMethod("OnInit");
 			}
 		}
@@ -155,6 +156,17 @@ namespace Nuake
 			auto entity = Entity{ e, m_Scene };
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
 			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
+		}
+
+		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			const UUID& canvasInstanceUUID = widget.first.first;
+			const UUID& widgetInstanceUUID = widget.first.second;
+			if (scriptingEngineNet.HasCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID))
+			{
+				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID);
+				widgetInstance.InvokeMethod("OnTick", ts.GetSeconds());
+			}
 		}
 
 		DispatchPhysicCallbacks();

@@ -26,6 +26,7 @@ namespace Nuake
 		void Reload();
 
 		Ref<Texture> GetOutputTexture() const;
+		Ref<NuakeUI::Canvas> GetCanvas() { return canvas; }
 
 	private:
 		Ref<NuakeUI::Canvas> canvas;

@@ -1,11 +1,14 @@
 #pragma once
 #include "Node.h"
-#include "../InputManager.h"
-#include "../Styles/StyleSheet.h"
+#include "src/Core/Maths.h"
+#include "src/Resource/UUID.h"
+#include "src/UI/InputManager.h"
+#include "src/UI/Styles/StyleSheet.h"
 
-#include <src/Core/Maths.h>
 #include "yoga/YGConfig.h"
+
 #include <memory>
+
 
 namespace NuakeUI
 {
@@ -14,8 +17,12 @@ namespace NuakeUI
 	
 	class Canvas
 	{
+		friend Node;
+
 	private:
 		YGConfigRef mYogaConfig;
+
+		std::map<UUID, Ref<Node>> nodeCache;
 
 		std::string mFilePath = "";
 		
@@ -25,10 +32,15 @@ namespace NuakeUI
 		NodePtr mRootNode;
 		
 		bool mDirty;
+
+
 	public:
 		static CanvasPtr New();
 		Canvas();
 		~Canvas();
+
+		UUID uuid = UUID(0);
+		UUID GetUUID() { return uuid; }
 
 		void Tick();
 		void Draw();
@@ -51,5 +63,7 @@ namespace NuakeUI
 
 			return true;
 		}
+
+		Ref<Node> GetNodeByUUID(const UUID& uuid);
 	};
 }

@@ -14,9 +14,9 @@ namespace NuakeUI
 
 	Text::Text(const std::string& id, const std::string& text)
 	{
+		Type = "text";
 		ID = id;
 		mNode = YGNodeNew();
-
 		mFont = Renderer::Get().mDefaultFont;
 
 		SetText(text);
@@ -38,6 +38,17 @@ namespace NuakeUI
 
 		if(std::size(Lines) > 0)
 			Calculate();
+	}
+
+	std::string Text::GetText() const
+	{
+		std::string result = "";
+		for (const auto& line : Lines)
+		{
+			result += line + "\n";
+		}
+
+		return result;
 	}
 
 	void Text::Draw(int z)

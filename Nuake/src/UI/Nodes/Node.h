@@ -84,11 +84,13 @@ namespace NuakeUI
 	class Node;
 	class CanvasParser;
 	class Renderer;
+	class Canvas;
 
 	typedef std::shared_ptr<Node> NodePtr;
 
 	class Node
 	{
+		friend NuakeUI::Canvas;
 		friend NuakeUI::CanvasParser;
 		friend NuakeUI::Renderer;
 
@@ -97,9 +99,11 @@ namespace NuakeUI
 		UUID scriptingId;
 
 	protected:
+		Canvas* canvasOwner;
+
+		std::string Type = "node";
 		float ScrollDelta = 0.0f;
 		std::string ID = "";
-		std::string Type = "node";
 		Node* Parent = nullptr;
 		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
 
@@ -136,13 +140,7 @@ namespace NuakeUI
 
 		void OnMouseHover(InputManager* inputManager) {};
 		void OnMouseExit(InputManager* inputManager) {};
-		void OnClick(InputManager* inputManager) 
-		{
-			if (ScriptingEngineNet::Get().HasCustomWidgetInstance(scriptingId))
-			{
-				ScriptingEngineNet::Get().GetCustomWidgetInstance(scriptingId).InvokeMethod("OnClick");
-			}
-		};
+		void OnClick(InputManager* inputManager);
 		void OnTick(InputManager* manager) {};
 		void OnClickReleased(InputManager* inputManager) {};
 		void OnScroll(InputManager* inputManager) {};
@@ -150,6 +148,11 @@ namespace NuakeUI
 		void SetScriptingID(const UUID& uuid)
 		{
 			scriptingId = uuid;
+		}
+
+		UUID GetScriptingID() const
+		{
+			return scriptingId;
 		}
 
 		bool HasFocus() const;

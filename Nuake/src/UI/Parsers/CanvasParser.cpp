@@ -250,12 +250,12 @@ bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 
 	// Let's parse the file
 	auto firstNode = doc.FirstChildElement();
-	IterateOverElement(firstNode, node);
+	IterateOverElement(firstNode, node, nodeTypeName);
 
 	return true;
 }
 
-void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
+void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, const std::string& customNodeName)
 {
 	tinyxml2::XMLElement* current = e;
 	while (current)
@@ -272,17 +272,18 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
 		// Let's keep fragments for now as they remove 
 		// the need to create a C# class for simple templating.
 		ScanFragment(current, node);
-		bool hasScript = ScanCustomWidgets(current, node);
+		ScanCustomWidgets(current, node);
 		
 		// Let's add custom widgets to the DOM.
 		NodePtr newNode = CreateNodeFromXML(current, id);
 		if (newNode)
 		{
-			if (hasScript)
+			if (!customNodeName.empty())
 			{
+				// Allow to link between C# script and node using a UUID
 				UUID scriptingId = UUID();
-				node->SetScriptingID(scriptingId);
-				customWidgetIDs.push_back(std::make_pair(scriptingId, current->Value()));
+				newNode->SetScriptingID(scriptingId);
+				customWidgetIDs.push_back(std::make_pair(std::make_pair(node->canvasOwner->uuid, scriptingId), customNodeName));
 			}
 
 			AddClassesToNode(current, newNode);
@@ -301,7 +302,7 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
 	}
 }
 
-Ref<Canvas> CanvasParser::Parse(const std::string& path)
+Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 {
 	customWidgetIDs.clear();
 
@@ -327,7 +328,6 @@ Ref<Canvas> CanvasParser::Parse(const std::string& path)
 		return nullptr;
 	}
 
-	CanvasPtr canvas = Canvas::New();
 	NodePtr root = Node::New("root");
 
 	auto firstNode = doc.FirstChildElement();
@@ -348,9 +348,8 @@ Ref<Canvas> CanvasParser::Parse(const std::string& path)
 		}
 	}
 
-	IterateOverElement(firstNode, root);
-
 	canvas->SetRoot(root);
+	IterateOverElement(firstNode, root);
 
 	return canvas;
 }

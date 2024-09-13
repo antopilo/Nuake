@@ -92,41 +92,52 @@ namespace NuakeUI
 		for (auto& rule : mStyleSheet->Rules)
 		{
 			bool respectSelector = true;
-
 			for (StyleSelector& selector : rule.Selector)
 			{
 				bool foundSelector = false;
-				if (selector.Type == StyleSelectorType::Class)
+				switch (selector.Type)
 				{
-					for (auto& c : node->Classes)
+					case StyleSelectorType::Class:
 					{
-						if (c == selector.Value)
-							foundSelector = true;
+						for (auto& c : node->Classes)
+						{
+							if (c == selector.Value)
+								foundSelector = true;
+						}
+						break;
 					}
-				}
-				else if (selector.Type == StyleSelectorType::Pseudo)
-				{
-					if (selector.Value == "hover" && node->State == NodeState::Hover)
-						foundSelector = true;
-					if (selector.Value == "active" && node->State == NodeState::Pressed)
-						foundSelector = true;
-				}
-				else if (selector.Type == StyleSelectorType::Id)
-				{
-					if (node->GetID() == selector.Value)
-						foundSelector = true;
-				}
-				else if (selector.Type == StyleSelectorType::Tag)
-				{
-					if (selector.Value == node->GetType())
+					case StyleSelectorType::Pseudo:
 					{
-						foundSelector = true;
-
+						const bool isHover = selector.Value == "hover" && node->State == NodeState::Hover;
+						const bool isActive = selector.Value == "active" && node->State == NodeState::Clicked;
+						if (isHover || isActive)
+						{
+							foundSelector = true;
+						}
+						break;
+					}
+					case StyleSelectorType::Id:
+					{
+						if (selector.Value == node->GetID())
+						{
+							foundSelector = true;
+						}
+						break;
+					}
+					case StyleSelectorType::Tag:
+					{
+						if (selector.Value == node->GetType())
+						{
+							foundSelector = true;
+						}
+						break;
 					}
 				}
 
 				if (!foundSelector)
+				{
 					respectSelector = false;
+				}
 			}
 
 			if (respectSelector)
@@ -149,6 +160,7 @@ namespace NuakeUI
 	void Canvas::SetRoot(NodePtr root)
 	{
 		mRootNode = root;
+		root->canvasOwner = this;
 	}
 
 	void Canvas::SetInputManager(InputManager* inputManager)
@@ -165,5 +177,15 @@ namespace NuakeUI
 	{
 		mDirty = true;
 		mStyleSheet = styleSheet;
+	}
+
+	Ref<Node> Canvas::GetNodeByUUID(const UUID& uuid)
+	{
+		if (!nodeCache.contains(uuid))
+		{
+			return nullptr;
+		}
+
+		return nodeCache[uuid];
 	}
 }

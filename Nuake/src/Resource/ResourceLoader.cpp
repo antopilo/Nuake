@@ -98,7 +98,6 @@ Ref<Model> ResourceLoader::LoadModel(const std::string& path)
 Ref<UIResource> ResourceLoader::LoadUI(const std::string& path)
 {
 	auto uiResource = CreateRef<UIResource>(path);
-	uiResource->ID = UUID();
 	return uiResource;
 }
 

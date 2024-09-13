@@ -242,7 +242,7 @@ namespace Nuake.Net
         public bool Playing { get; set; }
         public int CurrentAnimation { get; set; }
 
-        public void Play(String name)
+        public void Play(string name)
         {
             unsafe { PlayIcall(EntityID, name); }
         }

@@ -4,9 +4,11 @@
 
 #include "NodeState.h"
 #include "../StringHelper.h"
+#include "src/UI/Nodes/Canvas.h"
 
 #include <nanosvg.h>
 #include <nanosvgrast.h>
+
 
 namespace NuakeUI
 {
@@ -15,7 +17,10 @@ namespace NuakeUI
 		return std::make_shared<Node>(id, value);
 	}
 
-	Node::Node(const std::string& id, const std::string& value) : ID(id)
+	Node::Node(const std::string& id, const std::string& value) : 
+		ID(id), 
+		Type("div"),
+		canvasOwner(nullptr)
 	{
 		InitializeNode();
 
@@ -300,6 +305,14 @@ namespace NuakeUI
 		}
 	}
 
+	void Node::OnClick(InputManager * inputManager)
+	{
+		if (ScriptingEngineNet::Get().HasCustomWidgetInstance(canvasOwner->GetUUID(), scriptingId))
+		{
+			ScriptingEngineNet::Get().GetCustomWidgetInstance(canvasOwner->GetUUID(), scriptingId).InvokeMethod("OnClick");
+		}
+	}
+
 	bool Node::IsMouseHover(float x, float y)
 	{
 		YGNodeRef ygNode = GetYogaNode();
@@ -335,8 +348,17 @@ namespace NuakeUI
 		if (!mHasBeenInitialized)
 			InitializeNode();
 
+		if (!canvasOwner)
+		{
+			assert(false && "cannot add a node if it is not part of canvas");
+		}
+
 		child->Parent = this;
+		child->canvasOwner = canvasOwner;
 		Childrens.push_back(child);
+
+		canvasOwner->nodeCache[child->scriptingId] = child;
+
 		uint32_t index = (uint32_t)Childrens.size() - 1;
 		YGNodeInsertChild(this->mNode, child->GetYogaNode(), index);
 	}

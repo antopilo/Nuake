@@ -10,6 +10,7 @@
 #include "NetModules/EngineNetAPI.h"
 #include "NetModules/InputNetAPI.h"
 #include "NetModules/SceneNetAPI.h"
+#include "NetModules/UINetAPI.h"
 
 #include <src/Scene/Components/BSPBrushComponent.h>
 
@@ -53,7 +54,8 @@ namespace Nuake
 		{
 			CreateRef<EngineNetAPI>(),
 			CreateRef<InputNetAPI>(),
-			CreateRef<SceneNetAPI>()
+			CreateRef<SceneNetAPI>(),
+			CreateRef<UINetAPI>()
 		};
 
 		for (auto& m : modules)
@@ -289,7 +291,7 @@ namespace Nuake
 		return uiWidgets[widgetName];
 	}
 
-	void ScriptingEngineNet::RegisterCustomWidgetInstance(const UUID& uuid, const std::string& widgetTypeName)
+	void ScriptingEngineNet::RegisterCustomWidgetInstance(const UUID& canvasUUID, const UUID& nodeUUID, const std::string& widgetTypeName)
 	{
 		if (uiWidgets.find(widgetTypeName) == uiWidgets.end())
 		{
@@ -301,24 +303,25 @@ namespace Nuake
 		}
 
 		auto classInstance = uiWidgets[widgetTypeName].coralType->CreateInstance();
-		classInstance.SetPropertyValue("ID", uuid);
-		widgetUUIDToManagedObjects[uuid] = classInstance;
+		classInstance.SetFieldValue("CanvasUUID", Coral::String::New(std::to_string(canvasUUID)));
+		classInstance.SetFieldValue("UUID", Coral::String::New(std::to_string(nodeUUID)));
+		widgetUUIDToManagedObjects[std::make_pair(canvasUUID, nodeUUID)] = classInstance;
 	}
 
-	bool ScriptingEngineNet::HasCustomWidgetInstance(const UUID& uuid)
+	bool ScriptingEngineNet::HasCustomWidgetInstance(const UUID& canvasUUID, const UUID& uuid)
 	{
-		return widgetUUIDToManagedObjects.contains(uuid);
+		return widgetUUIDToManagedObjects.contains(std::make_pair(canvasUUID, uuid));
 	}
 
-	Coral::ManagedObject ScriptingEngineNet::GetCustomWidgetInstance(const UUID& uuid)
+	Coral::ManagedObject ScriptingEngineNet::GetCustomWidgetInstance(const UUID& canvasUUID, const UUID& uuid)
 	{
-		if (!HasCustomWidgetInstance(uuid))
+		if (!HasCustomWidgetInstance(canvasUUID, uuid))
 		{
 			Logger::Log("Failed to get custom widget .Net script instance, doesn't exist", ".net", CRITICAL);
 			return Coral::ManagedObject();
 		}
 
-		return widgetUUIDToManagedObjects[uuid];
+		return widgetUUIDToManagedObjects[std::make_pair(canvasUUID, uuid)];
 	}
 
 	std::vector<CompilationError> ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
