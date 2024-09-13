@@ -11,7 +11,6 @@
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/QuakeMap.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
-#include <src/Scene/Components/TriggerZone.h>
 #include <src/Scene/Components/CylinderColliderComponent.h>
 
 namespace Nuake
