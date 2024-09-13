@@ -785,7 +785,7 @@ namespace Nuake
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32327.299
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ")" + cleanProjectName + R"(", ")" + cleanProjectName + R"(.csproj", ")" + guid + R"(")
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = ")" + cleanProjectName + R"(", ")" + cleanProjectName + R"(.csproj", ")" + guid + R"("
   EndProject
 Global
   GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -793,10 +793,10 @@ Global
     Release|Any CPU = Release|Any CPU
   EndGlobalSection
   GlobalSection(ProjectConfigurationPlatforms) = postSolution
-    {)" + guid + R"(.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-    {)" + guid + R"(.Debug|Any CPU.Build.0 = Debug|Any CPU
-    {)" + guid + R"(.Release|Any CPU.ActiveCfg = Release|Any CPU
-    {)" + guid + R"(.Release|Any CPU.Build.0 = Release|Any CPU
+    {)" + guid + R"(}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+    {)" + guid + R"(}.Debug|Any CPU.Build.0 = Debug|Any CPU
+    {)" + guid + R"(}.Release|Any CPU.ActiveCfg = Release|Any CPU
+    {)" + guid + R"(}.Release|Any CPU.Build.0 = Release|Any CPU
   EndGlobalSection
   GlobalSection(SolutionProperties) = preSolution
     HideSolutionNode = FALSE
