@@ -139,7 +139,7 @@ namespace Nuake
 	/// </summary>
 	/// <param name="scene">Scene to render</param>
 	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
-	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer)
+	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer, bool renderUI)
 	{
 		ZoneScoped;
 
@@ -179,8 +179,10 @@ namespace Nuake
 		);
 
 		// World Space UI
-
-		DebugRendererPass(scene);
+		if (renderUI)
+		{
+			DebugRendererPass(scene);
+		}
 
 		Ref<Texture> finalOutput = mShadingBuffer->GetTexture();
 		if (scene.GetEnvironment()->BloomEnabled)
@@ -291,7 +293,7 @@ namespace Nuake
 		}
 		mToneMapBuffer->Unbind();
 
-		if (sceneEnv->SSREnabled)
+		if (sceneEnv->SSREnabled && renderUI)
 		{
 			sceneEnv->mSSR->Resize(framebufferResolution);
 			sceneEnv->mSSR->Draw(mGBuffer.get(), framebuffer.GetTexture(), mView, mProjection, scene.GetCurrentCamera());
@@ -449,7 +451,7 @@ namespace Nuake
 				continue;
 			}
 
-			if (!uiComponent.IsWorldSpace)
+			if (!uiComponent.IsWorldSpace && renderUI)
 			{
 				// Fetch resource from resource manager using UUID
 				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);

@@ -2695,7 +2695,7 @@ namespace Nuake {
 
                 auto sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
                 sceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
-                sceneRenderer->RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get());
+                sceneRenderer->RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get(), false);
 
                 virtualCamera->Clear();
                 ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 640, 360 }, { 0, 1 }, {1, 0});
