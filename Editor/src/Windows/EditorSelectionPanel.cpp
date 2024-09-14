@@ -597,6 +597,8 @@ void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta
 void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 {
 	entt::meta_type componentMeta = component.type();
+
+	// Draw component bound data
 	for (auto [fst, dataType] : componentMeta.data())
 	{
 		const ComponentFieldTrait fieldTraits = dataType.traits<ComponentFieldTrait>();
@@ -621,6 +623,33 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 		}
 
 		ImGui::TableNextRow();
+	}
+
+	// Draw any actions bound to the component
+	for (auto [fst, funcMeta] : componentMeta.func())
+	{
+		ImGui::TableSetColumnIndex(0);
+		
+		const ComponentFuncTrait funcTraits = funcMeta.traits<ComponentFuncTrait>();
+		if ((funcTraits & ComponentFuncTrait::Action) == ComponentFuncTrait::Action)
+		{
+			ImGui::TableNextColumn();
+			
+			std::string funcDisplayName = "";
+			auto prop = funcMeta.prop(HashedName::DisplayName).value();
+			if (prop)
+			{
+				funcDisplayName = std::string(*prop.try_cast<const char*>());
+			}
+			
+			std::string buttonName = funcDisplayName;
+			if (UI::SecondaryButton(buttonName.c_str()))
+			{
+				entt::meta_any result = funcMeta.invoke(component);
+			}
+
+			ImGui::TableNextRow();
+		}
 	}
 }
 

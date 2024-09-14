@@ -15,6 +15,7 @@ namespace Nuake
 
         bool Exist();
         std::string GetRelativePath();
+        std::string GetAbsolutePath();
         
         Ref<File> file = nullptr;
     };

@@ -22,6 +22,7 @@ namespace Nuake
     {
         NK_HASHED_STATIC_STR(GetComponentName)
         NK_HASHED_STATIC_STR(AddToEntity)
+        NK_HASHED_STATIC_STR(ActionName)
     };
 
     struct HashedFieldPropName
@@ -45,6 +46,13 @@ namespace Nuake
         InspectorExposed = 1 << 0,
     };
 
+    enum class ComponentFuncTrait : uint16_t
+    {
+        None = 0,
+        // Exposes the component to be added via the inspector
+        Action = 1 << 0,
+    };
+
     enum class ComponentFieldTrait : uint16_t
     {
         None = 0,
@@ -61,6 +69,7 @@ namespace Nuake
     }
 
     NK_ENUM_BITWISE_IMPL(ComponentTypeTrait);
+    NK_ENUM_BITWISE_IMPL(ComponentFuncTrait);
     NK_ENUM_BITWISE_IMPL(ComponentFieldTrait);
 }
 
@@ -145,4 +154,13 @@ public:                                                                         
     { \
         static_assert((std::is_enum_v<Enums> && ...), "All arguments must be of enum class type"); \
         return ComponentFactory.traits((enums | ...)); \
+    } \
+    \
+    template<auto Func> \
+    static void BindAction(const char* funcName, const char* actionName) \
+    { \
+        ComponentFactory \
+            .func<Func>(entt::hashed_string(funcName)) \
+            .prop(HashedName::DisplayName, actionName); \
+        SetFlags(ComponentFuncTrait::Action); \
     }

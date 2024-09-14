@@ -16,3 +16,13 @@ std::string Nuake::ResourceFile::GetRelativePath()
 
     return "";
 }
+
+std::string Nuake::ResourceFile::GetAbsolutePath()
+{
+    if (Exist())
+    {
+        return file->GetAbsolutePath();
+    }
+
+    return "";
+}
