@@ -60,25 +60,8 @@ namespace Nuake
         return static_cast<std::underlying_type_t<Enum>>(e);
     }
 
-    inline ComponentTypeTrait operator|(ComponentTypeTrait lhs, ComponentTypeTrait rhs)
-    {
-        return static_cast<ComponentTypeTrait>(ToUnderlying(lhs) | ToUnderlying(rhs));
-    }
-
-    inline ComponentTypeTrait operator&(ComponentTypeTrait lhs, ComponentTypeTrait rhs)
-    {
-        return static_cast<ComponentTypeTrait>(ToUnderlying(lhs) & ToUnderlying(rhs));
-    }
-
-    inline ComponentFieldTrait operator|(ComponentFieldTrait lhs, ComponentFieldTrait rhs)
-    {
-        return static_cast<ComponentFieldTrait>(ToUnderlying(lhs) | ToUnderlying(rhs));
-    }
-
-    inline ComponentFieldTrait operator&(ComponentFieldTrait lhs, ComponentFieldTrait rhs)
-    {
-        return static_cast<ComponentFieldTrait>(ToUnderlying(lhs) & ToUnderlying(rhs));
-    }
+    NK_ENUM_BITWISE_IMPL(ComponentTypeTrait);
+    NK_ENUM_BITWISE_IMPL(ComponentFieldTrait);
 }
 
 #define NUAKECOMPONENT(klass, componentName)                                                                                                                                             \
