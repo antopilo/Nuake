@@ -12,6 +12,9 @@ namespace Nuake
     {
         ResourceFile() {}
         ResourceFile(const Ref<File>& inFile) : file(inFile) {}
+
+        bool Exist();
+        std::string GetRelativePath();
         
         Ref<File> file = nullptr;
     };
