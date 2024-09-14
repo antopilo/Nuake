@@ -10,12 +10,18 @@ namespace Nuake
     
     struct ResourceFile
     {
-        ResourceFile() {}
+        ResourceFile() = default;
         ResourceFile(const Ref<File>& inFile) : file(inFile) {}
 
         bool Exist();
         std::string GetRelativePath();
         
         Ref<File> file = nullptr;
+    };
+
+    struct DynamicItemList
+    {
+        std::vector<std::string> items;
+        int index = -1;
     };
 }

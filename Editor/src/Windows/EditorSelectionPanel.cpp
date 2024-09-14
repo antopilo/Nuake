@@ -33,6 +33,7 @@ EditorSelectionPanel::EditorSelectionPanel()
 	REGISTER_TYPE_DRAWER(Vector3, EditorSelectionPanel::DrawFieldTypeVector3);
 	REGISTER_TYPE_DRAWER(std::string, EditorSelectionPanel::DrawFieldTypeString);
 	REGISTER_TYPE_DRAWER(ResourceFile, EditorSelectionPanel::DrawFieldTypeResourceFile);
+	REGISTER_TYPE_DRAWER(DynamicItemList, EditorSelectionPanel::DrawFieldTypeDynamicItemList);
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -779,6 +780,60 @@ void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, ent
 		else
 		{
 			ImGui::Text("ERR");
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeDynamicItemList(entt::meta_data& field, entt::meta_any& component)
+{
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		auto fieldValPtr = fieldVal.try_cast<DynamicItemList>();
+		if (fieldValPtr == nullptr)
+		{
+			ImGui::Text("ERR");
+		}
+
+		const auto& items = fieldValPtr->items;
+		const int index = fieldValPtr->index;
+
+		// Check first to see if we are within the bounds
+		std::string selectedStr = "";
+		if (index >= 0 || index < items.size())
+		{
+			selectedStr = items[index];
+		}
+			
+		std::string controlName = std::string("##") + displayName;
+		if (ImGui::BeginCombo(controlName.c_str(), selectedStr.c_str()))
+		{
+			for (int i = 0; i < items.size(); i++)
+			{
+				bool isSelected = (index == i);
+				std::string name = items[i];
+
+				if (name.empty())
+				{
+					name = "Empty";
+				}
+
+				if (ImGui::Selectable(name.c_str(), isSelected))
+				{
+					field.set(component, i);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
 		}
 	}
 }
