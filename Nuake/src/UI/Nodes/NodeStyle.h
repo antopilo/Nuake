@@ -45,7 +45,7 @@ namespace NuakeUI
 		float AspectRatio;
 		FlexDirectionType FlexDirection;
 		FlexWrapType FlexWrap;
-		float FlexBasis;
+		Length FlexBasis;
 		float FlexGrow;
 		float FlexShrink;
 		JustifyContentType JustifyContent;

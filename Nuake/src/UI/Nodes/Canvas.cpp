@@ -18,6 +18,8 @@ namespace NuakeUI
 	Canvas::Canvas() : mInputManager(nullptr), mDirty(false)
 	{
 		mYogaConfig = YGConfigNew();
+		YGConfigSetUseWebDefaults(mYogaConfig, true);
+		YGConfigSetPointScaleFactor(mYogaConfig, 1.0f);
 	}
 
 	Canvas::~Canvas()
@@ -70,8 +72,16 @@ namespace NuakeUI
 
 		mRootNode->Calculate();
 
+		YGNodeStyleSetMaxWidth(root, size.x);
+		// This enfores that the root max size is the viewport.
+		mRootNode->ComputedStyle.MaxWidth = { size.x, LengthType::Pixel };
+		mRootNode->ComputedStyle.MaxHeight = { size.y, LengthType::Pixel };
+
 		if (root)
+		{
+			YGNodeSetAlwaysFormsContainingBlock(root, true /*alwaysFormsContainingBlock*/);
 			YGNodeCalculateLayout(root, size.x, size.y, YGDirectionLTR);
+		}
 	}
 
 	void Canvas::ComputeStyle(NodePtr node)

@@ -423,9 +423,7 @@ namespace NuakeUI
 					break;
 				EnumProp(FlexDirection)
 				EnumProp(FlexWrap)
-				case StyleProperties::FlexBasis:
-					ComputedStyle.FlexBasis = value.value.Number;
-					break;
+				LengthProp(FlexBasis)
 				case StyleProperties::FlexGrow:
 					ComputedStyle.FlexGrow = value.value.Number;
 					break;		
@@ -519,7 +517,6 @@ namespace NuakeUI
 			}
 		}
 
-
 		SetLength(Width)
 		SetLength(Height)
 		
@@ -557,6 +554,13 @@ namespace NuakeUI
 		SetLengthBorderNoAuto(Padding, Top);
 		SetLengthBorderNoAuto(Padding, Right);
 		SetLengthBorderNoAuto(Padding, Bottom);
+
+		if (ComputedStyle.FlexGrow > 0.f)
+			YGNodeStyleSetFlexGrow(mNode, ComputedStyle.FlexGrow);
+		if (ComputedStyle.FlexShrink > 0.f)
+			YGNodeStyleSetFlexShrink(mNode, ComputedStyle.FlexShrink);
+
+		SetLength(FlexBasis);
 
 		if (ComputedStyle.Position == PositionType::Relative)
 			YGNodeStyleSetPositionType(mNode, YGPositionTypeRelative);
@@ -607,6 +611,8 @@ namespace NuakeUI
 			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionColumn);
 		if (ComputedStyle.FlexDirection == FlexDirectionType::ColumnReversed)
 			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionColumnReverse);
+		
+
 
 		else if (ComputedStyle.AlignItems == AlignItemsType::Center)
 			YGNodeStyleSetAlignItems(mNode, YGAlignCenter);

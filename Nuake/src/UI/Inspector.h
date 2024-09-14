@@ -83,7 +83,6 @@ namespace NuakeUI
 		ImGui::SliderFloat("Margin Top", &mSelectedNode->ComputedStyle.MarginTop.value, 0.f, 1920.0f);
 		ImGui::SliderFloat("Margin Bottom", &mSelectedNode->ComputedStyle.MarginBottom.value, 0.0f, 1080.0f);
 
-		ImGui::SliderFloat("Flex Basis", &mSelectedNode->ComputedStyle.FlexBasis, 0.f, 1920.0f);
 		ImGui::SliderFloat("Flex Grow", &mSelectedNode->ComputedStyle.FlexGrow, 0.0f, 1080.0f);
 		ImGui::SliderFloat("Flex Shrink", &mSelectedNode->ComputedStyle.FlexShrink, 0.f, 1920.0f);
 		ImGui::SliderFloat("Font Size", &mSelectedNode->ComputedStyle.FontSize, 0.0f, 1080.0f);
