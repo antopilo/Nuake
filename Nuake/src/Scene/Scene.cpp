@@ -273,9 +273,9 @@ namespace Nuake
 			for (const auto& e : view)
 			{
 				auto& map = view.get<QuakeMapComponent>(e);
-				if (map.AutoRebuild && !map.Path.empty() && FileSystem::FileExists(map.Path))
+				if (map.AutoRebuild && map.Path.Exist())
 				{
-					if (auto file = FileSystem::GetFile(map.Path); file->Exist() && file->GetHasBeenModified())
+					if (auto file = FileSystem::GetFile(map.Path.GetRelativePath()); file->Exist() && file->GetHasBeenModified())
 					{
 						file->SetHasBeenModified(false);
 

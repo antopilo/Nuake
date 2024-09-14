@@ -67,7 +67,7 @@ namespace Nuake {
             m_Scene->DestroyEntity(e);
         }
 
-        map_parser_load((FileSystem::Root + quakeMapC.Path).c_str());
+        map_parser_load(quakeMapC.Path.GetAbsolutePath().c_str());
         geo_generator_run();
 
         DefaultMaterial = MaterialManager::Get()->GetMaterial("default");
