@@ -1,7 +1,10 @@
 #pragma once
 
 #include "Component.h"
+#include "FieldTypes.h"
 
+#include "src/FileSystem/File.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Resource/Serializable.h"
 #include "src/Resource/SkinnedModel.h"
 
@@ -10,44 +13,38 @@
 
 namespace Nuake
 {
+    class Scene;
+    
     class SkinnedModelComponent : public Component
     {
         NUAKECOMPONENT(SkinnedModelComponent, "Skinned Model")
 
+        static void InitializeComponentClass()
+        {
+            BindComponentField<&SkinnedModelComponent::ModelPath>("ModelPath", "Model Path");
+            BindComponentProperty<&SkinnedModelComponent::SetPlaying, &SkinnedModelComponent::GetIsPlaying>("Playing", "Playing");
+                SetFlags(ComponentFieldTrait::Transient);
+
+            BindComponentProperty<&SkinnedModelComponent::SetAnimationList, &SkinnedModelComponent::GetAnimationList>("Animation", "Animation");
+                SetFlags(ComponentFieldTrait::Transient);
+        }
+
         Ref<SkinnedModel> ModelResource;
-        std::string ModelPath;
+        ResourceFile ModelPath;
+        DynamicItemList animationList;
 
-        SkinnedModelComponent();
+        void LoadModel(entt::entity e, Scene* scene);
 
-        void LoadModel();
+        void SetPlaying(bool play);
+        bool GetIsPlaying() const;
 
-        std::string directory;
+        DynamicItemList& GetAnimationList() { return animationList; }
+        void SetAnimationList(int i);
 
-        json Serialize()
-        {
-            BEGIN_SERIALIZE();
-            SERIALIZE_VAL(ModelPath);
+        void RegenerateAnimationList();
 
-            if (ModelResource)
-            {
-                SERIALIZE_OBJECT(ModelResource);
-            }
-            END_SERIALIZE();
-        }
+        json Serialize();
 
-        bool Deserialize(const json& j)
-        {
-            ModelPath = j["ModelPath"];
-            
-            ModelResource = CreateRef<SkinnedModel>();
-
-            if (j.contains("ModelResource"))
-            {
-                auto& res = j["ModelResource"];
-                ModelResource->Deserialize(res);
-            }
-
-            return true;
-        }
+        bool Deserialize(const json& j);
     };
 }
