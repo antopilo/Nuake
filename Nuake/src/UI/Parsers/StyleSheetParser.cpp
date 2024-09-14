@@ -1,6 +1,7 @@
 #include "StyleSheetParser.h"
 
 #include "src/FileSystem/FileSystem.h"
+#include <src/UI/Nodes/Canvas.h>
 
 #include <cassert>
 #include <iostream>
@@ -9,10 +10,11 @@
 
 using namespace NuakeUI;
 
-std::shared_ptr<StyleSheet> StyleSheetParser::Parse(const std::string& path)
+std::shared_ptr<StyleSheet> StyleSheetParser::Parse(Ref<NuakeUI::Canvas> canvas, const std::string& path)
 {
 	assert(FileSystem::FileExists(path));
 
+	currentCanvas = canvas;
 	_parsingPath = path;
 
 	std::string fileContent = FileSystem::ReadFile(path);
@@ -31,6 +33,7 @@ std::shared_ptr<StyleSheet> StyleSheetParser::Parse(const std::string& path)
 			std::cout << "ERROR at line " + std::to_string(error->first_line) +
 				" : " + std::to_string(error->first_column) << std::endl;
 		}
+
 		return styleSheet;
 	}
 	else
@@ -95,6 +98,9 @@ void StyleSheetParser::ParseImportRule(KatanaImportRule* rule, StyleSheetPtr sty
 	std::string fileContent = FileSystem::ReadFile(path);
 	auto data = katana_parse(fileContent.c_str(), fileContent.length(), KatanaParserModeStylesheet);
 
+	// Add to source files anyway since the user might fix his errors, we want to reload.
+	currentCanvas->AddSourceFile(FileSystem::GetFile(path));
+
 	if (data->errors.length > 0)
 	{
 		KatanaArray errors = data->errors;
@@ -106,7 +112,7 @@ void StyleSheetParser::ParseImportRule(KatanaImportRule* rule, StyleSheetPtr sty
 			std::cout << "ERROR at line " + std::to_string(error->first_line) +
 				" : " + std::to_string(error->first_column) << std::endl;
 		}
-
+		
 		return;
 	}
 

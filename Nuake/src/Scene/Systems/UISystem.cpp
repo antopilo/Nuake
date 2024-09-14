@@ -50,6 +50,11 @@ namespace Nuake
 					bool sourceHasChanged = false;
 					for (auto& fileAssociated : ui->GetCanvas()->GetSourceFiles())
 					{
+						if (!fileAssociated)
+						{
+							continue;
+						}
+
 						// Re-fetching the file object because the Scan might have invalided the pointer.
 						if (FileSystem::GetFile(fileAssociated->GetRelativePath())->GetHasBeenModified())
 						{

@@ -359,7 +359,7 @@ Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 		std::string relativePath = styleSheet->Value();
 		if (FileSystem::FileExists(relativePath))
 		{
-			auto styleSheet = StyleSheetParser::Get().Parse(relativePath);
+			auto styleSheet = StyleSheetParser::Get().Parse(canvas, relativePath);
 			currentParsingCanvas->AddSourceFile(FileSystem::GetFile(relativePath));
 			canvas->SetStyleSheet(styleSheet);
 		}

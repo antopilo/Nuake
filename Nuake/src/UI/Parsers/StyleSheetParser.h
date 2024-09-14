@@ -6,6 +6,8 @@
 
 #include "../Vendors/katana-parser/katana.h"
 
+#include "src/UI/Nodes/Canvas.h"
+
 namespace NuakeUI
 {
 	class StyleSheetParser
@@ -20,9 +22,10 @@ namespace NuakeUI
 		StyleSheetParser() = default;
 		~StyleSheetParser() = default;
 
-		std::shared_ptr<StyleSheet> Parse(const std::string& path);
+		std::shared_ptr<StyleSheet> Parse(Ref<NuakeUI::Canvas> canvas, const std::string& path);
 
 	private:
+		Ref<Canvas> currentCanvas;
 		std::string _parsingPath;
 		std::vector<std::string> _visitedFiles;
 
