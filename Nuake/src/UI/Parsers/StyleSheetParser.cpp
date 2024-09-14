@@ -181,35 +181,64 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 		while (selector)
 		{
 			auto match = selector->match; // tag, id or class
+			StyleSelector currentStyleSelector = {};
 			switch (match)
 			{
 				case KatanaSelectorMatchPseudoClass:
 				{
 					std::string matchPseudo = selector->data->value;
-					styleSelector.push_back({ StyleSelectorType::Pseudo, matchPseudo });
+					KatanaPseudoType pseudoType = selector->pseudo;
+					KatanaSelectorRelation relation = selector->relation;
+					currentStyleSelector.Type = StyleSelectorType::Pseudo;
+					currentStyleSelector.Value = matchPseudo;
 				}
 				break;
 				case KatanaSelectorMatchTag:
 				{
 					std::string matchTag = selector->tag->local;
-					styleSelector.push_back({ StyleSelectorType::Tag, matchTag });
+					currentStyleSelector.Type = StyleSelectorType::Tag;
+					currentStyleSelector.Value = matchTag;
 				}
 				break;
 				case KatanaSelectorMatchId:
 				{
 					std::string matchId = selector->data->value;
-					styleSelector.push_back({ StyleSelectorType::Id, matchId });
+					currentStyleSelector.Type = StyleSelectorType::Id;
+					currentStyleSelector.Value = matchId;
 				}
 				break;
 				case KatanaSelectorMatchClass:
 				{
 					std::string matchClass = selector->data->value;
-					styleSelector.push_back({ StyleSelectorType::Class, matchClass });
+					currentStyleSelector.Type = StyleSelectorType::Class;
+					currentStyleSelector.Value = matchClass;
 				}
 				break;
 			}
 
+			KatanaSelectorRelation relation = selector->relation;
+			switch (relation)
+			{
+			case KatanaSelectorRelationDescendant:
+				currentStyleSelector.SelectorRelation = Relation::Descendant;
+				break;
+
+			case KatanaSelectorRelationChild:
+				currentStyleSelector.SelectorRelation = Relation::Child;
+				break;
+			
+			case KatanaSelectorRelationSubSelector:
+				currentStyleSelector.SelectorRelation = Relation::SubSelection;
+				break;
+
+			default:
+				currentStyleSelector.SelectorRelation = Relation::None;
+				break;
+			}
+
 			selector = selector->tagHistory;
+
+			styleSelector.push_back(currentStyleSelector);
 		}
 
 		// Added the new rule with selectors.
@@ -234,7 +263,7 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 
 				switch (value->unit)
 				{
-				case KatanaValueUnit::KATANA_VALUE_STRING:
+					case KatanaValueUnit::KATANA_VALUE_STRING:
 					{
 						std::string stringValue = value->string;
 						if (propType == StyleProperties::BackgroundImage || propType == StyleProperties::Font)
@@ -260,6 +289,43 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 						propValue.type = PropValueType::Color;
 					}
 					break;
+					case KatanaValueUnit::KATANA_VALUE_RGBCOLOR:
+					{
+						int r, g, b, a = 255;
+						Logger::Log("RGB COLOR DETECTED" + std::string(value->string));
+						propValue.value.Color = Color(r, g, b, a);
+						propValue.type = PropValueType::Color;
+					}
+					break;
+					case KatanaValueUnit::KATANA_VALUE_PARSER_FUNCTION:
+					{
+						const std::string& functionName = std::string(value->function->name);
+						if (functionName == "rgb(" || functionName == "rgba(")
+						{
+							int r = 0, g = 0, b = 0, a = 255;
+							int colorChannel = 0; // commas are considered as args. 
+							for (int i = 0; i < value->function->args->length; i++)
+							{
+								KatanaValue* arg = reinterpret_cast<KatanaValue*>(value->function->args->data[i]);
+								if (arg->unit == KatanaValueUnit::KATANA_VALUE_NUMBER)  // Check if it's a number
+								{
+									int colorComponent = static_cast<int>(arg->fValue);  // Retrieve float value and cast to int
+
+									// Assign to r, g, b based on index
+									if (colorChannel == 0)		 r = colorComponent;
+									else if (colorChannel == 1) g = colorComponent;
+									else if (colorChannel == 2) b = colorComponent;
+									else if (colorChannel == 4) a = colorComponent;
+
+									colorChannel++;
+								}
+							}
+
+							propValue.value.Color = Color(r, g, b, a);
+							propValue.type = PropValueType::Color;
+						}
+					}
+						break;
 					case KatanaValueUnit::KATANA_VALUE_UNKNOWN:
 					{
 						std::string valueStr = value->string;

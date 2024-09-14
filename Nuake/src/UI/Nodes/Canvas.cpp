@@ -104,46 +104,48 @@ namespace NuakeUI
 		for (auto& rule : mStyleSheet->Rules)
 		{
 			bool respectSelector = true;
+			// TODO: Apply descendant selectors to child nodes.
 			for (StyleSelector& selector : rule.Selector)
 			{
 				bool foundSelector = false;
+				
 				switch (selector.Type)
 				{
-					case StyleSelectorType::Class:
+				case StyleSelectorType::Class:
+				{
+					for (auto& c : node->Classes)
 					{
-						for (auto& c : node->Classes)
-						{
-							if (c == selector.Value)
-								foundSelector = true;
-						}
-						break;
-					}
-					case StyleSelectorType::Pseudo:
-					{
-						const bool isHover = selector.Value == "hover" && node->State == NodeState::Hover;
-						const bool isActive = selector.Value == "active" && node->State == NodeState::Clicked;
-						if (isHover || isActive)
-						{
+						if (c == selector.Value)
 							foundSelector = true;
-						}
-						break;
 					}
-					case StyleSelectorType::Id:
+					break;
+				}
+				case StyleSelectorType::Pseudo:
+				{
+					const bool isHover = selector.Value == "hover" && node->State == NodeState::Hover;
+					const bool isActive = selector.Value == "active" && node->State == NodeState::Clicked;
+					if (isHover || isActive)
 					{
-						if (selector.Value == node->GetID())
-						{
-							foundSelector = true;
-						}
-						break;
+						foundSelector = true;
 					}
-					case StyleSelectorType::Tag:
+					break;
+				}
+				case StyleSelectorType::Id:
+				{
+					if (selector.Value == node->GetID())
 					{
-						if (selector.Value == node->GetType())
-						{
-							foundSelector = true;
-						}
-						break;
+						foundSelector = true;
 					}
+					break;
+				}
+				case StyleSelectorType::Tag:
+				{
+					if (selector.Value == node->GetType())
+					{
+						foundSelector = true;
+					}
+					break;
+				}
 				}
 
 				if (!foundSelector)
@@ -153,7 +155,11 @@ namespace NuakeUI
 			}
 
 			if (respectSelector)
-				node->ApplyStyleProperties(rule.Properties);
+			{
+
+			}
+
+			node->ApplyStyleProperties(rule.Properties);
 		}
 
 		for (auto& c : node->GetChildrens())

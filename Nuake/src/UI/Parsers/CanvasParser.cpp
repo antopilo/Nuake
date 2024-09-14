@@ -365,6 +365,7 @@ Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 		}
 	}
 
+	canvas->AddSourceFile(FileSystem::GetFile(FileSystem::AbsoluteToRelative(path)));
 	canvas->SetRoot(root);
 	IterateOverElement(firstNode, root);
 

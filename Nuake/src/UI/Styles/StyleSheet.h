@@ -83,11 +83,12 @@ namespace NuakeUI
 
 	// Selector
 	enum class StyleSelectorType { Id, Class, Tag, Pseudo };
-
+	enum class Relation { None, Descendant, Child, SubSelection };
 	struct StyleSelector
 	{
 		StyleSelectorType Type;
 		std::string Value;
+		Relation SelectorRelation;
 	};
 
 	class StyleRule

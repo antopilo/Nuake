@@ -94,7 +94,6 @@ void Renderer::DrawNode(std::shared_ptr<Node> node, int z)
 	const float left = YGNodeLayoutGetLeft(yogaNode);
 	const float top = YGNodeLayoutGetTop(yogaNode) - parentScroll;
 	const float borderLeft = YGNodeLayoutGetBorder(yogaNode, YGEdgeLeft);
-
 	float parentLeft = 0.f;
 	float parentTop = 0.f;
 
@@ -158,7 +157,7 @@ void Renderer::DrawNode(std::shared_ptr<Node> node, int z)
 
 void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::shared_ptr<Font> font, Vector3 position)
 {
-	const float fontSize = nodeStyle.FontSize / 64.f;
+	const float fontSize = nodeStyle.FontSize * 2.0 / 64.f;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 	mSDFShader->Bind();
