@@ -101,14 +101,16 @@ namespace NuakeUI
 				node->RemoveClass(s->ClassName);
 			}
 		}
+
+		std::vector<StyleRule> relationStyles;
 		for (auto& rule : mStyleSheet->Rules)
 		{
 			bool respectSelector = true;
+			bool containsRelation = false;
 			// TODO: Apply descendant selectors to child nodes.
 			for (StyleSelector& selector : rule.Selector)
 			{
 				bool foundSelector = false;
-				
 				switch (selector.Type)
 				{
 				case StyleSelectorType::Class:
@@ -148,22 +150,38 @@ namespace NuakeUI
 				}
 				}
 
+				if (selector.SelectorRelation != Relation::None)
+				{
+					containsRelation = true;
+					if (selector.SelectorRelation == Relation::Descendant)
+					{
+						auto ruleSelector = StyleSelector{ selector.Type, selector.Value, Relation::None };
+
+						StyleRule newStyleRule = StyleRule({ ruleSelector });
+						newStyleRule.Properties = rule.Properties;
+						relationStyles.push_back(std::move(newStyleRule));
+					}
+				}
+
 				if (!foundSelector)
 				{
 					respectSelector = false;
 				}
 			}
 
-			if (respectSelector)
+			if (respectSelector && !containsRelation)
 			{
-
+				node->ApplyStyleProperties(rule.Properties);
 			}
-
-			node->ApplyStyleProperties(rule.Properties);
 		}
 
 		for (auto& c : node->GetChildrens())
 		{
+			if (relationStyles.size() > 0)
+			{
+				//c->ApplyStyleProperties(relationStyles.);
+			}
+
 			ComputeStyle(c);
 		}
 	}
