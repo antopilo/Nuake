@@ -16,6 +16,14 @@ namespace Nuake {
 	{
 		NUAKECOMPONENT(RigidBodyComponent, "Rigid Body")
 
+		static void InitializeComponentClass()
+		{
+			BindComponentField<&RigidBodyComponent::Mass>("Mass", "Mass");
+			BindComponentField<&RigidBodyComponent::LockX>("LockX", "Lock X");
+			BindComponentField<&RigidBodyComponent::LockY>("LockY", "Lock Y");
+			BindComponentField<&RigidBodyComponent::LockZ>("LockZ", "Lock Z");
+		}
+
 	public:
 		float Mass;
 		bool LockX = false;
@@ -39,7 +47,7 @@ namespace Nuake {
 		json Serialize()
 		{
 			BEGIN_SERIALIZE();
-			SERIALIZE_VAL_LBL("Mass", Mass);
+			SERIALIZE_VAL(Mass);
 			SERIALIZE_VAL(LockX);
 			SERIALIZE_VAL(LockY);
 			SERIALIZE_VAL(LockZ);
@@ -48,22 +56,10 @@ namespace Nuake {
 
 		bool Deserialize(const json& j)
 		{
-			Mass = j["Mass"];
-
-			if (j.contains("LockX"))
-			{
-				LockX = j["LockX"];
-			}
-
-			if (j.contains("LockY"))
-			{
-				LockY = j["LockY"];
-			}
-
-			if (j.contains("LockZ"))
-			{
-				LockZ = j["LockZ"];
-			}
+			DESERIALIZE_VAL(Mass);
+			DESERIALIZE_VAL(LockX);
+			DESERIALIZE_VAL(LockY);
+			DESERIALIZE_VAL(LockZ);
 
 			return true;
 		}
