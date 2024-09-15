@@ -368,7 +368,8 @@ project "NuakeRuntime"
         kind "WindowedApp"
         runtime "Release"
         optimize "on"
-        flags { "WinMain" }
+        entrypoint "WinMainCRTStartup"
+        flags { }
         defines
         {
             "NK_DIST",
