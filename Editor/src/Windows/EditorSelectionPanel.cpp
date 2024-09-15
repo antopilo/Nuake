@@ -159,25 +159,25 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
 
     // Draw each component properties panels.
- //    mLightPanel.Draw(entity);
- //    mScriptPanel.Draw(entity);
-	// mNetScriptPanel.Draw(entity);
+    mLightPanel.Draw(entity);
+    mScriptPanel.Draw(entity);
+	mNetScriptPanel.Draw(entity);
 	// mAudioEmitterPanel.Draw(entity);
 	// mParticleEmitterPanel.Draw(entity);
- //    mSpritePanel.Draw(entity);
- //    mMeshPanel.Draw(entity);
+    // mSpritePanel.Draw(entity);
+    mMeshPanel.Draw(entity);
 	// mSkinnedModelPanel.Draw(entity);
-	// mBonePanel.Draw(entity);
- //    mQuakeMapPanel.Draw(entity);
- //    mCameraPanel.Draw(entity);
- //    mRigidbodyPanel.Draw(entity);
- //    mBoxColliderPanel.Draw(entity);
- //    mSphereColliderPanel.Draw(entity);
-	// mCapsuleColliderPanel.Draw(entity);
-	// mCylinderColliderPanel.Draw(entity);
- //    mMeshColliderPanel.Draw(entity);
- //    mCharacterControllerPanel.Draw(entity);
-	// mNavMeshVolumePanel.Draw(entity);
+	mBonePanel.Draw(entity);
+    // mQuakeMapPanel.Draw(entity);
+    mCameraPanel.Draw(entity);
+    // mRigidbodyPanel.Draw(entity);
+    mBoxColliderPanel.Draw(entity);
+    // mSphereColliderPanel.Draw(entity);
+	mCapsuleColliderPanel.Draw(entity);
+	mCylinderColliderPanel.Draw(entity);
+    mMeshColliderPanel.Draw(entity);
+    mCharacterControllerPanel.Draw(entity);
+	mNavMeshVolumePanel.Draw(entity);
 	// mUiPanel.Draw(entity);
 
 	using namespace Nuake;
