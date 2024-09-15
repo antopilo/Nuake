@@ -130,8 +130,8 @@ namespace NuakeUI
 			// Iterate over each character and add up the advance.
 			for (char const& c : l)
 			{
-				Char letter = mFont->GetChar((int)c);
-				textWidth += (letter.Advance);
+				Char letter = ComputedStyle.FontFamily->GetChar((int)c);
+				textWidth += (letter.Advance * fontSize);
 			}
 
 			if (textWidth > maxWidth)
@@ -139,7 +139,7 @@ namespace NuakeUI
 		}
 
 		// Scale the width by the font size.
-		return maxWidth * fontSize;
+		return maxWidth;
 	}
 
 	void Text::Calculate()

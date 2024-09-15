@@ -125,6 +125,8 @@ namespace NuakeUI
 		Vector2 ComputedPosition = { 0, 0 };
 		int32_t ComputedZIndex = 0;
 		NodeStyle ComputedStyle;
+		NodeStyle TargetStyle;
+
 
 		static NodePtr New(const std::string id, const std::string& value = "");
 		Node(const std::string& id, const std::string& value = "");

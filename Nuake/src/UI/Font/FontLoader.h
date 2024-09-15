@@ -29,7 +29,7 @@ namespace NuakeUI
 		msdf_atlas::GeneratorAttributes generatorAttributes;
 		bool preprocessGeometry;
 		bool kerning;
-		int threadCount = 1;
+		int threadCount = 2;
 	};
 
 

@@ -55,6 +55,9 @@ namespace NuakeUI
 		Value value;
 		std::string string;
 
+		Value targetValue;
+		float transitionTime = 0.2f;
+
 		PropValue()
 		{
 
@@ -64,20 +67,35 @@ namespace NuakeUI
 		{
 			type = t;
 			value.Number = f;
+			targetValue.Number = f;
 		}
 
 		PropValue(int i)
 		{
 			type = PropValueType::Enum;
 			value.Enum = i;
+			targetValue.Enum = i;
 		}
 
 		PropValue(Color c)
 		{
 			type = PropValueType::Color;
 			value.Color = c;
+			targetValue.Color = c;
 		}
 
+		Value GetInterpolatedValue(float t)
+		{
+			Value resultValue = value;
+			switch (type) {
+			case PropValueType::Percent:
+			case PropValueType::Pixel:
+				resultValue.Number = glm::mix(resultValue.Number, targetValue.Number, t);
+				break;
+			}
+
+			return resultValue;
+		}
 
 	};
 
