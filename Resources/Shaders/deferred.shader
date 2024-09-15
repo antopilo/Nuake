@@ -60,10 +60,8 @@ struct DirectionalLight
 {
     vec3 Direction;
     vec3 Color;
-    int ShadowMapsIDs[4];
     float CascadeDepth[4];
     mat4 LightTransforms[4];
-    int Volumetric;
     int Shadow;
 };
 

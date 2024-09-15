@@ -115,11 +115,8 @@ namespace Nuake
 			shader->SetUniform("u_Depth", depthTexture.get(), 2);
 			shader->SetUniform("u_Normal", normalTexture.get(), 3);
 			shader->SetUniform("u_Noise", _ssaoNoiseTexture.get(), 6);
-			shader->SetUniform("u_KernelSize", 64);
 			shader->SetUniform("u_Radius", Radius);
 			shader->SetUniform("u_Bias", Bias);
-			shader->SetUniform("u_Falloff", Falloff);
-			shader->SetUniform("u_Area", Area);
 			shader->SetUniform("u_Strength", Strength);
 			shader->SetUniform("u_NoiseScale", Vector2(_size.x / 4, _size.y / 4) );
 

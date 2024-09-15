@@ -306,14 +306,12 @@ namespace Nuake
                     light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
                     const int shadowMapId = shadowmapAmount + i;
                     deferredShader->SetUniform("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
-                    deferredShader->SetUniform("u_DirectionalLight.ShadowMapsIDs[" + std::to_string(i) + "]", shadowMapId);
                     deferredShader->SetUniform("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
                     deferredShader->SetUniform("u_DirectionalLight.LightTransforms[" + std::to_string(i) + "]", light.mViewProjections[i]);
                 }
             }
 
             deferredShader->SetUniform("u_DirectionalLight.Direction", direction.x, direction.y, direction.z);
-            deferredShader->SetUniform("u_DirectionalLight.Volumetric", light.IsVolumetric);
             deferredShader->SetUniform("u_DirectionalLight.Color", light.Color.r * light.Strength, light.Color.g * light.Strength, light.Color.b * light.Strength);
 
             shadowmapAmount += CSM_AMOUNT;

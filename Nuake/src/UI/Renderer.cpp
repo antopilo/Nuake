@@ -165,14 +165,8 @@ void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::
 	mSDFShader->SetUniforms({
 		{ "u_View", mView },
 		{ "u_Atlas", 5 },
-		{ "u_Scale", 1.0f},
-		{ "u_SDF_BorderSize", 0.0f},
 		{ "u_FontColor", nodeStyle.FontColor },
 		{ "u_PxRange",   4.0f },
-		{ "u_SDF_BorderSize", {1.0, 1.0}},
-		{ "u_SubpixelThreshold", subpixelThreshold},
-		{ "u_CurveTolerance", curveTolerance},
-		{ "u_SubpixelAmount", subpixelAmount}
 	});
 		
 	mVertexArray->Bind();

@@ -47,7 +47,6 @@ namespace Nuake {
 			mShader->SetUniform("debugDraw", DebugDraw);
 			mShader->SetUniform("samplingCoefficient", SampleingCoefficient);
 			mShader->SetUniform("view", view);
-			mShader->SetUniform("invView", glm::inverse(view));
 			mShader->SetUniform("proj", projection);
 			mShader->SetUniform("invProj", glm::inverse(projection));
 

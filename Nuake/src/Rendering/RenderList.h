@@ -45,7 +45,12 @@ namespace Nuake
 		void Flush(Shader* shader, bool depthOnly = false)
 		{
 			shader->Bind();
-			const uint32_t entityIdUniformLocation = shader->FindUniformLocation("u_EntityID");
+			uint32_t entityIdUniformLocation = -1;;
+			if (!depthOnly)
+			{
+				entityIdUniformLocation = shader->FindUniformLocation("u_EntityID");
+			}
+
 			const uint32_t modelMatrixUniformLocation = shader->FindUniformLocation("u_Model");
 			for (auto& i : m_RenderList)
 			{

@@ -366,7 +366,6 @@ namespace Nuake
 			shader->SetUniform("namount", sceneEnv->DOFNAmmount);
 			shader->SetUniform("dbsize", sceneEnv->DOFDbSize);
 			shader->SetUniform("feather", sceneEnv->DOFFeather);
-			shader->SetUniform("u_Distortion", sceneEnv->BarrelDistortion);
 			shader->SetUniform("height", static_cast<float>(finalOutput->GetHeight()));
 			shader->SetUniform("width", static_cast<float>(finalOutput->GetWidth()));
 			shader->SetUniform("depthTex", mGBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 0);
