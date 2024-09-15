@@ -58,6 +58,32 @@ namespace Nuake
 			func.invoke(newComponent, m_EntityHandle, &m_Scene->m_Registry);
 		}
 
+		void RemoveComponent(entt::meta_type& enttMetaType)
+		{
+			if (!enttMetaType)
+			{
+				Logger::Log("Meta data empty/invalid", "Entity", WARNING);
+				return;
+			}
+			
+			entt::meta_any newComponent = enttMetaType.construct();
+			if (!newComponent)
+			{
+				Logger::Log("Could not create a component from the meta type", "Entity", CRITICAL);
+				return;
+			}
+			
+			auto func = enttMetaType.func(HashedFnName::RemoveFromEntity);
+			// TODO: [WiggleWizard] Needs a lot more validation
+			if (!func)
+			{
+				Logger::Log("No such function exists or is registered on component", "Entity", CRITICAL);
+				return;
+			}
+
+			func.invoke(newComponent, m_EntityHandle, &m_Scene->m_Registry);
+		}
+
 		template<typename T>
 		T& AddComponent() 
 		{

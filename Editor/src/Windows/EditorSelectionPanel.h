@@ -75,7 +75,7 @@ private:
 	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
 	void DrawNetScriptPanel(Ref<Nuake::File> file);
 
-	void DrawComponent(const Nuake::Entity& entity, entt::meta_any& component);
+	void DrawComponent(Nuake::Entity& entity, entt::meta_any& component);
 	void DrawComponentContent(entt::meta_any& component);
 
 	void DrawFieldTypeFloat(entt::meta_data& field, entt::meta_any& component);

@@ -548,7 +548,7 @@ void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
 	ImGui::PopTextWrapPos();
 }
 
-void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta_any& component)
+void EditorSelectionPanel::DrawComponent(Nuake::Entity& entity, entt::meta_any& component)
 {
 	ZoneScoped;
 
@@ -571,7 +571,8 @@ void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta
 	
 	if(removed)
 	{
-		// entity.RemoveComponent<component>();
+		auto componentType = component.type();
+		entity.RemoveComponent(componentType);
 		ImGui::PopStyleVar();
 		delete boldFont;
 	}
