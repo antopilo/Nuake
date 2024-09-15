@@ -16,6 +16,8 @@
 
 #include <entt/entt.hpp>
 
+#include "Tracy.hpp"
+
 
 #define REGISTER_TYPE_DRAWER(forType, fn) \
 	FieldTypeDrawers[entt::type_id<forType>().hash()] = std::bind(&fn, this, std::placeholders::_1, std::placeholders::_2);
@@ -122,6 +124,8 @@ void EditorSelectionPanel::DrawNone()
 
 void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 {
+	ZoneScoped;
+
 	if (!entity.IsValid())
 	{
 		return;
@@ -545,6 +549,8 @@ void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
 
 void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta_any& component)
 {
+	ZoneScoped;
+
 	const entt::meta_type componentMeta = component.type();
 	const std::string componentName = Component::GetName(componentMeta);
 
@@ -580,6 +586,8 @@ void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta
 			ImGui::TableSetupColumn("set", 0, 0.65f);
 			ImGui::TableSetupColumn("reset", 0, 0.1f);
 			
+			ImGui::TableNextRow();
+			
 			DrawComponentContent(component);
 			
 			ImGui::EndTable();
@@ -596,6 +604,8 @@ void EditorSelectionPanel::DrawComponent(const Nuake::Entity& entity, entt::meta
 
 void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 {
+	ZoneScoped;
+	
 	entt::meta_type componentMeta = component.type();
 
 	// Draw component bound data
@@ -608,7 +618,7 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 			continue;
 		}
 
-		ImGui::TableNextColumn();
+		ImGui::TableSetColumnIndex(0);
 
 		// Search for the appropriate drawer for the type
 		entt::id_type dataId = dataType.type().id();
@@ -628,12 +638,10 @@ void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
 	// Draw any actions bound to the component
 	for (auto [fst, funcMeta] : componentMeta.func())
 	{
-		ImGui::TableSetColumnIndex(0);
-		
 		const ComponentFuncTrait funcTraits = funcMeta.traits<ComponentFuncTrait>();
 		if ((funcTraits & ComponentFuncTrait::Action) == ComponentFuncTrait::Action)
 		{
-			ImGui::TableNextColumn();
+			ImGui::TableSetColumnIndex(0);
 			
 			std::string funcDisplayName = "";
 			auto prop = funcMeta.prop(HashedName::DisplayName).value();

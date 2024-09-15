@@ -15,10 +15,33 @@ namespace Nuake
 	{
 		NUAKECOMPONENT(ParticleEmitterComponent, "Particle Emitter")
 
+		static void InitializeComponentClass()
+		{
+			BindComponentField<&ParticleEmitterComponent::resFile>("Particle", "Particle");
+			BindComponentField<&ParticleEmitterComponent::Amount>("Amount", "Amount");
+				FieldFloatLimits(0.1f, 0.0f, 500.0f);
+			BindComponentField<&ParticleEmitterComponent::LifeRandomness>("LifeRandomness", "Life Randomness");
+				FieldFloatLimits(0.1f, 0.f, 9999.f);
+			BindComponentField<&ParticleEmitterComponent::Life>("Life", "Life");
+				FieldFloatLimits(0.1f, 0.0f, 100.0f);
+			BindComponentField<&ParticleEmitterComponent::Rate>("Rate", "Rate");
+				FieldFloatLimits(0.1f, 0.0f, 10.0f);
+			BindComponentField<&ParticleEmitterComponent::ScaleRandomness>("ScaleRandomness", "Scale Randomness");
+				FieldFloatLimits(0.01f, 0.0f, 0.f);
+			BindComponentField<&ParticleEmitterComponent::ParticleScale>("ParticleScale", "Particle Scale");
+			BindComponentField<&ParticleEmitterComponent::GlobalSpace>("GlobalSpace", "Global Space");
+			BindComponentField<&ParticleEmitterComponent::Gravity>("Gravity", "Gravity");
+			BindComponentField<&ParticleEmitterComponent::GravityRandom>("GravityRandom", "Gravity Random");
+				FieldFloatLimits(0.01f, 0.0f, 1.0f);
+			BindComponentField<&ParticleEmitterComponent::Radius>("Radius", "Radius");
+				FieldFloatLimits(0.01f, 0.0f, 10.0f);
+		}
+
 	public:
 		ParticleEmitterComponent() = default;
 		~ParticleEmitterComponent() = default;
 
+		ResourceFile resFile;
 		Ref<Material> ParticleMaterial = CreateRef<Material>();
 
 		float Amount;

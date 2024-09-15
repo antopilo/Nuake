@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/Core/Object/Object.h"
+#include "FieldTypes.h"
 
 namespace Nuake
 {

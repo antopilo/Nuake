@@ -18,6 +18,7 @@ namespace Nuake
         std::string GetAbsolutePath();
         
         Ref<File> file = nullptr;
+        bool dirty = true;
     };
 
     struct DynamicItemList
