@@ -316,6 +316,11 @@ namespace NuakeUI
 
 	bool Node::IsMouseHover(float x, float y)
 	{
+		if (ComputedStyle.Visibility != VisibilityType::Show)
+		{
+			return false;
+		}
+
 		YGNodeRef ygNode = GetYogaNode();
 
 		float parentScroll = 0.f;
@@ -340,7 +345,15 @@ namespace NuakeUI
 
 		left += parentLeft;
 		top += parentTop;
-		bool isHover = x > left && x < left + width && y > top && y < top + height;
+		bool isHover = x >= left && x < left + width && y >= top && y < top + height;
+
+		for (auto& c : Childrens)
+		{
+			if (c->IsMouseHover(x, y))
+			{
+				return true;
+			}
+		}
 		return isHover;
 	}
 

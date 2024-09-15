@@ -227,9 +227,9 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 				currentStyleSelector.SelectorRelation = Relation::Child;
 				break;
 			
-			case KatanaSelectorRelationSubSelector:
-				currentStyleSelector.SelectorRelation = Relation::SubSelection;
-				break;
+			//case KatanaSelectorRelationSubSelector:
+			//	currentStyleSelector.SelectorRelation = Relation::SubSelection;
+			//	break;
 
 			default:
 				currentStyleSelector.SelectorRelation = Relation::None;

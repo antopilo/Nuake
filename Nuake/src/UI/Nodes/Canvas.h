@@ -51,7 +51,7 @@ namespace NuakeUI
 		void Tick();
 		void Draw();
 		void ComputeLayout(Vector2 size);
-		void ComputeStyle(NodePtr node);
+		void ComputeStyle(NodePtr node, const std::vector<StyleRule>& inheritedRules = {});
 		
 		NodePtr GetRoot() const;
 		void SetRoot(NodePtr root);

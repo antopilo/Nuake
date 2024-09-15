@@ -36,8 +36,8 @@ namespace NuakeUI
 		if (!mRootNode)
 			return;
 		
-		mRootNode->UpdateInput(mInputManager);
 		mRootNode->Tick(mInputManager);
+		mRootNode->UpdateInput(mInputManager);
 
 		mInputManager->ScrollX = 0.f;
 		mInputManager->ScrollY = 0.f;
@@ -84,29 +84,26 @@ namespace NuakeUI
 		}
 	}
 
-	void Canvas::ComputeStyle(NodePtr node)
+	void Canvas::ComputeStyle(NodePtr node, const std::vector<StyleRule>& inheritedRules)
 	{
-		for (auto& s : node->GetDataModelOperations())
+		std::vector<StyleRule> relationStyles;
+
+		auto allRules = mStyleSheet->Rules;
+		for (auto& i : inheritedRules)
 		{
-			if (s->Type != OperationType::IfClass)
-				continue;
-
-
-			if (auto dataModel = node->GetDataModel(); s->Compare(dataModel))
-			{
-				node->AddClass(s->ClassName);
-			}
-			else
-			{
-				node->RemoveClass(s->ClassName);
-			}
+			allRules.push_back(i);
 		}
 
-		std::vector<StyleRule> relationStyles;
-		for (auto& rule : mStyleSheet->Rules)
+		if (node->Classes.size() == 1 && node->Classes[0] == "dropdown")
+		{
+ 			Logger::Log("Found dropdown");
+		}
+
+		for (auto& rule : allRules)
 		{
 			bool respectSelector = true;
 			bool containsRelation = false;
+			std::vector<StyleRule> relationalStyleInRule;
 			// TODO: Apply descendant selectors to child nodes.
 			for (StyleSelector& selector : rule.Selector)
 			{
@@ -150,22 +147,26 @@ namespace NuakeUI
 				}
 				}
 
-				if (selector.SelectorRelation != Relation::None)
+				if (respectSelector && selector.SelectorRelation != Relation::None)
 				{
-					containsRelation = true;
 					if (selector.SelectorRelation == Relation::Descendant)
 					{
+						containsRelation = true;
+						foundSelector = true;
 						auto ruleSelector = StyleSelector{ selector.Type, selector.Value, Relation::None };
-
 						StyleRule newStyleRule = StyleRule({ ruleSelector });
 						newStyleRule.Properties = rule.Properties;
-						relationStyles.push_back(std::move(newStyleRule));
+						relationalStyleInRule.push_back(std::move(newStyleRule));
 					}
 				}
-
-				if (!foundSelector)
+				else if(!foundSelector)
 				{
 					respectSelector = false;
+				}
+
+				if (respectSelector)
+				{
+					
 				}
 			}
 
@@ -173,16 +174,20 @@ namespace NuakeUI
 			{
 				node->ApplyStyleProperties(rule.Properties);
 			}
+
+			if (relationalStyleInRule.size() > 0 && respectSelector)
+			{
+				for (auto& s : relationalStyleInRule)
+				{
+					relationStyles.push_back(s);
+				}
+			}
+
 		}
 
 		for (auto& c : node->GetChildrens())
 		{
-			if (relationStyles.size() > 0)
-			{
-				//c->ApplyStyleProperties(relationStyles.);
-			}
-
-			ComputeStyle(c);
+			ComputeStyle(c, relationStyles);
 		}
 	}
 	
