@@ -3,6 +3,8 @@
 
 #include <src/Scene/Entities/ImGuiHelper.h>
 #include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include "src/AI/NavManager.h"
+#include "src/Scene/Components/QuakeMap.h"
 #include <src/Core/Maths.h>
 #include <src/AI/RecastConfig.h>
 

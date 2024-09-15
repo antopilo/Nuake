@@ -13,7 +13,6 @@
 #include "../ComponentsPanel/BoxColliderPanel.h"
 #include "../ComponentsPanel/CapsuleColliderPanel.h"
 #include "../ComponentsPanel/CylinderColliderPanel.h"
-#include "../ComponentsPanel/SphereColliderPanel.h"
 #include "../ComponentsPanel/MeshColliderPanel.h"
 #include "../ComponentsPanel/CharacterControllerPanel.h"
 #include "../ComponentsPanel/BonePanel.h"
