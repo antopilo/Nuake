@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "src/Core/String.h"
 #include "../Renderer.h"
 #include "src/FileSystem/FileSystem.h"
 
@@ -6,6 +7,8 @@
 #include "../StringHelper.h"
 #include "src/UI/Nodes/Canvas.h"
 
+#define NANOSVGRAST_IMPLEMENTATION
+#define NANOSVG_IMPLEMENTATION
 #include <nanosvg.h>
 #include <nanosvgrast.h>
 #include <src/UI/Font/FontManager.h>
@@ -477,47 +480,52 @@ namespace NuakeUI
 					ComputedStyle.ZIndex = value.value.Number;
 					break;
 				case StyleProperties::Font:
-					if (FileSystem::FileExists(value.string, true))
+				{
+					bool fileExists = FileSystem::FileExists(Nuake::String::ReplaceSlash(value.string), true);
+					if (fileExists)
 					{
 						ComputedStyle.FontFamily = FontManager::Get().GetFont(value.string);
 					}
-					break;
+				}
+				break;
 				case StyleProperties::BackgroundImage:
 					{
 						if (ComputedStyle.BackgroundImage == nullptr)
 						{
 							if (StringHelper::EndsWith(value.string, ".svg"))
 							{
-								//NSVGimage* image = NULL;
-								//NSVGrasterizer* rast = NULL;
-								//unsigned char* img = NULL;
-								//
-								//int w, h;
-								//image = nsvgParseFromFile(value.string.c_str(), "px", 96.0f);
-								//if (image == NULL) {
-								//	printf("Could not open SVG image.\n");
-								//
-								//}
-								//w = (int)image->width;
-								//h = (int)image->height;
-								//
-								//rast = nsvgCreateRasterizer();
-								//if (rast == NULL) {
-								//	printf("Could not init rasterizer.\n");
-								//}
-								//
-								//img = (unsigned char*)malloc(w * h * 4);
-								//if (img == NULL) {
-								//	printf("Could not alloc image buffer.\n");
-								//}
-								//
-								//nsvgRasterize(rast, image, 0, 0, 1, img, w, h, w * 4);
-								//
-								//auto texture = std::make_shared<Texture>(img, w * h * 4);
-								//ComputedStyle.BackgroundImage = texture;
-								//
-								//nsvgDeleteRasterizer(rast);
-								//nsvgDelete(image);
+								NSVGimage* image = NULL;
+								NSVGrasterizer* rast = NULL;
+								unsigned char* img = NULL;
+								
+								int w, h;
+								image = nsvgParseFromFile(value.string.c_str(), "px", 96.0f);
+								if (image == NULL) {
+									printf("Could not open SVG image.\n");
+								
+								}
+								w = (int)image->width;
+								h = (int)image->height;
+								
+								rast = nsvgCreateRasterizer();
+								if (rast == NULL) {
+									printf("Could not init rasterizer.\n");
+								}
+								
+								img = (unsigned char*)malloc(w * h * 4);
+								if (img == NULL) {
+									printf("Could not alloc image buffer.\n");
+								}
+								
+								nsvgRasterize(rast, image, 0, 0, 1, img, w, h, w * 4);
+								
+								TextureFlags flags;
+								flags.flipVertical = true;
+								auto texture = std::make_shared<Texture>(flags, Vector2{ w, h }, img);
+								ComputedStyle.BackgroundImage = texture;
+								
+								nsvgDeleteRasterizer(rast);
+								nsvgDelete(image);
 							}
 							else
 							{

@@ -48,9 +48,34 @@ namespace Nuake
 		m_Width = size.x;
 		m_Height = size.y;
 
+		void* tempData = data;
+		if (flags.flipVertical)
+		{
+			int row;
+			size_t bytes_per_row = (size_t)m_Width * 4;
+			stbi_uc temp[2048];
+			stbi_uc* bytes = (stbi_uc*)tempData;
+
+			for (row = 0; row < ((int)m_Width >> 1); row++) {
+				stbi_uc* row0 = bytes + row * bytes_per_row;
+				stbi_uc* row1 = bytes + ((int)m_Width - row - 1) * bytes_per_row;
+				// swap row0 with row1
+				size_t bytes_left = bytes_per_row;
+				while (bytes_left) {
+					size_t bytes_copy = (bytes_left < sizeof(temp)) ? bytes_left : sizeof(temp);
+					memcpy(temp, row0, bytes_copy);
+					memcpy(row0, row1, bytes_copy);
+					memcpy(row1, temp, bytes_copy);
+					row0 += bytes_copy;
+					row1 += bytes_copy;
+					bytes_left -= bytes_copy;
+				}
+			}
+		}
+
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)flags.pixelFormat, size.x, size.y, 0, (GLenum)flags.pixelFormat, (GLenum)flags.pixelDataType, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)flags.pixelFormat, size.x, size.y, 0, (GLenum)flags.pixelFormat, (GLenum)flags.pixelDataType, tempData);
 		
 		SetMagnificationFilter(flags.magFilter);
 		SetMinificationFilter(flags.minFilter);
@@ -187,5 +212,10 @@ namespace Nuake
 			return false;
 
 		return true;
+	}
+
+	void Texture::FlipOnLoad()
+	{
+
 	}
 }
