@@ -657,36 +657,6 @@ namespace Nuake
 					}
 				}
 
-			    if (ImGui::MenuItem("Wren Script"))
-			    {
-			        std::string path = FileDialog::SaveFile("*.wren");
-			        
-			        if (!String::EndsWith(path, ".wren"))
-			        {
-			            path += ".wren";
-			        }
-
-			        if (!path.empty())
-			        {
-                        std::string fileName = String::ToUpper(FileSystem::GetFileNameFromPath(path));
-			            fileName = String::RemoveWhiteSpace(fileName);
-			            
-			            if(!String::IsDigit(fileName[0]))
-			            {
-			                
-                            FileSystem::BeginWriteFile(path, true);
-                            FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
-                            FileSystem::EndWriteFile();
-			            
-                            RefreshFileBrowser();
-                        }
-			            else
-			            {
-			                Logger::Log("Cannot create script files that starts with a number.", "filesystem", CRITICAL);
-			            }
-			        }
-			    }
-
 				ImGui::EndMenu();
 			}
 

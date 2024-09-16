@@ -7,7 +7,6 @@
 
 #include "../ComponentsPanel/TransformPanel.h"
 #include "../ComponentsPanel/LightPanel.h"
-#include "../ComponentsPanel/ScriptPanel.h"
 #include "../ComponentsPanel/MeshPanel.h"
 #include "../ComponentsPanel/CameraPanel.h"
 #include "../ComponentsPanel/BoxColliderPanel.h"
@@ -35,7 +34,6 @@ class EditorSelectionPanel
 private:
 	TransformPanel mTransformPanel;
 	LightPanel mLightPanel;
-	ScriptPanel mScriptPanel;
 	NetScriptPanel mNetScriptPanel;
 	MeshPanel mMeshPanel;
 	CameraPanel mCameraPanel;

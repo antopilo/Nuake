@@ -161,7 +161,6 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
     // Draw each component properties panels.
     mLightPanel.Draw(entity);
-    mScriptPanel.Draw(entity);
 	mNetScriptPanel.Draw(entity);
 	// mAudioEmitterPanel.Draw(entity);
 	// mParticleEmitterPanel.Draw(entity);
