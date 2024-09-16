@@ -6,19 +6,20 @@
 #include <src/Scene/Components/BoneComponent.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
 
-class BonePanel : ComponentPanel
+class BonePanel
 {
 public:
-	BonePanel() {}
-
-	void Draw(Nuake::Entity entity) override
+	static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
 	{
 		using namespace Nuake;
-
-		if (!entity.HasComponent<BoneComponent>())
+        
+		Nuake::BoneComponent* componentPtr = componentInstance.try_cast<Nuake::BoneComponent>();
+		if (componentPtr == nullptr)
+		{
 			return;
-
-		auto& component = entity.GetComponent<BoneComponent>();
+		}
+		Nuake::BoneComponent& component = *componentPtr;
+        
 		BeginComponentTable(BONE, BoneComponent);
 		{
 			{

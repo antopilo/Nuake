@@ -26,13 +26,17 @@ public:
         CreateScope<ModelResourceInspector>();
     }
 
-    void Draw(Nuake::Entity entity) override
+    void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
         using namespace Nuake;
-        if (!entity.HasComponent<ModelComponent>())
+        
+        Nuake::ModelComponent* componentPtr = componentInstance.try_cast<Nuake::ModelComponent>();
+        if (componentPtr == nullptr)
+        {
             return;
-
-        ModelComponent& component = entity.GetComponent<ModelComponent>();
+        }
+        Nuake::ModelComponent& component = *componentPtr;
+        
         BeginComponentTable(MESH, ModelComponent);
         {
             ImGui::Text("Model");

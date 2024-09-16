@@ -8,6 +8,7 @@
 #include <src/Scene/Components/SphereCollider.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/BoxCollider.h>
+#include "src/Scene/Components/RigidbodyComponent.h"
 
 #include <src/Resource/ModelLoader.h>
 #include <src/Rendering/RenderList.h>
@@ -25,7 +26,6 @@
 #include <src/Scene/Components/ParentComponent.h>
 #include <DetourDebugDraw.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
-
 
 GizmoDrawer::GizmoDrawer(EditorInterface* editor)
 {

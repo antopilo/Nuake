@@ -1,11 +1,12 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Physics/CharacterController.h"
 
 namespace Nuake 
 {
-	class CharacterControllerComponent
+	class CharacterControllerComponent : public Component
 	{
 		NUAKECOMPONENT(CharacterControllerComponent, "Character Controller")
 

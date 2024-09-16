@@ -1,13 +1,13 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
 
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include "TransformComponent.h"
 #include "../Rendering/Camera.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
-#include "BaseComponent.h"
+#include "VisibilityComponent.h"
 #include "../Resource/Serializable.h"
 
 #include <glm/ext/matrix_clip_space.hpp>
@@ -20,7 +20,7 @@ namespace Nuake
     };
 
     const int CSM_AMOUNT = 4;
-    class LightComponent 
+    class LightComponent : public Component
     {
         NUAKECOMPONENT(LightComponent, "Light")
 

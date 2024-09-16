@@ -1,5 +1,6 @@
 #include "SpriteComponent.h"
 
+#include "src/FileSystem/File.h"
 #include "src/FileSystem/FileSystem.h"
 #include "src/Rendering/Textures/TextureManager.h"
 #include "src/Rendering/Textures/MaterialManager.h"
@@ -10,8 +11,7 @@ namespace Nuake
 {
 	SpriteComponent::SpriteComponent() :
 		Billboard(false),
-		LockYRotation(false),
-		SpritePath("")
+		LockYRotation(false)
 	{
 
 	}
@@ -32,7 +32,13 @@ namespace Nuake
 		SpriteMesh = CreateRef<Mesh>();
 		SpriteMesh->AddSurface(quadVertices, { 0, 1, 2, 3, 4, 5 });
 
-		Ref<Material> material = MaterialManager::Get()->GetMaterial(FileSystem::Root + SpritePath);
+		std::string absPath = "";
+		if (SpritePath.file != nullptr && SpritePath.file->Exist())
+		{
+			absPath = SpritePath.file->GetAbsolutePath();
+		}
+
+		Ref<Material> material = MaterialManager::Get()->GetMaterial(absPath);
 		bool hasNormal = material->HasNormal();
 		SpriteMesh->SetMaterial(material);
 
@@ -44,7 +50,7 @@ namespace Nuake
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Billboard);
 		SERIALIZE_VAL(LockYRotation);
-		SERIALIZE_VAL(SpritePath);
+		SERIALIZE_RES_FILE(SpritePath);
 		SERIALIZE_VAL(PositionFacing);
 		END_SERIALIZE();
 	}
@@ -61,15 +67,11 @@ namespace Nuake
 			LockYRotation = j["LockYRotation"];
 		}
 
+		DESERIALIZE_RES_FILE(SpritePath);
+
 		if (j.contains("PositionFacing"))
 		{
 			PositionFacing = j["PositionFacing"];
-		}
-
-		if (j.contains("SpritePath"))
-		{
-			SpritePath = j["SpritePath"];
-			LoadSprite();
 		}
 
 		return true;

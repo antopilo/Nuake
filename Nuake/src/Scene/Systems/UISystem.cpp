@@ -28,15 +28,15 @@ namespace Nuake
 		for (auto e : uiView)
 		{
 			auto& uiViewComponent = uiView.get<UIComponent>(e);
-			const std::string& filePath = uiViewComponent.UIFilePath;
+			Ref<File> file = uiViewComponent.UIFilePath.file;
 			if (uiViewComponent.UIResource == 0)
 			{
-				if (filePath.empty() || !FileSystem::FileExists(filePath))
+				if (file == nullptr || !file->Exist())
 				{
 					continue;
 				}
 
-				Ref<UIResource> uiResource = ResourceLoader::LoadUI(filePath);
+				Ref<UIResource> uiResource = ResourceLoader::LoadUI(file);
 				uiViewComponent.UIResource = uiResource->ID;
 				uis[uiViewComponent.UIResource] = uiResource;
 
@@ -44,7 +44,7 @@ namespace Nuake
 			}
 			else
 			{
-				if (FileSystem::FileExists(filePath))
+				if (file != nullptr && file->Exist())
 				{
 					auto ui = ResourceManager::GetResource<UIResource>(uiViewComponent.UIResource);
 					bool sourceHasChanged = false;

@@ -19,7 +19,6 @@
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
-#include <src/Scene/Components/TriggerZone.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/PrefabComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
@@ -406,8 +405,6 @@ namespace Nuake
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
-				TriggerZone trigger = ent.GetComponent<TriggerZone>();
-
 				int count = 0;
 
 				wrenSetSlotDouble(vm, 0, count);
@@ -417,8 +414,6 @@ namespace Nuake
 			{
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
-
-				TriggerZone trigger = ent.GetComponent<TriggerZone>();
 
 				std::vector<Entity> entities = {};
 

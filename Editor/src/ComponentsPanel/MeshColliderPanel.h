@@ -9,23 +9,25 @@
 #include <src/Resource/ResourceLoader.h>
 #include <src/Core/String.h>
 
-class MeshColliderPanel : ComponentPanel {
-private:
-    Scope<ModelResourceInspector> _modelInspector;
-    bool _expanded = false;
+class MeshColliderPanel : ComponentPanel
+{
 public:
     MeshColliderPanel()
     {
         CreateScope<ModelResourceInspector>();
     }
 
-    void Draw(Nuake::Entity entity) override
+    static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
         using namespace Nuake;
-        if (!entity.HasComponent<MeshColliderComponent>())
+        
+        Nuake::MeshColliderComponent* componentPtr = componentInstance.try_cast<Nuake::MeshColliderComponent>();
+        if (componentPtr == nullptr)
+        {
             return;
-
-        MeshColliderComponent& component = entity.GetComponent<MeshColliderComponent>();
+        }
+        Nuake::MeshColliderComponent& component = *componentPtr;
+        
         BeginComponentTable(MESH, MeshColliderComponent);
         {
             ImGui::Text("Model");

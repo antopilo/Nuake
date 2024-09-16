@@ -2,7 +2,7 @@
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 
-#include "entt/entt.hpp"
+#include <entt/entt.hpp>
 
 #include "src/Rendering/Camera.h"
 #include "Lighting/Environment.h"

@@ -4,11 +4,10 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/AudioEmitterComponent.h"
-
+#include "src/FileSystem/File.h"
 #include "src/Audio/AudioManager.h"
 
 #include <future>
-
 
 namespace Nuake
 {
@@ -44,14 +43,14 @@ namespace Nuake
 		{
 			auto [transformComponent, audioEmitterComponent] = view.get<TransformComponent, AudioEmitterComponent>(e);
 			
-			if (audioEmitterComponent.FilePath.empty())
+			if (audioEmitterComponent.FilePath.file == nullptr || !audioEmitterComponent.FilePath.file->Exist())
 			{
 				// Doesn't have a file 
 				continue;
 			}
 
 			const bool isPlaying = audioEmitterComponent.IsPlaying;
-			const std::string absoluteFilePath = FileSystem::RelativeToAbsolute(audioEmitterComponent.FilePath);
+			const std::string absoluteFilePath = audioEmitterComponent.FilePath.file->GetAbsolutePath();
 			const bool isVoiceActive = audioManager.IsVoiceActive(absoluteFilePath);
 
 			AudioRequest audioRequest;

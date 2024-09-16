@@ -917,8 +917,23 @@ namespace Nuake
 				{
 					auto [transform, emitterComponent, visibility] = particleEmitterView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
 
-					if (!visibility.Visible || !emitterComponent.ParticleMaterial)
+					if (!visibility.Visible)
 						continue;
+
+					if (emitterComponent.resFile.dirty)
+					{
+						emitterComponent.resFile.dirty = false;
+						if (emitterComponent.resFile.Exist())
+						{
+							Ref<Nuake::Material> material = Nuake::ResourceLoader::LoadMaterial(emitterComponent.resFile.GetRelativePath());
+							emitterComponent.ParticleMaterial = material;
+						}
+					}
+
+					if (emitterComponent.ParticleMaterial == nullptr)
+					{
+						continue;
+					}
 
 					Renderer::QuadMesh->SetMaterial(emitterComponent.ParticleMaterial);
 

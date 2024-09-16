@@ -31,7 +31,16 @@ namespace Nuake
 		{
 			auto [transformComponent, skinnedComponent] = view.get<TransformComponent, SkinnedModelComponent>(e);
 
-			auto& model = skinnedComponent.ModelResource;
+			Ref<SkinnedModel> model = skinnedComponent.ModelResource;
+
+			// Load the model if it's not already loaded
+			// TODO: [WiggleWizard] Needs some sort of flag to infer that we've tried loading it once already, so
+			// we don't try loading the model every frame if it's invalid.
+			if (skinnedComponent.ModelPath.Exist() && skinnedComponent.ModelResource == nullptr)
+			{
+				skinnedComponent.LoadModel(e, m_Scene);
+			}
+			
 			if (!model)
 			{
 				continue;

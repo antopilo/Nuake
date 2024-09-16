@@ -8,13 +8,50 @@
 #include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
 
+const std::string NET_TEMPLATE_SCRIPT_FIRST = R"(using Nuake.Net;
 
-void NetScriptPanel::Draw(Nuake::Entity entity)
+namespace NuakeShowcase
 {
-    if (!entity.HasComponent<Nuake::NetScriptComponent>())
-        return;
+    class )";
 
-    auto& component = entity.GetComponent<Nuake::NetScriptComponent>();
+const std::string NET_TEMPLATE_SCRIPT_SECOND = R"( : Entity
+    {
+        public override void OnInit()
+        {
+            // Called once at the start of the game
+        }
+
+        
+        public override void OnUpdate(float dt)
+        {
+            // Called every frame
+        }
+        
+        public override void OnFixedUpdate(float dt)
+        {
+            // Called every fixed update
+        }
+
+        
+        public override void OnDestroy()
+        {
+            // Called at the end of the game fixed update
+        }
+    }
+} 
+)";
+
+void NetScriptPanel::Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
+{
+    using namespace Nuake;
+        
+    Nuake::NetScriptComponent* componentPtr = componentInstance.try_cast<Nuake::NetScriptComponent>();
+    if (componentPtr == nullptr)
+    {
+        return;
+    }
+    Nuake::NetScriptComponent& component = *componentPtr;
+    
     BeginComponentTable(.NETSCRIPT, Nuake::NetScriptComponent);
     {
         {

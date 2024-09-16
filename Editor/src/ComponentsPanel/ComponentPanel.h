@@ -93,5 +93,7 @@ ImGui::Text(##name);
 
 class ComponentPanel {
 public:
-	virtual void Draw(Nuake::Entity entity) = 0;
+	virtual void Draw(Nuake::Entity entity);
 };
+
+inline void ComponentPanel::Draw(Nuake::Entity entity) {}

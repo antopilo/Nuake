@@ -22,7 +22,6 @@ extern "C" {
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/LightComponent.h"
 #include "src/Scene/Components/NameComponent.h"
-#include "src/Scene/Components/TriggerZone.h"
 #include "src/Resource/FGD/FGDClass.h"
 #include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
@@ -68,7 +67,7 @@ namespace Nuake {
             m_Scene->DestroyEntity(e);
         }
 
-        map_parser_load((FileSystem::Root + quakeMapC.Path).c_str());
+        map_parser_load(quakeMapC.Path.GetAbsolutePath().c_str());
         geo_generator_run();
 
         DefaultMaterial = MaterialManager::Get()->GetMaterial("default");

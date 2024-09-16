@@ -3,17 +3,20 @@
 #include <src/Scene/Components/CameraComponent.h>
 #include "src/FileSystem/FileSystem.h"
 
-class CameraPanel : ComponentPanel {
+class CameraPanel {
 
 public:
-    CameraPanel() {}
-
-    void Draw(Nuake::Entity entity) override
+    static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
-        if (!entity.HasComponent<Nuake::CameraComponent>())
+        using namespace Nuake;
+        
+        Nuake::CameraComponent* componentPtr = componentInstance.try_cast<Nuake::CameraComponent>();
+        if (componentPtr == nullptr)
+        {
             return;
-
-        auto& component = entity.GetComponent<Nuake::CameraComponent>();
+        }
+        Nuake::CameraComponent& component = *componentPtr;
+        
         BeginComponentTable(CAMERA, Nuake::CameraComponent);
         {
             {

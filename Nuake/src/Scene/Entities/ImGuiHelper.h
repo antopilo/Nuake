@@ -8,8 +8,10 @@
 
 class ImGuiHelper {
 public:
-	static void DrawVec3(const std::string label, glm::vec3* values, float resetValue = 0.0f, float columnWidth = 100.0, float rate = 0.1f, float min = 0.0f) 
+	static bool DrawVec3(const std::string label, glm::vec3* values, float resetValue = 0.0f, float columnWidth = 100.0, float rate = 0.1f, float min = 0.0f) 
 	{
+		bool changed = false;
+		
 		ImGuiIO& io = ImGui::GetIO();
 		auto boldFont = io.Fonts->Fonts[0];
 
@@ -26,13 +28,19 @@ public:
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("###X", buttonSize))
+		{
 			values->x = resetValue;
+			changed = true;
+		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 		
 		ImGui::SameLine();
 		ImGui::PushItemWidth(availWidth);
-		ImGui::DragFloat("##X", &values->x, rate, min, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##X", &values->x, rate, min, 0.0f, "%.2f"))
+		{
+			changed = true;
+		}
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 		
@@ -41,12 +49,18 @@ public:
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.2f, 0.7f, 0.2f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Y", buttonSize))
+		{
 			values->y = resetValue;
+			changed = true;			
+		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 		ImGui::SameLine();
 		ImGui::PushItemWidth(availWidth);
-		ImGui::DragFloat("##Y", &values->y, rate, 0.0f, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##Y", &values->y, rate, 0.0f, 0.0f, "%.2f"))
+		{
+			changed = true;
+		}
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 		
@@ -55,19 +69,26 @@ public:
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.25f, 0.8f, 1.0f });
 		ImGui::PushFont(boldFont);
 		if (ImGui::Button("Z", buttonSize))
+		{
 			values->z = resetValue;
+			changed = true;
+		}
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
 		ImGui::SameLine();
 
 		ImGui::PushItemWidth(availWidth);
-		ImGui::DragFloat("##Z", &values->z, rate, 0.0f, 0.0f, "%.2f");
+		if (ImGui::DragFloat("##Z", &values->z, rate, 0.0f, 0.0f, "%.2f"))
+		{
+			changed = true;
+		}
 		ImGui::PopItemWidth();
 		
 		ImGui::PopStyleVar();
 		
 		ImGui::PopID();
-		//ImGui::Text("Hello");
+
+		return changed;
 	}
 
 	static void DrawVec2(const std::string label, glm::vec2* values, float resetValue = 0.0f, float columnWidth = 100.0, float rate = 0.1f, float min = 0.0f)

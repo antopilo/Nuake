@@ -1,6 +1,7 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 #include "src/FileSystem/FileSystem.h"
@@ -34,7 +35,7 @@ namespace Nuake {
 		NetScriptExposedVarType Type;
 	};
 
-	class NetScriptComponent
+	class NetScriptComponent : public Component
 	{
 		NUAKECOMPONENT(NetScriptComponent, "Net Script")
 		

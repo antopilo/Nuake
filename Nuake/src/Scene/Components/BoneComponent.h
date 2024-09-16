@@ -1,13 +1,13 @@
 #pragma once
 
-#include "src/Core/Object/Object.h"
+#include "Component.h"
+
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 
-
 namespace Nuake
 {
-	class BoneComponent
+	class BoneComponent : public Component
 	{
         NUAKECOMPONENT(BoneComponent, "Bone")
 

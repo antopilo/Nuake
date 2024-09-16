@@ -3,6 +3,10 @@
 #include "EditorSelectionPanel.h"
 #include "../Misc/ImGuiTextHelper.h"
 #include <src/Scene/Components.h>
+#include "src/Scene/Components/FieldTypes.h"
+
+#include "../ComponentsPanel/MaterialEditor.h"
+#include "../ComponentsPanel/BoxColliderPanel.h"
 
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>
@@ -15,6 +19,8 @@
 
 #include <entt/entt.hpp>
 
+#include "Tracy.hpp"
+
 using namespace Nuake;
 
 EditorSelectionPanel::EditorSelectionPanel()
@@ -22,6 +28,24 @@ EditorSelectionPanel::EditorSelectionPanel()
 	virtualScene = CreateRef<Scene>();
 	virtualScene->SetName("Virtual Scene");
 	virtualScene->CreateEntity("Camera").AddComponent<CameraComponent>();
+	
+	RegisterComponentDrawer<LightComponent, &LightPanel::Draw>();
+	RegisterComponentDrawer<ModelComponent, &MeshPanel::Draw>(&meshPanel);
+	RegisterComponentDrawer<CameraComponent, &CameraPanel::Draw>();
+	RegisterComponentDrawer<MeshColliderComponent, &MeshColliderPanel::Draw>();
+	RegisterComponentDrawer<CapsuleColliderComponent, &CapsuleColliderPanel::Draw>();
+	RegisterComponentDrawer<NetScriptComponent, &NetScriptPanel::Draw>();
+	RegisterComponentDrawer<CylinderColliderComponent, &CylinderColliderPanel::Draw>();
+	RegisterComponentDrawer<CharacterControllerComponent, &CharacterControllerPanel::Draw>();
+	RegisterComponentDrawer<BoneComponent, &BonePanel::Draw>();
+	RegisterComponentDrawer<NavMeshVolumeComponent, &NavMeshVolumePanel::Draw>();
+
+	RegisterTypeDrawer<bool, &EditorSelectionPanel::DrawFieldTypeBool>(this);
+	RegisterTypeDrawer<float, &EditorSelectionPanel::DrawFieldTypeFloat>(this);
+	RegisterTypeDrawer<Vector3, &EditorSelectionPanel::DrawFieldTypeVector3>(this);
+	RegisterTypeDrawer<std::string, &EditorSelectionPanel::DrawFieldTypeString>(this);
+	RegisterTypeDrawer<ResourceFile, &EditorSelectionPanel::DrawFieldTypeResourceFile>(this);
+	RegisterTypeDrawer<DynamicItemList, &EditorSelectionPanel::DrawFieldTypeDynamicItemList>(this);
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -110,6 +134,8 @@ void EditorSelectionPanel::DrawNone()
 
 void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 {
+	ZoneScoped;
+
 	if (!entity.IsValid())
 	{
 		return;
@@ -117,28 +143,29 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
     DrawAddComponentMenu(entity);
 
-    // Draw each component properties panels.
-    mTransformPanel.Draw(entity);
-    mLightPanel.Draw(entity);
-    mScriptPanel.Draw(entity);
-	mNetScriptPanel.Draw(entity);
-	mAudioEmitterPanel.Draw(entity);
-	mParticleEmitterPanel.Draw(entity);
-    mSpritePanel.Draw(entity);
-    mMeshPanel.Draw(entity);
-	mSkinnedModelPanel.Draw(entity);
-	mBonePanel.Draw(entity);
-    mQuakeMapPanel.Draw(entity);
-    mCameraPanel.Draw(entity);
-    mRigidbodyPanel.Draw(entity);
-    mBoxColliderPanel.Draw(entity);
-    mSphereColliderPanel.Draw(entity);
-	mCapsuleColliderPanel.Draw(entity);
-	mCylinderColliderPanel.Draw(entity);
-    mMeshColliderPanel.Draw(entity);
-    mCharacterControllerPanel.Draw(entity);
-	mNavMeshVolumePanel.Draw(entity);
-	mUiPanel.Draw(entity);
+	mTransformPanel.Draw(entity);
+
+	entt::registry& registry = entity.GetScene()->m_Registry;
+	for (auto&& [componentTypeId, storage] : registry.storage())
+	{
+		entt::type_info componentType = storage.type();
+		
+		entt::entity entityId = static_cast<entt::entity>(entity.GetHandle());
+		if (storage.contains(entityId))
+		{
+			entt::meta_type type = entt::resolve(componentType);
+			entt::meta_any component = type.from_void(storage.value(entityId));
+			
+			ComponentTypeTrait typeTraits = type.traits<ComponentTypeTrait>();
+			// Component not exposed as an inspector panel
+			if ((typeTraits & ComponentTypeTrait::InspectorExposed) == ComponentTypeTrait::None)
+			{
+				continue;
+			}
+			
+			DrawComponent(entity, component);
+		}
+	}
 
 	using namespace Nuake;
 	
@@ -154,16 +181,12 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 
 	if (ImGui::BeginPopup("ComponentPopup"))
 	{
-		for(entt::meta_type t : entt::resolve())
+		for(auto [fst, component] : entt::resolve())
 		{
-			if (entt::meta_func func = t.func(HashedFnName::GetComponentName))
+			std::string componentName = Component::GetName(component);
+			if (ImGui::MenuItem(componentName.c_str()))
 			{
-				entt::meta_any ret = func.invoke(t);
-				std::string className = ret.cast<std::string>();
-				if (ImGui::MenuItem(className.c_str()))
-				{
-					entity.AddComponent(t);
-				}
+				entity.AddComponent(component);
 			}
 		}
 		
@@ -509,5 +532,345 @@ void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
 	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
 
 	ImGui::PopTextWrapPos();
+}
+
+void EditorSelectionPanel::DrawComponent(Nuake::Entity& entity, entt::meta_any& component)
+{
+	ZoneScoped;
+
+	// Call into custom component drawer if one is available for this component
+	
+	const auto componentIdHash = component.type().info().hash();
+	if (ComponentTypeDrawers.contains(componentIdHash))
+	{
+		const auto drawerFn = ComponentTypeDrawers[componentIdHash];
+		drawerFn(entity, component);
+		
+		return;
+	}
+
+	const entt::meta_type componentMeta = component.type();
+	const std::string componentName = Component::GetName(componentMeta);
+
+	UIFont* boldFont = new UIFont(Fonts::Bold);
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+	bool removed = false;
+	bool headerOpened = ImGui::CollapsingHeader(componentName.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+    	
+	ImGui::PopStyleVar();
+	if (strcmp(componentName.c_str(), "TRANSFORM") != 0 && ImGui::BeginPopupContextItem())
+	{
+		if (ImGui::Selectable("Remove")) { removed = true; }
+		ImGui::EndPopup();
+	}
+	
+	if(removed)
+	{
+		auto componentType = component.type();
+		entity.RemoveComponent(componentType);
+		ImGui::PopStyleVar();
+		delete boldFont;
+	}
+	else if (headerOpened)
+	{
+		delete boldFont;
+		ImGui::PopStyleVar();
+		ImGui::Indent();
+		
+		if (ImGui::BeginTable(componentName.c_str(), 3, ImGuiTableFlags_SizingStretchProp))
+		{
+			ImGui::TableSetupColumn("name", 0, 0.25f);
+			ImGui::TableSetupColumn("set", 0, 0.65f);
+			ImGui::TableSetupColumn("reset", 0, 0.1f);
+			
+			ImGui::TableNextRow();
+			
+			DrawComponentContent(component);
+			
+			ImGui::EndTable();
+		}
+		ImGui::Unindent();
+	}
+	else
+	{
+		ImGui::PopStyleVar();
+		delete boldFont;
+	}
+	ImGui::PopStyleVar();
+}
+
+void EditorSelectionPanel::DrawComponentContent(entt::meta_any& component)
+{
+	ZoneScoped;
+	
+	entt::meta_type componentMeta = component.type();
+
+	// Draw component bound data
+	for (auto [fst, dataType] : componentMeta.data())
+	{
+		const ComponentFieldTrait fieldTraits = dataType.traits<ComponentFieldTrait>();
+		// Field marked as internal and thus not exposed to the inspector
+		if ((fieldTraits & ComponentFieldTrait::Internal) == ComponentFieldTrait::Internal)
+		{
+			continue;
+		}
+
+		ImGui::TableSetColumnIndex(0);
+
+		// Search for the appropriate drawer for the type
+		entt::id_type dataId = dataType.type().id();
+		if (FieldTypeDrawers.contains(dataId))
+		{
+			auto drawerFn = FieldTypeDrawers[dataId];
+			drawerFn(dataType, component);
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+
+		ImGui::TableNextRow();
+	}
+
+	// Draw any actions bound to the component
+	for (auto [fst, funcMeta] : componentMeta.func())
+	{
+		const ComponentFuncTrait funcTraits = funcMeta.traits<ComponentFuncTrait>();
+		if ((funcTraits & ComponentFuncTrait::Action) == ComponentFuncTrait::Action)
+		{
+			ImGui::TableSetColumnIndex(0);
+			
+			std::string funcDisplayName = "";
+			auto prop = funcMeta.prop(HashedName::DisplayName).value();
+			if (prop)
+			{
+				funcDisplayName = std::string(*prop.try_cast<const char*>());
+			}
+			
+			std::string buttonName = funcDisplayName;
+			if (UI::SecondaryButton(buttonName.c_str()))
+			{
+				entt::meta_any result = funcMeta.invoke(component);
+			}
+
+			ImGui::TableNextRow();
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeFloat(entt::meta_data& field, entt::meta_any& component)
+{
+	float stepSize = 1.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatStep))
+		stepSize = *prop.value().try_cast<float>();
+	
+	float min = 0.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatMin))
+		min = *prop.value().try_cast<float>();
+	
+	float max = 0.f;
+	if (auto prop = field.prop(HashedFieldPropName::FloatMax))
+		max = *prop.value().try_cast<float>();
+
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		float* floatPtr = fieldVal.try_cast<float>();
+		if (floatPtr != nullptr)
+		{
+			float floatProxy = *floatPtr;
+			const std::string controlId = std::string("##") + displayName;
+			if (ImGui::DragFloat(controlId.c_str(), &floatProxy, stepSize, min, max))
+			{
+				field.set(component, floatProxy);
+			}
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_any& component)
+{
+	auto prop = field.prop(HashedName::DisplayName);
+	auto propVal = prop.value();
+	const char* displayName = *propVal.try_cast<const char*>();
+		
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		bool* boolPtr = fieldVal.try_cast<bool>();
+		if (boolPtr != nullptr)
+		{
+			bool boolProxy = *boolPtr;
+			std::string controlId = std::string("##") + displayName;
+			if (ImGui::Checkbox(controlId.c_str(), &boolProxy))
+			{
+				field.set(component, boolProxy);
+			}
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::meta_any& component)
+{
+	auto prop = field.prop(HashedName::DisplayName);
+	auto propVal = prop.value();
+	const char* displayName = *propVal.try_cast<const char*>();
+		
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		Vector3* vec3Ptr = fieldVal.try_cast<Vector3>();
+		std::string controlId = std::string("##") + displayName;
+		ImGui::PushID(controlId.c_str());
+		
+		if (ImGuiHelper::DrawVec3("BoxSize", vec3Ptr, 0.5f, 100.0, 0.01f))
+		{
+			field.set(component, *vec3Ptr);
+		}
+
+		ImGui::PopID();
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::meta_any& component)
+{
+	auto prop = field.prop(HashedName::DisplayName);
+	auto propVal = prop.value();
+	const char* displayName = *propVal.try_cast<const char*>();
+		
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		std::string* fieldValPtr = fieldVal.try_cast<std::string>();
+		if (fieldValPtr != nullptr)
+		{
+			std::string fieldValProxy = *fieldValPtr;
+			std::string controlId = std::string("##") + displayName;
+			ImGui::InputText(controlId.c_str(), &fieldValProxy);
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, entt::meta_any& component)
+{
+	const char* resourceRestrictedType = nullptr;
+	if (auto prop = field.prop(HashedFieldPropName::ResourceFileType))
+		resourceRestrictedType = *prop.value().try_cast<const char*>();
+	
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		auto fieldValPtr = fieldVal.try_cast<ResourceFile>();
+		if (fieldValPtr != nullptr)
+		{
+			auto fieldValProxy = *fieldValPtr;
+			std::string filePath = fieldValProxy.file == nullptr ? "" : fieldValProxy.file->GetRelativePath();
+			std::string controlName = filePath + std::string("##") + displayName;
+			ImGui::Button(controlName.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(resourceRestrictedType))
+				{
+					const char* payloadFilePath = static_cast<char*>(payload->Data);
+					const std::string fullPath = std::string(payloadFilePath, 256);
+					const Ref<Nuake::File> file = FileSystem::GetFile(FileSystem::AbsoluteToRelative(fullPath));
+					field.set(component, ResourceFile{ file });
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
+		else
+		{
+			ImGui::Text("ERR");
+		}
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeDynamicItemList(entt::meta_data& field, entt::meta_any& component)
+{
+	auto propDisplayName = field.prop(HashedName::DisplayName);
+	const char* displayName = *propDisplayName.value().try_cast<const char*>();
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		auto fieldValPtr = fieldVal.try_cast<DynamicItemList>();
+		if (fieldValPtr == nullptr)
+		{
+			ImGui::Text("ERR");
+		}
+
+		const auto& items = fieldValPtr->items;
+		const int index = fieldValPtr->index;
+
+		// Check first to see if we are within the bounds
+		std::string selectedStr = "";
+		if (index >= 0 || index < items.size())
+		{
+			selectedStr = items[index];
+		}
+			
+		std::string controlName = std::string("##") + displayName;
+		if (ImGui::BeginCombo(controlName.c_str(), selectedStr.c_str()))
+		{
+			for (int i = 0; i < items.size(); i++)
+			{
+				bool isSelected = (index == i);
+				std::string name = items[i];
+
+				if (name.empty())
+				{
+					name = "Empty";
+				}
+
+				if (ImGui::Selectable(name.c_str(), isSelected))
+				{
+					field.set(component, i);
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+	}
 }
 

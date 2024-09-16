@@ -273,16 +273,28 @@ namespace Nuake
 			for (const auto& e : view)
 			{
 				auto& map = view.get<QuakeMapComponent>(e);
-				if (map.AutoRebuild && !map.Path.empty() && FileSystem::FileExists(map.Path))
+
+				bool buildMap = false;
+				if (map.rebuildNextTick && map.Path.Exist())
 				{
-					if (auto file = FileSystem::GetFile(map.Path); file->Exist() && file->GetHasBeenModified())
+					buildMap = true;
+					map.rebuildNextTick = false;
+				}
+				
+				if (map.AutoRebuild && map.Path.Exist())
+				{
+					if (auto file = FileSystem::GetFile(map.Path.GetRelativePath()); file->Exist() && file->GetHasBeenModified())
 					{
 						file->SetHasBeenModified(false);
-
-						Entity entity = Entity(e, this);
-						QuakeMapBuilder builder;
-						builder.BuildQuakeMap(entity, map.HasCollisions);
+						buildMap = true;
 					}
+				}
+
+				if (buildMap)
+				{
+					Entity entity = Entity(e, this);
+					QuakeMapBuilder builder;
+					builder.BuildQuakeMap(entity, map.HasCollisions);
 				}
 			}
 		}
@@ -469,7 +481,6 @@ namespace Nuake
 		}
 
 		entity.Destroy();
-		m_Registry.shrink_to_fit();
 	}
 
 	bool Scene::EntityExists(const std::string& name)
@@ -638,11 +649,12 @@ namespace Nuake
 
 		// This will turn the deserialized entity ids into actual Entities.
 		// This has to be done after the whole scene has been deserialized 
-		// to make sure we can fetch  the id in the scene. Otherwise, we could 
-		m_Registry.each([this](auto e) {
+		// to make sure we can fetch  the id in the scene. Otherwise, we could
+		for (const entt::entity& e : m_Registry.view<entt::entity>())
+		{
 			auto entity = Entity{ e, this };
 			entity.PostDeserialize();
-		});
+		};
 
 		return true;
 	}

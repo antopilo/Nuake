@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components/AudioEmitterComponent.h"
-#include "Components/BaseComponent.h"
+#include "Components/VisibilityComponent.h"
 #include "Components/BoneComponent.h"
 #include "Components/BoxCollider.h"
 #include "Components/BSPBrushComponent.h"

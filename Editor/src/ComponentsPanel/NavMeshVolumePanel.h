@@ -3,24 +3,25 @@
 
 #include <src/Scene/Entities/ImGuiHelper.h>
 #include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include "src/AI/NavManager.h"
+#include "src/Scene/Components/QuakeMap.h"
 #include <src/Core/Maths.h>
 #include <src/AI/RecastConfig.h>
 
-class NavMeshVolumePanel : ComponentPanel {
-
+class NavMeshVolumePanel
+{
 public:
-    NavMeshVolumePanel() {}
-
-    void Draw(Nuake::Entity entity) override
+    static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
         using namespace Nuake;
-
-        if (!entity.HasComponent<NavMeshVolumeComponent>())
+        
+        Nuake::NavMeshVolumeComponent* componentPtr = componentInstance.try_cast<Nuake::NavMeshVolumeComponent>();
+        if (componentPtr == nullptr)
         {
             return;
         }
-
-        auto& component = entity.GetComponent<NavMeshVolumeComponent>();
+        Nuake::NavMeshVolumeComponent& component = *componentPtr;
+        
         BeginComponentTable(NAVMESH VOLUME, NavMeshVolumeComponent);
         {
             {
