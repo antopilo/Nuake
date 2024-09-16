@@ -144,46 +144,59 @@ std::string FileDialog::OpenFolder()
 	std::string folderPath;
 
 #ifdef NK_WIN
-	BROWSEINFOA bi;
-	CHAR szFolder[260] = { 0 };
-	ZeroMemory(&bi, sizeof(BROWSEINFO));
-	bi.lpszTitle = "Select a Folder";
-	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
-	bi.hwndOwner = glfwGetWin32Window(Engine::GetCurrentWindow()->GetHandle());
-	bi.pszDisplayName = szFolder;
-	LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
-	if (pidl != NULL)
+	// Initialize COM library for the current thread
+	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED | COINIT_DISABLE_OLE1DDE);
+	if (SUCCEEDED(hr))
 	{
-		SHGetPathFromIDListA(pidl, szFolder);
-		folderPath = std::string(szFolder);
-		CoTaskMemFree(pidl);
+		IFileOpenDialog* pFileOpen = NULL;
+
+		// Create the FileOpenDialog object
+		hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, (void**)&pFileOpen);
+
+		if (SUCCEEDED(hr))
+		{
+			// Set the options for the dialog to pick folders
+			DWORD dwOptions;
+			hr = pFileOpen->GetOptions(&dwOptions);
+			if (SUCCEEDED(hr))
+			{
+				hr = pFileOpen->SetOptions(dwOptions | FOS_PICKFOLDERS); // Use FOS_PICKFOLDERS to select folders
+			}
+
+			// Show the dialog to the user
+			hr = pFileOpen->Show(NULL); // NULL here means no parent window
+
+			// If the user selects a folder
+			if (SUCCEEDED(hr))
+			{
+				IShellItem* pItem;
+				hr = pFileOpen->GetResult(&pItem);
+
+				if (SUCCEEDED(hr))
+				{
+					// Get the selected folder's path
+					PWSTR pszFolderPath = NULL;
+					hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFolderPath);
+
+					if (SUCCEEDED(hr))
+					{
+						// Convert from wide string (PWSTR) to std::string
+						char szFolderPath[MAX_PATH];
+						wcstombs(szFolderPath, pszFolderPath, MAX_PATH);
+						folderPath = std::string(szFolderPath);
+
+						// Free memory
+						CoTaskMemFree(pszFolderPath);
+					}
+					pItem->Release();
+				}
+			}
+			pFileOpen->Release();
+		}
+
+		// Uninitialize COM library
+		CoUninitialize();
 	}
 #endif
-
-#ifdef NK_LINUX
-	GtkWidget* dialog;
-	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
-	gint res;
-
-	dialog = gtk_file_chooser_dialog_new("Select Folder",
-		NULL,
-		action,
-		"_Cancel",
-		GTK_RESPONSE_CANCEL,
-		"_Select",
-		GTK_RESPONSE_ACCEPT,
-		NULL);
-
-	res = gtk_dialog_run(GTK_DIALOG(dialog));
-
-	if (res == GTK_RESPONSE_ACCEPT) {
-		char* foldername = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-		folderPath = foldername;
-		g_free(foldername);
-	}
-
-	gtk_widget_destroy(dialog);
-#endif
-
 	return folderPath;
 }

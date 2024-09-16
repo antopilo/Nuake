@@ -139,27 +139,25 @@ namespace Nuake
 					ImGui::InputText("##Location", &location); ImGui::SameLine();
 					if (ImGui::Button((ICON_FA_FOLDER + std::string("##folderOpen")).c_str()))
 					{
-						std::string folderPath = Nuake::FileDialog::SaveFile("Project File\0*.project");
+						std::string folderPath = Nuake::FileDialog::OpenFolder();
 						folderPath = Nuake::String::ReplaceSlash(folderPath);
 
 
 						if (!folderPath.empty())
 						{
 							auto splits = Nuake::String::Split(folderPath, '/');
-							projectFileName = splits[splits.size() - 1];
-							if (!Nuake::String::EndsWith(projectFileName, ".project"))
-							{
-								projectFileName += ".project";
-							}
+							
 
 							location = "";
 
-							for (int i = 0; i < splits.size() - 1; i++)
+							for (int i = 0; i < splits.size(); i++)
 							{
 								location += splits[i] + "/";
 							}
 						}
 					}
+
+					projectFileName = Nuake::String::RemoveWhiteSpace(projectTitle) + ".project";
 
 					finalLocation = location;
 					static std::string projectParentPath = location;
