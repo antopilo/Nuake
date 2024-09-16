@@ -4,9 +4,6 @@
 [submodule "Nuake/dependencies/assimp"]
 	path = Nuake/dependencies/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "Nuake/dependencies/glew"]
-	path = Nuake/dependencies/glew
-	url = https://github.com/nigels-com/glew.git
 [submodule "Nuake/dependencies/JoltPhysics"]
 	path = Nuake/dependencies/JoltPhysics
 	url = https://github.com/antopilo/JoltPhysics.git
