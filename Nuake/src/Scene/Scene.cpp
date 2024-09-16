@@ -273,16 +273,28 @@ namespace Nuake
 			for (const auto& e : view)
 			{
 				auto& map = view.get<QuakeMapComponent>(e);
+
+				bool buildMap = false;
+				if (map.rebuildNextTick && map.Path.Exist())
+				{
+					buildMap = true;
+					map.rebuildNextTick = false;
+				}
+				
 				if (map.AutoRebuild && map.Path.Exist())
 				{
 					if (auto file = FileSystem::GetFile(map.Path.GetRelativePath()); file->Exist() && file->GetHasBeenModified())
 					{
 						file->SetHasBeenModified(false);
-
-						Entity entity = Entity(e, this);
-						QuakeMapBuilder builder;
-						builder.BuildQuakeMap(entity, map.HasCollisions);
+						buildMap = true;
 					}
+				}
+
+				if (buildMap)
+				{
+					Entity entity = Entity(e, this);
+					QuakeMapBuilder builder;
+					builder.BuildQuakeMap(entity, map.HasCollisions);
 				}
 			}
 		}

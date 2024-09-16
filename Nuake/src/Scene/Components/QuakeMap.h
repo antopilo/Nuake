@@ -35,6 +35,8 @@ namespace Nuake {
 		bool AutoRebuild = false;
 		float ScaleFactor = 1.f;
 		
+		bool rebuildNextTick = false;
+		
 		std::vector<Ref<Mesh>> m_Meshes;
 		std::vector<Entity> m_Brushes;
 		std::vector<int> m_SerializedBrushIDs;
@@ -98,5 +100,6 @@ namespace Nuake {
 
 	inline void QuakeMapComponent::ActionRebuild()
 	{
+		rebuildNextTick = true;
 	}
 }
