@@ -3039,29 +3039,6 @@ namespace Nuake {
             return;
         }
 
-        // Shortcuts
-        if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
-        {
-            if(ImGui::IsKeyPressed(ImGuiKey_S))
-            {
-                Engine::GetProject()->Save();
-                Engine::GetCurrentScene()->Save();
-
-            }
-            else if(ImGui::IsKeyPressed(ImGuiKey_O))
-            {
-                OpenScene();
-                
-                Selection = EditorSelection();
-            }
-            else if(ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsKeyPressed(ImGuiKey_S))
-            {
-                std::string savePath = FileDialog::SaveFile("*.project");
-                Engine::GetProject()->SaveAs(savePath);
-
-                Selection = EditorSelection();
-            }
-        }
 
         if (_WelcomeWindow->IsProjectQueued() && frameCount > 0)
         {
@@ -3085,6 +3062,30 @@ namespace Nuake {
         else
         {
             m_ProjectSettingsWindow->Init(Engine::GetProject());
+        }
+
+        // Shortcuts
+        if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+        {
+            if(ImGui::IsKeyPressed(ImGuiKey_S))
+            {
+                Engine::GetProject()->Save();
+                Engine::GetCurrentScene()->Save();
+
+            }
+            else if(ImGui::IsKeyPressed(ImGuiKey_O))
+            {
+                OpenScene();
+                
+                Selection = EditorSelection();
+            }
+            else if(ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsKeyPressed(ImGuiKey_S))
+            {
+                std::string savePath = FileDialog::SaveFile("*.project");
+                Engine::GetProject()->SaveAs(savePath);
+
+                Selection = EditorSelection();
+            }
         }
 
         pInterface.m_CurrentProject = Engine::GetProject();

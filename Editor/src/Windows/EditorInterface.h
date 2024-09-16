@@ -68,6 +68,7 @@ namespace Nuake
 
 		AudioWindow* _audioWindow;
 		FileSystemUI* filesystem;
+		bool isNewProject = false;
 		static EditorSelection Selection;
 		EditorSelectionPanel SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;

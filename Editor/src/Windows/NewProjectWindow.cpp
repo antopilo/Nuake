@@ -243,7 +243,7 @@ namespace Nuake
 							window->Maximize();
 
 							m_Editor->filesystem->m_CurrentDirectory = Nuake::FileSystem::RootDirectory;
-
+							m_Editor->isNewProject = true;
 							m_HasCreatedProject = true;
 						}
 					}
