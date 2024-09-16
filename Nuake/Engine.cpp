@@ -10,7 +10,6 @@
 #include "src/Core/Input.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
-#include "src/Scripting/ScriptingEngine.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
 #include "src/Core/RegisterCoreTypes.h"

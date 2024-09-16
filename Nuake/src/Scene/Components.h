@@ -24,5 +24,4 @@
 #include "Components/SphereCollider.h"
 #include "Components/SpriteComponent.h"
 #include "Components/TransformComponent.h"
-#include "Components/WrenScriptComponent.h"
 #include "Components/UIComponent.h"

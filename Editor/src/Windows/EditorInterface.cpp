@@ -2104,16 +2104,6 @@ namespace Nuake {
                     }
                     ImGui::EndMenu();
                 }
-
-                if (ImGui::BeginMenu("Script"))
-                {
-                    if (ImGui::MenuItem("Script"))
-                    {
-                        entity = scene->CreateEntity("Script");
-                        entity.AddComponent<WrenScriptComponent>();
-                    }
-                    ImGui::EndMenu();
-                }
                 
                 if (entity.IsValid())
                 {

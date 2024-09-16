@@ -33,8 +33,6 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>())
 		if (HasComponent<LightComponent>())
 			SERIALIZE_OBJECT_REF_LBL("LightComponent", GetComponent<LightComponent>())
-		if (HasComponent<WrenScriptComponent>())
-			SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>())
 		if (HasComponent<CharacterControllerComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>())
 		if (HasComponent<BoxColliderComponent>())
@@ -87,7 +85,6 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(QuakeMapComponent);
 		DESERIALIZE_COMPONENT(LightComponent);
 		DESERIALIZE_COMPONENT(ModelComponent);
-		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		DESERIALIZE_COMPONENT(BoxColliderComponent);
 		DESERIALIZE_COMPONENT(CapsuleColliderComponent);
