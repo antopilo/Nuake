@@ -4,7 +4,9 @@
 #include "../Misc/ImGuiTextHelper.h"
 #include <src/Scene/Components.h>
 #include "src/Scene/Components/FieldTypes.h"
+
 #include "../ComponentsPanel/MaterialEditor.h"
+#include "../ComponentsPanel/BoxColliderPanel.h"
 
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>
@@ -19,10 +21,6 @@
 
 #include "Tracy.hpp"
 
-
-#define REGISTER_TYPE_DRAWER(forType, fn) \
-	FieldTypeDrawers[entt::type_id<forType>().hash()] = std::bind(&fn, this, std::placeholders::_1, std::placeholders::_2);
-
 using namespace Nuake;
 
 EditorSelectionPanel::EditorSelectionPanel()
@@ -31,12 +29,12 @@ EditorSelectionPanel::EditorSelectionPanel()
 	virtualScene->SetName("Virtual Scene");
 	virtualScene->CreateEntity("Camera").AddComponent<CameraComponent>();
 
-	REGISTER_TYPE_DRAWER(bool, EditorSelectionPanel::DrawFieldTypeBool);
-	REGISTER_TYPE_DRAWER(float, EditorSelectionPanel::DrawFieldTypeFloat);
-	REGISTER_TYPE_DRAWER(Vector3, EditorSelectionPanel::DrawFieldTypeVector3);
-	REGISTER_TYPE_DRAWER(std::string, EditorSelectionPanel::DrawFieldTypeString);
-	REGISTER_TYPE_DRAWER(ResourceFile, EditorSelectionPanel::DrawFieldTypeResourceFile);
-	REGISTER_TYPE_DRAWER(DynamicItemList, EditorSelectionPanel::DrawFieldTypeDynamicItemList);
+	RegisterTypeDrawer<bool, &EditorSelectionPanel::DrawFieldTypeBool>(this);
+	RegisterTypeDrawer<float, &EditorSelectionPanel::DrawFieldTypeFloat>(this);
+	RegisterTypeDrawer<Vector3, &EditorSelectionPanel::DrawFieldTypeVector3>(this);
+	RegisterTypeDrawer<std::string, &EditorSelectionPanel::DrawFieldTypeString>(this);
+	RegisterTypeDrawer<ResourceFile, &EditorSelectionPanel::DrawFieldTypeResourceFile>(this);
+	RegisterTypeDrawer<DynamicItemList, &EditorSelectionPanel::DrawFieldTypeDynamicItemList>(this);
 }
 
 void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
@@ -171,7 +169,7 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
     // mQuakeMapPanel.Draw(entity);
     mCameraPanel.Draw(entity);
     // mRigidbodyPanel.Draw(entity);
-    mBoxColliderPanel.Draw(entity);
+    // mBoxColliderPanel.Draw(entity);
     // mSphereColliderPanel.Draw(entity);
 	mCapsuleColliderPanel.Draw(entity);
 	mCylinderColliderPanel.Draw(entity);
@@ -550,6 +548,17 @@ void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
 void EditorSelectionPanel::DrawComponent(Nuake::Entity& entity, entt::meta_any& component)
 {
 	ZoneScoped;
+
+	// Call into custom component drawer if one is available for this component
+	
+	const auto componentIdHash = component.type().info().hash();
+	if (ComponentTypeDrawers.contains(componentIdHash))
+	{
+		const auto drawerFn = ComponentTypeDrawers[componentIdHash];
+		drawerFn(entity, component);
+		
+		return;
+	}
 
 	const entt::meta_type componentMeta = component.type();
 	const std::string componentName = Component::GetName(componentMeta);
