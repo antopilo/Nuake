@@ -3126,6 +3126,39 @@ namespace Nuake {
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();
 
+        if (isNewProject)
+        {
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Welcome to Nuake Engine!", 0, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::TextWrapped("If you would like to use the Trenchbroom integration, please locate your Trenchbroom executable.");
+
+                if (ImGui::Button("Locate..."))
+                {
+                    const std::string& locationPath = Nuake::FileDialog::OpenFile("TrenchBroom (.exe)\0TrenchBroom.exe\0");
+
+                    if (!locationPath.empty())
+                    {
+                        Engine::GetProject()->TrenchbroomPath = locationPath;
+                    }
+                }
+                ImGui::SameLine();
+                ImGui::InputText("##Trenchbroom Path", &Engine::GetProject()->TrenchbroomPath);
+                ImGui::TextColored(ImVec4(1, 1, 1, 0.5), "Note: You can configure this later in the Project Settings");
+                ImGui::Text("");
+                if (ImGui::Button("OK"))
+                {
+                    isNewProject = false;
+                    Engine::GetProject()->Save();
+                }
+
+                ImGui::EndPopup();
+            }
+
+            PopupHelper::OpenPopup("Welcome to Nuake Engine!");
+        }
+
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
     }
