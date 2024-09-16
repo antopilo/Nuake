@@ -3,48 +3,47 @@
 
 #include <src/Scene/Components/CapsuleColliderComponent.h>
 
-class CapsuleColliderPanel : ComponentPanel
+class CapsuleColliderPanel
 {
 public:
-	CapsuleColliderPanel() = default;
-
-	void Draw(Nuake::Entity entity) override
+	static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
 	{
 		using namespace Nuake;
-
-		if (!entity.HasComponent<CapsuleColliderComponent>())
+        
+		Nuake::CapsuleColliderComponent* componentPtr = componentInstance.try_cast<Nuake::CapsuleColliderComponent>();
+		if (componentPtr == nullptr)
 		{
 			return;
 		}
-
-		auto& [Capsule, Radius, Height, IsTrigger] = entity.GetComponent<CapsuleColliderComponent>();
+		Nuake::CapsuleColliderComponent& component = *componentPtr;
+        
 		BeginComponentTable(CAPSULE COLLIDER, CapsuleColliderComponent)
 		{
 			{
 				ImGui::Text("Radius");
 				ImGui::TableNextColumn();
-				ImGui::DragFloat("##Radius", &Radius, 0.01f, 0.001f);
-				Radius = std::max(Radius, 0.001f);
+				ImGui::DragFloat("##Radius", &component.Radius, 0.01f, 0.001f);
+				component.Radius = std::max(component.Radius, 0.001f);
 				ImGui::TableNextColumn();
-				ComponentTableReset(Radius, 0.5f)
+				ComponentTableReset(component.Radius, 0.5f)
 			}
 			ImGui::TableNextColumn();
 			{
 				ImGui::Text("Height");
 				ImGui::TableNextColumn();
-				ImGui::DragFloat("##Height", &Height, 0.01f, 0.001f);
-				Height = std::max(Height, 0.001f);
+				ImGui::DragFloat("##Height", &component.Height, 0.01f, 0.001f);
+				component.Height = std::max(component.Height, 0.001f);
 				ImGui::TableNextColumn();
-				ComponentTableReset(Height, 1.0f)
+				ComponentTableReset(component.Height, 1.0f)
 			}
 			ImGui::TableNextColumn();
 			{
 				ImGui::Text("Is Trigger");
 				ImGui::TableNextColumn();
 
-				ImGui::Checkbox("##isTrigger", &IsTrigger);
+				ImGui::Checkbox("##isTrigger", &component.IsTrigger);
 				ImGui::TableNextColumn();
-				ComponentTableReset(IsTrigger, false);
+				ComponentTableReset(component.IsTrigger, false);
 			}
 		}
 		EndComponentTable()

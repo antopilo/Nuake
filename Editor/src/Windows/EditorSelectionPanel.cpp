@@ -28,6 +28,17 @@ EditorSelectionPanel::EditorSelectionPanel()
 	virtualScene = CreateRef<Scene>();
 	virtualScene->SetName("Virtual Scene");
 	virtualScene->CreateEntity("Camera").AddComponent<CameraComponent>();
+	
+	RegisterComponentDrawer<LightComponent, &LightPanel::Draw>();
+	RegisterComponentDrawer<ModelComponent, &MeshPanel::Draw>(&meshPanel);
+	RegisterComponentDrawer<CameraComponent, &CameraPanel::Draw>();
+	RegisterComponentDrawer<MeshColliderComponent, &MeshColliderPanel::Draw>();
+	RegisterComponentDrawer<CapsuleColliderComponent, &CapsuleColliderPanel::Draw>();
+	RegisterComponentDrawer<NetScriptComponent, &NetScriptPanel::Draw>();
+	RegisterComponentDrawer<CylinderColliderComponent, &CylinderColliderPanel::Draw>();
+	RegisterComponentDrawer<CharacterControllerComponent, &CharacterControllerPanel::Draw>();
+	RegisterComponentDrawer<BoneComponent, &BonePanel::Draw>();
+	RegisterComponentDrawer<NavMeshVolumeComponent, &NavMeshVolumePanel::Draw>();
 
 	RegisterTypeDrawer<bool, &EditorSelectionPanel::DrawFieldTypeBool>(this);
 	RegisterTypeDrawer<float, &EditorSelectionPanel::DrawFieldTypeFloat>(this);
@@ -155,28 +166,6 @@ void EditorSelectionPanel::DrawEntity(Nuake::Entity entity)
 			DrawComponent(entity, component);
 		}
 	}
-
-
-    // Draw each component properties panels.
-    mLightPanel.Draw(entity);
-	mNetScriptPanel.Draw(entity);
-	// mAudioEmitterPanel.Draw(entity);
-	// mParticleEmitterPanel.Draw(entity);
-    // mSpritePanel.Draw(entity);
-    mMeshPanel.Draw(entity);
-	// mSkinnedModelPanel.Draw(entity);
-	mBonePanel.Draw(entity);
-    // mQuakeMapPanel.Draw(entity);
-    mCameraPanel.Draw(entity);
-    // mRigidbodyPanel.Draw(entity);
-    // mBoxColliderPanel.Draw(entity);
-    // mSphereColliderPanel.Draw(entity);
-	mCapsuleColliderPanel.Draw(entity);
-	mCylinderColliderPanel.Draw(entity);
-    mMeshColliderPanel.Draw(entity);
-    mCharacterControllerPanel.Draw(entity);
-	mNavMeshVolumePanel.Draw(entity);
-	// mUiPanel.Draw(entity);
 
 	using namespace Nuake;
 	

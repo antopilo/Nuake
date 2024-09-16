@@ -2,17 +2,18 @@
 #include "ComponentPanel.h"
 #include "src/Scene/Components/LightComponent.h"
 
-class LightPanel :ComponentPanel {
-
+class LightPanel
+{
 public:
-	LightPanel() { }
 
-	void Draw(Nuake::Entity entity) override
+	static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
 	{
-        if (!entity.HasComponent<Nuake::LightComponent>())
-            return;
-
-        Nuake::LightComponent& component = entity.GetComponent<Nuake::LightComponent>();
+        Nuake::LightComponent* componentPtr = componentInstance.try_cast<Nuake::LightComponent>();
+	    if (componentPtr == nullptr)
+	    {
+	        return;
+	    }
+	    Nuake::LightComponent& component = *componentPtr;
 
         BeginComponentTable(LIGHT, Nuake::LightComponent);
         {

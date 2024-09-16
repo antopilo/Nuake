@@ -33,16 +33,7 @@ class EditorSelectionPanel
 	
 private:
 	TransformPanel mTransformPanel;
-	LightPanel mLightPanel;
-	NetScriptPanel mNetScriptPanel;
-	MeshPanel mMeshPanel;
-	CameraPanel mCameraPanel;
-	MeshColliderPanel mMeshColliderPanel;
-	CapsuleColliderPanel mCapsuleColliderPanel;
-	CylinderColliderPanel mCylinderColliderPanel;
-	CharacterControllerPanel mCharacterControllerPanel;
-	BonePanel mBonePanel;
-	NavMeshVolumePanel mNavMeshVolumePanel;
+	MeshPanel meshPanel;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;

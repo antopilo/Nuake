@@ -3,18 +3,20 @@
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include "src/FileSystem/FileSystem.h"
 
-class CharacterControllerPanel : ComponentPanel {
-
+class CharacterControllerPanel
+{
 public:
-    CharacterControllerPanel() {}
-
-    void Draw(Nuake::Entity entity) override
+    static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
-        if (!entity.HasComponent<Nuake::CharacterControllerComponent>())
-            return;
         using namespace Nuake;
-
-        auto& component = entity.GetComponent<Nuake::CharacterControllerComponent>();
+        
+        Nuake::CharacterControllerComponent* componentPtr = componentInstance.try_cast<Nuake::CharacterControllerComponent>();
+        if (componentPtr == nullptr)
+        {
+            return;
+        }
+        Nuake::CharacterControllerComponent& component = *componentPtr;
+        
         BeginComponentTable(CHARACTER CONTROLLER, Nuake::CharacterControllerComponent);
         {
             {
