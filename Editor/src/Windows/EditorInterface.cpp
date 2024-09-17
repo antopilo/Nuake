@@ -2446,6 +2446,11 @@ namespace Nuake {
 
     void EditorInterface::Overlay()
     {
+        if (Engine::GetGameState() == GameState::Playing)
+        {
+            return;
+        }
+         
         // FIXME-VIEWPORT: Select a default viewport
         const float DISTANCE = 10.0f;
         int corner = 0;
