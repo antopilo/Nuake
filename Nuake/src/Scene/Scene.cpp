@@ -28,7 +28,6 @@
 
 #include "src/Scene/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
 #include "src/Scene/Components/BoneComponent.h"

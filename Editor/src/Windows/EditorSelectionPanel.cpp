@@ -11,7 +11,6 @@
 #include <src/Rendering/Textures/Material.h>
 #include <src/Resource/ResourceLoader.h>
 #include <src/Resource/FontAwesome5.h>
-#include <src/Scripting/WrenScript.h>
 #include <src/FileSystem/FileDialog.h>
 
 #include <Engine.h>
@@ -224,7 +223,6 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 		}
 		case FileType::Script:
 		{
-			DrawWrenScriptPanel(CreateRef<WrenScript>(file, true));
 			break;
 		}
 		case FileType::NetScript:
@@ -492,26 +490,6 @@ void EditorSelectionPanel::DrawProjectPanel(Ref<Nuake::Project> project)
 
     ImGui::SameLine();
     ImGui::InputText("Trenchbroom Path", &project->TrenchbroomPath);
-}
-
-void EditorSelectionPanel::DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile)
-{
-	auto filePath = wrenFile->GetFile()->GetAbsolutePath();
-	std::string fileContent = Nuake::FileSystem::ReadFile(filePath, true);
-	
-	ImGui::Text("Content");
-	ImGui::SameLine(ImGui::GetWindowWidth()-90);
-	if(ImGui::Button("Open..."))
-	{
-		Nuake::OS::OpenIn(filePath);
-	}
-	
-	ImGui::Separator();
-	
-	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetWindowWidth());
-	ImGui::Text(fileContent.c_str(), ImGui::GetWindowWidth());
-	
-	ImGui::PopTextWrapPos();
 }
 
 void EditorSelectionPanel::DrawNetScriptPanel(Ref<Nuake::File> file)
