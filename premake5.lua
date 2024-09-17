@@ -246,52 +246,64 @@ project "NuakeRuntime"
         "Runtime/Runtime.cpp"
     }
 
-    includedirs
+    includedirs 
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/glad/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/build",
-		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include",
-        "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
+        "%{prj.name}/../Nuake/src/Vendors/nanosvg",
+        "%{prj.name}/../Nuake/dependencies/glad/include",
+        "%{prj.name}/../Nuake/dependencies/glfw/include",
+        "%{prj.name}/../Nuake/dependencies/assimp/include",
+        "%{prj.name}/../Nuake/dependencies/build",
+	    "%{prj.name}/../Nuake/dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/soloud/include",
+        "/usr/include/gtk-3.0/",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
-	    
+        "%{prj.name}/../Nuake/dependencies/yoga",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
         "%{prj.name}/../Nuake/dependencies/entt/src",
     }
 
-    libdirs
-    {
+    libdirs 
+    { 
+        "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/",
+        "%{prj.name}/../Nuake/dependencies/freetype/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Freetype"
     }
 
     links
-    {
+    { 
         "Nuake",
+        "glad", 
         "GLFW",
-        "glad",
         "assimp",
-		"JoltPhysics",
+        "JoltPhysics",
         "soloud",
         "Coral.Native",
-        "DebugUtils",
+	    "DebugUtils",
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
 	    "Recast",
 	    "tracy",
+        "yoga",
+        "msdf-gen",
+        "msdf-atlas-gen",
+        "Freetype"
     }
     
     defines {
@@ -426,7 +438,6 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
         "%{prj.name}/../Nuake/dependencies/entt/src",
-
     }
     
     libdirs 
