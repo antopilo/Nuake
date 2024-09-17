@@ -48,18 +48,29 @@ namespace Nuake
 				{
 					auto ui = ResourceManager::GetResource<UIResource>(uiViewComponent.UIResource);
 					bool sourceHasChanged = false;
-					for (auto& fileAssociated : ui->GetCanvas()->GetSourceFiles())
+					if (ui->GetCanvas() == nullptr)
 					{
-						if (!fileAssociated)
-						{
-							continue;
-						}
-
-						// Re-fetching the file object because the Scan might have invalided the pointer.
-						if (FileSystem::GetFile(fileAssociated->GetRelativePath())->GetHasBeenModified())
+						if (FileSystem::GetFile(uiViewComponent.UIFilePath.file->GetRelativePath())->GetHasBeenModified())
 						{
 							sourceHasChanged = true;
-							FileSystem::GetFile(fileAssociated->GetRelativePath())->SetHasBeenModified(false);
+							FileSystem::GetFile(uiViewComponent.UIFilePath.file->GetRelativePath())->SetHasBeenModified(false);
+						}
+					}
+					else
+					{
+						for (auto& fileAssociated : ui->GetCanvas()->GetSourceFiles())
+						{
+							if (!fileAssociated)
+							{
+								continue;
+							}
+
+							// Re-fetching the file object because the Scan might have invalided the pointer.
+							if (FileSystem::GetFile(fileAssociated->GetRelativePath())->GetHasBeenModified())
+							{
+								sourceHasChanged = true;
+								FileSystem::GetFile(fileAssociated->GetRelativePath())->SetHasBeenModified(false);
+							}
 						}
 					}
 

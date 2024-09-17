@@ -55,14 +55,10 @@ namespace NuakeUI
 	
 	void Canvas::ComputeLayout(Vector2 size)
 	{
-		if (!mRootNode)
+		if (!mRootNode || mInputManager)
 			return;
 		
 		Renderer::Get().SetViewportSize(size);
-
-		float x, y;
-		x = mInputManager->GetMouseX();
-		y = mInputManager->GetMouseY();
 
 		auto root = mRootNode->GetYogaNode();
 
