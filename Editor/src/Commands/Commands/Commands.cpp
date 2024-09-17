@@ -65,7 +65,7 @@ namespace NuakeEditor
         "packageformat": { "extension": ".zip", "format": "zip" }
     },
     "textures": {
-        "root": "textures",
+        "root": "Textures",
         "extensions": [ ".jpg", ".png", ".tga" ]
     },
     "entities": {
