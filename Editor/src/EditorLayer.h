@@ -23,6 +23,7 @@ public:
 	virtual void OnDetach() override;
 
 	virtual void OnWindowFocused() override;
+	virtual void OnDragNDrop(const std::vector<std::string>& paths) override;
 
 private:
 	CommandBuffer mCommandBuffer;

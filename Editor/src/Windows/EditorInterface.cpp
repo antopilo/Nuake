@@ -3238,6 +3238,27 @@ namespace Nuake {
         
     }
 
+    void EditorInterface::OnDragNDrop(const std::vector<std::string>& paths)
+    {
+        if (Engine::GetProject())
+        {
+            for (const auto& path : paths)
+            {
+                if (!FileSystem::FileExists(path, true))
+                {
+                    continue;
+                }
+
+                if (!FileSystem::DirectoryExists(FileSystemUI::m_CurrentDirectory->GetFullPath(), true))
+                {
+                    return;
+                }
+
+                FileSystem::CopyFileAbsolute(path, FileSystemUI::m_CurrentDirectory->GetFullPath());
+            }
+        }
+    }
+
 	bool EditorInterface::LoadProject(const std::string& projectPath)
 	{
         FileSystem::SetRootDirectory(FileSystem::GetParentPath(projectPath));

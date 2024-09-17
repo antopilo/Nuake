@@ -119,9 +119,15 @@ namespace Nuake {
         extern const std::string Resources_Images_shape_png_path;
         extern unsigned int Resources_Images_shape_png_len;
         extern unsigned char Resources_Images_shape_png[];
+        extern const std::string Resources_Images_sln_icon_png_path;
+        extern unsigned int Resources_Images_sln_icon_png_len;
+        extern unsigned char Resources_Images_sln_icon_png[];
         extern const std::string Resources_Images_speaker_png_path;
         extern unsigned int Resources_Images_speaker_png_len;
         extern unsigned char Resources_Images_speaker_png[];
+        extern const std::string Resources_Images_trenchbroom_icon_png_path;
+        extern unsigned int Resources_Images_trenchbroom_icon_png_len;
+        extern unsigned char Resources_Images_trenchbroom_icon_png[];
         extern const std::string Resources_Images_wrench_png_path;
         extern unsigned int Resources_Images_wrench_png_len;
         extern unsigned char Resources_Images_wrench_png[];

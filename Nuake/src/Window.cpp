@@ -102,6 +102,22 @@ int Window::Init()
             window->OnWindowFocused(*window, static_cast<bool>(focused));
         });
 
+    glfwSetDropCallback(window, [](GLFWwindow* nativeWindow, int count, const char** paths)
+        {
+            std::vector<std::string> filePaths;
+            filePaths.reserve(count);
+
+            int i;
+            for (i = 0; i < count; i++)
+            {
+                std::string filePath = std::string(paths[i]);
+                filePaths.push_back(filePath);
+            }
+
+            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+            window->OnDragNDropCallback(*window, filePaths);
+        });
+
     // TODO: have clear color in environnement.
     glClearColor(0.f, 0.f, 0.f, 1.0f);
 
@@ -348,6 +364,11 @@ void Window::SetOnWindowClosedCallback(std::function<void(Window& window)> callb
     onWindowClosedCallback = callback;
 }
 
+void Nuake::Window::SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback)
+{
+    onDragNDropCallback = callback;
+}
+
 void Window::OnWindowFocused(Window& window, bool focused)
 {
     if (onWindowFocusedCallback)
@@ -361,6 +382,14 @@ void Window::OnWindowClosed(Window& window)
     if (onWindowClosedCallback)
     {
         onWindowClosedCallback(window);
+    }
+}
+
+void Window::OnDragNDropCallback(Window& window, const std::vector<std::string>& paths)
+{
+    if (onDragNDropCallback)
+    {
+        onDragNDropCallback(window, paths);
     }
 }
 

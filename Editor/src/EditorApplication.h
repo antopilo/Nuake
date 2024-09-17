@@ -10,6 +10,15 @@
 
 using namespace NuakeEditor;
 
+class DragNDropModule : public Nuake::IApplicationModule
+{
+public:
+	 void OnInit() override 
+	 {
+		
+	 }
+};
+
 class EditorApplication : public Nuake::Application
 {
 private:

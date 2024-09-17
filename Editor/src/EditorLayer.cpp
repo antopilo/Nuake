@@ -80,3 +80,8 @@ void EditorLayer::OnWindowFocused()
 {
     m_EditorInterface->OnWindowFocused();
 }
+
+void EditorLayer::OnDragNDrop(const std::vector<std::string>& paths)
+{
+    m_EditorInterface->OnDragNDrop(paths);
+}

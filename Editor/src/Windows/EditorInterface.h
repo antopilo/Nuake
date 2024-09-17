@@ -106,5 +106,6 @@ namespace Nuake
 
 	public:
 		void OnWindowFocused();
+		void OnDragNDrop(const std::vector<std::string>& paths);
 	};
 }

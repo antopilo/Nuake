@@ -10,6 +10,8 @@
 #include "src/UI/NuakeUI.h"
 #include "src/UI/UIInputManager.h"
 
+
+
 void EditorApplication::OnInit()
 {
     using namespace Nuake;
@@ -73,6 +75,13 @@ void EditorApplication::OnInit()
             }
         });
     
+    m_Window->SetOnDragNDropCallback([&](Window& window, const std::vector<std::string>& paths) {
+        for (auto& layer : m_LayerStack)
+        {
+            layer->OnDragNDrop(paths);
+        }
+    });
+
     PushLayer(CreateScope<EditorLayer>());
 }
 

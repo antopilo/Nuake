@@ -78,6 +78,11 @@ FileType File::GetFileType() const
 	{
 		return FileType::Mesh;
 	}
+	
+	if (ext == ".glb" || ext == ".gltf")
+	{
+		return FileType::MeshAsset;
+	}
 
 	if (ext == ".html")
 	{
@@ -89,7 +94,7 @@ FileType File::GetFileType() const
 		return FileType::CSS;
 	}
 
-	return FileType::Unkown;
+	return FileType::Unknown;
 }
 
 std::string File::GetFileTypeAsString() const

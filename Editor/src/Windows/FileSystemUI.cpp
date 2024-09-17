@@ -261,6 +261,8 @@ namespace Nuake
                         OS::OpenTrenchbroomMap(file->GetAbsolutePath());
                         break;
                     case FileType::NetScript:
+                    case FileType::UI:
+                    case FileType::CSS:
                         OS::OpenIn(file->GetAbsolutePath());
                         break;
                     case FileType::Scene:
@@ -383,17 +385,30 @@ namespace Nuake
                 textureImage = image;
             }
         }
+        else if (fileType == FileType::Solution)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/sln_icon.png");
+        }
+        else if (fileType == FileType::Map)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/trenchbroom_icon.png");
+        }
 
         ImGui::SetCursorPos(prevCursor);
         ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         ImGui::PopStyleVar();
         
-        auto imguiStyle = ImGui::GetStyle();
+        auto& imguiStyle = ImGui::GetStyle();
 
         ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
         ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
         ImU32 rectColor = IM_COL32(255, 255, 255, 16);
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+
+        ImU32 rectColor2 = UI::PrimaryCol;
+        Color fileTypeColor = GetColorByFileType(file->GetFileType());
+        ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 101) + offsetEnd, IM_COL32(fileTypeColor.r * 255.f, fileTypeColor.g * 255.f, fileTypeColor.b * 255.f, fileTypeColor.a * 255.f), 0.0f);
+
         std::string visibleName = file->GetName();
         const uint32_t MAX_CHAR_NAME = 32;
         if (file->GetName().size() >= MAX_CHAR_NAME)
@@ -670,6 +685,57 @@ namespace Nuake
         Scan();
     }
 
+    Color FileSystemUI::GetColorByFileType(FileType fileType)
+    {
+        switch (fileType)
+        {
+        case Nuake::FileType::Unknown:
+            break;
+        case Nuake::FileType::Image:
+            break;
+        case Nuake::FileType::Material:
+            break;
+        case Nuake::FileType::Mesh:
+            break;
+        case Nuake::FileType::Script:
+            return { 1.0, 0.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::NetScript:
+            return { 1.0, 0.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::Project:
+            return Engine::GetProject()->Settings.PrimaryColor;
+            break;
+        case Nuake::FileType::Prefab:
+            break;
+        case Nuake::FileType::Scene:
+            return { 0, 1.0f, 1.0, 1.0 };
+            break;
+        case Nuake::FileType::Wad:
+            break;
+        case Nuake::FileType::Map:
+            return { 0.0, 1.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::Assembly:
+            break;
+        case Nuake::FileType::Solution:
+            break;
+        case Nuake::FileType::Audio:
+            return { 0.0, 0.0, 1.0, 1.0 };
+            break;
+        case Nuake::FileType::UI:
+            return { 1.0, 1.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::CSS:
+            return { 1.0, 0.0, 1.0, 1.0 };
+            break;
+        default:
+            break;
+        }
+
+        return Color(0, 0, 0, 0);
+    }
+
     void FileSystemUI::Scan()
     {
         if (!m_CurrentDirectory)
@@ -888,6 +954,11 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
+                                if (d->GetName() == "bin" || d->GetName() == ".vs" || d->GetName() == "obj")
+                                {
+                                    continue;
+                                }
+
                                 if(String::Sanitize(d->Name).find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
                                     if (i + 1 % amount != 0)
@@ -907,6 +978,11 @@ namespace Nuake
                             {
                                 if(m_SearchKeyword.empty() || f->GetName().find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
+                                    if (f->GetFileType() == FileType::Unknown || f->GetFileType() == FileType::Assembly)
+                                    {
+                                        continue;
+                                    }
+
                                     if (i + 1 % amount != 0 || i == 1)
                                     {
                                         ImGui::TableNextColumn();
@@ -915,7 +991,7 @@ namespace Nuake
                                     {
                                         ImGui::TableNextRow();
                                     }
-                                
+                                    
                                     DrawFile(f, i);
                                     i++;
                                 }
