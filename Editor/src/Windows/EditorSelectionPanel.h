@@ -17,7 +17,6 @@
 #include "../ComponentsPanel/NetScriptPanel.h"
 #include "../ComponentsPanel/NavMeshVolumePanel.h"
 
-#include <src/Scene/Components/WrenScriptComponent.h>
 #include <src/Resource/Prefab.h>
 
 
@@ -82,7 +81,6 @@ private:
 	void ResolveFile(Ref<Nuake::File> file);
 	void DrawMaterialPanel(Ref<Nuake::Material> material);
 	void DrawProjectPanel(Ref<Nuake::Project> project);
-	void DrawWrenScriptPanel(Ref<Nuake::WrenScript> wrenFile);
 	void DrawNetScriptPanel(Ref<Nuake::File> file);
 
 	void DrawComponent(Nuake::Entity& entity, entt::meta_any& component);

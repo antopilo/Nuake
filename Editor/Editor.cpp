@@ -15,7 +15,6 @@
 
 #include <GLFW/glfw3.h>
 #include <src/Vendors/glm/trigonometric.hpp>
-#include <src/Scripting/ScriptingEngine.h>
 #include <src/Resource/FGD/FGDFile.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
