@@ -73,6 +73,11 @@ namespace Nuake
 						uis[uiViewComponent.UIResource]->Tick();
 					}
 
+					if (uiViewComponent.IsWorldSpace)
+					{
+						uis[uiViewComponent.UIResource]->Resize(uiViewComponent.GetResolution());
+					}
+
 					uis[uiViewComponent.UIResource]->Draw();
 				}
 			}

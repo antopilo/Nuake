@@ -27,8 +27,12 @@ UIResource::UIResource(const std::string& path) :
 	canvas = Canvas::New();
 	canvas->uuid = this->ID;
 	canvas = CanvasParser::Get().Parse(canvas, FileSystem::RelativeToAbsolute(path));
-	canvas->SetInputManager(inputManager);
-	canvas->ComputeLayout(defaultSize);
+
+	if (!canvas)
+	{
+		canvas->SetInputManager(inputManager);
+		canvas->ComputeLayout(defaultSize);
+	}
 }
 
 void UIResource::Tick()
@@ -57,7 +61,10 @@ void UIResource::Draw()
 void UIResource::Resize(const Vector2& size)
 {
 	framebuffer->QueueResize(size);
-	canvas->ComputeLayout(size);
+	if (canvas)
+	{
+		canvas->ComputeLayout(size);
+	}
 }
 
 void UIResource::Reload()
