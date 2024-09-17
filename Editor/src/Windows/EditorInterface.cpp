@@ -3297,9 +3297,10 @@ namespace Nuake {
 
     void EditorInterface::OnDragNDrop(const std::vector<std::string>& paths)
     {
-        if (Engine::GetProject())
+        const bool isProjectLoaded = Engine::GetProject() != nullptr;
+        for (const auto& path : paths)
         {
-            for (const auto& path : paths)
+            if (isProjectLoaded)
             {
                 if (!FileSystem::FileExists(path, true))
                 {
@@ -3312,6 +3313,10 @@ namespace Nuake {
                 }
 
                 FileSystem::CopyFileAbsolute(path, FileSystemUI::m_CurrentDirectory->GetFullPath());
+            }
+            else
+            {
+                _WelcomeWindow->ImportProject(path);
             }
         }
     }

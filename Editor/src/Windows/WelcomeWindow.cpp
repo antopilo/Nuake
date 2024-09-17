@@ -115,8 +115,41 @@ namespace Nuake
 		Engine::GetCurrentWindow()->SetTitle("Nuake Engine - Editing " + project->Name);
 	}
 
+	void WelcomeWindow::ImportProject(const std::string& file)
+	{
+		if (file != "" && String::EndsWith(file, ".project"))
+		{
+			// Prevent importing the same project twice in the list
+			bool alreadyContainsProject = false;
+			for (auto& p : _Projects)
+			{
+				if (p.Path == file)
+				{
+					alreadyContainsProject = true;
+				}
+			}
+
+			if (!alreadyContainsProject)
+			{
+				_Projects.push_back(ProjectPreview(file));
+				SaveRecentFile();
+			}
+		}
+	}
+
 	void WelcomeWindow::Draw()
 	{
+		if (!queuedRemovalPath.empty())
+		{
+			std::erase_if(_Projects, [&](ProjectPreview preview) 
+				{
+				return preview.Path == queuedRemovalPath;
+				});
+
+			queuedRemovalPath = "";
+			SaveRecentFile();
+		}
+
 		// Make viewport fullscreen
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->Pos);
@@ -150,6 +183,7 @@ namespace Nuake
 
 			DrawRightControls();
 			ImGui::SameLine();
+
 			DrawRecentProjectsSection();
 
 			ImGui::End();
@@ -163,36 +197,30 @@ namespace Nuake
 		ImVec2 projectsWindowSize = ImGui::GetContentRegionAvail();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
-		ImGui::BeginChild("Projects", projectsWindowSize, false);
+		ImGui::BeginChild("Projects", projectsWindowSize);
 		{
+			//ImGui::Dummy({ 4, 4 });
+			//ImGui::SameLine();
+			//{
+			//	auto font = UIFont(Bold);
+			//	ImGui::Text("Recent Projects");
+			//}
+
 			ImGui::PopStyleColor();
 			for (uint32_t i = 0; i < std::size(_Projects); i++)
 			{
 				DrawProjectItem(i);
 			}
 
-			const float itemHeight = 100.0f;
+			ImGui::Dummy({ 1, 4 });
+			ImGui::SameLine();
+			const float itemHeight = 60.0f;
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			if (ImGui::Button("Import an existing project", ImVec2(ImGui::GetContentRegionAvail().x, itemHeight)))
+			if (UI::SecondaryButton("Import or Drag a Project", Vector2(ImGui::GetContentRegionAvail().x - 8, itemHeight)))
 			{
 				const std::string path = FileDialog::OpenFile("Project file(.project)\0*.project\0");
-				if (path != "" && String::EndsWith(path, ".project"))
-				{
-					// Prevent importing the same project twice in the list
-					bool alreadyContainsProject = false;
-					for (auto& p : _Projects)
-					{
-						if (p.Path == path)
-						{
-							alreadyContainsProject = true;
-						}
-					}
 
-					if (!alreadyContainsProject)
-					{
-						_Projects.push_back(ProjectPreview(path));
-					}
-				}
+				ImportProject(path);
 			}
 			ImGui::PopStyleColor();
 		}
@@ -224,6 +252,18 @@ namespace Nuake
 		ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.25, 0.25, 0.5, 0.0));
 		bool result = ImGui::Selectable(selectableName.c_str(), SelectedProject == itemIndex, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetContentRegionAvail().x - 12, itemHeight));
 		ImGui::PopStyleVar();
+
+		if (ImGui::BeginPopupContextWindow(selectableName.c_str()))
+		{
+			if (ImGui::MenuItem("Remove from list"))
+			{
+				queuedRemovalPath = _Projects[itemIndex].Path;
+			}
+
+			ImGui::EndPopup();
+		}
+
+
 		if (result)
 		{
 			SelectedProject = itemIndex;
@@ -233,7 +273,7 @@ namespace Nuake
 		{
 			SaveRecentFile();
 
-			queuedProjectPath = _Projects[SelectedProject].Path;
+			queuedProjectPath = _Projects[itemIndex].Path;
 		}
 
 		ImU32 color = IM_COL32(63, 63, 66, 128);
@@ -246,7 +286,10 @@ namespace Nuake
 			color = IM_COL32(20, 20, 20, 128);
 		}
 
-		//ImGui::PopStyleColor();
+		if (isSelected && ImGui::IsKeyPressed(ImGuiKey_Delete))
+		{
+			queuedRemovalPath = _Projects[SelectedProject].Path;
+		}
 
 		if (result)
 		{

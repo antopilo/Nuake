@@ -42,6 +42,8 @@ namespace Nuake
 		int32_t SelectedProject = -1;
 		std::vector<ProjectPreview> _Projects;
 		std::string queuedProjectPath;
+		std::string queuedRemovalPath;
+
 	public:
 		WelcomeWindow(Nuake::EditorInterface* editor);
 		~WelcomeWindow() = default;
@@ -50,6 +52,9 @@ namespace Nuake
 
 		bool IsProjectQueued() const { return !queuedProjectPath.empty(); };
 		void LoadQueuedProject();
+
+		void ImportProject(const std::string& file);
+
 	private:
 		void DrawRecentProjectsSection();
 		void DrawProjectItem(const uint32_t projectPreview);
