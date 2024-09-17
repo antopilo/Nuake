@@ -76,9 +76,20 @@ void FileSystem::SetRootDirectory(const std::string path)
 					return;
 				}
 
+				if (event == filewatch::Event::added)
+				{
+					const std::string& parent = std::filesystem::path(normalizedPath).parent_path().string();
+					auto parentDirectory = FileSystem::GetDirectory(parent);
+					auto filePath = std::filesystem::path(normalizedPath);
+					std::string name = filePath.filename().string();
+					std::string extension = filePath.extension().string();
+					Ref<File> newImportedFile = CreateRef<File>(parentDirectory, FileSystem::RelativeToAbsolute(normalizedPath), name, extension);
+					parentDirectory->Files.push_back(newImportedFile);
+				}
+
 				if(Ref<File> file = GetFile(normalizedPath); file)
 				{
-					if (file->GetFileType() == FileType::Unkown)
+					if (file->GetFileType() == FileType::Unknown)
 					{
 						return;
 					}
@@ -89,8 +100,8 @@ void FileSystem::SetRootDirectory(const std::string path)
 					{
 						file->SetHasBeenModified(true);
 					}
-				}
 					
+				}
 			}
 	);
 	Scan();
@@ -119,6 +130,12 @@ std::string FileSystem::GetParentPath(const std::string& fullPath)
 	std::filesystem::path pathObj(fullPath);
 	auto returnvalue = pathObj.parent_path().string();
 	return returnvalue + "/";
+}
+
+void FileSystem::CopyFileAbsolute(const std::string& src, const std::string& dest)
+{
+	const std::string& destPath = dest + "/" + std::filesystem::path(src).filename().string();
+	std::filesystem::copy_file(src, destPath, std::filesystem::copy_options::overwrite_existing);
 }
 
 std::string FileSystem::ReadFile(const std::string& path, bool absolute)
@@ -287,4 +304,9 @@ Directory::Directory(const std::string& path)
 std::string Directory::GetName() const
 {
 	return Name;
+}
+
+std::string Directory::GetFullPath() const
+{
+	return FullPath;
 }

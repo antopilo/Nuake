@@ -4,10 +4,11 @@ namespace Nuake
 {
 	enum class FileType
 	{
-		Unkown,
+		Unknown,
 		Image,
 		Material,
 		Mesh,
+		MeshAsset,
 		Script,
 		NetScript,
 		Project,

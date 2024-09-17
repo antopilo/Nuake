@@ -1376,7 +1376,7 @@ void katana_print_rule(KatanaParser* parser, KatanaRule* rule)
             break;
         case KatanaRuleSupports:
             break;
-        case KatanaRuleUnkown:
+        case KatanaRuleUnknown:
             break;
             
         default:

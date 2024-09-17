@@ -27,6 +27,7 @@
 #include <DetourDebugDraw.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 
+
 GizmoDrawer::GizmoDrawer(EditorInterface* editor)
 {
 	m_LineShader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
@@ -221,6 +222,8 @@ void GizmoDrawer::DrawNavMesh(Ref<Scene> scene, bool occluded)
 void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 {
 	using namespace Nuake;
+
+	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
 
@@ -459,6 +462,24 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	for (auto e : camView)
+	{
+		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+		m_LineShader->Bind();
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		const float aspectRatio = camera.CameraInstance->AspectRatio;
+		const float fov = camera.CameraInstance->Fov;
+		Matrix4 clampedPerspective = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
+		m_LineShader->SetUniform("u_View", glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedPerspective));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		m_BoxBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 26);
+	}
+
 	auto flatShader = ShaderManager::GetShader("Resources/Shaders/flat.shader");
 	flatShader->Bind();
 	flatShader->SetUniform("u_View", scene->m_EditorCamera->GetTransform());
@@ -484,7 +505,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	const Vector3 gizmoSize = Vector3(Engine::GetProject()->Settings.GizmoSize);
 
 	// Camera
-	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
 		gizmoShader->SetUniform("gizmo_texture", TextureManager::Get()->GetTexture("Resources/Gizmos/camera.png").get());

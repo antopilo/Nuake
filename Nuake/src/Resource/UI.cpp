@@ -27,13 +27,17 @@ UIResource::UIResource(const std::string& path) :
 	canvas = Canvas::New();
 	canvas->uuid = this->ID;
 	canvas = CanvasParser::Get().Parse(canvas, FileSystem::RelativeToAbsolute(path));
-	canvas->SetInputManager(inputManager);
-	canvas->ComputeLayout(defaultSize);
+
+	if (canvas != nullptr)
+	{
+		canvas->SetInputManager(inputManager);
+		canvas->ComputeLayout(defaultSize);
+	}
 }
 
 void UIResource::Tick()
 {
-	if (canvas)
+	if (canvas != nullptr)
 	{
 		canvas->Tick();
 	}
@@ -46,7 +50,7 @@ void UIResource::Draw()
 		RenderCommand::SetClearColor({ 0, 0, 0, 0 });
 		RenderCommand::Clear();
 
-		if (canvas)
+		if (canvas != nullptr)
 		{
 			canvas->Draw();
 		}
@@ -57,7 +61,10 @@ void UIResource::Draw()
 void UIResource::Resize(const Vector2& size)
 {
 	framebuffer->QueueResize(size);
-	canvas->ComputeLayout(size);
+	if (canvas != nullptr)
+	{
+		canvas->ComputeLayout(size);
+	}
 }
 
 void UIResource::Reload()
@@ -68,7 +75,7 @@ void UIResource::Reload()
 	}
 
 	canvas = CanvasParser::Get().Parse(canvas, FileSystem::RelativeToAbsolute(filePath));
-	if (canvas)
+	if (canvas != nullptr)
 	{
 		canvas->SetInputManager(inputManager);
 		canvas->ComputeLayout(framebuffer->GetSize());

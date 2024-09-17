@@ -37,6 +37,7 @@ namespace Nuake
 		static bool FileExists(const std::string& path, bool absolute = false);
 
 		static std::string ReadFile(const std::string& path, bool absolute = false);
+		static void CopyFileAbsolute(const std::string& src, const std::string& dest);
 
 		static std::ofstream fileWriter;
 		static bool BeginWriteFile(const std::string path, bool absolute = false);

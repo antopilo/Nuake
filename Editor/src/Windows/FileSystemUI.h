@@ -33,6 +33,8 @@ namespace Nuake {
 		void DrawContextMenu();
 		void RefreshFileBrowser();
 
+		Color GetColorByFileType(FileType fileType);
+
 		void Scan();
 	};
 }

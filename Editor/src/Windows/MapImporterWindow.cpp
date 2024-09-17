@@ -240,7 +240,7 @@ std::vector<std::string> MapImporterWindow::ScanUsedWads()
 
 std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 {
-	const std::string& baseTextureDir = "/textures/";
+	const std::string& baseTextureDir = "/Textures/";
 
 	using namespace Nuake;
 	if (m_WadToMaterialMap.find(path) != m_WadToMaterialMap.end())
@@ -285,7 +285,7 @@ std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 
 		if (entry.is_regular_file() && stem == upperInput)
 		{
-			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), FileSystem::Root + "/textures/");
+			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), FileSystem::Root + "/Textures/");
 			std::filesystem::path pathWithoutExtension = relativePath;
 			pathWithoutExtension = pathWithoutExtension.parent_path(); // Remove the file name
 

@@ -57,9 +57,11 @@ namespace Nuake
 
 		void OnWindowFocused(Window& window, bool focused);
 		void OnWindowClosed(Window& window);
+		void OnDragNDropCallback(Window& window, const std::vector<std::string>& paths);
 
 		void SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback);
 		void SetOnWindowClosedCallback(std::function<void(Window& window)> callback);
+		void SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback);
 
 	private:
 		const std::string DEFAULT_TITLE = "Untitled Window";
@@ -79,10 +81,10 @@ namespace Nuake
 		// Callbacks
 		std::function<void(Window&)> onWindowClosedCallback;
 		std::function<void(Window&, bool)> onWindowFocusedCallback;
+		std::function<void(Window&, const std::vector<std::string>& paths)> onDragNDropCallback;
 
 		void InitImgui();
 
 	private:
-
 	};
 }

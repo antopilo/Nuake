@@ -471,6 +471,11 @@ namespace Nuake
 			{
 				// Fetch resource from resource manager using UUID
 				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+				if (!uiResource)
+				{
+					continue;
+				}
+
 				uiResource->Resize(framebuffer.GetSize());
 
 				// Copy UI onto final viewport
@@ -989,6 +994,11 @@ namespace Nuake
 					}
 
 					Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
+					if (!uiResource)
+					{
+						continue;
+					}
+
 					Matrix4 finalTransform = transform.GetGlobalTransform();
 					Renderer::QuadMesh->GetMaterial()->SetAlbedo(uiResource->GetOutputTexture());
 					Renderer::SubmitMesh(Renderer::QuadMesh, finalTransform, (uint32_t)e);

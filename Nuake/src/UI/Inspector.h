@@ -96,6 +96,11 @@ namespace NuakeUI
 
 	static void DrawInspector(std::shared_ptr<Canvas> canvas)
 	{
+		if (canvas == nullptr)
+		{
+			return;
+		}
+
 		if (ImGui::Begin("Inspector"))
 		{
 			if (ImGui::BeginTabBar("MyTabBar"))
