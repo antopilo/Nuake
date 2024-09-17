@@ -736,6 +736,7 @@ namespace Nuake {
 
 		NameComponent& nameComponent = e.GetComponent<NameComponent>();
 		std::string name = nameComponent.Name;
+
         ParentComponent& parent = e.GetComponent<ParentComponent>();
 
         if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
@@ -767,9 +768,7 @@ namespace Nuake {
         }
 
         auto cursorPos = ImGui::GetCursorPos();
-
         ImGui::SetNextItemAllowOverlap();
-
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
 
         if (m_IsRenaming)
@@ -903,6 +902,25 @@ namespace Nuake {
         ImGui::TableNextColumn();
 
         ImGui::TextColored(ImVec4(0.5, 0.5, 0.5, 1.0), GetEntityTypeName(e).c_str());
+
+        ImGui::TableNextColumn();
+        {
+            bool hasScript = e.HasComponent<NetScriptComponent>();
+            if (hasScript)
+            {
+                std::string scrollIcon = std::string(ICON_FA_SCROLL) + "##" + name;
+                ImGui::PushStyleColor(ImGuiCol_Button, { 0, 0, 0, 0 });
+                if (ImGui::Button(scrollIcon.c_str(), { 40, 0 }))
+                {
+                    auto& scriptComponent = e.GetComponent<NetScriptComponent>();
+                    if (!scriptComponent.ScriptPath.empty() && FileSystem::FileExists(scriptComponent.ScriptPath))
+                    {
+                        OS::OpenIn(FileSystem::RelativeToAbsolute(scriptComponent.ScriptPath));
+                    }
+                }
+                ImGui::PopStyleColor();
+            }
+        }
 
         ImGui::TableNextColumn();
         {
@@ -2139,10 +2157,11 @@ namespace Nuake {
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4, 4 });
             if (ImGui::BeginChild("Scene tree", ImGui::GetContentRegionAvail(), false))
             {
-                if (ImGui::BeginTable("entity_table", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp))
+                if (ImGui::BeginTable("entity_table", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("   Label", ImGuiTableColumnFlags_IndentEnable | ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
                     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
+                    ImGui::TableSetupColumn("Script", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Visibility   ", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableHeadersRow();
 
