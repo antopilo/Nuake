@@ -111,12 +111,16 @@ namespace Nuake
 					{
 						int lineNum = std::stoi(lineCharNums[0]);
 						int charNum = std::stoi(lineCharNums[1]);
-
+						bool isWarning = false;
 						// error message
 						std::string errMesg = "";
 						int i = 0;
 						for (auto s : String::Split(line, ':'))
 						{
+							if (String::BeginsWith(String::RemoveWhiteSpace(s), "warning"))
+							{
+								isWarning = true;
+							}
 							if (i >= 3)
 							{
 								errMesg += s;
@@ -128,6 +132,7 @@ namespace Nuake
 						compilationError.message = errMesg;
 						compilationError.file = filePath;
 						compilationError.line = lineNum;
+						compilationError.isWarning = isWarning;
 						errors.push_back(compilationError);
 					}
 					
@@ -334,7 +339,6 @@ namespace Nuake
 		}
 
 		std::string result = OS::CompileSln(FileSystem::Root + sanitizedProjectName + ".sln");
-
 		return ExtractErrors(result);
 		//if (errors.size() > 0)
 		//{

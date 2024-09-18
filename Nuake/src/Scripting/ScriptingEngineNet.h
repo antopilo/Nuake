@@ -69,6 +69,7 @@ namespace Nuake
 		std::string file;
 		int line;
 		std::string message;
+		bool isWarning;
 	};
 
 	class ScriptingEngineNet

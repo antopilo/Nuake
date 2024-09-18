@@ -41,6 +41,7 @@ EditorSelectionPanel::EditorSelectionPanel()
 
 	RegisterTypeDrawer<bool, &EditorSelectionPanel::DrawFieldTypeBool>(this);
 	RegisterTypeDrawer<float, &EditorSelectionPanel::DrawFieldTypeFloat>(this);
+	RegisterTypeDrawer<Vector2, &EditorSelectionPanel::DrawFieldTypeVector2>(this);
 	RegisterTypeDrawer<Vector3, &EditorSelectionPanel::DrawFieldTypeVector3>(this);
 	RegisterTypeDrawer<std::string, &EditorSelectionPanel::DrawFieldTypeString>(this);
 	RegisterTypeDrawer<ResourceFile, &EditorSelectionPanel::DrawFieldTypeResourceFile>(this);
@@ -722,9 +723,34 @@ void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::me
 		std::string controlId = std::string("##") + displayName;
 		ImGui::PushID(controlId.c_str());
 		
-		if (ImGuiHelper::DrawVec3("BoxSize", vec3Ptr, 0.5f, 100.0, 0.01f))
+		if (ImGuiHelper::DrawVec3(controlId, vec3Ptr, 0.5f, 100.0, 0.01f))
 		{
 			field.set(component, *vec3Ptr);
+		}
+
+		ImGui::PopID();
+	}
+}
+
+void EditorSelectionPanel::DrawFieldTypeVector2(entt::meta_data& field, entt::meta_any& component)
+{
+	auto prop = field.prop(HashedName::DisplayName);
+	auto propVal = prop.value();
+	const char* displayName = *propVal.try_cast<const char*>();
+
+	if (displayName != nullptr)
+	{
+		ImGui::Text(displayName);
+		ImGui::TableNextColumn();
+
+		auto fieldVal = field.get(component);
+		Vector2* vec2Ptr = fieldVal.try_cast<Vector2>();
+		std::string controlId = std::string("##") + displayName;
+		ImGui::PushID(controlId.c_str());
+
+		if (ImGuiHelper::DrawVec2(controlId, vec2Ptr, 0.5f, 100.0, 0.01f))
+		{
+			field.set(component, *vec2Ptr);
 		}
 
 		ImGui::PopID();

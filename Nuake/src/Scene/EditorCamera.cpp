@@ -10,7 +10,7 @@
 
 namespace Nuake
 {
-	void EditorCamera::Update(Timestep ts, const bool hover)
+	bool EditorCamera::Update(Timestep ts, const bool hover)
 	{
 		if (IsMoving)
 		{
@@ -28,6 +28,7 @@ namespace Nuake
 		const float y = Input::GetMouseY();
 
 		m_IsFlying = Input::IsMouseButtonDown(1) || Input::IsMouseButtonDown(2);
+
 		const bool isPressingMouse = m_IsFlying || Input::YScroll != 0.0f;
 		
 		if (hover)
@@ -74,7 +75,7 @@ namespace Nuake
 				Input::YScroll = 0.0f;
 			}
 
-			return;
+			return true;
 		}
 
 		// Keyboard
@@ -194,6 +195,8 @@ namespace Nuake
 		
 		mouseLastX = x;
 		mouseLastY = y;
+
+		return controlled;
 	}
 
 	Ref<EditorCamera> EditorCamera::Copy()

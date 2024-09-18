@@ -34,6 +34,7 @@ namespace Nuake
 		Ref<Scene> SceneSnapshot;
 		static NuakeEditor::CommandBuffer* mCommandBuffer;
 
+		bool isControllingCamera = false;
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;

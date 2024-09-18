@@ -88,6 +88,7 @@ private:
 
 	void DrawFieldTypeFloat(entt::meta_data& field, entt::meta_any& component);
 	void DrawFieldTypeBool(entt::meta_data& field, entt::meta_any& component);
+	void DrawFieldTypeVector2(entt::meta_data& field, entt::meta_any& component);
 	void DrawFieldTypeVector3(entt::meta_data& field, entt::meta_any& component);
 	void DrawFieldTypeString(entt::meta_data& field, entt::meta_any& component);
 	void DrawFieldTypeResourceFile(entt::meta_data& field, entt::meta_any& component);

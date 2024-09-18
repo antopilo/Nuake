@@ -20,7 +20,7 @@ namespace Nuake
 			Translation = Vector3(2, 2, 2);
 		}
 
-		void Update(Timestep ts, const bool hover);
+		bool Update(Timestep ts, const bool hover);
 
 		Vector3 TargetPos = Vector3(0, 0, 0);
 		bool IsMoving = false;

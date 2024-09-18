@@ -261,6 +261,20 @@ namespace Nuake {
                     modelComponent.ModelResource = modelResource;
                     entity.GetComponent<TransformComponent>().SetLocalPosition(dragnDropWorldPos);
                 }
+
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Map"))
+                {
+                    char* file = (char*)payload->Data;
+                    std::string fullPath = std::string(file, 256);
+                    fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+
+                    auto entity = Engine::GetCurrentScene()->CreateEntity(FileSystem::GetFileNameFromPath(fullPath));
+                    QuakeMapComponent& mapComponent = entity.AddComponent<QuakeMapComponent>();
+                    mapComponent.Path = FileSystem::GetFile(fullPath);
+                    mapComponent.AutoRebuild = true;
+                    mapComponent.HasCollisions = true;
+                    mapComponent.ActionRebuild();
+                }
             }
             else
             {
@@ -468,31 +482,31 @@ namespace Nuake {
         {
             if (ImGui::BeginMenuBar()) 
             {
-                float availWidth = ImGui::GetContentRegionAvail().x;
-                float windowWidth = ImGui::GetWindowWidth();
-
-                float used = windowWidth - availWidth;
-                float half = windowWidth / 2.0;
-                float needed = half - used;
-
+                //float availWidth = ImGui::GetContentRegionAvail().x;
+                //float windowWidth = ImGui::GetWindowWidth();
+                //
+                //float used = windowWidth - availWidth;
+                //float half = windowWidth / 2.0;
+                //float needed = half - used;
+                //
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
                 ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-
-                if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::W))
-                {
-                    CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::E))
-                {
-                    CurrentOperation = ImGuizmo::OPERATION::ROTATE;
-                }
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::R))
-                {
-                    CurrentOperation = ImGuizmo::OPERATION::SCALE;
-                }
-                ImGui::SameLine();
+                
+                //if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::W))
+                //{
+                //    CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+                //}
+                //ImGui::SameLine();
+                //if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::E))
+                //{
+                //    CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+                //}
+                //ImGui::SameLine();
+                //if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::R))
+                //{
+                //    CurrentOperation = ImGuizmo::OPERATION::SCALE;
+                //}
+                //ImGui::SameLine();
                 ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
                 ImGui::SameLine();
 
@@ -560,7 +574,12 @@ namespace Nuake {
 
                             JobSystem::Get().Dispatch(job, [this]()
                             {
-                                if (errors.size() > 0)
+                                bool containsError = false;
+                                std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                                        return error.isWarning == false;
+                                    });
+
+                                if (errors.size() > 0 && containsError)
                                 {
                                     SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
 
@@ -575,9 +594,16 @@ namespace Nuake {
                                 {
                                     Engine::GetProject()->ExportEntitiesToTrenchbroom();
 
+                                    ImGui::SetWindowFocus("Logger");
                                     SetStatusMessage("Entering play mode...");
 
                                     PushCommand(SetGameState(GameState::Playing));
+
+                                    for (CompilationError error : errors)
+                                    {
+                                        const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                        Logger::Log(errorMessage, ".net", WARNING);
+                                    }
 
                                     std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
                                     SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
@@ -676,18 +702,33 @@ namespace Nuake {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
                 ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 
-                if (ImGui::Button(ICON_FA_HAMMER, ImVec2(30, 30)))
+                static bool isBuilding = false;
+                std::string icon = isBuilding ? ICON_FA_SYNC_ALT : ICON_FA_HAMMER;
+
+                if (isBuilding)
+                {
+                    ImGui::BeginDisabled();
+                }
+
+                if (ImGui::Button(icon.c_str(), ImVec2(30, 30)) && !isBuilding)
                 {
                     SetStatusMessage(std::string(ICON_FA_HAMMER)+ " Building solution...", { 0.1f, 0.1f, 1.0f, 1.0f });
 
                     auto job = [this]()
                         {
+                            isBuilding = true;
                             this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                         };
 
                     JobSystem::Get().Dispatch(job, [this]()
                     {
-                        if (errors.size() > 0)
+                        isBuilding = false;
+                        bool containsError = false;
+                        std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                            return error.isWarning == false;
+                            });
+
+                        if (errors.size() > 0 && containsError)
                         {
                             SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
 
@@ -700,10 +741,23 @@ namespace Nuake {
                         }
                         else
                         {
+                            for (CompilationError error : errors)
+                            {
+                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                Logger::Log(errorMessage, ".net", WARNING);
+                            }
+
+                            Logger::Log("Build Successful!", ".net", VERBOSE);
+                            ScriptingEngineNet::Get().LoadProjectAssembly(Engine::GetProject());
                             Engine::GetProject()->ExportEntitiesToTrenchbroom();
-                            SetStatusMessage("Build succesful!");
+                            SetStatusMessage("Build Successful!");
                         }
                     });
+                }
+
+                if (isBuilding)
+                {
+                    ImGui::EndDisabled();
                 }
 
                 if (ImGui::BeginItemTooltip())
@@ -821,8 +875,25 @@ namespace Nuake {
                     parent.Children.push_back(payload_entity);
                 }
             }
+            else if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_NetScript"))
+            {
+                char* file = (char*)payload->Data;
+
+                std::string fullPath = std::string(file, 512);
+                std::string path = Nuake::FileSystem::AbsoluteToRelative(std::move(fullPath));
+
+                if (e.HasComponent<NetScriptComponent>())
+                {
+                    e.GetComponent<NetScriptComponent>().ScriptPath = path;
+                }
+                else
+                {
+                    e.AddComponent<NetScriptComponent>().ScriptPath = path;
+                }
+            }
             ImGui::EndDragDropTarget();
         }
+        
 
         if (!isDragging && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
         {
@@ -2244,20 +2315,109 @@ namespace Nuake {
     {
         if (ImGui::Begin("Logger"))
         {
-            if (ImGui::Button("Clear Logs"))
+            if (ImGui::Button("Clear"))
             {
                 Logger::ClearLogs();
                 SetStatusMessage("Logs cleared.");
             }
 
             ImGui::SameLine();
-            ImGui::Checkbox("Errors", &LogErrors);
+
+            if (ImGui::BeginMenu("Edit"))
+            {
+                if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+                ImGui::Separator();
+                if (ImGui::MenuItem("Project Settings", ""))
+                {
+                }
+                ImGui::EndMenu();
+            }
             ImGui::SameLine();
-            ImGui::Checkbox("Warning", &LogWarnings);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+
+            bool isEnabled = LogErrors;
+            if (isEnabled)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_BAN, ImVec2(30, 28)))
+            {
+                LogErrors = !LogErrors;
+            }
+
+            UI::Tooltip("Display Errors");
+            if (isEnabled)
+            {
+                ImGui::PopStyleColor();
+            }
+
             ImGui::SameLine();
-            ImGui::Checkbox("Debug", &LogDebug);
+
+            isEnabled = LogWarnings;
+            if (isEnabled)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, ImVec2(30, 28)))
+            {
+                LogWarnings = !LogWarnings;
+            }
+
+            UI::Tooltip("Display Warnings");
+            if (isEnabled)
+            {
+                ImGui::PopStyleColor();
+            }
+
             ImGui::SameLine();
-            ImGui::Checkbox("Autoscroll", &AutoScroll);
+
+            isEnabled = LogDebug;
+            if (isEnabled)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_INFO, ImVec2(30, 28)))
+            {
+                LogDebug = !LogDebug;
+            }
+
+            UI::Tooltip("Display Verbose");
+            if (isEnabled)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::SameLine();
+
+            isEnabled = AutoScroll;
+            if (isEnabled)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            }
+
+            if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(30, 28)))
+            {
+                AutoScroll = !AutoScroll;
+            }
+
+            UI::Tooltip("Auto-Scroll");
+            if (isEnabled)
+            {
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
             //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             //if (ImGui::BeginChild("Log window", ImGui::GetContentRegionAvail(), false))
             //{
@@ -2471,7 +2631,7 @@ namespace Nuake {
                 ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
             }
 
-            if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::W))
+            if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
             {
                 CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
             }
@@ -2492,7 +2652,7 @@ namespace Nuake {
                 ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
             }
 
-            if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::E))
+            if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_E, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
             {
                 CurrentOperation = ImGuizmo::OPERATION::ROTATE;
             }
@@ -2513,7 +2673,7 @@ namespace Nuake {
                 ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
             }
 
-            if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || Input::IsKeyDown(Key::R))
+            if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
             {
                 CurrentOperation = ImGuizmo::OPERATION::SCALE;
             }
@@ -2573,6 +2733,7 @@ namespace Nuake {
             ImGui::PushItemWidth(75);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
             ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
+            CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.z };
             ImGui::PopStyleVar();
 
             ImGui::PopItemWidth();
@@ -2651,8 +2812,8 @@ namespace Nuake {
             const float camSpeed = editorCam->Speed;
 
             const float maxSpeed = 50.0f;
-            const float minSpeed = 0.1f;
-            const float normalizedSpeed = glm::clamp(camSpeed / maxSpeed, 0.0f, 1.0f);
+            const float minSpeed = 0.05f;
+            const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
 
             ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0) ;
             ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
@@ -3081,13 +3242,13 @@ namespace Nuake {
         // Shortcuts
         if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
         {
-            if(ImGui::IsKeyPressed(ImGuiKey_S))
+            if(ImGui::IsKeyPressed(ImGuiKey_S, false))
             {
                 Engine::GetProject()->Save();
                 Engine::GetCurrentScene()->Save();
 
             }
-            else if(ImGui::IsKeyPressed(ImGuiKey_O))
+            else if(ImGui::IsKeyPressed(ImGuiKey_O, false))
             {
                 OpenScene();
                 
@@ -3131,7 +3292,7 @@ namespace Nuake {
 
         DrawStatusBar();
 
-		pInterface.DrawEntitySettings();
+		//pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
         SelectionPanel.Draw(Selection);
@@ -3187,7 +3348,7 @@ namespace Nuake {
         }
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-        editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
+        isControllingCamera = editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
         if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(Key::F))

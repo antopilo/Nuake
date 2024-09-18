@@ -77,6 +77,7 @@ namespace Nuake
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 	}
 
 	bool Input::IsMouseHidden() 
@@ -89,6 +90,7 @@ namespace Nuake
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 	}
 
 	// Action

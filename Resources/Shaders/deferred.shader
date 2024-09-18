@@ -158,6 +158,7 @@ float SampleShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 
 float SampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
 {
+    //return SampleShadowMap(shadowMap, coords.xy, compare);
     vec2 pixelPos = coords / texelSize + vec2(0.5);
     vec2 fracPart = fract(pixelPos);
     vec2 startTexel = (pixelPos - fracPart) * texelSize;
@@ -195,12 +196,14 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
     float bias = max(0.005 * (1.0 - dot(normal, u_DirectionalLight.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
+    //return SampleShadowMap(ShadowMaps[shadowmap], projCoords.xy, currentDepth - bias);
+    
     if (shadowmap <= 4)
     {
         const float NUM_SAMPLES = 4.f;
         const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
         const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
-        vec2 texelSize = 1.0 / vec2(4096, 4096);
+        vec2 texelSize = 1.0 / vec2(2048, 2048);
 
         float result = 0.0f;
         for (float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0f)
@@ -214,7 +217,6 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
 
         return result / NUM_SAMPLES_SQUARED;
     }
-    
     else
     {
         return SampleShadowMap(ShadowMaps[shadowmap], projCoords.xy, currentDepth - bias);

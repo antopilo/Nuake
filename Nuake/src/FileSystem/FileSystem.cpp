@@ -94,8 +94,6 @@ void FileSystem::SetRootDirectory(const std::string path)
 						return;
 					}
 
-					Logger::Log(normalizedPath + " event: " + filewatch::event_to_string(event), "filewatcher", VERBOSE);
-
 					if (event == filewatch::Event::modified)
 					{
 						file->SetHasBeenModified(true);

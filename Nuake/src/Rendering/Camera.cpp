@@ -67,7 +67,7 @@ namespace Nuake
 	Matrix4 Camera::GetPerspective()
 	{
 		//TODO: Add perspective options
-		m_Perspective = glm::perspectiveFov(glm::radians(Fov), 9.0f * AspectRatio, 9.0f, 0.001f, 1000.0f);
+		m_Perspective = glm::perspectiveFov(glm::radians(Fov), 9.0f * AspectRatio, 9.0f, 0.001f, 500.0f);
 		return m_Perspective;
 	}
 
