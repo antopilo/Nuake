@@ -324,6 +324,15 @@ namespace Nuake
 		return widgetUUIDToManagedObjects[std::make_pair(canvasUUID, uuid)];
 	}
 
+	template<class T>
+	void ScriptingEngineNet::AddListener(const T& delegate)	{}
+
+	template <>
+	void ScriptingEngineNet::AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(const GameAssemblyLoadedDelegate& delegate)
+	{
+		listenersGameAssemblyLoaded.push_back(delegate);
+	}
+
 	std::vector<CompilationError> ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
 	{
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
@@ -524,6 +533,11 @@ namespace Nuake
 						}
 					}
 				}
+			}
+
+			for (auto& delegate : listenersGameAssemblyLoaded)
+			{
+				delegate();
 			}
 		}
 	}

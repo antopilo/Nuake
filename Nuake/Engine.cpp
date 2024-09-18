@@ -20,6 +20,8 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
 
+#include "src/Subsystems/EngineSubsystemScript.h"
+#include "src/Subsystems/TickableEngineSubsystem.h"
 
 
 namespace Nuake
@@ -39,6 +41,8 @@ namespace Nuake
 
 	void Engine::Init()
 	{
+		ScriptingEngineNet::Get().AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(&Engine::OnScriptingEngineGameAssemblyLoaded);
+		
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
@@ -53,6 +57,8 @@ namespace Nuake
 		RegisterCoreTypes::RegisterCoreComponents();
 
 		Modules::StartupModules();
+
+		InitializeCoreSubsystems();
 	}
 
 	void Engine::Tick()
@@ -89,6 +95,15 @@ namespace Nuake
 					queuedScene = "";
 				}
 				
+			}
+		}
+
+		// Tick all subsystems
+		for (auto subsystem : tickableSubsystems)
+		{
+			if (subsystem != nullptr)
+			{
+				subsystem->Tick();
 			}
 		}
 
@@ -214,6 +229,46 @@ namespace Nuake
 	Ref<Project> Engine::GetProject()
 	{
 		return currentProject;
+	}
+
+	Ref<EngineSubsystemScript> Engine::GetScriptedSubsystem(const std::string& subsystemName)
+	{
+		if (scriptedSubsystemMap.contains(subsystemName))
+		{
+			return scriptedSubsystemMap[subsystemName];
+		}
+		return nullptr;
+	}
+
+	void Engine::InitializeCoreSubsystems()
+	{
+	}
+
+	void Engine::OnScriptingEngineGameAssemblyLoaded()
+	{
+		subsystems.clear();
+		scriptedSubsystemMap.clear();
+		
+		auto& gameAssembly = ScriptingEngineNet::Get().GetGameAssembly();
+
+		auto scriptTypeEngineSubsystem = gameAssembly.GetType("Nuake.Net.EngineSubsystem");
+		
+		const auto& types = gameAssembly.GetTypes();
+		for (const auto& type : types)
+		{
+			// Initialize all subsystems
+			if (type->IsSubclassOf(scriptTypeEngineSubsystem))
+			{
+				const std::string typeName = std::string(type->GetFullName());
+				Logger::Log("Creating Scripted Subsystem " + typeName);
+
+				Coral::ManagedObject scriptedSubsystem = type->CreateInstance();
+				Ref<EngineSubsystemScript> subsystemScript = CreateRef<EngineSubsystemScript>(scriptedSubsystem);
+				subsystems.push_back(subsystemScript);
+
+				scriptedSubsystemMap[typeName] = subsystemScript;
+			}
+		}
 	}
 
 	bool Engine::LoadProject(Ref<Project> project)

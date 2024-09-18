@@ -74,6 +74,9 @@ namespace Nuake
 	class ScriptingEngineNet
 	{
 	public:
+		using GameAssemblyLoadedDelegate = std::function<void()>; 
+		
+	public:
 		static ScriptingEngineNet& Get();
 
 		void Initialize();
@@ -83,6 +86,7 @@ namespace Nuake
 		Coral::HostInstance* GetHostInstance() { return hostInstance; }
 		Coral::AssemblyLoadContext& GetLoadContext() { return loadContext; }
 		Coral::ManagedAssembly GetNuakeAssembly() const { return nuakeAssembly; }
+		Coral::ManagedAssembly& GetGameAssembly() { return gameAssembly; }
 
 		Coral::ManagedAssembly ReloadEngineAPI(Coral::AssemblyLoadContext & context);
 
@@ -109,6 +113,9 @@ namespace Nuake
 		std::unordered_map<std::string, NetGameScriptObject> GetBrushEntities() const { return brushEntityTypes; }
 		std::unordered_map<std::string, NetGameScriptObject> GetPointEntities() const { return pointEntityTypes; }
 		std::unordered_map<std::string, UIWidgetObject> GetUIWidgets() const { return uiWidgets; }
+
+		template<class T> void AddListener(const T& delegate);
+		template<> void AddListener(const GameAssemblyLoadedDelegate& delegate);
 
 	private:
 		const std::string m_Scope = "Nuake.Net";
@@ -140,6 +147,8 @@ namespace Nuake
 
 		std::unordered_map<uint32_t, Coral::ManagedObject> entityToManagedObjects;
 		std::map<std::pair<UUID, UUID>, Coral::ManagedObject> widgetUUIDToManagedObjects;
+
+		std::vector<GameAssemblyLoadedDelegate> listenersGameAssemblyLoaded;
 		
 		ScriptingEngineNet();
 		~ScriptingEngineNet();

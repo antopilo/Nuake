@@ -1,10 +1,15 @@
 #include "EngineNetAPI.h"
-#include <Coral/String.hpp>
-#include <src/Core/Maths.h>
-#include <Engine.h>
+
+#include "src/Core/Maths.h"
 #include "src/Rendering/SceneRenderer.h"
+#include "Engine.h"
+#include "src/Physics/PhysicsManager.h"
+
+#include <Coral/String.hpp>
+#include <Coral/ManagedObject.hpp>
 #include <Coral/Array.hpp>
-#include <src/Physics/PhysicsManager.h>
+#include "Coral/Type.hpp"
+#include "src/Subsystems/EngineSubsystemScript.h"
 
 namespace Nuake {
 
@@ -112,10 +117,22 @@ namespace Nuake {
 		Engine::QueueSceneSwitch(std::string(path));
 	}
 
+	Coral::ManagedObject GetEngineSubsystemByName(Coral::String subsystemName)
+	{
+		const Ref<EngineSubsystemScript> scriptedSubsystem = Engine::GetScriptedSubsystem(subsystemName);
+		if (scriptedSubsystem == nullptr)
+		{
+			return {};
+		}
+		
+		return scriptedSubsystem->GetManagedObjectInstance();
+	}
+
 	void EngineNetAPI::RegisterMethods()
 	{
 		RegisterMethod("Engine.LoadSceneIcall", &LoadScene);
 		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
+		RegisterMethod("Engine.GetSubsystemByNameIcall", &GetEngineSubsystemByName);
 
 		// Debug renderer
 		RegisterMethod("Debug.DrawLineIcall", &DrawLine);

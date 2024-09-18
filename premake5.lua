@@ -127,6 +127,8 @@ project "Nuake"
         "%{prj.name}/src/Threading/**.cpp",
         "%{prj.name}/src/UI/**.h",
         "%{prj.name}/src/UI/**.cpp",
+        "%{prj.name}/src/Subsystems/**.h",
+        "%{prj.name}/src/Subsystems/**.cpp",
         "%{prj.name}/src/Vendors/**.h",
         "%{prj.name}/src/Vendors/**.cpp",
         
