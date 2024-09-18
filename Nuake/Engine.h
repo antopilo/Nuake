@@ -10,11 +10,11 @@ namespace Nuake
 	class Project;
 	class Scene;
 	class EngineSubsystem;
-	class TickableEngineSubsystem;
-	class EngineSubsystemScript;
+	class EngineSubsystemScriptable;
 
 	enum GameState
 	{
+		Loading,
 		Playing,
 		Paused,
 		Stopped
@@ -54,7 +54,8 @@ namespace Nuake
 		static bool LoadProject(Ref<Project> project);
 		static Ref<Project> GetProject();
 
-		static Ref<EngineSubsystemScript> GetScriptedSubsystem(const std::string& subsystemName);
+		static Ref<EngineSubsystemScriptable> GetScriptedSubsystem(const std::string& subsystemName);
+		static Ref<EngineSubsystemScriptable> GetScriptedSubsystem(const int subsystemId);
 
 	protected:
 		static void InitializeCoreSubsystems();
@@ -67,9 +68,7 @@ namespace Nuake
 		static std::string queuedScene;
 
 		static inline std::vector<Ref<EngineSubsystem>> subsystems;
-		static inline std::vector<Ref<TickableEngineSubsystem>> tickableSubsystems;
-
-		static inline std::unordered_map<std::string, Ref<EngineSubsystemScript>> scriptedSubsystemMap;
+		static inline std::unordered_map<std::string, Ref<EngineSubsystemScriptable>> scriptedSubsystemMap;
 
 		static GameState gameState;
 

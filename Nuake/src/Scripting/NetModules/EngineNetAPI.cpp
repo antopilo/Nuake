@@ -9,7 +9,7 @@
 #include <Coral/ManagedObject.hpp>
 #include <Coral/Array.hpp>
 #include "Coral/Type.hpp"
-#include "src/Subsystems/EngineSubsystemScript.h"
+#include "..\..\Subsystems\EngineSubsystemScriptable.h"
 
 namespace Nuake {
 
@@ -119,7 +119,7 @@ namespace Nuake {
 
 	Coral::ManagedObject GetEngineSubsystemByName(Coral::String subsystemName)
 	{
-		const Ref<EngineSubsystemScript> scriptedSubsystem = Engine::GetScriptedSubsystem(subsystemName);
+		const Ref<EngineSubsystemScriptable> scriptedSubsystem = Engine::GetScriptedSubsystem(subsystemName);
 		if (scriptedSubsystem == nullptr)
 		{
 			return {};

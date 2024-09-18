@@ -14,14 +14,13 @@
 #include "src/Threading/JobSystem.h"
 #include "src/Core/RegisterCoreTypes.h"
 #include "src/Modules/Modules.h"
+#include "src/Subsystems/EngineSubsystemScriptable.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
 
-#include "src/Subsystems/EngineSubsystemScript.h"
-#include "src/Subsystems/TickableEngineSubsystem.h"
 
 
 namespace Nuake
@@ -97,20 +96,27 @@ namespace Nuake
 				
 			}
 		}
+		
+		float scaledTimeStep = timeStep * timeScale;
 
 		// Tick all subsystems
-		for (auto subsystem : tickableSubsystems)
+		if (Engine::IsPlayMode())
 		{
-			if (subsystem != nullptr)
+			for (auto subsystem : subsystems)
 			{
-				subsystem->Tick();
+				if (subsystem == nullptr)
+					continue;
+
+				if (subsystem->CanEverTick())
+				{
+					subsystem->Tick(scaledTimeStep);
+				}
 			}
 		}
 
 		// Dont update if no scene is loaded.
 		if (currentWindow->GetScene())
 		{
-			float scaledTimeStep = timeStep * timeScale;
 			currentWindow->Update(scaledTimeStep);
 
 			// Play mode update all the entities, Editor does not.
@@ -136,12 +142,14 @@ namespace Nuake
 
 	void Engine::EnterPlayMode()
 	{
+		SetGameState(GameState::Loading);
+		
 		lastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
-		if (GetGameState() == GameState::Playing)
+		if (GetGameState() == GameState::Playing || GetGameState() == GameState::Loading)
 		{
-			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
+			Logger::Log("Cannot enter play mode if is already in play mode or is loading.", "engine", WARNING);
 			return;
 		}
 
@@ -155,6 +163,9 @@ namespace Nuake
 		{
 			Logger::Log("Cannot enter play mode. Scene OnInit failed", "engine", CRITICAL);
 			GetCurrentScene()->OnExit();
+
+			// Precautionary measure
+			SetGameState(GameState::Stopped);
 		}
 	}
 
@@ -231,7 +242,7 @@ namespace Nuake
 		return currentProject;
 	}
 
-	Ref<EngineSubsystemScript> Engine::GetScriptedSubsystem(const std::string& subsystemName)
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const std::string& subsystemName)
 	{
 		if (scriptedSubsystemMap.contains(subsystemName))
 		{
@@ -240,18 +251,32 @@ namespace Nuake
 		return nullptr;
 	}
 
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const int subsystemId)
+	{
+		if (subsystemId >= subsystems.size())
+		{
+			return nullptr;
+		}
+		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
+	}
+
 	void Engine::InitializeCoreSubsystems()
 	{
 	}
 
 	void Engine::OnScriptingEngineGameAssemblyLoaded()
 	{
+		if (!Engine::IsPlayMode() && Engine::GetGameState() != GameState::Loading)
+		{
+			return;
+		}
+		
 		subsystems.clear();
 		scriptedSubsystemMap.clear();
-		
-		auto& gameAssembly = ScriptingEngineNet::Get().GetGameAssembly();
 
-		auto scriptTypeEngineSubsystem = gameAssembly.GetType("Nuake.Net.EngineSubsystem");
+		const Coral::ManagedAssembly& gameAssembly = ScriptingEngineNet::Get().GetGameAssembly();
+
+		const auto scriptTypeEngineSubsystem = gameAssembly.GetType("Nuake.Net.EngineSubsystem");
 		
 		const auto& types = gameAssembly.GetTypes();
 		for (const auto& type : types)
@@ -263,10 +288,13 @@ namespace Nuake
 				Logger::Log("Creating Scripted Subsystem " + typeName);
 
 				Coral::ManagedObject scriptedSubsystem = type->CreateInstance();
-				Ref<EngineSubsystemScript> subsystemScript = CreateRef<EngineSubsystemScript>(scriptedSubsystem);
+				scriptedSubsystem.SetPropertyValue("EngineSubsystemID", subsystems.size());
+				Ref<EngineSubsystemScriptable> subsystemScript = CreateRef<EngineSubsystemScriptable>(scriptedSubsystem);
 				subsystems.push_back(subsystemScript);
 
 				scriptedSubsystemMap[typeName] = subsystemScript;
+
+				subsystemScript->Initialize();
 			}
 		}
 	}

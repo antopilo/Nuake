@@ -1,19 +1,23 @@
 ﻿#pragma once
 
 #include "EngineSubsystem.h"
-#include "Coral/ManagedObject.hpp"
+
+#include <Coral/ManagedObject.hpp>
 
 /**
  * Essentially just a wrapper for C# subsystems
  */
 namespace Nuake
 {
-    class EngineSubsystemScript : public EngineSubsystem
+    class EngineSubsystemScriptable : public EngineSubsystem
     {
     public:
-        EngineSubsystemScript(const Coral::ManagedObject& object);
+        EngineSubsystemScriptable(const Coral::ManagedObject& object);
 
         Coral::ManagedObject& GetManagedObjectInstance();
+
+        virtual void Initialize() override;
+        virtual void Tick(float deltaTime) override;
 
     private:
         Coral::ManagedObject cSharpObjectInstance;

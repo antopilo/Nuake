@@ -9,6 +9,13 @@ namespace Nuake
     class EngineSubsystem
     {
     public:
+        void SetCanTick(bool canTick);
+        bool CanEverTick() const;
 
+        virtual void Initialize() {}
+        virtual void Tick(float deltaTime) {}
+
+    private:
+        bool canEverTick = true;
     };
 }

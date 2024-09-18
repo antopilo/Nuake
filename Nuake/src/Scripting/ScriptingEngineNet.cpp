@@ -8,6 +8,7 @@
 #include "src/Scene/Components/NetScriptComponent.h"
 
 #include "NetModules/EngineNetAPI.h"
+#include "NetModules/EngineSubsystemNetAPI.h"
 #include "NetModules/InputNetAPI.h"
 #include "NetModules/SceneNetAPI.h"
 #include "NetModules/UINetAPI.h"
@@ -53,6 +54,7 @@ namespace Nuake
 		modules =
 		{
 			CreateRef<EngineNetAPI>(),
+			CreateRef<EngineSubsystemNetAPI>(),
 			CreateRef<InputNetAPI>(),
 			CreateRef<SceneNetAPI>(),
 			CreateRef<UINetAPI>()
