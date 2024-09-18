@@ -16,6 +16,6 @@ namespace Nuake
         virtual void Tick(float deltaTime) {}
 
     private:
-        bool canEverTick = true;
+        bool canEverTick = false;
     };
 }

@@ -142,8 +142,6 @@ namespace Nuake
 
 	void Engine::EnterPlayMode()
 	{
-		SetGameState(GameState::Loading);
-		
 		lastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
@@ -152,6 +150,8 @@ namespace Nuake
 			Logger::Log("Cannot enter play mode if is already in play mode or is loading.", "engine", WARNING);
 			return;
 		}
+		
+		SetGameState(GameState::Loading);
 
 		PhysicsManager::Get().ReInit();
 
@@ -163,9 +163,6 @@ namespace Nuake
 		{
 			Logger::Log("Cannot enter play mode. Scene OnInit failed", "engine", CRITICAL);
 			GetCurrentScene()->OnExit();
-
-			// Precautionary measure
-			SetGameState(GameState::Stopped);
 		}
 	}
 
