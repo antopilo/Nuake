@@ -1,4 +1,5 @@
 #pragma once
+
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Window.h"
@@ -8,9 +9,12 @@ namespace Nuake
 {
 	class Project;
 	class Scene;
+	class EngineSubsystem;
+	class EngineSubsystemScriptable;
 
 	enum GameState
 	{
+		Loading,
 		Playing,
 		Paused,
 		Stopped
@@ -50,11 +54,21 @@ namespace Nuake
 		static bool LoadProject(Ref<Project> project);
 		static Ref<Project> GetProject();
 
+		static Ref<EngineSubsystemScriptable> GetScriptedSubsystem(const std::string& subsystemName);
+		static Ref<EngineSubsystemScriptable> GetScriptedSubsystem(const int subsystemId);
+
+	protected:
+		static void InitializeCoreSubsystems();
+		static void OnScriptingEngineGameAssemblyLoaded();
+
 	private:
 		static Ref<Window> currentWindow;
 		static Ref<Project> currentProject;
 		static Ref<Scene> currentScene;
 		static std::string queuedScene;
+
+		static inline std::vector<Ref<EngineSubsystem>> subsystems;
+		static inline std::unordered_map<std::string, Ref<EngineSubsystemScriptable>> scriptedSubsystemMap;
 
 		static GameState gameState;
 

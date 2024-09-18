@@ -14,6 +14,7 @@
 #include "src/Threading/JobSystem.h"
 #include "src/Core/RegisterCoreTypes.h"
 #include "src/Modules/Modules.h"
+#include "src/Subsystems/EngineSubsystemScriptable.h"
 
 #include <GLFW/glfw3.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -39,6 +40,8 @@ namespace Nuake
 
 	void Engine::Init()
 	{
+		ScriptingEngineNet::Get().AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(&Engine::OnScriptingEngineGameAssemblyLoaded);
+		
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
@@ -53,6 +56,8 @@ namespace Nuake
 		RegisterCoreTypes::RegisterCoreComponents();
 
 		Modules::StartupModules();
+
+		InitializeCoreSubsystems();
 	}
 
 	void Engine::Tick()
@@ -91,11 +96,27 @@ namespace Nuake
 				
 			}
 		}
+		
+		float scaledTimeStep = timeStep * timeScale;
+
+		// Tick all subsystems
+		if (Engine::IsPlayMode())
+		{
+			for (auto subsystem : subsystems)
+			{
+				if (subsystem == nullptr)
+					continue;
+
+				if (subsystem->CanEverTick())
+				{
+					subsystem->Tick(scaledTimeStep);
+				}
+			}
+		}
 
 		// Dont update if no scene is loaded.
 		if (currentWindow->GetScene())
 		{
-			float scaledTimeStep = timeStep * timeScale;
 			currentWindow->Update(scaledTimeStep);
 
 			// Play mode update all the entities, Editor does not.
@@ -124,11 +145,13 @@ namespace Nuake
 		lastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
-		if (GetGameState() == GameState::Playing)
+		if (GetGameState() == GameState::Playing || GetGameState() == GameState::Loading)
 		{
-			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
+			Logger::Log("Cannot enter play mode if is already in play mode or is loading.", "engine", WARNING);
 			return;
 		}
+		
+		SetGameState(GameState::Loading);
 
 		PhysicsManager::Get().ReInit();
 
@@ -214,6 +237,63 @@ namespace Nuake
 	Ref<Project> Engine::GetProject()
 	{
 		return currentProject;
+	}
+
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const std::string& subsystemName)
+	{
+		if (scriptedSubsystemMap.contains(subsystemName))
+		{
+			return scriptedSubsystemMap[subsystemName];
+		}
+		return nullptr;
+	}
+
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const int subsystemId)
+	{
+		if (subsystemId >= subsystems.size())
+		{
+			return nullptr;
+		}
+		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
+	}
+
+	void Engine::InitializeCoreSubsystems()
+	{
+	}
+
+	void Engine::OnScriptingEngineGameAssemblyLoaded()
+	{
+		if (!Engine::IsPlayMode() && Engine::GetGameState() != GameState::Loading)
+		{
+			return;
+		}
+		
+		subsystems.clear();
+		scriptedSubsystemMap.clear();
+
+		const Coral::ManagedAssembly& gameAssembly = ScriptingEngineNet::Get().GetGameAssembly();
+
+		const auto scriptTypeEngineSubsystem = gameAssembly.GetType("Nuake.Net.EngineSubsystem");
+		
+		const auto& types = gameAssembly.GetTypes();
+		for (const auto& type : types)
+		{
+			// Initialize all subsystems
+			if (type->IsSubclassOf(scriptTypeEngineSubsystem))
+			{
+				const std::string typeName = std::string(type->GetFullName());
+				Logger::Log("Creating Scripted Subsystem " + typeName);
+
+				Coral::ManagedObject scriptedSubsystem = type->CreateInstance();
+				scriptedSubsystem.SetPropertyValue("EngineSubsystemID", subsystems.size());
+				Ref<EngineSubsystemScriptable> subsystemScript = CreateRef<EngineSubsystemScriptable>(scriptedSubsystem);
+				subsystems.push_back(subsystemScript);
+
+				scriptedSubsystemMap[typeName] = subsystemScript;
+
+				subsystemScript->Initialize();
+			}
+		}
 	}
 
 	bool Engine::LoadProject(Ref<Project> project)

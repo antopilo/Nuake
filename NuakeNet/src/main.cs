@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -18,6 +19,8 @@ namespace Nuake.Net
     {
         internal static unsafe delegate*<NativeString, void> LoggerLogIcall;
         internal static unsafe delegate*<NativeString, void> LoadSceneIcall;
+        internal static unsafe delegate*<NativeString, NativeInstance<EngineSubsystem>> GetSubsystemByNameIcall;
+        
         public Engine() { }
 
         public static void LoadScene(string path)
@@ -32,6 +35,14 @@ namespace Nuake.Net
         public static void Log(string input)
         {
             unsafe { LoggerLogIcall(input); }
+        }
+
+        public static T? GetSubsystem<T>() where T : EngineSubsystem
+        {
+            unsafe
+            {
+                return (T?)GetSubsystemByNameIcall(typeof(T).FullName);
+            }
         }
     }
 
