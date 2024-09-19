@@ -13,4 +13,10 @@ namespace Nuake {
 			PrefabInstance = prefab;
 		}
 	};
+
+	class PrefabMember
+	{
+	public:
+		Entity owner;
+	};
 }

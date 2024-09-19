@@ -975,7 +975,7 @@ namespace Nuake {
 
                 if (!savePath.empty()) 
                 {
-                    newPrefab->SaveAs(savePath);
+                    newPrefab->SaveAs(FileSystem::AbsoluteToRelative(savePath));
                     Selection.Entity.AddComponent<PrefabComponent>().PrefabInstance = newPrefab;
                     FileSystem::Scan();
                     FileSystemUI::m_CurrentDirectory = FileSystem::RootDirectory;
@@ -2282,7 +2282,9 @@ namespace Nuake {
                     char* file = (char*)payload->Data;
                     std::string fullPath = std::string(file, 256);
                     std::string relPath = FileSystem::AbsoluteToRelative(fullPath);
-                    Prefab::New(relPath);
+                    auto newPrefabInstance = Prefab::New(relPath);
+                    newPrefabInstance->Root.GetComponent<PrefabComponent>().SetPrefab(newPrefabInstance);
+                    newPrefabInstance->Root.GetComponent<NameComponent>().IsPrefab = true;
                 }
                 ImGui::EndDragDropTarget();
             }

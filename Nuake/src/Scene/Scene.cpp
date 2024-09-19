@@ -296,6 +296,67 @@ namespace Nuake
 					builder.BuildQuakeMap(entity, map.HasCollisions);
 				}
 			}
+
+			std::map<std::string, Ref<File>> prefabToReimport;
+			const auto& prefabView = m_Registry.view<PrefabComponent>();
+			for (const auto& e : prefabView)
+			{
+				auto& prefabComponent = prefabView.get<PrefabComponent>(e);
+				
+				const std::string& filePath = prefabComponent.PrefabInstance->Path;
+				if (!FileSystem::FileExists(filePath))
+				{
+					continue;
+				}
+
+				Ref<File> file = FileSystem::GetFile(filePath);
+				if (file->GetHasBeenModified())
+				{
+					prefabToReimport[filePath] = file;
+				}
+			}
+
+			if (prefabToReimport.size() > 0)
+			{
+				for (const auto& e : prefabView)
+				{
+					auto& prefabComponent = prefabView.get<PrefabComponent>(e);
+					auto& prefabInstance = prefabComponent.PrefabInstance;
+			
+					if (prefabInstance == nullptr)
+					{
+						continue;
+					}
+			
+					// We don't need to reimport that one
+					if (!prefabToReimport.contains(prefabInstance->Path))
+					{
+						continue;
+					}
+			
+			
+					for (auto& ent : prefabInstance->Entities)
+					{
+						// Destroy all children, not the root!
+						if (ent.IsValid() && ent != prefabInstance->Root)
+						{
+							this->DestroyEntity(ent);
+						}
+					}
+				
+					std::remove_if(prefabInstance->Entities.begin(), prefabInstance->Entities.end(), [](const Entity& entity) 
+						{
+							return !entity.IsValid();
+						});
+
+					prefabInstance->ReInstance();
+				}
+			
+				for (auto& [path, prefabFile] : prefabToReimport)
+				{
+					prefabFile->SetHasBeenModified(false);
+				}
+			}
 		}
 
 		for (auto& system : m_Systems)
