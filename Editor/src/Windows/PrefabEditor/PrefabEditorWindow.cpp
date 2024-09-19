@@ -36,7 +36,8 @@ PrefabEditorWindow::PrefabEditorWindow(Ref<Prefab> inPrefab) :
 	virtualScene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
 	virtualScene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
 	
-	Prefab::InstanceInScene(inPrefab->Path, virtualScene);
+	prefab = Prefab::InstanceInScene(inPrefab->Path, virtualScene);
+	prefab->Path = inPrefab->Path;
 
 	Ref<Texture> outputTexture = CreateRef<Texture>(defaultSize, GL_RGB);
 	outputTexture->SetParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -78,8 +79,10 @@ void PrefabEditorWindow::Draw()
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				ImGui::MenuItem("New", "Ctrl+N");
-				ImGui::MenuItem("Open", "Ctrl+O");
+				if(ImGui::MenuItem("Save", "Ctrl+S"))
+				{
+					Save();
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
@@ -268,28 +271,15 @@ void PrefabEditorWindow::Draw()
 
 				ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 				std::vector<Nuake::Entity> entities = scene->GetAllEntities();
-				for (auto& e : entities)
-				{
-					ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-					std::string name = e.GetComponent<NameComponent>().Name;
-					// If selected add selected flag.
-					if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
-						base_flags |= ImGuiTreeNodeFlags_Selected;
 
-					// Draw all entity without parents.
-					if (!e.GetComponent<ParentComponent>().HasParent)
-					{
-						// Recursively draw childrens.
-						DrawEntityTree(e);
-					}
+				ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
+				std::string name = prefab->Root.GetComponent<NameComponent>().Name;
+				// If selected add selected flag.
+				if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == prefab->Root)
+					base_flags |= ImGuiTreeNodeFlags_Selected;
 
-					// Pop font.
-					//ImGui::PopFont();
+				DrawEntityTree(prefab->Root);
 
-					// Right click menu
-					//if (ImGui::BeginPopupContextItem())
-					//    ImGui::EndPopup();
-				}
 				ImGui::PopStyleVar();
 			}
 			ImGui::EndTable();
@@ -623,4 +613,11 @@ void PrefabEditorWindow::DrawEntityTree(Nuake::Entity e)
 
 	ImGui::PopStyleVar();
 	//ImGui::PopFont();
+}
+
+void PrefabEditorWindow::Save()
+{
+	Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(prefab->Root);
+	newPrefab->Path = prefab->Path;
+	newPrefab->SaveAs(newPrefab->Path);
 }

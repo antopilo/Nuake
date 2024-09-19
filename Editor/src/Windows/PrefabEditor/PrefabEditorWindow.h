@@ -41,4 +41,5 @@ private:
 	void DrawViewportWindow();
 	void RenderScene();
 	void DrawEntityTree(Nuake::Entity e);
+	void Save();
 };
