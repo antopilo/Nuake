@@ -303,9 +303,12 @@ Ref<Scene> Window::GetScene()
     return this->scene;
 }
 
-bool Window::SetScene(Ref<Scene> scene)
+bool Window::SetScene(Ref<Scene> newScene)
 {
-    this->scene = scene;
+    scene = newScene;
+
+    windowSetSceneDelegate.Broadcast(newScene);
+    
     return true;
 }
 

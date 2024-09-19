@@ -58,8 +58,12 @@ namespace Nuake
 		static Ref<EngineSubsystemScriptable> GetScriptedSubsystem(const int subsystemId);
 
 	protected:
+		static void OnWindowSetScene(Ref<Scene> scene);
 		static void InitializeCoreSubsystems();
 		static void OnScriptingEngineGameAssemblyLoaded();
+
+		static void OnScenePreInitialize(Ref<Scene> scene);
+		static void OnScenePostInitialize(Ref<Scene> scene);
 
 	private:
 		static Ref<Window> currentWindow;

@@ -1,6 +1,8 @@
 #pragma once
+
 #include "src/Core/Timestep.h"
 #include "src/Core/Core.h"
+#include "src/Core/MulticastDelegate.h"
 
 namespace Nuake
 {
@@ -17,5 +19,12 @@ namespace Nuake
 		virtual void FixedUpdate(Timestep ts) = 0;
 		virtual void EditorUpdate() {}
 		virtual void Exit() = 0;
+
+		MulticastDelegate<>& OnPreInit() { return preInitDelegate; }
+		MulticastDelegate<>& OnPostInit() { return postInitDelegate; }
+
+	protected:
+		MulticastDelegate<> preInitDelegate;
+		MulticastDelegate<> postInitDelegate;
 	};
 }

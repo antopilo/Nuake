@@ -19,6 +19,9 @@ namespace Nuake
 	class Entity;
 	class SceneRenderer;
 
+	DECLARE_MULTICAST_DELEGATE(PreInitializeDelegate)
+	DECLARE_MULTICAST_DELEGATE(PostInitializeDelegate)
+
 	class Scene : public ISerializable
 	{
 		friend Entity;
@@ -92,6 +95,13 @@ namespace Nuake
 		// Component specific utilies
 		void CreateSkeleton(Entity& entity);
 
+		PreInitializeDelegate& OnPreInitialize() { return preInitializeDelegate; }
+		PostInitializeDelegate& OnPostInitialize() { return postInitializeDelegate; }
+
+	protected:
+		PreInitializeDelegate preInitializeDelegate;
+		PostInitializeDelegate postInitializeDelegate;
+		
 	private:
 		void CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode);
 	};

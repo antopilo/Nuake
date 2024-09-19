@@ -40,6 +40,8 @@ namespace Nuake
 
 	void Engine::Init()
 	{
+		Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
+		
 		ScriptingEngineNet::Get().AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		
 		AudioManager::Get().Initialize();
@@ -257,6 +259,15 @@ namespace Nuake
 		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
 	}
 
+	void Engine::OnWindowSetScene(Ref<Scene> scene)
+	{
+		if (scene != nullptr)
+		{
+			scene->OnPreInitialize().AddStatic(&Engine::OnScenePreInitialize, scene);
+			scene->OnPostInitialize().AddStatic(&Engine::OnScenePostInitialize, scene);
+		}
+	}
+
 	void Engine::InitializeCoreSubsystems()
 	{
 	}
@@ -293,6 +304,28 @@ namespace Nuake
 
 				subsystemScript->Initialize();
 			}
+		}
+	}
+
+	void Engine::OnScenePreInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreInitialize(scene);
+		}
+	}
+
+	void Engine::OnScenePostInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePostInitialize(scene);
 		}
 	}
 

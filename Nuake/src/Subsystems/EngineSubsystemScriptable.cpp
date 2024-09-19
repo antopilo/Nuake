@@ -29,6 +29,18 @@ void EngineSubsystemScriptable::Tick(float deltaTime)
 
     cSharpObjectInstance.InvokeMethod("OnTick", deltaTime);
 }
+
+void EngineSubsystemScriptable::OnScenePreInitialize(Ref<Scene> scene)
+{
+}
+
+void EngineSubsystemScriptable::OnScenePostInitialize(Ref<Scene> scene)
+{
+    if (!cSharpObjectInstance.IsValid())
+        return;
+
+    cSharpObjectInstance.InvokeMethod("OnScenePostInitialize", scene);
+}
     
 }
 

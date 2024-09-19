@@ -20,6 +20,9 @@
         }
 
         public virtual void Initialize() {}
+        public virtual void OnScenePreInit(Scene scene) {}
+        public virtual void OnScenePostInit(Scene scene) {}
+        public virtual void OnSceneUnloaded(Scene scene) {}
         public virtual void OnTick(float deltaTime) {}
     }
 }

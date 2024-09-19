@@ -1,5 +1,6 @@
 #pragma once
 #include "System.h"
+#include "src/Core/MulticastDelegate.h"
 
 namespace Nuake {
 	class Scene;
