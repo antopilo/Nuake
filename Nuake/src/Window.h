@@ -1,10 +1,11 @@
 #pragma once
+
 #include "Core/Core.h"
 #include "Core/Maths.h"
+#include "Core/MulticastDelegate.h"
 #include "Core/Timestep.h"
 
 #include <functional>
-
 
 struct GLFWwindow;
 
@@ -13,6 +14,8 @@ namespace Nuake
 	class Scene;
 	class FrameBuffer;
 
+	DECLARE_MULTICAST_DELEGATE(OnWindowSetSceneDelegate, Ref<Scene>, Ref<Scene>)
+	
 	class Window
 	{
 	public:
@@ -44,7 +47,7 @@ namespace Nuake
 		void Center();
 
 		Ref<Scene> GetScene();
-		bool SetScene(Ref<Scene> scene);
+		bool SetScene(Ref<Scene> newScene);
 
 		void SetTitle(const std::string& title);
 		std::string GetTitle();
@@ -62,6 +65,10 @@ namespace Nuake
 		void SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback);
 		void SetOnWindowClosedCallback(std::function<void(Window& window)> callback);
 		void SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback);
+
+		// Delegate is broadcasted BEFORE the actual internal scene has been reassigned, this is to keep
+		// the potential old scene relevant before its ultimate destruction.
+		OnWindowSetSceneDelegate& OnWindowSetScene() { return windowSetSceneDelegate; }
 
 	private:
 		const std::string DEFAULT_TITLE = "Untitled Window";
@@ -84,6 +91,8 @@ namespace Nuake
 		std::function<void(Window&, const std::vector<std::string>& paths)> onDragNDropCallback;
 
 		void InitImgui();
+
+		OnWindowSetSceneDelegate windowSetSceneDelegate;
 
 	private:
 	};

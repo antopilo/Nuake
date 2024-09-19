@@ -18,6 +18,8 @@ namespace Nuake
 	{
 		Logger::Log("Initializing ScriptingSystem");
 
+		preInitDelegate.Broadcast();
+
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 		scriptingEngineNet.Uninitialize();
 		scriptingEngineNet.Initialize();
@@ -69,6 +71,8 @@ namespace Nuake
 				widgetInstance.InvokeMethod("OnInit");
 			}
 		}
+
+		postInitDelegate.Broadcast();
 
 		return true;
 	}

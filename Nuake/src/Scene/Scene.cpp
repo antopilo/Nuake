@@ -243,6 +243,8 @@ namespace Nuake
 
 	bool Scene::OnInit()
 	{
+		preInitializeDelegate.Broadcast();
+		
 		for (auto& system : m_Systems)
 		{
 			if (!system->Init())
@@ -250,6 +252,8 @@ namespace Nuake
 				return false;
 			}
 		}
+		
+		postInitializeDelegate.Broadcast();
 
 		return true;
 	}

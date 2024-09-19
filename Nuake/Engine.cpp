@@ -40,7 +40,9 @@ namespace Nuake
 
 	void Engine::Init()
 	{
-		ScriptingEngineNet::Get().AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(&Engine::OnScriptingEngineGameAssemblyLoaded);
+		Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
+		
+		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
@@ -257,6 +259,26 @@ namespace Nuake
 		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
 	}
 
+	void Engine::OnWindowSetScene(Ref<Scene> oldScene, Ref<Scene> newScene)
+	{
+		// Inform the subsystems that we are going to destroy/swap out the old scene
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreDestroy(oldScene);
+		}
+
+		// Hook into when the internal pieces of the scene are just about to be ready and when the scene is finally
+		// ready to present (ie, all initialized and loaded).
+		if (newScene != nullptr)
+		{
+			newScene->OnPreInitialize().AddStatic(&Engine::OnScenePreInitialize, newScene);
+			newScene->OnPostInitialize().AddStatic(&Engine::OnScenePostInitialize, newScene);
+		}
+	}
+
 	void Engine::InitializeCoreSubsystems()
 	{
 	}
@@ -293,6 +315,28 @@ namespace Nuake
 
 				subsystemScript->Initialize();
 			}
+		}
+	}
+
+	void Engine::OnScenePreInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreInitialize(scene);
+		}
+	}
+
+	void Engine::OnScenePostInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePostInitialize(scene);
 		}
 	}
 
