@@ -60,6 +60,8 @@ namespace Nuake
 	protected:
 		static void OnWindowSetScene(Ref<Scene> oldScene, Ref<Scene> newScene);
 		static void InitializeCoreSubsystems();
+		
+		static void OnScriptingEngineUninitialize();
 		static void OnScriptingEngineGameAssemblyLoaded();
 
 		static void OnScenePreInitialize(Ref<Scene> scene);

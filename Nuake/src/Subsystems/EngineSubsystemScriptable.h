@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "EngineSubsystem.h"
+#include "src/Core/MulticastDelegate.h"
 
 #include <Coral/ManagedObject.hpp>
 
@@ -13,6 +14,7 @@ namespace Nuake
     {
     public:
         EngineSubsystemScriptable(const Coral::ManagedObject& object);
+        virtual ~EngineSubsystemScriptable();
 
         Coral::ManagedObject& GetManagedObjectInstance();
 
@@ -23,7 +25,11 @@ namespace Nuake
         virtual void OnScenePostInitialize(Ref<Scene> scene) override;
         virtual void OnScenePreDestroy(Ref<Scene> scene) override;
 
-    private:
+    protected:
+        void OnScriptEngineUninitialize();
+
+        DelegateHandle scriptEngineUninitializeDelegateHandle;
+
         Coral::ManagedObject cSharpObjectInstance;
     };
 }

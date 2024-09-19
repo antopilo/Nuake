@@ -1,6 +1,8 @@
 ﻿#include "EngineSubsystemScriptable.h"
 
-#include "Coral/Type.hpp"
+#include "src/Scripting/ScriptingEngineNet.h"
+
+#include <Coral/Type.hpp>
 
 namespace Nuake
 {
@@ -11,6 +13,16 @@ EngineSubsystemScriptable::EngineSubsystemScriptable(const Coral::ManagedObject&
 
 }
 
+EngineSubsystemScriptable::~EngineSubsystemScriptable()
+{
+    if (!cSharpObjectInstance.IsValid())
+        return;
+
+    ScriptingEngineNet::Get().OnUninitialize().Remove(scriptEngineUninitializeDelegateHandle);
+    
+    cSharpObjectInstance.Destroy();
+}
+
 Coral::ManagedObject& EngineSubsystemScriptable::GetManagedObjectInstance()
 {
     return cSharpObjectInstance;
@@ -18,6 +30,8 @@ Coral::ManagedObject& EngineSubsystemScriptable::GetManagedObjectInstance()
 
 void EngineSubsystemScriptable::Initialize()
 {
+    scriptEngineUninitializeDelegateHandle = ScriptingEngineNet::Get().OnUninitialize().AddRaw(this, &EngineSubsystemScriptable::OnScriptEngineUninitialize);
+
     if (!cSharpObjectInstance.IsValid())
         return;
 
@@ -52,12 +66,18 @@ void EngineSubsystemScriptable::OnScenePreDestroy(Ref<Scene> scene)
 {
     if (!cSharpObjectInstance.IsValid())
         return;
-
-    if (cSharpObjectInstance.GetType().GetTypeId() == -1)
-        return;
     
     cSharpObjectInstance.InvokeMethod("InternalOnScenePreDestroy");
 }
+
+void EngineSubsystemScriptable::OnScriptEngineUninitialize()
+{
+    if (!cSharpObjectInstance.IsValid())
+        return;
+    
+    cSharpObjectInstance.Destroy();
+}
+    
 }
 
 

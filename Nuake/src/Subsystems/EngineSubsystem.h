@@ -23,7 +23,9 @@ namespace Nuake
         virtual void OnScenePostInitialize(Ref<Scene> scene) {}
         virtual void OnScenePreDestroy(Ref<Scene> scene) {}
 
-    private:
+    protected:
+        void OnScriptEngineUninitialize();
+        
         bool canEverTick = false;
     };
 }

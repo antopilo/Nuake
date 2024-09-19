@@ -42,7 +42,7 @@ namespace Nuake
 	{
 		Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
 		
-		ScriptingEngineNet::Get().AddListener<ScriptingEngineNet::GameAssemblyLoadedDelegate>(&Engine::OnScriptingEngineGameAssemblyLoaded);
+		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();

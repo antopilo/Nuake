@@ -25,6 +25,9 @@ namespace Nuake
 {
 	class Project;
 
+	DECLARE_MULTICAST_DELEGATE(OnGameAssemblyLoadedDelegate)
+	DECLARE_MULTICAST_DELEGATE(OnUninitializeDelegate)
+
 	enum class ExposedVarTypes
 	{
 		Bool,
@@ -115,8 +118,8 @@ namespace Nuake
 		std::unordered_map<std::string, NetGameScriptObject> GetPointEntities() const { return pointEntityTypes; }
 		std::unordered_map<std::string, UIWidgetObject> GetUIWidgets() const { return uiWidgets; }
 
-		template<class T> void AddListener(const T& delegate);
-		template<> void AddListener(const GameAssemblyLoadedDelegate& delegate);
+		OnGameAssemblyLoadedDelegate& OnUninitialize() { return onUninitializeDelegate; }
+		OnUninitializeDelegate& OnGameAssemblyLoaded() { return onGameAssemblyLoadedDelegate; }
 
 	private:
 		const std::string m_Scope = "Nuake.Net";
@@ -149,7 +152,8 @@ namespace Nuake
 		std::unordered_map<uint32_t, Coral::ManagedObject> entityToManagedObjects;
 		std::map<std::pair<UUID, UUID>, Coral::ManagedObject> widgetUUIDToManagedObjects;
 
-		std::vector<GameAssemblyLoadedDelegate> listenersGameAssemblyLoaded;
+		OnGameAssemblyLoadedDelegate onGameAssemblyLoadedDelegate;
+		OnUninitializeDelegate onUninitializeDelegate;
 		
 		ScriptingEngineNet();
 		~ScriptingEngineNet();

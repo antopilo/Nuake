@@ -2,21 +2,32 @@
 
 #include <functional>
 #include <vector>
-#include <algorithm>
 
-#define DECLARE_MULTICAST_DELEGATE(multicastDelegateName, ...) typedef MulticastDelegate<__VA_ARGS__> multicastDelegateName; 
+#define DECLARE_MULTICAST_DELEGATE(multicastDelegateName, ...) typedef MulticastDelegate<__VA_ARGS__> multicastDelegateName;
+
+struct DelegateHandle
+{
+    size_t id = InvalidHandle;
+    
+    static inline size_t InvalidHandle = static_cast<size_t>(-1);
+
+    bool IsValid() const { return id != InvalidHandle; }
+    void Reset() { id = InvalidHandle; }
+
+    // Comparison operators for convenience
+    bool operator==(const DelegateHandle& other) const { return id == other.id; }
+    bool operator!=(const DelegateHandle& other) const { return id != other.id; }
+};
 
 template<typename... Args>
 class MulticastDelegate
 {
 public:
-    using DelegateID = size_t;
-
     // Add a callable with bound variables (supports no arguments as well)
     template<typename Callable, typename... BoundArgs>
-    DelegateID AddStatic(Callable&& func, BoundArgs&&... boundArgs)
+    DelegateHandle AddStatic(Callable&& func, BoundArgs&&... boundArgs)
     {
-        DelegateID id = nextID++;
+        size_t id = GetNextID();
         auto boundFunction = [=](Args... args) {
             if constexpr (sizeof...(Args) > 0)
             {
@@ -27,14 +38,14 @@ public:
                 func(boundArgs...);
             }
         };
-        delegates.push_back({id, boundFunction});
-        return id;
+        SetDelegate(id, boundFunction);
+        return DelegateHandle{ id };
     }
     
-    template<typename Callable, typename Obj, typename... BoundArgs>
-    DelegateID AddObject(Callable&& func, Obj* object, BoundArgs&&... boundArgs)
+    template<typename Obj, typename Callable, typename... BoundArgs>
+    DelegateHandle AddRaw(Obj* object, Callable&& func, BoundArgs&&... boundArgs)
     {
-        DelegateID id = nextID++;
+        size_t id = GetNextID();
         auto boundFunction = [=](Args... args) {
             if constexpr (sizeof...(Args) > 0)
             {
@@ -45,42 +56,79 @@ public:
                 (object->*func)(boundArgs...);
             }
         };
-        delegates.push_back({id, boundFunction});
-        return id;
+        SetDelegate(id, boundFunction);
+        return DelegateHandle{ id };
     }
 
     // Remove a callable using the token returned by Add()
-    void Remove(DelegateID id)
+    void Remove(DelegateHandle& handle)
     {
-        auto it = std::remove_if(delegates.begin(), delegates.end(), [id](const auto& pair)
-        {
-            return pair.first == id;
-        });
+        ASSERT(handle.IsValid());
         
-        if (it != delegates.end())
+        if (handle.IsValid() && handle.id < delegates.size())
         {
-            delegates.erase(it, delegates.end());
+            delegates[handle.id].active = false;
+            
+            // Mark this slot as reusable
+            freeIDs.push_back(handle.id);
         }
+
+        // Invalidate the handle
+        handle.Reset();
     }
 
     // Clear all delegates
     void Clear()
     {
         delegates.clear();
+        freeIDs.clear();
+        nextID = 0;
     }
 
     // Invoke all callables
     void Broadcast(Args... args)
     {
-        for (auto& [id, delegate] : delegates)
+        for (auto& delegate : delegates)
         {
-            delegate(std::forward<Args>(args)...);
+            if (delegate.active)
+            {
+                delegate.function(std::forward<Args>(args)...);
+            }
         }
     }
 
 private:
-    using DelegatePair = std::pair<DelegateID, std::function<void(Args...)>>;
-    
-    std::vector<DelegatePair> delegates;  // Vector of (ID, callable) pairs
-    DelegateID nextID = 0;  // Unique ID generator
+    struct Delegate
+    {
+        bool active = false;
+        std::function<void(Args...)> function;
+    };
+
+    // A vector of delegates with active state
+    std::vector<Delegate> delegates;
+    // List of reusable slots
+    std::vector<size_t> freeIDs;
+    size_t nextID = 0;
+
+    // Get the next available ID, either by reusing a free slot or by creating a new one
+    size_t GetNextID()
+    {
+        if (!freeIDs.empty())
+        {
+            size_t id = freeIDs.back();
+            freeIDs.pop_back();
+            return id;
+        }
+        
+        return nextID++;
+    }
+
+    // Set the delegate in the vector, makes the array larger if necessary
+    void SetDelegate(size_t id, const std::function<void(Args...)>& func)
+    {
+        if (id >= delegates.size())
+            delegates.resize(id + 1);
+        
+        delegates[id] = { true, func };
+    }
 };

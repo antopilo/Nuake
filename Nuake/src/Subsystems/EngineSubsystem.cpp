@@ -1,11 +1,18 @@
 ﻿#include "EngineSubsystem.h"
 
-void Nuake::EngineSubsystem::SetCanTick(bool canTick)
+#include "src/Scripting/ScriptingEngineNet.h"
+
+namespace Nuake
 {
-    canEverTick = canTick;
+    void EngineSubsystem::SetCanTick(bool canTick)
+    {
+        canEverTick = canTick;
+    }
+
+    bool EngineSubsystem::CanEverTick() const
+    {
+        return canEverTick;
+    }
 }
 
-bool Nuake::EngineSubsystem::CanEverTick() const
-{
-    return canEverTick;
-}
+
