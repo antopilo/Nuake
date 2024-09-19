@@ -14,7 +14,7 @@ namespace Nuake
 	class Scene;
 	class FrameBuffer;
 
-	DECLARE_MULTICAST_DELEGATE(OnWindowSetSceneDelegate, Ref<Scene>)
+	DECLARE_MULTICAST_DELEGATE(OnWindowSetSceneDelegate, Ref<Scene>, Ref<Scene>)
 	
 	class Window
 	{
@@ -66,6 +66,8 @@ namespace Nuake
 		void SetOnWindowClosedCallback(std::function<void(Window& window)> callback);
 		void SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback);
 
+		// Delegate is broadcasted BEFORE the actual internal scene has been reassigned, this is to keep
+		// the potential old scene relevant before its ultimate destruction.
 		OnWindowSetSceneDelegate& OnWindowSetScene() { return windowSetSceneDelegate; }
 
 	private:

@@ -21,6 +21,7 @@ namespace Nuake
 
         virtual void OnScenePreInitialize(Ref<Scene> scene) {}
         virtual void OnScenePostInitialize(Ref<Scene> scene) {}
+        virtual void OnScenePreDestroy(Ref<Scene> scene) {}
 
     private:
         bool canEverTick = false;

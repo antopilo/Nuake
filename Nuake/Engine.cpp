@@ -259,12 +259,23 @@ namespace Nuake
 		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
 	}
 
-	void Engine::OnWindowSetScene(Ref<Scene> scene)
+	void Engine::OnWindowSetScene(Ref<Scene> oldScene, Ref<Scene> newScene)
 	{
-		if (scene != nullptr)
+		// Inform the subsystems that we are going to destroy/swap out the old scene
+		for (auto subsystem : subsystems)
 		{
-			scene->OnPreInitialize().AddStatic(&Engine::OnScenePreInitialize, scene);
-			scene->OnPostInitialize().AddStatic(&Engine::OnScenePostInitialize, scene);
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreDestroy(oldScene);
+		}
+
+		// Hook into when the internal pieces of the scene are just about to be ready and when the scene is finally
+		// ready to present (ie, all initialized and loaded).
+		if (newScene != nullptr)
+		{
+			newScene->OnPreInitialize().AddStatic(&Engine::OnScenePreInitialize, newScene);
+			newScene->OnPostInitialize().AddStatic(&Engine::OnScenePostInitialize, newScene);
 		}
 	}
 

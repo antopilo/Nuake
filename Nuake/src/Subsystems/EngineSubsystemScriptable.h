@@ -21,6 +21,7 @@ namespace Nuake
 
         virtual void OnScenePreInitialize(Ref<Scene> scene) override;
         virtual void OnScenePostInitialize(Ref<Scene> scene) override;
+        virtual void OnScenePreDestroy(Ref<Scene> scene) override;
 
     private:
         Coral::ManagedObject cSharpObjectInstance;
