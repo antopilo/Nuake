@@ -10,7 +10,7 @@ namespace Nuake
 	{
 	private:
 		bool m_IsFlying = false;
-
+		bool wasControlled = false;
 	public:
 		
 		EditorCamera()

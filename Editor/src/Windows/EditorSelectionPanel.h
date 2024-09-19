@@ -41,7 +41,7 @@ private:
 public:
 	EditorSelectionPanel();
 
-	void Draw(EditorSelection selection);
+	void Draw(EditorSelection selection, const std::string& id = "");
 
 	void DrawNone();
 	void DrawEntity(Nuake::Entity entity);

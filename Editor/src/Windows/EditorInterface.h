@@ -18,6 +18,7 @@
 
 #include <src/Scripting/ScriptingEngineNet.h>
 #include "ProjectSettings/ProjectSettingsWindow.h"
+#include "PrefabEditor/PrefabEditorWindow.h"
 
 
 using namespace NuakeEditor;
@@ -31,6 +32,7 @@ namespace Nuake
 	{
 	private:
 		std::vector<CompilationError> errors;
+		std::vector<Ref<PrefabEditorWindow>> prefabEditors;
 		Ref<Scene> SceneSnapshot;
 		static NuakeEditor::CommandBuffer* mCommandBuffer;
 
@@ -93,9 +95,9 @@ namespace Nuake
 		void DrawSceneTree();
 		void DrawLogger();
 		void DrawProjectSettings();
-		bool EntityContainsItself(Entity ent1, Entity ent2);
 		void Overlay();
 
+		void OpenPrefabWindow(const std::string& prefabPath);
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
 		bool ShouldDrawCollision() const { return m_DebugCollisions; }
 		bool ShouldDrawNavMesh() const { return m_DrawNavMesh; }

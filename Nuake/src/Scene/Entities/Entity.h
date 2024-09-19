@@ -27,6 +27,8 @@ namespace Nuake
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
+		bool EntityContainsItself(Entity a, Entity b);
+
 		bool IsValid() const
 		{
 			return m_EntityHandle != (entt::entity)-1 && m_Scene->m_Registry.valid((entt::entity)GetHandle());

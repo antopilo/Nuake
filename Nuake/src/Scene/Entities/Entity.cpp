@@ -16,6 +16,26 @@ namespace Nuake
 		}
 	}
 
+	bool Entity::EntityContainsItself(Entity a, Entity b)
+	{
+		ParentComponent& targeParentComponent = b.GetComponent<ParentComponent>();
+		if (!targeParentComponent.HasParent)
+			return false;
+
+		Entity currentParent = b.GetComponent<ParentComponent>().Parent;
+		while (currentParent != a)
+		{
+			if (currentParent.GetComponent<ParentComponent>().HasParent)
+				currentParent = currentParent.GetComponent<ParentComponent>().Parent;
+			else
+				return false;
+
+			if (currentParent == a)
+				return true;
+		}
+		return true;
+	}
+
 	json Entity::Serialize()
 	{
 		BEGIN_SERIALIZE();

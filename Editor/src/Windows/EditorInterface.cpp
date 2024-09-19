@@ -307,6 +307,11 @@ namespace Nuake {
                     const auto& editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
                     Matrix4 cameraView = editorCam->GetTransform();
                     Matrix4 cameraProjection = editorCam->GetPerspective();
+                    static Vector3 camPreviousPos = Engine::GetCurrentScene()->m_EditorCamera->Translation;
+                    static Vector3 camNewPos = Vector3(0, 0, 0);
+
+                    Vector3 camDelta = camNewPos - camPreviousPos;
+                    Vector3 previousGlobalPos = transform[3];
 
                     // Imguizmo calculates the delta from the gizmo,
                     ImGuizmo::Manipulate(
@@ -323,6 +328,15 @@ namespace Nuake {
                         // we need to multiply by the inverse of the parent's global transform in order to revert
                         // the changes from the parent transform.
                         Matrix4 localTransform = Matrix4(transform);
+
+                        Vector3 newGlobalPos = transform[3];
+                        if(ImGui::IsKeyDown(ImGuiKey_LeftShift))
+                        {
+                            Vector3 positionDelta = newGlobalPos - previousGlobalPos;
+                            Engine::GetCurrentScene()->m_EditorCamera->Translation += positionDelta;
+                            camNewPos = Engine::GetCurrentScene()->m_EditorCamera->Translation;
+                        }
+
                         ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
                         if (parent.HasParent)
                         {
@@ -861,7 +875,7 @@ namespace Nuake {
 
                 // Check if entity is already parent.
                 ParentComponent& parentPayload = payload_entity.GetComponent<ParentComponent>();
-                if (!EntityContainsItself(payload_entity, e) && parentPayload.Parent != e && std::count(parent.Children.begin(), parent.Children.end(), payload_entity) == 0)
+                if (!payload_entity.EntityContainsItself(payload_entity, e) && parentPayload.Parent != e && std::count(parent.Children.begin(), parent.Children.end(), payload_entity) == 0)
                 {
                     if (parentPayload.HasParent)
                     {
@@ -2287,26 +2301,6 @@ namespace Nuake {
         ImGui::End();
     }
 
-    bool EditorInterface::EntityContainsItself(Entity source, Entity target)
-    {
-        ParentComponent& targeParentComponent = target.GetComponent<ParentComponent>();
-        if (!targeParentComponent.HasParent)
-            return false;
-
-        Entity currentParent = target.GetComponent<ParentComponent>().Parent;
-        while (currentParent != source)
-        {
-            if (currentParent.GetComponent<ParentComponent>().HasParent)
-                currentParent = currentParent.GetComponent<ParentComponent>().Parent;
-            else
-                return false;
-
-            if (currentParent == source)
-                return true;
-        }
-        return true;
-    }
-
     bool LogErrors = true;
     bool LogWarnings = true;
     bool LogDebug = true;
@@ -2315,7 +2309,7 @@ namespace Nuake {
     {
         if (ImGui::Begin("Logger"))
         {
-            if (ImGui::Button("Clear"))
+            if (ImGui::Button("Clear", ImVec2(60, 28)))
             {
                 Logger::ClearLogs();
                 SetStatusMessage("Logs cleared.");
@@ -2323,77 +2317,78 @@ namespace Nuake {
 
             ImGui::SameLine();
 
-            if (ImGui::BeginMenu("Edit"))
+            if (ImGui::Button(ICON_FA_FILTER, ImVec2(30, 28)))
             {
-                if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-                if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-                ImGui::Separator();
-                if (ImGui::MenuItem("Project Settings", ""))
-                {
-                }
-                ImGui::EndMenu();
+                ImGui::OpenPopup("filter_popup");
             }
+
             ImGui::SameLine();
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
 
             bool isEnabled = LogErrors;
-            if (isEnabled)
+            if (ImGui::BeginPopup("filter_popup"))
             {
-                Color color = Engine::GetProject()->Settings.PrimaryColor;
-                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
-            }
+                ImGui::SeparatorText("Filters");
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
 
-            if (ImGui::Button(ICON_FA_BAN, ImVec2(30, 28)))
-            {
-                LogErrors = !LogErrors;
-            }
+                if (isEnabled)
+                {
+                    Color color = Engine::GetProject()->Settings.PrimaryColor;
+                    ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+                }
 
-            UI::Tooltip("Display Errors");
-            if (isEnabled)
-            {
+                if (ImGui::Button((std::string(ICON_FA_BAN) + " Error").c_str()))
+                {
+                    LogErrors = !LogErrors;
+                }
+
+                UI::Tooltip("Display Errors");
+                if (isEnabled)
+                {
+                    ImGui::PopStyleColor();
+                }
+
+                isEnabled = LogWarnings;
+                if (isEnabled)
+                {
+                    Color color = Engine::GetProject()->Settings.PrimaryColor;
+                    ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+                }
+
+                if (ImGui::Button((std::string(ICON_FA_EXCLAMATION_TRIANGLE) + " Warning").c_str()))
+                {
+                    LogWarnings = !LogWarnings;
+                }
+
+                UI::Tooltip("Display Warnings");
+                if (isEnabled)
+                {
+                    ImGui::PopStyleColor();
+                }
+
+                isEnabled = LogDebug;
+                if (isEnabled)
+                {
+                    Color color = Engine::GetProject()->Settings.PrimaryColor;
+                    ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+                }
+
+                if (ImGui::Button((std::string(ICON_FA_INFO) + " Info").c_str()))
+                {
+                    LogDebug = !LogDebug;
+                }
+
+                UI::Tooltip("Display Verbose");
+                if (isEnabled)
+                {
+                    ImGui::PopStyleColor();
+                }
+
                 ImGui::PopStyleColor();
-            }
+                ImGui::PopStyleVar(2);
 
-            ImGui::SameLine();
-
-            isEnabled = LogWarnings;
-            if (isEnabled)
-            {
-                Color color = Engine::GetProject()->Settings.PrimaryColor;
-                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
-            }
-
-            if (ImGui::Button(ICON_FA_EXCLAMATION_TRIANGLE, ImVec2(30, 28)))
-            {
-                LogWarnings = !LogWarnings;
-            }
-
-            UI::Tooltip("Display Warnings");
-            if (isEnabled)
-            {
-                ImGui::PopStyleColor();
-            }
-
-            ImGui::SameLine();
-
-            isEnabled = LogDebug;
-            if (isEnabled)
-            {
-                Color color = Engine::GetProject()->Settings.PrimaryColor;
-                ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
-            }
-
-            if (ImGui::Button(ICON_FA_INFO, ImVec2(30, 28)))
-            {
-                LogDebug = !LogDebug;
-            }
-
-            UI::Tooltip("Display Verbose");
-            if (isEnabled)
-            {
-                ImGui::PopStyleColor();
+                ImGui::EndPopup();
             }
 
             ImGui::SameLine();
@@ -2416,8 +2411,6 @@ namespace Nuake {
                 ImGui::PopStyleColor();
             }
 
-            ImGui::PopStyleColor();
-            ImGui::PopStyleVar(2);
             //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             //if (ImGui::BeginChild("Log window", ImGui::GetContentRegionAvail(), false))
             //{
@@ -2884,6 +2877,19 @@ namespace Nuake {
         }
     }
 
+    void EditorInterface::OpenPrefabWindow(const std::string& prefabPath)
+    {
+        if (!FileSystem::FileExists(prefabPath))
+        {
+            return;
+        }
+
+        Ref<Prefab> newPrefab = CreateRef<Prefab>();
+        newPrefab->Path = prefabPath;
+
+        prefabEditors.push_back(CreateRef<PrefabEditorWindow>(newPrefab));
+    }
+
     void NewProject()
     {
         if (Engine::GetProject() && Engine::GetProject()->FileExist())
@@ -3265,6 +3271,18 @@ namespace Nuake {
 
         pInterface.m_CurrentProject = Engine::GetProject();
 
+        uint32_t selectedEntityID;
+        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid())
+        {
+           selectedEntityID = Selection.Entity.GetHandle();
+        }
+        else
+        {
+            selectedEntityID = 0;
+        }
+
+        Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = selectedEntityID;
+
         m_ProjectSettingsWindow->Draw();
 
         m_DemoWindow.Draw();
@@ -3292,6 +3310,10 @@ namespace Nuake {
 
         DrawStatusBar();
 
+        for (auto& prefabEditors : prefabEditors)
+        {
+            prefabEditors->Draw();
+        }
 		//pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
@@ -3300,6 +3322,7 @@ namespace Nuake {
 
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();
+
 
         if (isNewProject)
         {
@@ -3351,7 +3374,7 @@ namespace Nuake {
         isControllingCamera = editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
-        if (editorCam->IsFlying() && entityIsSelected && Input::IsKeyPressed(Key::F))
+        if (entityIsSelected && Input::IsKeyPressed(Key::F))
         {
             editorCam->IsMoving = true;
             editorCam->TargetPos = Selection.Entity.GetComponent<TransformComponent>().GetGlobalPosition();

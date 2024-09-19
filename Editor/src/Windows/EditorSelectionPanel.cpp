@@ -66,9 +66,9 @@ void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
     }
 }
 
-void EditorSelectionPanel::Draw(EditorSelection selection)
+void EditorSelectionPanel::Draw(EditorSelection selection, const std::string& id)
 {
-    if (ImGui::Begin("Properties"))
+    if (ImGui::Begin(std::string("Properties##" + id).c_str()))
     {
         switch (selection.Type)
         {

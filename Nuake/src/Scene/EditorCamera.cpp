@@ -52,19 +52,14 @@ namespace Nuake
 			}
 		}
 
+
+
 		const bool smoothCamera = Engine::GetProject()->Settings.SmoothCamera;
 		const float smoothCameraSpeed = Engine::GetProject()->Settings.SmoothCameraSpeed;
 		Yaw = glm::mix(Yaw, TargetYaw, smoothCamera ? smoothCameraSpeed : 1.0f);
 		Pitch = glm::mix(Pitch, TargetPitch, smoothCamera ? smoothCameraSpeed : 1.0f);
 
-		if (!controlled)
-		{
-			Input::ShowMouse();
-		}
-		else if(hover)
-		{
-			Input::HideMouse();
-		}
+		
 
 		if (Input::IsKeyDown(Key::LEFT_ALT))
 		{
@@ -168,6 +163,12 @@ namespace Nuake
 		
 		if (controlled)
 		{
+			if (!wasControlled)
+			{
+				Input::HideMouse();
+				wasControlled = true;
+			}
+
 			if (Input::IsMouseButtonDown(2))
 			{
 				Vector3 movement = Vector3(0);
@@ -187,6 +188,14 @@ namespace Nuake
 			{
 				Translation += Vector3(Direction) * Input::YScroll;
 				Input::YScroll = 0.0f;
+			}
+		}
+		else
+		{
+			if (wasControlled)
+			{
+				Input::ShowMouse();
+				wasControlled = false;
 			}
 		}
 

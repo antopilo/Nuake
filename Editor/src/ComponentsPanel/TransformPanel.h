@@ -27,14 +27,14 @@ public:
                     ImGui::TableNextColumn();
 
                     Vector3 position = component.GetLocalPosition();
-                    ImGuiHelper::DrawVec3("Translation", &position);
+                    ImGuiHelper::DrawVec3("Translation##" + entity.GetHandle(), &position);
                     if (position != component.GetLocalPosition())
                         component.SetLocalPosition(position);
 
                     ImGui::TableNextColumn();
 
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetTranslation";
+                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetTranslation" + std::to_string(entity.GetHandle());
                     if (ImGui::Button(resetLabel.c_str()))
                         component.SetLocalPosition(Vector3(0, 0, 0));
 
@@ -52,7 +52,7 @@ public:
                     Vector3 eulerDegreesOld = glm::degrees(glm::eulerAngles(currentRotation));
 
                     // Draw the ImGui widget for rotation
-                    ImGuiHelper::DrawVec3("Rotation", &eulerDegreesOld);
+                    ImGuiHelper::DrawVec3("Rotation##" + entity.GetHandle(), &eulerDegreesOld);
 
                     // Calculate the delta in Euler angles
                     Vector3 eulerDelta = eulerDegreesOld - glm::degrees(glm::eulerAngles(currentRotation));
@@ -84,7 +84,7 @@ public:
                     ImGui::TableNextColumn();
 
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetRotation";
+                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetRotation" + std::to_string(entity.GetHandle());
                     if (ImGui::Button(resetLabel.c_str()))
                     {
                         component.SetLocalRotation(Quat(1, 0, 0, 0));
@@ -97,7 +97,7 @@ public:
                     ImGui::TableNextColumn();
 
                     Vector3 localScale = component.GetLocalScale();
-                    ImGuiHelper::DrawVec3("Scale", &localScale);
+                    ImGuiHelper::DrawVec3("Scale##" + entity.GetHandle(), &localScale);
 
                     if (localScale != component.GetLocalScale())
                         component.SetLocalScale(localScale);
@@ -105,7 +105,7 @@ public:
                     ImGui::TableNextColumn();
 
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));                 
-                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetScale";  
+                    std::string resetLabel = std::string(ICON_FA_UNDO) + "##ResetScale" + std::to_string(entity.GetHandle());
                     if (ImGui::Button(resetLabel.c_str()))
                         component.SetLocalScale(Vector3(1, 1, 1));   
 

@@ -41,7 +41,6 @@ public:
 	EditorSelection(const Nuake::Entity& entity)
 	{
 		Type = EditorSelectionType::Entity;
-		Nuake::Engine::GetCurrentScene()->m_SceneRenderer->mOutlineEntityID = (uint32_t)entity.GetHandle();
 		Entity = entity;
 	}
 

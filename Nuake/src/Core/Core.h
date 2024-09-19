@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include <stdexcept>
+#include <cassert>
 
 #define ASSERT(x) if (!(x)) assert(false)
 

@@ -271,6 +271,9 @@ namespace Nuake
                     case FileType::Solution:
                         OS::OpenIn(file->GetAbsolutePath());
                         break;
+                    case FileType::Prefab:
+                        this->Editor->OpenPrefabWindow(file->GetRelativePath());
+                        break;
                 }
             }
             
