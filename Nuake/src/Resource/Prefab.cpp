@@ -85,6 +85,23 @@ namespace Nuake
 						Entity newEntity = { entity.GetScene()->m_Registry.create(), entity.GetScene() };
 						newEntity.Deserialize(e); // Id gets overriden by serialized id.
 
+						if (newEntity.GetComponent<ParentComponent>().HasParent)
+						{
+							auto pId = newEntity.GetComponent<ParentComponent>().ParentID;
+							newEntity.GetComponent<ParentComponent>().ParentID = newIdsLut[pId];
+							auto nc = entity.GetScene()->GetEntityByID(pId);
+							nc.GetComponent<ParentComponent>().RemoveChildren(newEntity);
+							newEntity.GetComponent<ParentComponent>().Parent = entity.GetScene()->GetEntityByID(newIdsLut[pId]);
+							entity.GetScene()->GetEntityByID(newIdsLut[pId]).AddChild(newEntity);
+
+
+						}
+
+						if (newEntity.GetComponent<ParentComponent>().ParentID == j["Root"])
+						{
+							entity.AddChild(newEntity);
+						}
+
 						auto& nameComponent = newEntity.GetComponent<NameComponent>();
 
 						uint32_t oldId = nameComponent.ID;
@@ -103,6 +120,7 @@ namespace Nuake
 						auto& parentC = e.GetComponent<ParentComponent>();
 						auto parent = entity.GetScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
 
+						Logger::Log(parent.GetComponent<NameComponent>().Name);
 						if (parentC.ParentID == j["Root"])
 						{
 							entity.AddChild(e);

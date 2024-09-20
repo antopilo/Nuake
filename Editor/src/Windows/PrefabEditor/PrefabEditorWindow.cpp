@@ -36,7 +36,7 @@ PrefabEditorWindow::PrefabEditorWindow(Ref<Prefab> inPrefab) :
 	virtualScene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
 	virtualScene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
 	
-	prefab = Prefab::InstanceInScene(inPrefab->Path, virtualScene);
+	prefab = Prefab::InstanceInScene(inPrefab->Path, virtualScene.get());
 	prefab->Path = inPrefab->Path;
 
 	Ref<Texture> outputTexture = CreateRef<Texture>(defaultSize, GL_RGB);
