@@ -306,7 +306,11 @@ namespace Nuake
 			for (const auto& e : prefabView)
 			{
 				auto& prefabComponent = prefabView.get<PrefabComponent>(e);
-				
+				if (prefabComponent.PrefabInstance == nullptr)
+				{
+					continue;
+				}
+
 				const std::string& filePath = prefabComponent.PrefabInstance->Path;
 				if (!FileSystem::FileExists(filePath))
 				{
@@ -646,6 +650,11 @@ namespace Nuake
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 		{
+			if (e.HasComponent<PrefabMember>())
+			{
+				continue;
+			}
+
 			auto returnValue = std::async(std::launch::async, [&]() {
 					entities.push_back(e.Serialize());
 			});

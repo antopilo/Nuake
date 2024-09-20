@@ -11,6 +11,7 @@ namespace Nuake
 	public:
 		Scene* m_Scene;
 
+
 		virtual bool Init() = 0;
 
 		virtual void Draw() = 0;

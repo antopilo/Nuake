@@ -110,7 +110,7 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		camComponent.CameraInstance->AspectRatio = 1.0f;
 		m_ShadedFramebuffer->SetTexture(texture);
 
-		Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene);
+		Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene.get());
 
 		scene->Update(0.01f);
 		scene->Draw(*m_ShadedFramebuffer.get());

@@ -130,6 +130,8 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const json& str);
+		bool DeserializeComponents(const json& str);
+
 		void PostDeserialize();
 
 		Scene* GetScene() const

@@ -443,7 +443,6 @@ namespace Nuake {
 	bool IsOnGround(int entityId)
 	{
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
-
 		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
 		{
 			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
@@ -500,7 +499,7 @@ namespace Nuake {
 	}
 
 	void Play(int entityId, Coral::String animation)
-	{
+	{ 
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
 
 		if (entity.IsValid() && entity.HasComponent<SkinnedModelComponent>())

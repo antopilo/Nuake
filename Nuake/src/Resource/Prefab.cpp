@@ -35,7 +35,7 @@ namespace Nuake
 		return newPrefab;
 	}
 
-	Ref<Prefab> Prefab::InstanceInScene(const std::string& path, Ref<Scene> scene)
+	Ref<Prefab> Prefab::InstanceInScene(const std::string& path, Scene* scene)
 	{
 		Ref<Prefab> newPrefab = CreateRef<Prefab>();
 		newPrefab->Path = path;
@@ -47,6 +47,102 @@ namespace Nuake
 			if (!prefabTextContent.empty())
 			{
 				newPrefab->DeserializeIntoScene(json::parse(prefabTextContent), scene);
+			}
+		}
+
+		return newPrefab;
+	}
+
+	Ref<Prefab> Prefab::InstanceOntoRoot(Entity entity, const std::string & path)
+	{
+		Ref<Prefab> newPrefab = CreateRef<Prefab>();
+		newPrefab->Path = path;
+
+		if (FileSystem::FileExists(path, false))
+		{
+			std::string prefabTextContent = FileSystem::ReadFile(path);
+
+			if (!prefabTextContent.empty())
+			{
+				json j = json::parse(prefabTextContent);
+
+				if (j == "")
+					return newPrefab;
+
+				newPrefab->Root = entity;
+				if (j.contains("Entities"))
+				{
+					std::map<uint32_t, uint32_t> newIdsLut;
+					newIdsLut[j["Root"]] = entity.GetID();
+
+					for (json e : j["Entities"])
+					{
+						if (e["NameComponent"]["ID"] == j["Root"])
+						{
+							continue; // skip root
+						}
+
+						Entity newEntity = { entity.GetScene()->m_Registry.create(), entity.GetScene() };
+						newEntity.Deserialize(e); // Id gets overriden by serialized id.
+
+						auto& nameComponent = newEntity.GetComponent<NameComponent>();
+
+						uint32_t oldId = nameComponent.ID;
+						uint32_t newId = OS::GetTime();
+						nameComponent.Name = nameComponent.Name;
+						nameComponent.ID = newId;
+
+						newIdsLut[oldId] = newId;
+
+						newPrefab->AddEntity(newEntity);
+					}
+
+					// Set reference to the parent entity to children
+					for (auto& e : newPrefab->Entities)
+					{
+						auto& parentC = e.GetComponent<ParentComponent>();
+						auto parent = entity.GetScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
+
+						if (parentC.ParentID == j["Root"])
+						{
+							entity.AddChild(e);
+						}
+						else
+						{
+							parent.AddChild(e);
+						}
+					}
+
+					// Since the bones point to an entity, and we are instancing a prefab, the new skeleton is gonna be pointing to the wrong
+					// bones, we need to remap the skeleton to the new entities. We are simply reussing the same map we are using for the 
+					// reparenting. Pretty neat.
+					std::function<void(SkeletonNode&)> recursiveBoneRemapping = [&recursiveBoneRemapping, &newIdsLut](SkeletonNode& currentBone)
+						{
+							currentBone.EntityHandle = newIdsLut[currentBone.EntityHandle];
+							for (SkeletonNode& bone : currentBone.Children)
+							{
+								recursiveBoneRemapping(bone);
+							}
+						};
+
+					// Do the remapping of the skeleton
+					for (auto& e : newPrefab->Entities)
+					{
+						if (!e.HasComponent<SkinnedModelComponent>())
+						{
+							continue;
+						}
+
+						auto& skinnedModelComponent = e.GetComponent<SkinnedModelComponent>();
+						if (!skinnedModelComponent.ModelResource)
+						{
+							continue;
+						}
+
+						SkeletonNode& currentBone = skinnedModelComponent.ModelResource->GetSkeletonRootNode();
+						recursiveBoneRemapping(currentBone);
+					}
+				}
 			}
 		}
 
@@ -159,7 +255,7 @@ namespace Nuake
 					parent.AddChild(e);
 				}
 
-				e.GetComponent<PrefabMember>().owner = Root;
+				e.GetComponent<PrefabMember>().owner = Root.GetID();
 			}
 
 			// Since the bones point to an entity, and we are instancing a prefab, the new skeleton is gonna be pointing to the wrong

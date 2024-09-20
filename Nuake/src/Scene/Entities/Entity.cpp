@@ -85,7 +85,10 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("NavMeshVolumeComponent", GetComponent<NavMeshVolumeComponent>())
 		if (HasComponent<UIComponent>())
 			SERIALIZE_OBJECT_REF_LBL("UIComponent", GetComponent<UIComponent>())
-
+		if(HasComponent<PrefabComponent>())
+			SERIALIZE_OBJECT_REF_LBL("PrefabComponent", GetComponent<PrefabComponent>())
+		if (HasComponent<PrefabMember>())
+			SERIALIZE_OBJECT_REF_LBL("PrefabMember", GetComponent<PrefabMember>())
 		END_SERIALIZE();
 	}
 
@@ -99,6 +102,54 @@ namespace Nuake
 		}
 		DESERIALIZE_COMPONENT(NameComponent);
 		DESERIALIZE_COMPONENT(ParentComponent);
+		
+		if (j.contains("PrefabComponent"))
+		{
+			GetComponent<NameComponent>().IsPrefab = true;
+			auto& prefabComp = AddComponent<PrefabComponent>();
+			const auto& prefabPath = j["PrefabComponent"]["Path"];
+
+			if (prefabPath.empty())
+			{
+				return true;
+			}
+
+			if (!FileSystem::FileExists(prefabPath, false))
+			{
+				return true;
+			}
+
+			// This will map serialized ID to new generated ones while
+			// keeping the parent/child relationship in the prefab file.
+			std::string prefabTextContent = FileSystem::ReadFile(prefabPath);
+			auto prefabJson = json::parse(prefabTextContent);
+			auto& rootId = prefabJson["Root"];
+			json rootJson = "";
+			for (const auto& entJson : prefabJson["Entities"])
+			{
+				bool isRoot = false;
+				if (entJson["NameComponent"]["ID"] == rootId)
+				{
+					rootJson = entJson;
+					isRoot = true;
+					continue;
+				}
+			}
+
+			Prefab::InstanceOntoRoot(Entity{(entt::entity)GetHandle(), m_Scene}, prefabPath);
+			
+			DeserializeComponents(rootJson);
+		}
+		else
+		{
+			DeserializeComponents(j);
+		}
+			
+		return true;
+	}
+
+	bool Entity::DeserializeComponents(const json& j)
+	{
 		DESERIALIZE_COMPONENT(ParticleEmitterComponent);
 		DESERIALIZE_COMPONENT(SpriteComponent);
 		DESERIALIZE_COMPONENT(CameraComponent);
@@ -119,12 +170,20 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(NetScriptComponent);
 		DESERIALIZE_COMPONENT(NavMeshVolumeComponent);
 		DESERIALIZE_COMPONENT(UIComponent);
-		return true;
+		return false;
 	}
 
 	void Entity::PostDeserialize()
 	{
 		POSTDESERIALIZE_COMPONENT(QuakeMapComponent);
+
+		if (HasComponent<PrefabComponent>())
+		{
+			auto& prefabComp = GetComponent<PrefabComponent>();
+			const std::string& path = prefabComp.Path;
+		}
+
+		POSTDESERIALIZE_COMPONENT(PrefabComponent);
 	}
 
 	Entity::Entity(entt::entity handle, Scene* scene)

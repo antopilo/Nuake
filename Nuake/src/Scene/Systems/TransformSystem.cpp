@@ -147,7 +147,6 @@ namespace Nuake
 
 		for (auto& c : parentComponent.Children)
 		{
-			
 			auto& childParentComponent = c.GetComponent<TransformComponent>();
 			childParentComponent.GlobalDirty = true;
 

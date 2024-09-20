@@ -23,8 +23,8 @@ namespace Nuake {
 
 		static Ref<Prefab> CreatePrefabFromEntity(Entity entity);
 		static Ref<Prefab> New(const std::string& path);
-		static Ref<Prefab> InstanceInScene(const std::string& path, Ref<Scene> targetScene);
-
+		static Ref<Prefab> InstanceInScene(const std::string& path, Scene* targetScene);
+		static Ref<Prefab> InstanceOntoRoot(Entity entity, const std::string& path);
 		Prefab() 
 		{
 			Path = "";
@@ -74,7 +74,7 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool DeserializeIntoScene(const json& j, Ref<Scene> scene)
+		bool DeserializeIntoScene(const json& j, Scene* scene)
 		{
 			if (j == "")
 				return false;
@@ -96,7 +96,7 @@ namespace Nuake {
 				std::map<uint32_t, uint32_t> newIdsLut;
 				for (json e : j["Entities"])
 				{
-					Entity entity = { scene->m_Registry.create(), scene.get() };
+					Entity entity = { scene->m_Registry.create(), scene };
 					entity.Deserialize(e); // Id gets overriden by serialized id.
 
 					auto& nameComponent = entity.GetComponent<NameComponent>();
