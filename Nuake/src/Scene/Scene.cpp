@@ -52,10 +52,13 @@ namespace Nuake
 		m_EditorCamera = CreateRef<EditorCamera>();
 		m_Environement = CreateRef<Environment>();
 
+		physicsSystem = CreateRef<PhysicsSystem>(this);
+		scriptingSystem = CreateRef<ScriptingSystem>(this);
+
 		// Adding systems - Order is important
-		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
+		m_Systems.push_back(physicsSystem);
 		m_Systems.push_back(CreateRef<UISystem>(this));
-		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
+		m_Systems.push_back(scriptingSystem);
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));

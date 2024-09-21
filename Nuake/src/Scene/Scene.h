@@ -22,6 +22,9 @@ namespace Nuake
 	DECLARE_MULTICAST_DELEGATE(PreInitializeDelegate)
 	DECLARE_MULTICAST_DELEGATE(PostInitializeDelegate)
 
+	class PhysicsSystem;
+	class ScriptingSystem;
+
 	class Scene : public ISerializable
 	{
 		friend Entity;
@@ -42,6 +45,9 @@ namespace Nuake
 		std::unordered_map<uint32_t, Entity> m_EntitiesIDMap;
 		std::unordered_map<std::string, Entity> m_EntitiesNameMap;
 		std::string Path = "";
+
+		Ref<PhysicsSystem> physicsSystem;
+		Ref<ScriptingSystem> scriptingSystem;
 
 		Ref<SceneRenderer> m_SceneRenderer;
 
@@ -97,6 +103,9 @@ namespace Nuake
 
 		PreInitializeDelegate& OnPreInitialize() { return preInitializeDelegate; }
 		PostInitializeDelegate& OnPostInitialize() { return postInitializeDelegate; }
+
+		Ref<PhysicsSystem> GetPhysicsSystem() const { return physicsSystem; }
+		Ref<ScriptingSystem> GetScriptingSystem() const { return scriptingSystem; }
 
 	protected:
 		PreInitializeDelegate preInitializeDelegate;

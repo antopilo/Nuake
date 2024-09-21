@@ -15,6 +15,8 @@ namespace Nuake {
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
 
+		void InitializeNewScripts();
+
 	private:
 		void DispatchPhysicCallbacks();
 	};

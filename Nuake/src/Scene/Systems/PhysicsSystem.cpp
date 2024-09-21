@@ -109,6 +109,13 @@ namespace Nuake
 		PhysicsManager::Get().Reset();
 	}
 
+	void PhysicsSystem::InitializeNewBodies()
+	{
+		InitializeShapes();
+		InitializeRigidbodies();
+		InitializeCharacterControllers();
+	}
+
 	void PhysicsSystem::InitializeQuakeMap()
 	{
 		auto quakeBrushesView = m_Scene->m_Registry.view<TransformComponent, BSPBrushComponent>();

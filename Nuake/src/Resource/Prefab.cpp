@@ -1,6 +1,8 @@
 #include "Prefab.h"
 #include "src/Scene/Components/ParentComponent.h"
 #include <src/Scene/Components/PrefabComponent.h>
+#include <src/Scene/Components/NetScriptComponent.h>
+#include <src/Scene/Components/CharacterControllerComponent.h>
 
 namespace Nuake 
 {

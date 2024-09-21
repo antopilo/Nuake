@@ -21,6 +21,8 @@
 #include "src/Scene/Components/QuakeMap.h"
 
 #include "src/Physics/PhysicsManager.h"
+#include "src/Scene/Systems/PhysicsSystem.h"
+#include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 
 #include <Coral/Array.hpp>
@@ -292,6 +294,10 @@ namespace Nuake {
 		TransformComponent& transformComponent = root.GetComponent<TransformComponent>();
 		transformComponent.SetLocalPosition(position);
 		transformComponent.SetLocalRotation(Quat(qw, qx, qy, qz));
+
+		Ref<Scene> scene = Engine::GetCurrentScene();
+		scene->GetPhysicsSystem()->InitializeNewBodies();
+		scene->GetScriptingSystem()->InitializeNewScripts();
 
 		return root.GetHandle();
 	}
