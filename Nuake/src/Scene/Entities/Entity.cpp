@@ -136,8 +136,9 @@ namespace Nuake
 				}
 			}
 
-			Prefab::InstanceOntoRoot(Entity{(entt::entity)GetHandle(), m_Scene}, prefabPath);
-			
+			prefabComp.PrefabInstance = Prefab::InstanceOntoRoot(Entity{(entt::entity)GetHandle(), m_Scene}, prefabPath);
+			prefabComp.Path = prefabPath;
+
 			DeserializeComponents(rootJson);
 		}
 		else

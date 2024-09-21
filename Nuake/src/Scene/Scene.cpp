@@ -318,7 +318,7 @@ namespace Nuake
 				}
 
 				Ref<File> file = FileSystem::GetFile(filePath);
-				if (file->GetHasBeenModified())
+				if (file->GetHasBeenModified() || !prefabComponent.isInitialized)
 				{
 					prefabToReimport[filePath] = file;
 				}
@@ -342,7 +342,6 @@ namespace Nuake
 						continue;
 					}
 			
-			
 					for (auto& ent : prefabInstance->Entities)
 					{
 						// Destroy all children, not the root!
@@ -358,6 +357,7 @@ namespace Nuake
 						});
 
 					prefabInstance->ReInstance();
+					prefabComponent.isInitialized = true;
 				}
 			
 				for (auto& [path, prefabFile] : prefabToReimport)

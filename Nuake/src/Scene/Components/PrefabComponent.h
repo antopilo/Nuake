@@ -9,6 +9,8 @@ namespace Nuake {
 		Ref<Prefab> PrefabInstance;
         std::string Path;
 
+        bool isInitialized = false;
+
 		void SetPrefab(Ref<Prefab> prefab)
 		{
 			PrefabInstance = prefab;

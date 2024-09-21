@@ -85,25 +85,21 @@ namespace Nuake
 						Entity newEntity = { entity.GetScene()->m_Registry.create(), entity.GetScene() };
 						newEntity.Deserialize(e); // Id gets overriden by serialized id.
 
-						if (newEntity.GetComponent<ParentComponent>().HasParent)
+						ParentComponent& parentComponent = newEntity.GetComponent<ParentComponent>();
+						if (parentComponent.HasParent && parentComponent.ParentID != j["Root"])
 						{
-							auto pId = newEntity.GetComponent<ParentComponent>().ParentID;
-							newEntity.GetComponent<ParentComponent>().ParentID = newIdsLut[pId];
-							auto nc = entity.GetScene()->GetEntityByID(pId);
-							nc.GetComponent<ParentComponent>().RemoveChildren(newEntity);
-							newEntity.GetComponent<ParentComponent>().Parent = entity.GetScene()->GetEntityByID(newIdsLut[pId]);
-							entity.GetScene()->GetEntityByID(newIdsLut[pId]).AddChild(newEntity);
-
-
+							//auto pId = newEntity.GetComponent<ParentComponent>().ParentID;
+							//newEntity.GetComponent<ParentComponent>().ParentID = newIdsLut[pId];
+							//auto nc = entity.GetScene()->GetEntityByID(pId).GetComponent<ParentComponent>().RemoveChildren(newEntity);
+							//newEntity.GetComponent<ParentComponent>().Parent = entity.GetScene()->GetEntityByID(newIdsLut[pId]);
+							//entity.GetScene()->GetEntityByID(newIdsLut[pId]).AddChild(newEntity);
 						}
-
-						if (newEntity.GetComponent<ParentComponent>().ParentID == j["Root"])
+						else if (newEntity.GetComponent<ParentComponent>().ParentID == j["Root"])
 						{
-							entity.AddChild(newEntity);
+							//entity.AddChild(newEntity);
 						}
 
 						auto& nameComponent = newEntity.GetComponent<NameComponent>();
-
 						uint32_t oldId = nameComponent.ID;
 						uint32_t newId = OS::GetTime();
 						nameComponent.Name = nameComponent.Name;
@@ -117,18 +113,18 @@ namespace Nuake
 					// Set reference to the parent entity to children
 					for (auto& e : newPrefab->Entities)
 					{
-						auto& parentC = e.GetComponent<ParentComponent>();
-						auto parent = entity.GetScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
-
-						Logger::Log(parent.GetComponent<NameComponent>().Name);
-						if (parentC.ParentID == j["Root"])
-						{
-							entity.AddChild(e);
-						}
-						else
-						{
-							parent.AddChild(e);
-						}
+						//auto& parentC = e.GetComponent<ParentComponent>();
+						//auto parent = entity.GetScene()->GetEntityByID(newIdsLut[parentC.ParentID]);
+						//
+						//Logger::Log(parent.GetComponent<NameComponent>().Name);
+						//if (parentC.ParentID == j["Root"])
+						//{
+						//	entity.AddChild(e);
+						//}
+						//else
+						//{
+						//	parent.AddChild(e);
+						//}
 					}
 
 					// Since the bones point to an entity, and we are instancing a prefab, the new skeleton is gonna be pointing to the wrong
