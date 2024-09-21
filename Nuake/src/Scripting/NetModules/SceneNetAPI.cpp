@@ -297,7 +297,7 @@ namespace Nuake {
 
 		Ref<Scene> scene = Engine::GetCurrentScene();
 		scene->GetPhysicsSystem()->InitializeNewBodies();
-		scene->GetScriptingSystem()->InitializeNewScripts();
+		// scene->GetScriptingSystem()->InitializeNewScripts(); // We cant instantiate scripts here..
 
 		return root.GetHandle();
 	}
