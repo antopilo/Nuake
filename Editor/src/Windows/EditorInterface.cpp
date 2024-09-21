@@ -856,6 +856,7 @@ namespace Nuake {
         }
 
         bool isDragging = false;
+        bool isPrefab = e.HasComponent<PrefabComponent>();
         if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>() || e.HasComponent<BSPBrushComponent>())
         {
 			ImGui::PopStyleColor();
@@ -867,7 +868,7 @@ namespace Nuake {
 			ImGui::EndDragDropSource();
 		}
 
-        if (ImGui::BeginDragDropTarget())
+        if (!isPrefab && ImGui::BeginDragDropTarget())
         {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
             {
@@ -907,7 +908,6 @@ namespace Nuake {
             }
             ImGui::EndDragDropTarget();
         }
-        
 
         if (!isDragging && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
         {
@@ -964,7 +964,7 @@ namespace Nuake {
                 }
             }
 
-            if (ImGui::Selectable("Save entity as a new prefab"))
+            if (!isPrefab && ImGui::Selectable("Save entity as a new prefab"))
             {
                 Ref<Prefab> newPrefab = Prefab::CreatePrefabFromEntity(Selection.Entity);
                 std::string savePath = FileDialog::SaveFile("*.prefab");
@@ -1019,7 +1019,7 @@ namespace Nuake {
             ImGui::PopStyleColor();
         }
        
-        if (open)
+        if (!isPrefab && open)
         {
             // Caching list to prevent deletion while iterating.
             std::vector<Entity> childrens = parent.Children;
@@ -3430,6 +3430,7 @@ namespace Nuake {
         if (entity.HasComponent<PrefabComponent>())
         {
             entityTypeName = "Prefab";
+            return entityTypeName;
         }
 
         if (entity.HasComponent<AudioEmitterComponent>())
