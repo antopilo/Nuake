@@ -816,7 +816,8 @@ namespace Nuake {
         ImGui::PushFont(normalFont);
 
         // If has no childrens draw tree node leaf
-        if (parent.Children.size() <= 0)
+        bool isPrefab = e.HasComponent<PrefabComponent>();
+        if (parent.Children.size() <= 0 || isPrefab)
         {
             base_flags |= ImGuiTreeNodeFlags_Leaf;
         }
@@ -856,7 +857,6 @@ namespace Nuake {
         }
 
         bool isDragging = false;
-        bool isPrefab = e.HasComponent<PrefabComponent>();
         if (nameComponent.IsPrefab && e.HasComponent<PrefabComponent>() || e.HasComponent<BSPBrushComponent>())
         {
 			ImGui::PopStyleColor();
@@ -1019,12 +1019,15 @@ namespace Nuake {
             ImGui::PopStyleColor();
         }
        
-        if (!isPrefab && open)
+        if (open)
         {
-            // Caching list to prevent deletion while iterating.
-            std::vector<Entity> childrens = parent.Children;
-            for (auto& c : childrens)
-                DrawEntityTree(c);
+            if (!isPrefab)
+            {
+                // Caching list to prevent deletion while iterating.
+                std::vector<Entity> childrens = parent.Children;
+                for (auto& c : childrens)
+                    DrawEntityTree(c);
+            }
 
             ImGui::TreePop();
         }
