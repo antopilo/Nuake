@@ -82,10 +82,41 @@ namespace Nuake
 		if (!Engine::IsPlayMode())
 			return;
 
-		InitializeNewScripts();
-
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+
+		// Instance all the new entities
+		std::vector<Entity> entityJustInstanced;
+		for (auto& e : netEntities)
+		{
+			auto& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+			if (!netScriptComponent.Initialized)
+			{
+				if (netScriptComponent.ScriptPath.empty())
+					continue;
+
+				auto entity = Entity{ e, m_Scene };
+
+				// Creates an instance of the entity script in C#
+				scriptingEngineNet.RegisterEntityScript(entity);
+
+				netScriptComponent.Initialized = true;
+				entityJustInstanced.push_back(entity);
+			}
+		}
+
+		// Call init on the newly created instance
+		for (auto& e : entityJustInstanced)
+		{
+			auto& netScriptComponent = e.GetComponent<NetScriptComponent>();
+			if (e.IsValid() && scriptingEngineNet.HasEntityScriptInstance(e))
+			{
+				// We can now call on init on it.
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(e);
+				scriptInstance.InvokeMethod("OnInit");
+			}
+		}
+
 		// Then call update on all the other scripts
 		for (auto& e : netEntities)
 		{
@@ -178,18 +209,6 @@ namespace Nuake
 
 				netScriptComponent.Initialized = true;
 				entityJustInstanced.push_back(entity);
-			}
-		}
-
-		// Call init on the newly created instance
-		for (auto& e : entityJustInstanced)
-		{
-			auto& netScriptComponent = e.GetComponent<NetScriptComponent>();
-			if (e.IsValid() && scriptingEngineNet.HasEntityScriptInstance(e))
-			{
-				// We can now call on init on it.
-				auto scriptInstance = scriptingEngineNet.GetEntityScript(e);
-				scriptInstance.InvokeMethod("OnInit");
 			}
 		}
 	}

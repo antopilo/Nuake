@@ -301,6 +301,22 @@ namespace Nuake.Net
             return entity;
         }
 
+        public T? Instance<T>(Vector3 position = default, Quaternion quat = default) where T : Entity
+        {
+            int handle;
+            unsafe { handle = PrefabInstanceIcall(Path, position, quat.X, quat.Y, quat.Z, quat.W); }
+
+            if (handle == -1)
+            {
+                return null;
+            }
+
+            T? instance = Scene.GetEntity<T>(handle);
+            instance.OnInit();
+
+            return instance;
+        }
+
         public static implicit operator bool(Prefab prefab)
         {
             if (object.ReferenceEquals(prefab, null))
