@@ -861,7 +861,8 @@ namespace Nuake {
         {
 			ImGui::PopStyleColor();
         }
-		else if (!m_IsRenaming && ImGui::BeginDragDropSource())
+
+		if (!m_IsRenaming && ImGui::BeginDragDropSource())
 		{ 
 			ImGui::SetDragDropPayload("ENTITY", (void*)&e, sizeof(Entity));
 			ImGui::Text(name.c_str());
