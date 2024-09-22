@@ -21,6 +21,8 @@
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/NetScriptComponent.h>
 #include <src/FileSystem/FileDialog.h>
+#include <imgui/ImGuizmo.h>
+#include <glm/gtc/type_ptr.hpp>
 
 
 using namespace Nuake;
@@ -245,7 +247,7 @@ void PrefabEditorWindow::Draw()
 				}
 				else
 				{
-					auto& camera = Engine::GetCurrentScene()->m_EditorCamera;
+					auto& camera = virtualScene->m_EditorCamera;
 					Vector3 newEntityPos = camera->Translation + camera->Direction;
 					entity.GetComponent<TransformComponent>().SetLocalPosition(newEntityPos);
 				}
@@ -320,6 +322,12 @@ void PrefabEditorWindow::DrawViewportWindow()
 
 	if (ImGui::Begin(std::string("Viewport##" + prefab->Path).c_str()))
 	{
+		DrawOverlay();
+
+		ImGuizmo::BeginFrame();
+
+		ImGuizmo::SetOrthographic(false);
+
 		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
 		Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
@@ -333,6 +341,8 @@ void PrefabEditorWindow::DrawViewportWindow()
 
 		const Vector2& mousePos = Input::GetMousePosition();
 
+		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+
 		const ImVec2& windowPos = ImGui::GetWindowPos();
 		const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
 		const ImVec2& windowSize = ImGui::GetWindowSize();
@@ -340,8 +350,97 @@ void PrefabEditorWindow::DrawViewportWindow()
 		const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
 		isHoveringViewport = isInsideWidth && isInsideHeight;
 
+		ImGuizmo::SetDrawlist();
+		ImGuizmo::AllowAxisFlip(true);
+		ImGuizmo::SetRect(imagePos.x, imagePos.y + 0.0f, viewportPanelSize.x, viewportPanelSize.y);
+
 		auto& editorCam = virtualScene->m_EditorCamera;
-		bool isControllingCamera = editorCam->Update(Engine::GetTimestep(), isHoveringViewport);
+		isControllingCamera = editorCam->Update(Engine::GetTimestep(), isHoveringViewport);
+
+		if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode())
+		{
+			if (!Selection.Entity.IsValid())
+			{
+				Selection = EditorSelection();
+			}
+			else
+			{
+				TransformComponent& tc = Selection.Entity.GetComponent<TransformComponent>();
+				Matrix4 transform = tc.GetGlobalTransform();
+				const auto& editorCam = virtualScene->GetCurrentCamera();
+				Matrix4 cameraView = editorCam->GetTransform();
+				Matrix4 cameraProjection = editorCam->GetPerspective();
+				static Vector3 camPreviousPos = virtualScene->m_EditorCamera->Translation;
+				static Vector3 camNewPos = Vector3(0, 0, 0);
+
+				Vector3 camDelta = camNewPos - camPreviousPos;
+				Vector3 previousGlobalPos = transform[3];
+
+				// Imguizmo calculates the delta from the gizmo,
+				ImGuizmo::Manipulate(
+					glm::value_ptr(cameraView),
+					glm::value_ptr(cameraProjection),
+					CurrentOperation, CurrentMode,
+					glm::value_ptr(transform), NULL,
+					UseSnapping ? &CurrentSnapping.x : NULL
+				);
+
+				if (ImGuizmo::IsUsing())
+				{
+					// Since imguizmo returns a transform in global space and we want the local transform,
+					// we need to multiply by the inverse of the parent's global transform in order to revert
+					// the changes from the parent transform.
+					Matrix4 localTransform = Matrix4(transform);
+
+					Vector3 newGlobalPos = transform[3];
+					if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
+					{
+						Vector3 positionDelta = newGlobalPos - previousGlobalPos;
+						virtualScene->m_EditorCamera->Translation += positionDelta;
+						camNewPos = virtualScene->m_EditorCamera->Translation;
+					}
+
+					ParentComponent& parent = Selection.Entity.GetComponent<ParentComponent>();
+					if (parent.HasParent)
+					{
+						const auto& parentTransformComponent = parent.Parent.GetComponent<TransformComponent>();
+						const Matrix4& parentTransform = parentTransformComponent.GetGlobalTransform();
+						localTransform = glm::inverse(parentTransform) * localTransform;
+					}
+
+					// Decompose local transform
+					float decomposedPosition[3];
+					float decomposedEuler[3];
+					float decomposedScale[3];
+					ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(localTransform), decomposedPosition, decomposedEuler, decomposedScale);
+
+					const auto& localPosition = Vector3(decomposedPosition[0], decomposedPosition[1], decomposedPosition[2]);
+					const auto& localScale = Vector3(decomposedScale[0], decomposedScale[1], decomposedScale[2]);
+
+					localTransform[0] /= localScale.x;
+					localTransform[1] /= localScale.y;
+					localTransform[2] /= localScale.z;
+					const auto& rotationMatrix = Matrix3(localTransform);
+					const Quat& localRotation = glm::normalize(Quat(rotationMatrix));
+
+					const Matrix4& rotationMatrix4 = glm::mat4_cast(localRotation);
+					const Matrix4& scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
+					const Matrix4& translationMatrix = glm::translate(Matrix4(1.0f), localPosition);
+					const Matrix4& newLocalTransform = translationMatrix * rotationMatrix4 * scaleMatrix;
+
+					tc.Translation = localPosition;
+
+					if (CurrentOperation != ImGuizmo::SCALE)
+					{
+						tc.Rotation = localRotation;
+					}
+
+					tc.Scale = localScale;
+					tc.LocalTransform = newLocalTransform;
+					tc.Dirty = true;
+				}
+			}
+		}
 
 		if (ImGui::IsWindowHovered() && isHoveringViewport && !isViewportFocused && ImGui::GetIO().WantCaptureMouse)
 		{
@@ -375,6 +474,191 @@ void PrefabEditorWindow::DrawViewportWindow()
 			gbuffer.Unbind();
 		}
 	}
+	ImGui::End();
+}
+
+void PrefabEditorWindow::DrawOverlay()
+{
+	if (Engine::GetGameState() == GameState::Playing)
+	{
+		return;
+	}
+
+	// FIXME-VIEWPORT: Select a default viewport
+	const float DISTANCE = 10.0f;
+	int corner = 0;
+	ImGuiIO& io = ImGui::GetIO();
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+	window_flags |= ImGuiWindowFlags_NoMove;
+	ImGuiViewport* viewport = ImGui::GetWindowViewport();
+	ImVec2 work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+	ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
+	ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+	ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+	ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+	ImGui::SetNextWindowViewport(viewport->ID);
+
+	ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+	if (ImGui::Begin("ActionBar", 0, window_flags))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+		ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+
+		bool selectedMode = CurrentOperation == ImGuizmo::OPERATION::TRANSLATE;
+		if (selectedMode)
+		{
+			Color color = Engine::GetProject()->Settings.PrimaryColor;
+			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+		}
+
+		if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
+		{
+			CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+		}
+
+
+		UI::Tooltip("Translate");
+		if (selectedMode)
+		{
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::SameLine();
+
+		selectedMode = CurrentOperation == ImGuizmo::OPERATION::ROTATE;
+		if (selectedMode)
+		{
+			Color color = Engine::GetProject()->Settings.PrimaryColor;
+			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+		}
+
+		if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_E, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
+		{
+			CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+		}
+
+		UI::Tooltip("Rotate");
+
+		if (selectedMode)
+		{
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::SameLine();
+
+		selectedMode = CurrentOperation == ImGuizmo::OPERATION::SCALE;
+		if (selectedMode)
+		{
+			Color color = Engine::GetProject()->Settings.PrimaryColor;
+			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+		}
+
+		if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
+		{
+			CurrentOperation = ImGuizmo::OPERATION::SCALE;
+		}
+
+		UI::Tooltip("Scale");
+
+		if (selectedMode)
+		{
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::SameLine();
+
+		selectedMode = CurrentMode == ImGuizmo::MODE::WORLD;
+		if (selectedMode)
+		{
+			Color color = Engine::GetProject()->Settings.PrimaryColor;
+			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+		}
+
+		if (ImGui::Button(ICON_FA_GLOBE, ImVec2(30, 28)))
+		{
+			CurrentMode = ImGuizmo::MODE::WORLD;
+		}
+
+		UI::Tooltip("Global Transformation");
+
+		if (selectedMode)
+		{
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::SameLine();
+
+		selectedMode = CurrentMode == ImGuizmo::MODE::LOCAL;
+		if (selectedMode)
+		{
+			Color color = Engine::GetProject()->Settings.PrimaryColor;
+			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+		}
+
+		if (ImGui::Button(ICON_FA_CUBE, ImVec2(30, 28)))
+		{
+			CurrentMode = ImGuizmo::MODE::LOCAL;
+		}
+
+		UI::Tooltip("Local Transformation");
+
+		if (selectedMode)
+		{
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::SameLine();
+
+		ImGui::SameLine();
+		ImGui::PushItemWidth(75);
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
+		ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
+		CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.z };
+		ImGui::PopStyleVar();
+
+		ImGui::PopItemWidth();
+		UI::Tooltip("Snapping");
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor();
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::End();
+
+	int corner2 = 1;
+	work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+	work_area_size = ImGui::GetCurrentWindow()->Size;
+	window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+	window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
+	ImGui::SetNextWindowPos(window_pos + ImVec2(0, 40), ImGuiCond_Always, window_pos_pivot);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+	ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
+	if (ImGui::Begin("Controls", 0, window_flags))
+	{
+		const auto& editorCam = virtualScene->m_EditorCamera;
+		const float camSpeed = editorCam->Speed;
+
+		const float maxSpeed = 50.0f;
+		const float minSpeed = 0.05f;
+		const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
+
+		ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0);
+		ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
+		ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
+
+		ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+		ImGui::PopStyleVar();
+	}
+
+	ImGui::PopStyleVar();
 	ImGui::End();
 }
 
@@ -536,7 +820,7 @@ void PrefabEditorWindow::DrawEntityTree(Nuake::Entity e)
 			// Moves the editor camera to the camera position and direction.
 			if (ImGui::Selectable("Focus camera"))
 			{
-				Ref<EditorCamera> editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+				Ref<EditorCamera> editorCam = virtualScene->m_EditorCamera;
 				Vector3 camDirection = entity.GetComponent<CameraComponent>().CameraInstance->GetDirection();
 				camDirection.z *= -1.0f;
 				editorCam->SetTransform(glm::inverse(entity.GetComponent<TransformComponent>().GetGlobalTransform()));

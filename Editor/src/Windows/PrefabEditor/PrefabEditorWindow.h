@@ -1,8 +1,9 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "src/Core/Maths.h"
 
 #include "../EditorSelectionPanel.h"
-
+#include <src/Vendors/imgui/ImGuizmo.h>
 
 namespace Nuake
 {
@@ -38,9 +39,14 @@ private:
 	EditorSelectionPanel SelectionPanel;
 	EditorSelection Selection;
 	Nuake::Entity QueueDeletion;
-
+	ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
+	ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
+	bool UseSnapping = true;
+	Nuake::Vector3 CurrentSnapping = Nuake::Vector3{ 0.0f, 0.0f, 0.0f };
+	bool isControllingCamera = false;
 private:
 	void DrawViewportWindow();
+	void DrawOverlay();
 	void RenderScene();
 	void DrawEntityTree(Nuake::Entity e);
 	void Save();
