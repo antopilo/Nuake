@@ -13,7 +13,6 @@ namespace Nuake
 		Billboard(false),
 		LockYRotation(false)
 	{
-
 	}
 
 	bool SpriteComponent::LoadSprite()
@@ -73,6 +72,8 @@ namespace Nuake
 		{
 			PositionFacing = j["PositionFacing"];
 		}
+
+		LoadSprite();
 
 		return true;
 	}

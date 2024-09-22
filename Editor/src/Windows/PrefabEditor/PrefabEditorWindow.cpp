@@ -280,9 +280,21 @@ void PrefabEditorWindow::Draw()
 
 				DrawEntityTree(prefab->Root);
 
+
+
 				ImGui::PopStyleVar();
 			}
 			ImGui::EndTable();
+
+			if (QueueDeletion.GetHandle() != -1)
+			{
+				virtualScene->DestroyEntity(QueueDeletion);
+
+				// Clear Selection
+				Selection = EditorSelection();
+
+				QueueDeletion = Nuake::Entity{ (entt::entity)-1, scene.get() };
+			}
 
 		}
 		ImGui::EndChild();
@@ -511,7 +523,7 @@ void PrefabEditorWindow::DrawEntityTree(Nuake::Entity e)
 
 	if (!isRenaming && Selection.Type == EditorSelectionType::Entity && Input::IsKeyPressed(Key::DELETE_KEY))
 	{
-		//QueueDeletion = Selection.Entity;
+		QueueDeletion = Selection.Entity;
 	}
 
 	if (ImGui::BeginPopupContextItem())
@@ -534,7 +546,7 @@ void PrefabEditorWindow::DrawEntityTree(Nuake::Entity e)
 
 		if (ImGui::Selectable("Remove"))
 		{
-			//QueueDeletion = e;
+			QueueDeletion = e;
 		}
 
 		if (entity.GetComponent<ParentComponent>().HasParent && ImGui::Selectable("Move to root"))

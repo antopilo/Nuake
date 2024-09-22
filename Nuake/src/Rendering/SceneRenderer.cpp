@@ -863,6 +863,7 @@ namespace Nuake
 				Renderer::Flush(gBufferShader, true);
 			}
 
+			glDisable(GL_CULL_FACE);
 			// Sprites
 			{
 				ZoneScopedN("Render Sprites");

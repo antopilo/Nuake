@@ -10,6 +10,7 @@ namespace Nuake
 	class Scene;
 	class FrameBuffer;
 	class Texture;
+	class Entity;
 }
 
 class PrefabEditorWindow
@@ -36,6 +37,7 @@ private:
 
 	EditorSelectionPanel SelectionPanel;
 	EditorSelection Selection;
+	Nuake::Entity QueueDeletion;
 
 private:
 	void DrawViewportWindow();
