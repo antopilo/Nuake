@@ -325,7 +325,6 @@ void PrefabEditorWindow::DrawViewportWindow()
 		DrawOverlay();
 
 		ImGuizmo::BeginFrame();
-
 		ImGuizmo::SetOrthographic(false);
 
 		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
@@ -356,6 +355,7 @@ void PrefabEditorWindow::DrawViewportWindow()
 
 		auto& editorCam = virtualScene->m_EditorCamera;
 		isControllingCamera = editorCam->Update(Engine::GetTimestep(), isHoveringViewport);
+		
 
 		if (Selection.Type == EditorSelectionType::Entity && !Engine::IsPlayMode())
 		{
@@ -501,7 +501,7 @@ void PrefabEditorWindow::DrawOverlay()
 
 	ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
-	if (ImGui::Begin("ActionBar", 0, window_flags))
+	if (ImGui::Begin("ActionBar2", 0, window_flags))
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
 		ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
@@ -514,7 +514,7 @@ void PrefabEditorWindow::DrawOverlay()
 			ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
 		}
 
-		if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
+		if (ImGui::Button(ICON_FA_ARROWS_ALT , ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !isControllingCamera))
 		{
 			CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
 		}
@@ -640,7 +640,7 @@ void PrefabEditorWindow::DrawOverlay()
 	ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
 	ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
-	if (ImGui::Begin("Controls", 0, window_flags))
+	if (ImGui::Begin("Controls2", 0, window_flags))
 	{
 		const auto& editorCam = virtualScene->m_EditorCamera;
 		const float camSpeed = editorCam->Speed;
