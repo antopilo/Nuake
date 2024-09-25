@@ -108,9 +108,9 @@ namespace Nuake
        
     }
 
-    void Renderer::SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId)
+    void Renderer::SubmitMesh(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId, const Matrix4& previousTransform)
     {
-        m_RenderList.AddToRenderList(mesh, transform, entityId);
+        m_RenderList.AddToRenderList(mesh, transform, entityId, previousTransform);
     }
 
     void Renderer::SubmitCube(Matrix4 transform)

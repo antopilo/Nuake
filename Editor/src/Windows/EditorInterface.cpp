@@ -178,6 +178,10 @@ namespace Nuake {
             {
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetScaledDepthTexture();
             }
+            else if (SelectedViewport == 4)
+            {
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT5);
+            }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 
@@ -195,7 +199,6 @@ namespace Nuake {
             const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
             m_IsHoveringViewport = isInsideWidth && isInsideHeight;
 
-            
             if (ImGui::BeginDragDropTarget())
             {
                 auto& gbuffer = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer();
@@ -2766,7 +2769,7 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
-            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth"};
+            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity"};
             ImGui::SetNextItemWidth(128);
 			if (ImGui::BeginCombo("##Output", items[SelectedViewport]))
 			{

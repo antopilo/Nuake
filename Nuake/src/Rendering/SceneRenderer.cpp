@@ -22,19 +22,43 @@
 
 namespace Nuake 
 {
+	std::vector<Vector2> SceneRenderer::mJitterOffsets = []{
+		
+		return std::vector<Vector2> {
+			Vector2(0.500000, 0.333333),
+			Vector2(0.250000, 0.666667),
+			Vector2(0.750000, 0.111111),
+			Vector2(0.125000, 0.444444),
+			Vector2(0.625000, 0.777778),
+			Vector2(0.375000, 0.222222),
+			Vector2(0.875000, 0.555556),
+			Vector2(0.062500, 0.888889),
+			Vector2(0.562500, 0.037037),
+			Vector2(0.312500, 0.370370),
+			Vector2(0.812500, 0.703704),
+			Vector2(0.187500, 0.148148),
+			Vector2(0.687500, 0.481481),
+			Vector2(0.437500, 0.814815),
+			Vector2(0.937500, 0.259259),
+			Vector2(0.031250, 0.592593)
+		};
+	}();
+
 	void SceneRenderer::Init()
 	{
 		const auto defaultResolution = Vector2(1920, 1080);
+
+		auto entityTexture = CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT);
+		entityTexture->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+
 		mGBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_DEPTH_COMPONENT), GL_DEPTH_ATTACHMENT); // Depth
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0); // Albedo
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT1); // Normal
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT2); // Material + unlit
-
-		auto entityTexture = CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT);
-		entityTexture->SetParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		mGBuffer->SetTexture(entityTexture, GL_COLOR_ATTACHMENT3); // Entity ID
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT5); // Velocity
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -91,6 +115,9 @@ namespace Nuake
 
 		mDebugLines = std::vector<DebugLine>();
 		mDebugShapes = std::vector<DebugShape>();
+
+		mScaledJitterOffets.reserve(mJitterOffsets.size());
+		UpdateJitterOffsets(defaultResolution);
 	}
 
 	void SceneRenderer::Cleanup()
@@ -148,11 +175,34 @@ namespace Nuake
 
 		const Vector2 framebufferResolution = framebuffer.GetSize();
 
+		if (framebufferResolution != GetGBuffer().GetSize())
+		{
+			UpdateJitterOffsets({ 1600, 1200 });
+		}
+
 		if (renderUI)
 		{
 			mGBuffer->QueueResize(framebufferResolution);
 		}
 		GBufferPass(scene);
+
+		if (framebuffer.GetSize() != GetGBuffer().GetSize())
+		{
+			// UpdateJitterOffsets(framebuffer.GetSize());
+		}
+
+		// Save previous Matrix
+		auto modelView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+		for (auto e : modelView)
+		{
+			auto [transform, mesh, visibility] = modelView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+			Entity entity = { (entt::entity)e, Engine::GetCurrentScene().get() };
+			Logger::Log("Setting previous pos of : " + entity.GetComponent<NameComponent>().Name);
+			if (mesh.ModelResource && visibility.Visible)
+			{
+				transform.PreviousTransform = mProjection * mView * transform.GetGlobalTransform();
+			}
+		}
 
 		if(renderUI)
 		{
@@ -805,6 +855,10 @@ namespace Nuake
 			gBufferShader->Bind();
 			gBufferShader->SetUniform("u_Projection", mProjection);
 			gBufferShader->SetUniform("u_View", mView);
+			gBufferShader->SetUniform("u_Jitter", mScaledJitterOffets[mJitterIndex]);
+
+			mJitterIndex++;
+			mJitterIndex = mJitterIndex % mScaledJitterOffets.size();
 
 			// Models
 			{
@@ -818,7 +872,7 @@ namespace Nuake
 					{
 						for (auto& m : mesh.ModelResource->GetMeshes())
 						{
-							Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e);
+							Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e, transform.PreviousTransform);
 						}
 					}
 				}
@@ -1288,6 +1342,22 @@ namespace Nuake
 			}
 
 			SetSkeletonBoneTransformRecursive(scene, child, shader);
+		}
+	}
+
+	void SceneRenderer::UpdateJitterOffsets(const Vector2& viewportSize)
+	{
+		mScaledJitterOffets.clear();
+		
+		uint32_t index = 0;
+		for (auto& jitterPoint : mJitterOffsets)
+		{
+			mScaledJitterOffets.push_back({ 
+				((jitterPoint.x - 0.5f) / viewportSize.x) * 2.0f,
+				((jitterPoint.y - 0.5f) / viewportSize.y) * 2.0f
+			});
+
+			index++;
 		}
 	}
 

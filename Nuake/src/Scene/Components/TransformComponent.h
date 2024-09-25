@@ -16,6 +16,8 @@ namespace Nuake
 
 		Matrix4 LocalTransform;
 		Matrix4 GlobalTransform;
+
+		Matrix4 PreviousTransform;
 	public:
 		bool Dirty = true;
 		bool GlobalDirty = true;

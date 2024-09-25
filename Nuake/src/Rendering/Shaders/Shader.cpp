@@ -222,7 +222,7 @@ namespace Nuake
 		{
 			int addr = glGetUniformLocation(programId, uniform.c_str());
 
-			ASSERT(addr != -1);
+			// ASSERT(addr != -1);
 			
 			UniformCache[uniform] = addr;
 

@@ -108,6 +108,10 @@ namespace Nuake
 		std::vector<DebugLine> mDebugLines;
 		std::vector<DebugShape> mDebugShapes;
 
+		static std::vector<Vector2> mJitterOffsets;
+		std::vector<Vector2> mScaledJitterOffets;
+		uint32_t mJitterIndex = 0;
+
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
 		void ShadingPass(Scene& scene);
@@ -115,5 +119,7 @@ namespace Nuake
 		void DebugRendererPass(Scene& scene);
 
 		void SetSkeletonBoneTransformRecursive(Scene& scene, SkeletonNode& skeletonNode, Shader* shader);
+		
+		void UpdateJitterOffsets(const Vector2& viewportSize);
 	};
 }
