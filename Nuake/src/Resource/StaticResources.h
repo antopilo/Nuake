@@ -8,9 +8,6 @@ namespace Nuake {
         extern const std::string Resources_default_layout_ini_path;
         extern unsigned int Resources_default_layout_ini_len;
         extern unsigned char Resources_default_layout_ini[];
-        extern const std::string Resources_resources_aps_path;
-        extern unsigned int Resources_resources_aps_len;
-        extern unsigned char Resources_resources_aps[];
         extern const std::string Resources_resources_rc_path;
         extern unsigned int Resources_resources_rc_len;
         extern unsigned char Resources_resources_rc[];
@@ -185,6 +182,9 @@ namespace Nuake {
         extern const std::string Resources_Shaders_depth_aware_blur_shader_path;
         extern unsigned int Resources_Shaders_depth_aware_blur_shader_len;
         extern unsigned char Resources_Shaders_depth_aware_blur_shader[];
+        extern const std::string Resources_Shaders_displayVelocity_shader_path;
+        extern unsigned int Resources_Shaders_displayVelocity_shader_len;
+        extern unsigned char Resources_Shaders_displayVelocity_shader[];
         extern const std::string Resources_Shaders_display_depth_shader_path;
         extern unsigned int Resources_Shaders_display_depth_shader_len;
         extern unsigned char Resources_Shaders_display_depth_shader[];

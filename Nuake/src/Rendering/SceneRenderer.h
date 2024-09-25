@@ -66,6 +66,11 @@ namespace Nuake
 			return mDisplayDepthBuffer->GetTexture(GL_COLOR_ATTACHMENT0);
 		}
 
+		Ref<Texture> GetVelocityTexture()
+		{
+			return mDisplayMotionVector->GetTexture(GL_COLOR_ATTACHMENT0);
+		}
+
 		bool IsTempModelLoaded(const std::string& name) const
 		{
 			return mTempModels.find(name) != mTempModels.end();
@@ -94,6 +99,7 @@ namespace Nuake
 		Scope<FrameBuffer> mDOFBuffer;
 		Scope<FrameBuffer> mOutlineBuffer;
 		Scope<FrameBuffer> mDisplayDepthBuffer;
+		Scope<FrameBuffer> mDisplayMotionVector;
 		Scope<FrameBuffer> mTempFrameBuffer;
 
 		// Shapes

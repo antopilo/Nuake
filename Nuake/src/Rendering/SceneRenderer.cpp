@@ -85,6 +85,9 @@ namespace Nuake
 		mDisplayDepthBuffer = CreateScope<FrameBuffer>(false, defaultResolution);
 		mDisplayDepthBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
 
+		mDisplayMotionVector = CreateScope<FrameBuffer>(false, defaultResolution);
+		mDisplayMotionVector->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
 		// Generate debug meshes
 		std::vector<Vertex> lineVertices
 		{
@@ -191,12 +194,30 @@ namespace Nuake
 			// UpdateJitterOffsets(framebuffer.GetSize());
 		}
 
+		mDisplayMotionVector->QueueResize(framebufferResolution);
+		mDisplayMotionVector->Bind();
+		{
+			auto shader = ShaderManager::GetShader("Resources/Shaders/displayVelocity.shader");
+			shader->Bind();
+
+			GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT5)->Bind(0);
+			shader->SetUniform("u_Source", 0);
+			shader->SetUniform("u_Resolution", framebufferResolution);
+			mDisplayMotionVector->Clear();
+
+			Renderer::DrawQuad();
+		}
+		mDisplayMotionVector->Unbind();
+
 		// Save previous Matrix
 		auto modelView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		for (auto e : modelView)
 		{
 			auto [transform, mesh, visibility] = modelView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
 			Entity entity = { (entt::entity)e, Engine::GetCurrentScene().get() };
+			if (!entity.IsValid())
+				continue;
+
 			Logger::Log("Setting previous pos of : " + entity.GetComponent<NameComponent>().Name);
 			if (mesh.ModelResource && visibility.Visible)
 			{

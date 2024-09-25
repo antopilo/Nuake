@@ -180,7 +180,7 @@ namespace Nuake {
             }
             else if (SelectedViewport == 4)
             {
-                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT5);
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetVelocityTexture();
             }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
