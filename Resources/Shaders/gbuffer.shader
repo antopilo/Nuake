@@ -162,11 +162,11 @@ void main()
 
     vec4 fragPos = FragPos / FragPos.w;
     fragPos.xy = (fragPos.xy + 1.0) / 2.0;
-    fragPos.y = 1.0 - fragPos.y;
+    //fragPos.y = 1.0 - fragPos.y;
 
     vec4 previousFragPos =  PreviousFragPos / PreviousFragPos.w;
     previousFragPos.xy = (previousFragPos.xy + 1.0) / 2.0;
-    previousFragPos.y = 1.0 - previousFragPos.y;
+    //previousFragPos.y = 1.0 - previousFragPos.y;
 
     vec2 positionDifference = (fragPos).xy - (previousFragPos).xy;
     gVelocity = vec4(positionDifference.x, positionDifference.y, 0.0, 1.0);
