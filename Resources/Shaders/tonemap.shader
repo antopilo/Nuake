@@ -18,7 +18,9 @@ void main()
 uniform sampler2D u_Source;
 uniform float u_Gamma;
 uniform float u_Exposure;
-
+uniform float u_TAAFactor;
+uniform sampler2D u_PreviousFrame;
+uniform sampler2D u_VelocityFrame;
 
 in vec2 UV;
 
@@ -43,5 +45,25 @@ void main()
     // gamma correct
     color = pow(mapped, vec3(u_Gamma));
 
+    // TAA
+    vec2 velocity = texture(u_VelocityFrame, UV).rg;
+    vec2 previousPixelPos = UV - velocity;
+
+    vec3 historyColor = texture(u_PreviousFrame, previousPixelPos).rgb;
+
+    // Sample the neighboring pixels for clamping
+    vec3 NearColor0 = textureOffset(u_Source, UV, ivec2(1, 0)).rgb;
+    vec3 NearColor1 = textureOffset(u_Source, UV, ivec2(0, 1)).rgb;
+    vec3 NearColor2 = textureOffset(u_Source, UV, ivec2(-1, 0)).rgb;
+    vec3 NearColor3 = textureOffset(u_Source, UV, ivec2(0, -1)).rgb;
+
+    // Calculate the min and max colors
+    vec3 BoxMin = min(color, min(NearColor0, min(NearColor1, min(NearColor2, NearColor3))));
+    vec3 BoxMax = max(color, max(NearColor0, max(NearColor1, max(NearColor2, NearColor3))));
+
+    // Clamp the history color
+    historyColor = clamp(historyColor, BoxMin, BoxMax);
+
+    color = mix(color, historyColor, u_TAAFactor);
     FragColor = vec4(color, 1.0);
 }

@@ -58,7 +58,7 @@ namespace Nuake
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT2); // Material + unlit
 		mGBuffer->SetTexture(entityTexture, GL_COLOR_ATTACHMENT3); // Entity ID
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
-		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT), GL_COLOR_ATTACHMENT5); // Velocity
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RG, GL_RG16F, GL_FLOAT), GL_COLOR_ATTACHMENT5); // Velocity
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -87,6 +87,9 @@ namespace Nuake
 
 		mDisplayMotionVector = CreateScope<FrameBuffer>(false, defaultResolution);
 		mDisplayMotionVector->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB), GL_COLOR_ATTACHMENT0);
+
+		mPreviousFrame = CreateScope<FrameBuffer>(false, defaultResolution);
+		mPreviousFrame->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGBA), GL_COLOR_ATTACHMENT0);
 
 		// Generate debug meshes
 		std::vector<Vertex> lineVertices
@@ -180,17 +183,19 @@ namespace Nuake
 
 		if (framebufferResolution != GetGBuffer().GetSize())
 		{
-			UpdateJitterOffsets({ 1600, 1200 });
+			UpdateJitterOffsets(framebuffer.GetSize());
 		}
 
 		if (renderUI)
 		{
 			mGBuffer->QueueResize(framebufferResolution);
 		}
+
 		GBufferPass(scene);
 
-		if (framebuffer.GetSize() != GetGBuffer().GetSize())
+		if (mPreviousFrame->GetSize() != GetGBuffer().GetSize())
 		{
+			mPreviousFrame->QueueResize(framebufferResolution);
 			// UpdateJitterOffsets(framebuffer.GetSize());
 		}
 
@@ -218,7 +223,6 @@ namespace Nuake
 			if (!entity.IsValid())
 				continue;
 
-			Logger::Log("Setting previous pos of : " + entity.GetComponent<NameComponent>().Name);
 			if (mesh.ModelResource && visibility.Visible)
 			{
 				transform.PreviousTransform = mProjection * mView * transform.GetGlobalTransform();
@@ -246,7 +250,8 @@ namespace Nuake
 		{
 			mShadingBuffer->QueueResize(framebufferResolution);
 		}
-		ShadingPass(scene);
+
+		ShadingPass(scene, framebuffer.GetTexture(GL_COLOR_ATTACHMENT0));
 
 		// Blit depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, mGBuffer->GetRenderID());
@@ -333,10 +338,28 @@ namespace Nuake
 
 			shader->SetUniform("u_Exposure", sceneEnv->Exposure);
 			shader->SetUniform("u_Gamma", sceneEnv->Gamma);
+
+			Ref<Texture> previousTexture = mPreviousFrame->GetTexture(GL_COLOR_ATTACHMENT0);
+			previousTexture->SetMagnificationFilter(SamplerFilter::LINEAR);
+			previousTexture->SetMinificationFilter(SamplerFilter::LINEAR);
+			previousTexture->SetWrapping(SamplerWrapping::CLAMP_TO_EDGE);
+			shader->SetUniform("u_PreviousFrame", previousTexture.get(), 4);
+			shader->SetUniform("u_VelocityFrame", GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT5).get(), 7);
+			shader->SetUniform("u_TAAFactor", TAAFactor);
 			shader->SetUniform("u_Source", finalOutput.get());
 			Renderer::DrawQuad();
 		}
 		mToneMapBuffer->Unbind();
+
+		mPreviousFrame->Bind();
+		{
+			RenderCommand::Clear();
+			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+			shader->Bind();
+			shader->SetUniform("u_Source", mToneMapBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 1);
+			Renderer::DrawQuad();
+		}
+		mPreviousFrame->Unbind();
 
 		ProjectSettings projectSettings = Engine::GetProject()->Settings;
 
@@ -1126,7 +1149,7 @@ namespace Nuake
 		RenderCommand::Enable(RendererEnum::BLENDING);
 	}
 
-	void SceneRenderer::ShadingPass(Scene& scene)
+	void SceneRenderer::ShadingPass(Scene& scene, Ref<Texture> previousFrame)
 	{
 		ZoneScoped;
 
@@ -1158,6 +1181,8 @@ namespace Nuake
 			shadingShader->SetUniform("u_EyePosition", scene.GetCurrentCamera()->Translation);
 			shadingShader->SetUniform("u_AmbientTerm", environment->AmbientTerm);
 			shadingShader->SetUniform("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
+
+
 
 			Ref<Environment> env = scene.GetEnvironment();
 

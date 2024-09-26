@@ -1279,6 +1279,33 @@ namespace Nuake {
                 }
             END_COLLAPSE_HEADER()
 
+            BEGIN_COLLAPSE_HEADER(TAA)
+                if (ImGui::BeginTable("EnvTableTAA", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3f);
+                    ImGui::TableSetupColumn("set", 0, 0.6f);
+                    ImGui::TableSetupColumn("reset", 0, 0.1f);
+
+                    ImGui::TableNextColumn();
+                    {
+                        auto& sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
+
+                        // Title
+                        ImGui::Text("TAA Factor");
+                        ImGui::TableNextColumn();
+
+                        ImGui::SliderFloat("##TAAFactor", &sceneRenderer->TAAFactor, 0.0f, 1.0f );
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetTAAFactor");
+                        if (ImGui::Button(resetVolumetric.c_str())) sceneRenderer->TAAFactor = 0.6f;
+                        ImGui::PopStyleColor();
+                    }
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
             BEGIN_COLLAPSE_HEADER(BLOOM)
                 if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {

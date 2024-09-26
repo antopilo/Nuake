@@ -103,7 +103,7 @@ float arrow(vec2 p, vec2 v) {
 }
 
 vec2 field(vec2 pos) {
-	return texture(u_Source, UV).xy * 2.0 - 1.0;
+	return texture(u_Source, UV).xy;
 }
 
 void main()

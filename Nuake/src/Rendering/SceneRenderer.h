@@ -85,6 +85,8 @@ namespace Nuake
 			mTempModels.clear();
 		}
 
+
+		float TAAFactor = 0.6f;
 		int mOutlineEntityID = 0;
 	private:
 		Matrix4 mProjection, mView;
@@ -101,6 +103,7 @@ namespace Nuake
 		Scope<FrameBuffer> mDisplayDepthBuffer;
 		Scope<FrameBuffer> mDisplayMotionVector;
 		Scope<FrameBuffer> mTempFrameBuffer;
+		Scope<FrameBuffer> mPreviousFrame;
 
 		// Shapes
 		Ref<BoxGizmo> mBoxGizmo;
@@ -120,7 +123,7 @@ namespace Nuake
 
 		void ShadowPass(Scene& scene);
 		void GBufferPass(Scene& scene);
-		void ShadingPass(Scene& scene);
+		void ShadingPass(Scene& scene, Ref<Texture> previousFrame);
 		void PostProcessPass(const Scene& scene);
 		void DebugRendererPass(Scene& scene);
 

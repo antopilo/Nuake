@@ -1,6 +1,8 @@
 #shader vertex
 #version 440 core
 
+
+
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
 layout(location = 2) in vec3 Normal;
@@ -14,13 +16,13 @@ uniform mat4 u_PreviousViewModel;
 uniform vec2 u_Jitter;
 
 out vec4 FragPos;
+out vec4 PreviousFragPos;
 out mat3 TBN;
 out vec2 UV;
 out mat4 Inv_Proj;
 out mat4 Inv_View;
 out mat4 view;
 out vec3 o_Tangent;
-out vec4 PreviousFragPos;
 
 void main()
 {
@@ -41,14 +43,21 @@ void main()
     o_Tangent = Tangent;
 
     vec4 clipPosition = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
-    FragPos = clipPosition;
 
-    gl_Position = clipPosition;
+    FragPos = clipPosition; // Push unjittered to not affect velocity buffer
+
+    // Now we can jitter.
+    vec4 newClipPosition = clipPosition + vec4(u_Jitter.x, u_Jitter.y, 0, 0) * clipPosition.w; 
+
+    gl_Position = newClipPosition;
+
     PreviousFragPos = u_PreviousViewModel * vec4(VertexPosition, 1.0f);
 }
 
 #shader fragment
 #version 440 core
+
+precision highp float;
 
 layout(location = 0) out vec4 gAlbedo;
 layout(location = 1) out vec4 gNormal;
@@ -151,6 +160,14 @@ void main()
     gEntityID = int(u_EntityID);
     gEmissive = u_Emissive;
 
-    vec4 positionDifference = FragPos - PreviousFragPos;
-    gVelocity = vec4((positionDifference.x + 1.0) / 2.0, (positionDifference.y + 1.0) / 2.0, 0.0f, 1);
+    vec4 fragPos = FragPos / FragPos.w;
+    fragPos.xy = (fragPos.xy + 1.0) / 2.0;
+    fragPos.y = 1.0 - fragPos.y;
+
+    vec4 previousFragPos =  PreviousFragPos / PreviousFragPos.w;
+    previousFragPos.xy = (previousFragPos.xy + 1.0) / 2.0;
+    previousFragPos.y = 1.0 - previousFragPos.y;
+
+    vec2 positionDifference = (fragPos).xy - (previousFragPos).xy;
+    gVelocity = vec4(positionDifference.x, positionDifference.y, 0.0, 1.0);
 }

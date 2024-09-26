@@ -73,6 +73,7 @@ uniform DirectionalLight u_DirectionalLight;
 uniform int u_DisableSSAO = 0;
 
 uniform float u_AmbientTerm;
+uniform sampler2D u_PreviousFrame;
 
 // Converts depth to World space coords.
 vec3 WorldPosFromDepth(float depth) {
