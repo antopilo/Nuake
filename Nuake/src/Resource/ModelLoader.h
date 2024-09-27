@@ -37,7 +37,7 @@ namespace Nuake
 		std::unordered_map<std::string, Bone> m_BoneMap;
 
 		void ProcessNode(aiNode* node, const aiScene* scene);
-		Ref<Mesh> ProcessMesh(aiMesh* node, const aiScene* scene);
+		Ref<Mesh> ProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene);
 
 		std::vector<Vertex> ProcessVertices(aiMesh* mesh);
 		std::vector<uint32_t> ProcessIndices(aiMesh* mesh);

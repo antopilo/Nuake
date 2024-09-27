@@ -194,10 +194,6 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 
 		ModelComponent& modelComp = scene->CreateEntity("Mesh").AddComponent<ModelComponent>();
 		modelComp.ModelResource = ResourceLoader::LoadModel(file->GetRelativePath());
-
-		AABB aabb = modelComp.ModelResource->GetMeshes()[0]->GetAABB();
-		Vector3 middlePoint = aabb.Max / 2.0f;
-
 		scene->Update(0.01f);
 		scene->Draw(*m_ShadedFramebuffer.get());
 	}

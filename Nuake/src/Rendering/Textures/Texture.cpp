@@ -1,9 +1,14 @@
 #include "Texture.h"
 #include "src/Core/Logger.h"
-#include <iostream>
 #include "src/FileSystem/FileSystem.h"
+#include "src/Core/String.h"
+
+#include "dds/dds.h"
 
 #include <glad/glad.h>
+
+#include <fstream>
+#include <iostream>
 
 
 namespace Nuake
@@ -17,8 +22,42 @@ namespace Nuake
 		m_Height = 0;
 		m_BPP = 0;
 
-		stbi_set_flip_vertically_on_load(1);
-		m_LocalBuffer = stbi_load((path).c_str(), &m_Width, &m_Height, &m_BPP, 4);
+		if (String::EndsWith(path, ".dds"))
+		{
+			std::ifstream file(path, std::ios::binary | std::ios::ate);
+			if (!file)
+			{
+				const std::string& msg = "Failed to load texture: " + path;
+				Logger::Log(msg, "texture", WARNING);
+				return;
+			}
+
+			size_t fileSize = file.tellg();
+			std::vector<unsigned char> fileData(fileSize);
+			file.seekg(0);
+			file.read(reinterpret_cast<char*>(fileData.data()), fileSize);
+			file.close();
+
+			// Parse the DDS header
+			dds::Header header = dds::read_header(fileData.data(), fileSize);
+			if (!header.is_valid())
+			{
+				const std::string& msg = "Invalid DDS texture: " + path;
+				Logger::Log(msg, "texture", WARNING);
+				return;
+			}
+
+			// Set texture properties
+			m_Width = header.width();
+			m_Height = header.height();
+
+		}
+		else
+		{
+			stbi_set_flip_vertically_on_load(1);
+			m_LocalBuffer = stbi_load((path).c_str(), &m_Width, &m_Height, &m_BPP, 4);
+		}
+		
 
 		glGenTextures(1, &m_RendererId);
 		glBindTexture(GL_TEXTURE_2D, m_RendererId);

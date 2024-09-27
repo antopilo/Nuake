@@ -166,7 +166,7 @@ namespace Nuake
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			m_Meshes.push_back(ProcessMesh(mesh, scene));
+			m_Meshes.push_back(ProcessMesh(mesh, node, scene));
 		}
 
 		for (uint32_t i = 0; i < node->mNumChildren; i++)
@@ -255,11 +255,16 @@ namespace Nuake
 		return mesh;
 	}
 
-	Ref<Mesh> ModelLoader::ProcessMesh(aiMesh* node, const aiScene* scene)
+	Ref<Mesh> ModelLoader::ProcessMesh(aiMesh* meshNode, aiNode* node, const aiScene* scene)
 	{
-		auto vertices = ProcessVertices(node);
-		auto indices = ProcessIndices(node);
-		auto material = ProcessMaterials(scene, node);
+		auto vertices = ProcessVertices(meshNode);
+		auto indices = ProcessIndices(meshNode);
+		auto material = ProcessMaterials(scene, meshNode);
+
+		for(auto& vert : vertices)
+		{
+			vert.position = ConvertMatrixToGLMFormat(node->mTransformation) * Vector4(vert.position, 1.0f);
+		}
 
 		Ref<Mesh> mesh = CreateRef<Mesh>();
 		mesh->AddSurface(vertices, indices);
@@ -502,7 +507,7 @@ namespace Nuake
 		{
 			materialNode->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
 			Ref<Texture> albedoTexture = ProcessTextures(scene, str.C_Str());
-			material->SetRoughness(albedoTexture);
+			//material->SetRoughness(albedoTexture);
 		}
 
 		if (materialNode->GetTextureCount(aiTextureType_DISPLACEMENT) > 0)

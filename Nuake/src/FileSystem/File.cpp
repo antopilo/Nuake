@@ -16,7 +16,7 @@ File::File(Ref<Directory> parentDir, const std::string& fullPath, const std::str
 FileType File::GetFileType() const
 {
 	const std::string ext = GetExtension();
-	if (ext == ".png" || ext == ".jpg")
+	if (ext == ".png" || ext == ".jpg" || ext == ".dds")
 	{
 		return FileType::Image;
 	}
@@ -79,7 +79,7 @@ FileType File::GetFileType() const
 		return FileType::Mesh;
 	}
 	
-	if (ext == ".glb" || ext == ".gltf")
+	if (ext == ".glb" || ext == ".gltf" || ext == ".fbx")
 	{
 		return FileType::MeshAsset;
 	}
