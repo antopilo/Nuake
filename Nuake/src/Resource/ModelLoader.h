@@ -35,6 +35,7 @@ namespace Nuake
 		std::vector<Ref<SkinnedMesh>> m_SkinnedMeshes;
 		std::unordered_map<std::string, uint32_t> m_BoneIDMap;
 		std::unordered_map<std::string, Bone> m_BoneMap;
+		std::map<std::string, Ref<Material>> m_Materials;
 
 		void ProcessNode(aiNode* node, const aiScene* scene);
 		Ref<Mesh> ProcessMesh(aiMesh* mesh, aiNode* node, const aiScene* scene);

@@ -62,7 +62,7 @@ namespace Nuake {
 
 				std::string u_light = "u_Lights[" + std::to_string(i) + "].";
 				volumetricShader->SetUniform(u_light + "transform", light.mViewProjections[0]);
-				volumetricShader->SetUniform(u_light + "color", light.Color);
+				volumetricShader->SetUniform(u_light + "color", light.Color * light.Strength);
 				volumetricShader->SetUniform(u_light + "direction", light.GetDirection());
 
 				volumetricShader->SetUniform(u_light + "shadowmap", light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT).get(), 5 + i);

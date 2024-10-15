@@ -19,7 +19,9 @@ namespace Nuake
 			BindComponentField<&SpriteComponent::Billboard>("Billboard", "Billboard");
 			BindComponentField<&SpriteComponent::LockYRotation>("LockYRotation", "Lock Y Rotation");
 			BindComponentField<&SpriteComponent::PositionFacing>("PositionFacing", "Position Facing");
-			BindComponentField<&SpriteComponent::SpritePath>("SpritePath", "Sprite Path");
+			//BindComponentField<&SpriteComponent::SpritePath>("SpritePath", "Sprite Path");
+			BindComponentProperty<&SpriteComponent::SetSprite, &SpriteComponent::GetSprite>("SpritePath", "Sprite Path");
+				ResourceFileRestriction("_Image");
 		}
 
 	public:
@@ -33,6 +35,12 @@ namespace Nuake
 		SpriteComponent();
 
 	public:
+		void SetSprite(ResourceFile file);
+		ResourceFile GetSprite()
+		{ 
+			return SpritePath;
+		}
+
 		bool LoadSprite();
 
 		json Serialize();

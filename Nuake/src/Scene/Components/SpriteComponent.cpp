@@ -15,8 +15,15 @@ namespace Nuake
 	{
 	}
 
-	bool SpriteComponent::LoadSprite()
+	void SpriteComponent::SetSprite(ResourceFile path)
 	{
+		if (!FileSystem::FileExists(path.GetRelativePath()))
+		{
+			return;
+		}
+
+		SpritePath = FileSystem::GetFile(path.GetRelativePath());
+
 		std::vector<Vertex> quadVertices =
 		{
 			{ Vector3(-1.0f,  1.0f, 0.0f),	Vector2(0.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
@@ -40,6 +47,10 @@ namespace Nuake
 		Ref<Material> material = MaterialManager::Get()->GetMaterial(absPath);
 		bool hasNormal = material->HasNormal();
 		SpriteMesh->SetMaterial(material);
+	}
+
+	bool SpriteComponent::LoadSprite()
+	{
 
 		return true;
 	}
@@ -67,6 +78,7 @@ namespace Nuake
 		}
 
 		DESERIALIZE_RES_FILE(SpritePath);
+		SetSprite(SpritePath);
 
 		if (j.contains("PositionFacing"))
 		{
