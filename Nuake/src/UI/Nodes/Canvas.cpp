@@ -55,7 +55,7 @@ namespace NuakeUI
 	
 	void Canvas::ComputeLayout(Vector2 size)
 	{
-		if (!mRootNode || mInputManager)
+		if (!mRootNode || !mInputManager)
 			return;
 		
 		Renderer::Get().SetViewportSize(size);
