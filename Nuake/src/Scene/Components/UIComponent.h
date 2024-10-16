@@ -33,6 +33,9 @@ namespace Nuake
         Vector3 Resolution = Vector3(1920, 1080, 0);
         // TODO: Z-Ordering
 
+        void SetUIFile(ResourceFile file);
+        ResourceFile GetUIFile();
+
         void SetResolution(const Vector3& newSize)
         {
             Resolution = newSize;

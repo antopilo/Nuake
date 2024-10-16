@@ -688,7 +688,6 @@ namespace Nuake
 		m_Environement = CreateRef<Environment>();
 		if (j.contains("m_Environement"))
 		{
-			m_Environement = CreateRef<Environment>();
 			m_Environement->Deserialize(j["m_Environement"]);
 		}
 
