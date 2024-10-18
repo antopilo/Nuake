@@ -27,6 +27,7 @@
 
 #include <Coral/Array.hpp>
 #include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include <src/Scene/Components/RigidbodyComponent.h>
 
 
 namespace Nuake {
@@ -316,7 +317,7 @@ namespace Nuake {
 				PhysicsManager::Get().SetCharacterControllerPosition(entity, { x, y, z });
 			}
 
-			if (entity.HasComponent<BSPBrushComponent>())
+			if (entity.HasComponent<BSPBrushComponent>() || entity.HasComponent<RigidBodyComponent>())
 			{
 				PhysicsManager::Get().SetBodyTransform(entity, { x, y, z }, component.GetGlobalRotation());
 			}
@@ -343,7 +344,7 @@ namespace Nuake {
 		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
 		{
 			auto& component = entity.GetComponent<TransformComponent>();
-			const auto& globalPosition = component.GetGlobalPosition();
+			const Vector3& globalPosition = component.GlobalTransform[3];
 			Coral::Array<float> result = Coral::Array<float>::New({ globalPosition.x, globalPosition.y, globalPosition.z });
 			return result;
 		}

@@ -95,6 +95,7 @@ namespace Nuake.Net
             public Vector3 ImpactNormal;
             public float Fraction;
             public Layers Layer;
+            public Entity Collider;
         }
         public struct BoxInternal
         {
@@ -131,15 +132,29 @@ namespace Nuake.Net
             unsafe
             {
                 NativeArray<float> resultICall = RayCastIcall(from.X, from.Y, from.Z, to.X, to.Y, to.Z);
-                for (int i = 0; i < resultICall.Length / 7; i++)
+                for (int i = 0; i < resultICall.Length / 9; i++)
                 {
-                    int index = i * 7;
+                    int index = i * 9;
+                    int entityId = (int)resultICall[index + 8];
+
+                    bool hasInstance = Entity.EntityHasManagedInstanceIcall(entityId);
+                    Entity entityInstance;
+                    if (hasInstance)
+                    {
+                        entityInstance = Scene.GetEntity<Entity>(entityId);
+                    }
+                    else
+                    {
+                        entityInstance = new Entity(entityId);
+                    }
+
                     ShapeCastResult shapeCastResult = new()
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
                         Fraction = resultICall[index + 6],
-                        Layer = (Layers)resultICall[index + 7]
+                        Layer = (Layers)resultICall[index + 7],
+                        Collider = entityInstance
                     };
 
                     result.Add(shapeCastResult);
@@ -164,15 +179,15 @@ namespace Nuake.Net
             {
                 NativeArray<float> resultICall = ShapeCastBoxIcall(from.X, from.Y, from.Z, to.X, to.Y, to.Z, boxInternal);
 
-                for (int i = 0; i < resultICall.Length / 7; i++)
+                for (int i = 0; i < resultICall.Length / 8; i++)
                 {
-                    int index = i * 7;
+                    int index = i * 8;
                     ShapeCastResult shapeCastResult = new()
                     {
                         ImpactPosition = new Vector3(resultICall[index + 0], resultICall[index + 1], resultICall[index + 2]),
                         ImpactNormal = new Vector3(resultICall[index + 3], resultICall[index + 4], resultICall[index + 5]),
                         Fraction = resultICall[index + 6],
-                        Layer = (Layers)resultICall[index + 7]
+                        Layer = (Layers)resultICall[index + 7],
                     };
 
                     result.Add(shapeCastResult);

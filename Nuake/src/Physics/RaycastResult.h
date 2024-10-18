@@ -20,5 +20,6 @@ namespace Nuake
 		float Fraction;
 		Vector3 ImpactNormal;
 		float Layer;
+		int EntityID;
 	};
 }

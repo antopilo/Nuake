@@ -538,9 +538,11 @@ namespace Nuake
 								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, Engine::GetFixedTimeStep());
 								break;
 							}
+							case JPH::EMotionType::Dynamic:
 							case JPH::EMotionType::Static:
 							{
 								_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+
 								break;
 							}
 						}
@@ -579,16 +581,18 @@ namespace Nuake
 				// Format result
 				for (int i = 0; i < num_hits; ++i)
 				{
-					const float hitFraction = results[i].mFraction;
-					const JPH::Vec3& hitPosition = ray.GetPointOnRay(results[i].mFraction);
-					auto bodyId = static_cast<JPH::BodyID>(results[i].mBodyID);
+					const float hitFraction = collector.mHits[i].mFraction;
+					const JPH::Vec3& hitPosition = ray.GetPointOnRay(collector.mHits[i].mFraction);
+					auto bodyId = static_cast<JPH::BodyID>(collector.mHits[i].mBodyID);
 					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
+					int userData = static_cast<int>(_JoltBodyInterface->GetUserData(bodyId));
 					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
 						Vector3(0, 0, 0),
-						layer
+						layer,
+						userData
 					};
 
 					raycastResults.push_back(std::move(result));
@@ -637,12 +641,14 @@ namespace Nuake
 
 					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
 
+					int userData = static_cast<int>(_JoltBodyInterface->GetUserData(bodyId));
 					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
 						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ()),
-						static_cast<float>(layer)
+						static_cast<float>(layer),
+						userData
 					};
 
 					shapecastResults.push_back(std::move(result));

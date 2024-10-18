@@ -73,6 +73,7 @@ namespace Nuake {
 			results.push_back(hit.ImpactNormal.z);
 			results.push_back(hit.Fraction);
 			results.push_back(hit.Layer);
+			results.push_back(hit.EntityID);
 
 		}
 		return Coral::Array<float>::New(results);

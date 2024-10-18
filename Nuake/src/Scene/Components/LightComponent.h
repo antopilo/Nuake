@@ -171,6 +171,8 @@ namespace Nuake
             SERIALIZE_VAL(Strength);
             SERIALIZE_VAL(SyncDirectionWithSky);
             SERIALIZE_VAL(CastShadows);
+            SERIALIZE_VAL(Cutoff);
+            SERIALIZE_VAL(OuterCutoff);
             END_SERIALIZE();
         }
 
@@ -195,6 +197,9 @@ namespace Nuake
                 float z = j["Direction"]["z"];
                 this->Direction = Vector3(x, y, z);
             }
+
+            DESERIALIZE_VAL(Cutoff);
+            DESERIALIZE_VAL(OuterCutoff);
 
             return true;
         }
