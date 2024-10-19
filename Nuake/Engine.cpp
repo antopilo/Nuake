@@ -40,7 +40,7 @@ namespace Nuake
 
 	void Engine::Init()
 	{
-		Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
+		//Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
 		
 		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		

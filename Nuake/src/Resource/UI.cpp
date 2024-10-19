@@ -16,8 +16,9 @@ UIResource::UIResource(const std::string& path) :
 	filePath(path)
 {
 	const Vector2 defaultSize = { 1280, 720 };
-	framebuffer = CreateRef<FrameBuffer>(true, defaultSize);
-	framebuffer->SetTexture(CreateRef<Texture>(defaultSize, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE));
+	framebuffer = CreateRef<FrameBuffer>(false, defaultSize);
+	framebuffer->SetTexture(CreateRef<Texture>(defaultSize, GL_RGBA));
+	framebuffer->SetTexture(CreateRef<Texture>(defaultSize, GL_DEPTH_COMPONENT), 0x8D00); // Depth
 
 	if (!inputManager)
 	{
@@ -45,9 +46,9 @@ void UIResource::Tick()
 
 void UIResource::Draw()
 {
+	RenderCommand::SetClearColor({ 0, 0, 0, 1.0f });
 	framebuffer->Bind();
 	{
-		RenderCommand::SetClearColor({ 0, 0, 0, 0 });
 		RenderCommand::Clear();
 
 		if (canvas != nullptr)
@@ -80,6 +81,11 @@ void UIResource::Reload()
 		canvas->SetInputManager(inputManager);
 		canvas->ComputeLayout(framebuffer->GetSize());
 	}
+}
+
+void Nuake::UIResource::SetMousePosition(const Vector2 & mousePos)
+{
+	canvas->SetOverrideMousePosition(mousePos);
 }
 
 Ref<Texture> UIResource::GetOutputTexture() const
