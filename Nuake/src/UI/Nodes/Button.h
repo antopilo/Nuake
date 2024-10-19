@@ -23,7 +23,7 @@ namespace NuakeUI
 
 		std::function<void(Button&)> ClickCallback;
 
-		void UpdateInput(InputManager* inputManager) override;
+		void UpdateInput(InputManager* inputManager, const Vector2& overrideMouseInput) override;
 
 		void SetClickCallback(std::function<void(Button&)> callback)
 		{

@@ -36,8 +36,15 @@ namespace NuakeUI
 		if (!mRootNode)
 			return;
 		
-		mRootNode->Tick(mInputManager);
-		mRootNode->UpdateInput(mInputManager);
+		if (mOverrideMousePosition != Vector2(-1, -1))
+		{
+			mRootNode->Tick(mInputManager, mOverrideMousePosition);
+		}
+		else
+		{
+			mRootNode->Tick(mInputManager);
+		}
+		mRootNode->UpdateInput(mInputManager, mOverrideMousePosition);
 
 		mInputManager->ScrollX = 0.f;
 		mInputManager->ScrollY = 0.f;
@@ -58,6 +65,7 @@ namespace NuakeUI
 		if (!mRootNode || !mInputManager)
 			return;
 		
+		mSize = size;
 		Renderer::Get().SetViewportSize(size);
 
 		auto root = mRootNode->GetYogaNode();
@@ -203,6 +211,11 @@ namespace NuakeUI
 	void Canvas::SetInputManager(InputManager* inputManager)
 	{
 		mInputManager = inputManager;
+	}
+
+	void Canvas::SetOverrideMousePosition(const Vector2& mousePosition)
+	{
+		mOverrideMousePosition = Vector2(mousePosition.x, mSize.y - mousePosition.y);
 	}
 
 	StyleSheetPtr Canvas::GetStyleSheet() const

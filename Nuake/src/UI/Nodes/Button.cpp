@@ -15,7 +15,7 @@ namespace NuakeUI
 		//InsertChild(Text::New(ID + "lbl", Label));
 	}
 
-	void Button::UpdateInput(InputManager* inputManager)
+	void Button::UpdateInput(InputManager* inputManager, const Vector2& overrideMousePos)
 	{
 		float mx = inputManager->GetMouseX();
 		float my = inputManager->GetMouseY();

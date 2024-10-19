@@ -20,6 +20,8 @@ Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
 	
 void FileSystem::ScanDirectory(Ref<Directory> directory)
 {
+	directory->Files.clear();
+	directory->Directories.clear();
 	for (const auto& entry : std::filesystem::directory_iterator(directory->FullPath))
 	{
 		if (entry.is_directory())

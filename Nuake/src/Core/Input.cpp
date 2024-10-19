@@ -8,6 +8,9 @@
 namespace Nuake
 {
 	Input* Input::s_Instance;
+	Vector2 Input::s_ViewportPos = Vector2(0,0);
+	Vector2 Input::s_ViewportSize = Vector2(0, 0);
+
 	std::map<int, bool> Input::m_Keys = std::map<int, bool>();
 	bool Input::m_MouseButtons[5] = { false, false, false, false, false };
 	float Input::XScroll = 0.0f;
@@ -154,6 +157,30 @@ namespace Nuake
 		return Vector2(xpos, ypos);
 	}
 
+	void Input::SetEditorViewportSize(const Vector2& position, const Vector2& size)
+	{
+		s_ViewportPos = position;
+		s_ViewportSize = size;
+	}
+
+	Vector2 Input::GetEditorViewportMousePosition()
+	{
+		if (s_ViewportPos == s_ViewportSize)
+		{
+			return GetMousePosition();
+		}
+
+		auto window = Window::Get()->GetHandle();
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		Vector2 absolutePosition = { xpos, ypos };
+		Vector2 offset = absolutePosition - ViewportPosition;
+
+		return Vector2(xpos , ypos);
+	}
+
 	void Input::SetMousePosition(const Vector2& position)
 	{
 		auto window = Window::Get()->GetHandle();
@@ -173,6 +200,11 @@ namespace Nuake
 	Vector2 Input::GetViewportMousePosition()
 	{
 		return glm::clamp(GetMousePosition() - ViewportPosition, { 0, 0 }, ViewportSize);
+	}
+
+	Vector2 Input::GetViewportSize()
+	{
+		return ViewportSize;
 	}
 
 	void Input::SetViewportDimensions(const Vector2& pos, const Vector2& size)

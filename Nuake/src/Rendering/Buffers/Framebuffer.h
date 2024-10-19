@@ -11,7 +11,7 @@ namespace Nuake
 	class FrameBuffer
 	{
 	private:
-		unsigned int m_FramebufferID;
+		uint32_t m_FramebufferID;
 		unsigned int m_RenderBuffer;
 
 		Vector2 m_Size;
@@ -40,6 +40,7 @@ namespace Nuake
 
 		uint32_t GetRenderID() const { return m_FramebufferID; }
 		int ReadPixel(uint32_t attachment, const Vector2 coords);
+		Vector2 ReadVec2(uint32_t attachment, const Vector2 coords);
 		float ReadDepth(const Vector2& coords);
 		void SetDrawBuffer(GLenum draw);
 		void SetReadBuffer(GLenum read);

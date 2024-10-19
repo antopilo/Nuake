@@ -182,9 +182,13 @@ namespace Nuake {
             {
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetVelocityTexture();
             }
+            else if (SelectedViewport == 5)
+            {
+                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT6);
+            }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
-
+            Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
             ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
@@ -2796,7 +2800,7 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
-            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity"};
+            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity", "UV"};
             ImGui::SetNextItemWidth(128);
 			if (ImGui::BeginCombo("##Output", items[SelectedViewport]))
 			{

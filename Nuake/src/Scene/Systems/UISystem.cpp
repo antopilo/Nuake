@@ -9,6 +9,8 @@
 #include "src/FileSystem/File.h"
 #include "src/Scene/Components/UIComponent.h"
 #include "src/FileSystem/FileSystem.h"
+#include "src/Rendering/SceneRenderer.h"
+#include "src/Core/Input.h"
 
 namespace Nuake
 {
@@ -81,6 +83,31 @@ namespace Nuake
 
 					if (Engine::IsPlayMode())
 					{
+						// Transform 2D viewport mouse position into project UV position on the UI plane.
+
+						Vector2 screenMousePosition;
+						if (Input::IsMouseHidden())
+						{
+							// Assume we use the middle of the screen
+							screenMousePosition = Input::GetViewportSize() / 2.0f;
+						}
+						else
+						{
+							screenMousePosition = Input::GetViewportMousePosition();
+						}
+
+						// Invert Y
+						screenMousePosition.y = m_Scene->m_SceneRenderer->GetGBuffer().GetSize().y - screenMousePosition.y;
+
+						m_Scene->m_SceneRenderer->GetGBuffer().Bind();
+						const Vector2& planeUV = m_Scene->m_SceneRenderer->GetGBuffer().ReadVec2(6, screenMousePosition);
+						m_Scene->m_SceneRenderer->GetGBuffer().Unbind();
+
+						if (uiViewComponent.IsWorldSpace && planeUV.x > 0 && planeUV.y > 0)
+						{
+							uis[uiViewComponent.UIResource]->SetMousePosition(planeUV * Vector2{ uiViewComponent.GetResolution().x, uiViewComponent.GetResolution().y });
+						}
+
 						uis[uiViewComponent.UIResource]->Tick();
 					}
 

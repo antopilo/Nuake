@@ -49,12 +49,17 @@ namespace NuakeUI
 
 		std::vector<std::pair<std::pair<UUID, UUID>, std::string>> GetAllCustomWidgetInstance() { return customWidgetIDs; }
 
+		void Clear()
+		{
+			customWidgetIDs.clear();
+		}
+
 	private:
 		void ScanFragment(tinyxml2::XMLElement* e, NodePtr node);
-		bool ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node);
+		bool ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node, const std::string& inheritedID = "");
 
 		void WriteValueFromString(std::variant<int, float, bool, std::string, char>& var, const std::string& str);
-		void IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, const std::string& customNodeName = "");
+		void IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, const std::string& customNodeName = "", const std::string& inheritedID = "");
 		NodePtr CreateNodeFromXML(tinyxml2::XMLElement* xml, const std::string& id = "Node");
 		void AddClassesToNode(tinyxml2::XMLElement* e, NodePtr node);
 		void AddModelIfToNode(tinyxml2::XMLElement* e, NodePtr node);

@@ -136,8 +136,8 @@ namespace NuakeUI
 		bool HasBeenInitialized() const;
 
 		virtual void Draw(int z);
-		virtual void UpdateInput(InputManager* manager);
-		virtual void Tick(InputManager* manager);
+		virtual void UpdateInput(InputManager* manager, const Vector2& overrideMousePos = Vector2(-1, -1));
+		virtual void Tick(InputManager* manager, const Vector2& overrideMousePos = Vector2(-1, -1));
 		virtual void Calculate();
 
 		void OnMouseHover(InputManager* inputManager) {};

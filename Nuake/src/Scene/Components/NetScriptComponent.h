@@ -221,11 +221,15 @@ namespace Nuake {
 					}
 					case NetScriptExposedVarType::Entity:
 					{
-						int x = exposedVarJson["Value"];
-						exposedVar.Value = x;
+						if (exposedVarJson.contains("Value"))
+						{
+							int x = exposedVarJson["Value"];
+							exposedVar.Value = x;
 
-						x = exposedVarJson["DefaultValue"];
-						exposedVar.DefaultValue = x;
+							x = exposedVarJson["DefaultValue"];
+							exposedVar.DefaultValue = x;
+						}
+						
 						break;
 					}
 					default:

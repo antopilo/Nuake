@@ -224,9 +224,18 @@ void CanvasParser::ScanFragment(tinyxml2::XMLElement* e, NodePtr node)
 	}
 }
 
-bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
+bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node, const std::string& inheritedId)
 {
 	const std::string nodeTypeName = e->Value();
+	std::string id = inheritedId;
+
+	// Look if the node has an id.
+	auto idAttribute = e->FindAttribute("id");
+	if (idAttribute)
+	{
+		id = idAttribute->Value();
+	}
+
 	if (!ScriptingEngineNet::Get().HasUIWidget(nodeTypeName))
 	{
 		return false; 
@@ -264,12 +273,12 @@ bool CanvasParser::ScanCustomWidgets(tinyxml2::XMLElement* e, NodePtr node)
 
 	// Let's parse the file
 	auto firstNode = doc.FirstChildElement();
-	IterateOverElement(firstNode, node, nodeTypeName);
+	IterateOverElement(firstNode, node, nodeTypeName, id);
 
 	return true;
 }
 
-void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, const std::string& customNodeName)
+void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, const std::string& customNodeName, const std::string& inheritedID)
 {
 	tinyxml2::XMLElement* current = e;
 	while (current)
@@ -282,11 +291,12 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, con
 		{
 			id = idAttribute->Value();
 		}
+		
 
 		// Let's keep fragments for now as they remove 
 		// the need to create a C# class for simple templating.
 		ScanFragment(current, node);
-		ScanCustomWidgets(current, node);
+		ScanCustomWidgets(current, node, id);
 		
 		// Let's add custom widgets to the DOM.
 		NodePtr newNode = CreateNodeFromXML(current, id);
@@ -294,6 +304,11 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, con
 		{
 			if (!customNodeName.empty())
 			{
+				if (!inheritedID.empty())
+				{
+					newNode->ID = inheritedID;
+				}
+
 				// Allow to link between C# script and node using a UUID
 				UUID scriptingId = UUID();
 				newNode->SetScriptingID(scriptingId);
@@ -318,8 +333,6 @@ void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node, con
 
 Ref<Canvas> CanvasParser::Parse(CanvasPtr canvas, const std::string& path)
 {
-	customWidgetIDs.clear();
-
 	_parsingPath = path;
 
 	currentParsingCanvas = canvas;

@@ -466,7 +466,7 @@ namespace Nuake
 
 								if (hasDefaultValue)
 								{
-									exposedVar.Value = a.GetFieldValue<Coral::Bool32>("DefaultValueInternalBool");
+									exposedVar.Value = (bool)a.GetFieldValue<Coral::Bool32>("DefaultValueInternalBool");
 								}
 							}
 							else if (typeName == "System.Numerics.Vector2")

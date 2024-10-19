@@ -123,22 +123,28 @@ namespace NuakeUI
 		mDataModelOperations.push_back(operation);
 	}
 
-	void Node::Tick(InputManager* inputManager)
+	void Node::Tick(InputManager* inputManager, const Vector2& overrideMousePos)
 	{
 		OnTick(inputManager);
 
 		for (auto& c : Childrens)
 		{
-			c->Tick(inputManager);
+			c->Tick(inputManager, overrideMousePos);
 		}
 	}
 
-	void Node::UpdateInput(InputManager* inputManager)
+	void Node::UpdateInput(InputManager* inputManager, const Vector2& overrideMousePos)
 	{
 		inputManager = inputManager;
 
 		float mx = inputManager->GetMouseX();
 		float my = inputManager->GetMouseY();
+		if (overrideMousePos != Vector2(-1, -1))
+		{
+			mx = overrideMousePos.x;
+			my = overrideMousePos.y;
+		}
+
 		bool isHover = IsMouseHover(mx, my);
 
 		bool isMouseDown = inputManager->IsMouseInputDown();
@@ -262,7 +268,7 @@ namespace NuakeUI
 
 		for (auto& c : Childrens)
 		{
-			c->UpdateInput(inputManager);
+			c->UpdateInput(inputManager, overrideMousePos);
 		}
 	}
 

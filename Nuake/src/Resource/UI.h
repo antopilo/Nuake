@@ -25,6 +25,7 @@ namespace Nuake
 		void Resize(const Vector2& size);
 		void Reload();
 
+		void SetMousePosition(const Vector2& mousePos);
 		Ref<Texture> GetOutputTexture() const;
 		Ref<NuakeUI::Canvas> GetCanvas() { return canvas; }
 

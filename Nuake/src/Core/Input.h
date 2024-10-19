@@ -160,12 +160,16 @@ namespace Nuake
 		static float GetMouseX();
 		static float GetMouseY();
 		static Vector2 GetMousePosition();
+
+		static void SetEditorViewportSize(const Vector2& position, const Vector2& size);
+		static Vector2 GetEditorViewportMousePosition();
 		static void SetMousePosition(const Vector2& position);
 
 		// Get mouse position relative to viewport
 		static float GetViewportMouseY();
 		static float GetViewportMouseX();
 		static Vector2 GetViewportMousePosition();
+		static Vector2 GetViewportSize();
 		static void SetViewportDimensions(const Vector2& pos, const Vector2& size);
 
 
@@ -176,5 +180,7 @@ namespace Nuake
 
 	private:
 		static Input* s_Instance;
+		static Vector2 s_ViewportPos;
+		static Vector2 s_ViewportSize;
 	};
 }

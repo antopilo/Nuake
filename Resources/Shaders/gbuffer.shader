@@ -65,6 +65,7 @@ layout(location = 2) out vec4 gMaterial;
 layout(location = 3) out int gEntityID;
 layout(location = 4) out float gEmissive;
 layout(location = 5) out vec4 gVelocity;
+layout(location = 6) out vec4 gUV;
 
 in vec4 FragPos;
 in vec2 UV;
@@ -170,4 +171,6 @@ void main()
 
     vec2 positionDifference = (fragPos).xy - (previousFragPos).xy;
     gVelocity = vec4(positionDifference.x, positionDifference.y, 0.0, 1.0);
+
+    gUV = vec4(UV.x, UV.y, 0, 1);
 }

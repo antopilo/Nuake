@@ -140,6 +140,15 @@ namespace Nuake
 		return pixelData;
 	}
 
+	Vector2 FrameBuffer::ReadVec2(uint32_t attachment, const Vector2 coords)
+	{
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+		unsigned char pixelData[2]; // Store two components for the vec2 (byte)
+		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RG, GL_UNSIGNED_BYTE, &pixelData);
+		// Normalize the values (unsigned byte to [0, 1] float)
+		return Vector2(pixelData[0] / 255.0f, pixelData[1] / 255.0f);
+	}
+
 	float FrameBuffer::ReadDepth(const Vector2& coords)
 	{
 		glReadBuffer(GL_DEPTH_ATTACHMENT);

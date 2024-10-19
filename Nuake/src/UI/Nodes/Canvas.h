@@ -35,9 +35,10 @@ namespace NuakeUI
 		StyleSheetPtr mStyleSheet;
 
 		NodePtr mRootNode;
-		
+		Vector2 mSize;
 		bool mDirty;
 
+		Vector2 mOverrideMousePosition = Vector2(-1, -1);
 		std::vector<Ref<Nuake::File>> sourceFiles;
 
 	public:
@@ -57,6 +58,7 @@ namespace NuakeUI
 		void SetRoot(NodePtr root);
 
 		void SetInputManager(InputManager* manager);
+		void SetOverrideMousePosition(const Vector2& mousePosition);
 
 		StyleSheetPtr GetStyleSheet() const;
 		void SetStyleSheet(StyleSheetPtr stylesheet);

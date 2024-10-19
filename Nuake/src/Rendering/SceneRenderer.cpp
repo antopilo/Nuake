@@ -59,6 +59,7 @@ namespace Nuake
 		mGBuffer->SetTexture(entityTexture, GL_COLOR_ATTACHMENT3); // Entity ID
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED, GL_R16F, GL_FLOAT), GL_COLOR_ATTACHMENT4); // Emissive
 		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RG, GL_RG16F, GL_FLOAT), GL_COLOR_ATTACHMENT5); // Velocity
+		mGBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RG, GL_RG, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT6); // UV
 
 		mShadingBuffer = CreateScope<FrameBuffer>(true, defaultResolution);
 		mShadingBuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RGB, GL_RGB16F, GL_FLOAT));
@@ -561,7 +562,7 @@ namespace Nuake
 				continue;
 			}
 
-			if (!uiComponent.IsWorldSpace && renderUI)
+			if (!uiComponent.IsWorldSpace)
 			{
 				// Fetch resource from resource manager using UUID
 				Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(uiComponent.UIResource);
@@ -583,7 +584,7 @@ namespace Nuake
 				}
 				framebuffer.Unbind();
 
-				NuakeUI::DrawInspector(uiResource->GetCanvas());
+				
 			}
 		}
 
@@ -1102,6 +1103,8 @@ namespace Nuake
 					Renderer::QuadMesh->GetMaterial()->SetAlbedo(uiResource->GetOutputTexture());
 					Renderer::SubmitMesh(Renderer::QuadMesh, finalTransform, (uint32_t)e);
 					Renderer::Flush(gBufferShader, false);
+
+					NuakeUI::DrawInspector(uiResource->GetCanvas());
 					//Renderer::DrawQuad(finalTransform);
 				}
 
