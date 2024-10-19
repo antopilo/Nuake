@@ -27,7 +27,7 @@ public:
                     ImGui::TableNextColumn();
 
                     Vector3 position = component.GetLocalPosition();
-                    ImGuiHelper::DrawVec3("Translation##" + entity.GetHandle(), &position);
+                    ImGuiHelper::DrawVec3("Translation##" + std::to_string(entity.GetHandle()), &position);
                     if (position != component.GetLocalPosition())
                         component.SetLocalPosition(position);
 
@@ -52,7 +52,7 @@ public:
                     Vector3 eulerDegreesOld = glm::degrees(glm::eulerAngles(currentRotation));
 
                     // Draw the ImGui widget for rotation
-                    ImGuiHelper::DrawVec3("Rotation##" + entity.GetHandle(), &eulerDegreesOld);
+                    ImGuiHelper::DrawVec3("Rotation##" + std::to_string(entity.GetHandle()), &eulerDegreesOld);
 
                     // Calculate the delta in Euler angles
                     Vector3 eulerDelta = eulerDegreesOld - glm::degrees(glm::eulerAngles(currentRotation));
@@ -97,7 +97,7 @@ public:
                     ImGui::TableNextColumn();
 
                     Vector3 localScale = component.GetLocalScale();
-                    ImGuiHelper::DrawVec3("Scale##" + entity.GetHandle(), &localScale);
+                    ImGuiHelper::DrawVec3("Scale##" + std::to_string(entity.GetHandle()), &localScale);
 
                     if (localScale != component.GetLocalScale())
                         component.SetLocalScale(localScale);

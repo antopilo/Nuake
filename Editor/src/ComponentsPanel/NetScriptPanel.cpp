@@ -215,10 +215,14 @@ void NetScriptPanel::Draw(Nuake::Entity& entity, entt::meta_any& componentInstan
                         field.Value = field.DefaultValue;
                     }
 
-                    bool currentValue = std::any_cast<bool>(field.Value);
-                    const std::string sliderName = "##" + field.Name + "slider";
-                    ImGui::Checkbox(sliderName.c_str(), &currentValue);
-                    field.Value = currentValue;
+                     auto typeName = field.Value.type().name();
+                    if (typeName == std::string("bool"))
+                    {
+                        bool currentValue = std::any_cast<bool>(field.Value);
+                        const std::string sliderName = "##" + field.Name + "slider";
+                        ImGui::Checkbox(sliderName.c_str(), &currentValue);
+                        field.Value = currentValue;
+                    }
                 }
 
                 if (field.Type == Nuake::NetScriptExposedVarType::String)
