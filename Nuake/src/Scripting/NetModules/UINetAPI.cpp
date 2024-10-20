@@ -84,6 +84,60 @@ Coral::ManagedObject GetNativeInstanceNodeICall(const Coral::String& canvasUUID,
 	return Coral::ManagedObject();
 }
 
+Coral::Bool32 GetVisibilityICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID)
+{
+	if (!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
+	{
+		Logger::Log("Error getting native instance of UI node, canvas is not loaded.", ".net/ui", CRITICAL);
+	}
+
+	Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(UUIDFromString(canvasUUID));
+	Ref<Canvas> canvas = uiResource->GetCanvas();
+	Ref<Node> node = std::static_pointer_cast<NuakeUI::Node>(canvas->GetNodeByUUID(UUIDFromString(nodeUUID)));
+	return node->ComputedStyle.Visibility == VisibilityType::Show;
+}
+
+void SetWidthPercentageICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID, float percentage)
+{
+	if (!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
+	{
+		Logger::Log("Error getting native instance of UI node, canvas is not loaded.", ".net/ui", CRITICAL);
+	}
+
+	Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(UUIDFromString(canvasUUID));
+	Ref<Canvas> canvas = uiResource->GetCanvas();
+	Ref<Node> node = std::static_pointer_cast<NuakeUI::Node>(canvas->GetNodeByUUID(UUIDFromString(nodeUUID)));
+	node->ComputedStyle.Width.type = LengthType::Percentage;
+	node->ComputedStyle.Width.value = percentage;
+}
+
+void SetHeightPercentageICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID, float percentage)
+{
+	if (!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
+	{
+		Logger::Log("Error getting native instance of UI node, canvas is not loaded.", ".net/ui", CRITICAL);
+	}
+
+	Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(UUIDFromString(canvasUUID));
+	Ref<Canvas> canvas = uiResource->GetCanvas();
+	Ref<Node> node = std::static_pointer_cast<NuakeUI::Node>(canvas->GetNodeByUUID(UUIDFromString(nodeUUID)));
+	node->ComputedStyle.Height.type = LengthType::Percentage;
+	node->ComputedStyle.Height.value = percentage;
+}
+
+void SetVisibilityICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID, Coral::Bool32 visible)
+{
+	if (!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
+	{
+		Logger::Log("Error getting native instance of UI node, canvas is not loaded.", ".net/ui", CRITICAL);
+	}
+
+	Ref<UIResource> uiResource = ResourceManager::GetResource<UIResource>(UUIDFromString(canvasUUID));
+	Ref<Canvas> canvas = uiResource->GetCanvas();
+	Ref<Node> node = std::static_pointer_cast<NuakeUI::Node>(canvas->GetNodeByUUID(UUIDFromString(nodeUUID)));
+	node->ComputedStyle.Visibility = visible ? VisibilityType::Show : VisibilityType::Hidden;
+}
+
 Coral::String GetTextNodeTextICall(const Coral::String& canvasUUID, const Coral::String& nodeUUID)
 {
 	if(!ResourceManager::IsResourceLoaded(UUIDFromString(canvasUUID)))
@@ -117,6 +171,15 @@ void UINetAPI::RegisterMethods()
 	RegisterMethod("Node.FindChildByIDICall", &FindChildByIDIcall);
 	RegisterMethod("Node.HasNativeInstanceICall", &HasNativeInstanceICall);
 	RegisterMethod("Node.GetNativeInstanceNodeICall", &GetNativeInstanceNodeICall);
+
+	// Styling
+	RegisterMethod("Node.GetVisibilityICall", &GetVisibilityICall);
+	RegisterMethod("Node.SetVisibilityICall", &SetVisibilityICall);
+
+	//RegisterMethod("Node.GetWidthPercentageICall", &GetWidthPercentageICall);
+	RegisterMethod("Node.SetWidthPercentageICall", &SetWidthPercentageICall);
+	//	RegisterMethod("Node.GetHeightPercentageICall", &GetHeightPercentageICall);
+	RegisterMethod("Node.SetHeightPercentageICall", &SetHeightPercentageICall);
 
 	RegisterMethod("TextNode.GetTextNodeTextICall", &GetTextNodeTextICall);
 	RegisterMethod("TextNode.SetTextNodeTextICall", &SetTextNodeTextICall);

@@ -305,7 +305,7 @@ Ref<Scene> Window::GetScene()
 
 bool Window::SetScene(Ref<Scene> newScene)
 {
-    windowSetSceneDelegate.Broadcast(scene, newScene);
+    //windowSetSceneDelegate.Broadcast(scene, newScene);
     
     scene = newScene;
     

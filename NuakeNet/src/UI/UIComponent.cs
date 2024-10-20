@@ -69,11 +69,25 @@ namespace Nuake.Net
         }
     }
 
+    public enum Visibility
+    {
+        Hidden,
+        Visible,
+    }
+
+
     public class Node
     {
         internal static unsafe delegate*<NativeString, NativeString, NativeString, NativeString> FindChildByIDICall;
         internal static unsafe delegate*<NativeString, NativeString, bool> HasNativeInstanceICall;
         internal static unsafe delegate*<NativeString, NativeString, NativeInstance<Node>> GetNativeInstanceNodeICall;
+        internal static unsafe delegate*<NativeString, NativeString, Bool32, void> SetVisibilityICall;
+        internal static unsafe delegate*<NativeString, NativeString, Bool32> GetVisibilityICall;
+
+        internal static unsafe delegate*<NativeString, NativeString, float> GetHeightPercentageICall;
+        internal static unsafe delegate*<NativeString, NativeString, float, void> SetHeightPercentageICall;
+        internal static unsafe delegate*<NativeString, NativeString, float> GetWidthPercentageICall;
+        internal static unsafe delegate*<NativeString, NativeString, float, void> SetWidthPercentageICall;
 
         public string UUID;
         public string CanvasUUID;
@@ -87,6 +101,66 @@ namespace Nuake.Net
 
         public string ID { get; set; } = "";
         public List<string> Classes { get; set; } = new();
+
+        public float GetWidthPercentage()
+        {
+            unsafe
+            {
+                return GetHeightPercentageICall(CanvasUUID, UUID);
+            }
+        }
+
+        public void SetWidthPercentage(float percentage)
+        {
+            unsafe
+            {
+                if (percentage < 0.0f)
+                {
+                    throw new ArgumentException("Percentage has to be greater than 0.");
+                }
+
+                SetWidthPercentageICall(CanvasUUID, UUID, percentage);
+            }
+        }
+
+        public float GetHeightPercentage()
+        {
+            unsafe
+            {
+                return GetHeightPercentageICall(CanvasUUID, UUID);
+            }
+        }
+
+        public void SetHeightPercentage(float percentage)
+        {
+            unsafe
+            {
+                if(percentage < 0.0f)
+                {
+                    throw new ArgumentException("Percentage has to be greater than 0.");
+                }
+
+                SetHeightPercentageICall(CanvasUUID, UUID, percentage);
+            }
+        }
+
+        public Visibility Visibility
+        {
+            get
+            {
+                unsafe
+                {
+                    return GetVisibilityICall(CanvasUUID, UUID) ? Visibility.Visible : Visibility.Hidden;
+                }
+            }
+            set
+            {
+                unsafe
+                {
+                    SetVisibilityICall(CanvasUUID, UUID, value == Visibility.Visible);
+                }
+            }
+        }
 
         /// <summary>
         /// Traverse the DOM starting from this node to find a child from a unique ID

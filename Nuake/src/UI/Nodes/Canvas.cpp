@@ -92,7 +92,7 @@ namespace NuakeUI
 	{
 		std::vector<StyleRule> relationStyles;
 
-		auto allRules = mStyleSheet->Rules;
+		auto& allRules = mStyleSheet->Rules;
 		for (auto& i : inheritedRules)
 		{
 			allRules.push_back(i);
