@@ -28,7 +28,7 @@ namespace Nuake {
 
 		// TODO: Sample rate, back end, buffer size, flags.
 #ifdef NK_WIN
-		m_Soloud->init();
+		m_Soloud->init(SoLoud::Soloud::LEFT_HANDED_3D);
 #else
 		m_Soloud->init(SoLoud::Soloud::CLIP_ROUNDOFF, SoLoud::Soloud::ALSA);
 #endif
@@ -54,6 +54,7 @@ namespace Nuake {
 					m_ListenerDirection.x, m_ListenerDirection.y, m_ListenerDirection.z,
 					m_ListenerUp.x, m_ListenerUp.y, m_ListenerUp.z
 			);
+
 
 			m_Soloud->update3dAudio();
 		}

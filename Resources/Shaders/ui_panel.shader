@@ -86,7 +86,7 @@ void main() {
 
 		if(a == 1.f)
         { 
-			finalColor = mix(u_BorderColor, finalColor, borderAlpha);
+			finalColor.rgb = mix(u_BorderColor.rgb, finalColor.rgb, borderAlpha);
             if(coords.x < u_Border || coords.x > u_Size.x - u_Border ||
                 coords.y < u_Border || coords.y > u_Size.y - u_Border)
             {
@@ -111,6 +111,5 @@ void main() {
         }
     }
     
-    finalColor.a = a;
 	FragColor = finalColor; 
 }

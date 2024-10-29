@@ -582,6 +582,15 @@ namespace NuakeUI
 		SetLengthBorderNoAuto(Padding, Right);
 		SetLengthBorderNoAuto(Padding, Bottom);
 
+		if (ComputedStyle.Visibility == VisibilityType::Hidden)
+		{
+			YGNodeStyleSetDisplay(mNode, YGDisplayNone);
+		}
+		else
+		{
+			YGNodeStyleSetDisplay(mNode, YGDisplayFlex);
+		}
+
 		if (ComputedStyle.FlexGrow > 0.f)
 			YGNodeStyleSetFlexGrow(mNode, ComputedStyle.FlexGrow);
 		if (ComputedStyle.FlexShrink > 0.f)
