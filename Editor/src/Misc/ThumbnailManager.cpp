@@ -94,26 +94,26 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	auto file = FileSystem::GetFile(path);
 	if (file->GetFileType() == FileType::Prefab)
 	{
-		Ref<Scene> scene = Scene::New();
-		auto cam = scene->CreateEntity("Camera");
-		TransformComponent& camTransform = cam.GetComponent<TransformComponent>();
-		camTransform.SetLocalPosition({ 0.0f, 0.0f, 2.0f });
-
-		auto& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
-		previewLight.SetCastShadows(false);
-		previewLight.Type = LightType::Directional;
-
-		scene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
-		scene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
-		auto& camComponent = cam.AddComponent<CameraComponent>();
-		camComponent.CameraInstance->Fov = 45.0f;
-		camComponent.CameraInstance->AspectRatio = 1.0f;
-		m_ShadedFramebuffer->SetTexture(texture);
-
-		Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene.get());
-
-		scene->Update(0.01f);
-		scene->Draw(*m_ShadedFramebuffer.get());
+		//Ref<Scene> scene = Scene::New();
+		//auto cam = scene->CreateEntity("Camera");
+		//TransformComponent& camTransform = cam.GetComponent<TransformComponent>();
+		//camTransform.SetLocalPosition({ 0.0f, 0.0f, 2.0f });
+		//
+		//auto& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
+		//previewLight.SetCastShadows(false);
+		//previewLight.Type = LightType::Directional;
+		//
+		//scene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
+		//scene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
+		//auto& camComponent = cam.AddComponent<CameraComponent>();
+		//camComponent.CameraInstance->Fov = 45.0f;
+		//camComponent.CameraInstance->AspectRatio = 1.0f;
+		//m_ShadedFramebuffer->SetTexture(texture);
+		//
+		//Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene.get());
+		//
+		//scene->Update(0.01f);
+		//scene->Draw(*m_ShadedFramebuffer.get());
 
 		// Gbuffer pass
 		//m_Framebuffer->Bind();
@@ -192,8 +192,8 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 
 		m_ShadedFramebuffer->SetTexture(texture);
 
-		ModelComponent& modelComp = scene->CreateEntity("Mesh").AddComponent<ModelComponent>();
-		modelComp.ModelResource = ResourceLoader::LoadModel(file->GetRelativePath());
+		//ModelComponent& modelComp = scene->CreateEntity("Mesh").AddComponent<ModelComponent>();
+		//modelComp.ModelResource = ResourceLoader::LoadModel(file->GetRelativePath());
 		scene->Update(0.01f);
 		scene->Draw(*m_ShadedFramebuffer.get());
 	}
