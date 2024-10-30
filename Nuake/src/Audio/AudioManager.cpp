@@ -151,30 +151,35 @@ namespace Nuake {
 	void AudioManager::AudioUpdate()
 	{
 		// Check if we have audio queued
+		if (m_Soloud->getGlobalVolume() != m_GlobalVolume)
+		{
+			m_Soloud->setGlobalVolume(m_GlobalVolume);
+		}
+
 		while (!m_AudioQueue.empty())
 		{
 			AudioRequest& audioRequest = m_AudioQueue.front();
 			Ref<SoLoud::AudioSource> audio = m_WavSamples[audioRequest.audioFile];
 
-			SoLoud::handle soloudHandle;
+			SoLoud::handle handle;
 			if (!audioRequest.spatialized)
 			{
-				soloudHandle = m_Soloud->play(*audio);
-				m_Soloud->setVolume(soloudHandle, audioRequest.volume);
-				m_Soloud->setPan(soloudHandle, audioRequest.pan);
+				handle = m_Soloud->play(*audio);
+				m_Soloud->setVolume(handle, audioRequest.volume);
+				m_Soloud->setPan(handle, audioRequest.pan);
 			}
 			else
 			{
 				const Vector3& position = audioRequest.position;
-				soloudHandle = m_Soloud->play3d(*audio, position.x, position.y, position.z);
-				m_Soloud->set3dSourceMinMaxDistance(soloudHandle, audioRequest.MinDistance, audioRequest.MaxDistance);
-				m_Soloud->set3dSourceAttenuation(soloudHandle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
+				handle = m_Soloud->play3d(*audio, position.x, position.y, position.z);
+				m_Soloud->set3dSourceMinMaxDistance(handle, audioRequest.MinDistance, audioRequest.MaxDistance);
+				m_Soloud->set3dSourceAttenuation(handle, SoLoud::AudioSource::ATTENUATION_MODELS::EXPONENTIAL_DISTANCE, audioRequest.AttenuationFactor);
 			}
 				
-			m_Soloud->setRelativePlaySpeed(soloudHandle, audioRequest.speed);
-			m_Soloud->setLooping(soloudHandle, audioRequest.Loop);
+			m_Soloud->setRelativePlaySpeed(handle, audioRequest.speed);
+			m_Soloud->setLooping(handle, audioRequest.Loop);
 
-			m_ActiveClips[audioRequest.audioFile] = soloudHandle;
+			m_ActiveClips[audioRequest.audioFile] = handle;
 
 			m_AudioQueue.pop();
 		}
