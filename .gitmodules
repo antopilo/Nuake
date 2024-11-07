@@ -1,6 +1,3 @@
-[submodule "Nuake/dependencies/glfw"]
-	path = Nuake/dependencies/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "Nuake/dependencies/assimp"]
 	path = Nuake/dependencies/assimp
 	url = https://github.com/assimp/assimp.git
@@ -31,3 +28,6 @@
 [submodule "Nuake/dependencies/entt"]
 	path = Nuake/dependencies/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "Nuake/dependencies/glfw"]
+	path = Nuake/dependencies/glfw
+	url = https://github.com/antopilo/glfw.git
