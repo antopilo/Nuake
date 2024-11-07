@@ -18,6 +18,7 @@
 #include "src/Scene/Components/SphereCollider.h"
 #include "src/Scene/Components/SpriteComponent.h"
 #include "src/Scene/Components/UIComponent.h"
+#include "src/Scene/Components/SkyComponent.h"
 
 namespace Nuake
 {
@@ -42,6 +43,7 @@ namespace Nuake
         BoxColliderComponent::InternalInitializeClass();
         BoneComponent::InternalInitializeClass();
         AudioEmitterComponent::InternalInitializeClass();
+        SkyComponent::InternalInitializeClass();
     }
 }
 

@@ -5,7 +5,7 @@
 struct LaunchSettings
 {
     int32_t monitor = 1;
-    Nuake::Vector2 resolution = { 1920, 1080 };
+    Nuake::Vector2 resolution = { 1100, 630 };
     std::string windowTitle = "Nuake Editor ";
     std::string projectPath;
 };

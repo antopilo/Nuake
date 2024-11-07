@@ -94,6 +94,11 @@ FileType File::GetFileType() const
 		return FileType::CSS;
 	}
 
+	if (ext == ".sky")
+	{
+		return FileType::Sky;
+	}
+
 	return FileType::Unknown;
 }
 
@@ -158,6 +163,11 @@ std::string File::GetFileTypeAsString() const
 	if (ext == ".css")
 	{
 		return "StyleSheet";
+	}
+
+	if (ext == ".sky")
+	{
+		return "Sky";
 	}
 
 	return "File";

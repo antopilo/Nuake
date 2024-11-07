@@ -18,7 +18,7 @@
 #include "src/Rendering/Vertex.h"
 #include <imgui/imgui.h>
 #include <Tracy.hpp>
-
+#include <vector>
 namespace Nuake
 {
     uint32_t Renderer::MAX_LIGHT = 42;
@@ -49,25 +49,45 @@ namespace Nuake
 
     std::vector<Vertex> CubeVertices
     {
-        { Vector3(-0.5f, -0.5f, -0.5f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3( 0.5f, -0.5f, -0.5f), Vector2(1, 0), Vector3(-1, -1,0)},
-        { Vector3( 0.5f,  0.5f, -0.5f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(-0.5f,  0.5f, -0.5f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-0.5f, -0.5f,  0.5f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3( 0.5f, -0.5f,  0.5f), Vector2(1, 0), Vector3(-1, 0, 0) },
-        { Vector3( 0.5f,  0.5f,  0.5f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-0.5f,  0.5f,  0.5f), Vector2(1, 1), Vector3(-1, 0, 0) }
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
+        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
+        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
+        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) }
     };
 
-    std::vector<uint32_t> CubeIndices
-    {
-        0, 1, 3, 3, 1, 2,
-        1, 5, 2, 2, 5, 6,
-        5, 4, 6, 6, 4, 7,
-        4, 0, 7, 7, 0, 3,
-        3, 2, 7, 7, 2, 6,
-        4, 5, 0, 0, 5, 1
-    };
+    std::vector<uint32_t> CubeIndices;
 
     std::vector<Vertex> QuadVertices
     {
@@ -91,6 +111,12 @@ namespace Nuake
         Ref<Material> defaultMaterial = CreateRef<Material>(Vector3{1, 1, 1});
         defaultMaterial->SetName("white");
         MaterialManager::Get()->RegisterMaterial(defaultMaterial);
+
+        CubeIndices.reserve(36);
+        for (int i = 0; i < 36; i++)
+        {
+            CubeIndices.push_back(i);
+        }
 
         CubeMesh = CreateRef<Mesh>();
         CubeMesh->AddSurface(CubeVertices, CubeIndices);
@@ -395,12 +421,9 @@ namespace Nuake
         //m_DebugShader->SetUniform("u_Color", color.r, color.g, color.b, color.a);
     }
 
-    void Renderer::DrawCube(TransformComponent transform, glm::vec4 color)
+    void Renderer::DrawCube(Matrix4 transform)
     {
-        //glDisable(GL_DEPTH_TEST);
-        m_DebugShader->SetUniform("u_Model", transform.GetGlobalTransform());
-        m_DebugShader->SetUniform("u_Color", color.r, color.g, color.b, color.a);
-
+        ZoneScoped;
         CubeMesh->Bind();
         RenderCommand::DrawArrays(0, 36);
     }

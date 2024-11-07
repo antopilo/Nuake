@@ -119,10 +119,11 @@ Nuake::Application* Nuake::CreateApplication(int argc, char** argv)
     ApplicationSpecification specification
     {
         .Name = "Editor",
-        .WindowWidth = 1100,
-        .WindowHeight = 630,
+        .WindowWidth = static_cast<uint32_t>(launchSettings.resolution.x),
+        .WindowHeight = static_cast<uint32_t>(launchSettings.resolution.y),
         .VSync = true
     };
+
 
 #ifdef NK_DEBUG
     specification.Name += "(DEBUG BUILD)";

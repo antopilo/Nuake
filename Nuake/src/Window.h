@@ -71,7 +71,7 @@ namespace Nuake
 		OnWindowSetSceneDelegate& OnWindowSetScene() { return windowSetSceneDelegate; }
 
 	private:
-		const std::string DEFAULT_TITLE = "Untitled Window";
+		const std::string DEFAULT_TITLE = "Nuake Engine";
 		const uint32_t DEFAULT_WIDTH = 1280;
 		const uint32_t DEFAULT_HEIGHT = 720;
 
