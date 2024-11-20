@@ -109,6 +109,13 @@ namespace Nuake {
     {
         mCommandBuffer = &commandBuffer;
 
+        // Load textures
+        NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
+        CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
+        MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
+        RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
+        MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
+
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
 
@@ -127,19 +134,459 @@ namespace Nuake {
         virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 640, 360 });
         virtualCamera->SetTexture(CreateRef<Texture>(Vector2{ 640, 360 }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT0);
         //ScriptingContext::Get().Initialize();
+
+        Window::Get()->SetTitlebarHitTestCallback([&](Window& window, int x, int y, bool& hit) {
+            hit = m_TitleBarHovered;
+        });
+    }
+
+    void EditorInterface::DrawTitlebar(float& outHeight)
+    {
+        const bool isMaximized = Window::Get()->IsMaximized();
+        const float titlebarHeight = isMaximized ? 68.0f : 58.0f;
+        float titlebarVerticalOffset = isMaximized ? 0.0f : 0.0f;
+        const ImVec2 windowPadding = ImGui::GetCurrentWindow()->WindowPadding;
+
+        ImGui::SetCursorPos(ImVec2(windowPadding.x, windowPadding.y + titlebarVerticalOffset));
+        const ImVec2 titlebarMin = ImGui::GetCursorScreenPos();
+        const ImVec2 titlebarMax = { ImGui::GetCursorScreenPos().x + ImGui::GetWindowWidth() - windowPadding.y * 2.0f,
+                                     ImGui::GetCursorScreenPos().y + titlebarHeight };
+        auto* bgDrawList = ImGui::GetBackgroundDrawList();
+        auto* fgDrawList = ImGui::GetForegroundDrawList();
+
+        // Logo
+        {
+            const int logoWidth = NuakeTexture->GetSize().x;
+            const int logoHeight = NuakeTexture->GetSize().y;
+            const ImVec2 logoOffset(2.0f + windowPadding.x, 5.0f + windowPadding.y + titlebarVerticalOffset);
+            const ImVec2 logoRectStart = { ImGui::GetItemRectMin().x + logoOffset.x, ImGui::GetItemRectMin().y + logoOffset.y };
+            const ImVec2 logoRectMax = { logoRectStart.x + logoWidth, logoRectStart.y + logoHeight };
+
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 2.0f + windowPadding.x);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (5.0f + windowPadding.y + titlebarVerticalOffset) / 2.0);
+            ImGui::Image((ImTextureID)NuakeTexture->GetID(), ImVec2(logoWidth, logoHeight), ImVec2(0, 1), ImVec2(1, 0));
+        }
+
+        const float w = ImGui::GetContentRegionAvail().x;
+        const float buttonsAreaWidth = 94;
+
+        // Title bar drag area
+        // On Windows we hook into the GLFW win32 window internals
+        ImGui::SetCursorPos(ImVec2(windowPadding.x, windowPadding.y + titlebarVerticalOffset)); // Reset cursor pos
+        
+        const auto titleBarDragSize = ImVec2(w - buttonsAreaWidth, titlebarHeight);
+
+        if (Window::Get()->IsMaximized())
+        {
+            float windowMousePosY = ImGui::GetMousePos().y - ImGui::GetCursorScreenPos().y;
+            if (windowMousePosY >= 0.0f && windowMousePosY <= 5.0f)
+                m_TitleBarHovered = true; // Account for the top-most pixels which don't register
+        }
+           
+        auto curPos = ImGui::GetCursorPos();
+        bool isOnMenu = false;
+        {
+            const float logoHorizontalOffset = 5.0f * 2.0f + 48.0f + windowPadding.x;
+            ImGui::SetCursorPos(ImVec2(logoHorizontalOffset, 6.0f + titlebarVerticalOffset));
+            DrawMenuBar();
+            if (ImGui::IsItemHovered())
+            {
+                isOnMenu = true;
+            }
+
+        }
+        
+
+        {
+            // Centered Window title
+            ImVec2 currentCursorPos = ImGui::GetCursorPos();
+            const std::string title = "Nuake Engine - " + Engine::GetProject()->Name;
+            ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
+            ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * 0.5f - textSize.x * 0.5f - ImGui::GetStyle().WindowPadding.x / 2.0f, 2.0f + windowPadding.y + 6.0f));
+            ImGui::Text(title.c_str()); // Draw title
+            ImGui::SetCursorPos(currentCursorPos);
+        }
+        ImGui::SetItemAllowOverlap();
+        // Window buttons
+        const ImU32 buttonColN = UI::TextCol;
+        const ImU32 buttonColH = UI::TextCol;
+        const ImU32 buttonColP = UI::TextCol;
+        const float buttonWidth = 14.0f;
+        const float buttonHeight = 14.0f;
+
+        // Minimize Button
+        ImGui::SameLine();
+
+        const float remaining = ImGui::GetContentRegionAvail().x;
+        ImGui::Dummy(ImVec2(remaining - ((buttonWidth + ImGui::GetStyle().ItemSpacing.x) * 3.5), 0));
+        ImGui::SameLine();
+        {
+            const int iconWidth = MinimizeTexture->GetWidth();
+            const int iconHeight = MinimizeTexture->GetHeight();
+            const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
+            if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
+            {
+                glfwIconifyWindow(Window::Get()->GetHandle());
+            }
+            
+            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP);
+        }
+
+        ImGui::SameLine();
+
+        // Maximize Button
+        {
+            const int iconWidth = MaximizeTexture->GetWidth();
+            const int iconHeight = MaximizeTexture->GetHeight();
+
+            const bool isMaximized = Window::Get()->IsMaximized();
+
+            if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
+            {
+                const auto window = Window::Get()->GetHandle();
+                if (isMaximized)
+                {
+                    glfwRestoreWindow(window);
+                }
+                else
+                {
+                    glfwMaximizeWindow(window);
+                }
+            }
+            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            UI::DrawButtonImage(isMaximized ? RestoreTexture : MaximizeTexture, buttonColN, buttonColH, buttonColP);
+        }
+
+        // Close Button
+        ImGui::SameLine();
+        {
+            const int iconWidth = CloseIconTexture->GetWidth();
+            const int iconHeight = CloseIconTexture->GetHeight();
+            if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
+            {
+                glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
+            }
+            
+            UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
+        }
+
+        // Second bar with play stop pause etc
+        ImGui::SetCursorPosX(windowPadding.x);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+
+
+        ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
+        ImGui::SameLine();
+
+        if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
+            if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
+            {
+                Engine::SetGameState(GameState::Paused);
+
+                SetStatusMessage("Paused");
+            }
+            ImGui::PopStyleColor();
+
+            if (ImGui::IsItemHovered())
+            {
+                isOnMenu = true;
+            }
+
+            if (ImGui::BeginItemTooltip())
+            {
+                ImGui::Text("Pause game (F6)");
+                ImGui::EndTooltip();
+            }
+        }
+        else
+        {
+            bool playButtonPressed;
+            std::string tooltip;
+            if (Engine::GetGameState() == GameState::Paused)
+            {
+                Color color = Engine::GetProject()->Settings.PrimaryColor;
+                ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
+                playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F6);
+                ImGui::PopStyleColor();
+
+                tooltip = "Resume (F6)";
+            }
+            else
+            {
+                playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5);
+                tooltip = "Build & Play (F5)";
+
+            }
+
+            if (ImGui::IsItemHovered())
+            {
+                isOnMenu = true;
+            }
+
+            if (playButtonPressed)
+            {
+                if (Engine::GetGameState() == GameState::Paused)
+                {
+                    PushCommand(SetGameState(GameState::Playing));
+
+                    Color color = Engine::GetProject()->Settings.PrimaryColor;
+                    std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                    SetStatusMessage(statusMessage.c_str(), { color.r, color.g, color.b, 1.0f });
+                }
+                else
+                {
+                    this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
+
+                    std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
+                    SetStatusMessage(statusMessage);
+
+                    auto job = [this]()
+                        {
+                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                        };
+
+                    Selection = EditorSelection();
+
+                    JobSystem::Get().Dispatch(job, [this]()
+                    {
+                    bool containsError = false;
+                    std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                        return error.isWarning == false;
+                        });
+
+                    if (errors.size() > 0 && containsError)
+                    {
+                        SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
+
+                        Logger::Log("Build FAILED.", ".net", CRITICAL);
+                        for (CompilationError error : errors)
+                        {
+                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                            Logger::Log(errorMessage, ".net", CRITICAL);
+                        }
+                    }
+                    else
+                    {
+                        Engine::GetProject()->ExportEntitiesToTrenchbroom();
+
+                        ImGui::SetWindowFocus("Logger");
+                        SetStatusMessage("Entering play mode...");
+
+                        PushCommand(SetGameState(GameState::Playing));
+
+                        for (CompilationError error : errors)
+                        {
+                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                            Logger::Log(errorMessage, ".net", WARNING);
+                        }
+
+                        std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                        SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
+                    }
+                    });
+                }
+            }
+
+            if (ImGui::BeginItemTooltip())
+            {
+                ImGui::Text(tooltip.c_str());
+                ImGui::EndTooltip();
+            }
+        }
+
+        ImGui::SameLine();
+
+        const bool wasPlayMode = Engine::GetGameState() != GameState::Stopped;
+        if (!wasPlayMode)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && wasPlayMode)
+        {
+            Engine::ExitPlayMode();
+
+            Engine::SetCurrentScene(SceneSnapshot);
+            Selection = EditorSelection();
+            SetStatusMessage("Ready");
+        }
+
+        if (ImGui::IsItemHovered())
+        {
+            isOnMenu = true;
+        }
+            
+        if (!wasPlayMode)
+        {
+            ImGui::EndDisabled();
+        }
+        else
+        {
+            if (ImGui::BeginItemTooltip())
+            {
+                ImGui::Text("Stop game (F5)");
+                ImGui::EndTooltip();
+            }
+        }
+
+        ImGui::SameLine();
+
+        ImGui::PopStyleColor();
+
+        float lineHeight = 130.0f;
+        float separatorHeight = lineHeight * 8.0f;
+        float separatorThickness = 1.0f;
+
+        ImVec2 curPos2 = ImGui::GetCursorPos();
+        ImVec2 min = ImVec2(curPos2.x - separatorThickness, curPos2.y - separatorHeight);
+        ImVec2 max = ImVec2(curPos2.x + separatorThickness, curPos2.y - separatorHeight);
+        ImGui::GetWindowDrawList()->AddRectFilled(min, max, IM_COL32(255, 255, 255, 32), 2.0f);
+
+        ImGui::SameLine();
+
+        const int sizeofRightPart = 176;
+
+        ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - sizeofRightPart, 30));
+
+        ImGui::SameLine();
+
+        const auto& io = ImGui::GetIO();
+        float frameTime = 1000.0f / io.Framerate;
+        int fps = (int)io.Framerate;
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
+        ImGui::BeginChild("FPS", ImVec2(70, 30), false);
+
+        std::string text = std::to_string(fps) + " fps";
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25f - ImGui::CalcTextSize(text.c_str()).x
+            - ImGui::GetScrollX() - 2.f * ImGui::GetStyle().ItemSpacing.x);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
+        ImGui::Text(text.c_str());
+
+        ImGui::EndChild();
+        ImGui::SameLine();
+        ImGui::BeginChild("frametime", ImVec2(70, 30), false);
+        std::ostringstream out;
+        out.precision(2);
+        out << std::fixed << frameTime;
+        text = out.str() + " ms";
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
+            - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
+        ImGui::Text(text.c_str());
+
+        ImGui::EndChild();
+
+        ImGui::SameLine();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+
+        static bool isBuilding = false;
+        std::string icon = isBuilding ? ICON_FA_SYNC_ALT : ICON_FA_HAMMER;
+
+        if (isBuilding)
+        {
+            ImGui::BeginDisabled();
+        }
+
+        if (ImGui::Button(icon.c_str(), ImVec2(30, 30)) && !isBuilding)
+        {
+            SetStatusMessage(std::string(ICON_FA_HAMMER) + " Building solution...", { 0.1f, 0.1f, 1.0f, 1.0f });
+
+            auto job = [this]()
+                {
+                    isBuilding = true;
+                    this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                };
+
+            JobSystem::Get().Dispatch(job, [this]()
+            {
+            isBuilding = false;
+            bool containsError = false;
+            std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                return error.isWarning == false;
+                });
+
+            if (errors.size() > 0 && containsError)
+            {
+                SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
+
+                Logger::Log("Build FAILED.", ".net", CRITICAL);
+                for (CompilationError error : errors)
+                {
+                    const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                    Logger::Log(errorMessage, ".net", CRITICAL);
+                }
+            }
+            else
+            {
+                for (CompilationError error : errors)
+                {
+                    const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                    Logger::Log(errorMessage, ".net", WARNING);
+                }
+
+                Logger::Log("Build Successful!", ".net", VERBOSE);
+                ScriptingEngineNet::Get().LoadProjectAssembly(Engine::GetProject());
+                Engine::GetProject()->ExportEntitiesToTrenchbroom();
+                SetStatusMessage("Build Successful!");
+            }
+            });
+        }
+
+        if (isBuilding)
+        {
+            ImGui::EndDisabled();
+        }
+
+        if (ImGui::BeginItemTooltip())
+        {
+            ImGui::Text("Built .Net project");
+            ImGui::EndTooltip();
+        }
+
+        ImGui::SetCursorPos(curPos);
+        ImGui::InvisibleButton("##titleBarDragZone", ImVec2(w - buttonsAreaWidth, titlebarHeight));
+        m_TitleBarHovered = ImGui::IsItemHovered();
+
+        if (isOnMenu)
+        {
+            m_TitleBarHovered = false;
+        }
+
+        ImGui::SetItemAllowOverlap();
+
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
+
+        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
+
+        ImGui::PopStyleVar(1);
+
+        outHeight = titlebarHeight;
     }
 
     void EditorInterface::Init()
     {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->Pos);
-        ImGui::SetNextWindowSize(viewport->Size);
-        ImGui::SetNextWindowViewport(viewport->ID);
 
-        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-        ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
+
+        //ImGuiViewport* viewport = ImGui::GetMainViewport();
+        //ImGui::SetNextWindowPos(viewport->Pos);
+        //ImGui::SetNextWindowSize(viewport->Size);
+        //ImGui::SetNextWindowViewport(viewport->ID);
+        //
+        //ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+        //ImGui::DockSpaceOverViewport(viewport, dockspace_flags);
     }
 
     ImVec2 LastSize = ImVec2();
@@ -147,7 +594,11 @@ namespace Nuake {
     {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         std::string name = ICON_FA_GAMEPAD + std::string("  Scene");
-        if (ImGui::Begin(name.c_str()))
+        ImGuiWindowClass window_class;
+        window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+        ImGui::SetNextWindowClass(&window_class);
+
+        if (ImGui::Begin(name.c_str(), 0, ImGuiWindowFlags_NoDecoration))
         {
             ImGui::PopStyleVar();
 
@@ -501,302 +952,8 @@ namespace Nuake {
         float height = ImGui::GetFrameHeight();
         if (ImGui::BeginViewportSideBar("##SecondaryMenuBar", viewport, ImGuiDir_Up, height, window_flags)) 
         {
-            if (ImGui::BeginMenuBar()) 
-            {
-                //float availWidth = ImGui::GetContentRegionAvail().x;
-                //float windowWidth = ImGui::GetWindowWidth();
-                //
-                //float used = windowWidth - availWidth;
-                //float half = windowWidth / 2.0;
-                //float needed = half - used;
-                //
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-                
-                //if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::W))
-                //{
-                //    CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
-                //}
-                //ImGui::SameLine();
-                //if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::E))
-                //{
-                //    CurrentOperation = ImGuizmo::OPERATION::ROTATE;
-                //}
-                //ImGui::SameLine();
-                //if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 30)) || Input::IsKeyDown(Key::R))
-                //{
-                //    CurrentOperation = ImGuizmo::OPERATION::SCALE;
-                //}
-                //ImGui::SameLine();
-                ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
-                ImGui::SameLine();
 
-                if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
-                {
-                    Color color = Engine::GetProject()->Settings.PrimaryColor;
-                    ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
-                    if (ImGui::Button(ICON_FA_PAUSE, ImVec2(30, 30)) || (Input::IsKeyPressed(Key::F6)))
-                    {
-                        Engine::SetGameState(GameState::Paused);
-
-                        SetStatusMessage("Paused");
-                    }
-                    ImGui::PopStyleColor();
-
-                    if (ImGui::BeginItemTooltip())
-                    {
-                        ImGui::Text("Pause game (F6)");
-                        ImGui::EndTooltip();
-                    }
-                }
-                else
-                {
-                    bool playButtonPressed;
-                    std::string tooltip;
-                    if (Engine::GetGameState() == GameState::Paused)
-                    {
-                        Color color = Engine::GetProject()->Settings.PrimaryColor;
-                        ImGui::PushStyleColor(ImGuiCol_Text, { color.r, color.g, color.b, 1.0f });
-                        playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F6);
-                        ImGui::PopStyleColor();
-
-                        tooltip = "Resume (F6)";
-                    }
-                    else
-                    {
-                        playButtonPressed = ImGui::Button(ICON_FA_PLAY, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5);
-                        tooltip = "Build & Play (F5)";
-
-                    }
-                   
-                    if (playButtonPressed)
-                    {
-                        if (Engine::GetGameState() == GameState::Paused)
-                        {
-                            PushCommand(SetGameState(GameState::Playing));
-
-                            Color color = Engine::GetProject()->Settings.PrimaryColor;
-                            std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                            SetStatusMessage(statusMessage.c_str(), { color.r, color.g, color.b, 1.0f });
-                        }
-                        else
-                        {
-                            this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
-                            
-                            std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
-                            SetStatusMessage(statusMessage);
-
-                            auto job = [this]()
-                            {
-                                this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                            };
-
-                            Selection = EditorSelection();
-
-                            JobSystem::Get().Dispatch(job, [this]()
-                            {
-                                bool containsError = false;
-                                std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
-                                        return error.isWarning == false;
-                                    });
-
-                                if (errors.size() > 0 && containsError)
-                                {
-                                    SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
-
-                                    Logger::Log("Build FAILED.", ".net", CRITICAL);
-                                    for (CompilationError error : errors)
-                                    {
-                                        const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                                        Logger::Log(errorMessage, ".net", CRITICAL);
-                                    }
-                                }
-                                else
-                                {
-                                    Engine::GetProject()->ExportEntitiesToTrenchbroom();
-
-                                    ImGui::SetWindowFocus("Logger");
-                                    SetStatusMessage("Entering play mode...");
-
-                                    PushCommand(SetGameState(GameState::Playing));
-
-                                    for (CompilationError error : errors)
-                                    {
-                                        const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                                        Logger::Log(errorMessage, ".net", WARNING);
-                                    }
-
-                                    std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                                    SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
-                                }
-                            });
-                        }
-                    }
-
-                    if (ImGui::BeginItemTooltip())
-                    {
-                        ImGui::Text(tooltip.c_str());
-                        ImGui::EndTooltip();
-                    }
-                }
-
-                ImGui::SameLine();
-
-                const bool wasPlayMode = Engine::GetGameState() != GameState::Stopped;
-                if (!wasPlayMode)
-                {
-                    ImGui::BeginDisabled();
-                }
-
-                if ((ImGui::Button(ICON_FA_STOP, ImVec2(30, 30)) || Input::IsKeyPressed(Key::F5)) && wasPlayMode)
-                {
-                    Engine::ExitPlayMode();
-
-                    Engine::SetCurrentScene(SceneSnapshot);
-                    Selection = EditorSelection();
-                    SetStatusMessage("Ready");
-                }
-
-                if (!wasPlayMode)
-                {
-                    ImGui::EndDisabled();
-                }
-                else
-                {
-                    if (ImGui::BeginItemTooltip())
-                    {
-                        ImGui::Text("Stop game (F5)");
-                        ImGui::EndTooltip();
-                    }
-                }
-
-                ImGui::SameLine();
-
-                ImGui::PopStyleColor();
-
-                float lineHeight = 130.0f;
-                float separatorHeight = lineHeight * 8.0f;
-                float separatorThickness = 1.0f;
-
-                ImVec2 curPos = ImGui::GetCursorPos();
-                ImVec2 min = ImVec2(curPos.x - separatorThickness, curPos.y - separatorHeight);
-                ImVec2 max = ImVec2(curPos.x + separatorThickness, curPos.y - separatorHeight);
-                ImGui::GetWindowDrawList()->AddRectFilled(min, max, IM_COL32(255, 255, 255, 32), 2.0f);
-
-                ImGui::SameLine();
-
-                const int sizeofRightPart = 176;
-
-                ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - sizeofRightPart, 30));
-
-                ImGui::SameLine();
-
-                const auto& io = ImGui::GetIO();
-                float frameTime = 1000.0f / io.Framerate;
-                int fps = (int)io.Framerate;
-                ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 1));
-                ImGui::BeginChild("FPS", ImVec2(70, 30), false);
-
-                std::string text = std::to_string(fps) + " fps";
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25f - ImGui::CalcTextSize(text.c_str()).x
-                    - ImGui::GetScrollX() - 2.f * ImGui::GetStyle().ItemSpacing.x);
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
-                ImGui::Text(text.c_str());
-
-                ImGui::EndChild();
-                ImGui::SameLine();
-                ImGui::BeginChild("frametime", ImVec2(70, 30), false);
-                std::ostringstream out;
-                out.precision(2);
-                out << std::fixed << frameTime;
-                text = out.str() + " ms";
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 1.25 - ImGui::CalcTextSize(text.c_str()).x
-                    - ImGui::GetScrollX() - 2 * ImGui::GetStyle().ItemSpacing.x);
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 15 - (ImGui::CalcTextSize(text.c_str()).y) / 2.0);
-                ImGui::Text(text.c_str());
-
-                ImGui::EndChild();
-
-                ImGui::SameLine();
-
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
-                ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-
-                static bool isBuilding = false;
-                std::string icon = isBuilding ? ICON_FA_SYNC_ALT : ICON_FA_HAMMER;
-
-                if (isBuilding)
-                {
-                    ImGui::BeginDisabled();
-                }
-
-                if (ImGui::Button(icon.c_str(), ImVec2(30, 30)) && !isBuilding)
-                {
-                    SetStatusMessage(std::string(ICON_FA_HAMMER)+ " Building solution...", { 0.1f, 0.1f, 1.0f, 1.0f });
-
-                    auto job = [this]()
-                        {
-                            isBuilding = true;
-                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                        };
-
-                    JobSystem::Get().Dispatch(job, [this]()
-                    {
-                        isBuilding = false;
-                        bool containsError = false;
-                        std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
-                            return error.isWarning == false;
-                            });
-
-                        if (errors.size() > 0 && containsError)
-                        {
-                            SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
-
-                            Logger::Log("Build FAILED.", ".net", CRITICAL);
-                            for (CompilationError error : errors)
-                            {
-                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                                Logger::Log(errorMessage, ".net", CRITICAL);
-                            }
-                        }
-                        else
-                        {
-                            for (CompilationError error : errors)
-                            {
-                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                                Logger::Log(errorMessage, ".net", WARNING);
-                            }
-
-                            Logger::Log("Build Successful!", ".net", VERBOSE);
-                            ScriptingEngineNet::Get().LoadProjectAssembly(Engine::GetProject());
-                            Engine::GetProject()->ExportEntitiesToTrenchbroom();
-                            SetStatusMessage("Build Successful!");
-                        }
-                    });
-                }
-
-                if (isBuilding)
-                {
-                    ImGui::EndDisabled();
-                }
-
-                if (ImGui::BeginItemTooltip())
-                {
-                    ImGui::Text("Built .Net project");
-                    ImGui::EndTooltip();
-                }
-
-                ImGui::PopStyleColor();
-                ImGui::PopStyleVar();
-
-                ImGui::PopStyleColor();
-                ImGui::PopStyleVar();
-
-                ImGui::PopStyleVar(1);
-                ImGui::EndMenuBar();
-            }
-            ImGui::End();
+            
         }
         ImGui::PopStyleVar();
     }
@@ -3014,7 +3171,10 @@ namespace Nuake {
 
     void EditorInterface::DrawMenuBar()
     {
-        if (ImGui::BeginMainMenuBar())
+        const ImRect menuBarRect = { ImGui::GetCursorPos(), { ImGui::GetContentRegionAvail().x + ImGui::GetCursorScreenPos().x, ImGui::GetFrameHeightWithSpacing() } };
+        ImGui::BeginGroup();
+       
+        if (BeginMenubar(menuBarRect))
         {
             if (ImGui::BeginMenu("File"))
             {
@@ -3084,7 +3244,7 @@ namespace Nuake {
                 if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
                 if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
                 ImGui::Separator();
-                if (ImGui::MenuItem("Project Settings", "")) 
+                if (ImGui::MenuItem("Project Settings", ""))
                 {
                     m_ProjectSettingsWindow->m_DisplayWindow = true;
                 }
@@ -3208,7 +3368,7 @@ namespace Nuake {
                 if (ImGui::MenuItem("Duplicate selected", NULL)) {}
                 ImGui::EndMenu();
             }
-            
+
             if (ImGui::BeginMenu("Debug"))
             {
                 if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;
@@ -3225,8 +3385,94 @@ namespace Nuake {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();
-            ImGui::EndMainMenuBar();
+            
+
         }
+
+        EndMenubar();
+
+        if (ImGui::IsItemHovered())
+            m_TitleBarHovered = false;
+
+        ImGui::EndGroup();
+    }
+
+    bool EditorInterface::BeginMenubar(const ImRect& barRect)
+    {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+        /*if (!(window->Flags & ImGuiWindowFlags_MenuBar))
+            return false;*/
+
+        IM_ASSERT(!window->DC.MenuBarAppending);
+        ImGui::BeginGroup(); // Backup position on layer 0 // FIXME: Misleading to use a group for that backup/restore
+        ImGui::PushID("##menubar2");
+
+        const ImVec2 padding = window->WindowPadding;
+        ImRect result = barRect;
+        result.Min.x += 0.0f;
+        result.Min.y += padding.y;
+        result.Max.x += 0.0f;
+        result.Max.y += padding.y;
+
+        // We don't clip with current window clipping rectangle as it is already set to the area below. However we clip with window full rect.
+        // We remove 1 worth of rounding to Max.x to that text in long menus and small windows don't tend to display over the lower-right rounded area, which looks particularly glitchy.
+        ImRect bar_rect = result;// window->MenuBarRect();
+        ImRect clip_rect(IM_ROUND(ImMax(window->Pos.x, bar_rect.Min.x + window->WindowBorderSize + window->Pos.x - 10.0f)), IM_ROUND(bar_rect.Min.y + window->WindowBorderSize + window->Pos.y),
+            IM_ROUND(ImMax(bar_rect.Min.x + window->Pos.x, bar_rect.Max.x - ImMax(window->WindowRounding, window->WindowBorderSize))), IM_ROUND(bar_rect.Max.y + window->Pos.y));
+
+        clip_rect.ClipWith(window->OuterRectClipped);
+        ImGui::PushClipRect(clip_rect.Min, clip_rect.Max, false);
+
+        // We overwrite CursorMaxPos because BeginGroup sets it to CursorPos (essentially the .EmitItem hack in EndMenuBar() would need something analogous here, maybe a BeginGroupEx() with flags).
+        window->DC.CursorPos = window->DC.CursorMaxPos = ImVec2(bar_rect.Min.x + window->Pos.x, bar_rect.Min.y + window->Pos.y);
+        window->DC.LayoutType = ImGuiLayoutType_Horizontal;
+        window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
+        window->DC.MenuBarAppending = true;
+        ImGui::AlignTextToFramePadding();
+        return true;
+    }
+
+    void EditorInterface::EndMenubar()
+    {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return;
+        ImGuiContext& g = *GImGui;
+
+        // Nav: When a move request within one of our child menu failed, capture the request to navigate among our siblings.
+        if (ImGui::NavMoveRequestButNoResultYet() && (g.NavMoveDir == ImGuiDir_Left || g.NavMoveDir == ImGuiDir_Right) && (g.NavWindow->Flags & ImGuiWindowFlags_ChildMenu))
+        {
+            // Try to find out if the request is for one of our child menu
+            ImGuiWindow* nav_earliest_child = g.NavWindow;
+            while (nav_earliest_child->ParentWindow && (nav_earliest_child->ParentWindow->Flags & ImGuiWindowFlags_ChildMenu))
+                nav_earliest_child = nav_earliest_child->ParentWindow;
+            if (nav_earliest_child->ParentWindow == window && nav_earliest_child->DC.ParentLayoutType == ImGuiLayoutType_Horizontal && (g.NavMoveFlags & ImGuiNavMoveFlags_Forwarded) == 0)
+            {
+                // To do so we claim focus back, restore NavId and then process the movement request for yet another frame.
+                // This involve a one-frame delay which isn't very problematic in this situation. We could remove it by scoring in advance for multiple window (probably not worth bothering)
+                const ImGuiNavLayer layer = ImGuiNavLayer_Menu;
+                IM_ASSERT(window->DC.NavLayersActiveMaskNext & (1 << layer)); // Sanity check
+                ImGui::FocusWindow(window);
+                ImGui::SetNavID(window->NavLastIds[layer], layer, 0, window->NavRectRel[layer]);
+                g.NavDisableHighlight = true; // Hide highlight for the current frame so we don't see the intermediary selection.
+                g.NavDisableMouseHover = g.NavMousePosDirty = true;
+                ImGui::NavMoveRequestForward(g.NavMoveDir, g.NavMoveClipDir, g.NavMoveFlags, g.NavMoveScrollFlags); // Repeat
+            }
+        }
+
+        IM_MSVC_WARNING_SUPPRESS(6011); // Static Analysis false positive "warning C6011: Dereferencing NULL pointer 'window'"
+        // IM_ASSERT(window->Flags & ImGuiWindowFlags_MenuBar); // NOTE(Yan): Needs to be commented out because Jay
+        IM_ASSERT(window->DC.MenuBarAppending);
+        ImGui::PopClipRect();
+        ImGui::PopID();
+        window->DC.MenuBarOffset.x = window->DC.CursorPos.x - window->Pos.x; // Save horizontal position so next append can reuse it. This is kinda equivalent to a per-layer CursorPos.
+        g.GroupStack.back().EmitItem = false;
+        ImGui::EndGroup(); // Restore position on layer 0
+        window->DC.LayoutType = ImGuiLayoutType_Vertical;
+        window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
+        window->DC.MenuBarAppending = false;
     }
 
     bool isLoadingProject = false;
@@ -3253,8 +3499,8 @@ namespace Nuake {
 
             auto window = Window::Get();
             window->SetDecorated(true);
+            window->ShowTitleBar(false);
             window->SetSize({ 1100, 1000 });
-            window->Maximize();
             window->Center();
             frameCount = 0;
             return;
@@ -3325,9 +3571,9 @@ namespace Nuake {
 
         m_ProjectSettingsWindow->Draw();
 
-        m_DemoWindow.Draw();
+        //m_DemoWindow.Draw();
 
-        _audioWindow->Draw();
+        //_audioWindow->Draw();
 
         if (m_ShowTrenchbroomConfigurator)
         {
@@ -3339,17 +3585,127 @@ namespace Nuake {
             m_MapImporter.Draw();
         }
 
-        DrawMenuBar();
-        DrawMenuBars();
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->Pos);
+        ImGui::SetNextWindowSize(viewport->Size);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar;
+
+        const bool isMaximized = Window::Get()->IsMaximized();
+
+        auto projCol = Engine::GetProject()->Settings.PrimaryColor;
+        ImVec4 col = ImVec4{ projCol.x, projCol.g, projCol.b, 1.0 };
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, col);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 8.0f) : ImVec2(1.0f, 1.0f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+
+        ImGui::PushStyleColor(ImGuiCol_MenuBarBg, UI::PrimaryCol);
+        ImGui::Begin("DockSpaceWindow22", nullptr, window_flags);
+        ImGui::PopStyleColor(); // MenuBarBg
+        ImGui::PopStyleColor(); // windowbg
+        ImGui::PopStyleVar(2);
+
+        ImGui::PopStyleVar(2);
+
+        {
+            ImGui::PushStyleColor(ImGuiCol_Border, IM_COL32(50, 50, 50, 255));
+            // Draw window border if the window is not maximized
+            if (!isMaximized)
+            {
+                struct ImGuiResizeBorderDef
+                {
+                    ImVec2 InnerDir;
+                    ImVec2 SegmentN1, SegmentN2;
+                    float  OuterAngle;
+                };
+
+                static const ImGuiResizeBorderDef resize_border_def[4] =
+                {
+                    { ImVec2(+1, 0), ImVec2(0, 1), ImVec2(0, 0), IM_PI * 1.00f }, // Left
+                    { ImVec2(-1, 0), ImVec2(1, 0), ImVec2(1, 1), IM_PI * 0.00f }, // Right
+                    { ImVec2(0, +1), ImVec2(0, 0), ImVec2(1, 0), IM_PI * 1.50f }, // Up
+                    { ImVec2(0, -1), ImVec2(1, 1), ImVec2(0, 1), IM_PI * 0.50f }  // Down
+                };
+
+                auto GetResizeBorderRect = [](ImGuiWindow* window, int border_n, float perp_padding, float thickness)
+                    {
+                        ImRect rect = window->Rect();
+                        if (thickness == 0.0f)
+                        {
+                            rect.Max.x -= 1;
+                            rect.Max.y -= 1;
+                        }
+                        if (border_n == ImGuiDir_Left) { return ImRect(rect.Min.x - thickness, rect.Min.y + perp_padding, rect.Min.x + thickness, rect.Max.y - perp_padding); }
+                        if (border_n == ImGuiDir_Right) { return ImRect(rect.Max.x - thickness, rect.Min.y + perp_padding, rect.Max.x + thickness, rect.Max.y - perp_padding); }
+                        if (border_n == ImGuiDir_Up) { return ImRect(rect.Min.x + perp_padding, rect.Min.y - thickness, rect.Max.x - perp_padding, rect.Min.y + thickness); }
+                        if (border_n == ImGuiDir_Down) { return ImRect(rect.Min.x + perp_padding, rect.Max.y - thickness, rect.Max.x - perp_padding, rect.Max.y + thickness); }
+                        IM_ASSERT(0);
+                        return ImRect();
+                    };
+
+
+                ImGuiContext& g = *GImGui;
+                auto window = ImGui::GetCurrentWindow();
+                float rounding = window->WindowRounding;
+                float border_size = 1.0f; // window->WindowBorderSize;
+                if (border_size > 0.0f && !(window->Flags & ImGuiWindowFlags_NoBackground))
+                    window->DrawList->AddRect(window->Pos, { window->Pos.x + window->Size.x,  window->Pos.y + window->Size.y }, ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, border_size);
+
+                int border_held = window->ResizeBorderHeld;
+                if (border_held != -1)
+                {
+                    const ImGuiResizeBorderDef& def = resize_border_def[border_held];
+                    ImRect border_r = GetResizeBorderRect(window, border_held, rounding, 0.0f);
+                    ImVec2 p1 = ImLerp(border_r.Min, border_r.Max, def.SegmentN1);
+                    const float offsetX = def.InnerDir.x * rounding;
+                    const float offsetY = def.InnerDir.y * rounding;
+                    p1.x += 0.5f + offsetX;
+                    p1.y += 0.5f + offsetY;
+
+                    ImVec2 p2 = ImLerp(border_r.Min, border_r.Max, def.SegmentN2);
+                    p2.x += 0.5f + offsetX;
+                    p2.y += 0.5f + offsetY;
+
+                    window->DrawList->PathArcTo(p1, rounding, def.OuterAngle - IM_PI * 0.25f, def.OuterAngle);
+                    window->DrawList->PathArcTo(p2, rounding, def.OuterAngle, def.OuterAngle + IM_PI * 0.25f);
+                    window->DrawList->PathStroke(ImGui::GetColorU32(ImGuiCol_SeparatorActive), 0, ImMax(2.0f, border_size)); // Thicker than usual
+                }
+                if (g.Style.FrameBorderSize > 0 && !(window->Flags & ImGuiWindowFlags_NoTitleBar) && !window->DockIsActive)
+                {
+                    float y = window->Pos.y + window->TitleBarHeight() - 1;
+                    window->DrawList->AddLine(ImVec2(window->Pos.x + border_size, y), ImVec2(window->Pos.x + window->Size.x - border_size, y), ImGui::GetColorU32(ImGuiCol_Border), g.Style.FrameBorderSize);
+                }
+            }
+
+            ImGui::PopStyleColor(); // ImGuiCol_Border
+        }
+
+        float titleBarHeight;
+        DrawTitlebar(titleBarHeight);
+        ImGui::SetCursorPosY(titleBarHeight);
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuiStyle& style = ImGui::GetStyle();
+        float minWinSizeX = style.WindowMinSize.x;
+        style.WindowMinSize.x = 370.0f;
+        ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+        style.WindowMinSize.x = minWinSizeX;
+        ImGui::End();
+        //DrawMenuBar();
+        //DrawMenuBars();
 
         int i = 0;
-       //if (Logger::GetLogCount() > 0 && Logger::GetLogs()[Logger::GetLogCount() - 1].type == COMPILATION)
-       //{
-       //    SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
-       //}
+        if (Logger::GetLogCount() > 0 && Logger::GetLogs()[Logger::GetLogCount() - 1].type == COMPILATION)
+        {
+            SetStatusMessage(std::string(ICON_FA_EXCLAMATION_TRIANGLE) + "  An unhandled exception occured in your script. See logs for more details.", Color(1.0f, 0.1f, 0.1f, 1.0f));
+        }
 
         DrawStatusBar();
-
+        
         for (auto& prefabEditors : prefabEditors)
         {
             prefabEditors->Draw();
@@ -3359,11 +3715,8 @@ namespace Nuake {
         DrawSceneTree();
         SelectionPanel.Draw(Selection);
         DrawLogger();
-
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();
-
-
         if (isNewProject)
         {
             ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -3371,11 +3724,11 @@ namespace Nuake {
             if (ImGui::BeginPopupModal("Welcome to Nuake Engine!", 0, ImGuiWindowFlags_AlwaysAutoResize))
             {
                 ImGui::TextWrapped("If you would like to use the Trenchbroom integration, please locate your Trenchbroom executable.");
-
+        
                 if (ImGui::Button("Locate..."))
                 {
                     const std::string& locationPath = Nuake::FileDialog::OpenFile("TrenchBroom (.exe)\0TrenchBroom.exe\0");
-
+        
                     if (!locationPath.empty())
                     {
                         Engine::GetProject()->TrenchbroomPath = locationPath;
@@ -3390,13 +3743,13 @@ namespace Nuake {
                     isNewProject = false;
                     Engine::GetProject()->Save();
                 }
-
+        
                 ImGui::EndPopup();
             }
-
+        
             PopupHelper::OpenPopup("Welcome to Nuake Engine!");
         }
-
+        
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow();
     }

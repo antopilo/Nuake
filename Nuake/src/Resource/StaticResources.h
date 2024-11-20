@@ -74,6 +74,9 @@ namespace Nuake {
         extern const std::string Resources_Images_box_png_path;
         extern unsigned int Resources_Images_box_png_len;
         extern unsigned char Resources_Images_box_png[];
+        extern const std::string Resources_Images_close_icon_png_path;
+        extern unsigned int Resources_Images_close_icon_png_len;
+        extern unsigned char Resources_Images_close_icon_png[];
         extern const std::string Resources_Images_code_png_path;
         extern unsigned int Resources_Images_code_png_len;
         extern unsigned char Resources_Images_code_png[];
@@ -83,6 +86,9 @@ namespace Nuake {
         extern const std::string Resources_Images_cube_png_path;
         extern unsigned int Resources_Images_cube_png_len;
         extern unsigned char Resources_Images_cube_png[];
+        extern const std::string Resources_Images_editor_icon_png_path;
+        extern unsigned int Resources_Images_editor_icon_png_len;
+        extern unsigned char Resources_Images_editor_icon_png[];
         extern const std::string Resources_Images_file_icon_png_path;
         extern unsigned int Resources_Images_file_icon_png_len;
         extern unsigned char Resources_Images_file_icon_png[];
@@ -98,6 +104,12 @@ namespace Nuake {
         extern const std::string Resources_Images_logo_white_png_path;
         extern unsigned int Resources_Images_logo_white_png_len;
         extern unsigned char Resources_Images_logo_white_png[];
+        extern const std::string Resources_Images_maximize_icon_png_path;
+        extern unsigned int Resources_Images_maximize_icon_png_len;
+        extern unsigned char Resources_Images_maximize_icon_png[];
+        extern const std::string Resources_Images_minimize_icon_png_path;
+        extern unsigned int Resources_Images_minimize_icon_png_len;
+        extern unsigned char Resources_Images_minimize_icon_png[];
         extern const std::string Resources_Images_nuake_logo_png_path;
         extern unsigned int Resources_Images_nuake_logo_png_len;
         extern unsigned char Resources_Images_nuake_logo_png[];
@@ -107,6 +119,9 @@ namespace Nuake {
         extern const std::string Resources_Images_project_icon_png_path;
         extern unsigned int Resources_Images_project_icon_png_len;
         extern unsigned char Resources_Images_project_icon_png[];
+        extern const std::string Resources_Images_restore_icon_png_path;
+        extern unsigned int Resources_Images_restore_icon_png_len;
+        extern unsigned char Resources_Images_restore_icon_png[];
         extern const std::string Resources_Images_scene_icon_png_path;
         extern unsigned int Resources_Images_scene_icon_png_len;
         extern unsigned char Resources_Images_scene_icon_png[];

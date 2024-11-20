@@ -191,5 +191,77 @@ namespace Nuake
 
 			ImGui::PopStyleVar(2);
 		}
+
+		ImRect RectExpanded(const ImRect& rect, float x, float y)
+		{
+			ImRect result = rect;
+			result.Min.x -= x;
+			result.Min.y -= y;
+			result.Max.x += x;
+			result.Max.y += y;
+			return result;
+		}
+
+		ImRect RectOffset(const ImRect& rect, float x, float y)
+		{
+			ImRect result = rect;
+			result.Min.x += x;
+			result.Min.y += y;
+			result.Max.x += x;
+			result.Max.y += y;
+			return result;
+		}
+
+		ImRect RectOffset(const ImRect& rect, ImVec2 xy)
+		{
+			return RectOffset(rect, xy.x, xy.y);
+		}
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+	ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+	ImVec2 rectMin, ImVec2 rectMax)
+		{
+			auto* drawList = ImGui::GetForegroundDrawList();
+			if (ImGui::IsItemActive())
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintPressed);
+			else if (ImGui::IsItemHovered())													   				 
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintHovered);
+			else																				   				 
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintNormal);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImRect rectangle)
+		{
+			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, rectangle.Min, rectangle.Max);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImVec2 rectMin, ImVec2 rectMax)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, rectMin, rectMax);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImRect rectangle)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, rectangle.Min, rectangle.Max);
+		};
+
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
+		{
+			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		};
 	}
 }

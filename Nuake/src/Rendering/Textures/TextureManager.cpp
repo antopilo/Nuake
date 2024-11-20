@@ -39,6 +39,11 @@ namespace Nuake
 		m_Registry.emplace(Resources_Images_csharp_icon_png_path, CreateRef<Texture>(Resources_Images_csharp_icon_png, Resources_Images_csharp_icon_png_len));
 		m_Registry.emplace(Resources_Images_sln_icon_png_path, CreateRef<Texture>(Resources_Images_sln_icon_png, Resources_Images_sln_icon_png_len));
 		m_Registry.emplace(Resources_Images_trenchbroom_icon_png_path, CreateRef<Texture>(Resources_Images_trenchbroom_icon_png, Resources_Images_trenchbroom_icon_png_len));
+		m_Registry.emplace(Resources_Images_editor_icon_png_path, CreateRef<Texture>(Resources_Images_editor_icon_png, Resources_Images_editor_icon_png_len));
+		m_Registry.emplace(Resources_Images_close_icon_png_path, CreateRef<Texture>(Resources_Images_close_icon_png, Resources_Images_close_icon_png_len));
+		m_Registry.emplace(Resources_Images_maximize_icon_png_path, CreateRef<Texture>(Resources_Images_maximize_icon_png, Resources_Images_maximize_icon_png_len));
+		m_Registry.emplace(Resources_Images_minimize_icon_png_path, CreateRef<Texture>(Resources_Images_minimize_icon_png, Resources_Images_minimize_icon_png_len));
+		m_Registry.emplace(Resources_Images_restore_icon_png_path, CreateRef<Texture>(Resources_Images_restore_icon_png, Resources_Images_restore_icon_png_len));
 
 		unsigned char whitePixel[] = { 255, 255, 255, 255 };
 		m_Registry.emplace("Resources/Textures/Default.png", CreateRef<Texture>(Vector2( 1, 1 ), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &whitePixel));

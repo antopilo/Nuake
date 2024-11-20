@@ -51,20 +51,22 @@ namespace Nuake
 
 		void SetTitle(const std::string& title);
 		std::string GetTitle();
-
+		void ShowTitleBar(bool visible);
 		void SetWindowIcon(const std::string& path);
 		void SetVSync(bool enabled);
 		void SetDecorated(bool enabled);
 		void SetFullScreen(bool enabled);
 		void Maximize();
-
+		bool IsMaximized();
 		void OnWindowFocused(Window& window, bool focused);
 		void OnWindowClosed(Window& window);
 		void OnDragNDropCallback(Window& window, const std::vector<std::string>& paths);
+		void TitlebarHitTest(Window& window, int x, int y, bool& hit);
 
 		void SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback);
 		void SetOnWindowClosedCallback(std::function<void(Window& window)> callback);
 		void SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback);
+		void SetTitlebarHitTestCallback(std::function<void(Window&, int x, int y, bool& hit)> callback);
 
 		// Delegate is broadcasted BEFORE the actual internal scene has been reassigned, this is to keep
 		// the potential old scene relevant before its ultimate destruction.
@@ -89,6 +91,7 @@ namespace Nuake
 		std::function<void(Window&)> onWindowClosedCallback;
 		std::function<void(Window&, bool)> onWindowFocusedCallback;
 		std::function<void(Window&, const std::vector<std::string>& paths)> onDragNDropCallback;
+		std::function<void(Window&, int x, int y, bool& hit)> titleBarHitTestCallback;
 
 		void InitImgui();
 

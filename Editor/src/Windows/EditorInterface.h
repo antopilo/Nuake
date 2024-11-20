@@ -31,6 +31,7 @@ namespace Nuake
 	class EditorInterface
 	{
 	private:
+		bool m_TitleBarHovered = false;
 		std::vector<CompilationError> errors;
 		std::vector<Ref<PrefabEditorWindow>> prefabEditors;
 		Ref<Scene> SceneSnapshot;
@@ -78,15 +79,24 @@ namespace Nuake
 		MapImporterWindow m_MapImporter;
 
 		ProjectSettingsWindow* m_ProjectSettingsWindow;
-
+		Ref<Texture> NuakeTexture;
+		Ref<Texture> CloseIconTexture;
+		Ref<Texture> MaximizeTexture;
+		Ref<Texture> RestoreTexture;
+		Ref<Texture> MinimizeTexture;
 		EditorInterface(CommandBuffer& commandBuffer);
 
 		static ImFont* bigIconFont;
 		void BuildFonts();
+		void DrawTitlebar(float& outHeight);
 		void Init();
+		
 		void Draw();
 		void Update(float ts);
 		void DrawMenuBar();
+		bool BeginMenubar(const ImRect& barRectangle);
+		void EndMenubar();
+
 		void SetStatusMessage(const std::string& msg, const Color& color = Color(0.08f, 0.08f, 0.08f, 1.0f)) { m_StatusMessage = msg; m_StatusBarColor = color; }
 		void DrawViewport();
 		void DrawStatusBar();

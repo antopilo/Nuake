@@ -59,6 +59,8 @@ int Window::Init()
         return -1;
     }
 
+    ShowTitleBar(false);
+
     this->window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (!this->window)
     {
@@ -117,6 +119,16 @@ int Window::Init()
             Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
             window->OnDragNDropCallback(*window, filePaths);
         });
+
+    glfwSetTitlebarHitTestCallback(window, [](GLFWwindow* nativeWindow, int x, int y, int* hit)
+    {
+        bool isHit = false;
+        Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+
+        window->TitlebarHitTest(*window, x, y, isHit);
+
+        *hit = isHit;
+    });
 
     // TODO: have clear color in environnement.
     glClearColor(0.f, 0.f, 0.f, 1.0f);
@@ -322,11 +334,16 @@ std::string Window::GetTitle()
 {
     return this->title;
 }
-    
+
+void Window::ShowTitleBar(bool visible)
+{
+    glfwWindowHint(GLFW_TITLEBAR, visible);
+}
+
 void Window::SetWindowIcon(const std::string& path)
 {
     GLFWimage images[1];
-    images[0].pixels = stbi_load_from_memory(StaticResources::Resources_Images_nuake_logo_png, StaticResources::Resources_Images_nuake_logo_png_len, &images[0].width, &images[0].height, 0, 4);
+    images[0].pixels = stbi_load_from_memory(StaticResources::Resources_Images_editor_icon_png, StaticResources::Resources_Images_editor_icon_png_len, &images[0].width, &images[0].height, 0, 4);
     glfwSetWindowIcon(this->window, 1, images);
     stbi_image_free(images[0].pixels);
 }
@@ -357,6 +374,11 @@ void Window::Maximize()
     glfwMaximizeWindow(this->window);
 }
 
+bool Window::IsMaximized()
+{
+    return (bool)glfwGetWindowAttrib(window, GLFW_MAXIMIZED);
+}
+
 void Window::SetOnWindowFocusedCallback(std::function<void(Window& window, bool focused)> callback)
 {
     onWindowFocusedCallback = callback;
@@ -367,9 +389,14 @@ void Window::SetOnWindowClosedCallback(std::function<void(Window& window)> callb
     onWindowClosedCallback = callback;
 }
 
-void Nuake::Window::SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback)
+void Window::SetOnDragNDropCallback(std::function<void(Window&, const std::vector<std::string>& paths)> callback)
 {
     onDragNDropCallback = callback;
+}
+
+void Window::SetTitlebarHitTestCallback(std::function<void(Window&, int x, int y, bool&hit)> callback)
+{
+    titleBarHitTestCallback = callback;
 }
 
 void Window::OnWindowFocused(Window& window, bool focused)
@@ -393,6 +420,14 @@ void Window::OnDragNDropCallback(Window& window, const std::vector<std::string>&
     if (onDragNDropCallback)
     {
         onDragNDropCallback(window, paths);
+    }
+}
+
+void Window::TitlebarHitTest(Window& window, int x, int y, bool& hit)
+{
+    if (titleBarHitTestCallback)
+    {
+        titleBarHitTestCallback(window, x, y, hit);
     }
 }
 
