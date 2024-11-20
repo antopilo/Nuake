@@ -1164,54 +1164,51 @@ namespace Nuake
 			RenderCommand::Disable(RendererEnum::DEPTH_TEST);
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			Ref<Environment> environment = scene.GetEnvironment();
-			//if (environment->CurrentSkyType == SkyType::ProceduralSky)
-			//{
-			//	RenderCommand::Clear();
-			//	RenderCommand::SetClearColor(Color(0, 0, 0, 1));
-			//	environment->ProceduralSkybox->Draw(mProjection, mView);
-			//}
-			//else if (environment->CurrentSkyType == SkyType::ClearColor)
-			//{
-			//	RenderCommand::SetClearColor(environment->AmbientColor);
-			//	RenderCommand::Clear();
-			//	RenderCommand::SetClearColor(Color(0, 0, 0, 1));
-			//}
-			//
-			//RenderCommand::Enable(RendererEnum::FACE_CULL);
-			// Draw a cube
+
+			bool hasSky = false;
+			auto skyView = scene.m_Registry.view<SkyComponent>();
+			for (auto l : skyView)
 			{
-				auto skyView = scene.m_Registry.view<SkyComponent>();
-				for (auto l : skyView)
+				SkyComponent& sky = skyView.get<SkyComponent>(l);
+
+				Shader* cubemapShader = ShaderManager::GetShader("Resources/Shaders/skybox.shader");
+				cubemapShader->Bind();
+
+				if (sky.SkyResourceFilePath.Exist() && sky.SkyResource == UUID(0))
 				{
-					SkyComponent& sky = skyView.get<SkyComponent>(l);
-
-					Shader* cubemapShader = ShaderManager::GetShader("Resources/Shaders/skybox.shader");
-					cubemapShader->Bind();
-
-
-					if (sky.SkyResourceFilePath.Exist() && sky.SkyResource == UUID(0))
-					{
-						sky.SkyResource = ResourceLoader::LoadSky(sky.SkyResourceFilePath.GetRelativePath())->ID;
-					}
-
-					if (ResourceManager::IsResourceLoaded(sky.SkyResource))
-					{
-						auto skyResource = ResourceManager::GetResource<SkyResource>(sky.SkyResource);
-						skyResource->GetCubemap()->Bind(1);
-						cubemapShader->SetUniform("skybox", 1);
-					}
-
-					cubemapShader->SetUniform("skybox", 1);
-					cubemapShader->SetUniforms({
-						{ "projection", mProjection},
-						{ "view", mView}
-					});
-
-					Renderer::DrawCube(Matrix4());
+					sky.SkyResource = ResourceLoader::LoadSky(sky.SkyResourceFilePath.GetRelativePath())->ID;
 				}
-				
+
+				if (ResourceManager::IsResourceLoaded(sky.SkyResource))
+				{
+					auto skyResource = ResourceManager::GetResource<SkyResource>(sky.SkyResource);
+					skyResource->GetCubemap()->Bind(1);
+					cubemapShader->SetUniform("skybox", 1);
+				}
+
+				hasSky = true;
+
+				cubemapShader->SetUniform("skybox", 1);
+				cubemapShader->SetUniforms({
+					{ "projection", mProjection},
+					{ "view", mView}
+				});
+
+				Renderer::DrawCube(Matrix4());
 			}
 
+			if (!hasSky && environment->CurrentSkyType == SkyType::ProceduralSky)
+			{
+				RenderCommand::Clear();
+				RenderCommand::SetClearColor(Color(0, 0, 0, 1));
+				environment->ProceduralSkybox->Draw(mProjection, mView);
+			}
+			else if (!hasSky && environment->CurrentSkyType == SkyType::ClearColor)
+			{
+				RenderCommand::SetClearColor(environment->AmbientColor);
+				RenderCommand::Clear();
+				RenderCommand::SetClearColor(Color(0, 0, 0, 1));
+			}
 
 			Shader* shadingShader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 			shadingShader->Bind();
@@ -1220,8 +1217,6 @@ namespace Nuake
 			shadingShader->SetUniform("u_EyePosition", scene.GetCurrentCamera()->Translation);
 			shadingShader->SetUniform("u_AmbientTerm", environment->AmbientTerm);
 			shadingShader->SetUniform("m_SSAO", scene.GetEnvironment()->mSSAO->GetOuput()->GetTexture().get(), 9);
-
-
 
 			Ref<Environment> env = scene.GetEnvironment();
 

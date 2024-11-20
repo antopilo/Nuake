@@ -41,7 +41,9 @@ namespace Nuake
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
 		bool m_ShowImGuiDemo = false;
-		bool m_DebugCollisions = true;
+		bool m_DrawShapes = true;
+		bool m_DrawGizmos = true;
+		bool m_DrawCamPreview = false;
 		bool m_DrawNavMesh = true;
 		bool m_ShowOverlay = true;
 		bool m_IsHoveringViewport = false;
@@ -109,7 +111,8 @@ namespace Nuake
 
 		void OpenPrefabWindow(const std::string& prefabPath);
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
-		bool ShouldDrawCollision() const { return m_DebugCollisions; }
+		bool ShouldDrawShapes() const { return m_DrawShapes; }
+		bool ShouldDrawGizmos() const { return m_DrawGizmos; }
 		bool ShouldDrawNavMesh() const { return m_DrawNavMesh; }
 		bool LoadProject(const std::string& projectPath);
 

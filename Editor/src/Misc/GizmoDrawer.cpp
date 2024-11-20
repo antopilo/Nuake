@@ -219,31 +219,11 @@ void GizmoDrawer::DrawNavMesh(Ref<Scene> scene, bool occluded)
 	}
 }
 
-void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
+void GizmoDrawer::DrawShapes(Ref<Scene> scene, bool occluded)
 {
 	using namespace Nuake;
-
-	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
-
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-
 	glLineWidth(3.0f);
-	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
-	for (auto e : boxColliderView)
-	{
-		auto [transform, box] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
-
-		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
-		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-
-		m_LineShader->Bind();
-		m_LineShader->SetUniform("u_Opacity", 1.f);
-		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
-		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
-
-		m_BoxBuffer->Bind();
-		Nuake::RenderCommand::DrawLines(0, 26);
-	}
 
 	auto navMeshVolumeView = scene->m_Registry.view<TransformComponent, NavMeshVolumeComponent>();
 	for (auto e : navMeshVolumeView)
@@ -261,6 +241,23 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		m_LineShader->Bind();
 		m_LineShader->SetUniform("u_Opacity", 0.9f);
 		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, volume.VolumeSize));
+		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
+
+		m_BoxBuffer->Bind();
+		Nuake::RenderCommand::DrawLines(0, 26);
+	}
+
+	auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
+	for (auto e : boxColliderView)
+	{
+		auto [transform, box] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
+
+		const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+		const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+		m_LineShader->Bind();
+		m_LineShader->SetUniform("u_Opacity", 1.f);
+		m_LineShader->SetUniform("u_View", glm::scale(glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix, box.Size));
 		m_LineShader->SetUniform("u_Projection", scene->m_EditorCamera->GetPerspective());
 
 		m_BoxBuffer->Bind();
@@ -462,6 +459,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
 	for (auto e : camView)
 	{
 		auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
@@ -480,6 +478,18 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		Nuake::RenderCommand::DrawLines(0, 26);
 	}
 
+}
+
+void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
+{
+	using namespace Nuake;
+
+	auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
+
+	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+
+	glLineWidth(3.0f);
+	
 	auto flatShader = ShaderManager::GetShader("Resources/Shaders/flat.shader");
 	flatShader->Bind();
 	flatShader->SetUniform("u_View", scene->m_EditorCamera->GetTransform());
@@ -526,6 +536,7 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 	}
 
 	// Lights
+	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
 		auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);

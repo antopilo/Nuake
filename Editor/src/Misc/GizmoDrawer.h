@@ -53,6 +53,7 @@ public:
 	GizmoDrawer() = default;
 	~GizmoDrawer() = default;
 
+	void DrawShapes(Ref<Scene> scene, bool occluded);
 	void DrawGizmos(Ref<Scene> scene, bool occluded);
 	void DrawAxis(Ref<Scene> scene, bool occluded);
 	void DrawNavMesh(Ref<Scene> scene, bool occluded);

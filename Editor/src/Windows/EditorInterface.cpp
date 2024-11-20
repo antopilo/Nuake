@@ -3019,7 +3019,7 @@ namespace Nuake {
 
         corner = 2;
 
-        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>() && !Engine::IsPlayMode())
+        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid() && Selection.Entity.HasComponent<CameraComponent>() && !Engine::IsPlayMode() && m_DrawCamPreview)
         {
             window_flags |= ImGuiWindowFlags_NoMove;
             viewport = ImGui::GetWindowViewport();
@@ -3252,7 +3252,7 @@ namespace Nuake {
             }
             if (ImGui::BeginMenu("View"))
             {
-                if (ImGui::MenuItem("Draw grid", NULL, m_DrawGrid))
+                if (ImGui::MenuItem("Draw Grid", NULL, m_DrawGrid))
                 {
                     m_DrawGrid = !m_DrawGrid;
                 }
@@ -3262,18 +3262,28 @@ namespace Nuake {
                     m_DrawAxis = !m_DrawAxis;
                 }
 
-                if (ImGui::MenuItem("Draw collisions", NULL, m_DebugCollisions))
+                if (ImGui::MenuItem("Draw Shapes", NULL, m_DrawShapes))
                 {
-                    m_DebugCollisions = !m_DebugCollisions;
-                    PhysicsManager::Get().SetDrawDebug(m_DebugCollisions);
+                    m_DrawShapes = !m_DrawShapes;
                 }
 
-                if (ImGui::MenuItem("Draw navigation meshes", NULL, m_DrawNavMesh))
+                if (ImGui::MenuItem("Draw Gizmos", NULL, m_DrawGizmos))
                 {
-
+                    m_DrawGizmos = !m_DrawGizmos;
                 }
 
-                if (ImGui::MenuItem("Settings", NULL)) {}
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Draw Camera Preview", NULL, m_DrawCamPreview))
+                {
+                    m_DrawCamPreview = !m_DrawCamPreview;
+                }
+
+#ifdef NK_DEBUG
+                if (ImGui::MenuItem("Show ImGui", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;
+#endif // NK_DEBUG
+
+               
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Tool"))
@@ -3369,9 +3379,11 @@ namespace Nuake {
                 ImGui::EndMenu();
             }
 
+
+
             if (ImGui::BeginMenu("Debug"))
             {
-                if (ImGui::MenuItem("Show ImGui demo", NULL, m_ShowImGuiDemo)) m_ShowImGuiDemo = !m_ShowImGuiDemo;
+                
                 if (ImGui::MenuItem("Rebuild Shaders", NULL))
                 {
                     Nuake::Logger::Log("Rebuilding Shaders...");
@@ -3384,7 +3396,6 @@ namespace Nuake {
 
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Quit")) ImGui::EndMenu();
             
 
         }
@@ -3500,7 +3511,7 @@ namespace Nuake {
             auto window = Window::Get();
             window->SetDecorated(true);
             window->ShowTitleBar(false);
-            window->SetSize({ 1100, 1000 });
+            window->SetSize({ 1600, 900 });
             window->Center();
             frameCount = 0;
             return;

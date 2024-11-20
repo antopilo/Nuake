@@ -53,9 +53,14 @@ void EditorLayer::OnUpdate()
                     m_GizmoDrawer->DrawNavMesh(currentScene, true);
                 }
 
-                if (m_EditorInterface->ShouldDrawCollision())
+                if (m_EditorInterface->ShouldDrawGizmos())
                 {
                     m_GizmoDrawer->DrawGizmos(currentScene, false);
+                }
+
+                if (m_EditorInterface->ShouldDrawShapes())
+                {
+                    m_GizmoDrawer->DrawShapes(currentScene, false);
                 }
             }
         }
