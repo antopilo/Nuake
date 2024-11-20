@@ -52,6 +52,8 @@ namespace Nuake
 		json j = Serialize();
 		std::string serialized_string = j.dump(4);
 
+		IsDirty = false;
+
 		// TODO: Use file interface here...
 		// Write to file.
 		std::ofstream projectFile;

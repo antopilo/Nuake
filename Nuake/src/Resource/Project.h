@@ -40,6 +40,8 @@ namespace Nuake
 		std::string Description;
 		std::string FullPath;
 
+		bool IsDirty = false;
+
 		ProjectSettings Settings;
 
 		// Path of the trenchbroom .exe folder

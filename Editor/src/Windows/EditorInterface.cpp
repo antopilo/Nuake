@@ -200,7 +200,11 @@ namespace Nuake {
         {
             // Centered Window title
             ImVec2 currentCursorPos = ImGui::GetCursorPos();
-            const std::string title = "Nuake Engine - " + Engine::GetProject()->Name;
+            std::string title = "Nuake Engine - " + Engine::GetProject()->Name;
+
+            if (Engine::GetProject()->IsDirty)
+                title += "*";
+
             ImVec2 textSize = ImGui::CalcTextSize(title.c_str());
             ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth() * 0.5f - textSize.x * 0.5f - ImGui::GetStyle().WindowPadding.x / 2.0f, 2.0f + windowPadding.y + 6.0f));
             ImGui::Text(title.c_str()); // Draw title

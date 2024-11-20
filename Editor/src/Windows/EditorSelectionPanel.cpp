@@ -210,8 +210,24 @@ void EditorSelectionPanel::DrawAddComponentMenu(Nuake::Entity entity)
 	using namespace Nuake;
     if (entity.HasComponent<NameComponent>())
     {
+		UIFont* boldIconFont = new UIFont(Fonts::Icons);
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 4.0f);
+		ImGui::Text(ICON_FA_BOX);
+		delete boldIconFont;
+
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() - 2.0f);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 4.0f);
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
+		UIFont* boldFont = new UIFont(Fonts::Bold);
         auto& entityName = entity.GetComponent<NameComponent>().Name;
+
+
         ImGuiTextSTD("##Name", entityName);
+		delete boldFont;
+
+		ImGui::PopStyleColor();
     }
     
 }
@@ -754,6 +770,7 @@ void EditorSelectionPanel::DrawComponent(Nuake::Entity& entity, entt::meta_any& 
 		entity.RemoveComponent(componentType);
 		ImGui::PopStyleVar();
 		delete boldFont;
+		Engine::GetProject()->IsDirty = true;
 	}
 	else if (headerOpened)
 	{
@@ -872,6 +889,7 @@ void EditorSelectionPanel::DrawFieldTypeFloat(entt::meta_data& field, entt::meta
 			if (ImGui::DragFloat(controlId.c_str(), &floatProxy, stepSize, min, max))
 			{
 				field.set(component, floatProxy);
+				Engine::GetProject()->IsDirty = true;
 			}
 		}
 		else
@@ -901,6 +919,7 @@ void EditorSelectionPanel::DrawFieldTypeBool(entt::meta_data& field, entt::meta_
 			if (ImGui::Checkbox(controlId.c_str(), &boolProxy))
 			{
 				field.set(component, boolProxy);
+				Engine::GetProject()->IsDirty = true;
 			}
 		}
 		else
@@ -929,6 +948,7 @@ void EditorSelectionPanel::DrawFieldTypeVector3(entt::meta_data& field, entt::me
 		if (ImGuiHelper::DrawVec3(controlId, vec3Ptr, 0.5f, 100.0, 0.01f))
 		{
 			field.set(component, *vec3Ptr);
+			Engine::GetProject()->IsDirty = true;
 		}
 
 		ImGui::PopID();
@@ -954,6 +974,7 @@ void EditorSelectionPanel::DrawFieldTypeVector2(entt::meta_data& field, entt::me
 		if (ImGuiHelper::DrawVec2(controlId, vec2Ptr, 0.5f, 100.0, 0.01f))
 		{
 			field.set(component, *vec2Ptr);
+			Engine::GetProject()->IsDirty = true;
 		}
 
 		ImGui::PopID();
@@ -978,6 +999,11 @@ void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::met
 			std::string fieldValProxy = *fieldValPtr;
 			std::string controlId = std::string("##") + displayName;
 			ImGui::InputText(controlId.c_str(), &fieldValProxy);
+
+			if (fieldValProxy != fieldVal)
+			{
+				Engine::GetProject()->IsDirty = true;
+			}
 		}
 		else
 		{
@@ -1016,6 +1042,7 @@ void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, ent
 					const std::string fullPath = std::string(payloadFilePath, 256);
 					const Ref<Nuake::File> file = FileSystem::GetFile(FileSystem::AbsoluteToRelative(fullPath));
 					field.set(component, ResourceFile{ file });
+					Engine::GetProject()->IsDirty = true;
 				}
 				ImGui::EndDragDropTarget();
 			}

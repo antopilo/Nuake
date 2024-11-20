@@ -223,7 +223,7 @@ void GizmoDrawer::DrawShapes(Ref<Scene> scene, bool occluded)
 {
 	using namespace Nuake;
 	RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-	glLineWidth(3.0f);
+	glLineWidth(2.0f);
 
 	auto navMeshVolumeView = scene->m_Registry.view<TransformComponent, NavMeshVolumeComponent>();
 	for (auto e : navMeshVolumeView)
