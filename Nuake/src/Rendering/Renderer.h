@@ -80,7 +80,7 @@ namespace Nuake
 		// Debug
 		static void DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform = Matrix4());
 		static void DrawLine(Vector3 start, Vector3 end, Vector3 color);
-		static void DrawCube(TransformComponent transform, glm::vec4 color);
+		static void DrawCube(Matrix4 transform);
 		static void DrawSphere(TransformComponent transform, glm::vec4 color);
 		static void DrawQuad(Matrix4 transform = Matrix4());
 	};

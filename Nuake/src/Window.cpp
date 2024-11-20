@@ -67,7 +67,7 @@ int Window::Init()
         Logger::Log("Window creation failed", "window", CRITICAL);
         return -1;
     }
-
+    
     SetWindowIcon("resources/Images/nuake-logo.png");
     glfwMakeContextCurrent(this->window);
     SetVSync(false);
@@ -78,7 +78,7 @@ int Window::Init()
         return -1;
     }
 
-    Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "renderer");
+    Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "window");
 
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(this->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);

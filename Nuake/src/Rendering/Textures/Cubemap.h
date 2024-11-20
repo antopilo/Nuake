@@ -1,13 +1,17 @@
 #pragma once
 #include "stb_image/stb_image.h"
 #include <string>
+#include "src/Core/Core.h"
 
 namespace Nuake
 {
+	class SkyResource;
+
 	class CubemapTexture
 	{
 	public:
 		CubemapTexture(const std::string& path);
+		CubemapTexture(const SkyResource& sky);
 		void CreateFromHDR();
 		~CubemapTexture();
 

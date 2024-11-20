@@ -25,3 +25,4 @@
 #include "Components/SpriteComponent.h"
 #include "Components/TransformComponent.h"
 #include "Components/UIComponent.h"
+#include "Components/SkyComponent.h"

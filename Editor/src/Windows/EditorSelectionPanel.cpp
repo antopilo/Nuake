@@ -14,7 +14,10 @@
 #include <src/FileSystem/FileDialog.h>
 
 #include <Engine.h>
+#include <src/Resource/SkyResource.h>
 #include <src/Resource/Prefab.h>
+
+#include "src/Rendering/Textures/TextureManager.h"
 
 #include <entt/entt.hpp>
 
@@ -64,6 +67,12 @@ void EditorSelectionPanel::ResolveFile(Ref<Nuake::File> file)
         Ref<Material> material = ResourceLoader::LoadMaterial(currentFile->GetRelativePath());
         selectedResource = material;
     }
+
+	if (currentFile->GetFileType() == FileType::Sky)
+	{
+		Ref<SkyResource> sky = ResourceLoader::LoadSky(currentFile->GetRelativePath());
+		selectedResource = sky;
+	}
 }
 
 void EditorSelectionPanel::Draw(EditorSelection selection, const std::string& id)
@@ -236,6 +245,199 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 		{
 			//Ref<Prefab> prefab = CreateRef<Prefab>(file->GetRelativePath());
 			//DrawPrefabPanel(prefab);
+			break;
+		}
+		case FileType::Sky:
+		{
+			auto sky = std::static_pointer_cast<SkyResource>(selectedResource);
+			std::string skyName = sky->Path;
+			{
+				UIFont boldfont = UIFont(Fonts::SubTitle);
+				ImGui::Text(sky->Path.c_str());
+
+			}
+			ImGui::SameLine();
+			{
+				UIFont boldfont = UIFont(Fonts::Icons);
+				if (ImGui::Button(ICON_FA_SAVE))
+				{
+					if (ResourceManager::IsResourceLoaded(sky->ID))
+					{
+						ResourceManager::RegisterResource(sky);
+					}
+
+					std::string fileData = sky->Serialize().dump(4);
+
+					FileSystem::BeginWriteFile(sky->Path);
+					FileSystem::WriteLine(fileData);
+					FileSystem::EndWriteFile();
+				}
+			}
+
+			int textureId = 0;
+
+			// Top
+			ImGui::Text("Top");
+			if (auto topTexture = sky->GetFaceTexture(SkyFaces::Top); 
+				!topTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(topTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture1"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Top, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Top, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			textureId = 0;
+
+			ImGui::Text("Bottom");
+			if (auto bottomTexture = sky->GetFaceTexture(SkyFaces::Bottom);
+				!bottomTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(bottomTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture2"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Bottom, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Bottom, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			textureId = 0;
+
+			ImGui::Text("Left");
+			if (auto bottomTexture = sky->GetFaceTexture(SkyFaces::Left);
+				!bottomTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(bottomTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture3"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Left, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Left, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			textureId = 0;
+
+			ImGui::Text("Right");
+			if (auto bottomTexture = sky->GetFaceTexture(SkyFaces::Right);
+				!bottomTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(bottomTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture4"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Right, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Right, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			textureId = 0;
+
+			ImGui::Text("Front");
+			if (auto bottomTexture = sky->GetFaceTexture(SkyFaces::Front);
+				!bottomTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(bottomTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture5"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Front, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Front, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			textureId = 0;
+
+			ImGui::Text("Back");
+			if (auto bottomTexture = sky->GetFaceTexture(SkyFaces::Back);
+				!bottomTexture.empty())
+			{
+				textureId = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(bottomTexture))->GetID();
+			}
+
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture6"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			{
+				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				if (!texture.empty())
+				{
+					sky->SetTextureFace(SkyFaces::Back, FileSystem::AbsoluteToRelative(texture));
+				}
+			}
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Clear Texture"))
+				{
+					sky->SetTextureFace(SkyFaces::Back, "");
+				}
+				ImGui::EndPopup();
+			}
+
+			
 			break;
 		}
 	}

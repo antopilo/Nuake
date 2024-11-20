@@ -3094,12 +3094,12 @@ namespace Nuake {
         
         std::string selectedProject = FileDialog::SaveFile("Project file\0*.project");
         
-        if(!String::EndsWith(selectedProject, ".project"))
-            selectedProject += ".project";
-        
         if (selectedProject.empty()) // Hit cancel
             return;
 
+        if(!String::EndsWith(selectedProject, ".project"))
+            selectedProject += ".project";
+        
         auto backslashSplits = String::Split(selectedProject, '\\');
         auto fileName = backslashSplits[backslashSplits.size() - 1];
 

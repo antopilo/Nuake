@@ -89,6 +89,8 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("PrefabComponent", GetComponent<PrefabComponent>())
 		if (HasComponent<PrefabMember>())
 			SERIALIZE_OBJECT_REF_LBL("PrefabMember", GetComponent<PrefabMember>())
+		if (HasComponent<SkyComponent>())
+			SERIALIZE_OBJECT_REF_LBL("SkyComponent", GetComponent<SkyComponent>())
 		END_SERIALIZE();
 	}
 
@@ -171,6 +173,7 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(NetScriptComponent);
 		DESERIALIZE_COMPONENT(NavMeshVolumeComponent);
 		DESERIALIZE_COMPONENT(UIComponent);
+		DESERIALIZE_COMPONENT(SkyComponent);
 		return false;
 	}
 

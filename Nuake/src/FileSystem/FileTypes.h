@@ -20,6 +20,7 @@ namespace Nuake
 		Solution,
 		Audio,
 		UI,
-		CSS
+		CSS,
+		Sky
 	};
 }

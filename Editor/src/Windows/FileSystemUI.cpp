@@ -19,6 +19,7 @@
 #include "../Misc/ThumbnailManager.h"
 
 #include <Tracy.hpp>
+#include <src/Resource/SkyResource.h>
 
 namespace Nuake
 {
@@ -327,6 +328,10 @@ namespace Nuake
             else if (fileExtension == ".html")
             {
                 dragType = "_UIFile";
+            }
+            else if (fileExtension == ".sky")
+            {
+                dragType = "_SkyFile";
             }
 
             ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
@@ -674,6 +679,28 @@ namespace Nuake
 					    RefreshFileBrowser();
 					}
 				}
+                if (ImGui::MenuItem("Sky"))
+                {
+                    const std::string path = FileDialog::SaveFile("*.sky");
+                    if (!path.empty())
+                    {
+                        std::string finalPath = path;
+                        if (!String::EndsWith(path, ".sky"))
+                        {
+                            finalPath = path + ".sky";
+                        }
+
+                        Ref<SkyResource> sky = CreateRef<SkyResource>(FileSystem::AbsoluteToRelative(finalPath));
+                        sky->IsEmbedded = false;
+                        auto jsonData = sky->Serialize();
+ 
+                        FileSystem::BeginWriteFile(finalPath, true);
+                        FileSystem::WriteLine(jsonData.dump(4));
+                        FileSystem::EndWriteFile();
+
+                        RefreshFileBrowser();
+                    }
+                }
 
 				ImGui::EndMenu();
 			}
