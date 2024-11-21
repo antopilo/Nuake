@@ -10,6 +10,7 @@ layout(location = 5) in ivec4 BoneIDs;
 layout(location = 6) in vec4 Weights;
 
 uniform mat4 u_LightTransform;
+uniform mat4 u_Model;
 
 const int MAX_BONES = 200;
 const int MAX_BONES_INFLUENCE = 4;
@@ -36,7 +37,7 @@ void main()
         // vec3 localNormal = mat3(u_FinalBonesMatrice[BoneIDs[i]]) * Normal;
     }
 
-    gl_Position = u_LightTransform * totalPosition;
+    gl_Position = u_LightTransform * u_Model * totalPosition;
 }
 
 #shader fragment

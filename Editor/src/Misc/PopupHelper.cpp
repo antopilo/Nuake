@@ -4,8 +4,6 @@
 
 void PopupHelper::OpenPopup(const std::string& id)
 {
-    ImGui::TextWrapped(id.c_str());
-
     ImGui::OpenPopup(id.c_str());
 }
 

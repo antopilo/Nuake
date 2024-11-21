@@ -1,16 +1,57 @@
 #include "NetScriptPanel.h"
+
 #include "../Windows/FileSystemUI.h"
-#include <src/Scene/Components/NetScriptComponent.h>
-#include <src/Core/FileSystem.h>
+
+#include <src/FileSystem/FileDialog.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Scene/Components/NetScriptComponent.h>
 #include <src/Scene/Entities/ImGuiHelper.h>
 
-void NetScriptPanel::Draw(Nuake::Entity entity)
-{
-    if (!entity.HasComponent<Nuake::NetScriptComponent>())
-        return;
+const std::string NET_TEMPLATE_SCRIPT_FIRST = R"(using Nuake.Net;
 
-    auto& component = entity.GetComponent<Nuake::NetScriptComponent>();
+namespace NuakeShowcase
+{
+    class )";
+
+const std::string NET_TEMPLATE_SCRIPT_SECOND = R"( : Entity
+    {
+        public override void OnInit()
+        {
+            // Called once at the start of the game
+        }
+
+        
+        public override void OnUpdate(float dt)
+        {
+            // Called every frame
+        }
+        
+        public override void OnFixedUpdate(float dt)
+        {
+            // Called every fixed update
+        }
+
+        
+        public override void OnDestroy()
+        {
+            // Called at the end of the game fixed update
+        }
+    }
+} 
+)";
+
+void NetScriptPanel::Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
+{
+    using namespace Nuake;
+        
+    Nuake::NetScriptComponent* componentPtr = componentInstance.try_cast<Nuake::NetScriptComponent>();
+    if (componentPtr == nullptr)
+    {
+        return;
+    }
+    Nuake::NetScriptComponent& component = *componentPtr;
+    
     BeginComponentTable(.NETSCRIPT, Nuake::NetScriptComponent);
     {
         {
@@ -130,6 +171,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = 0.0f;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -143,6 +189,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = 0.0;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -156,19 +207,33 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = false;
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
-                    bool currentValue = std::any_cast<bool>(field.Value);
-                    const std::string sliderName = "##" + field.Name + "slider";
-                    ImGui::Checkbox(sliderName.c_str(), &currentValue);
-                    field.Value = currentValue;
+                     auto typeName = field.Value.type().name();
+                    if (typeName == std::string("bool"))
+                    {
+                        bool currentValue = std::any_cast<bool>(field.Value);
+                        const std::string sliderName = "##" + field.Name + "slider";
+                        ImGui::Checkbox(sliderName.c_str(), &currentValue);
+                        field.Value = currentValue;
+                    }
                 }
 
                 if (field.Type == Nuake::NetScriptExposedVarType::String)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = std::string();
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -183,6 +248,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = Nuake::Vector2(0, 0);
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 
@@ -198,6 +268,11 @@ void NetScriptPanel::Draw(Nuake::Entity entity)
                 {
                     if (!field.Value.has_value())
                     {
+                        if (!field.DefaultValue.has_value())
+                        {
+                            field.DefaultValue = Nuake::Vector3(0, 0, 0);
+                        }
+
                         field.Value = field.DefaultValue;
                     }
 

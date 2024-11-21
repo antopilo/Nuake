@@ -12,7 +12,8 @@
 #include "src/Scene/Systems/QuakeMapBuilder.h"
 #include "src/Scene/Systems/ParticleSystem.h"
 #include "src/Scene/Systems/AnimationSystem.h"
-#include <src/Scene/Systems/AudioSystem.h>
+#include "src/Scene/Systems/AudioSystem.h"
+#include "src/Scene/Systems/UISystem.h"
 
 #include "src/Rendering/SceneRenderer.h"
 #include "src/Rendering/Renderer.h"
@@ -22,19 +23,21 @@
 
 #include "Engine.h"
 #include "src/Core/Maths.h"
-#include "src/Core/FileSystem.h"
-#include "src/Scene/Components/Components.h"
+#include "src/FileSystem/FileSystem.h"
+#include "src/FileSystem/FileDialog.h"
+
+#include "src/Scene/Components.h"
 #include "src/Scene/Components/BoxCollider.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/BSPBrushComponent.h"
 #include "src/Scene/Components/SkinnedModelComponent.h"
 #include "src/Scene/Components/BoneComponent.h"
+
+#include <Tracy.hpp>
 
 #include <fstream>
 #include <future>
 #include <streambuf>
 #include <chrono>
-
 
 namespace Nuake 
 {
@@ -49,9 +52,13 @@ namespace Nuake
 		m_EditorCamera = CreateRef<EditorCamera>();
 		m_Environement = CreateRef<Environment>();
 
+		physicsSystem = CreateRef<PhysicsSystem>(this);
+		scriptingSystem = CreateRef<ScriptingSystem>(this);
+
 		// Adding systems - Order is important
-		m_Systems.push_back(CreateRef<PhysicsSystem>(this));
-		m_Systems.push_back(CreateRef<ScriptingSystem>(this));
+		m_Systems.push_back(physicsSystem);
+		m_Systems.push_back(CreateRef<UISystem>(this));
+		m_Systems.push_back(scriptingSystem);
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
@@ -70,7 +77,7 @@ namespace Nuake
 		return this->Name;
 	}
 
-	bool Scene::SetName(std::string& newName)
+	bool Scene::SetName(const std::string& newName)
 	{
 		if (newName == "")
 			return false;
@@ -213,8 +220,34 @@ namespace Nuake
 		return currentEntity;
 	}
 
+	bool Scene::EntityIsParent(Entity entity, Entity parent)
+	{
+		if (!entity.IsValid())
+			return false;
+
+		if (entity.GetComponent<ParentComponent>().HasParent && entity.GetComponent<ParentComponent>().Parent == parent)
+		{
+			return true;
+		}
+
+		Entity current = entity;
+		while (current.GetComponent<ParentComponent>().HasParent && current != parent)
+		{
+			current = current.GetComponent<ParentComponent>().Parent;
+
+			if (current == parent)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool Scene::OnInit()
 	{
+		preInitializeDelegate.Broadcast();
+		
 		for (auto& system : m_Systems)
 		{
 			if (!system->Init())
@@ -222,6 +255,8 @@ namespace Nuake
 				return false;
 			}
 		}
+		
+		postInitializeDelegate.Broadcast();
 
 		return true;
 	}
@@ -236,15 +271,112 @@ namespace Nuake
 
 	void Scene::Update(Timestep ts)
 	{
+		ZoneScoped;
+
+		if (!Engine::IsPlayMode())
+		{
+			const auto& view = m_Registry.view<QuakeMapComponent>();
+			for (const auto& e : view)
+			{
+				auto& map = view.get<QuakeMapComponent>(e);
+
+				bool buildMap = false;
+				if (map.rebuildNextTick && map.Path.Exist())
+				{
+					buildMap = true;
+					map.rebuildNextTick = false;
+				}
+				
+				if (map.AutoRebuild && map.Path.Exist())
+				{
+					if (auto file = FileSystem::GetFile(map.Path.GetRelativePath()); file->Exist() && file->GetHasBeenModified())
+					{
+						file->SetHasBeenModified(false);
+						buildMap = true;
+					}
+				}
+
+				if (buildMap)
+				{
+					Entity entity = Entity(e, this);
+					QuakeMapBuilder builder;
+					builder.BuildQuakeMap(entity, map.HasCollisions);
+				}
+			}
+
+			std::map<std::string, Ref<File>> prefabToReimport;
+			const auto& prefabView = m_Registry.view<PrefabComponent>();
+			for (const auto& e : prefabView)
+			{
+				auto& prefabComponent = prefabView.get<PrefabComponent>(e);
+				if (prefabComponent.PrefabInstance == nullptr)
+				{
+					continue;
+				}
+
+				const std::string& filePath = prefabComponent.PrefabInstance->Path;
+				if (!FileSystem::FileExists(filePath))
+				{
+					continue;
+				}
+
+				Ref<File> file = FileSystem::GetFile(filePath);
+				if (file->GetHasBeenModified() || !prefabComponent.isInitialized)
+				{
+					prefabToReimport[filePath] = file;
+				}
+			}
+
+			if (prefabToReimport.size() > 0)
+			{
+				for (const auto& e : prefabView)
+				{
+					auto& prefabComponent = prefabView.get<PrefabComponent>(e);
+					auto& prefabInstance = prefabComponent.PrefabInstance;
+			
+					if (prefabInstance == nullptr)
+					{
+						continue;
+					}
+			
+					// We don't need to reimport that one
+					if (!prefabToReimport.contains(prefabInstance->Path))
+					{
+						continue;
+					}
+			
+					for (auto& ent : prefabInstance->Entities)
+					{
+						// Destroy all children, not the root!
+						if (ent.IsValid() && ent != prefabInstance->Root)
+						{
+							this->DestroyEntity(ent);
+						}
+					}
+				
+					std::remove_if(prefabInstance->Entities.begin(), prefabInstance->Entities.end(), [](const Entity& entity) 
+						{
+							return !entity.IsValid();
+						});
+
+					prefabInstance->ReInstance();
+					prefabComponent.isInitialized = true;
+				}
+			
+				for (auto& [path, prefabFile] : prefabToReimport)
+				{
+					prefabFile->SetHasBeenModified(false);
+				}
+			}
+		}
+
 		for (auto& system : m_Systems)
 		{
+			ZoneScopedN("System Update");
 			system->Update(ts);
 		}
 
-		if (Engine::IsPlayMode())
-		{
-			m_SceneRenderer->Update(ts);
-		}
+		m_SceneRenderer->Update(ts, !Engine::IsPlayMode());
 	}
 
 	void Scene::FixedUpdate(Timestep ts)
@@ -262,6 +394,8 @@ namespace Nuake
 
 	void Scene::Draw(FrameBuffer& framebuffer)
 	{
+		ZoneScoped;
+
 		Ref<Camera> cam = nullptr;
 		const auto& view = m_Registry.view<TransformComponent, CameraComponent, ParentComponent>();
 		for (const auto& e : view)
@@ -270,7 +404,6 @@ namespace Nuake
 			cam = camera.CameraInstance;
 
 			cam->Translation = transform.GetGlobalPosition();
-			break;
 		}
 
 		if (!cam)
@@ -302,6 +435,12 @@ namespace Nuake
 				allEntities.push_back(newEntity);
 			}
 		}
+
+		// Temporary fix to prevent order of tree to change randomly until actual order is implemented.
+		std::sort(allEntities.begin(), allEntities.end(), [](Entity a, Entity b) {
+			return a.GetComponent<NameComponent>().Name < b.GetComponent<NameComponent>().Name;
+		});
+
 		return allEntities;
 	}
 
@@ -381,7 +520,6 @@ namespace Nuake
 		m_EntitiesIDMap[id] = entity;
 		m_EntitiesNameMap[entityName] = entity;
 
-		Logger::Log("Entity created with name: " + nameComponent.Name, "scene", LOG_TYPE::VERBOSE);
 		return entity;
 	}
 
@@ -414,7 +552,6 @@ namespace Nuake
 		}
 
 		entity.Destroy();
-		m_Registry.shrink_to_fit();
 	}
 
 	bool Scene::EntityExists(const std::string& name)
@@ -439,6 +576,7 @@ namespace Nuake
 
 			if (!cam)
 				cam = m_EditorCamera;
+
 			return cam;
 		}
 
@@ -515,6 +653,11 @@ namespace Nuake
 		std::vector<json> entities = std::vector<json>();
 		for (Entity e : GetAllEntities())
 		{
+			if (e.HasComponent<PrefabMember>())
+			{
+				continue;
+			}
+
 			auto returnValue = std::async(std::launch::async, [&]() {
 					entities.push_back(e.Serialize());
 			});
@@ -545,7 +688,6 @@ namespace Nuake
 		m_Environement = CreateRef<Environment>();
 		if (j.contains("m_Environement"))
 		{
-			m_Environement = CreateRef<Environment>();
 			m_Environement->Deserialize(j["m_Environement"]);
 		}
 
@@ -582,11 +724,12 @@ namespace Nuake
 
 		// This will turn the deserialized entity ids into actual Entities.
 		// This has to be done after the whole scene has been deserialized 
-		// to make sure we can fetch  the id in the scene. Otherwise, we could 
-		m_Registry.each([this](auto e) {
+		// to make sure we can fetch  the id in the scene. Otherwise, we could
+		for (const entt::entity& e : m_Registry.view<entt::entity>())
+		{
 			auto entity = Entity{ e, this };
 			entity.PostDeserialize();
-		});
+		};
 
 		return true;
 	}

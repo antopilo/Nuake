@@ -1,11 +1,11 @@
 #include "ScriptingSystem.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/NetScriptComponent.h"
 #include "src/Scene/Scene.h"
 #include "Engine.h"
 
 #include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Physics/PhysicsManager.h"
+#include <src/UI/Parsers/CanvasParser.h>
 
 namespace Nuake 
 {
@@ -16,31 +16,12 @@ namespace Nuake
 
 	bool ScriptingSystem::Init()
 	{
-		ScriptingEngine::Init();
-
 		Logger::Log("Initializing ScriptingSystem");
 
-		auto wrenEntities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto& e : wrenEntities)
-		{
-			WrenScriptComponent& wren = wrenEntities.get<WrenScriptComponent>(e);
-
-			if (!wren.mWrenScript)
-				continue;
-
-			wren.mWrenScript->Build(wren.mModule, true);
-			
-			if (!wren.mWrenScript->HasCompiledSuccesfully())
-			{
-				Logger::Log("Failed to compile Wren script: " + wren.Script, "scripting system");
-				return false;
-			}
-
-			wren.mWrenScript->SetScriptableEntityID((int)e);
-			wren.mWrenScript->CallInit();
-		}
+		preInitDelegate.Broadcast();
 
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		scriptingEngineNet.Uninitialize();
 		scriptingEngineNet.Initialize();
 		scriptingEngineNet.LoadProjectAssembly(Engine::GetProject());
 
@@ -60,6 +41,13 @@ namespace Nuake
 			netScriptComponent.Initialized = true;
 		}
 
+		// Instantiate UI widgets
+		for (auto& uiWidget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			scriptingEngineNet.RegisterCustomWidgetInstance(uiWidget.first.first, uiWidget.first.second, uiWidget.second);
+		}
+
+		// Call OnInit on entity script instances
 		for (auto& e : netEntities)
 		{
 			auto entity = Entity{ e, m_Scene };
@@ -71,6 +59,20 @@ namespace Nuake
 				scriptInstance.InvokeMethod("OnInit");
 			}
 		}
+		
+		// Call OnInit on UI widgets
+		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			const UUID& canvasInstanceUUID = widget.first.first;
+			const UUID& widgetInstanceUUID = widget.first.second;
+			if (scriptingEngineNet.HasCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID))
+			{
+				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID);
+				widgetInstance.InvokeMethod("OnInit");
+			}
+		}
+
+		postInitDelegate.Broadcast();
 
 		return true;
 	}
@@ -79,15 +81,6 @@ namespace Nuake
 	{
 		if (!Engine::IsPlayMode())
 			return;
-
-		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto& e : entities)
-		{
-			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
-
-			if (wren.mWrenScript != nullptr)
-				wren.mWrenScript->CallUpdate(ts);
-		}
 
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
@@ -137,6 +130,17 @@ namespace Nuake
 			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
 		}
 
+		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
+		{
+			const UUID& canvasInstanceUUID = widget.first.first;
+			const UUID& widgetInstanceUUID = widget.first.second;
+			if (scriptingEngineNet.HasCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID))
+			{
+				auto widgetInstance = scriptingEngineNet.GetCustomWidgetInstance(canvasInstanceUUID, widgetInstanceUUID);
+				widgetInstance.InvokeMethod("OnTick", ts.GetSeconds());
+			}
+		}
+
 		DispatchPhysicCallbacks();
 	}
 
@@ -144,15 +148,6 @@ namespace Nuake
 	{
 		if (!Engine::IsPlayMode())
 			return;
-
-		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto& e : entities)
-		{
-			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
-
-			if (wren.mWrenScript != nullptr)
-				wren.mWrenScript->CallFixedUpdate(ts);
-		}
 
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
@@ -171,21 +166,6 @@ namespace Nuake
 
 	void ScriptingSystem::Exit()
 	{
-		auto entities = m_Scene->m_Registry.view<WrenScriptComponent>();
-		for (auto& e : entities)
-		{
-			WrenScriptComponent& wren = entities.get<WrenScriptComponent>(e);
-
-			try
-			{
-				if (wren.mWrenScript != nullptr)
-					wren.mWrenScript->CallExit();
-			}
-			catch (std::exception* /*e*/)
-			{
-			}
-		}
-
 		auto& scriptingEngineNet = ScriptingEngineNet::Get();
 		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
 		for (auto& e : netEntities)
@@ -195,14 +175,42 @@ namespace Nuake
 			if (netScriptComponent.ScriptPath.empty())
 				continue;
 
-			// Creates an instance of the entity script in C#
 			auto entity = Entity{ e, m_Scene };
-			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnDestroy");
+			if (entity.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity))
+			{
+				Logger::Log(entity.GetComponent<NameComponent>().Name);
+				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
+				scriptInstance.InvokeMethod("OnDestroy");
+			}
 		}
 
-		ScriptingEngine::Close();
 		ScriptingEngineNet::Get().Uninitialize();
+	}
+
+	void ScriptingSystem::InitializeNewScripts()
+	{
+		auto& scriptingEngineNet = ScriptingEngineNet::Get();
+		auto netEntities = m_Scene->m_Registry.view<NetScriptComponent>();
+
+		// Instance all the new entities
+		std::vector<Entity> entityJustInstanced;
+		for (auto& e : netEntities)
+		{
+			auto& netScriptComponent = netEntities.get<NetScriptComponent>(e);
+			if (!netScriptComponent.Initialized)
+			{
+				if (netScriptComponent.ScriptPath.empty())
+					continue;
+
+				auto entity = Entity{ e, m_Scene };
+
+				// Creates an instance of the entity script in C#
+				scriptingEngineNet.RegisterEntityScript(entity);
+
+				netScriptComponent.Initialized = true;
+				entityJustInstanced.push_back(entity);
+			}
+		}
 	}
 
 	void ScriptingSystem::DispatchPhysicCallbacks()

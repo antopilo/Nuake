@@ -54,7 +54,7 @@ namespace Nuake.Net
             return entity;
         }
 
-        public static Entity? InstancePrefab(string path, Entity? parent = null)
+        public static T? InstancePrefab<T>(string path, Entity? parent = null) where T : class
         {
             int handle;
             unsafe { handle = InstancePrefabIcall(path); }
@@ -73,9 +73,17 @@ namespace Nuake.Net
             //    return entity as T;
             //}
 
-            Entity entity = new Entity(handle);
+            
+            NativeInstance<Entity> nativeInstance;
+            unsafe { nativeInstance = GetEntityScriptFromHandleIcall(handle); }
 
-            return entity;
+            Entity? entity = nativeInstance.Get();
+            if (entity != null && entity is T)
+            {
+                return entity as T;
+            }
+
+            return null;
         }
     }
 }

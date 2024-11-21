@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,11 +23,14 @@ namespace Nuake.Net
     public class Entity
     {
         internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
+        internal static unsafe delegate*<int, int, void> EntityAddComponentIcall;
         internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
         internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
         internal static unsafe delegate*<int, NativeString> EntityGetNameIcall;
         internal static unsafe delegate*<int, NativeString, void> EntitySetNameIcall;
         internal static unsafe delegate*<int, bool> EntityIsValidIcall;
+        internal static unsafe delegate*<NativeString, NativeArray<int>> EntityGetTargetsIcall;
+        internal static unsafe delegate*<int, NativeString> EntityGetTargetIcall;
 
         public enum ComponentTypes
         {
@@ -55,7 +59,51 @@ namespace Nuake.Net
             NAVMESH
         }
 
+        public List<Entity> Targets
+        { 
+            get 
+            {
+                unsafe 
+                {
+                    var targetIds = EntityGetTargetsIcall(Target);
 
+                    List<Entity> targets = new List<Entity>();
+                    foreach(var target in targetIds)
+                    {
+                        bool hasInstance = EntityHasManagedInstanceIcall(target);
+                        Entity entityInstance;
+                        if (hasInstance)
+                        {
+                            entityInstance = Scene.GetEntity<Entity>(target);
+                        }
+                        else
+                        {
+                            entityInstance = new Entity(ECSHandle);
+                        }
+
+                        targets.Add(entityInstance);
+                    }
+
+                    return targets; 
+                }
+            }
+        }
+
+        protected TransformComponent internalTransform;
+        public TransformComponent Transform
+        {
+            get
+            {
+                if(internalTransform == null)
+                {
+                    internalTransform = GetComponent<TransformComponent>()!;
+                }
+
+                return internalTransform;
+            }
+        }
+
+        public string Target { get { unsafe { return EntityGetTargetIcall(ECSHandle);  } }}
         public int ID { get; set; }
         public int ECSHandle { get; set; } = -1;
 
@@ -97,6 +145,11 @@ namespace Nuake.Net
 
         public virtual void OnCollision(Entity entity) 
         {
+        }
+
+        public virtual void Activate(Entity triggeredFrom)
+        {
+
         }
 
         // Physics
@@ -155,6 +208,20 @@ namespace Nuake.Net
             return false;
         }
 
+        public T? AddComponent<T>() where T : IComponent
+        {
+            if(HasComponent<T>())
+            {
+                return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
+            }
+
+            unsafe 
+            {  
+                EntityAddComponentIcall(ECSHandle, (int)MappingTypeEnum[typeof(T)]);
+                return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
+            };
+        }
+
         public T? GetComponent<T>() where T : IComponent
         {
             if (HasComponent<T>())
@@ -162,7 +229,7 @@ namespace Nuake.Net
                 return (T?)Activator.CreateInstance(typeof(T), ECSHandle);
             }
 
-            return null;
+            throw new Exception("Component not found: " + typeof(T).GetType().Name);
         }
 
         public T? GetEntity<T>(string path) where T : Entity
@@ -232,6 +299,22 @@ namespace Nuake.Net
 
             Entity entity = new Entity(handle);
             return entity;
+        }
+
+        public T? Instance<T>(Vector3 position = default, Quaternion quat = default) where T : Entity
+        {
+            int handle;
+            unsafe { handle = PrefabInstanceIcall(Path, position, quat.X, quat.Y, quat.Z, quat.W); }
+
+            if (handle == -1)
+            {
+                return null;
+            }
+
+            T? instance = Scene.GetEntity<T>(handle);
+            instance.OnInit();
+
+            return instance;
         }
 
         public static implicit operator bool(Prefab prefab)

@@ -9,12 +9,12 @@ void UIDemoWindow::Draw()
 {
 	using namespace Nuake;
 
-	UI::BeginWindow("UI Demo");
-	{
-		UI::PrimaryButton("Primary Button");
-		UI::SecondaryButton("Secondary Button");
-		UI::FloatSlider("Float slider", floatSlider);
-		UI::CheckBox("Checkbox", checkbox);
-	}
-	UI::EndWindow();
+	//UI::BeginWindow("UI Demo");
+	//{
+	//	UI::PrimaryButton("Primary Button");
+	//	UI::SecondaryButton("Secondary Button");
+	//	UI::FloatSlider("Float slider", floatSlider);
+	//	UI::CheckBox("Checkbox", checkbox);
+	//}
+	//UI::EndWindow();
 }

@@ -1,61 +1,125 @@
 #include "Engine.h"
+
+#include "src/Scene/Scene.h"
+#include "src/Resource/Project.h"
 #include "src/Physics/PhysicsManager.h"
-#include <GLFW/glfw3.h>
 
 #include "src/AI/NavManager.h"
 #include "src/Audio/AudioManager.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Input.h"
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Renderer2D.h"
-#include "src/Scripting/ScriptingEngine.h"
+#include "src/Scripting/ScriptingEngineNet.h"
 #include "src/Threading/JobSystem.h"
+#include "src/Core/RegisterCoreTypes.h"
+#include "src/Modules/Modules.h"
+#include "src/Subsystems/EngineSubsystemScriptable.h"
 
+#include <GLFW/glfw3.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <Tracy.hpp>
+
+
 
 namespace Nuake
 {
+	Ref<Project> Engine::currentProject;
+	Ref<Window> Engine::currentWindow;
+	std::string Engine::queuedScene = "";
 
-	Ref<Project> Engine::s_CurrentProject;
-	Ref<Window> Engine::s_CurrentWindow;
+	GameState Engine::gameState = GameState::Stopped;
 
-	GameState Engine::s_GameState = GameState::Stopped;
-
-	float Engine::s_LastFrameTime = 0.0f;
-	float Engine::s_FixedUpdateRate = 1.0f / 90.0f;
-	float Engine::s_FixedUpdateDifference = 0.f;
-	float Engine::s_Time = 0.f;
-	Timestep Engine::s_TimeStep = 0.f;
-	float Engine::s_TimeScale = 1.0f;
+	float Engine::lastFrameTime = 0.0f;
+	float Engine::fixedUpdateRate = 1.0f / 90.0f;
+	float Engine::fixedUpdateDifference = 0.f;
+	float Engine::time = 0.f;
+	Timestep Engine::timeStep = 0.f;
+	float Engine::timeScale = 1.0f;
 
 	void Engine::Init()
 	{
+		//Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
+		
+		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
+		
 		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
 
 		// Creates the window
-		s_CurrentWindow = Window::Get();
+		currentWindow = Window::Get();
 
 		Input::Init();
 		Renderer2D::Init();
 		Logger::Log("Engine initialized");
+
+		RegisterCoreTypes::RegisterCoreComponents();
+
+		Modules::StartupModules();
+
+		InitializeCoreSubsystems();
 	}
 
 	void Engine::Tick()
 	{
+		ZoneScoped;
+
 		JobSystem::Get().Update();
 
-		s_Time = static_cast<float>(glfwGetTime());
-		s_TimeStep = s_Time - s_LastFrameTime;
-		s_LastFrameTime = s_Time;
+		time = static_cast<float>(glfwGetTime());
+		timeStep = time - lastFrameTime;
+		lastFrameTime = time;
+
+		if (Engine::IsPlayMode())
+		{
+			if (!queuedScene.empty())
+			{
+				Ref<Scene> nextScene = Scene::New();
+				if (FileSystem::FileExists(queuedScene))
+				{
+					const std::string& fileContent = FileSystem::ReadFile(queuedScene);
+					nextScene->Path = queuedScene;
+					nextScene->Deserialize(json::parse(fileContent));
+
+					// Uninit current scene
+					GetCurrentScene()->OnExit();
+
+					// Set new scene
+					SetCurrentScene(nextScene);
+
+					// Init new scene
+					PhysicsManager::Get().ReInit();
+					GetCurrentScene()->OnInit();
+
+					queuedScene = "";
+				}
+				
+			}
+		}
+		
+		float scaledTimeStep = timeStep * timeScale;
+
+		// Tick all subsystems
+		if (Engine::IsPlayMode())
+		{
+			for (auto subsystem : subsystems)
+			{
+				if (subsystem == nullptr)
+					continue;
+
+				if (subsystem->CanEverTick())
+				{
+					subsystem->Tick(scaledTimeStep);
+				}
+			}
+		}
 
 		// Dont update if no scene is loaded.
-		if (s_CurrentWindow->GetScene())
+		if (currentWindow->GetScene())
 		{
-			float scaledTimeStep = s_TimeStep * s_TimeScale;
-			s_CurrentWindow->Update(scaledTimeStep);
+			currentWindow->Update(scaledTimeStep);
 
 			// Play mode update all the entities, Editor does not.
 			if (!Engine::IsPlayMode())
@@ -63,32 +127,35 @@ namespace Nuake
 				GetCurrentScene()->EditorUpdate(scaledTimeStep);
 			}
 
-			s_FixedUpdateDifference += s_TimeStep;
+			fixedUpdateDifference += timeStep;
 
 			// Fixed update
-			while (s_FixedUpdateDifference >= s_FixedUpdateRate)
+			while (fixedUpdateDifference >= fixedUpdateRate)
 			{
-				s_CurrentWindow->FixedUpdate(s_FixedUpdateRate * s_TimeScale);
+				currentWindow->FixedUpdate(fixedUpdateRate * timeScale);
 
-				s_FixedUpdateDifference -= s_FixedUpdateRate;
+				fixedUpdateDifference -= fixedUpdateRate;
 			}
 
 			Input::Update();
+			AudioManager::Get().AudioUpdate();
 		}
-
-
 	}
 
 	void Engine::EnterPlayMode()
 	{
-		s_LastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
+		lastFrameTime = (float)glfwGetTime(); // Reset timestep timer.
 
 		// Dont trigger init if already in player mode.
-		if (GetGameState() == GameState::Playing)
+		if (GetGameState() == GameState::Playing || GetGameState() == GameState::Loading)
 		{
-			Logger::Log("Cannot enter play mode if is already in play mode.", "engine", WARNING);
+			Logger::Log("Cannot enter play mode if is already in play mode or is loading.", "engine", WARNING);
 			return;
 		}
+		
+		SetGameState(GameState::Loading);
+
+		PhysicsManager::Get().ReInit();
 
 		if (GetCurrentScene()->OnInit())
 		{
@@ -104,22 +171,28 @@ namespace Nuake
 	void Engine::ExitPlayMode()
 	{
 		// Dont trigger exit if already not in play mode.
-		if (s_GameState != GameState::Stopped)
+		if (gameState != GameState::Stopped)
 		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();
-			s_GameState = GameState::Stopped;
+			gameState = GameState::Stopped;
 		}
 	}
 
 	void Engine::Draw()
 	{
+		ZoneScoped;
+
 		RenderCommand::Clear();
 
 		// Start imgui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		{
+			ZoneScopedN("ImGui New Frame");
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
 
 		// Draw scene
 		Window::Get()->Draw();
@@ -127,6 +200,7 @@ namespace Nuake
 
 	void Engine::EndDraw()
 	{
+		ZoneScoped;
 		Window::Get()->EndDraw();
 	}
 
@@ -137,34 +211,153 @@ namespace Nuake
 
 	Ref<Scene> Engine::GetCurrentScene()
 	{
-		return s_CurrentWindow->GetScene();
+		if (currentWindow)
+		{
+			return currentWindow->GetScene();
+		}
+
+		return nullptr;
 	}
 
-	bool Engine::LoadScene(Ref<Scene> scene)
+	bool Engine::SetCurrentScene(Ref<Scene> scene)
 	{
-		return s_CurrentWindow->SetScene(scene);
+		return currentWindow->SetScene(scene);
+	}
+
+	bool Engine::QueueSceneSwitch(const std::string& scenePath)
+	{
+		if (!IsPlayMode())
+		{
+			return false;
+		}
+
+		queuedScene = scenePath;
+
+		return true;
 	}
 
 	Ref<Project> Engine::GetProject()
 	{
-		return s_CurrentProject;
+		return currentProject;
+	}
+
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const std::string& subsystemName)
+	{
+		if (scriptedSubsystemMap.contains(subsystemName))
+		{
+			return scriptedSubsystemMap[subsystemName];
+		}
+		return nullptr;
+	}
+
+	Ref<EngineSubsystemScriptable> Engine::GetScriptedSubsystem(const int subsystemId)
+	{
+		if (subsystemId >= subsystems.size())
+		{
+			return nullptr;
+		}
+		return std::reinterpret_pointer_cast<EngineSubsystemScriptable>(subsystems[subsystemId]);
+	}
+
+	void Engine::OnWindowSetScene(Ref<Scene> oldScene, Ref<Scene> newScene)
+	{
+		// Inform the subsystems that we are going to destroy/swap out the old scene
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreDestroy(oldScene);
+		}
+
+		// Hook into when the internal pieces of the scene are just about to be ready and when the scene is finally
+		// ready to present (ie, all initialized and loaded).
+		if (newScene != nullptr)
+		{
+			newScene->OnPreInitialize().AddStatic(&Engine::OnScenePreInitialize, newScene);
+			newScene->OnPostInitialize().AddStatic(&Engine::OnScenePostInitialize, newScene);
+		}
+	}
+
+	void Engine::InitializeCoreSubsystems()
+	{
+	}
+
+	void Engine::OnScriptingEngineGameAssemblyLoaded()
+	{
+		if (!Engine::IsPlayMode() && Engine::GetGameState() != GameState::Loading)
+		{
+			return;
+		}
+		
+		subsystems.clear();
+		scriptedSubsystemMap.clear();
+
+		const Coral::ManagedAssembly& gameAssembly = ScriptingEngineNet::Get().GetGameAssembly();
+
+		const auto scriptTypeEngineSubsystem = gameAssembly.GetType("Nuake.Net.EngineSubsystem");
+		
+		const auto& types = gameAssembly.GetTypes();
+		for (const auto& type : types)
+		{
+			// Initialize all subsystems
+			if (type->IsSubclassOf(scriptTypeEngineSubsystem))
+			{
+				const std::string typeName = std::string(type->GetFullName());
+				Logger::Log("Creating Scripted Subsystem " + typeName);
+
+				Coral::ManagedObject scriptedSubsystem = type->CreateInstance();
+				scriptedSubsystem.SetPropertyValue("EngineSubsystemID", subsystems.size());
+				Ref<EngineSubsystemScriptable> subsystemScript = CreateRef<EngineSubsystemScriptable>(scriptedSubsystem);
+				subsystems.push_back(subsystemScript);
+
+				scriptedSubsystemMap[typeName] = subsystemScript;
+
+				subsystemScript->Initialize();
+			}
+		}
+	}
+
+	void Engine::OnScenePreInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePreInitialize(scene);
+		}
+	}
+
+	void Engine::OnScenePostInitialize(Ref<Scene> scene)
+	{
+		for (auto subsystem : subsystems)
+		{
+			if (subsystem == nullptr)
+				continue;
+
+			subsystem->OnScenePostInitialize(scene);
+		}
 	}
 
 	bool Engine::LoadProject(Ref<Project> project)
 	{
-		s_CurrentProject = project;
+		currentProject = project;
 
-		if (!Engine::LoadScene(s_CurrentProject->DefaultScene))
+		if (!Engine::SetCurrentScene(currentProject->DefaultScene))
 		{
 			return false;
 		}
 
 		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
+		ScriptingEngineNet::Get().Initialize();
+		ScriptingEngineNet::Get().LoadProjectAssembly(project);
+
 		return true;
 	}
 
 	Ref<Window> Engine::GetCurrentWindow()
 	{
-		return s_CurrentWindow;
+		return currentWindow;
 	}
 }

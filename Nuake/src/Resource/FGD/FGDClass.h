@@ -76,6 +76,7 @@ namespace Nuake {
 		std::string Name;
 		std::string Description;
 		std::string Prefab;
+		std::string Script;
 		std::vector<ClassProperty> Properties;
 		FGDBaseEntity BaseClass;
 

@@ -1,6 +1,6 @@
 #include "src/Core/Core.h"
 #include "Shader.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include <sstream>
@@ -20,9 +20,9 @@ namespace Nuake
 				!fileContent.empty())
 			{
 				Source = ParseShader(fileContent);
-				ProgramId = CreateProgram(Source);
+				programId = CreateProgram(Source);
 				return;
-			}
+			} 
 		}
 
 		Logger::Log("Shader source file not found: " + filePath, "shader", CRITICAL);
@@ -33,7 +33,7 @@ namespace Nuake
 		Path = filePath;
 
 		Source = ParseShader(content);
-		ProgramId = CreateProgram(Source);
+		programId = CreateProgram(Source);
 	}
 
 	bool Shader::Rebuild()
@@ -51,7 +51,7 @@ namespace Nuake
 			return false;
 
 		Source = newSource;
-		ProgramId = newProgramId;
+		programId = newProgramId;
 
 		return true;
 	}
@@ -59,7 +59,7 @@ namespace Nuake
 	// Bind the shader
 	void Shader::Bind() const 
 	{
-		glUseProgram(ProgramId);
+		glUseProgram(programId);
 	}
 
 	// unbind the shader
@@ -220,12 +220,11 @@ namespace Nuake
 	{
 		if (UniformCache.find(uniform) == UniformCache.end())
 		{
-			int addr = glGetUniformLocation(ProgramId, uniform.c_str());
+			int addr = glGetUniformLocation(programId, uniform.c_str());
 
-			if (addr == -1)
-				return addr;
-			else 
-				UniformCache[uniform] = addr;
+			// ASSERT(addr != -1);
+			
+			UniformCache[uniform] = addr;
 
 			return addr;
 		}
@@ -234,125 +233,166 @@ namespace Nuake
 	}
 
 	// Uniforms
-
-	void Shader::SetUniformVec4(const std::string& name, Vector4 vec)
+	void Shader::SetUniforms(const std::vector<UniformVariable>& uniforms)
 	{
-		SetUniform4f(name, vec.x, vec.y, vec.z, vec.w);
+		for (auto& u : uniforms)
+		{
+			std::string name = u.name;
+			auto type = u.type;
+			switch (type)
+			{
+			case UniformTypes::Float:
+				SetUniform(name, u.value.valueFloat);
+				break;
+			case UniformTypes::Int:
+				SetUniform(name, u.value.valueInt);
+				break;
+			case UniformTypes::Uint:
+				SetUniformUint(name, u.value.valueUInt);
+				break;
+			case UniformTypes::Vec2:
+				SetUniform(name, u.value.valueVec2);
+				break;
+			case UniformTypes::Vec3:
+				SetUniform(name, u.value.valueVec3);
+				break;
+			case UniformTypes::Vec4:
+				SetUniform(name, u.value.valueVec4);
+				break;
+			case UniformTypes::Mat3:
+				SetUniform(name, u.value.valueMat3);
+				break;
+			case UniformTypes::Mat4:
+				SetUniform(name, u.value.valueMat4);
+				break;
+			case UniformTypes::Sampler2D:
+				SetUniform(name, u.value.valueInt);
+				break;
+			}
+		}
 	}
 
-	void Shader::SetUniformVec3(const std::string& name, Vector3 vec)
-	{
-		SetUniform3f(name, vec.x, vec.y, vec.z);
-	}
-
-	void Shader::SetUniformVec2(const std::string& name, Vector2 vec)
-	{
-		SetUniform2f(name, vec.x, vec.y);
-	}
-
-	void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) 
+	void Shader::SetUniform(const std::string& name, float v0)
 	{
 		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-
 		if (addr != -1)
-			glUniform4f(addr, v0, v1, v2, v3);
+		{
+			glUniform1f(addr, v0);
+		}
 	}
 
-	void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2) 
+	void Shader::SetUniformUint(const std::string& name, uint32_t v0)
 	{
 		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-
-		if (addr != -1)
-			glUniform3f(addr, v0, v1, v2);
+		glUniform1ui(addr, v0);
 	}
 
-	void Shader::SetUniform2f(const std::string& name, float v0, float v1) 
+	void Shader::SetUniform(const std::string& name, int v0)
 	{
 		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-
-		if (addr != -1)
-			glUniform2f(addr, v0, v1);
+		glUniform1i(addr, v0);
 	}
 
-	void Shader::SetUniform1i(const std::string& name, int v0)
+	void Shader::SetUniform(const std::string& name, Vector2 v0)
 	{
-		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-
-		if (addr != -1)
-			SetUniform1i(addr, v0);
+		SetUniform(name, v0.x, v0.y);
 	}
 
-	void Shader::SetUniform1i(uint32_t location, int v0)
-	{
-		glUniform1i(location, v0);
-	}
-
-	void Shader::SetUniform1iv(const std::string& name, int size, int* value)
-	{
-		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-		if (addr != -1)
-			glUniform1iv(addr, size, value);
-	}
-
-	void Shader::SetUniform1fv(const std::string& name, int size, float* value)
-	{
-		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-		if (addr != -1)
-			glUniform1fv(addr, size, value);
-	}
-
-	void Shader::SetUniformMat3f(const std::string& name, Matrix3 mat)
-	{
-		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
-		if(addr != -1)
-			glUniformMatrix3fv(addr, 1, GL_FALSE, &mat[0][0]);
-	}
-
-	void Shader::SetUniformMat4f(uint32_t location, const Matrix4& mat)
-	{
-		glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
-	}
-
-	void Shader::SetUniformMat4f(const std::string& name, const Matrix4& mat)
+	void Shader::SetUniform(const std::string& name, float v0, float v1)
 	{
 		int addr = FindUniformLocation(name);
 
 		if (addr != -1)
 		{
-			SetUniformMat4f(addr, mat);
+			glUniform2f(addr, v0, v1);
 		}
 	}
 
-	void Shader::SetUniform1f(const std::string& name, float v0) 
+	void Shader::SetUniform(const std::string& name, float v0, float v1, float v2)
 	{
 		int addr = FindUniformLocation(name);
-		//ASSERT(addr != -1);
 
 		if (addr != -1)
-			glUniform1f(addr, v0);
+		{
+			glUniform3f(addr, v0, v1, v2);
+		}
 	}
 
-
-	void Shader::SetUniformTex(const std::string& name, Texture* texture, unsigned int slot)
+	void Shader::SetUniform(const std::string& name, Vector3 v0)
 	{
-		//ASSERT(texture != nullptr);
-
-		SetUniform1i(name, slot);
-		texture->Bind(slot);
+		SetUniform(name, v0.x, v0.y, v0.z);
 	}
 
-	void Shader::SetUniformTex(const std::string& name, Ref<Texture> texture, unsigned int slot)
+	void Shader::SetUniform(const std::string& name, float v0, float v1, float v2, float v3)
 	{
-		//ASSERT(texture != nullptr);
+		int addr = FindUniformLocation(name);
 
-		SetUniform1i(name, slot);
+		if (addr != -1)
+		{
+			glUniform4f(addr, v0, v1, v2, v3);
+		}
+	}
+
+	void Shader::SetUniform(const std::string& name, Vector4 v0)
+	{
+		SetUniform(name, v0.x, v0.y, v0.z, v0.w);
+	}
+
+	void Shader::SetUniform(const std::string& name, Matrix3 v0)
+	{
+		int addr = FindUniformLocation(name);
+
+		if (addr != -1)
+		{
+			glUniformMatrix3fv(addr, 1, GL_FALSE, &v0[0][0]);
+		}
+	}
+
+	void Shader::SetUniform(const std::string& name, Matrix4 v0)
+	{
+		int addr = FindUniformLocation(name);
+		if (addr != -1)
+		{
+			glUniformMatrix4fv(addr, 1, GL_FALSE, &v0[0][0]);
+		}
+	}
+
+	void Shader::SetUniformv(const std::string & name, int size, int* value)
+	{
+		int addr = FindUniformLocation(name);
+		if (addr != -1)
+		{
+			glUniform1iv(addr, size, value);
+		}
+	}
+
+	void Shader::SetUniform(const std::string & name, int size, float* value)
+	{
+		int addr = FindUniformLocation(name);
+		if (addr != -1)
+		{
+			glUniform1fv(addr, size, value);
+		}
+	}
+
+	void Shader::SetUniform(const std::string& name, bool value)
+	{
+		SetUniform(name, static_cast<int>(value));
+	}
+
+	void Shader::SetUniform(uint32_t uniformSlot, int value)
+	{
+		glUniform1i(uniformSlot, value);
+	}
+
+	void Shader::SetUniform(uint32_t uniformSlot, Matrix4 value)
+	{
+		glUniformMatrix4fv(uniformSlot, 1, GL_FALSE, &value[0][0]);
+	}
+
+	void Shader::SetUniform(const std::string& uniformName, Texture* texture, int slot)
+	{
+		SetUniform(uniformName, slot);
 		texture->Bind(slot);
 	}
 }

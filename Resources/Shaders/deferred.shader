@@ -51,26 +51,29 @@ struct Light {
     vec3 Direction;
     float OuterAngle;
     float InnerAngle;
+    int CastShadow; // For SpotLight for now
+    int ShadowMapID;
+    mat4 Transform;
 };
 
 struct DirectionalLight
 {
     vec3 Direction;
     vec3 Color;
-    int ShadowMapsIDs[4];
     float CascadeDepth[4];
     mat4 LightTransforms[4];
-    int Volumetric;
     int Shadow;
 };
 
 uniform sampler2D ShadowMaps[4];
+uniform sampler2D SpotShadowMaps[8];
 
 uniform Light Lights[MaxLight];
 uniform DirectionalLight u_DirectionalLight;
 uniform int u_DisableSSAO = 0;
 
 uniform float u_AmbientTerm;
+uniform sampler2D u_PreviousFrame;
 
 // Converts depth to World space coords.
 vec3 WorldPosFromDepth(float depth) {
@@ -151,11 +154,12 @@ int GetCSMDepth(float depth)
 
 float SampleShadowMap(sampler2D shadowMap, vec2 coords, float compare)
 {
-    return step(compare, texture(shadowMap, coords.xy).r);
+    return compare < texture(shadowMap, coords.xy).r ? 1.0f : 0.0f;
 }
 
 float SampleShadowMapLinear(sampler2D shadowMap, vec2 coords, float compare, vec2 texelSize)
 {
+    //return SampleShadowMap(shadowMap, coords.xy, compare);
     vec2 pixelPos = coords / texelSize + vec2(0.5);
     vec2 fracPart = fract(pixelPos);
     vec2 startTexel = (pixelPos - fracPart) * texelSize;
@@ -193,12 +197,14 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
     float bias = max(0.005 * (1.0 - dot(normal, u_DirectionalLight.Direction)), 0.0005);
     //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
 
+    //return SampleShadowMap(ShadowMaps[shadowmap], projCoords.xy, currentDepth - bias);
+    
     if (shadowmap <= 4)
     {
         const float NUM_SAMPLES = 4.f;
         const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
         const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
-        vec2 texelSize = 1.0 / vec2(4096, 4096);
+        vec2 texelSize = 1.0 / vec2(2048, 2048);
 
         float result = 0.0f;
         for (float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0f)
@@ -212,12 +218,32 @@ float ShadowCalculation(vec3 FragPos, vec3 normal)
 
         return result / NUM_SAMPLES_SQUARED;
     }
-    
     else
     {
         return SampleShadowMap(ShadowMaps[shadowmap], projCoords.xy, currentDepth - bias);
     }
    
+}
+
+float ShadowCalculationSpot(vec3 FragPos, vec3 normal, Light light)
+{
+    // Get Depth
+    float depth = length(FragPos - u_EyePosition);
+    vec4 fragPosLightSpace = light.Transform * vec4(FragPos, 1.0f);
+
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = 0.0;
+    float bias = max(0.0005 * (1.0 - dot(normal, light.Direction)), 0.0005);
+    //float pcfDepth = texture(ShadowMaps[shadowmap], vec3(projCoords.xy, currentDepth), bias);
+
+    return SampleShadowMap(SpotShadowMaps[light.ShadowMapID], projCoords.xy, currentDepth - 0.000005);
 }
 
 void main()
@@ -267,7 +293,7 @@ void main()
 
     vec3 Lo = vec3(0.0);
     vec3 fog = vec3(0.0);
-    float shadow = 0.0f;
+    float shadow = 1.0f;
     
     if (u_DirectionalLight.Shadow < 0.1f)
     {
@@ -284,10 +310,10 @@ void main()
 
         if(u_DirectionalLight.Shadow > 0.1f)
         {
-            shadow += ShadowCalculation(worldPos, N);
+            shadow *= ShadowCalculation(worldPos, N);
         }
 
-        vec3 radiance = u_DirectionalLight.Color * attenuation * shadow;
+        vec3 radiance = u_DirectionalLight.Color * attenuation;
 
         vec3 H = normalize(V + L);
         float NDF = DistributionGGX(N, H, roughness);
@@ -305,9 +331,10 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
     }
 
+    shadow = 1.0f;
     for (int i = 0; i < LightCount; i++)
     {
         Light light = Lights[i];
@@ -326,7 +353,14 @@ void main()
             float theta = dot(L, normalize(-Lights[i].Direction));
             float epsilon   = Lights[i].InnerAngle - Lights[i].OuterAngle;
             float intensity = clamp((theta - Lights[i].OuterAngle) / epsilon, 0.0, 1.0);    
-            radiance = Lights[i].Color * intensity;
+
+            float shadow2 = 1.0f;
+            if(light.CastShadow > 0 && light.ShadowMapID >= 0)
+            {
+                shadow2 = ShadowCalculationSpot(worldPos, N, Lights[i]);
+            }
+            
+            radiance = Lights[i].Color * intensity * shadow2;
         }
 
         // Cook-Torrance BRDF
@@ -357,7 +391,7 @@ void main()
     kD *= 1.0 - metallic;
 
     vec3 ambient = (albedo) * ao * ssao * u_AmbientTerm;
-    vec3 color = (ambient) + Lo;
+    vec3 color = (ambient) + Lo ;
 
     // Display CSM splits..
     /*float depth = length(worldPos - u_EyePosition);

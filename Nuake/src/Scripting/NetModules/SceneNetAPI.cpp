@@ -21,10 +21,13 @@
 #include "src/Scene/Components/QuakeMap.h"
 
 #include "src/Physics/PhysicsManager.h"
+#include "src/Scene/Systems/PhysicsSystem.h"
+#include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scripting/ScriptingEngineNet.h"
 
 #include <Coral/Array.hpp>
 #include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include <src/Scene/Components/RigidbodyComponent.h>
 
 
 namespace Nuake {
@@ -117,8 +120,6 @@ namespace Nuake {
 
 	bool EntityHasComponent(int id, int componentType)
 	{
-		uint32_t componentEnumValue = 3;
-		//Entity entity = Engine::GetCurrentScene()->GetEntityByID(id);
 		Entity entity = { (entt::entity)(id), Engine::GetCurrentScene().get()};
 
 		if (!entity.IsValid())
@@ -126,7 +127,7 @@ namespace Nuake {
 			return false;
 		}
 
-		switch (static_cast<ComponentTypes>(componentEnumValue))
+		switch (static_cast<ComponentTypes>(componentType))
 		{
 			case PARENT:				return entity.HasComponent<ParentComponent>();
 			case NAME:					return entity.HasComponent<NameComponent>();
@@ -151,6 +152,41 @@ namespace Nuake {
 			case NAVMESH:				return entity.HasComponent<NavMeshVolumeComponent>();
 			default:
 				return false;
+		}
+	}
+
+	void EntityAddComponent(int id, int componentType)
+	{
+		Entity entity = { (entt::entity)(id), Engine::GetCurrentScene().get() };
+
+		if (!entity.IsValid())
+		{
+			return;
+		}
+
+		switch (static_cast<ComponentTypes>(componentType))
+		{
+		case PARENT:				entity.AddComponent<ParentComponent>(); break;
+			case NAME:					entity.AddComponent<NameComponent>(); break;
+			case PREFAB:				entity.AddComponent<PrefabComponent>(); break;
+			case TRANSFORM:				entity.AddComponent<TransformComponent>(); break;
+			case LIGHT:					entity.AddComponent<LightComponent>(); break;
+			case CAMERA:				entity.AddComponent<CameraComponent>(); break;
+			case AUDIO_EMITTER:			entity.AddComponent<AudioEmitterComponent>(); break;
+			case MODEL:					entity.AddComponent<ModelComponent>(); break;
+			case SKINNED_MODEL:			entity.AddComponent<SkinnedModelComponent>(); break;
+			case BONE:					entity.AddComponent<BoneComponent>(); break;
+			case BOX_COLLIDER:			entity.AddComponent<BoxColliderComponent>(); break;
+			case SPHERE_COLLIDER:		entity.AddComponent<SphereColliderComponent>(); break;
+			case CAPSULE_COLLIDER:		entity.AddComponent<CapsuleColliderComponent>(); break;
+			case CYLINDER_COLLIDER:		entity.AddComponent<CylinderColliderComponent>(); break;
+			case MESH_COLLIDER:			entity.AddComponent<MeshColliderComponent>(); break;
+			case CHARACTER_CONTROLLER:	entity.AddComponent<CharacterControllerComponent>(); break;
+			case PARTICLE_EMITTER:		entity.AddComponent<ParticleEmitterComponent>(); break;
+			case QUAKE_MAP:				entity.AddComponent<QuakeMapComponent>(); break;
+			case BSP_BRUSH:				entity.AddComponent<BSPBrushComponent>(); break;
+			case SPRITE:				entity.AddComponent<SpriteComponent>(); break;
+			case NAVMESH:				entity.AddComponent<NavMeshVolumeComponent>(); break;
 		}
 	}
 
@@ -206,6 +242,46 @@ namespace Nuake {
 		return entity.IsValid();
 	}
 
+	Coral::String EntityGetTarget(int handle)
+	{
+		Entity entity = { (entt::entity)(handle), Engine::GetCurrentScene().get() };
+		if (entity.IsValid())
+		{
+			if (entity.HasComponent<BSPBrushComponent>())
+			{
+				return Coral::String::New(entity.GetComponent<BSPBrushComponent>().target);
+			}
+		}
+
+		return Coral::String::New("");
+	}
+
+	Coral::Array<int> EntityGetTargets(Coral::String target)
+	{
+		std::vector<int> targetsFound = std::vector<int>();
+
+		if (target == "")
+		{
+			return Coral::Array<int>::New(targetsFound);
+		}
+
+		Ref<Scene> scene = Engine::GetCurrentScene();
+		auto brushView = scene->m_Registry.view<BSPBrushComponent>();
+		for (auto e : brushView)
+		{
+			BSPBrushComponent& brushComponent = brushView.get<BSPBrushComponent>(e);
+			auto targets = brushComponent.Targets;
+			if (brushComponent.TargetName == target)
+			{
+				Entity entity = { (entt::entity)(e), scene.get() };
+				
+				targetsFound.push_back(entity.GetHandle());
+			}
+		}
+
+		return Coral::Array<int>::New(targetsFound);
+	}
+
 	int PrefabInstance(Coral::String path, Vector3 position, float qx, float qy, float qz, float qw)
 	{
 		if (!FileSystem::FileExists(path))
@@ -219,6 +295,10 @@ namespace Nuake {
 		TransformComponent& transformComponent = root.GetComponent<TransformComponent>();
 		transformComponent.SetLocalPosition(position);
 		transformComponent.SetLocalRotation(Quat(qw, qx, qy, qz));
+
+		Ref<Scene> scene = Engine::GetCurrentScene();
+		scene->GetPhysicsSystem()->InitializeNewBodies();
+		// scene->GetScriptingSystem()->InitializeNewScripts(); // We cant instantiate scripts here..
 
 		return root.GetHandle();
 	}
@@ -235,6 +315,11 @@ namespace Nuake {
 			if (entity.HasComponent<CharacterControllerComponent>())
 			{
 				PhysicsManager::Get().SetCharacterControllerPosition(entity, { x, y, z });
+			}
+
+			if (entity.HasComponent<BSPBrushComponent>() || entity.HasComponent<RigidBodyComponent>())
+			{
+				PhysicsManager::Get().SetBodyTransform(entity, { x, y, z }, component.GetGlobalRotation());
 			}
 		}
 	}
@@ -259,7 +344,7 @@ namespace Nuake {
 		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
 		{
 			auto& component = entity.GetComponent<TransformComponent>();
-			const auto& globalPosition = component.GetGlobalPosition();
+			const Vector3& globalPosition = component.GlobalTransform[3];
 			Coral::Array<float> result = Coral::Array<float>::New({ globalPosition.x, globalPosition.y, globalPosition.z });
 			return result;
 		}
@@ -277,6 +362,39 @@ namespace Nuake {
 		}
 	}
 
+	float LightGetIntensity(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			return component.Strength;
+		}
+
+		return 0.0f;
+	}
+
+	void LightSetIntensity(int entityId, float intensity)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			component.Strength = intensity;
+		}
+	}
+
+	void LightSetColor(int entityId, float r, float g, float b)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<LightComponent>())
+		{
+			auto& component = entity.GetComponent<LightComponent>();
+			component.Color = Color(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+		}
+	}
+
 	Coral::Array<float> CameraGetDirection(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -286,6 +404,29 @@ namespace Nuake {
 			auto& component = entity.GetComponent<CameraComponent>();
 			const Vector3 camDirection = component.CameraInstance->GetDirection();
 			return Coral::Array<float>::New({ camDirection.x, camDirection.y, camDirection.z });
+		}
+	}
+
+	float CameraGetFOV(int entityId)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CameraComponent>())
+		{
+			auto& component = entity.GetComponent<CameraComponent>();
+			return component.CameraInstance->Fov;
+		}
+	}
+
+	void CameraSetFOV(int entityId, float fov)
+	{
+		float safeFov = glm::clamp(fov, 1.0f, 180.0f);
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<CameraComponent>())
+		{
+			auto& component = entity.GetComponent<CameraComponent>();
+			component.CameraInstance->Fov = safeFov;
 		}
 	}
 
@@ -309,7 +450,6 @@ namespace Nuake {
 	bool IsOnGround(int entityId)
 	{
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
-
 		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
 		{
 			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
@@ -319,8 +459,54 @@ namespace Nuake {
 		return false;
 	}
 
-	void Play(int entityId, Coral::String animation)
+	Coral::Array<float> GetGroundVelocity(int entityId)
 	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		Coral::Array<float> resultArray = Coral::Array<float>::New(3);
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
+			Vector3 groundVelocity = PhysicsManager::Get().GetWorld()->GetCharacterGroundVelocity(entity);
+
+			resultArray[0] = groundVelocity.x;
+			resultArray[1] = groundVelocity.y;
+			resultArray[2] = groundVelocity.z;
+			
+			return resultArray;
+		}
+
+		resultArray[0] = 0.0f;
+		resultArray[1] = 0.0f;
+		resultArray[2] = 0.0f;
+		return resultArray;
+	}
+
+	Coral::Array<float> GetGroundNormal(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		Coral::Array<float> resultArray = Coral::Array<float>::New(3);
+		if (entity.IsValid() && entity.HasComponent<CharacterControllerComponent>())
+		{
+			auto& characterController = entity.GetComponent<CharacterControllerComponent>();
+			Vector3 groundVelocity = PhysicsManager::Get().GetWorld()->GetCharacterGroundNormal(entity);
+
+			resultArray[0] = groundVelocity.x;
+			resultArray[1] = groundVelocity.y;
+			resultArray[2] = groundVelocity.z;
+
+			return resultArray;
+		}
+
+		resultArray[0] = 0.0f;
+		resultArray[1] = 0.0f;
+		resultArray[2] = 0.0f;
+		return resultArray;
+	}
+
+	void Play(int entityId, Coral::String animation)
+	{ 
 		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
 
 		if (entity.IsValid() && entity.HasComponent<SkinnedModelComponent>())
@@ -376,15 +562,42 @@ namespace Nuake {
 		return {};
 	}
 
+	bool AudioEmitterGetIsPlaying(int entityId)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<AudioEmitterComponent>())
+		{
+			auto& audioEmitter = entity.GetComponent<AudioEmitterComponent>();
+			return audioEmitter.IsPlaying;
+		}
+
+		return false;
+	}
+
+	void AudioEmitterSetIsPlaying(int entityId, Coral::Bool32 isPlaying)
+	{
+		Entity entity = Entity((entt::entity)(entityId), Engine::GetCurrentScene().get());
+
+		if (entity.IsValid() && entity.HasComponent<AudioEmitterComponent>())
+		{
+			auto& audioEmitter = entity.GetComponent<AudioEmitterComponent>();
+			audioEmitter.IsPlaying = isPlaying;
+		}
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
 		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
+		RegisterMethod("Entity.EntityAddComponentIcall", &EntityAddComponent);
 		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
 		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
 		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
 		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
 		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
+		RegisterMethod("Entity.EntityGetTargetsIcall", &EntityGetTargets);
+		RegisterMethod("Entity.EntityGetTargetIcall", &EntityGetTarget);
 
 		// Prefab
 		RegisterMethod("Prefab.PrefabInstanceIcall", &PrefabInstance);
@@ -402,18 +615,31 @@ namespace Nuake {
 		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
 
+		// Lights
+		RegisterMethod("LightComponent.GetLightIntensityIcall", &LightGetIntensity);
+		RegisterMethod("LightComponent.SetLightIntensityIcall", &LightSetIntensity);
+		RegisterMethod("LightComponent.SetLightColorIcall", &LightSetColor);
+
 		// Camera
 		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
+		RegisterMethod("CameraComponent.GetCameraFOVIcall", &CameraGetFOV);
+		RegisterMethod("CameraComponent.SetCameraFOVIcall", &CameraSetFOV);
 
 		// Character Controller
 		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
 		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
+		RegisterMethod("CharacterControllerComponent.GetGroundVelocityIcall", &GetGroundVelocity);
+		RegisterMethod("CharacterControllerComponent.GetGroundNormalIcall", &GetGroundNormal);
 
 		// Skinned 
 		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
 
 		// Navigation Mesh
 		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", &NavMeshComponentFindPath);
+
+		// Audio Emitter
+		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", &AudioEmitterGetIsPlaying);
+		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", &AudioEmitterSetIsPlaying);
 	}
 
 }

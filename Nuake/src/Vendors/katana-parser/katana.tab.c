@@ -40,7 +40,6 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-#include <string.h>
 
 /* Identify Bison output.  */
 #define YYBISON 1
@@ -2796,13 +2795,13 @@ yyreduce:
   case 129:
 
     {
-        if (!strcasecmp((yyvsp[0].string).data, "from")) {
+        if (!stricmp((yyvsp[0].string).data, "from")) {
             KatanaParserNumber number;
             number.val = 0;
             number.raw = (KatanaParserString){"from", 4};
             (yyval.value) = katana_new_number_value(parser, 1, &number, KATANA_VALUE_NUMBER);
         }
-        else if (!strcasecmp((yyvsp[0].string).data, "to")) {
+        else if (!stricmp((yyvsp[0].string).data, "to")) {
             KatanaParserNumber number;
             number.val = 100;
             number.raw = (KatanaParserString){"to", 4};
@@ -2863,7 +2862,7 @@ yyreduce:
   case 136:
 
     {
-        if (!strcasecmp((yyvsp[-2].string).data, "deep"))
+        if (!stricmp((yyvsp[-2].string).data, "deep"))
             (yyval.relation) = KatanaSelectorRelationShadowDeep;
         else
             YYERROR;

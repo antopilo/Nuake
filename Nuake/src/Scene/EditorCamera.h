@@ -1,7 +1,8 @@
 #pragma once
-#include "../Core/Timestep.h"
-#include "../Rendering/Camera.h"
 #include "src/Core/Core.h"
+#include "src/Core/Timestep.h"
+#include "src/Rendering/Camera.h"
+
 
 namespace Nuake
 {
@@ -9,17 +10,17 @@ namespace Nuake
 	{
 	private:
 		bool m_IsFlying = false;
-
+		bool wasControlled = false;
 	public:
 		
 		EditorCamera()
 		{
-			Yaw = 0.0f;
-			Translation = Vector3(10, 10, 10);
-			SetDirection(Vector3(-1, -1, -1));
+			SetYaw(-90.0f - 45.0f);
+			SetPitch(-45.0f);
+			Translation = Vector3(2, 2, 2);
 		}
 
-		void Update(Timestep ts, const bool hover);
+		bool Update(Timestep ts, const bool hover);
 
 		Vector3 TargetPos = Vector3(0, 0, 0);
 		bool IsMoving = false;

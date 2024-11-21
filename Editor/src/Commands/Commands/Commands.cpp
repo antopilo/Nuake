@@ -1,7 +1,10 @@
 #include "Commands.h"
 
 #include <Engine.h>
-#include "src/Core/FileSystem.h"
+
+#include "src/FileSystem/FileSystem.h"
+
+#include <filesystem>
 
 namespace NuakeEditor
 {
@@ -39,6 +42,12 @@ namespace NuakeEditor
 	{
         const std::string& cleanProjectName = String::Sanitize(mProject->Name);
         const std::string& gameConfigFolderPath = mProject->TrenchbroomPath + "/../games/" + cleanProjectName + "/";
+
+        if (!FileSystem::DirectoryExists(gameConfigFolderPath))
+        {
+            FileSystem::MakeDirectory(gameConfigFolderPath, true);
+        }
+
         const std::string& gameConfigFilePath = gameConfigFolderPath + "GameConfig.cfg";
         FileSystem::BeginWriteFile(gameConfigFilePath, true);
 
@@ -56,7 +65,7 @@ namespace NuakeEditor
         "packageformat": { "extension": ".zip", "format": "zip" }
     },
     "textures": {
-        "root": "textures",
+        "root": "Textures",
         "extensions": [ ".jpg", ".png", ".tga" ]
     },
     "entities": {
@@ -69,8 +78,8 @@ namespace NuakeEditor
                 "name": "Trigger",
                 "attribs": [ "transparent" ],
                 "match": "classname",
-                "pattern": "trigger_*",
-                "texture": "trigger"
+                "pattern": "Trigger*",
+                "texture": "trigger.png"
             }
         ],
         "brushface": [
@@ -135,8 +144,15 @@ namespace NuakeEditor
         // Copy Icon.png
         if (FileSystem::FileExists("icon.png"))
         {
-            std::filesystem::copy_file(FileSystem::RelativeToAbsolute("icon.png"), gameConfigFolderPath + "Icon.png");
+            std::filesystem::copy_file(FileSystem::RelativeToAbsolute("icon.png"), gameConfigFolderPath + "Icon.png", std::filesystem::copy_options::overwrite_existing);
         }
 		return true;
 	}
+
+    bool SetVSync::Execute()
+    {
+        Engine::GetCurrentWindow()->SetVSync(value);
+
+        return true;
+    }
 }

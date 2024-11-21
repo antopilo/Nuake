@@ -1,9 +1,12 @@
 #include "MaterialEditor.h"
-#include <imgui/imgui.h>
-#include <src/Resource/FontAwesome5.h>
-#include <src/Vendors/imgui/imgui_internal.h>
 #include "../Misc/InterfaceFonts.h"
+#include <src/Resource/FontAwesome5.h>
 #include <src/Resource/ResourceManager.h>
+#include <src/FileSystem/FileDialog.h>
+
+#include <imgui/imgui.h>
+#include <src/Vendors/imgui/imgui_internal.h>
+
 
 void MaterialEditor::Draw(Ref<Nuake::Material> material)
 {

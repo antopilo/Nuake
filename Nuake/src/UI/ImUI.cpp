@@ -1,10 +1,13 @@
 #include "ImUI.h"
+#include "Engine.h"
+#include "src/Resource/Project.h"
+
 #include <imgui/imgui_internal.h>
 
-namespace Nuake {
-
-	namespace UI {
-
+namespace Nuake 
+{
+	namespace UI
+	{
 		void BeginWindow(const std::string& name)
 		{
 			ImGui::Begin(name.c_str());
@@ -15,11 +18,16 @@ namespace Nuake {
 			ImGui::End();
 		}
 
-		bool PrimaryButton(const std::string& name, const Vector2& size)
+		bool PrimaryButton(const std::string& name, const Vector2& size, Color color)
 		{
-			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(97, 0, 255, 255));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(97, 0, 255, 255));
+			if (Nuake::Engine::GetProject())
+			{
+				color = Nuake::Engine::GetProject()->Settings.PrimaryColor;
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 200));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ButtonPadding);
@@ -36,9 +44,15 @@ namespace Nuake {
 
 		bool SecondaryButton(const std::string& name, const Vector2& size)
 		{
+			Color color = Color(97.0f / 255.0f, 0, 1.0f, 1.0f);
+			if (Nuake::Engine::GetProject())
+			{
+				color = Nuake::Engine::GetProject()->Settings.PrimaryColor;
+			}
+
 			ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(97, 0, 255, 200));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(97, 0, 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 200));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, 255));
 			ImGui::PushStyleColor(ImGuiCol_Border, PrimaryCol);
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
@@ -161,5 +175,93 @@ namespace Nuake {
 				draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(*v ? colors[ImGuiCol_Button] : ImVec4(0.85f, 0.85f, 0.85f, 1.0f)), height * 0.50f);
 			draw_list->AddCircleFilled(ImVec2(p.x + radius + (*v ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
 		}
+
+		void Tooltip(const std::string& message)
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4, 4));
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+			{
+				ImGui::BeginTooltip();
+				ImGui::PushTextWrapPos(450.0f);
+				ImGui::TextUnformatted(message.c_str());
+				ImGui::PopTextWrapPos();
+				ImGui::EndTooltip();
+			}
+
+			ImGui::PopStyleVar(2);
+		}
+
+		ImRect RectExpanded(const ImRect& rect, float x, float y)
+		{
+			ImRect result = rect;
+			result.Min.x -= x;
+			result.Min.y -= y;
+			result.Max.x += x;
+			result.Max.y += y;
+			return result;
+		}
+
+		ImRect RectOffset(const ImRect& rect, float x, float y)
+		{
+			ImRect result = rect;
+			result.Min.x += x;
+			result.Min.y += y;
+			result.Max.x += x;
+			result.Max.y += y;
+			return result;
+		}
+
+		ImRect RectOffset(const ImRect& rect, ImVec2 xy)
+		{
+			return RectOffset(rect, xy.x, xy.y);
+		}
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+	ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+	ImVec2 rectMin, ImVec2 rectMax)
+		{
+			auto* drawList = ImGui::GetForegroundDrawList();
+			if (ImGui::IsItemActive())
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintPressed);
+			else if (ImGui::IsItemHovered())													   				 
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintHovered);
+			else																				   				 
+				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintNormal);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImRect rectangle)
+		{
+			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, rectangle.Min, rectangle.Max);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImVec2 rectMin, ImVec2 rectMax)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, rectMin, rectMax);
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
+			ImRect rectangle)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, rectangle.Min, rectangle.Max);
+		};
+
+
+		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
+		{
+			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		};
+
+		void DrawButtonImage(const Ref<Texture>& image,
+			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
+		{
+			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+		};
 	}
 }

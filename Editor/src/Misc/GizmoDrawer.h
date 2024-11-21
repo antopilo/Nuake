@@ -8,8 +8,6 @@
 #include <src/Resource/Model.h>
 #include <src/Physics/PhysicsShapes.h>
 
-#include "Gizmos/CapsuleGizmo.h"
-#include "Gizmos/CylinderGizmo.h"
 #include "../Windows/EditorInterface.h"
 #include "src/AI/NavMeshDebugDrawer.h"
 
@@ -22,8 +20,10 @@ private:
 	Shader* m_LineShader;
 	NavMeshDebugDrawer m_DebugDrawer;
 	std::map<std::string, Ref<Model>> m_Gizmos;
-	std::map<uint32_t, Scope<CapsuleGizmo>> m_CapsuleGizmo;
-	std::map<uint32_t, Scope<CylinderGizmo>> m_CylinderGizmo;
+	std::map<uint32_t, Scope<Nuake::CapsuleGizmo>> m_CapsuleGizmo;
+	std::map<uint32_t, Scope<Nuake::CylinderGizmo>> m_CylinderGizmo;
+
+	const Vector3 m_GizmoSize = Vector3(0.25f);
 
 	const std::vector<LineVertex> m_Vertices
 	{
@@ -53,6 +53,7 @@ public:
 	GizmoDrawer() = default;
 	~GizmoDrawer() = default;
 
+	void DrawShapes(Ref<Scene> scene, bool occluded);
 	void DrawGizmos(Ref<Scene> scene, bool occluded);
 	void DrawAxis(Ref<Scene> scene, bool occluded);
 	void DrawNavMesh(Ref<Scene> scene, bool occluded);
@@ -60,4 +61,5 @@ private:
 	void GenerateSphereGizmo();
 	bool IsEntityInSelection(Nuake::Entity entity);
 
+	float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& transform);
 };

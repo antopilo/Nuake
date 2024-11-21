@@ -1,6 +1,8 @@
 #shader vertex
 #version 440 core
 
+
+
 layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec2 UVPosition;
 layout(location = 2) in vec3 Normal;
@@ -10,8 +12,11 @@ layout(location = 4) in vec3 Bitangent;
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Projection;
+uniform mat4 u_PreviousViewModel;
+uniform vec2 u_Jitter;
 
 out vec4 FragPos;
+out vec4 PreviousFragPos;
 out mat3 TBN;
 out vec2 UV;
 out mat4 Inv_Proj;
@@ -37,26 +42,37 @@ void main()
     Inv_View = u_View;
     o_Tangent = Tangent;
 
-    gl_Position = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
-    FragPos = gl_Position;
+    vec4 clipPosition = u_Projection * u_View * u_Model * vec4(VertexPosition, 1.0f);
+
+    FragPos = clipPosition; // Push unjittered to not affect velocity buffer
+
+    // Now we can jitter.
+    vec4 newClipPosition = clipPosition + vec4(u_Jitter.x, u_Jitter.y, 0, 0) * clipPosition.w; 
+
+    gl_Position = newClipPosition;
+
+    PreviousFragPos = u_PreviousViewModel * vec4(VertexPosition, 1.0f);
 }
 
 #shader fragment
 #version 440 core
+
+precision highp float;
 
 layout(location = 0) out vec4 gAlbedo;
 layout(location = 1) out vec4 gNormal;
 layout(location = 2) out vec4 gMaterial;
 layout(location = 3) out int gEntityID;
 layout(location = 4) out float gEmissive;
-layout(location = 5) out vec4 gTexelOffset;
+layout(location = 5) out vec4 gVelocity;
+layout(location = 6) out vec4 gUV;
 
 in vec4 FragPos;
 in vec2 UV;
 in mat3 TBN;
 in mat4 Inv_Proj;
 in mat4 Inv_View;
-
+in vec4 PreviousFragPos;
 
 // Material
 uniform sampler2D m_Albedo;
@@ -143,27 +159,18 @@ void main()
     gMaterial.b = finalRoughness;
 
     gEntityID = int(u_EntityID);
-
     gEmissive = u_Emissive;
 
-    vec3 right = vec3(1.0, 0, 0);
-    right = TBN * normalize(right);
-    vec3 up = TBN * normalize(vec3(0, 1, 0));
+    vec4 fragPos = FragPos / FragPos.w;
+    fragPos.xy = (fragPos.xy + 1.0) / 2.0;
+    //fragPos.y = 1.0 - fragPos.y;
 
-    vec2 textureSize2d = textureSize(m_Albedo, 0);
-    vec2 pixelPos = UV * textureSize2d;
-    vec2 centerOfPixel = (vec2(0.5) + floor(pixelPos));
-    vec2 uvCenter = centerOfPixel;
+    vec4 previousFragPos =  PreviousFragPos / PreviousFragPos.w;
+    previousFragPos.xy = (previousFragPos.xy + 1.0) / 2.0;
+    //previousFragPos.y = 1.0 - previousFragPos.y;
 
-    vec3 uvDiff = vec3(uvCenter.x - pixelPos.x, uvCenter.y - pixelPos.y, 0.0f) / vec3(textureSize2d.x, textureSize2d.y, 1.0f);
+    vec2 positionDifference = (fragPos).xy - (previousFragPos).xy;
+    gVelocity = vec4(positionDifference.x, positionDifference.y, 0.0, 1.0);
 
-    uvDiff = uvDiff.x * right;
-    uvDiff = uvDiff.y * up;
-    //uvDiff * right;
-    uvDiff = uvDiff * 100.0f;
-    vec2 offset = (centerOfPixel - vec2(FragPos.x, FragPos.y)) * 10.0f;
-
-    vec3 finalTransformed =  normalize(uvDiff);
-    vec4 conversion = Inv_Proj * Inv_View * vec4(finalTransformed, 1.0f);
-    gTexelOffset = vec4(conversion.x / 2.0 + 0.5f, conversion.y / 2.0 + 0.5f, 0, 1);
+    gUV = vec4(UV.x, UV.y, 0, 1);
 }

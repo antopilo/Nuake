@@ -1,11 +1,14 @@
 #include "AudioEmitterComponent.h"
 
+#include "src/FileSystem/File.h"
+#include "src/FileSystem/FileSystem.h"
+
 namespace Nuake {
 
 	json AudioEmitterComponent::Serialize()
 	{
 		BEGIN_SERIALIZE();
-		SERIALIZE_VAL(FilePath);
+		SERIALIZE_RES_FILE(FilePath);
 		SERIALIZE_VAL(IsPlaying);
 		SERIALIZE_VAL(Volume);
 		SERIALIZE_VAL(Pan);
@@ -20,7 +23,7 @@ namespace Nuake {
 
 	bool AudioEmitterComponent::Deserialize(const json& j)
 	{
-		DESERIALIZE_VAL(FilePath);
+		DESERIALIZE_RES_FILE(FilePath);
 		DESERIALIZE_VAL(Volume);
 		DESERIALIZE_VAL(IsPlaying);
 		DESERIALIZE_VAL(Pan);

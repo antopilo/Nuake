@@ -2,10 +2,10 @@
 #include <string>
 
 enum class ClassPropertyType {
-	String,
-	Integer,
-	Float,
 	Boolean,
+	String,
+	Float,
+	Integer,
 	AABB,
 	Choices,
 	Color,
@@ -20,4 +20,5 @@ struct ClassProperty {
 	std::string name;
 	ClassPropertyType type;
 	std::string description;
+	std::string value;
 };

@@ -21,12 +21,15 @@ namespace Nuake
         CastShadows = toggle;
         if (CastShadows)
         {
-            for (int i = 0; i < CSM_AMOUNT; i++)
+            if (Type == LightType::Directional || Type == LightType::Spot)
             {
-                m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
-                auto texture = CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT);
-                texture->SetParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-                m_Framebuffers[i]->SetTexture(texture, GL_DEPTH_ATTACHMENT);
+				for (int i = 0; i < CSM_AMOUNT; i++)
+				{
+					m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
+					auto texture = CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT);
+					texture->SetParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+					m_Framebuffers[i]->SetTexture(texture, GL_DEPTH_ATTACHMENT);
+				}
             }
         }
         else 
@@ -40,7 +43,14 @@ namespace Nuake
 
     Matrix4 LightComponent::GetProjection()
     {
-        return glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
+        if (Type == LightType::Directional)
+        {
+            return glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, -25.0f, 25.0f);
+        }
+        else if(Type == LightType::Spot)
+        {
+            return glm::perspectiveFov(glm::radians(OuterCutoff * 2.5f), 1.0f, 1.0f, 0.001f, 50.5f);
+        }
     }
 
     Vector3 LightComponent::GetDirection()

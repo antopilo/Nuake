@@ -31,7 +31,6 @@ extern "C" {
 #endif
 
 #include "katana.h"
-
     
 struct KatanaInternalParser;
 

@@ -1,10 +1,16 @@
 #pragma once
+
+#include "Component.h"
+
 #include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
-namespace Nuake {
-	class MeshColliderComponent
+namespace Nuake
+{
+	class MeshColliderComponent : public Component
 	{
+		NUAKECOMPONENT(MeshColliderComponent, "Mesh Collider")
+
 	public:
 		uint32_t SubMesh = 0;
 		bool IsTrigger;

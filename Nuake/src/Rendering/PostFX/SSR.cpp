@@ -35,28 +35,27 @@ namespace Nuake {
 
 			mShader->Bind();
 
-			mShader->SetUniform1f("rayStep", RayStep);
-			mShader->SetUniform1i("iterationCount", IterationCount);
-			mShader->SetUniform1f("distanceBias", DistanceBias);
-			mShader->SetUniform1i("enableSSR", (int)1);
-			mShader->SetUniform1i("sampleCount", SampleCount);
-			mShader->SetUniform1i("isSamplingEnabled", SamplingEnabled);
-			mShader->SetUniform1i("isExponentialStepEnabled", ExpoStep);
-			mShader->SetUniform1i("isAdaptiveStepEnabled", AdaptiveStep);
-			mShader->SetUniform1i("isBinarySearchEnabled", BinarySearch);
-			mShader->SetUniform1i("debugDraw", DebugDraw);
-			mShader->SetUniform1f("samplingCoefficient", SampleingCoefficient);
-			mShader->SetUniformMat4f("view", view);
-			mShader->SetUniformMat4f("invView", glm::inverse(view));
-			mShader->SetUniformMat4f("proj", projection);
-			mShader->SetUniformMat4f("invProj", glm::inverse(projection));
+			mShader->SetUniform("rayStep", RayStep);
+			mShader->SetUniform("iterationCount", IterationCount);
+			mShader->SetUniform("distanceBias", DistanceBias);
+			mShader->SetUniform("enableSSR", (int)1);
+			mShader->SetUniform("sampleCount", SampleCount);
+			mShader->SetUniform("isSamplingEnabled", SamplingEnabled);
+			mShader->SetUniform("isExponentialStepEnabled", ExpoStep);
+			mShader->SetUniform("isAdaptiveStepEnabled", AdaptiveStep);
+			mShader->SetUniform("isBinarySearchEnabled", BinarySearch);
+			mShader->SetUniform("debugDraw", DebugDraw);
+			mShader->SetUniform("samplingCoefficient", SampleingCoefficient);
+			mShader->SetUniform("view", view);
+			mShader->SetUniform("proj", projection);
+			mShader->SetUniform("invProj", glm::inverse(projection));
 
-			mShader->SetUniformTex("textureDepth", gBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 1);
-			mShader->SetUniformTex("textureNorm", gBuffer->GetTexture(GL_COLOR_ATTACHMENT1).get(), 2);
-			mShader->SetUniformTex("textureMetallic", gBuffer->GetTexture(GL_COLOR_ATTACHMENT2).get(), 3);
+			mShader->SetUniform("textureDepth", gBuffer->GetTexture(GL_DEPTH_ATTACHMENT).get(), 1);
+			mShader->SetUniform("textureNorm", gBuffer->GetTexture(GL_COLOR_ATTACHMENT1).get(), 2);
+			mShader->SetUniform("textureMetallic", gBuffer->GetTexture(GL_COLOR_ATTACHMENT2).get(), 3);
 
-			mShader->SetUniformTex("textureAlbedo", gBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 5);
-			mShader->SetUniformTex("textureFrame", previousFrame.get(), 7);
+			mShader->SetUniform("textureAlbedo", gBuffer->GetTexture(GL_COLOR_ATTACHMENT0).get(), 5);
+			mShader->SetUniform("textureFrame", previousFrame.get(), 7);
 
 			Renderer::DrawQuad(Matrix4());
 		}

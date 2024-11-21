@@ -1,6 +1,6 @@
 #include "src/Resource/ModelLoader.h"
 
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 
 #include "src/Core/String.h"
@@ -166,7 +166,7 @@ namespace Nuake
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			m_Meshes.push_back(ProcessMesh(mesh, scene));
+			m_Meshes.push_back(ProcessMesh(mesh, node, scene));
 		}
 
 		for (uint32_t i = 0; i < node->mNumChildren; i++)
@@ -255,15 +255,17 @@ namespace Nuake
 		return mesh;
 	}
 
-	Ref<Mesh> ModelLoader::ProcessMesh(aiMesh* node, const aiScene* scene)
+	Ref<Mesh> ModelLoader::ProcessMesh(aiMesh* meshNode, aiNode* node, const aiScene* scene)
 	{
-		auto vertices = ProcessVertices(node);
-		auto indices = ProcessIndices(node);
-		auto material = ProcessMaterials(scene, node);
+		auto vertices = ProcessVertices(meshNode);
+		for(auto& vert : vertices)
+		{
+			vert.position = ConvertMatrixToGLMFormat(node->mTransformation) * Vector4(vert.position, 1.0f);
+		}
 
 		Ref<Mesh> mesh = CreateRef<Mesh>();
-		mesh->AddSurface(vertices, indices);
-		mesh->SetMaterial(material);
+		mesh->AddSurface(std::move(vertices), ProcessIndices(meshNode));
+		mesh->SetMaterial(ProcessMaterials(scene, meshNode));
 
 		return mesh;
 	}
@@ -271,6 +273,7 @@ namespace Nuake
 	std::vector<Vertex> ModelLoader::ProcessVertices(aiMesh* mesh)
 	{
 		auto vertices = std::vector<Vertex>();
+		vertices.reserve(mesh->mNumVertices);
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			Vertex vertex {};
@@ -278,32 +281,26 @@ namespace Nuake
 			Vector3 current;
 
 			// Position
-			current.x = mesh->mVertices[i].x;
-			current.y = mesh->mVertices[i].y;
-			current.z = mesh->mVertices[i].z;
-			vertex.position = current;
-
-			// Normals
-			current.x = mesh->mNormals[i].x;
-			current.y = mesh->mNormals[i].y;
-			current.z = mesh->mNormals[i].z;
-			vertex.normal = current;
+			vertex.position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z } ;
+			vertex.normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
 
 			// Tangents
 			if (mesh->mTangents)
 			{
-				current.x = mesh->mTangents[i].x;
-				current.y = mesh->mTangents[i].z;
-				current.z = mesh->mTangents[i].y;
-				vertex.tangent = current;
+				vertex.tangent = { 
+					mesh->mTangents[i].x,
+					mesh->mTangents[i].z,
+					mesh->mTangents[i].y
+				} ;
 			}
 
 			if (mesh->mBitangents)
 			{
-				current.x = mesh->mBitangents[i].x;
-				current.y = mesh->mBitangents[i].z;
-				current.z = mesh->mBitangents[i].y;
-				vertex.bitangent = current;
+				vertex.bitangent = {
+					mesh->mBitangents[i].x,
+					mesh->mBitangents[i].z,
+					mesh->mBitangents[i].y
+				};
 			}
 
 			vertex.uv = glm::vec2(0.0f, 0.0f);
@@ -311,12 +308,13 @@ namespace Nuake
 			// Does it contain UVs?
 			if (mesh->mTextureCoords[0]) 
 			{
-				float u = mesh->mTextureCoords[0][i].x;
-				float v = mesh->mTextureCoords[0][i].y;
-				vertex.uv = Vector2(u, v);
+				vertex.uv = {
+					mesh->mTextureCoords[0][i].x, 
+					mesh->mTextureCoords[0][i].y
+				};
 			}
 
-			vertices.push_back(vertex);
+			vertices.push_back(std::move(vertex));
 		}
 
 		return vertices;
@@ -325,6 +323,7 @@ namespace Nuake
 	std::vector<SkinnedVertex> ModelLoader::ProcessSkinnedVertices(aiMesh* mesh)
 	{
 		auto vertices = std::vector<SkinnedVertex>();
+		vertices.reserve(mesh->mNumVertices);
 		for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 		{
 			SkinnedVertex vertex;
@@ -462,11 +461,17 @@ namespace Nuake
 		if (mesh->mMaterialIndex < 0)
 			return nullptr;
 
-		aiMaterial* materialNode = scene->mMaterials[mesh->mMaterialIndex];
-		Ref<Material> material = CreateRef<Material>();
-		
 		aiString materialName;
+		aiMaterial* materialNode = scene->mMaterials[mesh->mMaterialIndex];
 		materialNode->Get(AI_MATKEY_NAME, materialName);
+		const std::string& materialNameStr = std::string(materialName.C_Str());
+		if (auto found = m_Materials.find(materialNameStr);
+			found != m_Materials.end())
+		{
+			return found->second;
+		}
+
+		Ref<Material> material = CreateRef<Material>();
 		material->SetName(std::string(materialName.C_Str()));
 
 		aiString str;
@@ -511,6 +516,8 @@ namespace Nuake
 			Ref<Texture> albedoTexture = ProcessTextures(scene, str.C_Str());
 			material->SetDisplacement(albedoTexture);
 		}
+
+		m_Materials[materialNameStr] = material;
 
 		return material;
 	}

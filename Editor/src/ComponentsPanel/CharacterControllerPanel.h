@@ -1,20 +1,22 @@
 #pragma once
 #include "ComponentPanel.h"
 #include <src/Scene/Components/CharacterControllerComponent.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 
-class CharacterControllerPanel : ComponentPanel {
-
+class CharacterControllerPanel
+{
 public:
-    CharacterControllerPanel() {}
-
-    void Draw(Nuake::Entity entity) override
+    static void Draw(Nuake::Entity& entity, entt::meta_any& componentInstance)
     {
-        if (!entity.HasComponent<Nuake::CharacterControllerComponent>())
-            return;
         using namespace Nuake;
-
-        auto& component = entity.GetComponent<Nuake::CharacterControllerComponent>();
+        
+        Nuake::CharacterControllerComponent* componentPtr = componentInstance.try_cast<Nuake::CharacterControllerComponent>();
+        if (componentPtr == nullptr)
+        {
+            return;
+        }
+        Nuake::CharacterControllerComponent& component = *componentPtr;
+        
         BeginComponentTable(CHARACTER CONTROLLER, Nuake::CharacterControllerComponent);
         {
             {
@@ -50,7 +52,7 @@ public:
                 {
                     ImGui::Text("Stick to floor step down");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StickToFloorStepDown", &component.StickToFloorStepDown.y, -10.0f, 0.01, 0.0f);
+                    ImGui::DragFloat("##StickToFloorStepDown", &component.StickToFloorStepDown.y, -10.0f, 0.01f, 0.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.StickToFloorStepDown.y, -0.5f);
                 }
@@ -58,7 +60,7 @@ public:
                 {
                     ImGui::Text("Step down extra");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StepDownExtra", &component.StepDownExtra.y, -10.0f, 0.01, 0.0f);
+                    ImGui::DragFloat("##StepDownExtra", &component.StepDownExtra.y, -10.0f, 0.01f, 0.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.StepDownExtra.y, 0.0f);
                 }
@@ -66,7 +68,7 @@ public:
                 {
                     ImGui::Text("Step up");
                     ImGui::TableNextColumn();
-                    ImGui::DragFloat("##StepUp", &component.SteppingStepUp.y, 0.0f, 0.01, 10.0f);
+                    ImGui::DragFloat("##StepUp", &component.SteppingStepUp.y, 0.0f, 0.01f, 10.0f);
                     ImGui::TableNextColumn();
                     ComponentTableReset(component.SteppingStepUp.y, 0.4f);
                 }

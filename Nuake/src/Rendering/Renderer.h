@@ -1,27 +1,31 @@
 #pragma once
-#include "src/Core/Maths.h"
-#include "Shaders/Shader.h"
-#include "src/Scene/Components/Components.h"
-#include "src/Core/Core.h"
-#include "Buffers/VertexArray.h"
 #include "RenderList.h"
+
+#include "src/Core/Core.h"
+#include "src/Core/Maths.h"
+
+#include "src/Rendering/Camera.h"
+#include "src/Scene/Components/LightComponent.h"
+#include "src/Scene/Components/TransformComponent.h"
+
+#include "Shaders/Shader.h"
 #include "Buffers/UniformBuffer.h"
+#include "Buffers/VertexArray.h"
+
 
 namespace Nuake
 {
-	struct Light 
+	struct Light
 	{
 		TransformComponent transform;
 		LightComponent light;
 	};
 
-	const int MAX_LIGHT = 64;
-
 	struct LightData
 	{
-		int ShadowMapsIDs[CSM_AMOUNT];
-		float CascadeDepth[CSM_AMOUNT];
-		Matrix4 LightTransforms[CSM_AMOUNT];
+		int ShadowMapsIDs[4];
+		float CascadeDepth[4];
+		Matrix4 LightTransforms[4];
 		int Type;
 		Vector3 Position;
 		Vector3 Direction;
@@ -59,7 +63,7 @@ namespace Nuake
 		static void Init();
 		static void LoadShaders();
 
-		static void SubmitMesh(Ref<Mesh> mesh, Matrix4 transform, const int32_t entityId = -1);
+		static void SubmitMesh(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId = -1, const Matrix4& previousTransform = Matrix4(1.0f));
 		static void SubmitCube(Matrix4 transform);
 		static void Flush(Shader* shader, bool depthOnly = false);
 
@@ -76,7 +80,7 @@ namespace Nuake
 		// Debug
 		static void DrawLine(Vector3 start, Vector3 end, Color color, Matrix4 transform = Matrix4());
 		static void DrawLine(Vector3 start, Vector3 end, Vector3 color);
-		static void DrawCube(TransformComponent transform, glm::vec4 color);
+		static void DrawCube(Matrix4 transform);
 		static void DrawSphere(TransformComponent transform, glm::vec4 color);
 		static void DrawQuad(Matrix4 transform = Matrix4());
 	};

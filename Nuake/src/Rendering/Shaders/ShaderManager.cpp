@@ -2,6 +2,7 @@
 #include "src/Core/Logger.h"
 
 #include "src/Resource/StaticResources.h"
+#include <Tracy.hpp>
 
 #define LoadEmbeddedShader(file) \
 m_Shaders[file##_path] = CreateScope<Shader>(file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
@@ -43,10 +44,16 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_volumetric_shader);
 		LoadEmbeddedShader(Resources_Shaders_debugLine_shader);
 		LoadEmbeddedShader(Resources_Shaders_add_shader);
+		LoadEmbeddedShader(Resources_Shaders_display_depth_shader);
+		LoadEmbeddedShader(Resources_Shaders_ui_panel_shader);
+		LoadEmbeddedShader(Resources_Shaders_ui_text_shader);
+		LoadEmbeddedShader(Resources_Shaders_displayVelocity_shader);
 	}
 
 	Shader* ShaderManager::GetShader(const std::string& path)
 	{
+		ZoneScoped;
+
 		if (m_Shaders.find(path) == m_Shaders.end())
 		{
 			m_Shaders[path] = CreateScope<Shader>(path);

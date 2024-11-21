@@ -7,7 +7,7 @@
 #include "Texture.h"
 #include <src/Resource/Serializable.h>
 #include "src/Resource/Resource.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 
 namespace Nuake
 {

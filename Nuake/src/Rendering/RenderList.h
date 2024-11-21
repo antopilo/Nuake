@@ -15,6 +15,7 @@ namespace Nuake
 		Ref<Mesh> mesh;
 		Matrix4 transform;
 		int32_t entityId;
+		Matrix4 previousTransform;
 	};
 
 	class RenderList
@@ -25,7 +26,7 @@ namespace Nuake
 			this->m_RenderList = std::unordered_map<Ref<Material>, std::vector<RenderMesh>>();
 		}
 
-		void AddToRenderList(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId = -1)
+		void AddToRenderList(Ref<Mesh> mesh, const Matrix4& transform, const int32_t entityId = -1, const Matrix4& previousTransform = Matrix4(0.0f) )
 		{
 			Ref<Material> material = mesh->GetMaterial();
 
@@ -39,14 +40,20 @@ namespace Nuake
 				m_RenderList[material] = std::vector<RenderMesh>();
 			}
 
-			m_RenderList[material].push_back({std::move(mesh), std::move(transform), entityId});
+			m_RenderList[material].push_back({std::move(mesh), std::move(transform), entityId, previousTransform});
 		}
 
 		void Flush(Shader* shader, bool depthOnly = false)
 		{
 			shader->Bind();
-			const uint32_t entityIdUniformLocation = shader->FindUniformLocation("u_EntityID");
+			uint32_t entityIdUniformLocation = -1;;
+			if (!depthOnly)
+			{
+				entityIdUniformLocation = shader->FindUniformLocation("u_EntityID");
+			}
+
 			const uint32_t modelMatrixUniformLocation = shader->FindUniformLocation("u_Model");
+			const int previousTransformUniformLocation = shader->FindUniformLocation("u_PreviousViewModel");
 			for (auto& i : m_RenderList)
 			{
 				if (!depthOnly)
@@ -58,10 +65,15 @@ namespace Nuake
 				{
 					if (!depthOnly)
 					{
-						shader->SetUniform1i(entityIdUniformLocation, m.entityId + 1);
+						shader->SetUniform(entityIdUniformLocation, m.entityId + 1);
 					}
 
-					shader->SetUniformMat4f(modelMatrixUniformLocation, m.transform);
+					if (previousTransformUniformLocation != -1)
+					{
+						shader->SetUniform(previousTransformUniformLocation, m.previousTransform);
+					}
+
+					shader->SetUniform(modelMatrixUniformLocation, m.transform);
 					m.mesh->Draw(shader, false);
 				}
 			}

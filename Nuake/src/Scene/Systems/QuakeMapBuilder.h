@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <map>
 
 struct brush;
 struct brush_geometry;
@@ -23,7 +24,7 @@ namespace Nuake {
 
 		void CreateFuncBrush(brush* brush, brush_geometry* brush_inst,
 			Scene* scene, Entity& parent,
-			const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush);
+			const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush, std::map<std::string, std::string> props);
 
 	public:
 		QuakeMapBuilder() {}

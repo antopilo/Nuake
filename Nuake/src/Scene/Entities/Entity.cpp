@@ -1,24 +1,7 @@
 #include "Entity.h"
 
-#include "src/Scene/Components/ParentComponent.h"
-#include "src/Scene/Components/NameComponent.h"
-#include "src/Scene/Components/TransformComponent.h"
-#include "src/Scene/Components/CameraComponent.h"
-#include "src/Scene/Components/QuakeMap.h"
-#include "src/Scene/Components/LightComponent.h"
-#include "src/Scene/Components/QuakeMap.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
-#include "src/Scene/Components/CharacterControllerComponent.h"
-#include "src/Scene/Components/RigidbodyComponent.h"
-#include "src/Scene/Components/BSPBrushComponent.h"
-#include "src/Scene/Components/Components.h"
-#include "src/Scene/Components/BoxCollider.h"
-#include "src/Scene/Components/CapsuleColliderComponent.h"
-#include "src/Scene/Components/SpriteComponent.h"
-#include "src/Scene/Components/ParticleEmitterComponent.h"
-#include "src/Scene/Components/BoneComponent.h"
-#include "src/Scene/Components/SkinnedModelComponent.h"
-#include <src/Scene/Components/NavMeshVolumeComponent.h>
+#include "src/Scene/Components.h"
+
 
 namespace Nuake
 {
@@ -31,6 +14,26 @@ namespace Nuake
 
 			GetComponent<ParentComponent>().Children.push_back(ent);
 		}
+	}
+
+	bool Entity::EntityContainsItself(Entity a, Entity b)
+	{
+		ParentComponent& targeParentComponent = b.GetComponent<ParentComponent>();
+		if (!targeParentComponent.HasParent)
+			return false;
+
+		Entity currentParent = b.GetComponent<ParentComponent>().Parent;
+		while (currentParent != a)
+		{
+			if (currentParent.GetComponent<ParentComponent>().HasParent)
+				currentParent = currentParent.GetComponent<ParentComponent>().Parent;
+			else
+				return false;
+
+			if (currentParent == a)
+				return true;
+		}
+		return true;
 	}
 
 	json Entity::Serialize()
@@ -50,8 +53,6 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("QuakeMapComponent", GetComponent<QuakeMapComponent>())
 		if (HasComponent<LightComponent>())
 			SERIALIZE_OBJECT_REF_LBL("LightComponent", GetComponent<LightComponent>())
-		if (HasComponent<WrenScriptComponent>())
-			SERIALIZE_OBJECT_REF_LBL("WrenScriptComponent", GetComponent<WrenScriptComponent>())
 		if (HasComponent<CharacterControllerComponent>())
 			SERIALIZE_OBJECT_REF_LBL("CharacterControllerComponent", GetComponent<CharacterControllerComponent>())
 		if (HasComponent<BoxColliderComponent>())
@@ -82,7 +83,14 @@ namespace Nuake
 			SERIALIZE_OBJECT_REF_LBL("NetScriptComponent", GetComponent<NetScriptComponent>())
 		if (HasComponent<NavMeshVolumeComponent>())
 			SERIALIZE_OBJECT_REF_LBL("NavMeshVolumeComponent", GetComponent<NavMeshVolumeComponent>())
-
+		if (HasComponent<UIComponent>())
+			SERIALIZE_OBJECT_REF_LBL("UIComponent", GetComponent<UIComponent>())
+		if(HasComponent<PrefabComponent>())
+			SERIALIZE_OBJECT_REF_LBL("PrefabComponent", GetComponent<PrefabComponent>())
+		if (HasComponent<PrefabMember>())
+			SERIALIZE_OBJECT_REF_LBL("PrefabMember", GetComponent<PrefabMember>())
+		if (HasComponent<SkyComponent>())
+			SERIALIZE_OBJECT_REF_LBL("SkyComponent", GetComponent<SkyComponent>())
 		END_SERIALIZE();
 	}
 
@@ -96,13 +104,61 @@ namespace Nuake
 		}
 		DESERIALIZE_COMPONENT(NameComponent);
 		DESERIALIZE_COMPONENT(ParentComponent);
+		
+		if (j.contains("PrefabComponent"))
+		{
+			GetComponent<NameComponent>().IsPrefab = true;
+			auto& prefabComp = AddComponent<PrefabComponent>();
+			const auto& prefabPath = j["PrefabComponent"]["Path"];
+
+			if (prefabPath.empty())
+			{
+				return true;
+			}
+
+			if (!FileSystem::FileExists(prefabPath, false))
+			{
+				return true;
+			}
+
+			// This will map serialized ID to new generated ones while
+			// keeping the parent/child relationship in the prefab file.
+			std::string prefabTextContent = FileSystem::ReadFile(prefabPath);
+			auto prefabJson = json::parse(prefabTextContent);
+			auto& rootId = prefabJson["Root"];
+			json rootJson = "";
+			for (const auto& entJson : prefabJson["Entities"])
+			{
+				bool isRoot = false;
+				if (entJson["NameComponent"]["ID"] == rootId)
+				{
+					rootJson = entJson;
+					isRoot = true;
+					continue;
+				}
+			}
+
+			prefabComp.PrefabInstance = Prefab::InstanceOntoRoot(Entity{(entt::entity)GetHandle(), m_Scene}, prefabPath);
+			prefabComp.Path = prefabPath;
+
+			DeserializeComponents(rootJson);
+		}
+		else
+		{
+			DeserializeComponents(j);
+		}
+			
+		return true;
+	}
+
+	bool Entity::DeserializeComponents(const json& j)
+	{
 		DESERIALIZE_COMPONENT(ParticleEmitterComponent);
 		DESERIALIZE_COMPONENT(SpriteComponent);
 		DESERIALIZE_COMPONENT(CameraComponent);
 		DESERIALIZE_COMPONENT(QuakeMapComponent);
 		DESERIALIZE_COMPONENT(LightComponent);
 		DESERIALIZE_COMPONENT(ModelComponent);
-		DESERIALIZE_COMPONENT(WrenScriptComponent);
 		DESERIALIZE_COMPONENT(CharacterControllerComponent);
 		DESERIALIZE_COMPONENT(BoxColliderComponent);
 		DESERIALIZE_COMPONENT(CapsuleColliderComponent);
@@ -116,12 +172,22 @@ namespace Nuake
 		DESERIALIZE_COMPONENT(AudioEmitterComponent);
 		DESERIALIZE_COMPONENT(NetScriptComponent);
 		DESERIALIZE_COMPONENT(NavMeshVolumeComponent);
-		return true;
+		DESERIALIZE_COMPONENT(UIComponent);
+		DESERIALIZE_COMPONENT(SkyComponent);
+		return false;
 	}
 
 	void Entity::PostDeserialize()
 	{
 		POSTDESERIALIZE_COMPONENT(QuakeMapComponent);
+
+		if (HasComponent<PrefabComponent>())
+		{
+			auto& prefabComp = GetComponent<PrefabComponent>();
+			const std::string& path = prefabComp.Path;
+		}
+
+		POSTDESERIALIZE_COMPONENT(PrefabComponent);
 	}
 
 	Entity::Entity(entt::entity handle, Scene* scene)

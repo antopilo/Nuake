@@ -4,7 +4,8 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Core/Maths.h"
-#include <src/Physics/PhysicsShapes.h>
+#include "src/Resource/Project.h"
+#include "src/Physics/PhysicsShapes.h"
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/CharacterControllerComponent.h"
 
@@ -205,7 +206,7 @@ namespace Nuake
 			case Layers::MOVING:
 				return true;
 			case Layers::SENSORS:
-				return inLayer2 == BroadPhaseLayers::MOVING;;
+				return inLayer2 == BroadPhaseLayers::MOVING;
 			default:
 				return false;
 			}
@@ -248,14 +249,61 @@ namespace Nuake
 			_registeredCharacters = std::map<uint32_t, CharacterGhostPair>();
 
 			// Initialize Jolt Physics
-			const uint32_t MaxBodies = 4096;
+			ProjectSettings settings;
+			if (Engine::GetProject())
+			{
+				settings = Engine::GetProject()->Settings;
+			}
+
+			const uint32_t MaxBodies = settings.MaxPhysicsBodies;
 			const uint32_t NumBodyMutexes = 0;
-			const uint32_t MaxBodyPairs = 2048;
-			const uint32_t MaxContactConstraints = 2048;
+			const uint32_t MaxBodyPairs = settings.MaxPhysicsBodyPair;
+			const uint32_t MaxContactConstraints = settings.MaxPhysicsContactConstraints;
 
 			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
 			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, JoltObjectVSBroadphaseLayerFilter, JoltObjectVSObjectLayerFilter);
+			// A body activation listener gets notified when bodies activate and go to sleep
+			// Note that this is called from a job so whatever you do here needs to be thread safe.
+			// Registering one is entirely optional.
+			_bodyActivationListener = CreateScope<MyBodyActivationListener>();
+			_JoltPhysicsSystem->SetBodyActivationListener(_bodyActivationListener.get());
 
+			// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
+			// Note that this is called from a job so whatever you do here needs to be thread safe.
+			// Registering one is entirely optional.
+			_contactListener = CreateScope<MyContactListener>(this);
+			_JoltPhysicsSystem->SetContactListener(_contactListener.get());
+
+			// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
+			// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
+			_JoltBodyInterface = &_JoltPhysicsSystem->GetBodyInterface();
+
+			// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
+			// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
+			// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
+			_JoltPhysicsSystem->OptimizeBroadPhase();
+			const uint32_t availableThreads = std::thread::hardware_concurrency() - 1;
+			_JoltJobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, availableThreads);
+		}
+
+		void DynamicWorld::ReInit()
+		{
+			_registeredCharacters = std::map<uint32_t, CharacterGhostPair>();
+
+			// Initialize Jolt Physics
+			ProjectSettings settings;
+			if (Engine::GetProject())
+			{
+				settings = Engine::GetProject()->Settings;
+			}
+
+			const uint32_t MaxBodies = settings.MaxPhysicsBodies;
+			const uint32_t NumBodyMutexes = 0;
+			const uint32_t MaxBodyPairs = settings.MaxPhysicsBodyPair;
+			const uint32_t MaxContactConstraints = settings.MaxPhysicsContactConstraints;
+
+			_JoltPhysicsSystem = CreateRef<JPH::PhysicsSystem>();
+			_JoltPhysicsSystem->Init(MaxBodies, NumBodyMutexes, MaxBodyPairs, MaxContactConstraints, JoltBroadphaseLayerInterface, JoltObjectVSBroadphaseLayerFilter, JoltObjectVSObjectLayerFilter);
 			// A body activation listener gets notified when bodies activate and go to sleep
 			// Note that this is called from a job so whatever you do here needs to be thread safe.
 			// Registering one is entirely optional.
@@ -305,6 +353,12 @@ namespace Nuake
 				layer = Layers::MOVING;
 			}
 
+			if (rb->GetForceKinematic())
+			{
+				motionType = JPH::EMotionType::Kinematic;
+				layer = Layers::MOVING;
+			}
+
 			const std::string name = rb->GetEntity().GetComponent<NameComponent>().Name;
 			if (rb->IsTrigger())
 			{
@@ -326,6 +380,11 @@ namespace Nuake
 			JPH::BodyCreationSettings bodySettings(joltShape, joltPos, joltRotation, motionType, layer);
 			bodySettings.mIsSensor = rb->IsTrigger();
 			if (bodySettings.mIsSensor)
+			{
+				bodySettings.mCollideKinematicVsNonDynamic = true;
+			}
+
+			if (rb->GetForceKinematic())
 			{
 				bodySettings.mCollideKinematicVsNonDynamic = true;
 			}
@@ -353,28 +412,15 @@ namespace Nuake
 				bodySettings.mMassPropertiesOverride.mMass = mass;
 			}
 			
-			if (rb->GetEntity().GetID() == 0)
+			if (int entityId = rb->GetEntity().GetHandle(); rb->GetEntity().IsValid())
 			{
-				Logger::Log("Entity with ID 0 detected. Name: " + rb->GetEntity().GetComponent<NameComponent>().Name, "DEBUG");
+				bodySettings.mUserData = rb->GetEntity().GetHandle();
+
+				// Create the actual rigid body
+				JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
+				uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
+				_registeredBodies.push_back(bodyIndex);
 			}
-
-			int entityId = rb->GetEntity().GetHandle();
-
-			if (entityId == 0)
-			{
-				Logger::Log("ERROR");
-			}
-
-			bodySettings.mUserData = entityId;
-			// Create the actual rigid body
-			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
-			uint32_t bodyIndex = (uint32_t)body.GetIndexAndSequenceNumber();
-			_registeredBodies.push_back(bodyIndex);
-		}
-
-		void DynamicWorld::AddGhostbody(Ref<GhostObject> gb)
-		{
-
 		}
 
 		void DynamicWorld::AddCharacterController(Ref<CharacterController> cc)
@@ -410,7 +456,7 @@ namespace Nuake
 			}
 
 			bodySettings.mUserData = cc->Owner.GetHandle();
-
+			bodySettings.mCollideKinematicVsNonDynamic = true;
 			// Create the actual rigid body
 			JPH::BodyID body = _JoltBodyInterface->CreateAndAddBody(bodySettings, JPH::EActivation::Activate); // Note that if we run out of bodies this can return nullptr
 			uint32_t bodyIndex = body.GetIndexAndSequenceNumber();
@@ -435,6 +481,35 @@ namespace Nuake
 			return false;
 		}
 
+		Vector3 DynamicWorld::GetCharacterGroundVelocity(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				characterController->UpdateGroundVelocity();
+				const auto groundVelocity = characterController->GetGroundVelocity();
+
+				return Vector3(groundVelocity.GetX(), groundVelocity.GetY(), groundVelocity.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
+		Vector3 DynamicWorld::GetCharacterGroundNormal(const Entity& entity)
+		{
+			const uint32_t entityHandle = entity.GetHandle();
+			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
+			{
+				auto& characterController = _registeredCharacters[entityHandle].Character;
+				const auto groundNormal = characterController->GetGroundNormal();
+
+				return Vector3(groundNormal.GetX(), groundNormal.GetY(), groundNormal.GetZ());
+			}
+
+			return { 0, 0, 0 };
+		}
+
 		void DynamicWorld::SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation)
 		{
 			const auto& bodyInterface = _JoltPhysicsSystem->GetBodyInterface();
@@ -454,13 +529,29 @@ namespace Nuake
 					if (newPosition != currentPosition || currentRotation != newRotation)
 					{
 						std::string name = entity.GetComponent<NameComponent>().Name;
-						_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+
+						JPH::EMotionType bodyType = _JoltBodyInterface->GetMotionType(bodyId);
+						switch (bodyType)
+						{
+							case JPH::EMotionType::Kinematic:
+							{
+								_JoltBodyInterface->MoveKinematic(bodyId, newPosition, newRotation, Engine::GetFixedTimeStep());
+								break;
+							}
+							case JPH::EMotionType::Dynamic:
+							case JPH::EMotionType::Static:
+							{
+								_JoltBodyInterface->SetPositionAndRotation(bodyId, newPosition, newRotation, JPH::EActivation::DontActivate);
+
+								break;
+							}
+						}
 					}
 				}
 			}
 		}
 
-		void DynamicWorld::SetCharacterControllerPosition(const Entity & entity, const Vector3 & position)
+		void DynamicWorld::SetCharacterControllerPosition(const Entity& entity, const Vector3 & position)
 		{
 			const uint32_t entityHandle = entity.GetHandle();
 			if (_registeredCharacters.find(entityHandle) != _registeredCharacters.end())
@@ -470,7 +561,7 @@ namespace Nuake
 			}
 		}
 
-		std::vector<RaycastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
+		std::vector<ShapeCastResult> DynamicWorld::Raycast(const Vector3& from, const Vector3& to)
 		{
 			// Create jolt ray
 			const auto& fromJolt = JPH::Vec3(from.x, from.y, from.z);
@@ -482,22 +573,26 @@ namespace Nuake
 			_JoltPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, JPH::RayCastSettings(), collector);
 
 			// Fetch results
-			std::vector<RaycastResult> raycastResults;
+			std::vector<ShapeCastResult> raycastResults;
 			if (collector.HadHit())
 			{
 				int num_hits = (int)collector.mHits.size();
 				JPH::BroadPhaseCastResult* results = collector.mHits.data();
-
 				// Format result
 				for (int i = 0; i < num_hits; ++i)
 				{
-					const float hitFraction = results[i].mFraction;
-					const JPH::Vec3& hitPosition = ray.GetPointOnRay(results[i].mFraction);
-
-					RaycastResult result
+					const float hitFraction = collector.mHits[i].mFraction;
+					const JPH::Vec3& hitPosition = ray.GetPointOnRay(collector.mHits[i].mFraction);
+					auto bodyId = static_cast<JPH::BodyID>(collector.mHits[i].mBodyID);
+					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
+					int userData = static_cast<int>(_JoltBodyInterface->GetUserData(bodyId));
+					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
-						hitFraction
+						hitFraction,
+						Vector3(0, 0, 0),
+						layer,
+						userData
 					};
 
 					raycastResults.push_back(std::move(result));
@@ -546,12 +641,14 @@ namespace Nuake
 
 					auto layer = _JoltBodyInterface->GetObjectLayer(bodyId);
 
+					int userData = static_cast<int>(_JoltBodyInterface->GetUserData(bodyId));
 					ShapeCastResult result
 					{
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
 						Vector3(surfaceNormal.GetX(), surfaceNormal.GetY(), surfaceNormal.GetZ()),
-						static_cast<float>(layer)
+						static_cast<float>(layer),
+						userData
 					};
 
 					shapecastResults.push_back(std::move(result));
@@ -574,7 +671,7 @@ namespace Nuake
 						continue;
 					}
 
-					JPH::Vec3 position = bodyInterface.GetCenterOfMassPosition(bodyId);
+					JPH::Vec3 position = bodyInterface.GetPosition(bodyId);
 					JPH::Vec3 velocity = bodyInterface.GetLinearVelocity(bodyId);
 					JPH::Mat44 joltTransform = bodyInterface.GetWorldTransform(bodyId);
 					const auto bodyRotation = bodyInterface.GetRotation(bodyId);
@@ -672,8 +769,8 @@ namespace Nuake
 			// If you take larger steps than 1 / 90th of a second you need to do multiple collision steps in order to keep the simulation stable.
 			// Do 1 collision step per 1 / 60th of a second (round up).
 			int collisionSteps = 1;
-			constexpr float minStepDuration = 1.0f / 90.0f;
-			constexpr int maxStepCount = 32;
+			const float minStepDuration = 1.0f / static_cast<float>(Engine::GetProject()->Settings.PhysicsStep);
+			const int maxStepCount = Engine::GetProject()->Settings.MaxPhysicsSubStep;
 
 			if(ts > minStepDuration)
 			{
@@ -714,6 +811,8 @@ namespace Nuake
 						const auto& LayerFilter = _JoltPhysicsSystem->GetDefaultLayerFilter(Layers::CHARACTER);
 						const auto& joltGravity = _JoltPhysicsSystem->GetGravity();
 						auto& tempAllocatorPtr = *(joltTempAllocator);
+
+						c.second.Character->UpdateGroundVelocity();
 						if (characterController->AutoStepping)
 						{
 							// Create update settings from character controller
@@ -722,7 +821,7 @@ namespace Nuake
 							joltUpdateSettings.mWalkStairsStepUp = CreateJoltVec3(characterController->StepUp);
 							joltUpdateSettings.mWalkStairsStepForwardTest = characterController->StepDistance;
 							joltUpdateSettings.mWalkStairsMinStepForward = characterController->StepMinDistance;
-
+							
 							c.second.Character->ExtendedUpdate(ts, joltGravity, joltUpdateSettings, broadPhaseLayerFilter, LayerFilter, { }, { }, tempAllocatorPtr);
 						}
 						else
@@ -821,7 +920,7 @@ namespace Nuake
 			_CollisionCallbacks.push_back(std::move(data));
 		}
 
-		const std::vector<CollisionData>& DynamicWorld::GetCollisionsData()
+		const std::vector<CollisionData> DynamicWorld::GetCollisionsData()
 		{
 			std::scoped_lock<std::mutex> lock(_CollisionCallbackMutex);
 			return _CollisionCallbacks;

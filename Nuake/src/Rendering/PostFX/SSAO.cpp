@@ -9,6 +9,7 @@
 
 #include <random>
 #include <src/Vendors/imgui/imgui.h>
+#include <Tracy.hpp>
 
 namespace Nuake 
 {
@@ -32,6 +33,8 @@ namespace Nuake
 
 	void SSAO::Resize(const Vector2& size)
 	{
+		ZoneScoped;
+
 		if (_size == size)
 			return;
 
@@ -42,6 +45,8 @@ namespace Nuake
 
 	void SSAO::Clear()
 	{
+		ZoneScoped;
+
 		_ssaoBlurFramebuffer->Bind();
 		{
 			RenderCommand::SetClearColor({ 1, 1, 1, 1});
@@ -96,6 +101,8 @@ namespace Nuake
 
 	void SSAO::Draw(FrameBuffer* gBuffer, const Matrix4& projection, const Matrix4& view)
 	{
+		ZoneScoped;
+
 		_ssaoFramebuffer->Bind();
 		{
 			_ssaoFramebuffer->Clear();
@@ -103,28 +110,25 @@ namespace Nuake
 			const auto& normalTexture = gBuffer->GetTexture(GL_COLOR_ATTACHMENT1);
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/ssao.shader");
 			shader->Bind();
-			shader->SetUniformMat4f("u_Projection", projection);
-			shader->SetUniformMat4f("u_View", view);
-			shader->SetUniformTex("u_Depth", depthTexture.get(), 2);
-			shader->SetUniformTex("u_Normal", normalTexture.get(), 3);
-			shader->SetUniformTex("u_Noise", _ssaoNoiseTexture.get(), 6);
-			shader->SetUniform1i("u_KernelSize", 64);
-			shader->SetUniform1f("u_Radius", Radius);
-			shader->SetUniform1f("u_Bias", Bias);
-			shader->SetUniform1f("u_Falloff", Falloff);
-			shader->SetUniform1f("u_Area", Area);
-			shader->SetUniform1f("u_Strength", Strength);
-			shader->SetUniformVec2("u_NoiseScale", Vector2(_size.x / 4, _size.y / 4) );
+			shader->SetUniform("u_Projection", projection);
+			shader->SetUniform("u_View", view);
+			shader->SetUniform("u_Depth", depthTexture.get(), 2);
+			shader->SetUniform("u_Normal", normalTexture.get(), 3);
+			shader->SetUniform("u_Noise", _ssaoNoiseTexture.get(), 6);
+			shader->SetUniform("u_Radius", Radius);
+			shader->SetUniform("u_Bias", Bias);
+			shader->SetUniform("u_Strength", Strength);
+			shader->SetUniform("u_NoiseScale", Vector2(_size.x / 4, _size.y / 4) );
 
 			int i = 0;
 			for (const auto& k : _ssaoKernel)
 			{
 				const std::string& uniformName = "u_Samples[" + std::to_string(i) + "]";
-				shader->SetUniform3f(uniformName, k.x, k.y, k.z);
+				shader->SetUniform(uniformName, k.x, k.y, k.z);
 				i++;
 			}
 
-			//shader->SetUniform1fv("u_Samples", 64 * 3, (float*)&(_ssaoKernel.begin()));
+			//shader->SetUniformv("u_Samples", 64 * 3, (float*)&(_ssaoKernel.begin()));
 			Renderer::DrawQuad(Matrix4(1.0));
 		}
 		_ssaoFramebuffer->Unbind();
@@ -134,7 +138,7 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/blur.shader");
 			shader->Bind();
 
-			shader->SetUniformTex("u_Input", _ssaoFramebuffer->GetTexture().get(), 2);
+			shader->SetUniform("u_Input", _ssaoFramebuffer->GetTexture().get(), 2);
 
 			Renderer::DrawQuad(Matrix4(1.0));
 		}

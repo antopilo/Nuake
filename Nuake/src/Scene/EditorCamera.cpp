@@ -5,10 +5,12 @@
 
 #include "src/Core/Logger.h"
 #include <src/Vendors/imgui/imgui.h>
+#include <Engine.h>
+#include "src/Resource/Project.h"
 
 namespace Nuake
 {
-	void EditorCamera::Update(Timestep ts, const bool hover)
+	bool EditorCamera::Update(Timestep ts, const bool hover)
 	{
 		if (IsMoving)
 		{
@@ -26,6 +28,7 @@ namespace Nuake
 		const float y = Input::GetMouseY();
 
 		m_IsFlying = Input::IsMouseButtonDown(1) || Input::IsMouseButtonDown(2);
+
 		const bool isPressingMouse = m_IsFlying || Input::YScroll != 0.0f;
 		
 		if (hover)
@@ -49,17 +52,14 @@ namespace Nuake
 			}
 		}
 
-		Yaw = glm::mix(Yaw, TargetYaw, 1.0f);
-		Pitch = glm::mix(Pitch, TargetPitch, 1.0f);
 
-		if (!controlled)
-		{
-			Input::ShowMouse();
-		}
-		else if(hover)
-		{
-			Input::HideMouse();
-		}
+
+		const bool smoothCamera = Engine::GetProject()->Settings.SmoothCamera;
+		const float smoothCameraSpeed = Engine::GetProject()->Settings.SmoothCameraSpeed;
+		Yaw = glm::mix(Yaw, TargetYaw, smoothCamera ? smoothCameraSpeed : 1.0f);
+		Pitch = glm::mix(Pitch, TargetPitch, smoothCamera ? smoothCameraSpeed : 1.0f);
+
+		
 
 		if (Input::IsKeyDown(Key::LEFT_ALT))
 		{
@@ -70,7 +70,7 @@ namespace Nuake
 				Input::YScroll = 0.0f;
 			}
 
-			return;
+			return true;
 		}
 
 		// Keyboard
@@ -163,6 +163,12 @@ namespace Nuake
 		
 		if (controlled)
 		{
+			if (!wasControlled)
+			{
+				Input::HideMouse();
+				wasControlled = true;
+			}
+
 			if (Input::IsMouseButtonDown(2))
 			{
 				Vector3 movement = Vector3(0);
@@ -184,12 +190,22 @@ namespace Nuake
 				Input::YScroll = 0.0f;
 			}
 		}
+		else
+		{
+			if (wasControlled)
+			{
+				Input::ShowMouse();
+				wasControlled = false;
+			}
+		}
 
 		SetDirection(glm::normalize(Direction));
 
 		
 		mouseLastX = x;
 		mouseLastY = y;
+
+		return controlled;
 	}
 
 	Ref<EditorCamera> EditorCamera::Copy()

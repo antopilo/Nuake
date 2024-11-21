@@ -17,11 +17,6 @@ namespace Nuake
 		m_World->AddRigidbody(rb);
 	}
 
-	void PhysicsManager::RegisterGhostBody(Ref<GhostObject> rb)
-	{
-		m_World->AddGhostbody(rb);
-	}
-
 	void PhysicsManager::RegisterCharacterController(Ref<Physics::CharacterController> cc) 
 	{
 		m_World->AddCharacterController(cc);
@@ -47,7 +42,7 @@ namespace Nuake
 		m_World->Clear();
 	}
 
-	std::vector<RaycastResult> PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
+	std::vector<ShapeCastResult> PhysicsManager::Raycast(const Vector3& from, const Vector3&  to)
 	{
 		return m_World->Raycast(from, to);
 	}
@@ -57,7 +52,7 @@ namespace Nuake
 		return m_World->CastShape(from, to, shape);
 	}
 
-	const std::vector<Physics::CollisionData>& PhysicsManager::GetCollisions()
+	const std::vector<Physics::CollisionData> PhysicsManager::GetCollisions()
 	{
 		return m_World->GetCollisionsData();
 	}

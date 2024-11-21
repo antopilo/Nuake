@@ -12,15 +12,19 @@
 
 #include <src/Rendering/Textures/Material.h>
 #include "../Misc/PopupHelper.h"
-
+#include <src/FileSystem/FileDialog.h>
+#include <src/FileSystem/Directory.h>
+#include <src/FileSystem/File.h>
 #include "src/Scene/Systems/WadConverter.h"
 #include "../Misc/ThumbnailManager.h"
+
+#include <Tracy.hpp>
+#include <src/Resource/SkyResource.h>
 
 namespace Nuake
 {
     Ref<Directory> FileSystemUI::m_CurrentDirectory;
     
-    // TODO: add filetree in same panel
     void FileSystemUI::Draw()
     {
 
@@ -64,6 +68,8 @@ namespace Nuake
 
     void FileSystemUI::DrawDirectory(Ref<Directory> directory, uint32_t drawId)
     {
+        ZoneScoped;
+
         ImGui::PushFont(FontManager::GetFont(Icons));
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         const char* icon = ICON_FA_FOLDER;
@@ -226,6 +232,8 @@ namespace Nuake
 
     void FileSystemUI::DrawFile(Ref<File> file, uint32_t drawId)
     {
+        ZoneScoped;
+
         ImGui::PushFont(EditorInterface::bigIconFont);
         ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {0.f, 0.f});
@@ -254,6 +262,8 @@ namespace Nuake
                         OS::OpenTrenchbroomMap(file->GetAbsolutePath());
                         break;
                     case FileType::NetScript:
+                    case FileType::UI:
+                    case FileType::CSS:
                         OS::OpenIn(file->GetAbsolutePath());
                         break;
                     case FileType::Scene:
@@ -262,8 +272,10 @@ namespace Nuake
                     case FileType::Solution:
                         OS::OpenIn(file->GetAbsolutePath());
                         break;
+                    case FileType::Prefab:
+                        this->Editor->OpenPrefabWindow(file->GetRelativePath());
+                        break;
                 }
-                
             }
             
             Editor->Selection = EditorSelection(file);
@@ -293,7 +305,7 @@ namespace Nuake
             {
                 dragType = "_Material";
             }
-            else if (fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
+            else if (fileExtension == ".mesh" || fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
             {
                 dragType = "_Model";
             }
@@ -312,6 +324,14 @@ namespace Nuake
             else if (fileExtension == ".wav" || fileExtension == ".ogg")
             {
                 dragType = "_AudioFile";
+            }
+            else if (fileExtension == ".html")
+            {
+                dragType = "_UIFile";
+            }
+            else if (fileExtension == ".sky")
+            {
+                dragType = "_SkyFile";
             }
 
             ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
@@ -365,17 +385,38 @@ namespace Nuake
                 textureImage = image;
             }
         }
+        else if (fileType == FileType::Mesh)
+        {
+            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            if (image)
+            {
+                textureImage = image;
+            }
+        }
+        else if (fileType == FileType::Solution)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/sln_icon.png");
+        }
+        else if (fileType == FileType::Map)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/trenchbroom_icon.png");
+        }
 
         ImGui::SetCursorPos(prevCursor);
         ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         ImGui::PopStyleVar();
         
-        auto imguiStyle = ImGui::GetStyle();
+        auto& imguiStyle = ImGui::GetStyle();
 
         ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
         ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
         ImU32 rectColor = IM_COL32(255, 255, 255, 16);
         ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+
+        ImU32 rectColor2 = UI::PrimaryCol;
+        Color fileTypeColor = GetColorByFileType(file->GetFileType());
+        ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 101) + offsetEnd, IM_COL32(fileTypeColor.r * 255.f, fileTypeColor.g * 255.f, fileTypeColor.b * 255.f, fileTypeColor.a * 255.f), 0.0f);
+
         std::string visibleName = file->GetName();
         const uint32_t MAX_CHAR_NAME = 32;
         if (file->GetName().size() >= MAX_CHAR_NAME)
@@ -536,15 +577,15 @@ namespace Nuake
         {
             Ref<Scene> scene = Scene::New();
             const std::string projectPath = file->GetAbsolutePath();
-            if (!scene->Deserialize(FileSystem::ReadFile(projectPath, true)))
+            if (!scene->Deserialize(json::parse(FileSystem::ReadFile(projectPath, true))))
             {
                 Logger::Log("Failed loading scene: " + projectPath,"editor", CRITICAL);
+                ImGui::PopFont();
                 return;
             }
 
-            FileSystem::SetRootDirectory(projectPath + "/");
             scene->Path = FileSystem::AbsoluteToRelative(projectPath);
-            Engine::LoadScene(scene);
+            Engine::SetCurrentScene(scene);
         }
 
         // Rename Popup
@@ -638,36 +679,28 @@ namespace Nuake
 					    RefreshFileBrowser();
 					}
 				}
-
-			    if (ImGui::MenuItem("Wren Script"))
-			    {
-			        std::string path = FileDialog::SaveFile("*.wren");
-			        
-			        if (!String::EndsWith(path, ".wren"))
-			        {
-			            path += ".wren";
-			        }
-
-			        if (!path.empty())
-			        {
-                        std::string fileName = String::ToUpper(FileSystem::GetFileNameFromPath(path));
-			            fileName = String::RemoveWhiteSpace(fileName);
-			            
-			            if(!String::IsDigit(fileName[0]))
-			            {
-			                
-                            FileSystem::BeginWriteFile(path, true);
-                            FileSystem::WriteLine(TEMPLATE_SCRIPT_FIRST + fileName + TEMPLATE_SCRIPT_SECOND);
-                            FileSystem::EndWriteFile();
-			            
-                            RefreshFileBrowser();
+                if (ImGui::MenuItem("Sky"))
+                {
+                    const std::string path = FileDialog::SaveFile("*.sky");
+                    if (!path.empty())
+                    {
+                        std::string finalPath = path;
+                        if (!String::EndsWith(path, ".sky"))
+                        {
+                            finalPath = path + ".sky";
                         }
-			            else
-			            {
-			                Logger::Log("Cannot create script files that starts with a number.", "filesystem", CRITICAL);
-			            }
-			        }
-			    }
+
+                        Ref<SkyResource> sky = CreateRef<SkyResource>(FileSystem::AbsoluteToRelative(finalPath));
+                        sky->IsEmbedded = false;
+                        auto jsonData = sky->Serialize();
+ 
+                        FileSystem::BeginWriteFile(finalPath, true);
+                        FileSystem::WriteLine(jsonData.dump(4));
+                        FileSystem::EndWriteFile();
+
+                        RefreshFileBrowser();
+                    }
+                }
 
 				ImGui::EndMenu();
 			}
@@ -679,8 +712,79 @@ namespace Nuake
 
     void FileSystemUI::RefreshFileBrowser()
     {
+        Scan();
+    }
+
+    Color FileSystemUI::GetColorByFileType(FileType fileType)
+    {
+        switch (fileType)
+        {
+        case Nuake::FileType::Unknown:
+            break;
+        case Nuake::FileType::Image:
+            break;
+        case Nuake::FileType::Material:
+            break;
+        case Nuake::FileType::Mesh:
+            break;
+        case Nuake::FileType::Script:
+            return { 1.0, 0.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::NetScript:
+            return { 1.0, 0.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::Project:
+            return Engine::GetProject()->Settings.PrimaryColor;
+            break;
+        case Nuake::FileType::Prefab:
+            break;
+        case Nuake::FileType::Scene:
+            return { 0, 1.0f, 1.0, 1.0 };
+            break;
+        case Nuake::FileType::Wad:
+            break;
+        case Nuake::FileType::Map:
+            return { 0.0, 1.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::Assembly:
+            break;
+        case Nuake::FileType::Solution:
+            break;
+        case Nuake::FileType::Audio:
+            return { 0.0, 0.0, 1.0, 1.0 };
+            break;
+        case Nuake::FileType::UI:
+            return { 1.0, 1.0, 0.0, 1.0 };
+            break;
+        case Nuake::FileType::CSS:
+            return { 1.0, 0.0, 1.0, 1.0 };
+            break;
+        default:
+            break;
+        }
+
+        return Color(0, 0, 0, 0);
+    }
+
+    void FileSystemUI::Scan()
+    {
+        if (!m_CurrentDirectory)
+        {
+            return;
+        }
+
+        std::string previousPath = m_CurrentDirectory->FullPath;
+
         FileSystem::Scan();
-        m_CurrentDirectory = FileSystem::RootDirectory;
+
+        if (FileSystem::DirectoryExists(previousPath, true))
+        {
+            m_CurrentDirectory = FileSystem::GetDirectory(FileSystem::AbsoluteToRelative(previousPath));
+        }
+        else
+        {
+            m_CurrentDirectory = FileSystem::RootDirectory;
+        }
     }
 
     float h = 200;
@@ -880,6 +984,11 @@ namespace Nuake
                         {
                             for (Ref<Directory>& d : m_CurrentDirectory->Directories)
                             {
+                                if (d->GetName() == "bin" || d->GetName() == ".vs" || d->GetName() == "obj")
+                                {
+                                    continue;
+                                }
+
                                 if(String::Sanitize(d->Name).find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
                                     if (i + 1 % amount != 0)
@@ -899,6 +1008,11 @@ namespace Nuake
                             {
                                 if(m_SearchKeyword.empty() || f->GetName().find(String::Sanitize(m_SearchKeyword)) != std::string::npos)
                                 {
+                                    if (f->GetFileType() == FileType::Unknown || f->GetFileType() == FileType::Assembly)
+                                    {
+                                        continue;
+                                    }
+
                                     if (i + 1 % amount != 0 || i == 1)
                                     {
                                         ImGui::TableNextColumn();
@@ -907,7 +1021,7 @@ namespace Nuake
                                     {
                                         ImGui::TableNextRow();
                                     }
-                                
+                                    
                                     DrawFile(f, i);
                                     i++;
                                 }

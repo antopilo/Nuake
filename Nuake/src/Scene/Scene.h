@@ -2,7 +2,7 @@
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 
-#include "entt/entt.hpp"
+#include <entt/entt.hpp>
 
 #include "src/Rendering/Camera.h"
 #include "Lighting/Environment.h"
@@ -18,6 +18,12 @@ namespace Nuake
 
 	class Entity;
 	class SceneRenderer;
+
+	DECLARE_MULTICAST_DELEGATE(PreInitializeDelegate)
+	DECLARE_MULTICAST_DELEGATE(PostInitializeDelegate)
+
+	class PhysicsSystem;
+	class ScriptingSystem;
 
 	class Scene : public ISerializable
 	{
@@ -40,6 +46,9 @@ namespace Nuake
 		std::unordered_map<std::string, Entity> m_EntitiesNameMap;
 		std::string Path = "";
 
+		Ref<PhysicsSystem> physicsSystem;
+		Ref<ScriptingSystem> scriptingSystem;
+
 		Ref<SceneRenderer> m_SceneRenderer;
 
 		static Ref<Scene> New();
@@ -56,7 +65,7 @@ namespace Nuake
 		void Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view);
 
 		std::string GetName();
-		bool SetName(std::string& newName);
+		bool SetName(const std::string& newName);
 
 		Ref<Camera> GetCurrentCamera();
 
@@ -74,6 +83,8 @@ namespace Nuake
 		Entity GetEntityFromPath(const std::string& path);
 		Entity GetRelativeEntityFromPath(Entity entity, const std::string& path);
 
+		bool EntityIsParent(Entity entity, Entity parent);
+
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src);
 
@@ -90,6 +101,16 @@ namespace Nuake
 		// Component specific utilies
 		void CreateSkeleton(Entity& entity);
 
+		PreInitializeDelegate& OnPreInitialize() { return preInitializeDelegate; }
+		PostInitializeDelegate& OnPostInitialize() { return postInitializeDelegate; }
+
+		Ref<PhysicsSystem> GetPhysicsSystem() const { return physicsSystem; }
+		Ref<ScriptingSystem> GetScriptingSystem() const { return scriptingSystem; }
+
+	protected:
+		PreInitializeDelegate preInitializeDelegate;
+		PostInitializeDelegate postInitializeDelegate;
+		
 	private:
 		void CreateSkeletonTraverse(Entity& entity, SkeletonNode& skeletonNode);
 	};

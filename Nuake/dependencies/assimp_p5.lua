@@ -11,12 +11,15 @@ project 'assimp'
 	warnings 'Off'
 	optimize 'Speed'
 
+	cppdialect "C++20"
+
 	includedirs {
 		'build/',
 		'build/assimp',
 		'assimp/',
 		'assimp/contrib/irrXML/',
 		'assimp/contrib/unzip/',
+		'assimp/contrib/utf8cpp/source',
 		'assimp/contrib/zlib/',
 		'assimp/contrib/rapidjson/include/',
 		'assimp/code',
@@ -32,6 +35,7 @@ project 'assimp'
 		'assimp/code/Common/**',
 		'assimp/code/PostProcessing/**',
 		'assimp/code/Material/**',
+		'assimp/code/Geometry/**',
 		'assimp/code/CApi/**',
 		-- Importers
 		'assimp/code/AssetLib/Collada/**',
@@ -99,7 +103,8 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_X_IMPORTER',
 		'ASSIMP_BUILD_NO_X3D_IMPORTER',
 		'ASSIMP_BUILD_NO_XGL_IMPORTER',
-		'ASSIMP_BUILD_NO_IQM_IMPORTER'
+		'ASSIMP_BUILD_NO_IQM_IMPORTER',
+		'ASSIMP_BUILD_NO_USD_IMPORTER'
 	}
 	-- Exporters
 	defines {
@@ -119,6 +124,13 @@ project 'assimp'
 		'ASSIMP_BUILD_NO_3MF_EXPORTER',
 		'ASSIMP_BUILD_NO_ASSJSON_EXPORTER'
 	}
+	
+    -- When building any Visual Studio solution
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
 
 	filter "configurations:Debug"
 		runtime "Debug"

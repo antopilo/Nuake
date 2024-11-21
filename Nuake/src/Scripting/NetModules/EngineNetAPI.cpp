@@ -1,10 +1,15 @@
 #include "EngineNetAPI.h"
-#include <Coral/String.hpp>
-#include <src/Core/Maths.h>
-#include <Engine.h>
+
+#include "src/Core/Maths.h"
 #include "src/Rendering/SceneRenderer.h"
+#include "Engine.h"
+#include "src/Physics/PhysicsManager.h"
+
+#include <Coral/String.hpp>
+#include <Coral/ManagedObject.hpp>
 #include <Coral/Array.hpp>
-#include <src/Physics/PhysicsManager.h>
+#include "Coral/Type.hpp"
+#include "..\..\Subsystems\EngineSubsystemScriptable.h"
 
 namespace Nuake {
 
@@ -35,6 +40,26 @@ namespace Nuake {
 		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugLine(start, end, color, life);
 	}
 
+	void DrawShapeBox(Vector3 position, Quat rotation, Vector3 box, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Box>(box.x, box.y, box.z), color, life, width);
+	}
+
+	void DrawShapeSphere(Vector3 position, Quat rotation, float radius, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Sphere>(radius), color, life, width);
+	}
+
+	void DrawShapeCylinder(Vector3 position, Quat rotation, float radius, float height, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Cylinder>(radius, height), color, life, width);
+	}
+
+	void DrawShapeCapsule(Vector3 position, Quat rotation, float radius, float height, Vector4 color, float life, float width)
+	{
+		Engine::GetCurrentScene()->m_SceneRenderer->DrawDebugShape(position, rotation, CreateRef<Physics::Capsule>(radius, height), color, life, width);
+	}
+
 	Coral::Array<float> ConvertHitsToArray(const std::vector<ShapeCastResult> hits)
 	{
 		std::vector<float> results;
@@ -48,9 +73,18 @@ namespace Nuake {
 			results.push_back(hit.ImpactNormal.z);
 			results.push_back(hit.Fraction);
 			results.push_back(hit.Layer);
+			results.push_back(hit.EntityID);
 
 		}
 		return Coral::Array<float>::New(results);
+	}
+
+	Coral::Array<float> Raycast(float fromX, float fromY, float fromZ, float toX, float toY, float toZ)
+	{
+		const Vector3 from = { fromX, fromY, fromZ };
+		const Vector3 to = { toX, toY, toZ };
+		auto hits = PhysicsManager::Get().Raycast(from, to);
+		return ConvertHitsToArray(hits);
 	}
 
 	Coral::Array<float> ShapeCastCapsule(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, CapsuleInternal capsuleInternal)
@@ -73,11 +107,42 @@ namespace Nuake {
 		return ConvertHitsToArray(hits);
 	}
 
+	void LoadScene(Coral::String path)
+	{
+		if (!FileSystem::FileExists(path))
+		{
+			Logger::Log("Failed to load scene with path: " + std::string(path), ".net/scene", CRITICAL);
+			return;
+		}
+
+		Engine::QueueSceneSwitch(std::string(path));
+	}
+
+	Coral::ManagedObject GetEngineSubsystemByName(Coral::String subsystemName)
+	{
+		const Ref<EngineSubsystemScriptable> scriptedSubsystem = Engine::GetScriptedSubsystem(subsystemName);
+		if (scriptedSubsystem == nullptr)
+		{
+			return {};
+		}
+		
+		return scriptedSubsystem->GetManagedObjectInstance();
+	}
+
 	void EngineNetAPI::RegisterMethods()
 	{
+		RegisterMethod("Engine.LoadSceneIcall", &LoadScene);
 		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
-		RegisterMethod("Debug.DrawLineIcall", &DrawLine);
+		RegisterMethod("Engine.GetSubsystemByNameIcall", &GetEngineSubsystemByName);
 
+		// Debug renderer
+		RegisterMethod("Debug.DrawLineIcall", &DrawLine);
+		RegisterMethod("Debug.DrawShapeBoxIcall", &DrawShapeBox);
+		RegisterMethod("Debug.DrawShapeSphereIcall", &DrawShapeSphere);
+		RegisterMethod("Debug.DrawShapeCapsuleIcall", &DrawShapeCapsule);
+		RegisterMethod("Debug.DrawShapeCylinderIcall", &DrawShapeCylinder);
+
+		RegisterMethod("Physic.RayCastIcall", &Raycast);
 		RegisterMethod("Physic.ShapeCastCapsuleIcall", &ShapeCastCapsule);
 		RegisterMethod("Physic.ShapeCastBoxIcall", &ShapeCastBox);
 	}

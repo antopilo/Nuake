@@ -113,6 +113,9 @@ namespace Nuake.Net
 
     public class LightComponent : IComponent
     {
+        internal static unsafe delegate*<int, float> GetLightIntensityIcall;
+        internal static unsafe delegate*<int, float, void> SetLightIntensityIcall;
+        internal static unsafe delegate*<int, float, float, float, void> SetLightColorIcall;
         public enum LightType
         {
             Directional,
@@ -126,8 +129,34 @@ namespace Nuake.Net
         }
 
         public LightType Type { get; set; }
-        public float Intensity { get; set; }
-        public Color Color { get; set; }
+        public float Intensity
+        {
+
+            get 
+            {
+                unsafe
+                {
+                    return GetLightIntensityIcall(EntityID); 
+                }
+            }
+            set 
+            {
+                unsafe
+                {
+                    SetLightIntensityIcall(EntityID, value);
+                }
+            }
+        }
+
+        public Color Color
+        {
+            get { return Color; }
+            set
+            {
+                unsafe { SetLightColorIcall(EntityID, (float)value.R, (float)value.G, (float)value.B); }
+            }
+        }
+
         public bool CastShadows { get; set; }
         public bool Volumetric { get; set; }
         public bool SyncWithSky { get; set; }
@@ -136,13 +165,25 @@ namespace Nuake.Net
     public class CameraComponent : IComponent
     {
         internal static unsafe delegate*<int, NativeArray<float>> GetDirectionIcall;
+        internal static unsafe delegate*<int, float, void> SetCameraFOVIcall;
+        internal static unsafe delegate*<int, float> GetCameraFOVIcall;
 
         public CameraComponent(int entityId)
         {
             EntityID = entityId;
         }
 
-        public float FOV { get; set; }
+        public float FOV 
+        {
+            get
+            {
+                unsafe { return GetCameraFOVIcall(EntityID); }
+            }
+            set
+            {
+                unsafe { SetCameraFOVIcall(EntityID, value); }
+            }
+        }
 
         public Vector3 Direction
         {
@@ -160,6 +201,9 @@ namespace Nuake.Net
 
     public class AudioEmitterComponent : IComponent
     {
+        internal static unsafe delegate*<int, bool> GetIsPlayingIcall;
+        internal static unsafe delegate*<int, bool, void> SetIsPlayingIcall;
+
         public AudioEmitterComponent(int entityId)
         {
             EntityID = entityId;
@@ -169,7 +213,11 @@ namespace Nuake.Net
 
         public bool Loop { get; set; }
         public bool Spatialized { get; set; }
-        public bool Playing { get; set; }
+        public bool Playing 
+        {
+            get { unsafe { return GetIsPlayingIcall(EntityID); } }
+            set { unsafe { SetIsPlayingIcall(EntityID, value); } }
+        }
     }
 
     public class ModelComponent : IComponent
@@ -194,7 +242,7 @@ namespace Nuake.Net
         public bool Playing { get; set; }
         public int CurrentAnimation { get; set; }
 
-        public void Play(String name)
+        public void Play(string name)
         {
             unsafe { PlayIcall(EntityID, name); }
         }
@@ -271,6 +319,8 @@ namespace Nuake.Net
     {
         internal static unsafe delegate*<int, float, float, float, void> MoveAndSlideIcall;
         internal static unsafe delegate*<int, bool> IsOnGroundIcall;
+        internal static unsafe delegate*<int, NativeArray<float>> GetGroundVelocityIcall;
+        internal static unsafe delegate*<int, NativeArray<float>> GetGroundNormalIcall;
 
         public CharacterControllerComponent(int entityId)
         {
@@ -285,6 +335,24 @@ namespace Nuake.Net
         public bool IsOnGround()
         {
             unsafe { return IsOnGroundIcall(EntityID); }
+        }
+
+        public Vector3 GetGroundNormal()
+        {
+            unsafe
+            {
+                NativeArray<float> resultArray = GetGroundNormalIcall(EntityID);
+                return new(resultArray[0], resultArray[1], resultArray[2]);
+            }
+        }
+
+        public Vector3 GetGroundVelocity()
+        {
+            unsafe
+            {
+                NativeArray<float> resultArray = GetGroundVelocityIcall(EntityID);
+                return new(resultArray[0], resultArray[1], resultArray[2]);
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 ﻿#include "OS.h"
 
-#include "src/Window.h"
 #include "Engine.h"
+#include "src/Resource/Project.h"
+#include "src/Window.h"
+#include "src/Core/String.h"
 
 #ifdef NK_WIN
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -18,13 +20,17 @@
 #include <X11/Xlib.h>
 #endif
 
+#include "src/FileSystem/File.h"
+#include "src/FileSystem/Directory.h"
+
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
+#include "imgui/imgui.h"
 
 #include <chrono>
-#include <imgui/imgui.h>
-#include <Subprocess.hpp>
 #include <codecvt>
+#include <filesystem>
+#include <Subprocess.hpp>
 
 namespace Nuake {
 
@@ -142,7 +148,7 @@ namespace Nuake {
 		return path;
 	}
 
-	void OS::CompileSln(const std::string& slnPath)
+	std::string OS::CompileSln(const std::string& slnPath)
 	{
 		std::string output = "";
 		std::string err = "";
@@ -154,8 +160,10 @@ namespace Nuake {
 			Logger::Log(err.c_str(), ".NET", LOG_TYPE::COMPILATION);
 		}
 		
-		Logger::Log(output.c_str(), ".NET");
+		return output;
 	}
+
+
 
 	int OS::Subprocess(const std::string& command, std::string& out, std::string& err)
 	{

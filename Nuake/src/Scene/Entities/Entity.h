@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <glm/ext/matrix_float4x4.hpp>
+
+#include "src/Core/Logger.h"
 #include "../Scene.h"
-#include "../Components/BaseComponent.h"
 #include "../Resource/Serializable.h"
 #include "../Components/NameComponent.h"
 
@@ -26,15 +27,69 @@ namespace Nuake
 			return m_Scene->m_Registry.all_of<T>(m_EntityHandle);
 		}
 
+		bool EntityContainsItself(Entity a, Entity b);
+
 		bool IsValid() const
 		{
-			return m_Scene->m_Registry.valid((entt::entity)GetHandle());
+			return m_EntityHandle != (entt::entity)-1 && m_Scene->m_Registry.valid((entt::entity)GetHandle());
+		}
+
+		void AddComponent(entt::meta_type& enttMetaType)
+		{
+			if (!enttMetaType)
+			{
+				Logger::Log("Meta data empty/invalid", "Entity", WARNING);
+				return;
+			}
+
+			entt::meta_any newComponent = enttMetaType.construct();
+			if (!newComponent)
+			{
+				Logger::Log("Could not create a component from the meta type", "Entity", CRITICAL);
+				return;
+			}
+
+			auto func = enttMetaType.func(HashedFnName::AddToEntity);
+			// TODO: [WiggleWizard] Needs a lot more validation
+			if (!func)
+			{
+				Logger::Log("No such function exists or is registered on component", "Entity", CRITICAL);
+				return;
+			}
+
+			func.invoke(newComponent, m_EntityHandle, &m_Scene->m_Registry);
+		}
+
+		void RemoveComponent(entt::meta_type& enttMetaType)
+		{
+			if (!enttMetaType)
+			{
+				Logger::Log("Meta data empty/invalid", "Entity", WARNING);
+				return;
+			}
+			
+			entt::meta_any newComponent = enttMetaType.construct();
+			if (!newComponent)
+			{
+				Logger::Log("Could not create a component from the meta type", "Entity", CRITICAL);
+				return;
+			}
+			
+			auto func = enttMetaType.func(HashedFnName::RemoveFromEntity);
+			// TODO: [WiggleWizard] Needs a lot more validation
+			if (!func)
+			{
+				Logger::Log("No such function exists or is registered on component", "Entity", CRITICAL);
+				return;
+			}
+
+			func.invoke(newComponent, m_EntityHandle, &m_Scene->m_Registry);
 		}
 
 		template<typename T>
 		T& AddComponent() 
 		{
-			T& component = m_Scene->m_Registry.emplace_or_replace <T>(m_EntityHandle);
+			T& component = m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle);
 			return component;
 		}
 
@@ -75,6 +130,8 @@ namespace Nuake
 
 		json Serialize() override;
 		bool Deserialize(const json& str);
+		bool DeserializeComponents(const json& str);
+
 		void PostDeserialize();
 
 		Scene* GetScene() const

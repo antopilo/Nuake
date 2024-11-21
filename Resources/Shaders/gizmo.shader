@@ -42,6 +42,11 @@ void main()
     vec4 px_color = texture(gizmo_texture, a_UV).rgba;
     color = px_color * vec4(1, 1, 1, u_Opacity);
 
+    if(color.a == 0.0f)
+    {
+        discard;
+    }
+
     if(u_Opacity >= 0.5f)
     {
         gEntityID = u_EntityID;

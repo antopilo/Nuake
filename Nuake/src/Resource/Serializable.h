@@ -6,6 +6,13 @@ using json = nlohmann::json;
 #define BEGIN_SERIALIZE() json j;
 #define SERIALIZE_VAL_LBL(lbl, v) j[lbl] = v;
 #define SERIALIZE_VAL(v) j[#v] = this->v;
+#define SERIALIZE_RES_FILE(v) \
+	bool validFile = this->v.file != nullptr && this->v.file->Exist(); \
+	j["validFile"#v] = validFile; \
+	if (validFile) \
+	{ \
+		j["file"#v] = this->v.file->GetRelativePath(); \
+	}
 
 #define SERIALIZE_VEC2(v) \
 		j[#v]["x"] = v.x; \
@@ -23,7 +30,17 @@ using json = nlohmann::json;
 if(j.contains(#p)) \
 { \
 p = j[#p]; \
-} 
+}
+
+#define DESERIALIZE_RES_FILE(v) \
+	if (j.contains("validFile"#v)) \
+	{ \
+		if (bool validFile = j["validFile"#v]) \
+		{ \
+			const std::string filePath = j["file"#v]; \
+			(v).file = FileSystem::GetFile(filePath); \
+		} \
+	}
 
 #define DESERIALIZE_VEC4(v, p) \
 	p = Vector4(v["x"], v["y"], v["z"], v["w"]);
@@ -56,8 +73,8 @@ p = j[#p]; \
 	} \
 }
 
-#define SERIALIZE_OBJECT(v) j[#v] = v->Serialize();
-#define SERIALIZE_OBJECT_REF(v) j[#v] = v.Serialize();
+#define SERIALIZE_OBJECT(v)				 j[#v] = v->Serialize();
+#define SERIALIZE_OBJECT_REF(v)			 j[#v] = v.Serialize();
 #define SERIALIZE_OBJECT_REF_LBL(lbl, v) j[lbl] = v.Serialize();
 #define END_SERIALIZE() return j;
 #define DUMP_SERIALIZE() j.dump(4);

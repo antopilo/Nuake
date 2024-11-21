@@ -3,15 +3,21 @@
 
 #include <imgui/imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
 	Input* Input::s_Instance;
+	Vector2 Input::s_ViewportPos = Vector2(0,0);
+	Vector2 Input::s_ViewportSize = Vector2(0, 0);
+
 	std::map<int, bool> Input::m_Keys = std::map<int, bool>();
 	bool Input::m_MouseButtons[5] = { false, false, false, false, false };
 	float Input::XScroll = 0.0f;
 	float Input::YScroll = 0.0f;
-
+	
+	Vector2 Input::ViewportPosition = Vector2(0, 0);;
+	Vector2 Input::ViewportSize = Vector2(0, 0);
 	void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		XScroll = (float)xoffset;
@@ -74,6 +80,7 @@ namespace Nuake
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 	}
 
 	bool Input::IsMouseHidden() 
@@ -86,6 +93,7 @@ namespace Nuake
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 	}
 
 	// Action
@@ -149,10 +157,60 @@ namespace Nuake
 		return Vector2(xpos, ypos);
 	}
 
+	void Input::SetEditorViewportSize(const Vector2& position, const Vector2& size)
+	{
+		s_ViewportPos = position;
+		s_ViewportSize = size;
+	}
+
+	Vector2 Input::GetEditorViewportMousePosition()
+	{
+		if (s_ViewportPos == s_ViewportSize)
+		{
+			return GetMousePosition();
+		}
+
+		auto window = Window::Get()->GetHandle();
+
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		Vector2 absolutePosition = { xpos, ypos };
+		Vector2 offset = absolutePosition - ViewportPosition;
+
+		return Vector2(xpos , ypos);
+	}
+
 	void Input::SetMousePosition(const Vector2& position)
 	{
 		auto window = Window::Get()->GetHandle();
 		glfwSetCursorPos(window, position.x, position.y);
+	}
+
+	float Input::GetViewportMouseY() 
+	{
+		return glm::clamp(GetMouseY() - ViewportPosition.y, 0.0f, ViewportSize.y);
+	}
+
+	float Input::GetViewportMouseX() 
+	{
+		return glm::clamp(GetMouseX() - ViewportPosition.x, 0.0f, ViewportSize.x);
+	}
+
+	Vector2 Input::GetViewportMousePosition()
+	{
+		return glm::clamp(GetMousePosition() - ViewportPosition, { 0, 0 }, ViewportSize);
+	}
+
+	Vector2 Input::GetViewportSize()
+	{
+		return ViewportSize;
+	}
+
+	void Input::SetViewportDimensions(const Vector2& pos, const Vector2& size)
+	{
+		ViewportPosition = pos;
+		ViewportSize = size;
 	}
 
 #pragma endregion
@@ -167,6 +225,8 @@ namespace Nuake
 
 	void Input::Update()
 	{
+		ZoneScoped;
+
 		// Reset all input to false.
 		for (auto& k : m_Keys)
 		{

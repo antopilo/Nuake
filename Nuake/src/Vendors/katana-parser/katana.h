@@ -36,7 +36,7 @@ extern "C" {
 #define KATANA_ERROR_MESSAGE_SIZE 100
 
 typedef enum {
-    KatanaRuleUnkown,
+    KatanaRuleUnknown,
     KatanaRuleStyle,
     KatanaRuleImport,
     KatanaRuleMedia,

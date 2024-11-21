@@ -1,11 +1,24 @@
 #include "MapImporterWindow.h"
-#include <imgui/imgui.h>
+
 #include "../Misc/InterfaceFonts.h"
-#include <src/UI/ImUI.h>
-#include <src/Core/Logger.h>
-#include <regex>
-#include <src/Threading/JobSystem.h>
+
 #include <Engine.h>
+#include <src/Core/Logger.h>
+#include <src/FileSystem/File.h>
+#include <src/Threading/JobSystem.h>
+#include <src/UI/ImUI.h>
+#include <src/FileSystem/FileDialog.h>
+#include <src/Core/String.h>
+#include <src/Resource/Project.h>
+
+#include <imgui/imgui.h>
+
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+#include <regex>
+
+using namespace Nuake;
 
 void MapImporterWindow::Draw()
 {
@@ -227,7 +240,7 @@ std::vector<std::string> MapImporterWindow::ScanUsedWads()
 
 std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 {
-	const std::string& baseTextureDir = "/textures/";
+	const std::string& baseTextureDir = "/Textures/";
 
 	using namespace Nuake;
 	if (m_WadToMaterialMap.find(path) != m_WadToMaterialMap.end())
@@ -272,7 +285,7 @@ std::string MapImporterWindow::GetTransformedWadPath(const std::string& path)
 
 		if (entry.is_regular_file() && stem == upperInput)
 		{
-			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), FileSystem::Root + "/textures/");
+			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), FileSystem::Root + "/Textures/");
 			std::filesystem::path pathWithoutExtension = relativePath;
 			pathWithoutExtension = pathWithoutExtension.parent_path(); // Remove the file name
 

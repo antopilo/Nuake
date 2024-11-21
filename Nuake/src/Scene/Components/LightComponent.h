@@ -1,10 +1,13 @@
 #pragma once
+
+#include "Component.h"
+
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float2.hpp>
 #include "TransformComponent.h"
 #include "../Rendering/Camera.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
-#include "BaseComponent.h"
+#include "VisibilityComponent.h"
 #include "../Resource/Serializable.h"
 
 #include <glm/ext/matrix_clip_space.hpp>
@@ -17,8 +20,10 @@ namespace Nuake
     };
 
     const int CSM_AMOUNT = 4;
-    class LightComponent 
+    class LightComponent : public Component
     {
+        NUAKECOMPONENT(LightComponent, "Light")
+
     public:
         LightType Type = Point;
         Vector3 Direction;
@@ -156,7 +161,6 @@ namespace Nuake
             }
         }
 
-
         json Serialize()
         {
             BEGIN_SERIALIZE();
@@ -167,6 +171,8 @@ namespace Nuake
             SERIALIZE_VAL(Strength);
             SERIALIZE_VAL(SyncDirectionWithSky);
             SERIALIZE_VAL(CastShadows);
+            SERIALIZE_VAL(Cutoff);
+            SERIALIZE_VAL(OuterCutoff);
             END_SERIALIZE();
         }
 
@@ -191,6 +197,9 @@ namespace Nuake
                 float z = j["Direction"]["z"];
                 this->Direction = Vector3(x, y, z);
             }
+
+            DESERIALIZE_VAL(Cutoff);
+            DESERIALIZE_VAL(OuterCutoff);
 
             return true;
         }

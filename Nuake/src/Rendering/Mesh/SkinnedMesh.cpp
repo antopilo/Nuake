@@ -110,7 +110,7 @@ namespace Nuake
     void SkinnedMesh::DebugDraw()
     {
         Renderer::m_DebugShader->Bind();
-        Renderer::m_DebugShader->SetUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
+        Renderer::m_DebugShader->SetUniform("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
 
         m_VertexArray->Bind();
         RenderCommand::DrawElements(RendererEnum::TRIANGLES, (int)m_Indices.size(), RendererEnum::UINT, 0);
@@ -179,7 +179,7 @@ namespace Nuake
                     try {
                         DESERIALIZE_VEC2(v["UV"], vertex.uv)
                     }
-                    catch (std::exception& e) {
+                    catch (std::exception& /*e*/) {
                         vertex.uv = { 0.0, 0.0 };
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)

@@ -1,5 +1,5 @@
 #pragma once
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include <src/Scene/Entities/Entity.h>
 #include "EditorInterface.h"
 
@@ -32,5 +32,9 @@ namespace Nuake {
 		bool DeletePopup();
 		void DrawContextMenu();
 		void RefreshFileBrowser();
+
+		Color GetColorByFileType(FileType fileType);
+
+		void Scan();
 	};
 }

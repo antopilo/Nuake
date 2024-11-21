@@ -46,15 +46,16 @@ namespace Nuake
 		bool IsRunning() { return m_IsRunning; }
 		void Step(Timestep ts);
 
+		void ReInit() { m_World->ReInit(); }
+
 		void Reset();
 
-		std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
+		std::vector<ShapeCastResult> Raycast(const Vector3& from, const Vector3& to);
 		std::vector<ShapeCastResult> Shapecast(const Vector3& from, const Vector3& to, const Ref<Physics::PhysicShape>& shape);
 
-		const std::vector<Physics::CollisionData>& GetCollisions();
+		const std::vector<Physics::CollisionData> GetCollisions();
 
 		void RegisterBody(Ref<Physics::RigidBody> rb);
-		void RegisterGhostBody(Ref<GhostObject> rb);
 		void RegisterCharacterController(Ref<Physics::CharacterController> c);
 
 		void SetBodyTransform(const Entity& entity, const Vector3& position, const Quat& rotation);

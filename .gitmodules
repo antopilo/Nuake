@@ -1,15 +1,6 @@
-[submodule "Nuake/dependencies/glfw"]
-	path = Nuake/dependencies/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "Nuake/dependencies/assimp"]
 	path = Nuake/dependencies/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "Nuake/dependencies/bullet3"]
-	path = Nuake/dependencies/bullet3
-	url = https://github.com/bulletphysics/bullet3.git
-[submodule "Nuake/dependencies/glew"]
-	path = Nuake/dependencies/glew
-	url = https://github.com/nigels-com/glew.git
 [submodule "Nuake/dependencies/JoltPhysics"]
 	path = Nuake/dependencies/JoltPhysics
 	url = https://github.com/antopilo/JoltPhysics.git
@@ -22,3 +13,21 @@
 [submodule "Nuake/dependencies/recastnavigation"]
 	path = Nuake/dependencies/recastnavigation
 	url = https://github.com/antopilo/recastnavigation.git
+[submodule "Nuake/dependencies/tracy"]
+	path = Nuake/dependencies/tracy
+	url = https://github.com/wolfpld/tracy.git
+[submodule "Nuake/dependencies/msdf-atlas-gen"]
+	path = Nuake/dependencies/msdf-atlas-gen
+	url = https://github.com/antopilo/msdf-atlas-gen.git
+[submodule "Nuake/dependencies/yoga"]
+	path = Nuake/dependencies/yoga
+	url = https://github.com/facebook/yoga.git
+[submodule "Nuake/dependencies/freetype"]
+	path = Nuake/dependencies/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "Nuake/dependencies/entt"]
+	path = Nuake/dependencies/entt
+	url = https://github.com/skypjack/entt.git
+[submodule "Nuake/dependencies/glfw"]
+	path = Nuake/dependencies/glfw
+	url = https://github.com/antopilo/glfw.git

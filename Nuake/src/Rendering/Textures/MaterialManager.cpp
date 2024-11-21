@@ -7,7 +7,7 @@
 #include "json/json.hpp"
 
 #include "../Rendering/Textures/Material.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/Logger.h"
 
 namespace Nuake

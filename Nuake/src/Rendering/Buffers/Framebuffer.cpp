@@ -1,5 +1,6 @@
 #include "Framebuffer.h"
 #include <glad/glad.h>
+#include <Tracy.hpp>
 
 namespace Nuake
 {
@@ -64,11 +65,13 @@ namespace Nuake
 
 	void FrameBuffer::Clear()
 	{
+		ZoneScoped;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void FrameBuffer::Bind()
 	{
+		ZoneScoped;
 		if (ResizeQueued)
 			UpdateSize(m_Size);
 
@@ -84,6 +87,8 @@ namespace Nuake
 
 	void FrameBuffer::QueueResize(Vector2 size)
 	{
+		ZoneScoped;
+
 		if (size == m_Size)
 			return;
 
@@ -93,6 +98,7 @@ namespace Nuake
 
 	void FrameBuffer::UpdateSize(Vector2 size)
 	{
+		ZoneScoped;
 		m_Size = size;
 		ResizeQueued = false;
 
@@ -132,6 +138,15 @@ namespace Nuake
 		int pixelData;
 		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
 		return pixelData;
+	}
+
+	Vector2 FrameBuffer::ReadVec2(uint32_t attachment, const Vector2 coords)
+	{
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+		unsigned char pixelData[2]; // Store two components for the vec2 (byte)
+		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RG, GL_UNSIGNED_BYTE, &pixelData);
+		// Normalize the values (unsigned byte to [0, 1] float)
+		return Vector2(pixelData[0] / 255.0f, pixelData[1] / 255.0f);
 	}
 
 	float FrameBuffer::ReadDepth(const Vector2& coords)

@@ -7,7 +7,6 @@
 #include <map>
 #include "RaycastResult.h"
 
-#include <src/Physics/GhostObject.h>
 #include "CharacterController.h"
 #include "CollisionData.h"
 
@@ -65,14 +64,18 @@ namespace Nuake
 		public:
 			DynamicWorld();
 
+			void ReInit();
+
 			void DrawDebug();
 
 			void SetGravity(const Vector3& g);
 			void AddRigidbody(Ref<RigidBody> rb);
 
-			void AddGhostbody(Ref<GhostObject> gb);
 			void AddCharacterController(Ref<CharacterController> cc);
 			bool IsCharacterGrounded(const Entity& entity);
+			Vector3 GetCharacterGroundVelocity(const Entity& entity);
+			Vector3 GetCharacterGroundNormal(const Entity& entity);
+
 			void SetCharacterControllerPosition(const Entity& entity, const Vector3& position);
 
 			void SetBodyPosition(const Entity& entity, const Vector3& position, const Quat& rotation);
@@ -81,7 +84,7 @@ namespace Nuake
 			void MoveAndSlideCharacterController(const Entity& entity, const Vector3& velocity);
 			void AddForceToRigidBody(Entity& entity, const Vector3& force);
 
-			std::vector<RaycastResult> Raycast(const Vector3& from, const Vector3& to);
+			std::vector<ShapeCastResult> Raycast(const Vector3& from, const Vector3& to);
 			std::vector<ShapeCastResult> CastShape(const Vector3& from, const Vector3& to, const Ref<PhysicShape>& shape);
 			void StepSimulation(Timestep ts);
 			void Clear();
@@ -89,7 +92,7 @@ namespace Nuake
 			void ClearCollisionData();
 
 			void RegisterCollisionCallback(const CollisionData& data);
-			const std::vector<CollisionData>& GetCollisionsData();
+			const std::vector<CollisionData> GetCollisionsData();
 		private:
 			JPH::Ref<JPH::Shape> GetJoltShape(const Ref<PhysicShape> shape);
 			void SyncEntitiesTranforms();

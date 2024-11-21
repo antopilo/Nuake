@@ -1,3 +1,20 @@
+-- ╔═══════════════════════════════════════╗
+-- ║               ACTIONS                 ║
+-- ╚═══════════════════════════════════════╝
+
+include "build/BuildAssets.lua"
+newaction {
+   trigger     = "build-assets",
+   description = "",
+   execute     = function ()
+      generateStaticResources("Resources", "Nuake/src/Resource/StaticResources.h", "Nuake/src/Resource/StaticResources.cpp")
+   end
+}
+
+
+-- ╔═══════════════════════════════════════╗
+-- ║               WORKSPACE               ║
+-- ╚═══════════════════════════════════════╝
 workspace "Nuake"
     conformancemode "On"
     configurations
@@ -26,6 +43,10 @@ workspace "Nuake"
         architecture "x64"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+local globalDefines = {
+    "TRACY_ENABLE",
+    "TRACY_ON_DEMAND"
+}
 
 group "Dependencies"
     include "Nuake/dependencies/glfw_p5.lua"
@@ -35,10 +56,15 @@ group "Dependencies"
     include "Nuake/dependencies/soloud_p5.lua"
     include "Nuake/dependencies/coral_p5.lua"
     include "Nuake/dependencies/recastnavigation_p5.lua"
+    include "Nuake/dependencies/tracy_p5.lua"
+    include "Nuake/dependencies/yoga_p5.lua"
+    include "Nuake/dependencies/msdf-atlas-gen_p5.lua"
+    include "Nuake/dependencies/freetype_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
-
+include "EditorNet/premake5.lua"
+include "Nuake/src/Modules/Modules.lua"
 
 project "Nuake"
     location "Nuake"
@@ -47,11 +73,24 @@ project "Nuake"
 
     language "C++"
     cppdialect "C++20"
+    
+    local moduleSources = {}
+	
+	if _ACTION then
+        local modulesDir = "Nuake/src/Modules"
+        local outputFilePath = path.join(modulesDir, "Modules.cpp")
+
+        -- Load and generate the modules file
+        local modules = loadModules(modulesDir)
+        moduleSources = generateModulesFile(modules, outputFilePath, "Nuake/src/Modules")
+    end
    
     defines
     {
+		table.unpack(globalDefines),
+
         "_MBCS",
-		"IMGUI_DEFINE_MATH_OPERATORS"
+		"IMGUI_DEFINE_MATH_OPERATORS",
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -59,10 +98,41 @@ project "Nuake"
 
     files
     {
+        -- Main Sources
         "%{prj.name}/Engine.h",
         "%{prj.name}/Engine.cpp",
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/src/*.h",
+        "%{prj.name}/src/*.cpp",
+        "%{prj.name}/src/AI/**.h",
+        "%{prj.name}/src/AI/**.cpp",
+        "%{prj.name}/src/Application/**.h",
+        "%{prj.name}/src/Application/**.cpp",
+        "%{prj.name}/src/Audio/**.h",
+        "%{prj.name}/src/Audio/**.cpp",
+        "%{prj.name}/src/Core/**.h",
+        "%{prj.name}/src/Core/**.cpp",
+        "%{prj.name}/src/FileSystem/**.h",
+        "%{prj.name}/src/FileSystem/**.cpp",
+        "%{prj.name}/src/Physics/**.h",
+        "%{prj.name}/src/Physics/**.cpp",
+        "%{prj.name}/src/Rendering/**.h",
+        "%{prj.name}/src/Rendering/**.cpp",
+        "%{prj.name}/src/Resource/**.h",
+        "%{prj.name}/src/Resource/**.cpp",
+        "%{prj.name}/src/Scene/**.h",
+        "%{prj.name}/src/Scene/**.cpp",
+        "%{prj.name}/src/Scripting/**.h",
+        "%{prj.name}/src/Scripting/**.cpp",
+        "%{prj.name}/src/Threading/**.h",
+        "%{prj.name}/src/Threading/**.cpp",
+        "%{prj.name}/src/UI/**.h",
+        "%{prj.name}/src/UI/**.cpp",
+        "%{prj.name}/src/Subsystems/**.h",
+        "%{prj.name}/src/Subsystems/**.cpp",
+        "%{prj.name}/src/Vendors/**.h",
+        "%{prj.name}/src/Vendors/**.cpp",
+        
+        -- Vendor Sources
         "%{prj.name}/src/Vendors/libmap/h/*.h",
         "%{prj.name}/src/Vendors/libmap/c/*.c",
         "%{prj.name}/src/Vendors/wren/src/vm/*.h",
@@ -70,7 +140,13 @@ project "Nuake"
         "%{prj.name}/src/Vendors/katana-parser/*.h",
         "%{prj.name}/src/Vendors/katana-parser/*.c",
         "%{prj.name}/src/Vendors/incbin/*.c",
-        "%{prj.name}/src/Vendors/incbin/*.h"
+        "%{prj.name}/src/Vendors/incbin/*.h",
+        "%{prj.name}/src/Vendors/nanosvg/*.h",
+
+        -- Modules System
+        "%{prj.name}/src/Modules/Modules.h",
+        "%{prj.name}/src/Modules/Modules.cpp",
+        table.unpack(moduleSources)
     }
 
     includedirs
@@ -83,6 +159,7 @@ project "Nuake"
         "%{prj.name}/dependencies/JoltPhysics",
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
+        "%{prj.name}/src/Vendors/nanosvg",
         "%{prj.name}/dependencies/build",
         "%{prj.name}/dependencies/soloud/include",
         "%{prj.name}/dependencies/Coral/Coral.Native/Include",
@@ -90,12 +167,22 @@ project "Nuake"
 	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/dependencies/recastnavigation/Recast/Include"
-    }
+	    "%{prj.name}/dependencies/recastnavigation/Recast/Include",
+	    "%{prj.name}/dependencies/yoga",
+        "%{prj.name}/dependencies/msdf-atlas-gen",
+        "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/dependencies/freetype/include",
+	    "%{prj.name}/dependencies/tracy/public/tracy",
+        "%{prj.name}/dependencies/entt/src",
 
+    }
+    
     links
     {
-        "soloud"
+        "soloud",
+        "tracy",
+        "yoga"
     }
 
     filter "system:linux"
@@ -126,11 +213,18 @@ project "Nuake"
         {
             "NK_WIN"
         }
-    
+        
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
     
     filter "configurations:Debug"
         runtime "Debug"
         symbols "on"
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"
@@ -140,7 +234,6 @@ project "Nuake"
         runtime "Release"
         optimize "on"
         
-
 project "NuakeRuntime"
     location "Runtime"
     kind "ConsoleApp"
@@ -155,48 +248,68 @@ project "NuakeRuntime"
         "Runtime/Runtime.cpp"
     }
 
-    includedirs
+    includedirs 
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
-        "%{prj.name}/../Nuake/Dependencies/glad/include",
-        "%{prj.name}/../Nuake/Dependencies/GLFW/include",
-        "%{prj.name}/../Nuake/Dependencies/assimp/include",
-        "%{prj.name}/../Nuake/Dependencies/build",
-		"%{prj.name}/../Nuake/Dependencies/JoltPhysics",
-        "%{prj.name}/../Nuake/Dependencies/build",
-        "%{prj.name}/../Nuake/Dependencies/soloud/include",
-        "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
+        "%{prj.name}/../Nuake/src/Vendors/nanosvg",
+        "%{prj.name}/../Nuake/dependencies/glad/include",
+        "%{prj.name}/../Nuake/dependencies/glfw/include",
+        "%{prj.name}/../Nuake/dependencies/assimp/include",
+        "%{prj.name}/../Nuake/dependencies/build",
+	    "%{prj.name}/../Nuake/dependencies/JoltPhysics",
+        "%{prj.name}/../Nuake/dependencies/build",
+        "%{prj.name}/../Nuake/dependencies/soloud/include",
+        "/usr/include/gtk-3.0/",
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DebugUtils/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+        "%{prj.name}/../Nuake/dependencies/yoga",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/../Nuake/dependencies/freetype/include",
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+        "%{prj.name}/../Nuake/dependencies/entt/src",
     }
 
-    libdirs
-    {
+    libdirs 
+    { 
+        "%{prj.name}/../Nuake/dependencies/GLEW/lib/Release/x64",
         "%{prj.name}/../Nuake/dependencies/assimp/lib/",
         "%{prj.name}/../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Nuake/",
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/",
+        "%{prj.name}/../Nuake/dependencies/freetype/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Freetype"
     }
 
     links
-    {
+    { 
         "Nuake",
+        "glad", 
         "GLFW",
-        "glad",
         "assimp",
-		"JoltPhysics",
+        "JoltPhysics",
         "soloud",
         "Coral.Native",
-        "DebugUtils",
+	    "DebugUtils",
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+        "yoga",
+        "msdf-gen",
+        "msdf-atlas-gen",
+        "Freetype"
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:windows"
@@ -214,6 +327,12 @@ project "NuakeRuntime"
     
         postbuildcommands {
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
+        }
+
+    filter { "system:windows", "action:vs*" }
+        flags
+        {
+            "MultiProcessorCompile",
         }
 
     filter "system:linux"
@@ -248,6 +367,8 @@ project "NuakeRuntime"
             "NK_DEBUG"
         }
 
+        buildoptions { "/Zi" }
+
     filter "configurations:Release"
         kind "WindowedApp"
         runtime "Release"
@@ -263,21 +384,23 @@ project "NuakeRuntime"
         kind "WindowedApp"
         runtime "Release"
         optimize "on"
-        flags { "WinMain" }
+        entrypoint "WinMainCRTStartup"
+        flags { }
         defines
         {
             "NK_DIST",
             "WIN32_LEAN_AND_MEAN"
         }
 
-
 project "Editor"
     location "Editor"
+    targetname ("Nuake Engine")
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
     staticruntime "On"
 
+    dependson { "NuakeNet" } 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 	debugdir ("%{prj.name}")
@@ -286,13 +409,17 @@ project "Editor"
     {
         "%{prj.name}/Editor.cpp",
         "%{prj.name}/src/**.cpp",
-        "%{prj.name}/src/**.h"
+        "%{prj.name}/src/**.h",
+        
+        -- This isn't ideal, but it works...needs a proper way of doing this, but that's for another time
+        "Nuake/dependencies/entt/natvis/entt/*.natvis"
     }
 
     includedirs 
     {
         "%{prj.name}/../Nuake",
         "%{prj.name}/../Nuake/src/Vendors",
+        "%{prj.name}/../Nuake/src/Vendors/nanosvg",
         "%{prj.name}/../Nuake/dependencies/glad/include",
         "%{prj.name}/../Nuake/dependencies/glfw/include",
         "%{prj.name}/../Nuake/dependencies/assimp/include",
@@ -305,7 +432,14 @@ project "Editor"
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Detour/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/../Nuake/dependencies/recastnavigation/DetourTileCache/Include",
-	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include"
+	    "%{prj.name}/../Nuake/dependencies/recastnavigation/Recast/Include",
+        "%{prj.name}/../Nuake/dependencies/yoga",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen",
+        "%{prj.name}/../Nuake/dependencies/msdf-atlas-gen/msdfgen/include",
+        "%{prj.name}/../Nuake/dependencies/freetype/include",
+	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
+        "%{prj.name}/../Nuake/dependencies/entt/src",
     }
     
     libdirs 
@@ -316,7 +450,8 @@ project "Editor"
         "%{prj.name}/../Nuake/src/Vendors/wren/src/include",
         "%{prj.name}/../Nuake/dependencies/JoltPhysics/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/JoltPhysics/",
         "%{prj.name}/../Nuake/dependencies/soloud/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}",
-        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/"
+        "%{prj.name}/../Nuake/dependencies/Coral/NetCore/",
+        "%{prj.name}/../Nuake/dependencies/freetype/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Freetype"
     }
 
     links
@@ -332,7 +467,16 @@ project "Editor"
 	    "Detour",
 	    "DetourCrowd",
 	    "DetourTileCache",
-	    "Recast"
+	    "Recast",
+	    "tracy",
+        "yoga",
+        "msdf-gen",
+        "msdf-atlas-gen",
+        "Freetype"
+    }
+    
+    defines {
+        table.unpack(globalDefines)
     }
 
     filter "system:Windows"
@@ -358,6 +502,11 @@ project "Editor"
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{wks.location}/%{prj.name}"'
         }
 
+    filter { "system:windows", "action:vs*"}
+        flags
+        {
+            "MultiProcessorCompile",
+        }
 
     filter "system:linux"
         links
@@ -400,6 +549,8 @@ project "Editor"
             "WIN32_LEAN_AND_MEAN",
             "IMGUI_DEFINE_MATH_OPERATORS"
         }
+
+        buildoptions { "/Zi" }
 
     filter "configurations:Release"
         runtime "Release"

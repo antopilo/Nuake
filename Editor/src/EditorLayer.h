@@ -22,6 +22,9 @@ public:
 	virtual void OnUpdate() override;
 	virtual void OnDetach() override;
 
+	virtual void OnWindowFocused() override;
+	virtual void OnDragNDrop(const std::vector<std::string>& paths) override;
+
 private:
 	CommandBuffer mCommandBuffer;
 	Nuake::EditorInterface* m_EditorInterface;

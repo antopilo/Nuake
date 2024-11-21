@@ -1,25 +1,24 @@
 #include "Job.h"
+#include <Tracy.hpp>
 
-namespace Nuake {
+using namespace Nuake;
 
-	Job::Job(std::function<void()> job, std::function<void()> end)
-		: m_Job(job)
-		, m_End(end)
+Job::Job(std::function<void()> logic, std::function<void()> endLogic) : 
+	job(logic),
+	end(endLogic)
+{
+	this->thread = std::thread([this, logic]()
 	{
-		m_End = end;
+		ZoneScoped;
+		job();
+		isDone = true;
+	});
+}
 
-		m_Thread = std::thread([this, job]()
-		{
-			job();
-			m_IsDone = true;
-		});
-	}
-
-	void Job::End()
+void Job::End()
+{
+	if (end)
 	{
-		if (m_End)
-		{
-			m_End();
-		}
+		end();
 	}
 }

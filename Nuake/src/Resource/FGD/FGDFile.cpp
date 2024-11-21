@@ -1,7 +1,8 @@
 #include "FGDFile.h"
 #include <src/Resource/FGD/FDGSerializer.h>
-#include <src/Core/FileSystem.h>
+#include "src/FileSystem/FileSystem.h"
 #include "Engine.h"
+#include "src/Resource/Project.h"
 
 namespace Nuake {
 	FGDFile::FGDFile(const std::string path)

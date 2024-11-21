@@ -1376,7 +1376,7 @@ void katana_print_rule(KatanaParser* parser, KatanaRule* rule)
             break;
         case KatanaRuleSupports:
             break;
-        case KatanaRuleUnkown:
+        case KatanaRuleUnknown:
             break;
             
         default:
@@ -1458,7 +1458,7 @@ void katana_print_media_query(KatanaParser* parser, KatanaMediaQuery* query)
             return;
         }
         
-        if ( (NULL != query->type && strcasecmp(query->type, "all")) || query->restrictor != KatanaMediaQueryRestrictorNone) {
+        if ( (NULL != query->type && stricmp(query->type, "all")) || query->restrictor != KatanaMediaQueryRestrictorNone) {
             if ( NULL != query->type ) {
                 katana_print("%s", query->type);
             }

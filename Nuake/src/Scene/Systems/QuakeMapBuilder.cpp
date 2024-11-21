@@ -1,7 +1,10 @@
 #include "QuakeMapBuilder.h"
 
+#include "Engine.h"
+#include "src/Resource/Project.h"
+
 #include "src/Rendering/Mesh/Mesh.h"
-#include "src/Core/FileSystem.h"
+#include "src/FileSystem/FileSystem.h"
 #include "src/Core/String.h"
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
@@ -19,15 +22,17 @@ extern "C" {
 #include "src/Scene/Components/TransformComponent.h"
 #include "src/Scene/Components/LightComponent.h"
 #include "src/Scene/Components/NameComponent.h"
-#include "src/Scene/Components/TriggerZone.h"
 #include "src/Resource/FGD/FGDClass.h"
-#include "src/Scene/Components/WrenScriptComponent.h"
 #include "src/Scene/Components/PrefabComponent.h"
 #include "src/Scene/Components/ModelComponent.h"
+#include <src/Resource/ResourceLoader.h>
+#include <src/Scene/Components/NetScriptComponent.h>
+#include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Resource/FGD/FGDFile.h>
 
 #include <vector>
 #include <map>
-#include <src/Resource/ResourceLoader.h>
+
 
 namespace Nuake {
     struct ProcessedMesh
@@ -37,344 +42,6 @@ namespace Nuake {
     };
 
     Ref<Material> DefaultMaterial;
-
-    void QuakeMapBuilder::CreateTrigger(brush* brush, brush_geometry* brush_inst, 
-                                        Scene* scene, Entity& parent, 
-                                        const std::string& target, const std::string& targetname)
-    {
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-
-        Entity brushEntity = scene->CreateEntity("Trigger");
-        TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
-        TriggerZone& trigger = brushEntity.AddComponent<TriggerZone>();
-        trigger.target = target;
-
-        parent.AddChild(brushEntity);
-
-        transformComponent.SetGlobalPosition(Vector3(brush->center.y * (1.0f / 64),
-            brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64)));
-
-        BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
-        bsp.IsSolid = false;
-        bsp.target = target;
-        int indexOffset = 0;
-        for (int f = 0; f < brush->face_count; ++f)
-        {
-            face* face = &brush->faces[f];
-
-            face_geometry* face_geo_inst = &brush_inst->faces[f];
-
-            for (int i = 0; i < face_geo_inst->vertex_count; ++i)
-            {
-                face_vertex vertex = face_geo_inst->vertices[i];
-
-                Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
-                );
-
-                Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
-                Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
-
-                vertices.push_back(Vertex{
-                    vertexPos,
-                    Vector2(0,0),
-                    vertexNormal,
-                    vertexTangent,
-                    glm::vec3(0.0, 1.0, 0.0)
-                    });
-            }
-
-            for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
-            {
-                unsigned int index = face_geo_inst->indices[i];
-                indices.push_back((unsigned int)indexOffset + index);
-            }
-
-            indexOffset += face_geo_inst->vertex_count;
-        }
-
-        Ref<Mesh> mesh = CreateRef<Mesh>();
-        mesh->AddSurface(vertices, indices);
-        bsp.Meshes.push_back(mesh);
-    }
-
-    void QuakeMapBuilder::CreateBrush(brush* brush, brush_geometry* brush_inst, 
-                                        Scene* scene, Entity& parent, 
-                                        const std::string& target, const std::string& targetname)
-    {
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-        Entity brushEntity = scene->CreateEntity(targetname);
-        TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
-        BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
-
-        parent.AddChild(brushEntity);
-
-        transformComponent.SetGlobalPosition(Vector3(
-            brush->center.y * ScaleFactor * (1.0f / 64),
-            brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64)));
-
-        int index_offset = 0;
-        int lastTextureID = -1;
-        std::string lastTexturePath = "";
-        for (int f = 0; f < brush->face_count; ++f)
-        {
-            face* face = &brush->faces[f];
-            texture_data* texture = &textures[face->texture_idx];
-
-            bool textureIsEmpty = std::string(texture->name) == "__TB_empty" || std::string(texture->name).empty();
-            if (textureIsEmpty)
-            {
-                texture->height = 1;
-                texture->width = 1;
-                continue;
-            }
-            else
-            {
-                if (FileSystem::FileExists("textures/" + std::string(texture->name) + ".material"))
-                {
-
-                }
-                else
-                {
-                    std::string path = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
-                    auto tex = TextureManager::Get()->GetTexture(path);
-
-                    texture->height = tex->GetHeight();
-                    texture->width = tex->GetWidth();
-                }
-            }
-
-            face_geometry* face_geo_inst = &brush_inst->faces[f];
-
-            for (int i = 0; i < face_geo_inst->vertex_count; ++i)
-            {
-                face_vertex vertex = face_geo_inst->vertices[i];
-                vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
-
-                Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
-                );
-
-                Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
-                Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
-                Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
-
-                vertices.push_back(Vertex{
-                    vertexPos,
-                    vertexUV,
-                    vertexNormal,
-                    vertexTangent,
-                    glm::vec3(0.0, 1.0, 0.0)
-                });
-            }
-
-            for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
-            {
-                unsigned int index = face_geo_inst->indices[i];
-                indices.push_back(index_offset + (unsigned int)index);
-            }
-
-            if (lastTextureID != face->texture_idx)
-            {
-                lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
-
-                Ref<Mesh> mesh = CreateRef<Mesh>();
-                mesh->AddSurface(vertices, indices);
-
-                if (const std::string materialPath = "textures/" + std::string(texture->name) + ".material";
-                    FileSystem::FileExists(materialPath))
-                {
-                    Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
-                    mesh->SetMaterial(material);
-                }
-                else if (std::string(texture->name) != "__TB_empty")
-                {
-                    Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
-                    mesh->SetMaterial(material);
-                }
-                
-                bsp.Meshes.push_back(mesh);
-
-                index_offset = 0;
-                vertices.clear();
-                indices.clear();
-                lastTextureID = face->texture_idx;
-            }
-            else
-            {
-                index_offset += (face_geo_inst->vertex_count);
-            }
-        }
-
-        if (vertices.size() > 0)
-        {
-            Ref<Mesh> mesh = CreateRef<Mesh>();
-            mesh->AddSurface(vertices, indices);
-
-            Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
-            mesh->SetMaterial(material);
-
-            bsp.Meshes.push_back(mesh);
-        }
-    }
-
-    void QuakeMapBuilder::CreateFuncBrush(brush* brush, brush_geometry* brush_inst, 
-                                            Scene* scene, Entity& parent, 
-        const std::string& target, const std::string& targetname, FGDBrushEntity fgdBrush)
-    {
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-
-        std::string name = fgdBrush.Name;
-        if (targetname != "")
-            name = targetname;
-
-        Entity brushEntity = scene->CreateEntity(name);
-
-        TransformComponent& transformComponent = brushEntity.GetComponent<TransformComponent>();
-        BSPBrushComponent& bsp = brushEntity.AddComponent<BSPBrushComponent>();
-
-        bsp.IsSolid = fgdBrush.Solid;
-        bsp.IsTransparent = !fgdBrush.Visible;
-        bsp.IsFunc = true;
-        bsp.IsTrigger = fgdBrush.IsTrigger;
-        if (fgdBrush.Script != "" && fgdBrush.Class != "")
-        {
-            auto& wrenScript = brushEntity.AddComponent<WrenScriptComponent>();
-            wrenScript.Script = fgdBrush.Script;
-            wrenScript.mModule = 0; // TODO
-        }
-
-        if (bsp.IsTrigger)
-        {
-            TriggerZone& trigger = brushEntity.AddComponent<TriggerZone>();
-            trigger.target = target;
-        }
-
-        bsp.target = target;
-
-        parent.AddChild(brushEntity);
-
-        transformComponent.SetLocalPosition(Vector3(
-            brush->center.y * ScaleFactor * (1.0f / 64),
-            brush->center.z * ScaleFactor * (1.0f / 64),
-            brush->center.x * ScaleFactor * (1.0f / 64)));
-
-        int index_offset = 0;
-        int lastTextureID = -1;
-        std::string lastTexturePath = "";
-
-        for (int f = 0; f < brush->face_count; ++f)
-        {
-            face* face = &brush->faces[f];
-            texture_data* texture = &textures[face->texture_idx];
-            if (std::string(texture->name) == "__TB_empty")
-            {
-                texture->height = 1;
-                texture->width = 1;
-            }
-            else
-            {
-                std::string path = FileSystem::Root + std::string(texture->name) + ".png";
-                auto tex = TextureManager::Get()->GetTexture(path);
-                texture->height = tex->GetHeight();
-                texture->width = tex->GetWidth();
-            }
-
-            face_geometry* face_geo_inst = &brush_inst->faces[f];
-
-            for (int i = 0; i < face_geo_inst->vertex_count; ++i)
-            {
-                face_vertex vertex = face_geo_inst->vertices[i];
-                vertex_uv vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
-
-                Vector3 vertexPos = Vector3(
-                    (vertex.vertex.y - brush->center.y) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.z - brush->center.z) * ScaleFactor * (1.0f / 64),
-                    (vertex.vertex.x - brush->center.x) * ScaleFactor * (1.0f / 64)
-                );
-
-                Vector2 vertexUV = Vector2(vertex_uv.u, vertex_uv.v);
-                Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
-                Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
-
-                vertices.push_back(Vertex
-                    {
-                        vertexPos,
-                        vertexUV,
-                        vertexNormal,
-                        vertexTangent,
-                        glm::vec3(0.0, 1.0, 0.0)
-                    }
-                );
-            }
-
-            for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; ++i)
-            {
-                unsigned int index = face_geo_inst->indices[i];
-                indices.push_back(index_offset + (unsigned int)index);
-            }
-
-            if (!bsp.IsTrigger)
-            {
-                if (lastTextureID != face->texture_idx)
-                {
-                    lastTexturePath = FileSystem::Root + "textures/" + std::string(texture->name) + ".png";
-                    Ref<Mesh> mesh = CreateRef<Mesh>();
-                    mesh->AddSurface(vertices, indices);
-
-                    if (std::string(texture->name) != "__TB_empty")
-                    {
-                        Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
-                        mesh->SetMaterial(material);
-                    }
-
-                    bsp.Meshes.push_back(mesh);
-
-                    index_offset = 0;
-                    vertices.clear();
-                    indices.clear();
-                    lastTextureID = face->texture_idx;
-                }
-                else
-                {
-                    index_offset += (face_geo_inst->vertex_count);
-                }
-            }
-            else
-            {
-                index_offset += (face_geo_inst->vertex_count);
-            }
-        }
-
-        if (bsp.IsTrigger)
-        {
-            Ref<Mesh> mesh = CreateRef<Mesh>();
-            mesh->AddSurface(vertices, indices);
-
-            bsp.Meshes.push_back(mesh);
-            vertices.clear();
-        }
-
-        if (vertices.size() > 0)
-        {
-            Ref<Mesh> mesh = CreateRef<Mesh>();
-            mesh->AddSurface(vertices, indices);
-
-            Ref<Material> material = MaterialManager::Get()->GetMaterial(lastTexturePath);
-            mesh->SetMaterial(material);
-            bsp.Meshes.push_back(mesh);
-        }
-            
-    }
 
     void QuakeMapBuilder::BuildQuakeMap(Entity& ent, bool Collisions)
     {
@@ -399,11 +66,12 @@ namespace Nuake {
             m_Scene->DestroyEntity(e);
         }
 
-        map_parser_load((FileSystem::Root + quakeMapC.Path).c_str());
+        map_parser_load(quakeMapC.Path.GetAbsolutePath().c_str());
         geo_generator_run();
 
         DefaultMaterial = MaterialManager::Get()->GetMaterial("default");
         Entity worldspawnEntity = { (entt::entity)-1, m_Scene };
+        Entity currentNonWorldEntity;
         std::map<std::string, Entity> pointEntities = std::map<std::string, Entity>();
         for (uint32_t e = 0; e < (uint32_t)entity_count; ++e)
         {
@@ -422,11 +90,14 @@ namespace Nuake {
             bool isWorldSpawn = false;
             bool isPointEntity = false;
             Vector3 brushLocalPosition = { 0, 0, 0 };
+            std::map<std::string, std::string> properties;
             for (int i = 0; i < entity_inst->property_count; i++)
             {
                 property* prop = &(entity_inst->properties)[i];
+
                 std::string key = prop->key;
                 std::string value = prop->value;
+                properties[key] = value;
 
                 if (key == "origin")
                 {
@@ -484,41 +155,254 @@ namespace Nuake {
 
             if (!isWorldSpawn)
             {
+                currentNonWorldEntity = m_Scene->CreateEntity(properties["classname"]);
+                ent.AddChild(currentNonWorldEntity);
+
+                auto& transformComponent = currentNonWorldEntity.GetComponent<TransformComponent>();
+                transformComponent.SetLocalPosition({entity_inst->center.y / 64.0f, entity_inst->center.z / 64.0f, entity_inst->center.x / 64.0f });
+                auto& bsp = currentNonWorldEntity.AddComponent<BSPBrushComponent>();
+
                 if (isPointEntity)
                 {
-                    if (pointEntities.find(pointEntity->Name) == pointEntities.end())
+                    std::string name = pointEntity->Name;
+                    if (targetname != "")
                     {
-                        Entity pointEntityParent = Engine::GetCurrentScene()->CreateEntity(pointEntity->Name);
-                        pointEntities[pointEntity->Name] = pointEntityParent;
-                        ent.AddChild(pointEntityParent);
+                        name = targetname;
                     }
 
-                    Entity newPrefab = Engine::GetCurrentScene()->CreateEntity(pointEntity->Name);
+                    bsp.target = target;
+                    bsp.TargetName = targetname;
 
-                    pointEntities[pointEntity->Name].AddChild(newPrefab);
-
-                    auto& prefabComponent = newPrefab.AddComponent<PrefabComponent>();
-                    prefabComponent.SetPrefab(Prefab::New(pointEntity->Prefab));
-                    newPrefab.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
-
-                    for (auto& e : prefabComponent.PrefabInstance->Entities)
+                    if (properties.find("origin") != properties.end())
                     {
-                        if (!e.GetComponent<ParentComponent>().HasParent)
+                        auto splits = String::Split(properties["origin"], ' ');
+                        if (splits.size() == 3)
                         {
-                            newPrefab.AddChild(e);
+                            int x = atoi(splits[0].c_str());
+                            int y = atoi(splits[1].c_str());
+                            int z = atoi(splits[2].c_str());
+
+                            Vector3 pointPosition = { y / 64.0f, z / 64.0f, x / 64.0f };
+                            transformComponent.SetLocalPosition(pointPosition);
+                        }
+                    }
+                    
+                    if (pointEntity->Script != "")
+                    {
+                        NetScriptComponent& netScript = currentNonWorldEntity.AddComponent<NetScriptComponent>();
+                        netScript.ScriptPath = pointEntity->Script;
+
+                        ScriptingEngineNet::Get().UpdateEntityWithExposedVar(currentNonWorldEntity);
+                        for (auto& ev : netScript.ExposedVar)
+                        {
+                            if (properties.find(ev.Name) != properties.end())
+                            {
+                                if (ev.Type == NetScriptExposedVarType::String)
+                                {
+                                    ev.Value = properties[ev.Name];
+                                    ev.DefaultValue = ev.Value;
+                                }
+                                else if (ev.Type == NetScriptExposedVarType::Float)
+                                {
+                                    float value = atof(properties[ev.Name].c_str());
+                                    ev.Value = value;
+                                    ev.DefaultValue = ev.Value;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Entity newPrefab = Engine::GetCurrentScene()->CreateEntity(pointEntity->Name);
+                        pointEntities[pointEntity->Name].AddChild(newPrefab);
+
+                        auto& prefabComponent = newPrefab.AddComponent<PrefabComponent>();
+                        prefabComponent.SetPrefab(Prefab::New(pointEntity->Prefab));
+                        newPrefab.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
+
+                        for (auto& e : prefabComponent.PrefabInstance->Entities)
+                        {
+                            if (!e.GetComponent<ParentComponent>().HasParent)
+                            {
+                                newPrefab.AddChild(e);
+                            }
                         }
                     }
                 }
-
-                for (int b = 0; b < entity_inst->brush_count; ++b)
+                else
                 {
-                    brush* brush_inst = &entity_inst->brushes[b];
-                    brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
+                    std::string name = fgdBrush->Name;
+                    if (targetname != "")
+                    {
+                        name = targetname;
+                    }
 
-                    //if (isEntity)
-                    //    CreateFuncBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname, fgdBrush);
-                    //else
-                    //    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
+                    bsp.IsSolid = !fgdBrush->IsTrigger;
+                    bsp.IsTransparent = !fgdBrush->Visible;
+                    bsp.IsFunc = true;
+                    bsp.IsTrigger = fgdBrush->IsTrigger;
+                    bsp.target = target;
+                    bsp.TargetName = targetname;
+
+                    if (fgdBrush->Script != "")
+                    {
+                        NetScriptComponent& netScript = currentNonWorldEntity.AddComponent<NetScriptComponent>();
+                        netScript.ScriptPath = fgdBrush->Script;
+
+                        ScriptingEngineNet::Get().UpdateEntityWithExposedVar(currentNonWorldEntity);
+                        for (auto& ev : netScript.ExposedVar)
+                        {
+                            if (properties.find(ev.Name) != properties.end())
+                            {
+                                if (ev.Type == NetScriptExposedVarType::String)
+                                {
+                                    ev.Value = properties[ev.Name];
+                                    ev.DefaultValue = ev.Value;
+                                }
+                            }
+                        }
+                    }
+
+                    std::map<std::string, Ref<Material>> m_Materials;
+                    std::map<Ref<Material>, std::vector<ProcessedMesh>> m_StaticWorld;
+                    for (int b = 0; b < entity_inst->brush_count; ++b)
+                    {
+                        brush* brush_inst = &entity_inst->brushes[b];
+                        brush_geometry* brush_geo_inst = &entity_geo_inst->brushes[b];
+                        std::vector<Vector3> pointsInBrush;
+                        if (isEntity)
+                        {
+                            std::vector<Vertex> vertices;
+                            std::vector<unsigned int> indices;
+
+                            int index_offset = 0;
+                            int lastTextureID = -1;
+                            std::string lastTexturePath = "";
+                            for (int f = 0; f < brush_inst->face_count; ++f)
+                            {
+                                face* face = &brush_inst->faces[f];
+                                texture_data* texture = &textures[face->texture_idx];
+                                Ref<Material> currentMaterial;
+                                if (std::string(texture->name) != "__TB_empty")
+                                {
+                                    std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
+
+                                    if (const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
+                                        FileSystem::FileExists(materialPath))
+                                    {
+                                        Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
+                                        m_Materials[path] = material;
+                                    }
+                                    else
+                                    {
+                                        if (m_Materials.find(path) == m_Materials.end())
+                                        {
+                                            m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+                                        }
+                                    }
+
+                                    currentMaterial = m_Materials[path];
+                                    texture->height = currentMaterial->m_Albedo->GetHeight();
+                                    texture->width = currentMaterial->m_Albedo->GetWidth();
+                                }
+                                else
+                                {
+                                    continue;
+
+                                    currentMaterial = MaterialManager::Get()->GetMaterial("resources/Textures/default/Default.png");
+                                    texture->height = texture->width = 1;
+                                }
+
+                                face_geometry* face_geo_inst = &brush_geo_inst->faces[f];
+                                std::vector<Vertex> vertices;
+                                std::vector<uint32_t> indices;
+                                for (int i = 0; i < face_geo_inst->vertex_count; ++i)
+                                {
+                                    face_vertex vertex = face_geo_inst->vertices[i];
+                                    vertex_uv vertex_uv;
+
+                                    if (face->is_valve_uv)
+                                        vertex_uv = get_valve_uv(vertex.vertex, face, texture->width, texture->height);
+                                    else
+                                        vertex_uv = get_standard_uv(vertex.vertex, face, texture->width, texture->height);
+
+                                    Vector3 vertexPos = Vector3(
+                                        (vertex.vertex.y - entity_inst->center.y) * quakeMapC.ScaleFactor,
+                                        (vertex.vertex.z - entity_inst->center.z) * quakeMapC.ScaleFactor,
+                                        (vertex.vertex.x - entity_inst->center.x) * quakeMapC.ScaleFactor
+                                    );
+
+                                    // We need to push the hull points because the batching
+                                    // will create 1 model per material, this prevents us from
+                                    // having 1 collision shape per brush(convex).
+                                    pointsInBrush.push_back(vertexPos * (1.0f / 64.0f));
+
+                                    Vector2 vertexUV = Vector2(vertex_uv.u, 1.0 - vertex_uv.v);
+                                    Vector3 vertexNormal = Vector3(vertex.normal.y, vertex.normal.z, vertex.normal.x);
+                                    Vector3 vertexTangent = Vector3(vertex.tangent.y, vertex.tangent.z, vertex.tangent.x);
+                                    Vector3 vertexBitangent = glm::cross(vertexNormal, vertexTangent) * (float)vertex.tangent.w;
+
+                                    vertices.push_back(Vertex{
+                                        vertexPos * (1.0f / 64.0f),
+                                        vertexUV,
+                                        vertexNormal,
+                                        vertexTangent,
+                                        vertexBitangent
+                                    });
+                                }
+
+                                for (int i = 0; i < (face_geo_inst->vertex_count - 2) * 3; i += 3)
+                                {
+                                    uint32_t i1 = face_geo_inst->indices[i];
+                                    uint32_t i2 = face_geo_inst->indices[i + 1];
+                                    uint32_t i3 = face_geo_inst->indices[i + 2];
+                                    indices.push_back(i3);
+                                    indices.push_back(i2);
+                                    indices.push_back(i1);
+                                }
+
+                                m_StaticWorld[currentMaterial].push_back({ vertices, indices });
+
+                                vertices.clear();
+                                indices.clear();
+                            }
+
+                            bsp.Hulls.push_back(std::move(pointsInBrush));
+                        }
+
+                        //else
+                        //    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
+                    }
+
+                    // Batching process
+                    Ref<Model> model = CreateRef<Model>();
+                    for (auto& mat : m_StaticWorld)
+                    {
+                        std::vector<Vertex> batchedVertices;
+                        std::vector<uint32_t> batchedIndices;
+                        uint32_t indexOffset = 0;
+                        for (auto& pm : mat.second)
+                        {
+                            for (auto& vert : pm.Vertices)
+                                batchedVertices.push_back(vert);
+
+                            for (auto& index : pm.Indices)
+                                batchedIndices.push_back(indexOffset + index);
+
+                            indexOffset += static_cast<uint32_t>(pm.Vertices.size());
+                        }
+
+                        Ref<Mesh> mesh = CreateRef<Mesh>();
+                        mesh->AddSurface(batchedVertices, batchedIndices);
+                        mesh->SetMaterial(mat.first);
+                        model->AddMesh(mesh);
+                    }
+
+                    if (!bsp.IsTrigger)
+                    {
+                        ModelComponent& modelComponent = currentNonWorldEntity.AddComponent<ModelComponent>();
+                        modelComponent.ModelResource = model;
+                    }
                 }
             }
             else

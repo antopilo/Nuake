@@ -7,11 +7,15 @@
 
 #include <glad/glad.h>
 
+#include "src/UI/NuakeUI.h"
+#include "src/UI/UIInputManager.h"
+
+
 
 void EditorApplication::OnInit()
 {
     using namespace Nuake;
-    
+
     Engine::Init();
     m_Window = Engine::GetCurrentWindow();
     m_Window->SetSize({ m_Specification.WindowWidth, m_Specification.WindowHeight });
@@ -44,6 +48,39 @@ void EditorApplication::OnInit()
             }
         }
     }
+
+    m_Window->SetOnWindowFocusedCallback([&](Window& window, bool focused)
+        {
+            if (!focused)
+            {
+                return;
+            }
+
+            for (auto& layer : m_LayerStack)
+            {
+                layer->OnWindowFocused();
+            }
+        }); 
+
+    m_Window->SetOnWindowClosedCallback([](Window& window)
+        {
+            if (Engine::GetProject())
+            {
+                Engine::GetProject()->Save();
+            }
+
+            if (Engine::GetCurrentScene())
+            {
+                Engine::GetCurrentScene()->Save();
+            }
+        });
+    
+    m_Window->SetOnDragNDropCallback([&](Window& window, const std::vector<std::string>& paths) {
+        for (auto& layer : m_LayerStack)
+        {
+            layer->OnDragNDrop(paths);
+        }
+    });
 
     PushLayer(CreateScope<EditorLayer>());
 }

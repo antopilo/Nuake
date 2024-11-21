@@ -1,15 +1,37 @@
 #pragma once
+
+#include "Component.h"
+
 #include "src/Physics/PhysicsShapes.h"
 #include "src/Core/Core.h"
 
-namespace Nuake {
-	class SphereColliderComponent
+namespace Nuake
+{
+	class SphereColliderComponent : public Component
 	{
+		NUAKECOMPONENT(SphereColliderComponent, "Sphere Component")
+
+		static void InitializeComponentClass()
+		{
+			BindComponentField<&SphereColliderComponent::IsTrigger>("IsTrigger", "Is Trigger");
+			BindComponentProperty<&SphereColliderComponent::SetRadius, &SphereColliderComponent::GetRadius>("Radius", "Radius");
+		}
+
 	public:
 		Ref<Physics::PhysicShape> Sphere;
 
 		float Radius = 0.5f;
 		bool IsTrigger = false;
+
+		void SetRadius(const float newRadius)
+		{
+			Radius = newRadius;
+		}
+
+		float GetRadius()
+		{
+			return Radius;
+		}
 
 		json Serialize()
 		{

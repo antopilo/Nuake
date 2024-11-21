@@ -46,30 +46,25 @@ void EditorLayer::OnUpdate()
                 if (m_EditorInterface->ShouldDrawAxis())
                 {
                     m_GizmoDrawer->DrawAxis(currentScene, false);
-                    glDepthFunc(GL_GREATER);
-
-                    m_GizmoDrawer->DrawAxis(currentScene, true);
-                    glDepthFunc(GL_LESS);
                 }
 
                 if (m_EditorInterface->ShouldDrawNavMesh())
                 {
-                    
                     m_GizmoDrawer->DrawNavMesh(currentScene, true);
                 }
 
-                if (m_EditorInterface->ShouldDrawCollision())
+                if (m_EditorInterface->ShouldDrawGizmos())
                 {
                     m_GizmoDrawer->DrawGizmos(currentScene, false);
-                    //glDepthFunc(GL_GREATER);
-
-                    //m_GizmoDrawer->DrawGizmos(currentScene, true);
-                    //glDepthFunc(GL_LESS);
                 }
 
-                
+                if (m_EditorInterface->ShouldDrawShapes())
+                {
+                    m_GizmoDrawer->DrawShapes(currentScene, false);
+                }
             }
         }
+
         sceneFramebuffer->Unbind();
     }
 
@@ -84,4 +79,14 @@ void EditorLayer::OnUpdate()
 void EditorLayer::OnDetach()
 {
 	delete m_EditorInterface;
+}
+
+void EditorLayer::OnWindowFocused()
+{
+    m_EditorInterface->OnWindowFocused();
+}
+
+void EditorLayer::OnDragNDrop(const std::vector<std::string>& paths)
+{
+    m_EditorInterface->OnDragNDrop(paths);
 }

@@ -5,23 +5,19 @@
 #include <src/Core/Input.h>
 #include <src/Scene/Scene.h>
 #include <src/Scene/Entities/Entity.h>
-#include <src/Scene/Components/Components.h>
+#include <src/Scene/Components.h>
 
 #include "src/Windows/EditorInterface.h"
 
-#include <src/Scene/Components/QuakeMap.h>
 #include <src/Vendors/imgui/imgui.h>
 #include <src/Vendors/imgui/ImGuizmo.h>
 #include <src/Physics/PhysicsManager.h>
-#include "src/Scene/Components/BoxCollider.h"
 
 #include <GLFW/glfw3.h>
 #include <src/Vendors/glm/trigonometric.hpp>
-#include <src/Scripting/ScriptingEngine.h>
 #include <src/Resource/FGD/FGDFile.h>
 #include <src/Rendering/Shaders/ShaderManager.h>
 #include <src/Rendering/Renderer.h>
-#include <src/Scene/Components/BSPBrushComponent.h>
 
 #include "src/Actions/EditorSelection.h"
 #include "src/Misc/GizmoDrawer.h"
@@ -98,6 +94,13 @@ LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
                 launchSettings.monitor = stoi(arguments[i + 1]);
             }
         }
+        else if (argumentSize == 2 && Nuake::FileSystem::FileExists(arg))
+        {
+            if (Nuake::String::EndsWith(arg, ".project"))
+            {
+                launchSettings.projectPath = arg;
+            }
+        }
 
         i++;
     }
@@ -116,10 +119,11 @@ Nuake::Application* Nuake::CreateApplication(int argc, char** argv)
     ApplicationSpecification specification
     {
         .Name = "Editor",
-        .WindowWidth = 1600,
-        .WindowHeight = 900,
+        .WindowWidth = static_cast<uint32_t>(launchSettings.resolution.x),
+        .WindowHeight = static_cast<uint32_t>(launchSettings.resolution.y),
         .VSync = true
     };
+
 
 #ifdef NK_DEBUG
     specification.Name += "(DEBUG BUILD)";

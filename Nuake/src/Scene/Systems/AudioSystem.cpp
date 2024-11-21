@@ -4,11 +4,10 @@
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components/AudioEmitterComponent.h"
-
+#include "src/FileSystem/File.h"
 #include "src/Audio/AudioManager.h"
 
 #include <future>
-
 
 namespace Nuake
 {
@@ -32,26 +31,28 @@ namespace Nuake
 		auto currentCamera = m_Scene->GetCurrentCamera();
 
 		Vector3 direction = currentCamera->GetDirection();
-		if (Engine::IsPlayMode())
+		Vector3 position = currentCamera->GetTranslation();
+		if (!Engine::IsPlayMode())
 		{
-			direction *= -1.0f;
+			direction.x *= -1.0f;
+			direction.z *= -1.0f;
 		}
 
-		audioManager.SetListenerPosition(currentCamera->GetTranslation(), std::move(direction), currentCamera->GetUp());
+		audioManager.SetListenerPosition(position, std::move(direction), currentCamera->GetUp());
 
 		auto view = m_Scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 		for (auto& e : view)
 		{
 			auto [transformComponent, audioEmitterComponent] = view.get<TransformComponent, AudioEmitterComponent>(e);
 			
-			if (audioEmitterComponent.FilePath.empty())
+			if (audioEmitterComponent.FilePath.file == nullptr || !audioEmitterComponent.FilePath.file->Exist())
 			{
 				// Doesn't have a file 
 				continue;
 			}
 
 			const bool isPlaying = audioEmitterComponent.IsPlaying;
-			const std::string absoluteFilePath = FileSystem::RelativeToAbsolute(audioEmitterComponent.FilePath);
+			const std::string absoluteFilePath = audioEmitterComponent.FilePath.file->GetAbsolutePath();
 			const bool isVoiceActive = audioManager.IsVoiceActive(absoluteFilePath);
 
 			AudioRequest audioRequest;

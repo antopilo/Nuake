@@ -1,5 +1,6 @@
 #pragma once
 #include "System.h"
+#include "src/Core/MulticastDelegate.h"
 
 namespace Nuake {
 	class Scene;
@@ -13,6 +14,8 @@ namespace Nuake {
 		void Draw() override {}
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
+
+		void InitializeNewScripts();
 
 	private:
 		void DispatchPhysicCallbacks();

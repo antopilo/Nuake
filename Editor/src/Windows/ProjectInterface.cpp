@@ -1,7 +1,12 @@
 #include "ProjectInterface.h"
-#include <src/Vendors/imgui/imgui.h>
+
 #include "Engine.h"
-#include "src/Core/FileSystem.h"
+#include <src/FileSystem/FileDialog.h>
+#include "src/FileSystem/FileSystem.h"
+#include <src/Scripting/ScriptingEngineNet.h>
+#include <src/Scripting/ScriptingEngineNet.h>
+
+#include <src/Vendors/imgui/imgui.h>
 //#include "ImGuiTextHelper.h"
 
 namespace Nuake {
@@ -45,7 +50,7 @@ namespace Nuake {
 
             ImGui::Text("Trenchbroom path:");
             ImGui::SameLine();
-            //ImGuiTextSTD("", m_CurrentProject->TrenchbroomPath);
+            ImGui::Text(m_CurrentProject->TrenchbroomPath.c_str());
             ImGui::SameLine();
             if (ImGui::Button("Browse"))
             {
@@ -112,6 +117,38 @@ namespace Nuake {
                 ImGui::EndPopup();
             }
 
+            if (ImGui::Button("Scan from assembly"))
+            {
+                file->BrushEntities.clear();
+                for (auto& [name, type] : Nuake::ScriptingEngineNet::Get().GetBrushEntities())
+                {
+                    FGDBrushEntity brushEntity = FGDBrushEntity(name);
+                    brushEntity.Script = name;
+                    brushEntity.Description = type.Description;
+                    brushEntity.IsTrigger = type.isTrigger;
+                    for (auto& t : type.exposedVars)
+                    {
+                        ClassProperty classProp;
+                        classProp.name = t.Name;
+                        classProp.type = ClassPropertyType::String;
+                        if (t.Type == ExposedVarTypes::String && t.Value.has_value())
+                        {
+                            classProp.value = std::any_cast<std::string>(t.Value);
+                        }
+                        else if (t.Type == ExposedVarTypes::Int)
+                        {
+                            classProp.value = std::to_string(std::any_cast<int>(t.Value));
+                        }
+                        else
+                        {
+                            classProp.value = "";
+                        }
+                        brushEntity.Properties.push_back(classProp);
+                    }
+
+                    file->BrushEntities.push_back(brushEntity);
+                }
+            }
 
             if (ImGui::Button("Export"))
             {
@@ -201,10 +238,12 @@ namespace Nuake {
                         int i = 0;
                         for (auto& pE : file->BrushEntities)
                         {
+                            ImGui::Text(pE.Name.c_str());
                             //ImGuiTextSTD("##Name" + std::to_string(i), pE.Name);
                             ImGui::TableNextColumn();
 
                             //ImGuiTextSTD("Desc" + std::to_string(i), pE.Description);
+                            ImGui::Text(pE.Description.c_str());
                             ImGui::TableNextColumn();
 
                             ImGui::Checkbox(std::string("Visible##" + std::to_string(i)).c_str(), &pE.Visible);
@@ -216,17 +255,7 @@ namespace Nuake {
                             ImGui::TableNextColumn();
 
                             //ImGuiTextSTD("Script##" + std::to_string(i), pE.Script);
-                            if (ImGui::BeginDragDropTarget())
-                            {
-                                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Script"))
-                                {
-                                    char* file = (char*)payload->Data;
-                                    std::string fullPath = std::string(file, 256);
-                                    pE.Script = FileSystem::AbsoluteToRelative(fullPath);
-                                }
-
-                                ImGui::EndDragDropTarget();
-                            }
+                            
                             //ImGuiTextSTD("Class##" + std::to_string(i), pE.Class);
                             ImGui::TableNextColumn();
 

@@ -67,7 +67,6 @@ project "Detour"
 		defines {"DEBUG"}
 		symbols "On"
 		postbuildcommands {}
-		flags {"staticruntime"} -- this is what worked for me
 
 	-- linux library cflags and libs
 	filter {"system:linux", "toolset:gcc"}

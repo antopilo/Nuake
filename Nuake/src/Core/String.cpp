@@ -99,6 +99,14 @@ namespace Nuake
 
 		return result;
 	}
+
+	std::string String::ReplaceSlash(const std::string& str)
+	{
+		std::string result = str;
+		std::replace(result.begin(), result.end(), '\\', '/');
+		return result;
+	}
+
 	std::string String::Base64Encode(const std::vector<uint8_t>& data)
 	{
 		static const char* chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -118,6 +126,7 @@ namespace Nuake
 		while (result.size() % 4) result.push_back('=');
 		return result;
 	}
+
 	std::vector<uint8_t> String::Base64Decode(const std::string& data)
 	{
 		static const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

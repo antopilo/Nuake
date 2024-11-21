@@ -17,6 +17,8 @@ namespace Nuake {
 
 		virtual void OnDraw() {};
 
+		virtual void OnWindowFocused() {};
+		virtual void OnDragNDrop(const std::vector<std::string>&) {};
 		// TODO: OnEvent
 
 		inline const std::string& GetName() const { return m_Name; }

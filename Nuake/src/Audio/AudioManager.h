@@ -34,15 +34,12 @@ namespace Nuake
 	class AudioManager
 	{
 	private:
-		const int MAX_VOICE_COUNT = 32;
+		int m_MaxVoiceCount = 32;
 		float m_GlobalVolume = 1.0f;
 
 		Ref<SoLoud::Soloud> m_Soloud;
 
-		bool m_AudioThreadRunning;
-		std::thread m_AudioThread;
-		std::mutex m_AudioQueueMutex;
-		std::atomic<bool> m_AudioQueued = { false };
+		bool m_AudioQueued = false;
 		std::queue<AudioRequest> m_AudioQueue;
 
 		Vector3 m_ListenerPosition;
@@ -74,6 +71,10 @@ namespace Nuake
 		void PlayTTS(const std::string& text);
 
 		float GetGlobalVolume() const { return m_GlobalVolume; }
+		void SetGlobalVolume(float volume) { m_GlobalVolume = volume; }
+
+		int GetMaxVoiceCount() const { return m_MaxVoiceCount; }
+		void SetMaxVoiceCount(int count) { m_MaxVoiceCount = count; }
 
 		void QueueWavAudio(const AudioRequest& request);
 		void UpdateVoice(const AudioRequest & request);
@@ -83,8 +84,9 @@ namespace Nuake
 		bool IsVoiceActive(const std::string & voice) const;
 		void LoadWavAudio(const std::string& filePath);
 
+		void AudioUpdate();
+
 	private:
-		void AudioThreadLoop();
 
 		void CleanupInactiveVoices();
 	};

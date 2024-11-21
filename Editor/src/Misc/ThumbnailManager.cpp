@@ -1,10 +1,19 @@
 #include "ThumbnailManager.h"
 
-#include <src/Vendors/glm/ext/matrix_clip_space.hpp>
+#include <src/FileSystem/FileTypes.h>
+#include <src/FileSystem/File.h>
+
+#include <src/Scene/Components/CameraComponent.h>
+#include <src/Scene/Components/ModelComponent.h>
+
 #include <src/Rendering/SceneRenderer.h>
-#include <src/Resource/ResourceLoader.h>
-#include <glad/glad.h>
+
 #include <src/Resource/Prefab.h>
+#include <src/Resource/ResourceLoader.h>
+
+#include <src/Vendors/glm/ext/matrix_clip_space.hpp>
+#include <glad/glad.h>
+#include <Tracy.hpp>
 
 
 ThumbnailManager::ThumbnailManager()
@@ -39,6 +48,8 @@ bool ThumbnailManager::IsThumbnailLoaded(const std::string& path) const
 
 Ref<Nuake::Texture> ThumbnailManager::GetThumbnail(const std::string& path)
 {
+	ZoneScoped;
+
 	if (IsThumbnailLoaded(path))
 	{
 		return m_Thumbnails[path];
@@ -71,6 +82,9 @@ void ThumbnailManager::MarkThumbnailAsDirty(const std::string & path)
 
 Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path, Ref<Nuake::Texture> texture)
 {
+	ZoneScopedN("GenerateThumbnail");
+	ZoneText(path.c_str(), path.size());
+
 	using namespace Nuake;
 
 	const Matrix4 ortho = glm::orthoLH(-0.6f, 0.6f, -0.6f, 0.6f, -100.0f, 100.0f);
@@ -80,26 +94,26 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 	auto file = FileSystem::GetFile(path);
 	if (file->GetFileType() == FileType::Prefab)
 	{
-		Ref<Scene> scene = Scene::New();
-		auto cam = scene->CreateEntity("Camera");
-		TransformComponent& camTransform = cam.GetComponent<TransformComponent>();
-		camTransform.SetLocalPosition({ 0.0f, 0.0f, 2.0f });
-
-		auto& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
-		previewLight.SetCastShadows(false);
-		previewLight.Type = LightType::Directional;
-
-		scene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
-		scene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
-		auto& camComponent = cam.AddComponent<CameraComponent>();
-		camComponent.CameraInstance->Fov = 45.0f;
-		camComponent.CameraInstance->AspectRatio = 1.0f;
-		m_ShadedFramebuffer->SetTexture(texture);
-
-		Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene);
-
-		scene->Update(0.01f);
-		scene->Draw(*m_ShadedFramebuffer.get());
+		//Ref<Scene> scene = Scene::New();
+		//auto cam = scene->CreateEntity("Camera");
+		//TransformComponent& camTransform = cam.GetComponent<TransformComponent>();
+		//camTransform.SetLocalPosition({ 0.0f, 0.0f, 2.0f });
+		//
+		//auto& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
+		//previewLight.SetCastShadows(false);
+		//previewLight.Type = LightType::Directional;
+		//
+		//scene->GetEnvironment()->CurrentSkyType = SkyType::ProceduralSky;
+		//scene->GetEnvironment()->ProceduralSkybox->SunDirection = { 0.58f, 0.34f, -0.74f };
+		//auto& camComponent = cam.AddComponent<CameraComponent>();
+		//camComponent.CameraInstance->Fov = 45.0f;
+		//camComponent.CameraInstance->AspectRatio = 1.0f;
+		//m_ShadedFramebuffer->SetTexture(texture);
+		//
+		//Ref<Prefab> prefab = Prefab::InstanceInScene(path, scene.get());
+		//
+		//scene->Update(0.01f);
+		//scene->Draw(*m_ShadedFramebuffer.get());
 
 		// Gbuffer pass
 		//m_Framebuffer->Bind();
@@ -113,9 +127,9 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	shader->Bind();
 		//
 		//	auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-		//	shader->SetUniformMat4f("u_View", view);
-		//	shader->SetUniformMat4f("u_Projection", ortho);
-		//	shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+		//	shader->SetUniform("u_View", view);
+		//	shader->SetUniform("u_Projection", ortho);
+		//	shader->SetUniform("u_Model", Matrix4(1.0f));
 		//	Renderer::SphereMesh->Draw(shader, true);
 		//}
 		//m_Framebuffer->Unbind();
@@ -129,15 +143,15 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	RenderCommand::Disable(RendererEnum::FACE_CULL);
 		//	auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 		//	shader->Bind();
-		//	shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
-		//	shader->SetUniform1i("LightCount", 0);
+		//	shader->SetUniform("u_EyePosition", Vector3(1, 0, 0));
+		//	shader->SetUniform("LightCount", 0);
 		//	auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
-		//	shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
-		//	shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
-		//	shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
-		//	shader->SetUniform1i("u_DisableSSAO", 1);
-		//	shader->SetUniformMat4f("u_View", view);
-		//	shader->SetUniformMat4f("u_Projection", ortho);
+		//	shader->SetUniform("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+		//	shader->SetUniform("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+		//	shader->SetUniform("u_DirectionalLight.Shadow", 0);
+		//	shader->SetUniform("u_DisableSSAO", 1);
+		//	shader->SetUniform("u_View", view);
+		//	shader->SetUniform("u_Projection", ortho);
 		//
 		//	m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
@@ -145,15 +159,43 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 		//	m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 		//
-		//	shader->SetUniform1i("m_Depth", 5);
-		//	shader->SetUniform1i("m_Albedo", 6);
-		//	shader->SetUniform1i("m_Normal", 7);
-		//	shader->SetUniform1i("m_Material", 8);
-		//	shader->SetUniform1i("m_Emissive", 10);
+		//	shader->SetUniform("m_Depth", 5);
+		//	shader->SetUniform("m_Albedo", 6);
+		//	shader->SetUniform("m_Normal", 7);
+		//	shader->SetUniform("m_Material", 8);
+		//	shader->SetUniform("m_Emissive", 10);
 		//
 		//	Renderer::DrawQuad(Matrix4());
 		//}
 		//m_ShadedFramebuffer->Unbind();
+	}
+	else if (file->GetFileType() == FileType::Mesh)
+	{
+		Ref<Scene> scene = Scene::New();
+		Ref<Environment> env = scene->GetEnvironment();
+		env->CurrentSkyType = SkyType::ClearColor;
+		env->ProceduralSkybox->SunDirection = { 0.88f, 0.34f, -0.14f };
+
+		Entity camera = scene->CreateEntity("Camera");
+		TransformComponent& camTransform = camera.GetComponent<TransformComponent>();
+		camTransform.SetLocalPosition({ 0.0f, 0.5f, 2.0f });
+
+		CameraComponent& camComponent = camera.AddComponent<CameraComponent>();
+		camComponent.CameraInstance->Fov = 45.0f;
+		camComponent.CameraInstance->AspectRatio = 1.0f;
+
+		LightComponent& previewLight = scene->CreateEntity("_directionalLight").AddComponent<LightComponent>();
+		previewLight.SetCastShadows(false);
+		previewLight.Type = LightType::Directional;
+		previewLight.Strength = 5.0f;
+		previewLight.SyncDirectionWithSky = true;
+
+		m_ShadedFramebuffer->SetTexture(texture);
+
+		//ModelComponent& modelComp = scene->CreateEntity("Mesh").AddComponent<ModelComponent>();
+		//modelComp.ModelResource = ResourceLoader::LoadModel(file->GetRelativePath());
+		scene->Update(0.01f);
+		scene->Draw(*m_ShadedFramebuffer.get());
 	}
 	else if (file->GetFileType() == FileType::Material)
 	{
@@ -169,9 +211,9 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			shader->Bind();
 
 			auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-			shader->SetUniformMat4f("u_View", view);
-			shader->SetUniformMat4f("u_Projection", ortho);
-			shader->SetUniformMat4f("u_Model", Matrix4(1.0f));
+			shader->SetUniform("u_View", view);
+			shader->SetUniform("u_Projection", ortho);
+			shader->SetUniform("u_Model", Matrix4(1.0f));
 			Ref<Material> material = ResourceLoader::LoadMaterial(path);
 			material->Bind(shader);
 			Renderer::SphereMesh->Draw(shader, false);
@@ -187,15 +229,15 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			RenderCommand::Disable(RendererEnum::FACE_CULL);
 			auto shader = ShaderManager::GetShader("Resources/Shaders/deferred.shader");
 			shader->Bind();
-			shader->SetUniformVec3("u_EyePosition", Vector3(1, 0, 0));
-			shader->SetUniform1i("LightCount", 0);
+			shader->SetUniform("u_EyePosition", Vector3(1, 0, 0));
+			shader->SetUniform("LightCount", 0);
 			auto dir = Engine::GetCurrentScene()->GetEnvironment()->ProceduralSkybox->GetSunDirection();
-			shader->SetUniform3f("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
-			shader->SetUniform3f("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
-			shader->SetUniform1i("u_DirectionalLight.Shadow", 0);
-			shader->SetUniform1i("u_DisableSSAO", 1);
-			shader->SetUniformMat4f("u_View", view);
-			shader->SetUniformMat4f("u_Projection", ortho);
+			shader->SetUniform("u_DirectionalLight.Direction", 0.6, -0.6, 0.6);
+			shader->SetUniform("u_DirectionalLight.Color", 10.0f, 10.0f, 10.0f);
+			shader->SetUniform("u_DirectionalLight.Shadow", 0);
+			shader->SetUniform("u_DisableSSAO", 1);
+			shader->SetUniform("u_View", view);
+			shader->SetUniform("u_Projection", ortho);
 
 			m_Framebuffer->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(5);
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->Bind(6);
@@ -203,11 +245,11 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT2)->Bind(8);
 			m_Framebuffer->GetTexture(GL_COLOR_ATTACHMENT4)->Bind(10);
 
-			shader->SetUniform1i("m_Depth", 5);
-			shader->SetUniform1i("m_Albedo", 6);
-			shader->SetUniform1i("m_Normal", 7);
-			shader->SetUniform1i("m_Material", 8);
-			shader->SetUniform1i("m_Emissive", 10);
+			shader->SetUniform("m_Depth", 5);
+			shader->SetUniform("m_Albedo", 6);
+			shader->SetUniform("m_Normal", 7);
+			shader->SetUniform("m_Material", 8);
+			shader->SetUniform("m_Emissive", 10);
 
 			Renderer::DrawQuad(Matrix4());
 		}

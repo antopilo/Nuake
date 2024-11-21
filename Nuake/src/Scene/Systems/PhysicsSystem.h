@@ -13,6 +13,7 @@ namespace Nuake
 		void FixedUpdate(Timestep ts) override;
 		void Exit() override;
 
+		void InitializeNewBodies();
 	private:
 		void InitializeShapes();
 		void InitializeQuakeMap();

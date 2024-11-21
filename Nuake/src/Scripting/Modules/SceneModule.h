@@ -19,7 +19,6 @@
 #include <src/Scene/Components/RigidbodyComponent.h>
 #include <src/Scene/Components/CharacterControllerComponent.h>
 #include <src/Scene/Components/WrenScriptComponent.h>
-#include <src/Scene/Components/TriggerZone.h>
 #include <src/Scene/Components/BSPBrushComponent.h>
 #include <src/Scene/Components/PrefabComponent.h>
 #include <src/Scene/Components/AudioEmitterComponent.h>
@@ -282,21 +281,6 @@ namespace Nuake
 
 				const auto& result = PhysicsManager::Get().GetWorld()->Raycast(from, to);
 
-				// We multiply by 3 since we have 3 floats per hit result: vector3.
-				wrenEnsureSlots(vm, static_cast<int>(result.size() * 3));
-				wrenSetSlotNewList(vm, 0);
-
-				uint32_t index = 1;
-				for (auto& r : result)
-				{
-					wrenSetSlotDouble(vm, index,	 r.WorldPosition.x);
-					wrenSetSlotDouble(vm, index + 1, r.WorldPosition.y);
-					wrenSetSlotDouble(vm, index + 2, r.WorldPosition.z);
-					wrenInsertInList(vm, 0, -1, index);
-					wrenInsertInList(vm, 0, -1, index + 1);
-					wrenInsertInList(vm, 0, -1, index + 2);
-					index += 3;
-				}
 			}
 
 			static void MoveAndSlide(WrenVM* vm)
@@ -421,9 +405,7 @@ namespace Nuake
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
-				TriggerZone trigger = ent.GetComponent<TriggerZone>();
-
-				int count = trigger.GetOverLappingCount();
+				int count = 0;
 
 				wrenSetSlotDouble(vm, 0, count);
 			}
@@ -433,9 +415,7 @@ namespace Nuake
 				double handle = wrenGetSlotDouble(vm, 1);
 				Entity ent = Entity((entt::entity)handle, Engine::GetCurrentScene().get());
 
-				TriggerZone trigger = ent.GetComponent<TriggerZone>();
-
-				std::vector<Entity> entities = trigger.GetOverlappingBodies();
+				std::vector<Entity> entities = {};
 
 				wrenEnsureSlots(vm, static_cast<int>(entities.size()));
 

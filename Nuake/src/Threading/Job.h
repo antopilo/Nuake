@@ -9,17 +9,20 @@ namespace Nuake {
 	class Job
 	{
 	public:
-		Job(std::function<void()> job, std::function<void()> end);
+		Job(std::function<void()> logic, std::function<void()> endLogic);
 		Job(const Job&) = delete;
 		Job& operator=(const Job&) = delete;
-		~Job() { m_Thread.join(); }
-		bool IsDone() { return m_IsDone; }
+		~Job() { thread.join(); }
+
+	public:
+		bool IsDone() { return isDone; }
 
 		void End();
+
 	private:
-		std::thread m_Thread;
-		std::atomic<bool> m_IsDone;
-		std::function<void()> m_Job;
-		std::function<void()> m_End;
+		std::thread thread;
+		std::atomic<bool> isDone;
+		std::function<void()> job;
+		std::function<void()> end;
 	};
 }
