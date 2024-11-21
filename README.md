@@ -2,7 +2,7 @@
 
 [Nuake](https://nuake.antopilo.dev) is a *boutique* game engine inspired by Quake. It focuses on fast level design iteration time that integrates with quake level editing software. 
 
-![Nuake](https://cdn.antopilo.dev/images/imageeditor.png)
+![Nuake](https://cdn.antopilo.dev/images/editor-crop.png)
 > It is currently in developement and is not feature complete. We are currently aiming for an alpha release with basic features and a demo level.
 
 ## More info & News!
