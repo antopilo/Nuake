@@ -33,13 +33,14 @@ class EditorSelectionPanel
 private:
 	TransformPanel mTransformPanel;
 	MeshPanel meshPanel;
+	EditorSelection* selection = nullptr;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
 
 	Ref<Nuake::Scene> virtualScene;
 public:
-	EditorSelectionPanel();
+	EditorSelectionPanel(EditorSelection& selection);
 
 	void Draw(EditorSelection selection, const std::string& id = "");
 

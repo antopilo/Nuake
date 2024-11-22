@@ -123,7 +123,8 @@ namespace Nuake {
         _NewProjectWindow = new NewProjectWindow(this);
         _audioWindow = new AudioWindow();
         m_ProjectSettingsWindow = new ProjectSettingsWindow();
-
+        SelectionPanel = new EditorSelectionPanel(this->Selection);
+            
         Logger::Log("Building fonts", "window", VERBOSE);
         BuildFonts();
 
@@ -2623,7 +2624,7 @@ namespace Nuake {
 		//pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
-        SelectionPanel.Draw(Selection);
+        SelectionPanel->Draw(Selection);
         DrawLogger();
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();

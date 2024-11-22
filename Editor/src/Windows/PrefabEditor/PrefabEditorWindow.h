@@ -36,7 +36,7 @@ private:
 	bool isRenaming;
 	bool isInitialized = false;
 
-	EditorSelectionPanel SelectionPanel;
+	EditorSelectionPanel* SelectionPanel;
 	EditorSelection Selection;
 	Nuake::Entity QueueDeletion;
 	ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;

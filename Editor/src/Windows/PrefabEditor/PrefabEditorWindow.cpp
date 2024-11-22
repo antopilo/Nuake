@@ -305,7 +305,7 @@ void PrefabEditorWindow::Draw()
 	}
 	ImGui::End();
 
-	SelectionPanel.Draw(Selection, prefab->Path);
+	SelectionPanel->Draw(Selection, prefab->Path);
 
 	DrawViewportWindow();
 }

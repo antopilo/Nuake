@@ -1,6 +1,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 #include "EditorSelectionPanel.h"
+#include "EditorInterface.h"
 #include "../Misc/ImGuiTextHelper.h"
 #include <src/Scene/Components.h>
 #include "src/Scene/Components/FieldTypes.h"
@@ -25,8 +26,10 @@
 
 using namespace Nuake;
 
-EditorSelectionPanel::EditorSelectionPanel()
+EditorSelectionPanel::EditorSelectionPanel(EditorSelection& inSelection)
 {
+    selection = &inSelection;
+
 	virtualScene = CreateRef<Scene>();
 	virtualScene->SetName("Virtual Scene");
 	virtualScene->CreateEntity("Camera").AddComponent<CameraComponent>();
@@ -2075,6 +2078,8 @@ void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, ent
 		auto fieldValPtr = fieldVal.try_cast<ResourceFile>();
 		if (fieldValPtr != nullptr)
 		{
+            ImGui::SetNextItemAllowOverlap();
+
 			auto fieldValProxy = *fieldValPtr;
 			std::string filePath = fieldValProxy.file == nullptr ? "" : fieldValProxy.file->GetRelativePath();
 			std::string controlName = filePath + std::string("##") + displayName;
@@ -2092,6 +2097,27 @@ void EditorSelectionPanel::DrawFieldTypeResourceFile(entt::meta_data& field, ent
 				}
 				ImGui::EndDragDropTarget();
 			}
+
+            ImGui::SameLine();
+
+            bool showShortcutBtn = !filePath.empty();
+            const int shortcutBtnWidth = 30;
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() - shortcutBtnWidth - ImGui::GetStyle().ItemSpacing.x);
+            if(ImGui::Button(">", ImVec2(shortcutBtnWidth, 0)))
+            {
+                if (FileSystem::FileExists(filePath))
+                {
+                    Ref<Nuake::File> file = FileSystem::GetFile(filePath);
+                    if (file->GetFileType() == FileType::Map)
+                    {
+                        OS::OpenTrenchbroomMap(file->GetAbsolutePath());
+                    }
+                    else
+                    {
+                        *selection = EditorSelection(FileSystem::GetFile(filePath));
+                    }
+                }
+            }
 		}
 		else
 		{

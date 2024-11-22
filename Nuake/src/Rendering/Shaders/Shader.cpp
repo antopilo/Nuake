@@ -237,36 +237,34 @@ namespace Nuake
 	{
 		for (auto& u : uniforms)
 		{
-			std::string name = u.name;
-			auto type = u.type;
-			switch (type)
+			switch (u.type)
 			{
 			case UniformTypes::Float:
-				SetUniform(name, u.value.valueFloat);
+				SetUniform(u.name, u.value.valueFloat);
 				break;
 			case UniformTypes::Int:
-				SetUniform(name, u.value.valueInt);
+				SetUniform(u.name, u.value.valueInt);
 				break;
 			case UniformTypes::Uint:
-				SetUniformUint(name, u.value.valueUInt);
+				SetUniformUint(u.name, u.value.valueUInt);
 				break;
 			case UniformTypes::Vec2:
-				SetUniform(name, u.value.valueVec2);
+				SetUniform(u.name, u.value.valueVec2);
 				break;
 			case UniformTypes::Vec3:
-				SetUniform(name, u.value.valueVec3);
+				SetUniform(u.name, u.value.valueVec3);
 				break;
 			case UniformTypes::Vec4:
-				SetUniform(name, u.value.valueVec4);
+				SetUniform(u.name, u.value.valueVec4);
 				break;
 			case UniformTypes::Mat3:
-				SetUniform(name, u.value.valueMat3);
+				SetUniform(u.name, u.value.valueMat3);
 				break;
 			case UniformTypes::Mat4:
-				SetUniform(name, u.value.valueMat4);
+				SetUniform(u.name, u.value.valueMat4);
 				break;
 			case UniformTypes::Sampler2D:
-				SetUniform(name, u.value.valueInt);
+				SetUniform(u.name, u.value.valueInt);
 				break;
 			}
 		}

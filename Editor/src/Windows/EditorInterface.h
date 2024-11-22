@@ -76,7 +76,7 @@ namespace Nuake
 		FileSystemUI* filesystem;
 		bool isNewProject = false;
 		static EditorSelection Selection;
-		EditorSelectionPanel SelectionPanel;
+		EditorSelectionPanel* SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 		MapImporterWindow m_MapImporter;
 
