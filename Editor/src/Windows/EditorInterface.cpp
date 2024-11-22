@@ -965,7 +965,7 @@ namespace Nuake {
 
     static int selected = 0;
     Entity QueueDeletion;
-    void EditorInterface::DrawEntityTree(Entity e)
+    void EditorInterface::DrawEntityTree(Entity e, bool drawChildrens)
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
 
@@ -986,7 +986,7 @@ namespace Nuake {
 
         // If has no childrens draw tree node leaf
         bool isPrefab = e.HasComponent<PrefabComponent>();
-        if (parent.Children.size() <= 0 || isPrefab)
+        if (parent.Children.size() <= 0 || isPrefab || !drawChildrens)
         {
             base_flags |= ImGuiTreeNodeFlags_Leaf;
         }
@@ -1006,8 +1006,27 @@ namespace Nuake {
         }
 
         auto cursorPos = ImGui::GetCursorPos();
+        ImVec2 cursorPosition = ImGui::GetCursorScreenPos();
+        const auto& cleanName = String::RemoveWhiteSpace(String::ToUpper(name));
+        const size_t searchIt = cleanName.find(String::RemoveWhiteSpace(String::ToUpper(searchQuery)));
+
         ImGui::SetNextItemAllowOverlap();
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
+
+        if (!searchQuery.empty() && searchIt != std::string::npos)
+        {
+            int firstLetterFoundIndex = static_cast<int>(searchIt);
+
+            const auto foundStr = name.substr(0, firstLetterFoundIndex + searchQuery.size());
+            auto highlightBeginPos = ImGui::CalcTextSize(foundStr.c_str());
+            auto highlightEndPos = ImGui::CalcTextSize(searchQuery.c_str());
+
+            auto fg = ImGui::GetForegroundDrawList();
+            auto color = Engine::GetProject()->Settings.PrimaryColor;
+            auto rgbColor = IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, std::min(color.a, 0.2f) * 255.0f);
+
+            fg->AddRectFilled(ImVec2(cursorPosition.x + 20.0f, cursorPosition.y + 4.0f), ImVec2(cursorPosition.x + highlightEndPos.x + 26.0f, cursorPosition.y + highlightEndPos.y + 6.0f), rgbColor, 4.0f);
+        }
 
         if (m_IsRenaming)
         {
@@ -1191,7 +1210,7 @@ namespace Nuake {
        
         if (open)
         {
-            if (!isPrefab)
+            if ((drawChildrens && !isPrefab))
             {
                 // Caching list to prevent deletion while iterating.
                 std::vector<Entity> childrens = parent.Children;
@@ -1218,8 +1237,6 @@ namespace Nuake {
         std::string title = ICON_FA_TREE + std::string("   Hierarchy");
         if (ImGui::Begin(title.c_str()))
         {
-            std::string searchQuery = "";
-            
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 8, 8 });
             ImGui::InputTextWithHint("##search", "Search entity", &searchQuery, 0, 0, 0);
             ImGui::PopStyleVar();
@@ -1410,34 +1427,47 @@ namespace Nuake {
                     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Script", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Visibility   ", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
-                    ImGui::TableHeadersRow();
-
+                    //mGui::TableHeadersRow();
                     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
-                    std::vector<Entity> entities = scene->GetAllEntities();
-                    for (Entity e : entities)
+
+                    // Build list of valid entity to display
+                    std::vector<Entity> entitiesToDisplay;
+                    if (searchQuery.empty())
                     {
-                        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-                        std::string name = e.GetComponent<NameComponent>().Name;
-                        // If selected add selected flag.
-                        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
-                            base_flags |= ImGuiTreeNodeFlags_Selected;
-
-                        // Write in normal font.
-                        ImGui::PushFont(normalFont);
-
-                        // Draw all entity without parents.
-                        if (!e.GetComponent<ParentComponent>().HasParent)
+                        entitiesToDisplay = scene->GetAllEntities();
+                    }
+                    else
+                    {
+                        auto view = scene->m_Registry.view<NameComponent>();
+                        for (auto& e : view)
                         {
-                            // Recursively draw childrens.
-                            DrawEntityTree(e);
+                            auto& nameComponent = view.get<NameComponent>(e);
+                            if (String::RemoveWhiteSpace(String::ToUpper(nameComponent.Name)).find(String::RemoveWhiteSpace(String::ToUpper(searchQuery))) != std::string::npos)
+                            {
+                                entitiesToDisplay.push_back({ e, scene.get() });
+                            }
+                        }
+                    }
+
+                    // Display valid entities
+                    for (Entity e : entitiesToDisplay)
+                    {
+                        // Draw all entity without parents.
+                        bool displayAllHierarchy = searchQuery.empty();
+                        if ((displayAllHierarchy && !e.GetComponent<ParentComponent>().HasParent) || !displayAllHierarchy)
+                        {
+                            ImGui::PushFont(normalFont);
+
+                            // Recursively draw childrens if not searching
+                            const std::string entityName = e.GetComponent<NameComponent>().Name;
+
+
+
+                            DrawEntityTree(e, displayAllHierarchy);
+
+                            ImGui::PopFont();
                         }
 
-                        // Pop font.
-                        ImGui::PopFont();
-
-                        // Right click menu
-                        //if (ImGui::BeginPopupContextItem())
-                        //    ImGui::EndPopup();
                     }
                     ImGui::PopStyleVar();
                 }
