@@ -89,6 +89,9 @@ namespace Nuake {
         extern const std::string Resources_Images_editor_icon_png_path;
         extern unsigned int Resources_Images_editor_icon_png_len;
         extern unsigned char Resources_Images_editor_icon_png[];
+        extern const std::string Resources_Images_env_file_icon_png_path;
+        extern unsigned int Resources_Images_env_file_icon_png_len;
+        extern unsigned char Resources_Images_env_file_icon_png[];
         extern const std::string Resources_Images_file_icon_png_path;
         extern unsigned int Resources_Images_file_icon_png_len;
         extern unsigned char Resources_Images_file_icon_png[];

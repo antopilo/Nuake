@@ -2,6 +2,7 @@
 #include "src/Core/Maths.h"
 #include "src/Core/Core.h"
 #include "src/Scene/Environment/ProceduralSky.h"
+#include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 
 #include "src/Rendering/PostFX/Bloom.h"
@@ -20,9 +21,10 @@ namespace Nuake
 		// CubeMap
 	};
 
-	class Environment : public ISerializable
+	class Environment : public Resource, ISerializable
 	{
 	public:
+		Environment(const std::string& path);
 		Environment();
 
 		SkyType CurrentSkyType;

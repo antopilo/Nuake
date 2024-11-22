@@ -6,6 +6,8 @@
 #include "src/Core/OS.h"
 #include "src/Physics/PhysicsManager.h"
 
+#include "src/Resource/ResourceManager.h"
+
 #include "src/Scene/Systems/ScriptingSystem.h"
 #include "src/Scene/Systems/PhysicsSystem.h"
 #include "src/Scene/Systems/TransformSystem.h"
@@ -32,6 +34,7 @@
 #include "src/Scene/Components/SkinnedModelComponent.h"
 #include "src/Scene/Components/BoneComponent.h"
 
+
 #include <Tracy.hpp>
 
 #include <fstream>
@@ -41,6 +44,8 @@
 
 namespace Nuake 
 {
+	Ref<Environment> Scene::m_Environment = nullptr;
+
 	Ref<Scene> Scene::New()
 	{
 		return CreateRef<Scene>();
@@ -48,9 +53,13 @@ namespace Nuake
 
 	Scene::Scene()
 	{
+		if (m_Environment == nullptr)
+		{
+			m_Environment = CreateRef<Environment>();
+		}
+
 		m_Systems = std::vector<Ref<System>>();
 		m_EditorCamera = CreateRef<EditorCamera>();
-		m_Environement = CreateRef<Environment>();
 
 		physicsSystem = CreateRef<PhysicsSystem>(this);
 		scriptingSystem = CreateRef<ScriptingSystem>(this);
@@ -583,14 +592,26 @@ namespace Nuake
 		return m_EditorCamera;
 	}
 
-	Ref<Environment> Scene::GetEnvironment() const
+	Ref<Environment> Scene::GetEnvironment()
 	{
-		return m_Environement;
-	}
+		auto view = m_Registry.view<EnvironmentComponent>();
+		for (auto e : view)
+		{
+			auto& envComponent = view.get<EnvironmentComponent>(e);
+			if (envComponent.EnvResourceFilePath.Exist() && envComponent.EnvResource == UUID(0))
+			{
+				auto env = ResourceLoader::LoadEnvironment(envComponent.EnvResourceFilePath.GetRelativePath());
+				envComponent.EnvResource = env->ID;
+				return env;
+			}
 
-	void Scene::SetEnvironment(Ref<Environment> env)
-	{
-		m_Environement = env;
+			if (ResourceManager::IsResourceLoaded(envComponent.EnvResource))
+			{
+				return ResourceManager::GetResource<Environment>(envComponent.EnvResource);
+			}
+		}
+
+		return m_Environment;
 	}
 
 	bool Scene::Save()
@@ -647,7 +668,6 @@ namespace Nuake
 	{
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(Name);
-		SERIALIZE_OBJECT(m_Environement)
 		SERIALIZE_VAL(Path)
 		
 		std::vector<json> entities = std::vector<json>();
@@ -683,12 +703,6 @@ namespace Nuake
 		if (j.contains(""))
 		{
 			Path = j["Path"];
-		}
-
-		m_Environement = CreateRef<Environment>();
-		if (j.contains("m_Environement"))
-		{
-			m_Environement->Deserialize(j["m_Environement"]);
 		}
 
 		// Parse entities

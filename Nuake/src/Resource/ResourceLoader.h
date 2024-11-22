@@ -10,6 +10,7 @@ namespace Nuake
 	class UIResource;
 	class File;
 	class SkyResource;
+	class Environment;
 
 	class ResourceLoader
 	{
@@ -25,6 +26,7 @@ namespace Nuake
 		static Ref<Material> LoadMaterial(const std::string& path);
 		static Ref<Model> LoadModel(const std::string& path);
 		static Ref<SkyResource> LoadSky(const std::string& path);
+		static Ref<Environment> LoadEnvironment(const std::string& path);
 		static Ref<UIResource> LoadUI(const std::string& path);
 		static Ref<UIResource> LoadUI(const Ref<File>& file);
 

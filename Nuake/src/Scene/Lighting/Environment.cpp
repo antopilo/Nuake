@@ -4,11 +4,12 @@
 #include "src/Core/Core.h"
 
 
-namespace Nuake {
-
-	Environment::Environment()
+namespace Nuake 
+{
+	Environment::Environment() :
+		m_AmbientColor(1.0f, 1.0f, 1.0f, 1.0f)
 	{
-		m_AmbientColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	
 		ProceduralSkybox = CreateRef<ProceduralSky>();
 
 		CurrentSkyType = SkyType::ProceduralSky;
@@ -41,6 +42,11 @@ namespace Nuake {
 		mVolumetric = CreateScope<Volumetric>();
 		mSSAO = CreateScope<SSAO>();
 		mSSR = CreateScope<SSR>();
+	}
+
+	Environment::Environment(const std::string& path) : Environment()
+	{
+		this->Path = path;
 	}
 
 	glm::vec4 Environment::GetAmbientColor()
@@ -76,6 +82,7 @@ namespace Nuake {
 	{
 		BEGIN_SERIALIZE();
 		SERIALIZE_VAL(CurrentSkyType);
+		j["UUID"] = static_cast<uint64_t>(ID);
 
 		// Bloom
 		SERIALIZE_VAL(BloomEnabled);

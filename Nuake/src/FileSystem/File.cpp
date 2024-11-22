@@ -99,6 +99,11 @@ FileType File::GetFileType() const
 		return FileType::Sky;
 	}
 
+	if (ext == ".env")
+	{
+		return FileType::Env;
+	}
+
 	return FileType::Unknown;
 }
 
@@ -168,6 +173,11 @@ std::string File::GetFileTypeAsString() const
 	if (ext == ".sky")
 	{
 		return "Sky";
+	}
+
+	if (ext == ".env")
+	{
+		return "Environment";
 	}
 
 	return "File";
