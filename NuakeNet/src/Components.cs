@@ -54,6 +54,7 @@ namespace Nuake.Net
         internal static unsafe delegate*<int, NativeArray<float>> GetGlobalPositionIcall;
         internal static unsafe delegate*<int, NativeArray<float>> GetPositionIcall;
         internal static unsafe delegate*<int, float, float, float, void> SetPositionIcall;
+        internal static unsafe delegate*<int, float, float, float, float, float, float, void> LookAtIcall;
         internal static unsafe delegate*<int, float, float, float, void> RotateIcall;
 
         public TransformComponent(int entityId)
@@ -108,6 +109,16 @@ namespace Nuake.Net
                 }
             }
             set { }
+        }
+
+        public void LookAt(Vector3 targetPosition)
+        {
+            LookAt(targetPosition, new(0, 1, 0)); // Default up direction
+        }
+
+        public void LookAt(Vector3 targetPosition, Vector3 up)
+        {
+           unsafe { LookAtIcall(EntityID, targetPosition.X, targetPosition.Y, targetPosition.Z, up.X, up.Y, up.Z); }
         }
     }
 
