@@ -12,7 +12,7 @@ namespace Nuake {
 		uint32_t mStepCount = 50;
 		float mRenderRatio = 0.75f;
 		float mFogAmount = 0.4f;
-		float mFogExponant = 4.0f;
+		float mFogExponant = 1.0f;
 		Vector2 mSize;
 		Texture* mDepth;
 
