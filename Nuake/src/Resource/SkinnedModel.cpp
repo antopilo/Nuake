@@ -119,6 +119,11 @@ namespace Nuake
 		}
 		else
 		{
+			if (!j.contains("Meshes"))
+			{
+				return true;
+			}
+
 			for (auto& m : j["Meshes"])
 			{
 				auto mesh = CreateRef<SkinnedMesh>();
