@@ -2007,26 +2007,29 @@ namespace Nuake {
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
         ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
-        if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
+        if (isControllingCamera)
         {
-            const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-            const float camSpeed = editorCam->Speed;
+            if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
+            {
+                const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+                const float camSpeed = editorCam->Speed;
 
-            const float maxSpeed = 50.0f;
-            const float minSpeed = 0.05f;
-            const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
+                const float maxSpeed = 50.0f;
+                const float minSpeed = 0.05f;
+                const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
 
-            ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0) ;
-            ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
-            ImVec2 startOffset = ImVec2(start.x , end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
+                ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0);
+                ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
+                ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
 
-            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            ImGui::PopStyleVar();
+                ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+                ImGui::PopStyleVar();
+            }
+            ImGui::End();
         }
-
         ImGui::PopStyleVar();
-        ImGui::End();
+
 
         corner = 2;
 
