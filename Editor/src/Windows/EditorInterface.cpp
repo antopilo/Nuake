@@ -642,6 +642,10 @@ namespace Nuake {
             {
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT6);
             }
+            else if (SelectedViewport == 6)
+            {
+                texture = Engine::GetCurrentScene()->GetEnvironment()->mSSAO->GetOuput()->GetTexture();
+            }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
             Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
@@ -1964,7 +1968,7 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
-            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity", "UV"};
+            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity", "UV", "SSAO"};
             ImGui::SetNextItemWidth(128);
 			if (ImGui::BeginCombo("##Output", items[SelectedViewport]))
 			{
@@ -2495,6 +2499,14 @@ namespace Nuake {
                 Selection = EditorSelection();
             }
         }
+
+#ifdef NK_DEBUG
+        // Shader reloading
+        if (ImGui::IsKeyPressed(ImGuiKey_F1, false))
+        {
+            ShaderManager::RebuildShaders();
+        }
+#endif
 
         pInterface.m_CurrentProject = Engine::GetProject();
 

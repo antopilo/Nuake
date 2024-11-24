@@ -5,7 +5,7 @@
 #include <Tracy.hpp>
 
 #define LoadEmbeddedShader(file) \
-m_Shaders[file##_path] = CreateScope<Shader>(file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
+m_Shaders[file##_path] = CreateScope<Shader>("../" + file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
 
 namespace Nuake
 {

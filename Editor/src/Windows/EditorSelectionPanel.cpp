@@ -912,7 +912,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         ImGui::Text("SSAO Strength");
                         ImGui::TableNextColumn();
 
-                        ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.1f, 0.0f, 10.0f);
+                        ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.01f, 0.01f, 10.0f);
                         ImGui::TableNextColumn();
 
                         // Reset button
@@ -928,13 +928,13 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         ImGui::Text("SSAO Radius");
                         ImGui::TableNextColumn();
 
-                        ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.001f, 0.0f, 1.0f);
+                        ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.01f, 0.0f, 10.0f);
                         ImGui::TableNextColumn();
 
                         // Reset button
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
                         std::string resetRadius = ICON_FA_UNDO + std::string("##resetRadius");
-                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 0.5f;
+                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 1.0f;
                         ImGui::PopStyleColor();
                     }
 
@@ -944,45 +944,13 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         ImGui::Text("SSAO Bias");
                         ImGui::TableNextColumn();
 
-                        ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.0f, 0.5f);
+                        ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.00001f, 0.5f);
                         ImGui::TableNextColumn();
 
                         // Reset button
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
                         std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOBias");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias = 0.025f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Area");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOArea", &env->mSSAO->Area, 0.0001f, 0.0f, 0.5f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOArea");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Area = 0.0075f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Falloff");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOFalloff", &env->mSSAO->Falloff, 0.0001f, 0.0f, 0.5f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOFalloff");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Falloff = 0.0022f;
+                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias = 0.001f;
                         ImGui::PopStyleColor();
                     }
 

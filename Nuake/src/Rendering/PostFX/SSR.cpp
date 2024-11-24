@@ -8,7 +8,6 @@ namespace Nuake {
 	SSR::SSR()
 	{
 		mSize = Vector2(1280, 720);
-		mShader = ShaderManager::GetShader("Resources/Shaders/ssr.shader");
 	}
 
 	void SSR::Init()
@@ -32,7 +31,7 @@ namespace Nuake {
 		OutputFramebuffer->Bind();
 		{
 			RenderCommand::Clear();
-
+			mShader = ShaderManager::GetShader("Resources/Shaders/ssr.shader");
 			mShader->Bind();
 
 			mShader->SetUniform("rayStep", RayStep);

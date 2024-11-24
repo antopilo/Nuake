@@ -44,11 +44,13 @@ namespace Nuake
 			return false;
 		}
 
-		ShaderSource newSource = ParseShader(FileSystem::ReadFile(this->Path));
+		ShaderSource newSource = ParseShader(FileSystem::ReadFile(this->Path, true));
 		unsigned int newProgramId = CreateProgram(newSource);
 
 		if(newProgramId == 0)
 			return false;
+
+		UniformCache.clear();
 
 		Source = newSource;
 		programId = newProgramId;
