@@ -1934,7 +1934,7 @@ namespace Nuake {
             ImGui::PushItemWidth(75);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
             ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
-            CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.z };
+            CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.x };
             ImGui::PopStyleVar();
 
             ImGui::PopItemWidth();
