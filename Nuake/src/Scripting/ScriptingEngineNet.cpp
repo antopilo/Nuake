@@ -333,6 +333,13 @@ namespace Nuake
 		return widgetUUIDToManagedObjects[std::make_pair(canvasUUID, uuid)];
 	}
 
+	std::string ScriptingEngineNet::GetGameAssemblyPath(Ref<Project> project) const
+	{
+		const std::string sanitizedProjectName = String::Sanitize(project->Name);
+		const std::string assemblyPath = "/bin/Debug/net8.0/" + sanitizedProjectName + ".dll";
+		return assemblyPath;
+	}
+
 	std::vector<CompilationError> ScriptingEngineNet::BuildProjectAssembly(Ref<Project> project)
 	{
 		const std::string sanitizedProjectName = String::Sanitize(project->Name);
@@ -361,16 +368,14 @@ namespace Nuake
 			return;
 		}
 
-		const std::string sanitizedProjectName = String::Sanitize(project->Name);
-		const std::string assemblyPath = "/bin/Debug/net8.0/" + sanitizedProjectName + ".dll";
-
-		if (!FileSystem::FileExists(assemblyPath))
+		const std::string gameAssemblyPath = GetGameAssemblyPath(project);
+		if (!FileSystem::FileExists(gameAssemblyPath))
 		{
 			Logger::Log("Couldn't load .net assembly. Did you forget to build the .net project?", ".net", CRITICAL);
 			return;
 		}
 
-		const std::string absoluteAssemblyPath = FileSystem::Root + assemblyPath;
+		const std::string absoluteAssemblyPath = FileSystem::Root + gameAssemblyPath;
 		gameAssembly = loadContext.LoadAssembly(absoluteAssemblyPath);
 
 		prefabType = gameAssembly.GetType("Nuake.Net.Prefab");

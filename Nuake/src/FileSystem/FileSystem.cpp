@@ -219,8 +219,14 @@ Ref<Directory> FileSystem::GetFileTree()
 	return RootDirectory;
 }
 
-Ref<File> FileSystem::GetFile(const std::string& path)
+Ref<File> FileSystem::GetFile(const std::string& inPath)
 {
+	std::string path = inPath;
+	if (String::BeginsWith(path, "/") || String::BeginsWith(path, "\\"))
+	{
+		path = inPath.substr(1, inPath.size() - 1);
+	}
+
 	// Note, Might be broken on other platforms.
 	auto splits = String::Split(path, '/');
 

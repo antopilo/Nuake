@@ -118,6 +118,8 @@ namespace Nuake
 		std::unordered_map<std::string, NetGameScriptObject> GetPointEntities() const { return pointEntityTypes; }
 		std::unordered_map<std::string, UIWidgetObject> GetUIWidgets() const { return uiWidgets; }
 
+		std::string GetGameAssemblyPath(Ref<Project> project) const;
+
 		OnGameAssemblyLoadedDelegate& OnUninitialize() { return onUninitializeDelegate; }
 		OnUninitializeDelegate& OnGameAssemblyLoaded() { return onGameAssemblyLoadedDelegate; }
 

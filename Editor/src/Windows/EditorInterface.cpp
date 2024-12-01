@@ -352,48 +352,48 @@ namespace Nuake {
                     SetStatusMessage(statusMessage);
 
                     auto job = [this]()
-                        {
-                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                        };
+                    {
+                            auto project = Engine::GetProject();
+                            auto& scriptingEngine = ScriptingEngineNet::Get();
+                            const std::string& assemblyPath = scriptingEngine.GetGameAssemblyPath(project);
+                            if (FileSystem::FileExists(assemblyPath) && FileSystem::GetFile(assemblyPath)->GetHasBeenModified())
+                            {
+                                this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                                FileSystem::GetFile(assemblyPath)->SetHasBeenModified(false);
+                            }
+                    };
 
                     Selection = EditorSelection();
 
                     JobSystem::Get().Dispatch(job, [this]()
                     {
-                    bool containsError = false;
-                    std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
-                        return error.isWarning == false;
+                        bool containsError = false;
+                        std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                            return error.isWarning == false;
                         });
 
-                    if (errors.size() > 0 && containsError)
-                    {
-                        SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
-
-                        Logger::Log("Build FAILED.", ".net", CRITICAL);
-                        for (CompilationError error : errors)
+                        if (errors.size() > 0 && containsError)
                         {
-                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                            Logger::Log(errorMessage, ".net", CRITICAL);
+                            SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
+
+                            Logger::Log("Build FAILED.", ".net", CRITICAL);
+                            for (CompilationError error : errors)
+                            {
+                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                Logger::Log(errorMessage, ".net", CRITICAL);
+                            }
                         }
-                    }
-                    else
-                    {
-                        Engine::GetProject()->ExportEntitiesToTrenchbroom();
-
-                        ImGui::SetWindowFocus("Logger");
-                        SetStatusMessage("Entering play mode...");
-
-                        PushCommand(SetGameState(GameState::Playing));
-
-                        for (CompilationError error : errors)
+                        else
                         {
-                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                            Logger::Log(errorMessage, ".net", WARNING);
-                        }
+                            Engine::GetProject()->ExportEntitiesToTrenchbroom();
 
-                        std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                        SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
-                    }
+                            ImGui::SetWindowFocus("Logger");
+                            SetStatusMessage("Entering play mode...");
+
+                            PushCommand(SetGameState(GameState::Playing));
+                            std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                            SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
+                        }
                     });
                 }
             }
