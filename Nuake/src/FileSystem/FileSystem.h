@@ -1,5 +1,6 @@
 #pragma once
 #include "src/Core/Core.h"
+#include "FileTypes.h"
 
 namespace filewatch
 {
@@ -35,6 +36,7 @@ namespace Nuake
 		static bool MakeDirectory(const std::string& path, bool absolute = false);
 		static bool DirectoryExists(const std::string& path, bool absolute = false);
 		static bool FileExists(const std::string& path, bool absolute = false);
+		static std::vector<Ref<File>> GetAllFiles(const FileType fileType);
 
 		static std::string ReadFile(const std::string& path, bool absolute = false);
 		static void CopyFileAbsolute(const std::string& src, const std::string& dest);
