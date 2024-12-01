@@ -746,7 +746,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Bloom");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##Enabled", &env->BloomEnabled);
@@ -762,7 +762,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Bloom Threshold");
+                        ImGui::Text("Threshold");
                         ImGui::TableNextColumn();
 
                         float threshold = env->mBloom->GetThreshold();
@@ -780,7 +780,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Bloom Quality");
+                        ImGui::Text("Quality");
                         ImGui::TableNextColumn();
 
                         int iteration = env->mBloom->GetIteration();
@@ -871,7 +871,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Volumetric");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##VolumetricEnabled", &env->VolumetricEnabled);
@@ -887,7 +887,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Volumetric Scattering");
+                        ImGui::Text("Scattering");
                         ImGui::TableNextColumn();
 
                         float fogAmount = env->mVolumetric->GetFogAmount();
@@ -905,7 +905,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Volumetric Strength");
+                        ImGui::Text("Strength");
                         ImGui::TableNextColumn();
 
                         float fogAmount = env->mVolumetric->GetFogExponant();
@@ -953,7 +953,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("SSAO");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##SSAOEnabled", &env->SSAOEnabled);
@@ -968,7 +968,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("SSAO Strength");
+                        ImGui::Text("Strength");
                         ImGui::TableNextColumn();
 
                         ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.01f, 0.01f, 10.0f);
@@ -984,7 +984,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("SSAO Radius");
+                        ImGui::Text("Radius");
                         ImGui::TableNextColumn();
 
                         ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.01f, 0.0f, 10.0f);
@@ -1000,7 +1000,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("SSAO Bias");
+                        ImGui::Text("Bias");
                         ImGui::TableNextColumn();
 
                         ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.00001f, 0.5f);
@@ -1028,7 +1028,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("SSR");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##SSREnabled", &env->SSREnabled);
@@ -1044,7 +1044,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("SSR RayStep");
+                        ImGui::Text("RayStep");
                         ImGui::TableNextColumn();
                         ImGui::DragFloat("##SSRRS", &ssr->RayStep, 0.01f, 0.0f);
                         ImGui::TableNextColumn();
@@ -1059,7 +1059,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("iterationCount");
+                        ImGui::Text("Iteration Count");
                         ImGui::TableNextColumn();
                         ImGui::DragInt("##SSRRSi", &ssr->IterationCount, 1, 1);
                         ImGui::TableNextColumn();
@@ -1074,7 +1074,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("distanceBias");
+                        ImGui::Text("Distance Bias");
                         ImGui::TableNextColumn();
                         ImGui::DragFloat("##SSRRSid", &ssr->DistanceBias, 0.01f, 0.f);
                         ImGui::TableNextColumn();
@@ -1089,7 +1089,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("sampleCount");
+                        ImGui::Text("Sample Count");
                         ImGui::TableNextColumn();
                         ImGui::DragInt("##SSRRSids", &ssr->SampleCount, 1, 0);
                         ImGui::TableNextColumn();
@@ -1104,7 +1104,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Sampling Enabled");
+                        ImGui::Text("Sampling");
                         ImGui::TableNextColumn();
                         ImGui::Checkbox("##SSRRSidss", &ssr->SamplingEnabled);
                         ImGui::TableNextColumn();
@@ -1150,7 +1150,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     ImGui::TableNextColumn();
                     {
                         // Title
-                        ImGui::Text("Binary Searcg");
+                        ImGui::Text("Binary Search");
                         ImGui::TableNextColumn();
                         ImGui::Checkbox("##SSRRSidsssbe", &ssr->BinarySearch);
                         ImGui::TableNextColumn();
@@ -1161,23 +1161,6 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
                         ImGui::PopStyleColor();
                     }
-
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Debug");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidsssbed", &ssr->DebugDraw);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
 
                     ImGui::TableNextColumn();
                     {
@@ -1210,7 +1193,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("DOF Enabled");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##dofEnabled", &env->DOFEnabled);
@@ -1223,53 +1206,6 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         ImGui::PopStyleColor();
                     }
 
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Focal Depth");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffocalDepth", &env->DOFFocalDepth);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetdofFocalDepth = ICON_FA_UNDO + std::string("##resetdofFocalDepth");
-                        if (ImGui::Button(resetdofFocalDepth.c_str())) env->DOFFocalDepth = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Focal Length");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffocalLength", &env->DOFFocalLength);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFocalLength = ICON_FA_UNDO + std::string("##resetDOFFocalLength");
-                        if (ImGui::Button(resetDOFFocalLength.c_str())) env->DOFFocalLength = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("fStop");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
 
                     {
                         ImGui::TableNextColumn();
@@ -1290,7 +1226,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Display auto focus");
+                        ImGui::Text("Display focus");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##dofshowautofocus", &env->DOFShowFocus);
@@ -1306,39 +1242,23 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Manual focus");
+                        ImGui::Text("Focus Distance");
                         ImGui::TableNextColumn();
 
-                        ImGui::Checkbox("##dofmanualfocus", &env->DOFManualFocus);
+                        ImGui::DragFloat("##doffocalDepth", &env->DOFFocalDepth);
                         ImGui::TableNextColumn();
 
                         // Reset button
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFShowautofocus = ICON_FA_UNDO + std::string("##resetdofshowautofocus");
-                        if (ImGui::Button(resetDOFShowautofocus.c_str())) env->DOFShowFocus = false;
+                        std::string resetdofFocalDepth = ICON_FA_UNDO + std::string("##resetdofFocalDepth");
+                        if (ImGui::Button(resetdofFocalDepth.c_str())) env->DOFFocalDepth = 1.0f;
                         ImGui::PopStyleColor();
                     }
 
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("fStop");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Start");
+                        ImGui::Text("Focus Size");
                         ImGui::TableNextColumn();
 
                         ImGui::DragFloat("##dofstart", &env->DOFStart);
@@ -1354,7 +1274,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("DOF Distance");
+                        ImGui::Text("Focus Fade");
                         ImGui::TableNextColumn();
 
                         ImGui::DragFloat("##dofdistance", &env->DOFDist);
@@ -1363,38 +1283,6 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         // Reset button
                         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
                         std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
-                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Threshold");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##dofthreshold", &env->DOFThreshold, 0.001f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
-                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Feather");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffeather", &env->DOFFeather, 0.001f, 0.0f, 1.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetdoffeather");
                         if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
                         ImGui::PopStyleColor();
                     }
@@ -1413,7 +1301,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Barrel Distortion");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##BarrelEnabled", &env->BarrelDistortionEnabled);
@@ -1485,7 +1373,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Vignette Enabled");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##VignetteEnabled", &env->VignetteEnabled);
@@ -1541,7 +1429,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Posterization Enabled");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##PosterizationEnabled", &env->PosterizationEnabled);
@@ -1583,7 +1471,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                     {
                         ImGui::TableNextColumn();
                         // Title
-                        ImGui::Text("Pixelization Enabled");
+                        ImGui::Text("Enabled");
                         ImGui::TableNextColumn();
 
                         ImGui::Checkbox("##PixelizationEnabled", &env->PixelizationEnabled);
