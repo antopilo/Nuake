@@ -48,6 +48,8 @@ namespace Nuake
 		};
 
 	public:
+		SceneRenderer();
+
 		void Init();
 		void Cleanup();
 

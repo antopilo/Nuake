@@ -46,6 +46,11 @@ namespace Nuake
 		};
 	}();
 
+	SceneRenderer::SceneRenderer()
+	{
+		Init();
+	}
+
 	void SceneRenderer::Init()
 	{
 		const auto defaultResolution = Vector2(1920, 1080);
@@ -232,7 +237,7 @@ namespace Nuake
 			}
 		}
 
-		if(renderUI)
+		if (renderUI)
 		{
 			mTempFrameBuffer->QueueResize(framebuffer.GetSize());
 		}
@@ -524,13 +529,26 @@ namespace Nuake
 		}
 		mVignetteBuffer->Unbind();
 
+
+		
+
 		framebuffer.Bind();
 		{
 			RenderCommand::Clear();
-			Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
-			shader->Bind();
-
-			shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+			if (sceneEnv->PosterizationEnabled)
+			{
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/posterization.shader");
+				shader->Bind();
+				shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_Levels", sceneEnv->PosterizationLevels);
+			}
+			else
+			{
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+				shader->Bind();
+				shader->SetUniform("u_Source", mVignetteBuffer->GetTexture().get(), 0);
+			}
+			
 			Renderer::DrawQuad();
 		}
 		framebuffer.Unbind();
@@ -545,6 +563,33 @@ namespace Nuake
 			Renderer::DrawQuad();
 		}
 		mTempFrameBuffer->Unbind();
+
+		if (sceneEnv->PixelizationEnabled)
+		{
+			framebuffer.Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/pixelization.shader");
+				shader->Bind();
+
+				shader->SetUniform("u_Source", mTempFrameBuffer->GetTexture().get(), 0);
+				shader->SetUniform("u_SourceSize", framebufferResolution);
+				shader->SetUniform("u_PixelSize", sceneEnv->PixelSize);
+				Renderer::DrawQuad();
+			}
+			framebuffer.Unbind();
+
+			mTempFrameBuffer->Bind();
+			{
+				RenderCommand::Clear();
+				Shader* shader = ShaderManager::GetShader("Resources/Shaders/copy.shader");
+				shader->Bind();
+
+				shader->SetUniform("u_Source", framebuffer.GetTexture().get(), 0);
+				Renderer::DrawQuad();
+			}
+			mTempFrameBuffer->Unbind();
+		}
 
 		//ImGui::Begin("SDF Params");
 		//{

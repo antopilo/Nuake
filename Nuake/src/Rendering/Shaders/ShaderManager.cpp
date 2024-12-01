@@ -48,6 +48,8 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_ui_panel_shader);
 		LoadEmbeddedShader(Resources_Shaders_ui_text_shader);
 		LoadEmbeddedShader(Resources_Shaders_displayVelocity_shader);
+		LoadEmbeddedShader(Resources_Shaders_posterization_shader);
+		LoadEmbeddedShader(Resources_Shaders_pixelization_shader);
 	}
 
 	Shader* ShaderManager::GetShader(const std::string& path)

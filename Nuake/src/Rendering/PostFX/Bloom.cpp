@@ -12,6 +12,17 @@ namespace Nuake
 		m_Iteration = iteration;
 	}
 
+	void Bloom::SetLensDirt(Ref<Texture> texture)
+	{
+		m_LensDirt = texture;
+		m_HasLensDirt = true;
+	}
+
+	void Bloom::ClearLensDirt()
+	{
+		m_HasLensDirt = false;
+	}
+
 	void Bloom::SetSource(Ref<Texture> source)
 	{
 		if (m_Source == source)
@@ -164,8 +175,17 @@ namespace Nuake
 			shader->SetUniform("u_Stage", 5);
 			shader->SetUniform("u_Source", 1);
 			shader->SetUniform("u_Source2", 2);
+			shader->SetUniform("u_HasLensDirt", m_HasLensDirt);
+			shader->SetUniform("u_LensDirt", 3);
+			if (m_LensDirt)
+			{
+				m_LensDirt->Bind(3);
+				shader->SetUniform("u_LensDirtIntensity", m_LensDirtIntensity);
+			}
+
 			m_UpSampleFB[m_Iteration - 1]->GetTexture()->Bind(1);
 			m_Source->Bind(2);
+
 			Renderer::DrawQuad(Matrix4());
 		}
 		

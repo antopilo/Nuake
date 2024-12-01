@@ -79,6 +79,12 @@ namespace Nuake
 		float VignetteIntensity = 15.0f;
 		float VignetteExtend = 0.5f;
 
+		bool PosterizationEnabled = false;
+		int PosterizationLevels = 10;
+
+		bool PixelizationEnabled = false;
+		int PixelSize = 4;
+
 		Vector3 ClearColor;
 
 		glm::vec4 m_AmbientColor;

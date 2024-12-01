@@ -236,6 +236,12 @@ namespace Nuake {
         extern const std::string Resources_Shaders_pbr_shader_path;
         extern unsigned int Resources_Shaders_pbr_shader_len;
         extern unsigned char Resources_Shaders_pbr_shader[];
+        extern const std::string Resources_Shaders_pixelization_shader_path;
+        extern unsigned int Resources_Shaders_pixelization_shader_len;
+        extern unsigned char Resources_Shaders_pixelization_shader[];
+        extern const std::string Resources_Shaders_posterization_shader_path;
+        extern unsigned int Resources_Shaders_posterization_shader_len;
+        extern unsigned char Resources_Shaders_posterization_shader[];
         extern const std::string Resources_Shaders_sdf_text_shader_path;
         extern unsigned int Resources_Shaders_sdf_text_shader_len;
         extern unsigned char Resources_Shaders_sdf_text_shader[];
