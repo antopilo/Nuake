@@ -8,6 +8,7 @@
 #include "../ComponentsPanel/TransformPanel.h"
 #include "../ComponentsPanel/LightPanel.h"
 #include "../ComponentsPanel/MeshPanel.h"
+#include "../ComponentsPanel/SkinnedMeshPanel.h"
 #include "../ComponentsPanel/CameraPanel.h"
 #include "../ComponentsPanel/CapsuleColliderPanel.h"
 #include "../ComponentsPanel/CylinderColliderPanel.h"
@@ -33,6 +34,7 @@ class EditorSelectionPanel
 private:
 	TransformPanel mTransformPanel;
 	MeshPanel meshPanel;
+	SkinnedMeshPanel skinnedMeshPanel;
 	EditorSelection* selection = nullptr;
 
 	Ref<Nuake::File> currentFile;

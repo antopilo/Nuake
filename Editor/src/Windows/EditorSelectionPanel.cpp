@@ -36,6 +36,7 @@ EditorSelectionPanel::EditorSelectionPanel(EditorSelection& inSelection)
 	
 	RegisterComponentDrawer<LightComponent, &LightPanel::Draw>();
 	RegisterComponentDrawer<ModelComponent, &MeshPanel::Draw>(&meshPanel);
+    //RegisterComponentDrawer<SkinnedModelComponent, &SkinnedMeshPanel::Draw>(&skinnedMeshPanel);
 	RegisterComponentDrawer<CameraComponent, &CameraPanel::Draw>();
 	RegisterComponentDrawer<MeshColliderComponent, &MeshColliderPanel::Draw>();
 	RegisterComponentDrawer<CapsuleColliderComponent, &CapsuleColliderPanel::Draw>();
