@@ -83,7 +83,7 @@ uniform bool showFocus = false;
 make sure that these two values are the same for your camera, otherwise distances will be wrong.
 */
 
-uniform float znear = 0.1f; //camera clipping start
+uniform float znear = 0.001f; //camera clipping start
 uniform float zfar = 1000.0; //camera clipping end
 
 //------------------------------------------

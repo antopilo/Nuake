@@ -447,6 +447,9 @@ namespace Nuake
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/dof.shader");
 			shader->Bind();
 
+			auto cam = scene.GetCurrentCamera();
+			shader->SetUniform("znear", cam->GetNear());
+			shader->SetUniform("zfar", cam->GetFar());
 			shader->SetUniform("focalDepth", sceneEnv->DOFFocalDepth);
 			shader->SetUniform("focalLength", sceneEnv->DOFFocalLength);
 			shader->SetUniform("fstop", sceneEnv->DOFFstop);

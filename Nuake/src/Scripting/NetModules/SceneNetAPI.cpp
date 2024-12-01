@@ -625,6 +625,16 @@ namespace Nuake {
 		}
 	}
 
+	void EnvironmentDepthOfFieldSetFocusDistanceIcall(float distance)
+	{
+		Engine::GetCurrentScene()->GetEnvironment()->DOFFocalDepth = distance;
+	}
+
+	float EnvironmentDepthOfFieldGetFocusDistanceIcall()
+	{
+		return Engine::GetCurrentScene()->GetEnvironment()->DOFFocalDepth;
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
@@ -680,6 +690,9 @@ namespace Nuake {
 		// Audio Emitter
 		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", &AudioEmitterGetIsPlaying);
 		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", &AudioEmitterSetIsPlaying);
+
+		RegisterMethod("Environment.SetFocusDistanceIcall", &EnvironmentDepthOfFieldSetFocusDistanceIcall);
+		RegisterMethod("Environment.GetFocusDistanceIcall", &EnvironmentDepthOfFieldGetFocusDistanceIcall);
 	}
 
 }
