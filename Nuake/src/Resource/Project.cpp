@@ -4,7 +4,7 @@
 #include "src/Core/Logger.h"
 #include "src/Audio/AudioManager.h"
 #include "src/Scripting/ScriptingEngineNet.h"
-
+#include "src/FileSystem/File.h"
 #include <json/json.hpp>
 
 #include <filesystem>
@@ -207,6 +207,23 @@ namespace Nuake
 
 				pointEntity.Properties.push_back(classProp);
 			}
+
+			file->PointEntities.push_back(pointEntity);
+		}
+
+		for (auto& p : FileSystem::GetAllFiles(FileType::Prefab))
+		{
+			const std::string& fileContent = FileSystem::ReadFile(p->GetRelativePath());
+			json fileJson = json::parse(fileContent);
+
+			std::string name = p->GetName();
+			if (fileJson.contains("DisplayName"))
+			{
+				name = fileJson["DisplayName"];
+			}
+
+			FGDPointEntity pointEntity = FGDPointEntity(name);
+			pointEntity.Description = "A Prefab entity";
 
 			file->PointEntities.push_back(pointEntity);
 		}
