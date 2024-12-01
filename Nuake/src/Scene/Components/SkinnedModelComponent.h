@@ -21,7 +21,10 @@ namespace Nuake
 
         static void InitializeComponentClass()
         {
-            BindComponentField<&SkinnedModelComponent::ModelPath>("ModelPath", "Model Path");
+            //BindComponentField<&SkinnedModelComponent::ModelPath>("ModelPath", "Model Path");
+            BindComponentProperty<&SkinnedModelComponent::SetModel, &SkinnedModelComponent::GetModel>("ModelPath", "Model");
+            ResourceFileRestriction("_Model");
+
             BindComponentProperty<&SkinnedModelComponent::SetPlaying, &SkinnedModelComponent::GetIsPlaying>("Playing", "Playing");
                 SetFlags(ComponentFieldTrait::Transient);
 
@@ -32,6 +35,12 @@ namespace Nuake
         Ref<SkinnedModel> ModelResource;
         ResourceFile ModelPath;
         DynamicItemList animationList;
+
+        void SetModel(ResourceFile file);
+        ResourceFile GetModel()
+        {
+            return ModelPath;
+        }
 
         void LoadModel(entt::entity e, Scene* scene);
 

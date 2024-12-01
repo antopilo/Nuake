@@ -46,20 +46,28 @@ namespace Nuake
 				continue;
 			}
 
-			float animationTime = 0.0f;
-			Ref<SkeletalAnimation> animation = model->GetCurrentAnimation();
-			if (animation && model->IsPlaying)
+			float animTime = 0.0f;
+			float prevAnimTime = 0.0f;
+			Ref<SkeletalAnimation> anim = model->GetCurrentAnimation();
+			Ref<SkeletalAnimation> prevAnim = model->GetPreviousAnimation();
+			float blendWeight = model->GetCurrentBlendTime();
+			if (anim && model->IsPlaying)
 			{
-				animationTime = animation->GetCurrentTime() + (ts * animation->GetTicksPerSecond());
-				animation->SetCurrentTime(animationTime);
+				animTime = anim->GetCurrentTime() + (ts * anim->GetTicksPerSecond());
+				anim->SetCurrentTime(animTime);
+
+				model->SetCurrentBlendTime(blendWeight - ts);
+				Logger::Log("Blend time: " + std::to_string(model->GetCurrentBlendTime()));
+				prevAnimTime = prevAnim->GetCurrentTime() + (ts * prevAnim->GetTicksPerSecond());
+				prevAnim->SetCurrentTime(prevAnimTime);
 			}
 
 			auto& rootBone = model->GetSkeletonRootNode();
-			UpdateBonePositionTraversal(rootBone, animation, animationTime, model->IsPlaying);
+			UpdateBonePositionTraversal(rootBone, anim, prevAnim, animTime, prevAnimTime, model->IsPlaying, model->GetCurrentBlendTime());
 		}
 	}
 
-	void AnimationSystem::UpdateBonePositionTraversal(SkeletonNode& bone, Ref<SkeletalAnimation> animation, float time, bool isPlaying)
+	void AnimationSystem::UpdateBonePositionTraversal(SkeletonNode& bone, Ref<SkeletalAnimation> animation, Ref<SkeletalAnimation> prevAnimation, float time, float prevTime, bool isPlaying, float blendTime)
 	{
 		if (Entity boneEnt = m_Scene->GetEntityByID(bone.EntityHandle); 
 			boneEnt.IsValid())
@@ -83,10 +91,31 @@ namespace Nuake
 					Vector3 localScale;
 					Decompose(finalTransform, localPosition, localRotation, localScale);
 
+					if (auto& prevAnimTrack = prevAnimation->GetTrack(bone.Name); !prevAnimTrack.IsEmpty())
+					{
+						prevAnimTrack.Update(prevTime);
+						Matrix4 prevTransform = prevAnimTrack.GetFinalTransform();
+
+						Vector3 prevLocalPosition;
+						Quat prevLocalRotation;
+						Vector3 prevLocalScale;
+						Decompose(prevTransform, prevLocalPosition, prevLocalRotation, prevLocalScale);
+
+						localPosition = glm::mix(localPosition, prevLocalPosition, blendTime);
+						localRotation = glm::slerp(localRotation, prevLocalRotation, blendTime);
+						prevLocalScale = glm::mix(localScale, prevLocalScale, blendTime);
+					}
+
+					Matrix4 finalLocalTransform = Matrix4(1.0f);
+					auto translateMatrix = glm::translate(Matrix4(1.0), localPosition);
+					auto RotationMatrix = glm::mat4_cast(localRotation);
+					auto scaleMatrix = glm::scale(Matrix4(1.0f), localScale);
+					
+					auto finalMatrix = translateMatrix * RotationMatrix * scaleMatrix;
 					transformComponent.SetLocalPosition(localPosition);
 					transformComponent.SetLocalRotation(localRotation);
 					transformComponent.SetLocalScale(localScale);
-					transformComponent.SetLocalTransform(finalTransform);
+					transformComponent.SetLocalTransform(finalMatrix);
 				}
 			}
 			
@@ -94,7 +123,7 @@ namespace Nuake
 
 		for (auto& childBone : bone.Children)
 		{
-			UpdateBonePositionTraversal(childBone, animation, time, isPlaying);
+			UpdateBonePositionTraversal(childBone, animation, prevAnimation, time, prevTime, isPlaying, blendTime);
 		}
 	}
 
