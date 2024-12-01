@@ -69,7 +69,7 @@ std::vector<Ref<File>> FileSystem::GetAllFiles(const FileType fileType)
 	std::vector<Ref<File>> foundFiles;
 
 	std::function<void(Ref<Directory>)> scanDir;
-	scanDir = [scanDir, &foundFiles, fileType](Ref<Directory> dir)
+	scanDir = [&scanDir, &foundFiles, &fileType](Ref<Directory> dir)
 	{
 		// All the files matching the filetype
 		for (auto& f : dir->Files)

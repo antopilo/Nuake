@@ -224,7 +224,7 @@ namespace Nuake
 
 			FGDPointEntity pointEntity = FGDPointEntity(name);
 			pointEntity.Description = "A Prefab entity";
-
+			pointEntity.Prefab = p->GetRelativePath();
 			file->PointEntities.push_back(pointEntity);
 		}
 
