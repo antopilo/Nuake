@@ -28,7 +28,8 @@
 using namespace Nuake;
 
 PrefabEditorWindow::PrefabEditorWindow(Ref<Prefab> inPrefab) :
-	prefab(inPrefab)
+	prefab(inPrefab),
+	SelectionPanel(CreateScope<EditorSelectionPanel>(Selection))
 {
 	const Vector2 defaultSize = Vector2{ 640, 360 };
 	viewportFramebuffer = CreateRef<FrameBuffer>(true, defaultSize);
@@ -50,7 +51,6 @@ PrefabEditorWindow::PrefabEditorWindow(Ref<Prefab> inPrefab) :
 	previewLight.SetCastShadows(true);
 	previewLight.SyncDirectionWithSky = true;
 	previewLight.Strength = 5.5f;
-
 }
 
 void PrefabEditorWindow::Update(float ts)
