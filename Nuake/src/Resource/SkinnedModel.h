@@ -16,6 +16,8 @@ namespace Nuake
 		SkeletonNode m_SkeletonRoot;
 
 		uint32_t m_CurrentAnimation = 0;
+		uint32_t m_PreviousAnimation = 0;
+		float m_TransitionBlendTime = 0.0f;
 		uint32_t m_NumAnimation = 0;
 		std::vector<Ref<SkeletalAnimation>> m_Animations;
 
@@ -39,7 +41,10 @@ namespace Nuake
 		void SetAnimations(const std::vector<Ref<SkeletalAnimation>> animations);
 		void AddAnimation(Ref<SkeletalAnimation> animation);
 
+		float GetCurrentBlendTime();
+		void SetCurrentBlendTime(float time);
 		Ref<SkeletalAnimation> GetCurrentAnimation();
+		Ref<SkeletalAnimation> GetPreviousAnimation();
 		void PlayAnimation(uint32_t animationId);
 		uint32_t GetCurrentAnimationIndex() const { return m_CurrentAnimation; }
 		uint32_t GetAnimationsCount() const { return m_NumAnimation; }

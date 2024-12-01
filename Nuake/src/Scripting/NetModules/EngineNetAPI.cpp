@@ -97,6 +97,16 @@ namespace Nuake {
 		return ConvertHitsToArray(hits);
 	}
 
+	Coral::Array<float> ShapeCastSphere(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, float radius)
+	{
+		auto sphere = CreateRef<Physics::Sphere>(radius);
+		const Vector3 from = { fromX, fromY, fromZ };
+		const Vector3 to = { toX, toY, toZ };
+		auto hits = PhysicsManager::Get().Shapecast(from, to, sphere);
+
+		return ConvertHitsToArray(hits);
+	}
+
 	Coral::Array<float> ShapeCastBox(float fromX, float fromY, float fromZ, float toX, float toY, float toZ, BoxInternal boxInternal)
 	{
 		auto capsule = CreateRef<Physics::Box>(boxInternal.x, boxInternal.y, boxInternal.z);
@@ -143,6 +153,7 @@ namespace Nuake {
 		RegisterMethod("Debug.DrawShapeCylinderIcall", &DrawShapeCylinder);
 
 		RegisterMethod("Physic.RayCastIcall", &Raycast);
+		RegisterMethod("Physic.ShapeCastSphereIcall", &ShapeCastSphere);
 		RegisterMethod("Physic.ShapeCastCapsuleIcall", &ShapeCastCapsule);
 		RegisterMethod("Physic.ShapeCastBoxIcall", &ShapeCastBox);
 	}

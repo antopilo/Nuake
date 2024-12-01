@@ -40,11 +40,32 @@ namespace Nuake
 		m_Animations.push_back(std::move(animation));
 	}
 
+	void SkinnedModel::SetCurrentBlendTime(float blendTime)
+	{
+		m_TransitionBlendTime = std::max(blendTime, 0.0f);
+	}
+
+	float SkinnedModel::GetCurrentBlendTime()
+	{
+		return m_TransitionBlendTime;
+	}
+
 	Ref<Nuake::SkeletalAnimation> SkinnedModel::GetCurrentAnimation()
 	{
 		if (m_CurrentAnimation < m_NumAnimation)
 		{
 			return m_Animations[m_CurrentAnimation];
+		}
+
+		Logger::Log("Cannot get animation if no animation exists", "skinned model", WARNING);
+		return nullptr;
+	}
+
+	Ref<Nuake::SkeletalAnimation> SkinnedModel::GetPreviousAnimation()
+	{
+		if (m_PreviousAnimation < m_NumAnimation)
+		{
+			return m_Animations[m_PreviousAnimation];
 		}
 
 		Logger::Log("Cannot get animation if no animation exists", "skinned model", WARNING);
@@ -61,7 +82,10 @@ namespace Nuake
 
 		GetCurrentAnimation()->SetCurrentTime(0.0f); // Reset previous animation
 
+		m_PreviousAnimation = m_CurrentAnimation;
 		m_CurrentAnimation = animationId;
+
+		m_TransitionBlendTime = 0.6f;
 	}
 
 	json SkinnedModel::Serialize()
