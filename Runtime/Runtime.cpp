@@ -127,10 +127,13 @@ int ApplicationMain(int argc, char* argv[])
 
     project->Deserialize(json::parse(projectfileContent));
 
+    window->ShowTitleBar(true);
+    window->SetDecorated(true);
     window->SetTitle(project->Name);
 
     Nuake::Engine::LoadProject(project);
     Nuake::Engine::EnterPlayMode();
+    window->SetVSync(false);
 
     while (!window->ShouldClose())
     {

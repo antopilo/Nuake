@@ -47,7 +47,11 @@ namespace Nuake
 		};
 
 		hostInstance = new Coral::HostInstance();
-		hostInstance->Initialize(settings);
+		Coral::CoralInitStatus status = hostInstance->Initialize(settings);
+		if (status != Coral::CoralInitStatus::Success)
+		{
+			Logger::Log("Failed to initialize Coral: " + std::to_string((int)status));
+		}
 
 		// Initialize API modules
 		// ----------------------------------
