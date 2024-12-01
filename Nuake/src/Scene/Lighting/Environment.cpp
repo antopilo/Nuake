@@ -2,7 +2,7 @@
 #include "Environment.h"
 
 #include "src/Core/Core.h"
-
+#include "src/Rendering/Textures/TextureManager.h"
 
 namespace Nuake 
 {
@@ -88,6 +88,8 @@ namespace Nuake
 		SERIALIZE_VAL(BloomEnabled);
 		SERIALIZE_VAL_LBL("BloomThreshold", mBloom->GetThreshold());
 		SERIALIZE_VAL_LBL("BloomIteration", mBloom->GetIteration());
+		SERIALIZE_VAL_LBL("BloomDirtTexture", mBloom->GetLensDirt() ? mBloom->GetLensDirt()->GetPath() : "");
+		SERIALIZE_VAL_LBL("BloomDirtIntensity", mBloom->GetLensDirtIntensity());
 
 		// Volumetric
 		SERIALIZE_VAL(VolumetricEnabled);
@@ -116,6 +118,13 @@ namespace Nuake
 
 		// DOF
 		SERIALIZE_VAL(DOFEnabled);
+		SERIALIZE_VAL(DOFAutoFocus);
+		SERIALIZE_VAL(DOFFocalDepth);
+		SERIALIZE_VAL(DOFManualFocus);
+		SERIALIZE_VAL(DOFDist);
+		SERIALIZE_VAL(DOFStart);
+		SERIALIZE_VAL(DOFFocalLength);
+		SERIALIZE_VAL(DOFShowFocus);
 
 		// Barrel distortion
 		SERIALIZE_VAL(BarrelDistortionEnabled);
@@ -130,6 +139,12 @@ namespace Nuake
 
 		SERIALIZE_VAL(AmbientTerm);
 		SERIALIZE_VEC4(AmbientColor);
+
+		SERIALIZE_VAL(PosterizationEnabled);
+		SERIALIZE_VAL(PosterizationLevels);
+
+		SERIALIZE_VAL(PixelizationEnabled);
+		SERIALIZE_VAL(PixelSize);
 
 		SERIALIZE_OBJECT(ProceduralSkybox);
 		END_SERIALIZE();
@@ -173,6 +188,21 @@ namespace Nuake
 		if (j.contains("BloomIteration"))
 		{
 			mBloom->SetIteration(j["BloomIteration"]);
+		}
+
+		if(j.contains("BloomDirtTexture"))
+		{
+			std::string texturePath = j["BloomDirtTexture"];
+			if (!texturePath.empty())
+			{
+				Ref<Texture> lensDirtTexture = TextureManager::Get()->GetTexture(texturePath);
+				mBloom->SetLensDirt(lensDirtTexture);
+			}
+		}
+
+		if (j.contains("BloomDirtIntensity"))
+		{
+			mBloom->SetLensDirtIntensity(j["BloomDirtIntensity"]);
 		}
 
 		// SSR
@@ -279,6 +309,13 @@ namespace Nuake
 			DOFEnabled = j["DOFEnabled"];
 		}
 
+		DESERIALIZE_VAL(DOFAutoFocus);
+		DESERIALIZE_VAL(DOFManualFocus);
+		DESERIALIZE_VAL(DOFFocalDepth);
+		DESERIALIZE_VAL(DOFFocalLength);
+		DESERIALIZE_VAL(DOFStart);
+		DESERIALIZE_VAL(DOFDist);
+
 		// Barrel distortion
 		if (j.contains("BarrelDistortionEnabled"))
 		{
@@ -315,6 +352,14 @@ namespace Nuake
 		{
 			VignetteIntensity = j["VignetteIntensity"];
 		}
+
+		DESERIALIZE_VAL(PosterizationEnabled);
+		DESERIALIZE_VAL(PosterizationLevels);
+
+		DESERIALIZE_VAL(PixelizationEnabled);
+		DESERIALIZE_VAL(PixelSize);
+
+
 
 		return false;
 	}

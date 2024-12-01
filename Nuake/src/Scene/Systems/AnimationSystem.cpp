@@ -57,7 +57,6 @@ namespace Nuake
 				anim->SetCurrentTime(animTime);
 
 				model->SetCurrentBlendTime(blendWeight - ts);
-				Logger::Log("Blend time: " + std::to_string(model->GetCurrentBlendTime()));
 				prevAnimTime = prevAnim->GetCurrentTime() + (ts * prevAnim->GetTicksPerSecond());
 				prevAnim->SetCurrentTime(prevAnimTime);
 			}

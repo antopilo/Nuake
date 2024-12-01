@@ -54,7 +54,7 @@ namespace Nuake
 				const Matrix4& newLocalTransform = translationMatrix * rotationMatrix * scaleMatrix;
 
 				transform.GlobalDirty = true;
-				UpdateDirtyFlagRecursive(currentEntity);
+				//UpdateDirtyFlagRecursive(currentEntity);
 				 
 				transform.SetLocalTransform(newLocalTransform);
 				transform.Dirty = false;
