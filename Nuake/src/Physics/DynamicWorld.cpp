@@ -164,7 +164,6 @@ namespace Nuake
 				normal,
 				position
 			};
-
 			_World->RegisterCollisionCallback(std::move(data));
 		}
 
@@ -989,7 +988,7 @@ namespace Nuake
 				Capsule* capsule = (Capsule*)shape.get();
 				const float radius = capsule->GetRadius();
 				const float height = capsule->GetHeight();
-				JPH::CapsuleShapeSettings shapeSettings(height / 2.0f, radius);
+				JPH::CapsuleShapeSettings shapeSettings(height / 4.0f, radius);
 				result = shapeSettings.Create();
 			}
 			break;
@@ -998,7 +997,7 @@ namespace Nuake
 				Cylinder* capsule = (Cylinder*)shape.get();
 				const float radius = capsule->GetRadius();
 				const float height = capsule->GetHeight();
-				JPH::CylinderShapeSettings shapeSettings(height / 2.0f, radius);
+				JPH::CylinderShapeSettings shapeSettings(height / 4.0f, radius);
 				result = shapeSettings.Create();
 			}
 			break;
