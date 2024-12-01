@@ -798,6 +798,64 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         if (ImGui::Button(resetQuality.c_str())) env->mBloom->SetIteration(3);
                         ImGui::PopStyleColor();
                     }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Lens Dirt");
+                        ImGui::TableNextColumn();
+
+                        Ref<Texture> lensTexture = env->mBloom->GetLensDirt();
+
+                        std::string filePath = lensTexture == nullptr ? "None" : lensTexture->GetPath();
+                        std::string controlName = filePath + std::string("##") + filePath;
+                        ImGui::Button(controlName.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0));
+
+                        if (ImGui::BeginDragDropTarget())
+                        {
+                            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Image"))
+                            {
+                                const char* payloadFilePath = static_cast<char*>(payload->Data);
+                                const std::string fullPath = std::string(payloadFilePath, 256);
+                                const Ref<Nuake::File> file = FileSystem::GetFile(FileSystem::AbsoluteToRelative(fullPath));
+                                env->mBloom->SetLensDirt(TextureManager::Get()->GetTexture(file->GetAbsolutePath()));
+                                Engine::GetProject()->IsDirty = true;
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetLens = ICON_FA_UNDO + std::string("##resetLens");
+                        if (ImGui::Button(resetLens.c_str())) env->mBloom->ClearLensDirt();
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::TableNextColumn();
+                    {
+                        // Title
+                        ImGui::Text("Lens Dirt Intensity");
+                        ImGui::TableNextColumn();
+
+                        float lensDirtIntensity = env->mBloom->GetLensDirtIntensity();
+                        ImGui::SliderFloat("##lensDirtIntensity", &lensDirtIntensity, 0.0f, 1.0f);
+
+                        if (lensDirtIntensity != env->mBloom->GetLensDirtIntensity())
+                        {
+                            env->mBloom->SetLensDirtIntensity(lensDirtIntensity);
+                        }
+
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetLensDirt = ICON_FA_UNDO + std::string("##resetLensDirtIntensity");
+                        if (ImGui::Button(resetLensDirt.c_str())) env->mBloom->SetLensDirtIntensity(1.0f);
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()
@@ -958,7 +1016,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                 }
             END_COLLAPSE_HEADER()
 
-                BEGIN_COLLAPSE_HEADER(SSR)
+            BEGIN_COLLAPSE_HEADER(SSR)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
@@ -1140,7 +1198,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
             END_COLLAPSE_HEADER()
 
 
-                BEGIN_COLLAPSE_HEADER(DOF)
+            BEGIN_COLLAPSE_HEADER(DOF)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
@@ -1415,7 +1473,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                 }
             END_COLLAPSE_HEADER()
 
-                BEGIN_COLLAPSE_HEADER(VIGNETTE)
+            BEGIN_COLLAPSE_HEADER(VIGNETTE)
                 if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
                 {
                     ImGui::TableSetupColumn("name", 0, 0.3);
@@ -1468,6 +1526,90 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
                         if (ImGui::Button(resetVolumetric.c_str())) env->VignetteExtend = 0.0f;
                         ImGui::PopStyleColor();
                     }
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(POSTERIZATION)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Posterization Enabled");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##PosterizationEnabled", &env->PosterizationEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetPosterization = ICON_FA_UNDO + std::string("##resetPosterizationEnabled");
+                        if (ImGui::Button(resetPosterization.c_str())) env->PosterizationEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Levels");
+                        ImGui::TableNextColumn();
+                        ImGui::DragInt("##PosterizationLevels", &env->PosterizationLevels, 1, 4, 25);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetPosterizationLevels = ICON_FA_UNDO + std::string("##resetPosterizationLevels");
+                        if (ImGui::Button(resetPosterizationLevels.c_str())) env->PosterizationLevels = 10;
+                        ImGui::PopStyleColor();
+                    }
+
+                    ImGui::EndTable();
+                }
+            END_COLLAPSE_HEADER()
+
+            BEGIN_COLLAPSE_HEADER(PIXELIZATION)
+                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
+                {
+                    ImGui::TableSetupColumn("name", 0, 0.3);
+                    ImGui::TableSetupColumn("set", 0, 0.6);
+                    ImGui::TableSetupColumn("reset", 0, 0.1);
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Pixelization Enabled");
+                        ImGui::TableNextColumn();
+
+                        ImGui::Checkbox("##PixelizationEnabled", &env->PixelizationEnabled);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetPixelization = ICON_FA_UNDO + std::string("##resetPixelizationEnabled");
+                        if (ImGui::Button(resetPixelization.c_str())) env->PixelizationEnabled = false;
+                        ImGui::PopStyleColor();
+                    }
+
+                    {
+                        ImGui::TableNextColumn();
+                        // Title
+                        ImGui::Text("Pixel Size");
+                        ImGui::TableNextColumn();
+                        ImGui::DragInt("##PixelSize", &env->PixelSize, 1, 1, 25);
+                        ImGui::TableNextColumn();
+
+                        // Reset button
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                        std::string resetPixelSize = ICON_FA_UNDO + std::string("##resetPixelSize");
+                        if (ImGui::Button(resetPixelSize.c_str())) env->PixelSize = 4;
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::EndTable();
                 }
             END_COLLAPSE_HEADER()
