@@ -1,6 +1,7 @@
 #pragma once
 #include "src/Core/Maths.h"
 
+#include <string>
 #include <map>
 #include <utility>
 
@@ -132,6 +133,35 @@ namespace Nuake
 		MENU = 348
 	};
 
+	enum class ControllerInput
+	{
+		A = 0, 
+		B, 
+		X, 
+		Y, 
+		LEFT_BUMPER, 
+		RIGHT_BUMPER, 
+		BACK, 
+		START, 
+		GUIDE, 
+		LEFT_THUMB, 
+		RIGHT_THUMB, 
+		DPAD_UP, 
+		DPAD_RIGHT, 
+		DPAD_DOWN,
+		DPAD_LEFT
+	};
+
+	enum class ControllerAxis
+	{
+		LEFT_X = 0, 
+		LEFT_Y, 
+		RIGHT_X, 
+		RIGHT_Y, 
+		LEFT_TRIGGER,
+		RIGHT_TRIGGER
+	};
+
 	class Input
 	{
 	private:
@@ -172,6 +202,12 @@ namespace Nuake
 		static Vector2 GetViewportSize();
 		static void SetViewportDimensions(const Vector2& pos, const Vector2& size);
 
+		// Controller
+		static bool IsControllerPresent(int id);
+		static std::string GetControllerName(int id);
+
+		static bool IsControllerButtonPressed(int id, ControllerInput input);
+		static float GetControllerAxis(int id, ControllerAxis axis);
 
 		static bool Init();
 		static void Update();

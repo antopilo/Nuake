@@ -14,6 +14,9 @@ namespace Nuake {
         extern const std::string Resources_resources_rc_path;
         extern unsigned int Resources_resources_rc_len;
         extern unsigned char Resources_resources_rc[];
+        extern const std::string Resources_Data_gamecontrollerdb_txt_path;
+        extern unsigned int Resources_Data_gamecontrollerdb_txt_len;
+        extern unsigned char Resources_Data_gamecontrollerdb_txt[];
         extern const std::string Resources_Fonts_fa_regular_400_ttf_path;
         extern unsigned int Resources_Fonts_fa_regular_400_ttf_len;
         extern unsigned char Resources_Fonts_fa_regular_400_ttf[];

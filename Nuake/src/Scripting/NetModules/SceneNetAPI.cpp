@@ -696,4 +696,3 @@ namespace Nuake {
 	}
 
 }
-
