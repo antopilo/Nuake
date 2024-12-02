@@ -333,6 +333,10 @@ namespace Nuake
             {
                 dragType = "_SkyFile";
             }
+            else if (fileExtension == ".env")
+            {
+                dragType = "_EnvFile";
+            }
 
             ImGui::SetDragDropPayload(dragType.c_str(), (void*)(pathBuffer), sizeof(pathBuffer));
             ImGui::Text(file->GetName().c_str());
@@ -400,6 +404,10 @@ namespace Nuake
         else if (fileType == FileType::Map)
         {
             textureImage = textureMgr->GetTexture("Resources/Images/trenchbroom_icon.png");
+        }
+        else if (fileType == FileType::Env)
+        {
+            textureImage = textureMgr->GetTexture("Resources/Images/env_file_icon.png");
         }
 
         ImGui::SetCursorPos(prevCursor);
@@ -694,6 +702,28 @@ namespace Nuake
                         sky->IsEmbedded = false;
                         auto jsonData = sky->Serialize();
  
+                        FileSystem::BeginWriteFile(finalPath, true);
+                        FileSystem::WriteLine(jsonData.dump(4));
+                        FileSystem::EndWriteFile();
+
+                        RefreshFileBrowser();
+                    }
+                }
+                if (ImGui::MenuItem("Environment"))
+                {
+                    const std::string path = FileDialog::SaveFile("*.env");
+                    if (!path.empty())
+                    {
+                        std::string finalPath = path;
+                        if (!String::EndsWith(path, ".env"))
+                        {
+                            finalPath = path + ".env";
+                        }
+
+                        Ref<Environment> env = CreateRef<Environment>(FileSystem::AbsoluteToRelative(finalPath));
+                        env->IsEmbedded = false;
+                        auto jsonData = env->Serialize();
+
                         FileSystem::BeginWriteFile(finalPath, true);
                         FileSystem::WriteLine(jsonData.dump(4));
                         FileSystem::EndWriteFile();

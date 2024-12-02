@@ -19,6 +19,8 @@
 #include "src/Scene/Components/SpriteComponent.h"
 #include "src/Scene/Components/UIComponent.h"
 #include "src/Scene/Components/SkyComponent.h"
+#include "src/Scene/Components/EnvironmentComponent.h"
+
 
 namespace Nuake
 {
@@ -44,6 +46,7 @@ namespace Nuake
         BoneComponent::InternalInitializeClass();
         AudioEmitterComponent::InternalInitializeClass();
         SkyComponent::InternalInitializeClass();
+        EnvironmentComponent::InternalInitializeClass();
     }
 }
 

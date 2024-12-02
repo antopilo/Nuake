@@ -81,7 +81,7 @@ namespace Nuake
 		}
 
 		
-		if (controlled && Input::IsMouseButtonDown(1))
+		if (controlled && Input::IsMouseButtonDown(1) || Input::IsControllerPresent(0))
 		{
 			// Should probably not have speed binding in here.
 			if (Input::YScroll != 0)
@@ -114,14 +114,51 @@ namespace Nuake
 				if (Input::IsKeyDown(Key::A))
 					movement += Right * (Speed * ts);
 
+				const float deadZone = 0.2f;
+				if (Input::IsControllerPresent(0))
+				{
+					float axis = Input::GetControllerAxis(0, ControllerAxis::LEFT_X);
+					if (glm::abs(axis) < deadZone)
+					{
+						axis = 0.0f;
+					}
+					movement -= Right * (Speed * ts * axis);
+				}
+
 				if (Input::IsKeyDown(Key::W))
 					movement += Direction * (Speed * ts);
 				if (Input::IsKeyDown(Key::S))
 					movement -= Direction * (Speed * ts);
+
+				if (Input::IsControllerPresent(0))
+				{
+					float axis = Input::GetControllerAxis(0, ControllerAxis::LEFT_Y);
+					if (glm::abs(axis) < deadZone)
+					{
+						axis = 0.0f;
+					}
+					movement -= Direction * (Speed * ts * axis);
+				}
+
 				if (Input::IsKeyDown(Key::LEFT_SHIFT))
 					movement -= Up * (Speed * ts);
 				if (Input::IsKeyDown(Key::SPACE))
 					movement += Up * (Speed * ts);
+
+				float rightTrigger = (Input::GetControllerAxis(0, ControllerAxis::RIGHT_TRIGGER) + 1.0f) / 2.0f;
+				if (glm::abs(rightTrigger) < 0.1f)
+				{
+					rightTrigger = 0.0f;
+				}
+
+				movement += Up * (Speed * ts * rightTrigger);
+
+				float leftTrigger = (Input::GetControllerAxis(0, ControllerAxis::LEFT_TRIGGER) + 1.0f) / 2.0f;
+				if (glm::abs(leftTrigger) < 0.1f)
+				{
+					leftTrigger = 0.0f;
+				}
+				movement -= Up * (Speed * ts * leftTrigger);
 
 				Translation += Vector3(movement);
 			}
@@ -145,6 +182,20 @@ namespace Nuake
 			TargetYaw += diffx;
 			TargetPitch += diffy;
 
+			float rightAxis = Input::GetControllerAxis(0, ControllerAxis::RIGHT_X);
+			float upAxis = Input::GetControllerAxis(0, ControllerAxis::RIGHT_Y);
+			if (glm::abs(rightAxis) < 0.1f)
+			{
+				rightAxis = 0.0f;
+			}
+
+			if (glm::abs(upAxis) < 0.1f)
+			{
+				upAxis = 0.0f;
+			}
+
+			TargetYaw += rightAxis;
+			TargetPitch -= upAxis;
 		}	
 
 		if (TargetPitch > 89.0f)

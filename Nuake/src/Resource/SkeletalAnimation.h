@@ -145,6 +145,7 @@ namespace Nuake
 	private:
 		std::unordered_map<std::string, BoneTransformTrack> m_Tracks;
 		float m_CurrentTime;
+		float m_PreviousTime;
 		float m_Duration;
 		float m_TicksPerSecond;
 		std::string m_Name;

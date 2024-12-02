@@ -8,6 +8,8 @@
 #include "src/Resource/Model.h"
 #include "src/Resource/UI.h"
 #include "src/Resource/SkyResource.h"
+#include "src/Scene/Lighting/Environment.h"
+
 using namespace Nuake;
 
 Ref<Material> ResourceLoader::LoadMaterial(const std::string& path)
@@ -138,6 +140,51 @@ Ref<SkyResource> ResourceLoader::LoadSky(const std::string& path)
 
 	return sky;
 }
+
+Ref<Environment> ResourceLoader::LoadEnvironment(const std::string& path)
+{
+	const std::string FILE_NOT_FOUND = "[Resource Loader] File doesn't exists. \n ";
+	const std::string WRONG_EXTENSION = "[Resource Loader] Resource type mismatch file extension. \n expected: ";
+	const std::string ENV_EXT = ".env";
+
+	if (path.empty())
+	{
+		Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
+		return nullptr;
+	}
+
+	if (!FileSystem::FileExists(path))
+	{
+		Logger::Log(FILE_NOT_FOUND + path, "resource", LOG_TYPE::WARNING);
+		return nullptr;
+	}
+
+	if (!String::EndsWith(path, ENV_EXT))
+	{
+		std::string message = WRONG_EXTENSION + ENV_EXT + " actual: " + path;
+		Logger::Log(message, "resource", LOG_TYPE::WARNING);
+	}
+
+	std::string content = FileSystem::ReadFile(path);
+	json j = json::parse(content);
+
+	UUID uuid = ReadUUID(j);
+
+	// Check if resource is already loaded.
+	if (ResourceManager::IsResourceLoaded(uuid))
+	{
+		return ResourceManager::GetResource<Environment>(uuid);
+	}
+
+	Ref<Environment> env = CreateRef<Environment>();
+	env->ID = uuid;
+	env->Path = path;
+	env->Deserialize(j);
+	ResourceManager::RegisterResource(env);
+
+	return env;
+}
+
 
 Ref<UIResource> ResourceLoader::LoadUI(const std::string& path)
 {

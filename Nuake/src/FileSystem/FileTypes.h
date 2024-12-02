@@ -21,6 +21,7 @@ namespace Nuake
 		Audio,
 		UI,
 		CSS,
-		Sky
+		Sky,
+		Env
 	};
 }

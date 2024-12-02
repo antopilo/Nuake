@@ -5,7 +5,7 @@
 #include <Tracy.hpp>
 
 #define LoadEmbeddedShader(file) \
-m_Shaders[file##_path] = CreateScope<Shader>(file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
+m_Shaders[file##_path] = CreateScope<Shader>("../" + file##_path, std::string(reinterpret_cast<const char*>(file), reinterpret_cast<const char*>(file) + file##_len));
 
 namespace Nuake
 {
@@ -48,6 +48,8 @@ namespace Nuake
 		LoadEmbeddedShader(Resources_Shaders_ui_panel_shader);
 		LoadEmbeddedShader(Resources_Shaders_ui_text_shader);
 		LoadEmbeddedShader(Resources_Shaders_displayVelocity_shader);
+		LoadEmbeddedShader(Resources_Shaders_posterization_shader);
+		LoadEmbeddedShader(Resources_Shaders_pixelization_shader);
 	}
 
 	Shader* ShaderManager::GetShader(const std::string& path)

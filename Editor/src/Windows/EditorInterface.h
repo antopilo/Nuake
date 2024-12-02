@@ -37,6 +37,7 @@ namespace Nuake
 		Ref<Scene> SceneSnapshot;
 		static NuakeEditor::CommandBuffer* mCommandBuffer;
 
+		std::string searchQuery = "";
 		bool isControllingCamera = false;
 		bool m_DrawGrid = false;
 		bool m_DrawAxis = true;
@@ -76,7 +77,7 @@ namespace Nuake
 		FileSystemUI* filesystem;
 		bool isNewProject = false;
 		static EditorSelection Selection;
-		EditorSelectionPanel SelectionPanel;
+		EditorSelectionPanel* SelectionPanel;
 		TrenchbroomConfiguratorWindow m_TrenchhbroomConfigurator;
 		MapImporterWindow m_MapImporter;
 
@@ -103,7 +104,7 @@ namespace Nuake
 		void DrawViewport();
 		void DrawStatusBar();
 		void DrawMenuBars();
-		void DrawEntityTree(Entity ent);
+		void DrawEntityTree(Entity ent, bool drawChildrens = true);
 		void DrawSceneTree();
 		void DrawLogger();
 		void DrawProjectSettings();

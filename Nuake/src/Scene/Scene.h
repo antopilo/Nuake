@@ -37,7 +37,7 @@ namespace Nuake
 		// You can create a new system(see 'Systems/'.) and register it
 		// In the scene constructor.
 		std::vector<Ref<System>> m_Systems;
-		Ref<Environment> m_Environement;
+		static Ref<Environment> m_Environment;
 
 	public:
 		Ref<EditorCamera> m_EditorCamera;
@@ -88,8 +88,7 @@ namespace Nuake
 		template<typename Component>
 		static void CopyComponent(entt::registry& dst, entt::registry& src);
 
-		Ref<Environment> GetEnvironment() const;
-		void SetEnvironment(Ref<Environment> env);
+		Ref<Environment> GetEnvironment();
 
 		bool Save();
 		bool SaveAs(const std::string& path);

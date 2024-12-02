@@ -23,6 +23,9 @@ uniform float u_Exposure;
 uniform float u_Gamma;
 uniform sampler2D u_Source2;
 uniform vec2 u_Source2Size;
+uniform int u_HasLensDirt;
+uniform sampler2D u_LensDirt;
+uniform float u_LensDirtIntensity;
 
 uniform float u_Threshold;
 uniform float u_BlurAmount;
@@ -127,6 +130,13 @@ void main()
     }
     else if (u_Stage == 5) // Final combine
     {
+        vec4 lensDirt = vec4(0.0f);
+        if(u_HasLensDirt == 1)
+        {
+            lensDirt = max(texture(u_LensDirt, UV) * u_LensDirtIntensity, 1.0 - u_LensDirtIntensity);
+        }
+
+        outputColor *= lensDirt;
         outputColor += texture(u_Source2, UV);
 
         vec3 color = outputColor.rgb;

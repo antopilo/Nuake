@@ -215,6 +215,50 @@ namespace Nuake
 
 #pragma endregion
 
+	bool Input::IsControllerPresent(int id)
+	{
+		if (id > GLFW_JOYSTICK_LAST)
+		{
+			return 0;
+		}
+		return glfwJoystickPresent(GLFW_JOYSTICK_1 + id);
+	}
+
+	std::string Input::GetControllerName(int id)
+	{
+		if (IsControllerPresent(id))
+		{
+			return glfwGetJoystickName(id);
+		}
+
+		return "Controller Disconnected";
+	}
+
+	bool Input::IsControllerButtonPressed(int id, ControllerInput input)
+	{
+		GLFWgamepadstate state;
+		if (glfwGetGamepadState(GLFW_JOYSTICK_1 + id, &state))
+		{
+			if (state.buttons[static_cast<int>(input)])
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	float Input::GetControllerAxis(int id, ControllerAxis axis)
+	{
+		GLFWgamepadstate state;
+		if (glfwGetGamepadState(GLFW_JOYSTICK_1 + id, &state))
+		{
+			return state.axes[static_cast<int>(axis)];
+		}
+
+		return 0.0f;
+	}
+
 	bool Input::Init()
 	{
 		//auto window = Application::Get().GetWindow()->GetNative();

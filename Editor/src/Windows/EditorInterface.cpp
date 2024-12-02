@@ -123,7 +123,8 @@ namespace Nuake {
         _NewProjectWindow = new NewProjectWindow(this);
         _audioWindow = new AudioWindow();
         m_ProjectSettingsWindow = new ProjectSettingsWindow();
-
+        SelectionPanel = new EditorSelectionPanel(this->Selection);
+            
         Logger::Log("Building fonts", "window", VERBOSE);
         BuildFonts();
 
@@ -351,48 +352,48 @@ namespace Nuake {
                     SetStatusMessage(statusMessage);
 
                     auto job = [this]()
-                        {
-                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                        };
+                    {
+                            auto project = Engine::GetProject();
+                            auto& scriptingEngine = ScriptingEngineNet::Get();
+                            const std::string& assemblyPath = scriptingEngine.GetGameAssemblyPath(project);
+                            if (FileSystem::FileExists(assemblyPath))
+                            {
+                                this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                                FileSystem::GetFile(assemblyPath)->SetHasBeenModified(false);
+                            }
+                    };
 
                     Selection = EditorSelection();
 
                     JobSystem::Get().Dispatch(job, [this]()
                     {
-                    bool containsError = false;
-                    std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
-                        return error.isWarning == false;
+                        bool containsError = false;
+                        std::find_if(errors.begin(), errors.end(), [](const CompilationError& error) {
+                            return error.isWarning == false;
                         });
 
-                    if (errors.size() > 0 && containsError)
-                    {
-                        SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
-
-                        Logger::Log("Build FAILED.", ".net", CRITICAL);
-                        for (CompilationError error : errors)
+                        if (errors.size() > 0 && containsError)
                         {
-                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                            Logger::Log(errorMessage, ".net", CRITICAL);
+                            SetStatusMessage("Failed to build scripts! See Logger for more info", { 1.0f, 0.1f, 0.1f, 1.0f });
+
+                            Logger::Log("Build FAILED.", ".net", CRITICAL);
+                            for (CompilationError error : errors)
+                            {
+                                const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
+                                Logger::Log(errorMessage, ".net", CRITICAL);
+                            }
                         }
-                    }
-                    else
-                    {
-                        Engine::GetProject()->ExportEntitiesToTrenchbroom();
-
-                        ImGui::SetWindowFocus("Logger");
-                        SetStatusMessage("Entering play mode...");
-
-                        PushCommand(SetGameState(GameState::Playing));
-
-                        for (CompilationError error : errors)
+                        else
                         {
-                            const std::string errorMessage = error.file + "( line " + std::to_string(error.line) + "): " + error.message;
-                            Logger::Log(errorMessage, ".net", WARNING);
-                        }
+                            Engine::GetProject()->ExportEntitiesToTrenchbroom();
 
-                        std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
-                        SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
-                    }
+                            ImGui::SetWindowFocus("Logger");
+                            SetStatusMessage("Entering play mode...");
+
+                            PushCommand(SetGameState(GameState::Playing));
+                            std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
+                            SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
+                        }
                     });
                 }
             }
@@ -640,6 +641,10 @@ namespace Nuake {
             else if (SelectedViewport == 5)
             {
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT6);
+            }
+            else if (SelectedViewport == 6)
+            {
+                texture = Engine::GetCurrentScene()->GetEnvironment()->mSSAO->GetOuput()->GetTexture();
             }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
@@ -964,7 +969,7 @@ namespace Nuake {
 
     static int selected = 0;
     Entity QueueDeletion;
-    void EditorInterface::DrawEntityTree(Entity e)
+    void EditorInterface::DrawEntityTree(Entity e, bool drawChildrens)
     {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2{ 0.0f, 0.0f });
 
@@ -985,7 +990,7 @@ namespace Nuake {
 
         // If has no childrens draw tree node leaf
         bool isPrefab = e.HasComponent<PrefabComponent>();
-        if (parent.Children.size() <= 0 || isPrefab)
+        if (parent.Children.size() <= 0 || isPrefab || !drawChildrens)
         {
             base_flags |= ImGuiTreeNodeFlags_Leaf;
         }
@@ -1005,8 +1010,27 @@ namespace Nuake {
         }
 
         auto cursorPos = ImGui::GetCursorPos();
+        ImVec2 cursorPosition = ImGui::GetCursorScreenPos();
+        const auto& cleanName = String::RemoveWhiteSpace(String::ToUpper(name));
+        const size_t searchIt = cleanName.find(String::RemoveWhiteSpace(String::ToUpper(searchQuery)));
+
         ImGui::SetNextItemAllowOverlap();
         bool open = ImGui::TreeNodeEx(name.c_str(), base_flags);
+
+        if (!searchQuery.empty() && searchIt != std::string::npos)
+        {
+            int firstLetterFoundIndex = static_cast<int>(searchIt);
+
+            const auto foundStr = name.substr(0, firstLetterFoundIndex + searchQuery.size());
+            auto highlightBeginPos = ImGui::CalcTextSize(foundStr.c_str());
+            auto highlightEndPos = ImGui::CalcTextSize(searchQuery.c_str());
+
+            auto fg = ImGui::GetForegroundDrawList();
+            auto color = Engine::GetProject()->Settings.PrimaryColor;
+            auto rgbColor = IM_COL32(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, std::min(color.a, 0.2f) * 255.0f);
+
+            fg->AddRectFilled(ImVec2(cursorPosition.x + 20.0f, cursorPosition.y + 4.0f), ImVec2(cursorPosition.x + highlightEndPos.x + 26.0f, cursorPosition.y + highlightEndPos.y + 6.0f), rgbColor, 4.0f);
+        }
 
         if (m_IsRenaming)
         {
@@ -1190,7 +1214,7 @@ namespace Nuake {
        
         if (open)
         {
-            if (!isPrefab)
+            if ((drawChildrens && !isPrefab))
             {
                 // Caching list to prevent deletion while iterating.
                 std::vector<Entity> childrens = parent.Children;
@@ -1205,18 +1229,7 @@ namespace Nuake {
         ImGui::PopFont();
     }
 
-#define BEGIN_COLLAPSE_HEADER(names) \
-    UIFont* names##_boldFont = new UIFont(Fonts::Bold); \
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f)); \
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f)); \
-    bool names##_Opened = ImGui::CollapsingHeader((std::string("  ") + #names).c_str()); \
-    ImGui::PopStyleVar(); \
-    delete names##_boldFont; \
-    if (names##_Opened) { \
 
-#define END_COLLAPSE_HEADER() \
-} \
-    ImGui::PopStyleVar(); \
 
     void EditorInterface::DrawSceneTree()
     {
@@ -1224,1029 +1237,10 @@ namespace Nuake {
           
         if (!scene)
             return;
-        const Ref<Environment> env = Engine::GetCurrentScene()->GetEnvironment();
-
-        if (ImGui::Begin((ICON_FA_MOUNTAIN + std::string("  Environment")).c_str()))
-        {
-            BEGIN_COLLAPSE_HEADER(SKY);
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Sky Type");
-                        ImGui::TableNextColumn();
-
-                        // Here we create a dropdown for every sky type.
-                        const char* SkyTypes[] = { "Procedural Sky", "Color" };
-                        static int currentSkyType = (int)env->CurrentSkyType;
-                        ImGui::Combo("##SkyType", &currentSkyType, SkyTypes, IM_ARRAYSIZE(SkyTypes));
-                        env->CurrentSkyType = (SkyType)currentSkyType;
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
-                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Gamma");
-                        ImGui::TableNextColumn();
-
-                        // Here we create a dropdown for every sky type.
-                        ImGui::DragFloat("##gamma", &env->Gamma, 0.001f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
-                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Exposure");
-                        ImGui::TableNextColumn();
-
-                        // Here we create a dropdown for every sky type.
-                        ImGui::DragFloat("##exposure", &env->Exposure, 0.001f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string ResetType = ICON_FA_UNDO + std::string("##ResetType");
-                        if (ImGui::Button(ResetType.c_str())) env->CurrentSkyType = SkyType::ProceduralSky;
-                        ImGui::PopStyleColor();
-                    }
-
-                    if (env->CurrentSkyType == SkyType::ProceduralSky)
-                    {
-                        ImGui::TableNextColumn();
-
-                        {   // Sun Intensity
-                            ImGui::Text("Sun Intensity");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##Sun Intensity", &env->ProceduralSkybox->SunIntensity, 0.1f, 0.0f, 1000.0f);
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetSunIntensity = ICON_FA_UNDO + std::string("##ResetSunIntensity");
-                            if (ImGui::Button(resetSunIntensity.c_str())) env->ProceduralSkybox->SunIntensity = 100.0f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // Sun Direction
-                            ImGui::Text("Sun Direction");
-                            ImGui::TableNextColumn();
-
-                            Vector3 sunDirection = env->ProceduralSkybox->GetSunDirection();
-                            ImGuiHelper::DrawVec3("##Sun Direction", &sunDirection);
-                            env->ProceduralSkybox->SunDirection = glm::mix(env->ProceduralSkybox->GetSunDirection(), glm::normalize(sunDirection), 0.1f);
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetSunDirection = ICON_FA_UNDO + std::string("##resetSunDirection");
-                            if (ImGui::Button(resetSunDirection.c_str())) env->ProceduralSkybox->SunDirection = Vector3(0.20000f, 0.95917f, 0.20000f);
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // Surface Radius
-                            ImGui::Text("Surface Radius");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##surfaceRadius", &env->ProceduralSkybox->SurfaceRadius, 100.f, 0.0f);
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetSurfaceRadius = ICON_FA_UNDO + std::string("##resetSurfaceRadius");
-                            if (ImGui::Button(resetSurfaceRadius.c_str())) env->ProceduralSkybox->SurfaceRadius = 6360e3f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // Atmosphere Radius
-                            ImGui::Text("Atmosphere Radius");
-                            ImGui::TableNextColumn();
-
-                            ImGui::DragFloat("##AtmosphereRadius", &env->ProceduralSkybox->AtmosphereRadius, 100.f, 0.0f);
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetAtmosphereRadius = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                            if (ImGui::Button(resetAtmosphereRadius.c_str())) env->ProceduralSkybox->AtmosphereRadius = 6380e3f;
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // Center point
-                            ImGui::Text("Center Point");
-                            ImGui::TableNextColumn();
-
-                            ImGuiHelper::DrawVec3("##Center Point", &env->ProceduralSkybox->CenterPoint, 0.0f, 100.0f, 100.0f);
-                            ImGui::TableNextColumn();
-                            if (env->ProceduralSkybox->CenterPoint.y < -env->ProceduralSkybox->AtmosphereRadius)
-                                env->ProceduralSkybox->CenterPoint.y = -env->ProceduralSkybox->AtmosphereRadius + 1.f;
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetCenterPoint = ICON_FA_UNDO + std::string("##resetAtmosphereRadius");
-                            if (ImGui::Button(resetCenterPoint.c_str())) env->ProceduralSkybox->CenterPoint = Vector3(0, -env->ProceduralSkybox->AtmosphereRadius, 0);
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // Mie Scattering
-                            ImGui::Text("Mie Scattering");
-                            ImGui::TableNextColumn();
-
-                            Vector3 mieScattering = env->ProceduralSkybox->MieScattering * 10000.0f;
-                            ImGuiHelper::DrawVec3("##Mie Scattering", &mieScattering, 0.0f, 100.0f, 0.01f);
-                            if (mieScattering.x < 0) mieScattering.x = 0;
-                            if (mieScattering.y < 0) mieScattering.y = 0;
-                            if (mieScattering.z < 0) mieScattering.z = 0;
-                            env->ProceduralSkybox->MieScattering = mieScattering / 10000.0f;
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetMieScattering = ICON_FA_UNDO + std::string("##resetMieScattering");
-                            if (ImGui::Button(resetMieScattering.c_str())) env->ProceduralSkybox->MieScattering = Vector3(2e-5f);
-                            ImGui::PopStyleColor();
-                        }
-
-                        ImGui::TableNextColumn();
-                        {   // RayleighScattering
-                            ImGui::Text("Rayleigh Scattering");
-                            ImGui::TableNextColumn();
-
-                            Vector3 rayleighScattering = env->ProceduralSkybox->RayleighScattering * 10000.0f;
-                            ImGuiHelper::DrawVec3("##Ray Scattering", &rayleighScattering, 0.0f, 100.0f, 0.01f);
-                            if (rayleighScattering.r < 0) rayleighScattering.r = 0;
-                            if (rayleighScattering.g < 0) rayleighScattering.g = 0;
-                            if (rayleighScattering.b < 0) rayleighScattering.b = 0;
-                            env->ProceduralSkybox->RayleighScattering = rayleighScattering / 10000.0f;
-                            ImGui::TableNextColumn();
-
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                            std::string resetRayScattering = ICON_FA_UNDO + std::string("##resetRayScattering");
-                            if (ImGui::Button(resetRayScattering.c_str())) env->ProceduralSkybox->RayleighScattering = Vector3(58e-7f, 135e-7f, 331e-7f);
-                            ImGui::PopStyleColor();
-                        }
-                    }
-
-                    if (env->CurrentSkyType == SkyType::ClearColor)
-                    {
-                        ImGui::TableNextColumn();
-
-                        // Title
-                        ImGui::Text("Clear color");
-                        ImGui::TableNextColumn();
-
-                        // Color picker
-                        ImGui::ColorEdit4("##clearColor", &env->AmbientColor.r, ImGuiColorEditFlags_NoAlpha);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetColor = ICON_FA_UNDO + std::string("##ResetColor");
-                        if (ImGui::Button(resetColor.c_str())) env->AmbientColor = Color(0, 0, 0, 1);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Ambient Term");
-                        ImGui::TableNextColumn();
-
-                        // Here we create a dropdown for every sky type.
-                        ImGui::DragFloat("##AmbientTerm", &env->AmbientTerm, 0.001f, 0.00f, 1.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string ResetType = ICON_FA_UNDO + std::string("##ambient");
-                        if (ImGui::Button(ResetType.c_str())) env->AmbientTerm = 0.25f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-            BEGIN_COLLAPSE_HEADER(TAA)
-                if (ImGui::BeginTable("EnvTableTAA", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-
-                    ImGui::TableNextColumn();
-                    {
-                        auto& sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
-
-                        // Title
-                        ImGui::Text("TAA Factor");
-                        ImGui::TableNextColumn();
-
-                        ImGui::SliderFloat("##TAAFactor", &sceneRenderer->TAAFactor, 0.0f, 1.0f );
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetTAAFactor");
-                        if (ImGui::Button(resetVolumetric.c_str())) sceneRenderer->TAAFactor = 0.6f;
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-            BEGIN_COLLAPSE_HEADER(BLOOM)
-                if (ImGui::BeginTable("BloomTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Bloom");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##Enabled", &env->BloomEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloom = ICON_FA_UNDO + std::string("##resetBloom");
-                        if (ImGui::Button(resetBloom.c_str())) env->BloomEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Bloom Threshold");
-                        ImGui::TableNextColumn();
-
-                        float threshold = env->mBloom->GetThreshold();
-                        ImGui::DragFloat("##Threshold", &threshold, 0.01f, 0.0f, 500.0f);
-                        env->mBloom->SetThreshold(threshold);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Bloom Quality");
-                        ImGui::TableNextColumn();
-
-                        int iteration = env->mBloom->GetIteration();
-                        int oldIteration = iteration;
-                        ImGui::DragInt("##quality", &iteration, 1.0f, 0, 4);
-
-                        if (oldIteration != iteration)
-                        {
-                            env->mBloom->SetIteration(iteration);
-                        }
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
-                        if (ImGui::Button(resetQuality.c_str())) env->mBloom->SetIteration(3);
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-            BEGIN_COLLAPSE_HEADER(VOLUMETRIC)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Volumetric");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##VolumetricEnabled", &env->VolumetricEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Volumetric Scattering");
-                        ImGui::TableNextColumn();
-
-                        float fogAmount = env->mVolumetric->GetFogAmount();
-                        ImGui::DragFloat("##Volumetric Scattering", &fogAmount, .001f, 0.f, 1.0f);
-                        env->mVolumetric->SetFogAmount(fogAmount);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBloomThreshold");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Volumetric Strength");
-                        ImGui::TableNextColumn();
-
-                        float fogAmount = env->mVolumetric->GetFogExponant();
-                        ImGui::DragFloat("##Volumetric Strength", &fogAmount, .001f, 0.f, 1.0f);
-                        env->mVolumetric->SetFogExponant(fogAmount);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetFogExpo");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mBloom->SetThreshold(2.4f);
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Step count");
-                        ImGui::TableNextColumn();
-
-                        int stepCount = env->mVolumetric->GetStepCount();
-                        ImGui::DragInt("##Volumetric Step Count", &stepCount, 1.f, 0.0f);
-                        env->mVolumetric->SetStepCount(stepCount);
-
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetQuality = ICON_FA_UNDO + std::string("##resetQuality");
-                        if (ImGui::Button(resetQuality.c_str())) env->VolumetricStepCount = 50.f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-            BEGIN_COLLAPSE_HEADER(SSAO)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##SSAOEnabled", &env->SSAOEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSSAO = ICON_FA_UNDO + std::string("##resetSSAO");
-                        if (ImGui::Button(resetSSAO.c_str())) env->SSAOEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Strength");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOStrength", &env->mSSAO->Strength, 0.1f, 0.0f, 10.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetRadius = ICON_FA_UNDO + std::string("##resetStrength");
-                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Strength = 2.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Radius");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAORadius", &env->mSSAO->Radius, 0.001f, 0.0f, 1.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetRadius = ICON_FA_UNDO + std::string("##resetRadius");
-                        if (ImGui::Button(resetRadius.c_str())) env->mSSAO->Radius = 0.5f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Bias");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOBias", &env->mSSAO->Bias, 0.0001f, 0.0f, 0.5f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOBias");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Bias = 0.025f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Area");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOArea", &env->mSSAO->Area, 0.0001f, 0.0f, 0.5f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOArea");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Area = 0.0075f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("SSAO Falloff");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##SSAOFalloff", &env->mSSAO->Falloff, 0.0001f, 0.0f, 0.5f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetSSAOFalloff");
-                        if (ImGui::Button(resetBloomThreshold.c_str())) env->mSSAO->Falloff = 0.0022f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-            BEGIN_COLLAPSE_HEADER(SSR)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
-
-                    SSR* ssr = env->mSSR.get();
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("SSR");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##SSREnabled", &env->SSREnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetSSR");
-                        if (ImGui::Button(resetSSR.c_str())) env->SSREnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("SSR RayStep");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##SSRRS", &ssr->RayStep, 0.01f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("iterationCount");
-                        ImGui::TableNextColumn();
-                        ImGui::DragInt("##SSRRSi", &ssr->IterationCount, 1, 1);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("distanceBias");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##SSRRSid", &ssr->DistanceBias, 0.01f, 0.f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("sampleCount");
-                        ImGui::TableNextColumn();
-                        ImGui::DragInt("##SSRRSids", &ssr->SampleCount, 1, 0);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Sampling Enabled");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidss", &ssr->SamplingEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Expo");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidsse", &ssr->ExpoStep);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Adaptive Steps");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidssse", &ssr->AdaptiveStep);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Binary Searcg");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidsssbe", &ssr->BinarySearch);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("Debug");
-                        ImGui::TableNextColumn();
-                        ImGui::Checkbox("##SSRRSidsssbed", &ssr->DebugDraw);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-
-                    ImGui::TableNextColumn();
-                    {
-                        // Title
-                        ImGui::Text("samplingCoefficient");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##samplingCoefficient", &ssr->SampleingCoefficient, 0.001f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VolumetricEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-
-                BEGIN_COLLAPSE_HEADER(DOF)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
-
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Enabled");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##dofEnabled", &env->DOFEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
-                        if (ImGui::Button(resetSSR.c_str())) env->DOFEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Focal Depth");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffocalDepth", &env->DOFFocalDepth);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetdofFocalDepth = ICON_FA_UNDO + std::string("##resetdofFocalDepth");
-                        if (ImGui::Button(resetdofFocalDepth.c_str())) env->DOFFocalDepth = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Focal Length");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffocalLength", &env->DOFFocalLength);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFocalLength = ICON_FA_UNDO + std::string("##resetDOFFocalLength");
-                        if (ImGui::Button(resetDOFFocalLength.c_str())) env->DOFFocalLength = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("fStop");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Auto focus");
-                        ImGui::TableNextColumn();
-            
-                        ImGui::Checkbox("##dofautofocus", &env->DOFAutoFocus);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetdofautofocus");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFAutoFocus = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Display auto focus");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##dofshowautofocus", &env->DOFShowFocus);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFShowautofocus = ICON_FA_UNDO + std::string("##resetdofshowautofocus");
-                        if (ImGui::Button(resetDOFShowautofocus.c_str())) env->DOFShowFocus = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Manual focus");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##dofmanualfocus", &env->DOFManualFocus);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFShowautofocus = ICON_FA_UNDO + std::string("##resetdofshowautofocus");
-                        if (ImGui::Button(resetDOFShowautofocus.c_str())) env->DOFShowFocus = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("fStop");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffstop", &env->DOFFstop);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetDOFFstop");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFFstop = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Start");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##dofstart", &env->DOFStart);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFFstop = ICON_FA_UNDO + std::string("##resetdofstartp");
-                        if (ImGui::Button(resetDOFFstop.c_str())) env->DOFStart = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Distance");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##dofdistance", &env->DOFDist);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
-                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Threshold");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##dofthreshold", &env->DOFThreshold, 0.001f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetDOFDist");
-                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("DOF Feather");
-                        ImGui::TableNextColumn();
-
-                        ImGui::DragFloat("##doffeather", &env->DOFFeather, 0.001f, 0.0f, 1.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetDOFDist = ICON_FA_UNDO + std::string("##resetdoffeather");
-                        if (ImGui::Button(resetDOFDist.c_str())) env->DOFDist = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-                BEGIN_COLLAPSE_HEADER(BARREL_DISTORTION)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3f);
-                    ImGui::TableSetupColumn("set", 0, 0.6f);
-                    ImGui::TableSetupColumn("reset", 0, 0.1f);
-                    
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Barrel Distortion");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##BarrelEnabled", &env->BarrelDistortionEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
-                        if (ImGui::Button(resetSSR.c_str())) env->BarrelDistortionEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Distortion");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##distortion", &env->BarrelDistortion, 0.01f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelDistortion = 0.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Edge Distortion");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##edgedistortion", &env->BarrelEdgeDistortion, 0.01f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelEdgeDistortion = 0.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Scale Adjustement");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##barrelScale", &env->BarrelScale, 0.01f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->BarrelScale = 1.0f;
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-
-            BEGIN_COLLAPSE_HEADER(VIGNETTE)
-                if (ImGui::BeginTable("EnvTable", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingStretchProp))
-                {
-                    ImGui::TableSetupColumn("name", 0, 0.3);
-                    ImGui::TableSetupColumn("set", 0, 0.6);
-                    ImGui::TableSetupColumn("reset", 0, 0.1);
-
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Vignette Enabled");
-                        ImGui::TableNextColumn();
-
-                        ImGui::Checkbox("##VignetteEnabled", &env->VignetteEnabled);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetSSR = ICON_FA_UNDO + std::string("##resetrBarrelDistortionEnabled");
-                        if (ImGui::Button(resetSSR.c_str())) env->VignetteEnabled = false;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Intensity");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##vignetteIntensity", &env->VignetteIntensity, 0.1f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VignetteIntensity = 0.0f;
-                        ImGui::PopStyleColor();
-                    }
-
-                    {
-                        ImGui::TableNextColumn();
-                        // Title
-                        ImGui::Text("Extend");
-                        ImGui::TableNextColumn();
-                        ImGui::DragFloat("##vignetteExtend", &env->VignetteExtend, 0.01f, 0.0f);
-                        ImGui::TableNextColumn();
-
-                        // Reset button
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
-                        std::string resetVolumetric = ICON_FA_UNDO + std::string("##resetVolumetric");
-                        if (ImGui::Button(resetVolumetric.c_str())) env->VignetteExtend = 0.0f;
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::EndTable();
-                }
-            END_COLLAPSE_HEADER()
-        }
-        ImGui::End();
 
         std::string title = ICON_FA_TREE + std::string("   Hierarchy");
         if (ImGui::Begin(title.c_str()))
         {
-            std::string searchQuery = "";
-            
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 8, 8 });
             ImGui::InputTextWithHint("##search", "Search entity", &searchQuery, 0, 0, 0);
             ImGui::PopStyleVar();
@@ -2437,34 +1431,47 @@ namespace Nuake {
                     ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Script", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
                     ImGui::TableSetupColumn("Visibility   ", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
-                    ImGui::TableHeadersRow();
-
+                    //mGui::TableHeadersRow();
                     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
-                    std::vector<Entity> entities = scene->GetAllEntities();
-                    for (Entity e : entities)
+
+                    // Build list of valid entity to display
+                    std::vector<Entity> entitiesToDisplay;
+                    if (searchQuery.empty())
                     {
-                        ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanFullWidth;
-                        std::string name = e.GetComponent<NameComponent>().Name;
-                        // If selected add selected flag.
-                        if (Selection.Type == EditorSelectionType::Entity && Selection.Entity == e)
-                            base_flags |= ImGuiTreeNodeFlags_Selected;
-
-                        // Write in normal font.
-                        ImGui::PushFont(normalFont);
-
-                        // Draw all entity without parents.
-                        if (!e.GetComponent<ParentComponent>().HasParent)
+                        entitiesToDisplay = scene->GetAllEntities();
+                    }
+                    else
+                    {
+                        auto view = scene->m_Registry.view<NameComponent>();
+                        for (auto& e : view)
                         {
-                            // Recursively draw childrens.
-                            DrawEntityTree(e);
+                            auto& nameComponent = view.get<NameComponent>(e);
+                            if (String::RemoveWhiteSpace(String::ToUpper(nameComponent.Name)).find(String::RemoveWhiteSpace(String::ToUpper(searchQuery))) != std::string::npos)
+                            {
+                                entitiesToDisplay.push_back({ e, scene.get() });
+                            }
+                        }
+                    }
+
+                    // Display valid entities
+                    for (Entity e : entitiesToDisplay)
+                    {
+                        // Draw all entity without parents.
+                        bool displayAllHierarchy = searchQuery.empty();
+                        if ((displayAllHierarchy && !e.GetComponent<ParentComponent>().HasParent) || !displayAllHierarchy)
+                        {
+                            ImGui::PushFont(normalFont);
+
+                            // Recursively draw childrens if not searching
+                            const std::string entityName = e.GetComponent<NameComponent>().Name;
+
+
+
+                            DrawEntityTree(e, displayAllHierarchy);
+
+                            ImGui::PopFont();
                         }
 
-                        // Pop font.
-                        ImGui::PopFont();
-
-                        // Right click menu
-                        //if (ImGui::BeginPopupContextItem())
-                        //    ImGui::EndPopup();
                     }
                     ImGui::PopStyleVar();
                 }
@@ -2927,7 +1934,7 @@ namespace Nuake {
             ImGui::PushItemWidth(75);
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
             ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
-            CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.z };
+            CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.x };
             ImGui::PopStyleVar();
 
             ImGui::PopItemWidth();
@@ -2961,7 +1968,7 @@ namespace Nuake {
             ImGui::PushStyleColor(ImGuiCol_FrameBg, IM_COL32(20, 20, 20, 0));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(20, 20, 20, 60));
             ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, IM_COL32(33, 33, 33, 45));
-            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity", "UV"};
+            const char* items[] = { "Shaded", "Albedo", "Normal", "Depth", "Velocity", "UV", "SSAO"};
             ImGui::SetNextItemWidth(128);
 			if (ImGui::BeginCombo("##Output", items[SelectedViewport]))
 			{
@@ -3000,26 +2007,29 @@ namespace Nuake {
         ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
         ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
-        if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
+        if (isControllingCamera)
         {
-            const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-            const float camSpeed = editorCam->Speed;
+            if (ImGui::Begin("Controls", &m_ShowOverlay, window_flags))
+            {
+                const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+                const float camSpeed = editorCam->Speed;
 
-            const float maxSpeed = 50.0f;
-            const float minSpeed = 0.05f;
-            const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
+                const float maxSpeed = 50.0f;
+                const float minSpeed = 0.05f;
+                const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
 
-            ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0) ;
-            ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
-            ImVec2 startOffset = ImVec2(start.x , end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
+                ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0);
+                ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
+                ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
 
-            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
-            ImGui::PopStyleVar();
+                ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+                ImGui::PopStyleVar();
+            }
+            ImGui::End();
         }
-
         ImGui::PopStyleVar();
-        ImGui::End();
+
 
         corner = 2;
 
@@ -3493,6 +2503,14 @@ namespace Nuake {
             }
         }
 
+#ifdef NK_DEBUG
+        // Shader reloading
+        if (ImGui::IsKeyPressed(ImGuiKey_F1, false))
+        {
+            ShaderManager::RebuildShaders();
+        }
+#endif
+
         pInterface.m_CurrentProject = Engine::GetProject();
 
         uint32_t selectedEntityID;
@@ -3651,7 +2669,7 @@ namespace Nuake {
 		//pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
-        SelectionPanel.Draw(Selection);
+        SelectionPanel->Draw(Selection);
         DrawLogger();
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();

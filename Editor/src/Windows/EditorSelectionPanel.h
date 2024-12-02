@@ -8,6 +8,7 @@
 #include "../ComponentsPanel/TransformPanel.h"
 #include "../ComponentsPanel/LightPanel.h"
 #include "../ComponentsPanel/MeshPanel.h"
+#include "../ComponentsPanel/SkinnedMeshPanel.h"
 #include "../ComponentsPanel/CameraPanel.h"
 #include "../ComponentsPanel/CapsuleColliderPanel.h"
 #include "../ComponentsPanel/CylinderColliderPanel.h"
@@ -33,13 +34,15 @@ class EditorSelectionPanel
 private:
 	TransformPanel mTransformPanel;
 	MeshPanel meshPanel;
+	SkinnedMeshPanel skinnedMeshPanel;
+	EditorSelection* selection = nullptr;
 
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
 
 	Ref<Nuake::Scene> virtualScene;
 public:
-	EditorSelectionPanel();
+	EditorSelectionPanel(EditorSelection& selection);
 
 	void Draw(EditorSelection selection, const std::string& id = "");
 

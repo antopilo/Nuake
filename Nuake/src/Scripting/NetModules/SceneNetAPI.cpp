@@ -362,6 +362,45 @@ namespace Nuake {
 		}
 	}
 
+	void TransformLookAt(int entityId, float x, float y, float z, float ux, float uy, float uz)
+	{
+		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
+
+		if (entity.IsValid() && entity.HasComponent<TransformComponent>())
+		{
+			auto& component = entity.GetComponent<TransformComponent>();
+
+			// Get the entity's current position
+			const Vector3 globalPos = component.GetGlobalTransform()[3];
+			const Vector3 targetPos = { x, y, z };
+			const Vector3 direction = glm::normalize(globalPos - targetPos);
+
+			Vector3 up = { ux, uy, uz };
+			if (glm::abs(glm::dot(direction, up)) > 0.999f)
+			{
+				up = { 0.0f, 0.0f, 1.0f };
+			}
+
+			// Calculate the right vector
+			const Vector3 right = glm::normalize(glm::cross(up, direction));
+
+			// Recompute the true up vector
+			const Vector3 adjustedUp = glm::normalize(glm::cross(direction, right));
+
+			// Construct a rotation matrix
+			const Matrix3 rotationMatrix = 
+			{
+				right,
+				adjustedUp,
+				direction
+			};
+
+			// Convert rotation matrix to a quaternion
+			Quat orientation = glm::quat_cast(rotationMatrix);
+			component.SetLocalRotation(std::move(orientation));
+		}
+	}
+
 	float LightGetIntensity(int entityId)
 	{
 		Entity entity = { (entt::entity)(entityId), Engine::GetCurrentScene().get() };
@@ -586,6 +625,16 @@ namespace Nuake {
 		}
 	}
 
+	void EnvironmentDepthOfFieldSetFocusDistanceIcall(float distance)
+	{
+		Engine::GetCurrentScene()->GetEnvironment()->DOFFocalDepth = distance;
+	}
+
+	float EnvironmentDepthOfFieldGetFocusDistanceIcall()
+	{
+		return Engine::GetCurrentScene()->GetEnvironment()->DOFFocalDepth;
+	}
+
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
@@ -614,6 +663,7 @@ namespace Nuake {
 		RegisterMethod("TransformComponent.GetPositionIcall", &TransformGetPosition);
 		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
 		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
+		RegisterMethod("TransformComponent.LookAtIcall", &TransformLookAt);
 
 		// Lights
 		RegisterMethod("LightComponent.GetLightIntensityIcall", &LightGetIntensity);
@@ -640,7 +690,9 @@ namespace Nuake {
 		// Audio Emitter
 		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", &AudioEmitterGetIsPlaying);
 		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", &AudioEmitterSetIsPlaying);
+
+		RegisterMethod("Environment.SetFocusDistanceIcall", &EnvironmentDepthOfFieldSetFocusDistanceIcall);
+		RegisterMethod("Environment.GetFocusDistanceIcall", &EnvironmentDepthOfFieldGetFocusDistanceIcall);
 	}
 
 }
-

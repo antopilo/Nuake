@@ -27,6 +27,9 @@ namespace Nuake
 		Matrix4 m_Perspective;
 		Matrix4 m_View;
 
+		float Near = 0.001f;
+		float Far = 400.0f;
+
 	public:
 		float AspectRatio = 16.0f / 9.0f;
 		
@@ -47,6 +50,9 @@ namespace Nuake
 
 		void SetDirection(Vector3 direction);
 		void SetDirection(const Quat& direction);
+
+		float GetNear() const { return Near; }
+		float GetFar() const { return Far; }
 
 		Vector3 GetTranslation();
 		Vector3 GetDirection();

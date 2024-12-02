@@ -2,6 +2,7 @@
 #include "src/Core/Maths.h"
 #include "src/Core/Core.h"
 #include "src/Scene/Environment/ProceduralSky.h"
+#include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 
 #include "src/Rendering/PostFX/Bloom.h"
@@ -20,9 +21,10 @@ namespace Nuake
 		// CubeMap
 	};
 
-	class Environment : public ISerializable
+	class Environment : public Resource, ISerializable
 	{
 	public:
+		Environment(const std::string& path);
 		Environment();
 
 		SkyType CurrentSkyType;
@@ -76,6 +78,12 @@ namespace Nuake
 		bool VignetteEnabled = true;
 		float VignetteIntensity = 15.0f;
 		float VignetteExtend = 0.5f;
+
+		bool PosterizationEnabled = false;
+		int PosterizationLevels = 10;
+
+		bool PixelizationEnabled = false;
+		int PixelSize = 4;
 
 		Vector3 ClearColor;
 

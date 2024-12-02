@@ -22,12 +22,12 @@ namespace Nuake
 		
 		_ssaoFramebuffer = CreateRef<FrameBuffer>(false, Vector2(_size));
 
-		auto renderTarget = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+		auto renderTarget = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
 		_ssaoFramebuffer->SetTexture(renderTarget, GL_COLOR_ATTACHMENT0);
 
 		_ssaoBlurFramebuffer = CreateRef<FrameBuffer>(false, Vector2(_size));
 
-		auto renderTargetBlur = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA16F, GL_FLOAT);
+		auto renderTargetBlur = CreateRef<Texture>(_size, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
 		_ssaoBlurFramebuffer->SetTexture(renderTargetBlur);
 	}
 
@@ -92,7 +92,7 @@ namespace Nuake
 			_ssaoNoise.push_back(noise);
 		}
 
-		_ssaoNoiseTexture = CreateRef<Texture>(Vector2(4, 4), GL_RGB, GL_RGBA16F, GL_FLOAT, &_ssaoNoise[0]);
+		_ssaoNoiseTexture = CreateRef<Texture>(Vector2(4, 4), GL_RGB, GL_RGB16F, GL_FLOAT, &_ssaoNoise[0]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -106,8 +106,13 @@ namespace Nuake
 		_ssaoFramebuffer->Bind();
 		{
 			_ssaoFramebuffer->Clear();
-			const auto& depthTexture = gBuffer->GetTexture(GL_DEPTH_ATTACHMENT);
-			const auto& normalTexture = gBuffer->GetTexture(GL_COLOR_ATTACHMENT1);
+			auto depthTexture = gBuffer->GetTexture(GL_DEPTH_ATTACHMENT);
+			auto normalTexture = gBuffer->GetTexture(GL_COLOR_ATTACHMENT1);
+
+			ImGui::Begin("debug");
+			ImGui::Image((ImTextureID)normalTexture->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
+			ImGui::End();
+
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/ssao.shader");
 			shader->Bind();
 			shader->SetUniform("u_Projection", projection);

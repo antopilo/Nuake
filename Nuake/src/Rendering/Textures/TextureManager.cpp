@@ -34,6 +34,7 @@ namespace Nuake
 		m_Registry.emplace(Resources_Images_logo_white_png_path, CreateRef<Texture>(Resources_Images_logo_white_png, Resources_Images_logo_white_png_len));
 		m_Registry.emplace(Resources_Images_logo_png_path, CreateRef<Texture>(Resources_Images_logo_png, Resources_Images_logo_png_len));
 		m_Registry.emplace(Resources_Images_file_icon_png_path, CreateRef<Texture>(Resources_Images_file_icon_png, Resources_Images_file_icon_png_len));
+		m_Registry.emplace(Resources_Images_env_file_icon_png_path, CreateRef<Texture>(Resources_Images_env_file_icon_png, Resources_Images_env_file_icon_png_len));
 		m_Registry.emplace(Resources_Images_scene_icon_png_path, CreateRef<Texture>(Resources_Images_scene_icon_png, Resources_Images_scene_icon_png_len));
 		m_Registry.emplace(Resources_Images_project_icon_png_path, CreateRef<Texture>(Resources_Images_project_icon_png, Resources_Images_project_icon_png_len));
 		m_Registry.emplace(Resources_Images_csharp_icon_png_path, CreateRef<Texture>(Resources_Images_csharp_icon_png, Resources_Images_csharp_icon_png_len));

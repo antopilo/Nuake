@@ -144,6 +144,35 @@ namespace Nuake.Net
         BUTTON_8 = 7,
     }
 
+    public enum ControllerInput
+    {
+        A = 0, 
+		B, 
+		X, 
+		Y, 
+		LEFT_BUMPER, 
+		RIGHT_BUMPER, 
+		BACK, 
+		START, 
+		GUIDE, 
+		LEFT_THUMB, 
+		RIGHT_THUMB, 
+		DPAD_UP, 
+		DPAD_RIGHT, 
+		DPAD_DOWN,
+		DPAD_LEFT
+    };
+
+    public enum ControllerAxis
+    {
+        LEFT_X = 0, 
+		LEFT_Y, 
+		RIGHT_X, 
+		RIGHT_Y, 
+		LEFT_TRIGGER,
+		RIGHT_TRIGGER
+    };
+
     public class Input
     {
         internal static unsafe delegate*<bool, void> ShowMouseIcall;
@@ -151,6 +180,11 @@ namespace Nuake.Net
         internal static unsafe delegate*<int, bool> IsKeyPressedIcall;
         internal static unsafe delegate*<int, bool> IsMouseButtonDownIcall;
         internal static unsafe delegate*<NativeArray<float>> GetMousePositionIcall;
+        internal static unsafe delegate*<int, bool> IsControllerConnectedIcall;
+        internal static unsafe delegate*<int, NativeString> GetControllerNameIcall;
+        internal static unsafe delegate*<int, int, bool> IsControllerButtonPressedIcall;
+        internal static unsafe delegate*<int, int, float> GetControllerAxisIcall;
+
 
         public static bool IsMouseButtonDown(MouseButton button)
         {
@@ -178,6 +212,35 @@ namespace Nuake.Net
             unsafe { result = GetMousePositionIcall(); }
 
             return new Vector2(result[0], result[1]);
+        }
+
+        public static bool IsControllerConnected(int id)
+        {
+            unsafe
+            {
+                return IsControllerConnectedIcall(id);
+            }
+        }
+
+        public static string GetControllerName(int id)
+        {
+            unsafe { return GetControllerNameIcall(id).ToString(); ; }
+        }
+
+        public static bool IsControllerButtonPressed(int id, ControllerInput button)
+        {
+            unsafe
+            {
+                return IsControllerButtonPressedIcall(id, (int)button);
+            }
+        }
+
+        public static float GetControllerAxis(int id, ControllerAxis axis)
+        {
+            unsafe
+            {
+                return GetControllerAxisIcall(id, (int)axis);
+            }
         }
     }
 }

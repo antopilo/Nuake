@@ -64,6 +64,34 @@ bool FileSystem::FileExists(const std::string& path, bool absolute)
 	return std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath);
 }
 
+std::vector<Ref<File>> FileSystem::GetAllFiles(const FileType fileType)
+{
+	std::vector<Ref<File>> foundFiles;
+
+	std::function<void(Ref<Directory>)> scanDir;
+	scanDir = [&scanDir, &foundFiles, &fileType](Ref<Directory> dir)
+	{
+		// All the files matching the filetype
+		for (auto& f : dir->Files)
+		{
+			if (f->GetFileType() == fileType)
+			{
+				foundFiles.push_back(f);
+			}
+		}
+
+		// Scan sub folder
+		for (auto& d : dir->Directories)
+		{
+			scanDir(d);
+		}
+	};
+
+	scanDir(RootDirectory);
+
+	return foundFiles;
+}
+
 void FileSystem::SetRootDirectory(const std::string path)
 {
 	Root = path;
@@ -219,8 +247,14 @@ Ref<Directory> FileSystem::GetFileTree()
 	return RootDirectory;
 }
 
-Ref<File> FileSystem::GetFile(const std::string& path)
+Ref<File> FileSystem::GetFile(const std::string& inPath)
 {
+	std::string path = inPath;
+	if (String::BeginsWith(path, "/") || String::BeginsWith(path, "\\"))
+	{
+		path = inPath.substr(1, inPath.size() - 1);
+	}
+
 	// Note, Might be broken on other platforms.
 	auto splits = String::Split(path, '/');
 

@@ -14,6 +14,9 @@ namespace Nuake {
         extern const std::string Resources_resources_rc_path;
         extern unsigned int Resources_resources_rc_len;
         extern unsigned char Resources_resources_rc[];
+        extern const std::string Resources_Data_gamecontrollerdb_txt_path;
+        extern unsigned int Resources_Data_gamecontrollerdb_txt_len;
+        extern unsigned char Resources_Data_gamecontrollerdb_txt[];
         extern const std::string Resources_Fonts_fa_regular_400_ttf_path;
         extern unsigned int Resources_Fonts_fa_regular_400_ttf_len;
         extern unsigned char Resources_Fonts_fa_regular_400_ttf[];
@@ -89,6 +92,9 @@ namespace Nuake {
         extern const std::string Resources_Images_editor_icon_png_path;
         extern unsigned int Resources_Images_editor_icon_png_len;
         extern unsigned char Resources_Images_editor_icon_png[];
+        extern const std::string Resources_Images_env_file_icon_png_path;
+        extern unsigned int Resources_Images_env_file_icon_png_len;
+        extern unsigned char Resources_Images_env_file_icon_png[];
         extern const std::string Resources_Images_file_icon_png_path;
         extern unsigned int Resources_Images_file_icon_png_len;
         extern unsigned char Resources_Images_file_icon_png[];
@@ -233,6 +239,12 @@ namespace Nuake {
         extern const std::string Resources_Shaders_pbr_shader_path;
         extern unsigned int Resources_Shaders_pbr_shader_len;
         extern unsigned char Resources_Shaders_pbr_shader[];
+        extern const std::string Resources_Shaders_pixelization_shader_path;
+        extern unsigned int Resources_Shaders_pixelization_shader_len;
+        extern unsigned char Resources_Shaders_pixelization_shader[];
+        extern const std::string Resources_Shaders_posterization_shader_path;
+        extern unsigned int Resources_Shaders_posterization_shader_len;
+        extern unsigned char Resources_Shaders_posterization_shader[];
         extern const std::string Resources_Shaders_sdf_text_shader_path;
         extern unsigned int Resources_Shaders_sdf_text_shader_len;
         extern unsigned char Resources_Shaders_sdf_text_shader[];

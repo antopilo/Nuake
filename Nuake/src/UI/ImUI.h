@@ -11,6 +11,19 @@
 
 namespace Nuake
 {
+#define BEGIN_COLLAPSE_HEADER(names) \
+    UIFont* names##_boldFont = new UIFont(Fonts::Bold); \
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.f, 0.f)); \
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 8.f)); \
+    bool names##_Opened = ImGui::CollapsingHeader((std::string("  ") + #names).c_str()); \
+    ImGui::PopStyleVar(); \
+    delete names##_boldFont; \
+    if (names##_Opened) { \
+
+#define END_COLLAPSE_HEADER() \
+} \
+    ImGui::PopStyleVar(); \
+
 	namespace UI
 	{
 		static uint32_t PrimaryCol = IM_COL32(97, 0, 255, 255);

@@ -4,6 +4,11 @@
 
 namespace Nuake
 {
+	void SkinnedModelComponent::SetModel(ResourceFile file)
+	{
+		ModelPath = file;
+	}
+
 	void SkinnedModelComponent::LoadModel(entt::entity e, Scene* scene)
 	{
 		ModelLoader loader = ModelLoader();
@@ -70,6 +75,9 @@ namespace Nuake
 		{
 			SERIALIZE_OBJECT(ModelResource);
 		}
+		
+		j["CurrentAnimationIndex"] = animationList.index;
+
 		END_SERIALIZE();
 	}
 
@@ -86,6 +94,15 @@ namespace Nuake
 		}
 
 		RegenerateAnimationList();
+
+		if (j.contains("CurrentAnimationIndex"))
+		{
+			int animIndex = j["CurrentAnimationIndex"];
+			if (animIndex > 0 && animIndex < animationList.items.size())
+			{
+				SetAnimationList(animIndex);
+			}
+		}
 
 		return true;
 	}
