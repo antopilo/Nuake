@@ -55,7 +55,7 @@ namespace Nuake
 		float DOFFstop = 1.0f;
 		bool DOFAutoFocus = false;
 		bool DOFShowFocus = false;
-		bool DOFManualFocus = false;
+		bool DOFManualFocus = true;
 		int DOFSamples = 3;
 		int DOFrings = 3;
 		float DOFStart = 1.0f;

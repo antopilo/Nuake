@@ -310,7 +310,6 @@ namespace Nuake
 		}
 
 		DESERIALIZE_VAL(DOFAutoFocus);
-		DESERIALIZE_VAL(DOFManualFocus);
 		DESERIALIZE_VAL(DOFFocalDepth);
 		DESERIALIZE_VAL(DOFFocalLength);
 		DESERIALIZE_VAL(DOFStart);
