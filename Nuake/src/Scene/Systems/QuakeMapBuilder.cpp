@@ -213,13 +213,12 @@ namespace Nuake {
                     }
                     else if(!pointEntity->Prefab.empty())
                     {
-                        auto& prefabComponent = currentNonWorldEntity.AddComponent<PrefabComponent>();
+                        //auto& prefabComponent = currentNonWorldEntity.AddComponent<PrefabComponent>();
                         Ref<Prefab> prefab = Prefab::InstanceInScene(pointEntity->Prefab, m_Scene);
-
-                        prefabComponent.SetPrefab(prefab);
-                        prefabComponent.isInitialized = true;
-                        currentNonWorldEntity.AddChild(prefabComponent.PrefabInstance->Root);
-                        currentNonWorldEntity.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
+                        //prefabComponent.SetPrefab(prefab);
+                        //prefabComponent.isInitialized = true;
+                        currentNonWorldEntity.AddChild(prefab->Root);
+                        //prefab->Root.GetComponent<TransformComponent>().SetLocalPosition(brushLocalPosition);
 
                         //for (auto& e : prefabComponent.PrefabInstance->Entities)
                         //{

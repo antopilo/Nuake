@@ -356,7 +356,7 @@ namespace Nuake {
                             auto project = Engine::GetProject();
                             auto& scriptingEngine = ScriptingEngineNet::Get();
                             const std::string& assemblyPath = scriptingEngine.GetGameAssemblyPath(project);
-                            if (FileSystem::FileExists(assemblyPath) && FileSystem::GetFile(assemblyPath)->GetHasBeenModified())
+                            if (FileSystem::FileExists(assemblyPath))
                             {
                                 this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
                                 FileSystem::GetFile(assemblyPath)->SetHasBeenModified(false);
