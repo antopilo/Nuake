@@ -21,7 +21,8 @@ project "GLFW"
         "glfw/src/null_init.c",
         "glfw/src/null_joystick.c",
         "glfw/src/null_monitor.c",
-        "glfw/src/null_window.c"
+        "glfw/src/null_window.c",
+	"glfw/src/vulkan.c"
     }
 
     filter "system:windows"
