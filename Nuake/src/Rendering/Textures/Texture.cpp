@@ -59,18 +59,18 @@ namespace Nuake
 		}
 		
 
-		glGenTextures(1, &m_RendererId);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		//glGenTextures(1, &m_RendererId);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glGenerateMipmap(GL_TEXTURE_2D);
+		////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		////glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		////glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.0f);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 		if (m_LocalBuffer)
 		{
 			stbi_image_free(m_LocalBuffer);
@@ -112,9 +112,9 @@ namespace Nuake
 			}
 		}
 
-		glGenTextures(1, &m_RendererId);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)flags.pixelFormat, size.x, size.y, 0, (GLenum)flags.pixelFormat, (GLenum)flags.pixelDataType, tempData);
+		//glGenTextures(1, &m_RendererId);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)flags.pixelFormat, size.x, size.y, 0, (GLenum)flags.pixelFormat, (GLenum)flags.pixelDataType, tempData);
 		
 		SetMagnificationFilter(flags.magFilter);
 		SetMinificationFilter(flags.minFilter);
@@ -139,13 +139,13 @@ namespace Nuake
 		m_Width = size.x;
 		m_Height = size.y;
 
-		glGenTextures(1, &m_RendererId);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, format2, size.x, size.y, 0, format, format3, data);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		//glGenTextures(1, &m_RendererId);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexImage2D(GL_TEXTURE_2D, 0, format2, size.x, size.y, 0, format, format3, data);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
@@ -155,11 +155,11 @@ namespace Nuake
 		int channels = 0;
 		stbi_set_flip_vertically_on_load(1);
 		m_LocalBuffer = stbi_load_from_memory(data, len, &m_Width, &m_Height, &channels, 4);
-		glGenTextures(1, &m_RendererId);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		//glGenTextures(1, &m_RendererId);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glGenerateMipmap(GL_TEXTURE_2D);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_LocalBuffer);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 
 		if (m_LocalBuffer)
 		{
@@ -175,35 +175,35 @@ namespace Nuake
 	void Texture::Resize(glm::vec2 size)
 	{
 
-		glDeleteTextures(1, &m_RendererId);
+		//glDeleteTextures(1, &m_RendererId);
 		m_Width = size.x;
 		m_Height = size.y;
-		glGenTextures(1, &m_RendererId);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexImage2D(GL_TEXTURE_2D, 0, m_Format2, size.x, size.y, 0, m_Format, m_Format3, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_Filtering);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_Filtering);
+		//glGenTextures(1, &m_RendererId);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexImage2D(GL_TEXTURE_2D, 0, m_Format2, size.x, size.y, 0, m_Format, m_Format3, NULL);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_Filtering);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_Filtering);
 	}
 
 	Texture::~Texture() 
 	{
-		glDeleteTextures(1, &m_RendererId);
+		//glDeleteTextures(1, &m_RendererId);
 	}
 
 	void Texture::AttachToFramebuffer(GLenum attachment)
 	{
-		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, m_RendererId, 0);
+		//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, m_RendererId, 0);
 	}
 
 	void Texture::Bind(unsigned int slot) const 
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glActiveTexture(GL_TEXTURE0 + slot);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
 	}
 
 	void Texture::Unbind() const 
 	{
-		glBindTexture(GL_TEXTURE_2D, 0);
+		//glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void Texture::SetParameter(const GLenum& param, const GLenum& value)
@@ -214,27 +214,27 @@ namespace Nuake
 		}
 
 		Bind();
-		glTexParameteri(GL_TEXTURE_2D, param, value);
+		//glTexParameteri(GL_TEXTURE_2D, param, value);
 		Unbind();
 	}
 
 	void Texture::SetMagnificationFilter(const SamplerFilter& filter)
 	{
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filter);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filter);
 	}
 
 	void Texture::SetMinificationFilter(const SamplerFilter& filter)
 	{
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filter);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filter);
 	}
 
 	void Texture::SetWrapping(const SamplerWrapping& wrapping)
 	{
-		glBindTexture(GL_TEXTURE_2D, m_RendererId);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)wrapping);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)wrapping);
+		//glBindTexture(GL_TEXTURE_2D, m_RendererId);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)wrapping);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)wrapping);
 	}
 
 	json Texture::Serialize()

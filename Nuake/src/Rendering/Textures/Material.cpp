@@ -25,20 +25,20 @@ namespace Nuake
 		InitDefaultTextures();
 		InitUniformBuffer();
 
-		glGenBuffers(1, &UBO);
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		//glGenBuffers(1, &UBO);
+		//glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+		//glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
+		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
 	Material::Material(const std::string albedo)
 	{
 		InitUniformBuffer();
 
-		glGenBuffers(1, &UBO);
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-		glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		//glGenBuffers(1, &UBO);
+		//glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+		//glBufferData(GL_UNIFORM_BUFFER, sizeof(UBOStructure), NULL, GL_STATIC_DRAW);
+		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		m_Albedo = TextureManager::Get()->GetTexture(albedo);
 
@@ -61,10 +61,10 @@ namespace Nuake
 		InitDefaultTextures();
 		InitUniformBuffer();
 
-		glGenBuffers(1, &UBO);
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-		glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		//glGenBuffers(1, &UBO);
+		//glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+		//glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
+		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		data.m_AlbedoColor = Vector3{ albedoColor.r, albedoColor.g, albedoColor.b };
 

@@ -21,6 +21,9 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
 
+#ifdef NK_VK
+	#include "src/Rendering/Vulkan/VulkanRenderer.h"
+#endif
 
 
 namespace Nuake
@@ -48,11 +51,15 @@ namespace Nuake
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
 
+#ifdef NK_VK
+		VkRenderer::Get().Initialize();
+#endif
+
 		// Creates the window
 		currentWindow = Window::Get();
 
 		Input::Init();
-		Renderer2D::Init();
+		//Renderer2D::Init();
 		Logger::Log("Engine initialized");
 
 		RegisterCoreTypes::RegisterCoreComponents();
@@ -183,15 +190,19 @@ namespace Nuake
 	{
 		ZoneScoped;
 
+		VkRenderer::Get().Draw();
+
 		RenderCommand::Clear();
 
 		// Start imgui frame
 		{
 			ZoneScopedN("ImGui New Frame");
 
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+			//ImGui_ImplOpenGL3_NewFrame();
+			//ImGui_ImplGlfw_NewFrame();
+			// ImGui_ImplVulkan_NewFrame();
+			//ImGui_ImplGlfw_NewFrame();
+			//ImGui::NewFrame();
 		}
 
 		// Draw scene

@@ -4,7 +4,8 @@
 namespace Nuake {
 	enum class RendererPlatforms
 	{
-		OpenGL
+		OpenGL,
+		Vulkan
 	};
 
 	class RenderCommand 

@@ -102,7 +102,7 @@ namespace Nuake
 
     void Renderer::Init()
     {
-        RenderCommand::SetRendererAPI(RendererPlatforms::OpenGL);
+        RenderCommand::SetRendererAPI(RendererPlatforms::Vulkan);
 
         ShaderManager::LoadShaders();
 

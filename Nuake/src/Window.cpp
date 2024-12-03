@@ -59,7 +59,11 @@ int Window::Init()
         return -1;
     }
 
-    ShowTitleBar(false);
+    //ShowTitleBar(false);
+
+#ifdef NK_VK
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+#endif 
 
     this->window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (!this->window)
@@ -72,6 +76,8 @@ int Window::Init()
     glfwMakeContextCurrent(this->window);
     SetVSync(false);
 
+#ifndef NK_VK
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         Logger::Log("glad initialization failed!", "window", CRITICAL);
@@ -80,6 +86,8 @@ int Window::Init()
 
     Logger::Log("Driver detected " + std::string(((char*)glGetString(GL_VERSION))), "window");
 
+#endif
+
     if (glfwRawMouseMotionSupported())
         glfwSetInputMode(this->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
@@ -87,8 +95,8 @@ int Window::Init()
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     glfwSetWindowUserPointer(window, this);
 
@@ -130,6 +138,7 @@ int Window::Init()
         *hit = isHit;
     });
 
+#ifndef  NK_VK
     // TODO: have clear color in environnement.
     glClearColor(0.f, 0.f, 0.f, 1.0f);
 
@@ -138,9 +147,7 @@ int Window::Init()
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glEnable(GL_CULL_FACE);
 
-    // Create viewports
     const Vector2 defaultResolution = Vector2(1, 1);
     this->framebuffer = CreateRef<FrameBuffer>(true, defaultResolution);
 
@@ -151,6 +158,11 @@ int Window::Init()
     this->framebuffer->SetTexture(outputTexture);
     this->framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT1); // Entity ID
 
+#endif //  NK_VK
+
+    //glEnable(GL_CULL_FACE);
+
+    // Create viewports
     InitImgui();
 
     Logger::Log("ImGui initialized ", "renderer");
@@ -204,7 +216,7 @@ void Window::Draw()
         this->scene->Draw(*this->framebuffer.get(), this->scene->m_EditorCamera->GetPerspective(), this->scene->m_EditorCamera->GetTransform());
     }
 
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     Renderer::EndDraw();
 }
 

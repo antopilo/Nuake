@@ -1,12 +1,21 @@
 #include "RenderCommand.h"
 #include "Platforms/OGLRendererAPI.h"
+#include "Platforms/VKRendererAPI.h"
+
 
 namespace Nuake {
 	RendererAPI* RenderCommand::sRendererAPI;
 
 	void RenderCommand::SetRendererAPI(RendererPlatforms platform)
 	{
-		sRendererAPI = new OGLRendererAPI();
+		if (platform == RendererPlatforms::OpenGL)
+		{
+			sRendererAPI = new OGLRendererAPI();
+		}
+		else if (platform == RendererPlatforms::Vulkan)
+		{
+			sRendererAPI = new VKRendererAPI();
+		}
 	}
 
 	void RenderCommand::Clear()

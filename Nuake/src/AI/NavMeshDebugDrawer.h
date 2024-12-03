@@ -21,7 +21,7 @@ namespace Nuake {
 	class NavMeshDebugDrawer : public duDebugDraw
 	{
 	private:
-		GLCheckerTexture m_Texture;
+		//GLCheckerTexture m_Texture;
 
 	public:
 		virtual void depthMask(bool state);

@@ -10,30 +10,30 @@ namespace Nuake
 		m_Size = size;
 		m_HasRenderBuffer = hasRenderBuffer;
 
-		glGenFramebuffers(1, &m_FramebufferID);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
-
-		// Create render buffer and attach to frame buffer.
-		if (m_HasRenderBuffer)
-		{
-			glGenRenderbuffers(1, &m_RenderBuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
-		}
-		else
-		{
-			m_RenderBuffer = -1;
-		}
-
-		// Unbind
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glGenFramebuffers(1, &m_FramebufferID);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
+		//
+		//// Create render buffer and attach to frame buffer.
+		//if (m_HasRenderBuffer)
+		//{
+		//	glGenRenderbuffers(1, &m_RenderBuffer);
+		//	glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
+		//	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
+		//	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
+		//}
+		//else
+		//{
+		//	m_RenderBuffer = -1;
+		//}
+		//
+		//// Unbind
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
 	FrameBuffer::~FrameBuffer()
 	{
-		glDeleteFramebuffers(1, &m_FramebufferID);
-		glDeleteRenderbuffers(1, &m_RenderBuffer);
+		//glDeleteFramebuffers(1, &m_FramebufferID);
+		//glDeleteRenderbuffers(1, &m_RenderBuffer);
 	}
 
 	void FrameBuffer::SetTexture(Ref<Texture> texture, GLenum attachment)
@@ -56,8 +56,8 @@ namespace Nuake
 			size += 1;
 		}
 
-		if (size > 0)
-			glDrawBuffers(size, &keys[0]);
+		//if (size > 0)
+		//	glDrawBuffers(size, &keys[0]);
 
 		Unbind();
 	}
@@ -66,7 +66,7 @@ namespace Nuake
 	void FrameBuffer::Clear()
 	{
 		ZoneScoped;
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void FrameBuffer::Bind()
@@ -75,14 +75,14 @@ namespace Nuake
 		if (ResizeQueued)
 			UpdateSize(m_Size);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
-
-		glViewport(0, 0, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_FramebufferID);
+		//
+		//glViewport(0, 0, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
 	}
 
 	void FrameBuffer::Unbind()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void FrameBuffer::QueueResize(Vector2 size)
@@ -103,13 +103,13 @@ namespace Nuake
 		ResizeQueued = false;
 
 		// Delete frame buffer and render buffer.
-		glDeleteFramebuffers(1, &m_FramebufferID);
-		if(m_HasRenderBuffer)
-			glDeleteRenderbuffers(1, &m_RenderBuffer);
-			
-		// New FBO and RBO.
-		glGenFramebuffers(1, &m_FramebufferID);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
+		//glDeleteFramebuffers(1, &m_FramebufferID);
+		//if(m_HasRenderBuffer)
+		//	glDeleteRenderbuffers(1, &m_RenderBuffer);
+		//	
+		//// New FBO and RBO.
+		//glGenFramebuffers(1, &m_FramebufferID);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_FramebufferID);
 
 		// Recreate resized texture.
 		for (auto& t : m_Textures)
@@ -122,39 +122,42 @@ namespace Nuake
 		// TODO: move out render buffer.
 		if (m_HasRenderBuffer)
 		{
-			glGenRenderbuffers(1, &m_RenderBuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
+			//glGenRenderbuffers(1, &m_RenderBuffer);
+			//glBindRenderbuffer(GL_RENDERBUFFER, m_RenderBuffer);
+			//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<int>(m_Size.x), static_cast<int>(m_Size.y));
+			//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RenderBuffer);
 		}
 
 		// Unbind.
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
 	int FrameBuffer::ReadPixel(uint32_t attachment, const Vector2 coords)
 	{
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
-		int pixelData;
-		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
-		return pixelData;
+		//glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+		//int pixelData;
+		//glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		//return pixelData;
+		return 0;
 	}
 
 	Vector2 FrameBuffer::ReadVec2(uint32_t attachment, const Vector2 coords)
 	{
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
-		unsigned char pixelData[2]; // Store two components for the vec2 (byte)
-		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RG, GL_UNSIGNED_BYTE, &pixelData);
-		// Normalize the values (unsigned byte to [0, 1] float)
-		return Vector2(pixelData[0] / 255.0f, pixelData[1] / 255.0f);
+		//glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+		//unsigned char pixelData[2]; // Store two components for the vec2 (byte)
+		//glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_RG, GL_UNSIGNED_BYTE, &pixelData);
+		//// Normalize the values (unsigned byte to [0, 1] float)
+		//return Vector2(pixelData[0] / 255.0f, pixelData[1] / 255.0f);
+		return Vector2();
 	}
 
 	float FrameBuffer::ReadDepth(const Vector2& coords)
 	{
-		glReadBuffer(GL_DEPTH_ATTACHMENT);
-		float pixelData;
-		glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &pixelData);
-		return pixelData;
+		//glReadBuffer(GL_DEPTH_ATTACHMENT);
+		//float pixelData;
+		//glReadPixels((int)coords.x, (int)coords.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &pixelData);
+		//return pixelData;
+		return 0;
 	}
 
 	void FrameBuffer::SetDrawBuffer(GLenum draw)

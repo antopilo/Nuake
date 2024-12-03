@@ -62,7 +62,7 @@ namespace Nuake {
 		if (state)
 		{
 			glEnable(GL_TEXTURE_2D);
-			m_Texture.bind();
+			//m_Texture.bind();
 		}
 		else
 		{

@@ -61,13 +61,13 @@ namespace Nuake
 	// Bind the shader
 	void Shader::Bind() const 
 	{
-		glUseProgram(programId);
+		//glUseProgram(programId);
 	}
 
 	// unbind the shader
 	void Shader::Unbind() const 
 	{
-		glUseProgram(0);
+		//glUseProgram(0);
 	}
 
 	// Prase the shader file and create string source.
@@ -123,7 +123,7 @@ namespace Nuake
 	// This returns the program id.
 	unsigned int Shader::CreateProgram(ShaderSource source)
 	{
-		unsigned int program = glCreateProgram();
+		unsigned int program = 0;//glCreateProgram();
 
 		unsigned int vs = Compile(GL_VERTEX_SHADER, source);
 		unsigned int fs = Compile(GL_FRAGMENT_SHADER, source);
@@ -139,27 +139,27 @@ namespace Nuake
 		if (Source.GeometryShader != "")
 		{
 			gs = Compile(GL_GEOMETRY_SHADER, source);
-			glAttachShader(program, gs);
+			//glAttachShader(program, gs);
 		}
 
 		if (Source.ComputeShader != "")
 		{
 			cs = Compile(GL_COMPUTE_SHADER, source);
-			glAttachShader(program, cs);
+			//glAttachShader(program, cs);
 		}
 
-		glAttachShader(program, vs);
-		glAttachShader(program, fs);
-		glLinkProgram(program);
-		glValidateProgram(program);
+		//glAttachShader(program, vs);
+		//glAttachShader(program, fs);
+		//glLinkProgram(program);
+		//glValidateProgram(program);
 
-		glDeleteShader(vs);
-		glDeleteShader(fs);
+		//glDeleteShader(vs);
+		//glDeleteShader(fs);
 
-		if (gs != 0)
-			glDeleteShader(gs);
-		if (cs != 0)
-			glDeleteShader(cs);
+		//if (gs != 0)
+		//	glDeleteShader(gs);
+		//if (cs != 0)
+		//	glDeleteShader(cs);
 
 		Source = {};
 
@@ -169,7 +169,7 @@ namespace Nuake
 	// Compile a single shader and checks for error.
 	unsigned int Shader::Compile(unsigned int type, ShaderSource source)
 	{
-		unsigned int id = glCreateShader(type);
+		unsigned int id = 0;// glCreateShader(type);
 
 		const char* src;
 		if (type == GL_FRAGMENT_SHADER) src = source.FragmentShader.c_str();
@@ -177,24 +177,24 @@ namespace Nuake
 		if (type == GL_GEOMETRY_SHADER) src = source.GeometryShader.c_str();
 		if (type == GL_COMPUTE_SHADER)  src = Source.ComputeShader.c_str();
 
-		glShaderSource(id, 1, &src, nullptr);
-		glCompileShader(id);
+		//glShaderSource(id, 1, &src, nullptr);
+		//glCompileShader(id);
 
 		//TODO: Error handling
-		int result;
-		glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+		int result = 0;
+		//glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 
 		// Shader error.
 		if (result == GL_FALSE)
 		{
-			int length;
-			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+			int length = 0;
+			//glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
 			// We allocate the size of the array using 
 			// m alloc. casted as a pointer.
 			char* message = (char*)malloc(length * sizeof(char));
 
-			glGetShaderInfoLog(id, length, &length, message);
+			//glGetShaderInfoLog(id, length, &length, message);
 
 			std::string stype;
 			if (type == GL_FRAGMENT_SHADER) stype = "Fragment";
@@ -207,7 +207,7 @@ namespace Nuake
 
 			std::cout << message << std::endl;
 			// Delete invalid shader
-			glDeleteShader(id);
+			//glDeleteShader(id);
 
 			delete[] message;
 
@@ -222,13 +222,13 @@ namespace Nuake
 	{
 		if (UniformCache.find(uniform) == UniformCache.end())
 		{
-			int addr = glGetUniformLocation(programId, uniform.c_str());
+			//int addr = glGetUniformLocation(programId, uniform.c_str());
 
 			// ASSERT(addr != -1);
 			
-			UniformCache[uniform] = addr;
+			//UniformCache[uniform] = addr;
 
-			return addr;
+			//return addr;
 		}
 
 		return UniformCache[uniform];
@@ -277,20 +277,20 @@ namespace Nuake
 		int addr = FindUniformLocation(name);
 		if (addr != -1)
 		{
-			glUniform1f(addr, v0);
+			//glUniform1f(addr, v0);
 		}
 	}
 
 	void Shader::SetUniformUint(const std::string& name, uint32_t v0)
 	{
 		int addr = FindUniformLocation(name);
-		glUniform1ui(addr, v0);
+		//glUniform1ui(addr, v0);
 	}
 
 	void Shader::SetUniform(const std::string& name, int v0)
 	{
 		int addr = FindUniformLocation(name);
-		glUniform1i(addr, v0);
+		//glUniform1i(addr, v0);
 	}
 
 	void Shader::SetUniform(const std::string& name, Vector2 v0)
@@ -304,7 +304,7 @@ namespace Nuake
 
 		if (addr != -1)
 		{
-			glUniform2f(addr, v0, v1);
+			//glUniform2f(addr, v0, v1);
 		}
 	}
 
@@ -314,7 +314,7 @@ namespace Nuake
 
 		if (addr != -1)
 		{
-			glUniform3f(addr, v0, v1, v2);
+			//glUniform3f(addr, v0, v1, v2);
 		}
 	}
 
@@ -329,7 +329,7 @@ namespace Nuake
 
 		if (addr != -1)
 		{
-			glUniform4f(addr, v0, v1, v2, v3);
+			//glUniform4f(addr, v0, v1, v2, v3);
 		}
 	}
 
@@ -344,7 +344,7 @@ namespace Nuake
 
 		if (addr != -1)
 		{
-			glUniformMatrix3fv(addr, 1, GL_FALSE, &v0[0][0]);
+			//glUniformMatrix3fv(addr, 1, //gl_FALSE, &v0[0][0]);
 		}
 	}
 
@@ -353,7 +353,7 @@ namespace Nuake
 		int addr = FindUniformLocation(name);
 		if (addr != -1)
 		{
-			glUniformMatrix4fv(addr, 1, GL_FALSE, &v0[0][0]);
+			//glUniformMatrix4fv(addr, 1, //gl_FALSE, &v0[0][0]);
 		}
 	}
 
@@ -362,7 +362,7 @@ namespace Nuake
 		int addr = FindUniformLocation(name);
 		if (addr != -1)
 		{
-			glUniform1iv(addr, size, value);
+			//glUniform1iv(addr, size, value);
 		}
 	}
 
@@ -371,7 +371,7 @@ namespace Nuake
 		int addr = FindUniformLocation(name);
 		if (addr != -1)
 		{
-			glUniform1fv(addr, size, value);
+			//glUniform1fv(addr, size, value);
 		}
 	}
 
@@ -382,12 +382,12 @@ namespace Nuake
 
 	void Shader::SetUniform(uint32_t uniformSlot, int value)
 	{
-		glUniform1i(uniformSlot, value);
+		//glUniform1i(uniformSlot, value);
 	}
 
 	void Shader::SetUniform(uint32_t uniformSlot, Matrix4 value)
 	{
-		glUniformMatrix4fv(uniformSlot, 1, GL_FALSE, &value[0][0]);
+		//glUniformMatrix4fv(uniformSlot, 1, GL_FALSE, &value[0][0]);
 	}
 
 	void Shader::SetUniform(const std::string& uniformName, Texture* texture, int slot)
