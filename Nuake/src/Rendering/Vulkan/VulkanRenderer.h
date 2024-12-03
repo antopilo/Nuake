@@ -8,6 +8,31 @@
 
 namespace Nuake
 {
+	// Since we need to delete things in order, and manually doing it in the cleanup is 
+// too tedious to maintain. We will use a queue of destructor to execute in inverse order
+// of insertion
+	struct DeletionQueue
+	{
+		std::deque<std::function<void()>> Deletors;
+
+		void push_function(std::function<void()>&& function)
+		{
+			Deletors.push_back(function);
+		}
+
+		void flush()
+		{
+			// reverse iterate the deletion queue to execute all the functions
+			for (auto it = Deletors.rbegin(); it != Deletors.rend(); it++)
+			{
+				(*it)(); //call functors
+			}
+
+			Deletors.clear();
+		}
+	};
+
+
 	// GPU has Vk Queue family type
 	// 2x Queue -> All operation
 	// 2x Queue -> Computer operation
@@ -38,7 +63,10 @@ namespace Nuake
 		// Two, one for window, other for rendering
 		VkSemaphore SwapchainSemaphore, RenderSemaphore;
 		VkFence RenderFence; // CPU wait for next frame
+
+		DeletionQueue LocalDeletionQueue; // Local when destroying this frame
 	};
+
 
 	constexpr unsigned int FRAME_OVERLAP = 2;
 
@@ -70,6 +98,8 @@ namespace Nuake
 
 		VkQueue GPUQueue;
 		uint32_t GPUQueueFamily;
+
+		DeletionQueue MainDeletionQueue;
 
 	public:
 		static VkRenderer& Get()

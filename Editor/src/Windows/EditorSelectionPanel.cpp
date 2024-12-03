@@ -2048,10 +2048,10 @@ void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::met
 			std::string controlId = std::string("##") + displayName;
 			ImGui::InputText(controlId.c_str(), &fieldValProxy);
 
-			if (fieldValProxy != fieldVal)
-			{
-				Engine::GetProject()->IsDirty = true;
-			}
+			//if (fieldValProxy != fieldVal)
+			//{
+			//	Engine::GetProject()->IsDirty = true;
+			//}
 		}
 		else
 		{

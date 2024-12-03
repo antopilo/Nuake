@@ -42,11 +42,11 @@ namespace Nuake
 			const std::string projectIconPath = Path + "/../icon.png";
 			if (FileSystem::FileExists(projectIconPath, true))
 			{
-				ProjectIcon = TextureManager::Get()->GetTexture(projectIconPath);
+				//ProjectIcon = TextureManager::Get()->GetTexture(projectIconPath);
 			}
 			else
 			{
-				ProjectIcon = TextureManager::Get()->GetTexture("Resources/Images/nuake-logo.png");
+				//ProjectIcon = TextureManager::Get()->GetTexture("Resources/Images/nuake-logo.png");
 			}
 		}
 		else
@@ -87,7 +87,7 @@ namespace Nuake
 		}
 
 		// Load Nuake logo
-		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
+		//_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
 	void WelcomeWindow::LoadQueuedProject()

@@ -23,6 +23,7 @@ void EditorLayer::OnUpdate()
     Nuake::Engine::Tick();
     Nuake::Engine::Draw();
 
+    /*
     auto sceneFramebuffer = GetApplication().GetWindow()->GetFrameBuffer();
 
     // Draw gizmos
@@ -70,8 +71,8 @@ void EditorLayer::OnUpdate()
 
     m_EditorInterface->Draw();
     m_EditorInterface->Update(Nuake::Engine::GetTimestep());
-
     Nuake::Engine::EndDraw();
+    */
 
     Nuake::Input::Update();
 }

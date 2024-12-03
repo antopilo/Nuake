@@ -70,7 +70,11 @@ void VkRenderer::CleanUp()
 		vkDestroyFence(Device, Frames[i].RenderFence, nullptr);
 		vkDestroySemaphore(Device, Frames[i].RenderSemaphore, nullptr);
 		vkDestroySemaphore(Device, Frames[i].SwapchainSemaphore, nullptr);
+
+		Frames[i].LocalDeletionQueue.flush();
 	}
+
+	MainDeletionQueue.flush();
 
 	DestroySwapchain();
 

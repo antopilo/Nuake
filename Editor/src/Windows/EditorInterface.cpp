@@ -110,11 +110,11 @@ namespace Nuake {
         mCommandBuffer = &commandBuffer;
 
         // Load textures
-        NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
-        CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
-        MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
-        RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
-        MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
+        //NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
+        //CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
+        //MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
+        //RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
+        //MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
 
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
@@ -2072,9 +2072,9 @@ namespace Nuake {
                 cam->Translation = transform.GetGlobalPosition();
                 cam->SetTransform(glm::inverse(transform.GetGlobalTransform()));
 
-                auto sceneRenderer = Engine::GetCurrentScene()->m_SceneRenderer;
-                sceneRenderer->BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
-                sceneRenderer->RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get(), false);
+                static SceneRenderer sceneRenderer = Nuake::SceneRenderer();
+                sceneRenderer.BeginRenderScene(cam->GetPerspective(), cam->GetTransform(), cam->Translation);
+                sceneRenderer.RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get(), false);
 
                 virtualCamera->Clear();
                 ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 640, 360 }, { 0, 1 }, {1, 0});
@@ -2447,7 +2447,7 @@ namespace Nuake {
 
             auto window = Window::Get();
             window->SetDecorated(true);
-            window->ShowTitleBar(false);
+            //window->ShowTitleBar(false);
             window->SetSize({ 1600, 900 });
             window->Center();
             frameCount = 0;
@@ -2560,6 +2560,7 @@ namespace Nuake {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, isMaximized ? ImVec2(6.0f, 8.0f) : ImVec2(1.0f, 1.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
 
+       
         ImGui::PushStyleColor(ImGuiCol_MenuBarBg, UI::PrimaryCol);
         ImGui::Begin("DockSpaceWindow22", nullptr, window_flags);
         ImGui::PopStyleColor(); // MenuBarBg
@@ -2673,6 +2674,10 @@ namespace Nuake {
         DrawLogger();
         filesystem->Draw();
         filesystem->DrawDirectoryExplorer();
+
+        //auto node = ImGui::DockBuilderGetNode(1);
+        //node->SizeRef = { node->Size.x, 50.0f };
+
         if (isNewProject)
         {
             ImVec2 center = ImGui::GetMainViewport()->GetCenter();
