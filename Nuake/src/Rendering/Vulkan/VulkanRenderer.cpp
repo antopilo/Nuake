@@ -1,9 +1,12 @@
 #include "VulkanRenderer.h"
 
 #include "src/Core/Logger.h"
+#include <src/Rendering/RenderCommand.h>
+
 #include "src/Window.h"
 #include <GLFW/glfw3.h>
-#include <src/Rendering/RenderCommand.h>
+
+
 
 using namespace Nuake;
 
@@ -46,6 +49,71 @@ void VkRenderer::Initialize()
 	InitCommands();
 
 	InitSync();
+
+	VmaVulkanFunctions vulkanFunctions = {};
+	vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+	vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
+	vulkanFunctions.vkAllocateMemory = vkAllocateMemory;
+	vulkanFunctions.vkFreeMemory = vkFreeMemory;
+	vulkanFunctions.vkMapMemory = vkMapMemory;
+	vulkanFunctions.vkUnmapMemory = vkUnmapMemory;
+	vulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
+	vulkanFunctions.vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges;
+	vulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
+	vulkanFunctions.vkBindImageMemory = vkBindImageMemory;
+	vulkanFunctions.vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements;
+	vulkanFunctions.vkGetImageMemoryRequirements = vkGetImageMemoryRequirements;
+	vulkanFunctions.vkCreateBuffer = vkCreateBuffer;
+	vulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
+	vulkanFunctions.vkCreateImage = vkCreateImage;
+	vulkanFunctions.vkDestroyImage = vkDestroyImage;
+	vulkanFunctions.vkCmdCopyBuffer = vkCmdCopyBuffer;
+
+	// Optional: Include extension functions if needed
+	vulkanFunctions.vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR;
+	vulkanFunctions.vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR;
+	vulkanFunctions.vkBindBufferMemory2KHR = vkBindBufferMemory2KHR;
+	vulkanFunctions.vkBindImageMemory2KHR = vkBindImageMemory2KHR;
+
+	// Pass the vulkanFunctions struct to the VMA allocator
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = GPU;
+	allocatorInfo.device = Device;
+	allocatorInfo.instance = Instance;
+	allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+	allocatorInfo.pVulkanFunctions = {
+        allocatorInfo.pVulkanFunctions = new VmaVulkanFunctions{
+            .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+            .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+            .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
+            .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
+            .vkAllocateMemory = vkAllocateMemory,
+            .vkFreeMemory = vkFreeMemory,
+            .vkMapMemory = vkMapMemory,
+            .vkUnmapMemory = vkUnmapMemory,
+            .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
+            .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
+            .vkBindBufferMemory = vkBindBufferMemory,
+            .vkBindImageMemory = vkBindImageMemory,
+            .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
+            .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
+            .vkCreateBuffer = vkCreateBuffer,
+            .vkDestroyBuffer = vkDestroyBuffer,
+            .vkCreateImage = vkCreateImage,
+            .vkDestroyImage = vkDestroyImage,
+            .vkCmdCopyBuffer = vkCmdCopyBuffer,
+            .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR,
+            .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR,
+            .vkBindBufferMemory2KHR = vkBindBufferMemory2KHR,
+            .vkBindImageMemory2KHR = vkBindImageMemory2KHR,
+        }
+	};
+
+	vmaCreateAllocator(&allocatorInfo, &Allocator);
+
+	MainDeletionQueue.push_function([&]() {
+		vmaDestroyAllocator(Allocator);
+	});
 
 	IsInitialized = true;
 }

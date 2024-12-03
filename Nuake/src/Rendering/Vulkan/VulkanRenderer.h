@@ -5,12 +5,15 @@
 #include <volk/volk.h>
 #include "vkb/VkBootstrap.h"
 
+#include "vk_mem_alloc.h"
+
+#include <functional>
 
 namespace Nuake
 {
 	// Since we need to delete things in order, and manually doing it in the cleanup is 
-// too tedious to maintain. We will use a queue of destructor to execute in inverse order
-// of insertion
+	// too tedious to maintain. We will use a queue of destructor to execute in inverse order
+	// of insertion
 	struct DeletionQueue
 	{
 		std::deque<std::function<void()>> Deletors;
@@ -100,6 +103,8 @@ namespace Nuake
 		uint32_t GPUQueueFamily;
 
 		DeletionQueue MainDeletionQueue;
+
+		VmaAllocator Allocator;
 
 	public:
 		static VkRenderer& Get()

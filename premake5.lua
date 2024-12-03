@@ -45,7 +45,8 @@ workspace "Nuake"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 local globalDefines = {
     "TRACY_ENABLE",
-    "TRACY_ON_DEMAND"
+    "TRACY_ON_DEMAND",
+    "NK_VK"
 }
 
 group "Dependencies"
@@ -60,6 +61,7 @@ group "Dependencies"
     include "Nuake/dependencies/yoga_p5.lua"
     include "Nuake/dependencies/msdf-atlas-gen_p5.lua"
     include "Nuake/dependencies/freetype_p5.lua"
+    include "Nuake/dependencies/vma_p5.lua"
 group ""
 
 include "NuakeNet/premake5.lua"
@@ -91,6 +93,7 @@ project "Nuake"
 
         "_MBCS",
 		"IMGUI_DEFINE_MATH_OPERATORS",
+        "NK_VK"
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -142,7 +145,10 @@ project "Nuake"
         "%{prj.name}/src/Vendors/incbin/*.c",
         "%{prj.name}/src/Vendors/incbin/*.h",
         "%{prj.name}/src/Vendors/nanosvg/*.h",
-
+        "%{prj.name}/src/Vendors/volk/*.c",
+        "%{prj.name}/src/Vendors/volk/*.h",
+        "%{prj.name}/src/Vendors/vkb/*.cpp",
+        "%{prj.name}/src/Vendors/vkb/*.h",
         -- Modules System
         "%{prj.name}/src/Modules/Modules.h",
         "%{prj.name}/src/Modules/Modules.cpp",
@@ -160,11 +166,13 @@ project "Nuake"
         "%{prj.name}/src/Vendors/wren/src/include",
         "%{prj.name}/src/Vendors/incbin",
         "%{prj.name}/src/Vendors/nanosvg",
+        "%{prj.name}/src/Vendors/vulkan",
+        "%{prj.name}/src/Vendors/vkb",
         "%{prj.name}/dependencies/build",
         "%{prj.name}/dependencies/soloud/include",
         "%{prj.name}/dependencies/Coral/Coral.Native/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DebugUtils/Include",
-	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",
+	    "%{prj.name}/dependencies/recastnavigation/Detour/Include",       
 	    "%{prj.name}/dependencies/recastnavigation/DetourCrowd/Include",
 	    "%{prj.name}/dependencies/recastnavigation/DetourTileCache/Include",
 	    "%{prj.name}/dependencies/recastnavigation/Recast/Include",
@@ -175,14 +183,15 @@ project "Nuake"
         "%{prj.name}/dependencies/freetype/include",
 	    "%{prj.name}/dependencies/tracy/public/tracy",
         "%{prj.name}/dependencies/entt/src",
-
+        "%{prj.name}/dependencies/vma/include"
     }
     
     links
     {
         "soloud",
         "tracy",
-        "yoga"
+        "yoga",
+        "vma"
     }
 
     filter "system:linux"
