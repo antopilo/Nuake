@@ -72,9 +72,9 @@ int Window::Init()
         return -1;
     }
     
-    SetWindowIcon("resources/Images/nuake-logo.png");
+    //SetWindowIcon("resources/Images/nuake-logo.png");
     glfwMakeContextCurrent(this->window);
-    SetVSync(false);
+    //SetVSync(false);
 
 #ifndef NK_VK
 
@@ -88,55 +88,55 @@ int Window::Init()
 
 #endif
 
-    if (glfwRawMouseMotionSupported())
-        glfwSetInputMode(this->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-    // TODO: Move this to renderer init. The window shouldnt have to do gl calls.
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //if (glfwRawMouseMotionSupported())
+    //    glfwSetInputMode(this->window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    //
+    //// TODO: Move this to renderer init. The window shouldnt have to do gl calls.
+    //glfwWindowHint(GLFW_SAMPLES, 4);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
     //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glfwSetWindowUserPointer(window, this);
-
-    glfwSetWindowCloseCallback(window, [](GLFWwindow* nativeWindow) 
-        {
-            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
-            window->OnWindowClosed(*window);
-        });
-
-    glfwSetWindowFocusCallback(window, [](GLFWwindow* nativeWindow, int focused)
-        {
-            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
-            window->OnWindowFocused(*window, static_cast<bool>(focused));
-        });
-
-    glfwSetDropCallback(window, [](GLFWwindow* nativeWindow, int count, const char** paths)
-        {
-            std::vector<std::string> filePaths;
-            filePaths.reserve(count);
-
-            int i;
-            for (i = 0; i < count; i++)
-            {
-                std::string filePath = std::string(paths[i]);
-                filePaths.push_back(filePath);
-            }
-
-            Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
-            window->OnDragNDropCallback(*window, filePaths);
-        });
-
-    glfwSetTitlebarHitTestCallback(window, [](GLFWwindow* nativeWindow, int x, int y, int* hit)
-    {
-        bool isHit = false;
-        Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
-
-        window->TitlebarHitTest(*window, x, y, isHit);
-
-        *hit = isHit;
-    });
+    //glfwSetWindowUserPointer(window, this);
+    //
+    //glfwSetWindowCloseCallback(window, [](GLFWwindow* nativeWindow) 
+    //    {
+    //        Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+    //        window->OnWindowClosed(*window);
+    //    });
+    //
+    //glfwSetWindowFocusCallback(window, [](GLFWwindow* nativeWindow, int focused)
+    //    {
+    //        Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+    //        window->OnWindowFocused(*window, static_cast<bool>(focused));
+    //    });
+    //
+    //glfwSetDropCallback(window, [](GLFWwindow* nativeWindow, int count, const char** paths)
+    //    {
+    //        std::vector<std::string> filePaths;
+    //        filePaths.reserve(count);
+    //
+    //        int i;
+    //        for (i = 0; i < count; i++)
+    //        {
+    //            std::string filePath = std::string(paths[i]);
+    //            filePaths.push_back(filePath);
+    //        }
+    //
+    //        Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+    //        window->OnDragNDropCallback(*window, filePaths);
+    //    });
+    //
+    //glfwSetTitlebarHitTestCallback(window, [](GLFWwindow* nativeWindow, int x, int y, int* hit)
+    //{
+    //    bool isHit = false;
+    //    Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(nativeWindow));
+    //
+    //    window->TitlebarHitTest(*window, x, y, isHit);
+    //
+    //    *hit = isHit;
+    //});
 
 #ifndef  NK_VK
     // TODO: have clear color in environnement.
@@ -163,9 +163,9 @@ int Window::Init()
     //glEnable(GL_CULL_FACE);
 
     // Create viewports
-    InitImgui();
+    //InitImgui();
 
-    Logger::Log("ImGui initialized ", "renderer");
+    //Logger::Log("ImGui initialized ", "renderer");
     return 0;
 }
 

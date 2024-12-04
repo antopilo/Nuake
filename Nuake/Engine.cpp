@@ -207,6 +207,8 @@ namespace Nuake
 
 		// Draw scene
 		Window::Get()->Draw();
+
+		glfwPollEvents();
 	}
 
 	void Engine::EndDraw()

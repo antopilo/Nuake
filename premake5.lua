@@ -183,15 +183,20 @@ project "Nuake"
         "%{prj.name}/dependencies/freetype/include",
 	    "%{prj.name}/dependencies/tracy/public/tracy",
         "%{prj.name}/dependencies/entt/src",
-        "%{prj.name}/dependencies/vma/include"
+        "%{prj.name}/dependencies/vma/include",
+        "%{prj.name}/dependencies/dxc/inc"
     }
     
+    libdirs { "%{prj.name}/dependencies/dxc/lib/x64" }
+
     links
     {
         "soloud",
         "tracy",
         "yoga",
-        "vma"
+        "vma",
+        "dxcompiler"
+
     }
 
     filter "system:linux"

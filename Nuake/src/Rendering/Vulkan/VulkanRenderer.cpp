@@ -1,11 +1,12 @@
 #include "VulkanRenderer.h"
 
 #include "src/Core/Logger.h"
-#include <src/Rendering/RenderCommand.h>
+#include "ShaderCompiler.h"
+#include "src/Rendering/RenderCommand.h"
+#include "VulkanShader.h"
 
 #include "src/Window.h"
 #include <GLFW/glfw3.h>
-
 
 
 using namespace Nuake;
@@ -40,6 +41,46 @@ void VkRenderer::Initialize()
 
 	SelectGPU();
 	
+	// Pass the vulkanFunctions struct to the VMA allocator
+	VmaAllocatorCreateInfo allocatorInfo = {};
+	allocatorInfo.physicalDevice = GPU;
+	allocatorInfo.device = Device;
+	allocatorInfo.instance = Instance;
+	allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+	allocatorInfo.pVulkanFunctions = {
+		allocatorInfo.pVulkanFunctions = new VmaVulkanFunctions{
+			.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+			.vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+			.vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
+			.vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
+			.vkAllocateMemory = vkAllocateMemory,
+			.vkFreeMemory = vkFreeMemory,
+			.vkMapMemory = vkMapMemory,
+			.vkUnmapMemory = vkUnmapMemory,
+			.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
+			.vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
+			.vkBindBufferMemory = vkBindBufferMemory,
+			.vkBindImageMemory = vkBindImageMemory,
+			.vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
+			.vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
+			.vkCreateBuffer = vkCreateBuffer,
+			.vkDestroyBuffer = vkDestroyBuffer,
+			.vkCreateImage = vkCreateImage,
+			.vkDestroyImage = vkDestroyImage,
+			.vkCmdCopyBuffer = vkCmdCopyBuffer,
+			.vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR,
+			.vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR,
+			.vkBindBufferMemory2KHR = vkBindBufferMemory2KHR,
+			.vkBindImageMemory2KHR = vkBindImageMemory2KHR,
+		}
+	};
+
+	vmaCreateAllocator(&allocatorInfo, &Allocator);
+
+	MainDeletionQueue.push_function([&]() {
+		vmaDestroyAllocator(Allocator);
+	});
+
 	CreateSwapchain(Window::Get()->GetSize());
 
 	// Now lets grab the Queues
@@ -50,70 +91,11 @@ void VkRenderer::Initialize()
 
 	InitSync();
 
-	VmaVulkanFunctions vulkanFunctions = {};
-	vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
-	vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
-	vulkanFunctions.vkAllocateMemory = vkAllocateMemory;
-	vulkanFunctions.vkFreeMemory = vkFreeMemory;
-	vulkanFunctions.vkMapMemory = vkMapMemory;
-	vulkanFunctions.vkUnmapMemory = vkUnmapMemory;
-	vulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
-	vulkanFunctions.vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges;
-	vulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
-	vulkanFunctions.vkBindImageMemory = vkBindImageMemory;
-	vulkanFunctions.vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements;
-	vulkanFunctions.vkGetImageMemoryRequirements = vkGetImageMemoryRequirements;
-	vulkanFunctions.vkCreateBuffer = vkCreateBuffer;
-	vulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
-	vulkanFunctions.vkCreateImage = vkCreateImage;
-	vulkanFunctions.vkDestroyImage = vkDestroyImage;
-	vulkanFunctions.vkCmdCopyBuffer = vkCmdCopyBuffer;
+	InitDescriptors();
 
-	// Optional: Include extension functions if needed
-	vulkanFunctions.vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR;
-	vulkanFunctions.vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR;
-	vulkanFunctions.vkBindBufferMemory2KHR = vkBindBufferMemory2KHR;
-	vulkanFunctions.vkBindImageMemory2KHR = vkBindImageMemory2KHR;
+	BackgroundShader = ShaderCompiler::Get().CompileShader("../Resources/Shaders/Vulkan/background.comp");
 
-	// Pass the vulkanFunctions struct to the VMA allocator
-	VmaAllocatorCreateInfo allocatorInfo = {};
-	allocatorInfo.physicalDevice = GPU;
-	allocatorInfo.device = Device;
-	allocatorInfo.instance = Instance;
-	allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-	allocatorInfo.pVulkanFunctions = {
-        allocatorInfo.pVulkanFunctions = new VmaVulkanFunctions{
-            .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-            .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
-            .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
-            .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
-            .vkAllocateMemory = vkAllocateMemory,
-            .vkFreeMemory = vkFreeMemory,
-            .vkMapMemory = vkMapMemory,
-            .vkUnmapMemory = vkUnmapMemory,
-            .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
-            .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
-            .vkBindBufferMemory = vkBindBufferMemory,
-            .vkBindImageMemory = vkBindImageMemory,
-            .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
-            .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
-            .vkCreateBuffer = vkCreateBuffer,
-            .vkDestroyBuffer = vkDestroyBuffer,
-            .vkCreateImage = vkCreateImage,
-            .vkDestroyImage = vkDestroyImage,
-            .vkCmdCopyBuffer = vkCmdCopyBuffer,
-            .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR,
-            .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR,
-            .vkBindBufferMemory2KHR = vkBindBufferMemory2KHR,
-            .vkBindImageMemory2KHR = vkBindImageMemory2KHR,
-        }
-	};
-
-	vmaCreateAllocator(&allocatorInfo, &Allocator);
-
-	MainDeletionQueue.push_function([&]() {
-		vmaDestroyAllocator(Allocator);
-	});
+	InitPipeline();
 
 	IsInitialized = true;
 }
@@ -141,7 +123,7 @@ void VkRenderer::CleanUp()
 
 		Frames[i].LocalDeletionQueue.flush();
 	}
-
+	
 	MainDeletionQueue.flush();
 
 	DestroySwapchain();
@@ -175,11 +157,9 @@ void VkRenderer::SelectGPU()
 	VkPhysicalDeviceVulkan13Features features{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
 	features.dynamicRendering = true;
 	features.synchronization2 = true;
-
 	VkPhysicalDeviceVulkan12Features features12{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
 	features12.bufferDeviceAddress = true;
 	features12.descriptorIndexing = true;
-
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
 	vkb::PhysicalDevice physicalDevice = selector
 		.set_minimum_version(1, 3)
@@ -194,6 +174,15 @@ void VkRenderer::SelectGPU()
 	VkbDevice = deviceBuilder.build().value();
 	Device = VkbDevice.device;
 	GPU = physicalDevice.physical_device;
+}
+
+void VkRenderer::RecreateSwapchain()
+{
+	vkQueueWaitIdle(GPUQueue);
+
+	DestroySwapchain();
+	CreateSwapchain(Window::Get()->GetSize());
+	UpdateDescriptorSets();
 }
 
 void VkRenderer::CreateSwapchain(const Vector2& size)
@@ -214,10 +203,50 @@ void VkRenderer::CreateSwapchain(const Vector2& size)
 
 	SwapchainExtent = vkbSwapchain.extent;
 	//store swapchain and its related images
-
+	DrawExtent = VkExtent2D{ static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y) };
 	Swapchain = vkbSwapchain.swapchain;
 	SwapchainImages = vkbSwapchain.get_images().value();
 	SwapchainImageViews = vkbSwapchain.get_image_views().value();
+
+	SurfaceSize = size;
+
+	//draw image size will match the window
+	VkExtent3D drawImageExtent = {
+		size.x,
+		size.y,
+		1
+	};
+
+	//hardcoding the draw format to 32 bit float
+	DrawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+	DrawImage.imageExtent = drawImageExtent;
+
+	VkImageUsageFlags drawImageUsages{};
+	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	VkImageCreateInfo rimg_info = VulkanInit::ImageCreateInfo(DrawImage.imageFormat, drawImageUsages, drawImageExtent);
+
+	//for the draw image, we want to allocate it from gpu local memory
+	VmaAllocationCreateInfo rimg_allocinfo = {};
+	rimg_allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+	rimg_allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	//allocate and create the image
+	VK_CALL(vmaCreateImage(Allocator, &rimg_info, &rimg_allocinfo, &DrawImage.image, &DrawImage.allocation, nullptr));
+
+	//build a image-view for the draw image to use for rendering
+	VkImageViewCreateInfo rview_info = VulkanInit::ImageviewCreateInfo(DrawImage.imageFormat, DrawImage.image, VK_IMAGE_ASPECT_COLOR_BIT);
+
+	VK_CALL(vkCreateImageView(Device, &rview_info, nullptr, &DrawImage.imageView));
+
+	//add to deletion queues
+	//ainDeletionQueue.push_function([=]() {
+	//	vkDestroyImageView(Device, DrawImage.imageView, nullptr);
+	//	vmaDestroyImage(Allocator, DrawImage.image, DrawImage.allocation);
+	//);
 }
 
 void VkRenderer::DestroySwapchain()
@@ -242,7 +271,7 @@ void VkRenderer::InitCommands()
 		// allocate the default command buffer that we will use for rendering
 		VkCommandBufferAllocateInfo cmdAllocInfo = VulkanInit::CommandBufferAllocateInfo(Frames[i].CommandPool, 1);
 
-		vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer);
+		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
 	}
 }
 
@@ -257,74 +286,160 @@ void VkRenderer::InitSync()
 
 	for (int i = 0; i < FRAME_OVERLAP; i++) 
 	{
-		vkCreateFence(Device, &fenceCreateInfo, nullptr, &Frames[i].RenderFence);
+		VK_CALL(vkCreateFence(Device, &fenceCreateInfo, nullptr, &Frames[i].RenderFence));
 
-		vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].SwapchainSemaphore);
-		vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].RenderSemaphore);
+		VK_CALL(vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].SwapchainSemaphore));
+		VK_CALL(vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].RenderSemaphore));
 	}
+}
+
+void VkRenderer::InitDescriptors()
+{
+	//create a descriptor pool that will hold 10 sets with 1 image each
+	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
+	{
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }
+	};
+
+	GlobalDescriptorAllocator.InitPool(Device, 1, sizes);
+
+	//make the descriptor set layout for our compute draw
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
+		DrawImageDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_COMPUTE_BIT);
+	}
+
+	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
+
+	UpdateDescriptorSets();
+}
+
+void VkRenderer::UpdateDescriptorSets()
+{
+	VkDescriptorImageInfo imgInfo{};
+	imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+	imgInfo.imageView = DrawImage.imageView;
+
+	VkWriteDescriptorSet drawImageWrite = {};
+	drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	drawImageWrite.pNext = nullptr;
+
+	drawImageWrite.dstBinding = 0;
+	drawImageWrite.dstSet = DrawImageDescriptors;
+	drawImageWrite.descriptorCount = 1;
+	drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+	drawImageWrite.pImageInfo = &imgInfo;
+
+	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
+}
+
+void VkRenderer::InitPipeline()
+{
+	InitBackgroundPipeline();
+}
+
+void VkRenderer::InitBackgroundPipeline()
+{
+	VkPipelineLayoutCreateInfo computeLayout{};
+	computeLayout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	computeLayout.pNext = nullptr;
+	computeLayout.pSetLayouts = &DrawImageDescriptorLayout;
+	computeLayout.setLayoutCount = 1;
+
+	VK_CALL(vkCreatePipelineLayout(Device, &computeLayout, nullptr, &PipelineLayout));
+
+	VkPipelineShaderStageCreateInfo stageinfo{};
+	stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	stageinfo.pNext = nullptr;
+	stageinfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	stageinfo.module = BackgroundShader->GetModule();
+	stageinfo.pName = "main";
+
+	VkComputePipelineCreateInfo computePipelineCreateInfo{};
+	computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	computePipelineCreateInfo.pNext = nullptr;
+	computePipelineCreateInfo.layout = PipelineLayout;
+	computePipelineCreateInfo.stage = stageinfo;
+
+	VK_CALL(vkCreateComputePipelines(Device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &Pipeline));
+
+	MainDeletionQueue.push_function([&]() {
+		vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
+		vkDestroyPipeline(Device, Pipeline, nullptr);
+	});
 }
 
 void VkRenderer::Draw()
 {
-	vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000);
-	vkResetFences(Device, 1, &GetCurrentFrame().RenderFence);
+	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
+
+	//GetCurrentFrame().LocalDeletionQueue.flush();
 
 	//request image from the swapchain
 	uint32_t swapchainImageIndex;
 	VkResult result = vkAcquireNextImageKHR(Device, Swapchain, 1000000000, GetCurrentFrame().SwapchainSemaphore, nullptr, &swapchainImageIndex);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR)
+	if (result == VK_ERROR_OUT_OF_DATE_KHR || SurfaceSize != Window::Get()->GetSize())
 	{
-		DestroySwapchain();
-		CreateSwapchain(Window::Get()->GetSize());
+		RecreateSwapchain();
+		//DestroySwapchain();
+		//CreateSwapchain(Window::Get()->GetSize());
 		return;
 	}
 
+	VK_CALL(vkResetFences(Device, 1, &GetCurrentFrame().RenderFence));
+
 	// Note: this will be the meat of the engine that should be here.
 	VkCommandBuffer cmd = GetCurrentFrame().CommandBuffer;
-	vkResetCommandBuffer(cmd, 0);
+	VK_CALL(vkResetCommandBuffer(cmd, 0));
 
 	// Begin the command buffer recording. We will use this command buffer exactly once, so we want to let vulkan know that
 	// Note: We might reuse them later!!!
 	VkCommandBufferBeginInfo cmdBeginInfo = VulkanInit::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	DrawExtent.width = DrawImage.imageExtent.width;
+	DrawExtent.height = DrawImage.imageExtent.height;
 
-	// Start the command buffer recording
-	vkBeginCommandBuffer(cmd, &cmdBeginInfo);
+	// Create commands
+	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 	{
-		// We transfer current frame from any layout to general layout.
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		// Transfer rendering image to general layout
+		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-		float flash = std::abs(std::sin(FrameNumber / 120.f));
-		VkClearColorValue clearValue;
-		clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
+		// Execute compute shader that writes to the image
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
 
-		VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
 
-		// TODO: Move to -> RenderCommand::Clear();
-		vkCmdClearColorImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+		// Transition rendering iamge to transfert onto swapchain images
+		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		// From writable, to presentable layout
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		// Execute a copy from the rendering image into the swapchain
+		VulkanUtil::CopyImageToImage(cmd, DrawImage.image, SwapchainImages[swapchainImageIndex], DrawExtent, SwapchainExtent);
+		
+		// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
-	vkEndCommandBuffer(cmd);
+	VK_CALL(vkEndCommandBuffer(cmd));
 
 	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
 
 	// Wait for both semaphore of swapchain and the texture of the frame.
 	VkSemaphoreSubmitInfo waitInfo = VulkanInit::SemaphoreSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR, GetCurrentFrame().SwapchainSemaphore);
 	VkSemaphoreSubmitInfo signalInfo = VulkanInit::SemaphoreSubmitInfo(VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT, GetCurrentFrame().RenderSemaphore);
-
-	// Submit command!!
 	VkSubmitInfo2 submit = VulkanInit::SubmitInfo(&cmdinfo, &signalInfo, &waitInfo);
 
-	//submit command buffer to the queue and execute it.
+	// Submit command buffer to the queue and execute it.
 	// _renderFence will now block until the graphic commands finish execution
-	vkQueueSubmit2(GPUQueue, 1, &submit, GetCurrentFrame().RenderFence);
+	VK_CALL(vkQueueSubmit2(GPUQueue, 1, &submit, GetCurrentFrame().RenderFence));
 
-	//prepare present
-	// this will put the image we just rendered to into the visible window.
-	// we want to wait on the _renderSemaphore for that, 
-	// as its necessary that drawing commands have finished before the image is displayed to the user
+	// Prepare present
+	// This will put the image we just rendered to into the visible window.
+	// We want to wait on the _renderSemaphore for that, 
+	// as it's necessary that drawing commands have finished before the image is displayed to the user
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.pNext = nullptr;
@@ -336,10 +451,25 @@ void VkRenderer::Draw()
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
-	vkQueuePresentKHR(GPUQueue, &presentInfo);
+	VK_CALL(vkQueuePresentKHR(GPUQueue, &presentInfo));
 
-	//increase the number of frames drawn
+	// Increase the number of frames drawn
 	FrameNumber++;
+}
+
+void VkRenderer::DrawBackground(VkCommandBuffer cmd)
+{
+	// This works
+	//VkClearColorValue clearValue;
+	//float flash = std::abs(std::sin(FrameNumber / 120.f));
+	//clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
+	//VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+	//vkCmdClearColorImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+
+	// This doesnt!!
+	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
+	vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
 }
 
 
@@ -450,6 +580,49 @@ VkSubmitInfo2 VulkanInit::SubmitInfo(VkCommandBufferSubmitInfo * cmd, VkSemaphor
 	return info;
 }
 
+VkImageCreateInfo VulkanInit::ImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent)
+{
+	VkImageCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+	info.pNext = nullptr;
+
+	info.imageType = VK_IMAGE_TYPE_2D;
+
+	info.format = format;
+	info.extent = extent;
+
+	info.mipLevels = 1;
+	info.arrayLayers = 1;
+
+	//for MSAA. we will not be using it by default, so default it to 1 sample per pixel.
+	info.samples = VK_SAMPLE_COUNT_1_BIT;
+
+	//optimal tiling, which means the image is stored on the best gpu format
+	info.tiling = VK_IMAGE_TILING_LINEAR;
+	info.usage = usageFlags;
+
+	return info;
+}
+
+VkImageViewCreateInfo VulkanInit::ImageviewCreateInfo(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags)
+{
+	// build a image-view for the depth image to use for rendering
+	VkImageViewCreateInfo info = {};
+	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	info.pNext = nullptr;
+
+	info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	info.image = image;
+	info.format = format;
+	info.subresourceRange.baseMipLevel = 0;
+	info.subresourceRange.levelCount = 1;
+	info.subresourceRange.baseArrayLayer = 0;
+	info.subresourceRange.layerCount = 1;
+	info.subresourceRange.aspectMask = aspectFlags;
+
+	return info;
+}
+
 // This is a helper to transtion images between readable, writable layouts.
 void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
 {
@@ -460,7 +633,6 @@ void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayo
 	imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
 	imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
 	imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
-
 	imageBarrier.oldLayout = currentLayout;
 	imageBarrier.newLayout = newLayout;
 
@@ -476,4 +648,115 @@ void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayo
 	depInfo.pImageMemoryBarriers = &imageBarrier;
 
 	vkCmdPipelineBarrier2(cmd, &depInfo);
+}
+
+void VulkanUtil::CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize)
+{
+	VkImageBlit2 blitRegion{ .sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2, .pNext = nullptr };
+
+	blitRegion.srcOffsets[1].x = srcSize.width;
+	blitRegion.srcOffsets[1].y = srcSize.height;
+	blitRegion.srcOffsets[1].z = 1;
+
+	blitRegion.dstOffsets[1].x = dstSize.width;
+	blitRegion.dstOffsets[1].y = dstSize.height;
+	blitRegion.dstOffsets[1].z = 1;
+
+	blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	blitRegion.srcSubresource.baseArrayLayer = 0;
+	blitRegion.srcSubresource.layerCount = 1;
+	blitRegion.srcSubresource.mipLevel = 0;
+
+	blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	blitRegion.dstSubresource.baseArrayLayer = 0;
+	blitRegion.dstSubresource.layerCount = 1;
+	blitRegion.dstSubresource.mipLevel = 0;
+
+	VkBlitImageInfo2 blitInfo{ .sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2, .pNext = nullptr };
+	blitInfo.dstImage = destination;
+	blitInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	blitInfo.srcImage = source;
+	blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	blitInfo.filter = VK_FILTER_LINEAR;
+	blitInfo.regionCount = 1;
+	blitInfo.pRegions = &blitRegion;
+
+	vkCmdBlitImage2(cmd, &blitInfo);
+}
+
+void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
+{
+	VkDescriptorSetLayoutBinding newbind{};
+	newbind.binding = binding;
+	newbind.descriptorCount = 1;
+	newbind.descriptorType = type;
+
+	Bindings.push_back(newbind);
+}
+
+void DescriptorLayoutBuilder::Clear()
+{
+	Bindings.clear();
+}
+
+VkDescriptorSetLayout DescriptorLayoutBuilder::Build(VkDevice device, VkShaderStageFlags shaderStages, void * pNext, VkDescriptorSetLayoutCreateFlags flags)
+{
+	for (auto& b : Bindings) {
+		b.stageFlags |= shaderStages;
+	}
+
+	VkDescriptorSetLayoutCreateInfo info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+	info.pNext = pNext;
+
+	info.pBindings = Bindings.data();
+	info.bindingCount = (uint32_t)Bindings.size();
+	info.flags = flags;
+
+	VkDescriptorSetLayout set;
+	VK_CALL(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
+
+	return set;
+}
+
+void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<PoolSizeRatio> poolRatios)
+{
+	std::vector<VkDescriptorPoolSize> poolSizes;
+	for (PoolSizeRatio ratio : poolRatios) {
+		poolSizes.push_back(VkDescriptorPoolSize{
+			.type = ratio.type,
+			.descriptorCount = uint32_t(ratio.ratio * maxSets)
+		});
+	}
+
+	VkDescriptorPoolCreateInfo pool_info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+	pool_info.flags = 0;
+	pool_info.maxSets = maxSets;
+	pool_info.poolSizeCount = (uint32_t)poolSizes.size();
+	pool_info.pPoolSizes = poolSizes.data();
+
+	VK_CALL(vkCreateDescriptorPool(device, &pool_info, nullptr, &pool));
+}
+
+void DescriptorAllocator::ClearDescriptors(VkDevice device)
+{
+	vkResetDescriptorPool(device, pool, 0);
+}
+
+void DescriptorAllocator::DestroyPool(VkDevice device)
+{
+	vkDestroyDescriptorPool(device, pool, nullptr);
+}
+
+VkDescriptorSet DescriptorAllocator::Allocate(VkDevice device, VkDescriptorSetLayout layout)
+{
+	VkDescriptorSetAllocateInfo allocInfo = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+	allocInfo.pNext = nullptr;
+	allocInfo.descriptorPool = pool;
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = &layout;
+
+	VkDescriptorSet ds;
+	VK_CALL(vkAllocateDescriptorSets(device, &allocInfo, &ds));
+
+	return ds;
 }

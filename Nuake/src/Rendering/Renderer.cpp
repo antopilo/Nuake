@@ -104,29 +104,29 @@ namespace Nuake
     {
         RenderCommand::SetRendererAPI(RendererPlatforms::Vulkan);
 
-        ShaderManager::LoadShaders();
+        //ShaderManager::LoadShaders();
 
-        m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
-
-        Ref<Material> defaultMaterial = CreateRef<Material>(Vector3{1, 1, 1});
-        defaultMaterial->SetName("white");
-        MaterialManager::Get()->RegisterMaterial(defaultMaterial);
-
-        CubeIndices.reserve(36);
-        for (int i = 0; i < 36; i++)
-        {
-            CubeIndices.push_back(i);
-        }
-
-        CubeMesh = CreateRef<Mesh>();
-        CubeMesh->AddSurface(CubeVertices, CubeIndices);
-        CubeMesh->SetMaterial(defaultMaterial);
-
-        QuadMesh = CreateRef<Mesh>();
-        QuadMesh->AddSurface(QuadVertices, { 0, 1, 2, 3, 4, 5 });
-        QuadMesh->SetMaterial(defaultMaterial);
-
-        SphereMesh = CreateSphereMesh();
+        //m_LightsUniformBuffer = CreateRef<UniformBuffer>(128);
+        //
+        //Ref<Material> defaultMaterial = CreateRef<Material>(Vector3{1, 1, 1});
+        //defaultMaterial->SetName("white");
+        //MaterialManager::Get()->RegisterMaterial(defaultMaterial);
+        //
+        //CubeIndices.reserve(36);
+        //for (int i = 0; i < 36; i++)
+        //{
+        //    CubeIndices.push_back(i);
+        //}
+        //
+        //CubeMesh = CreateRef<Mesh>();
+        //CubeMesh->AddSurface(CubeVertices, CubeIndices);
+        //CubeMesh->SetMaterial(defaultMaterial);
+        //
+        //QuadMesh = CreateRef<Mesh>();
+        //QuadMesh->AddSurface(QuadVertices, { 0, 1, 2, 3, 4, 5 });
+        //QuadMesh->SetMaterial(defaultMaterial);
+        //
+        //SphereMesh = CreateSphereMesh();
     }
 
     void Renderer::LoadShaders()

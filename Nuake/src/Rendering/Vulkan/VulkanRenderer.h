@@ -5,12 +5,25 @@
 #include <volk/volk.h>
 #include "vkb/VkBootstrap.h"
 
-#include "vk_mem_alloc.h"
+#include "VulkanCheck.h"
 
+#include "vk_mem_alloc.h"
+#
 #include <functional>
+#include <span>
 
 namespace Nuake
 {
+	class VulkanShader;
+
+	struct AllocatedImage {
+		VkImage image;
+		VkImageView imageView;
+		VmaAllocation allocation;
+		VkExtent3D imageExtent;
+		VkFormat imageFormat;
+	};
+
 	// Since we need to delete things in order, and manually doing it in the cleanup is 
 	// too tedious to maintain. We will use a queue of destructor to execute in inverse order
 	// of insertion
@@ -71,13 +84,40 @@ namespace Nuake
 	};
 
 
+	struct DescriptorLayoutBuilder 
+	{
+
+		std::vector<VkDescriptorSetLayoutBinding> Bindings;
+
+		void AddBinding(uint32_t binding, VkDescriptorType type);
+		void Clear();
+		VkDescriptorSetLayout Build(VkDevice device, VkShaderStageFlags shaderStages, void* pNext = nullptr, VkDescriptorSetLayoutCreateFlags flags = 0);
+	};
+
+	struct DescriptorAllocator 
+	{
+		struct PoolSizeRatio 
+		{
+			VkDescriptorType type;
+			float ratio;
+		};
+
+		VkDescriptorPool pool;
+
+		void InitPool(VkDevice device, uint32_t maxSets, std::span<PoolSizeRatio> poolRatios);
+		void ClearDescriptors(VkDevice device);
+		void DestroyPool(VkDevice device);
+
+		VkDescriptorSet Allocate(VkDevice device, VkDescriptorSetLayout layout);
+	};
+
 	constexpr unsigned int FRAME_OVERLAP = 2;
 
 	class VkRenderer
 	{
 	private:
 		bool IsInitialized = false;
-
+		Vector2 SurfaceSize;
 		VkInstance Instance;
 		vkb::Instance VkbInstance;
 		VkDebugUtilsMessengerEXT VkDebugMessenger;
@@ -99,12 +139,27 @@ namespace Nuake
 		FrameData Frames[FRAME_OVERLAP];
 		FrameData& GetCurrentFrame() { return Frames[FrameNumber % FRAME_OVERLAP]; };
 
+		AllocatedImage DrawImage;
+		VkExtent2D DrawExtent;
+
 		VkQueue GPUQueue;
 		uint32_t GPUQueueFamily;
 
 		DeletionQueue MainDeletionQueue;
 
 		VmaAllocator Allocator;
+		
+		// Descriptors
+		DescriptorAllocator GlobalDescriptorAllocator;
+
+		VkDescriptorSet DrawImageDescriptors;
+		VkDescriptorSetLayout DrawImageDescriptorLayout;
+
+		// Pipeline
+		VkPipeline Pipeline;
+		VkPipelineLayout PipelineLayout;
+
+		Ref<VulkanShader> BackgroundShader;
 
 	public:
 		static VkRenderer& Get()
@@ -116,19 +171,33 @@ namespace Nuake
 		VkRenderer() = default;
 		~VkRenderer();
 
+		VkDevice GetDevice() const
+		{
+			return Device;
+		}
+
 	public:
 		void Initialize();
 		void CleanUp();
 
 		void GetInstance();
 		void SelectGPU();
+		
+		void RecreateSwapchain();
 		void CreateSwapchain(const Vector2& size);
 		void DestroySwapchain();
 
+
+
 		void InitCommands();
 		void InitSync();
+		void InitDescriptors();
+		void UpdateDescriptorSets();
+		void InitPipeline();
+		void InitBackgroundPipeline();
 
 		void Draw();
+		void DrawBackground(VkCommandBuffer cmd);
 	};
 
 
@@ -149,6 +218,8 @@ namespace Nuake
 		static VkCommandBufferSubmitInfo CommandBufferSubmitInfo(VkCommandBuffer cmd);
 		static VkSubmitInfo2 SubmitInfo(VkCommandBufferSubmitInfo* cmd, VkSemaphoreSubmitInfo* signalSemaphoreInfo, VkSemaphoreSubmitInfo* waitSemaphoreInfo);
 
+		static VkImageCreateInfo ImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent);
+		static VkImageViewCreateInfo ImageviewCreateInfo(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags);
 	};
 
 	class VulkanUtil
@@ -158,5 +229,6 @@ namespace Nuake
 		~VulkanUtil() = delete;
 
 		static void TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout);
+		static void CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize);
 	};
 }
