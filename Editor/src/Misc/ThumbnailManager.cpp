@@ -202,21 +202,21 @@ Ref<Nuake::Texture> ThumbnailManager::GenerateThumbnail(const std::string& path,
 		// Gbuffer pass
 		m_Framebuffer->Bind();
 		{
-			RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
-			m_Framebuffer->Clear();
-
-			RenderCommand::Disable(RendererEnum::BLENDING);
-			RenderCommand::Enable(RendererEnum::DEPTH_TEST);
-			auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
-			shader->Bind();
-
-			auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
-			shader->SetUniform("u_View", view);
-			shader->SetUniform("u_Projection", ortho);
-			shader->SetUniform("u_Model", Matrix4(1.0f));
-			Ref<Material> material = ResourceLoader::LoadMaterial(path);
-			material->Bind(shader);
-			Renderer::SphereMesh->Draw(shader, false);
+			//RenderCommand::SetClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
+			//m_Framebuffer->Clear();
+			//
+			//RenderCommand::Disable(RendererEnum::BLENDING);
+			//RenderCommand::Enable(RendererEnum::DEPTH_TEST);
+			//auto shader = ShaderManager::GetShader("Resources/Shaders/gbuffer.shader");
+			//shader->Bind();
+			//
+			//auto cam = Engine::GetCurrentScene()->GetCurrentCamera();
+			//shader->SetUniform("u_View", view);
+			//shader->SetUniform("u_Projection", ortho);
+			//shader->SetUniform("u_Model", Matrix4(1.0f));
+			//Ref<Material> material = ResourceLoader::LoadMaterial(path);
+			//material->Bind(shader);
+			//Renderer::SphereMesh->Draw(shader, false);
 		}
 		m_Framebuffer->Unbind();
 		m_ShadedFramebuffer->SetTexture(texture);

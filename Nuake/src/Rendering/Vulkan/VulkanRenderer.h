@@ -161,6 +161,11 @@ namespace Nuake
 
 		Ref<VulkanShader> BackgroundShader;
 
+		// Imgui
+		VkFence ImguiFence;
+		VkCommandBuffer ImguiCommandBuffer;
+		VkCommandPool ImguiCommandPool;
+
 	public:
 		static VkRenderer& Get()
 		{
@@ -187,17 +192,19 @@ namespace Nuake
 		void CreateSwapchain(const Vector2& size);
 		void DestroySwapchain();
 
-
-
 		void InitCommands();
 		void InitSync();
 		void InitDescriptors();
 		void UpdateDescriptorSets();
 		void InitPipeline();
 		void InitBackgroundPipeline();
+		void InitImgui();
 
 		void Draw();
 		void DrawBackground(VkCommandBuffer cmd);
+		void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
+
+		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 	};
 
 
@@ -220,6 +227,9 @@ namespace Nuake
 
 		static VkImageCreateInfo ImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent);
 		static VkImageViewCreateInfo ImageviewCreateInfo(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags);
+
+		static VkRenderingAttachmentInfo AttachmentInfo(VkImageView view, VkClearValue* clear, VkImageLayout layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		static VkRenderingInfo RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo * colorAttachment, VkRenderingAttachmentInfo * depthAttachment);
 	};
 
 	class VulkanUtil

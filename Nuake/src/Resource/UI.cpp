@@ -53,7 +53,7 @@ void UIResource::Draw()
 
 		if (canvas != nullptr)
 		{
-			canvas->Draw();
+			//canvas->Draw();
 		}
 	}
 	framebuffer->Unbind();

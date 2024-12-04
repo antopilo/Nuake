@@ -182,6 +182,8 @@ namespace Nuake
 	/// <param name="framebuffer">Framebuffer to render the scene to. Should be in the right size</param>
 	void SceneRenderer::RenderScene(Scene& scene, FrameBuffer& framebuffer, bool renderUI)
 	{
+		return;
+
 		ZoneScoped;
 
 		// Renders all shadow maps
@@ -694,7 +696,7 @@ namespace Nuake
 		shader->Bind();
 
 		RenderCommand::Enable(RendererEnum::FACE_CULL);
-		glCullFace(GL_BACK);
+		//glCullFace(GL_BACK);
 
 		auto meshView = scene.m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		auto quakeView = scene.m_Registry.view<TransformComponent, BSPBrushComponent, VisibilityComponent>();

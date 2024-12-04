@@ -108,17 +108,17 @@ namespace Nuake {
     EditorInterface::EditorInterface(CommandBuffer& commandBuffer)
     {
         mCommandBuffer = &commandBuffer;
-
+        
         // Load textures
-        //NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
-        //CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
-        //MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
-        //RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
-        //MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
-
+        NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
+        CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
+        MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
+        RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
+        MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
+        
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
-
+        
         _WelcomeWindow = new WelcomeWindow(this);
         _NewProjectWindow = new NewProjectWindow(this);
         _audioWindow = new AudioWindow();
@@ -127,15 +127,15 @@ namespace Nuake {
             
         Logger::Log("Building fonts", "window", VERBOSE);
         BuildFonts();
-
+        
         Logger::Log("Loading imgui from mem", "window", VERBOSE);
         using namespace Nuake::StaticResources;
         ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
-
+        
         virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 640, 360 });
         virtualCamera->SetTexture(CreateRef<Texture>(Vector2{ 640, 360 }, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE), GL_COLOR_ATTACHMENT0);
         //ScriptingContext::Get().Initialize();
-
+        
         Window::Get()->SetTitlebarHitTestCallback([&](Window& window, int x, int y, bool& hit) {
             hit = m_TitleBarHovered;
         });
@@ -226,8 +226,11 @@ namespace Nuake {
         ImGui::Dummy(ImVec2(remaining - ((buttonWidth + ImGui::GetStyle().ItemSpacing.x) * 3.5), 0));
         ImGui::SameLine();
         {
-            const int iconWidth = MinimizeTexture->GetWidth();
-            const int iconHeight = MinimizeTexture->GetHeight();
+            int iconWidth = std::max(MinimizeTexture->GetWidth(), 24);
+            int iconHeight = std::max(MinimizeTexture->GetHeight(), 24);
+            
+
+
             const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
             if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
             {
@@ -242,8 +245,8 @@ namespace Nuake {
 
         // Maximize Button
         {
-            const int iconWidth = MaximizeTexture->GetWidth();
-            const int iconHeight = MaximizeTexture->GetHeight();
+            int iconWidth = std::max(MaximizeTexture->GetWidth(), 24);
+            int iconHeight = std::max(MaximizeTexture->GetHeight(), 24);
 
             const bool isMaximized = Window::Get()->IsMaximized();
 
@@ -266,8 +269,8 @@ namespace Nuake {
         // Close Button
         ImGui::SameLine();
         {
-            const int iconWidth = CloseIconTexture->GetWidth();
-            const int iconHeight = CloseIconTexture->GetHeight();
+            int iconWidth = std::max(CloseIconTexture ->GetWidth(), 24);
+            int iconHeight = std::max(CloseIconTexture->GetHeight(), 24);
             if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
             {
                 glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
@@ -2752,7 +2755,7 @@ namespace Nuake {
     void EditorInterface::BuildFonts()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
-        FontManager::LoadFonts();
+        //FontManager::LoadFonts();
     }
 
     std::string EditorInterface::GetEntityTypeName(const Entity& entity) const

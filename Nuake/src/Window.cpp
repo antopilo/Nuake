@@ -7,7 +7,7 @@
 #include "src/Rendering/Renderer.h"
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "src/Scene/Scene.h"
-
+#include "src/Rendering/Vulkan/VulkanRenderer.h"
 #include "src/Resource/StaticResources.h"
 
 #include <glad/glad.h>
@@ -148,6 +148,7 @@ int Window::Init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+#endif //  NK_VK
     const Vector2 defaultResolution = Vector2(1, 1);
     this->framebuffer = CreateRef<FrameBuffer>(true, defaultResolution);
 
@@ -158,7 +159,6 @@ int Window::Init()
     this->framebuffer->SetTexture(outputTexture);
     this->framebuffer->SetTexture(CreateRef<Texture>(defaultResolution, GL_RED_INTEGER, GL_R32I, GL_INT), GL_COLOR_ATTACHMENT1); // Entity ID
 
-#endif //  NK_VK
 
     //glEnable(GL_CULL_FACE);
 
@@ -232,7 +232,9 @@ void Window::EndDraw()
         ImGui::Render();
     }
 
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    VkRenderer::Get().Draw();
+
+    //ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
@@ -536,4 +538,5 @@ void Window::InitImgui()
 
     ImGui_ImplGlfw_InitForOpenGL(this->window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+    
 }

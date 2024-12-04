@@ -411,7 +411,7 @@ namespace Nuake
         vblayout.Push<float>(3);
         lineVertexArray.AddBuffer(lineVertexBuffer, vblayout);
 
-        RenderCommand::DrawLines(0, 2);
+        //RenderCommand::DrawLines(0, 2);
     }
 
     void Renderer::DrawLine(Vector3 start, Vector3 end, Vector3 color)
@@ -424,8 +424,8 @@ namespace Nuake
     void Renderer::DrawCube(Matrix4 transform)
     {
         ZoneScoped;
-        CubeMesh->Bind();
-        RenderCommand::DrawArrays(0, 36);
+        //CubeMesh->Bind();
+        //RenderCommand::DrawArrays(0, 36);
     }
 
 
@@ -438,7 +438,7 @@ namespace Nuake
     {
 		ZoneScoped;
 
-        QuadMesh->Bind();
-        RenderCommand::DrawArrays(0, 6);
+        //QuadMesh->Bind();
+        //RenderCommand::DrawArrays(0, 6);
     }
 }

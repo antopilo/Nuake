@@ -427,7 +427,7 @@ namespace Nuake
 	void Scene::Draw(FrameBuffer& framebuffer, const Matrix4& projection, const Matrix4& view)
 	{
 		m_SceneRenderer->BeginRenderScene(m_EditorCamera->GetPerspective(), m_EditorCamera->GetTransform(), m_EditorCamera->Translation);
-		m_SceneRenderer->RenderScene(*this, framebuffer);
+		//m_SceneRenderer->RenderScene(*this, framebuffer);
 	}
 	
 	std::vector<Entity> Scene::GetAllEntities() 

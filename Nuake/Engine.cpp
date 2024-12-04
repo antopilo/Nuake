@@ -24,6 +24,7 @@
 #ifdef NK_VK
 	#include "src/Rendering/Vulkan/VulkanRenderer.h"
 #endif
+#include <imgui/imgui_impl_vulkan.h>
 
 
 namespace Nuake
@@ -190,7 +191,13 @@ namespace Nuake
 	{
 		ZoneScoped;
 
-		VkRenderer::Get().Draw();
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::ShowDemoWindow();
+
+		
 
 		RenderCommand::Clear();
 
@@ -208,7 +215,7 @@ namespace Nuake
 		// Draw scene
 		Window::Get()->Draw();
 
-		glfwPollEvents();
+
 	}
 
 	void Engine::EndDraw()

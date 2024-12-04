@@ -153,11 +153,11 @@ namespace Nuake
 		else
 			m_DefaultDisplacement->Bind(9);
 
-		glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);
+		//glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+		//
+		//glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UBOStructure), &data);
+		//glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		//glBindBufferBase(GL_UNIFORM_BUFFER, 32, UBO);
 		//Renderer::m_Shader->SetUniform("m_Displacement", 9);
 		//Renderer::m_Shader->SetUniform("m_Displacement", 9);
 	}

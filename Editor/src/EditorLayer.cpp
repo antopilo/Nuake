@@ -23,6 +23,8 @@ void EditorLayer::OnUpdate()
     Nuake::Engine::Tick();
     Nuake::Engine::Draw();
 
+    m_EditorInterface->Draw();
+    m_EditorInterface->Update(Nuake::Engine::GetTimestep());
     /*
     auto sceneFramebuffer = GetApplication().GetWindow()->GetFrameBuffer();
 
@@ -69,11 +71,10 @@ void EditorLayer::OnUpdate()
         sceneFramebuffer->Unbind();
     }
 
-    m_EditorInterface->Draw();
-    m_EditorInterface->Update(Nuake::Engine::GetTimestep());
-    Nuake::Engine::EndDraw();
     */
 
+
+    Nuake::Engine::EndDraw();
     Nuake::Input::Update();
 }
 

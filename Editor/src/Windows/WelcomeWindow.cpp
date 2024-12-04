@@ -87,7 +87,7 @@ namespace Nuake
 		}
 
 		// Load Nuake logo
-		//_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
+		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
 	}
 
 	void WelcomeWindow::LoadQueuedProject()

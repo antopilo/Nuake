@@ -8,6 +8,10 @@
 #include "src/Window.h"
 #include <GLFW/glfw3.h>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_vulkan.h"
+#include <imgui/imgui_impl_glfw.h>
+#include "src/Resource/StaticResources.h"
 
 using namespace Nuake;
 
@@ -97,6 +101,8 @@ void VkRenderer::Initialize()
 
 	InitPipeline();
 
+	InitImgui();
+
 	IsInitialized = true;
 }
 
@@ -160,12 +166,17 @@ void VkRenderer::SelectGPU()
 	VkPhysicalDeviceVulkan12Features features12{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
 	features12.bufferDeviceAddress = true;
 	features12.descriptorIndexing = true;
+
+	std::vector<const char*> requiredExtensions = { VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME };
+
+
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
 	vkb::PhysicalDevice physicalDevice = selector
 		.set_minimum_version(1, 3)
 		.set_required_features_13(features)
 		.set_required_features_12(features12)
 		.set_surface(Surface)
+		.add_required_extensions(requiredExtensions)
 		.select()
 		.value();
 
@@ -273,6 +284,17 @@ void VkRenderer::InitCommands()
 
 		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
 	}
+
+	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
+
+	// allocate the command buffer for immediate submits
+	VkCommandBufferAllocateInfo cmdAllocInfo = VulkanInit::CommandBufferAllocateInfo(ImguiCommandPool, 1);
+
+	VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &ImguiCommandBuffer));
+
+	MainDeletionQueue.push_function([=]() {
+		vkDestroyCommandPool(Device, ImguiCommandPool, nullptr);
+	});
 }
 
 void VkRenderer::InitSync()
@@ -291,6 +313,9 @@ void VkRenderer::InitSync()
 		VK_CALL(vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].SwapchainSemaphore));
 		VK_CALL(vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &Frames[i].RenderSemaphore));
 	}
+
+	VK_CALL(vkCreateFence(Device, &fenceCreateInfo, nullptr, &ImguiFence));
+	MainDeletionQueue.push_function([=]() { vkDestroyFence(Device, ImguiFence, nullptr); });
 }
 
 void VkRenderer::InitDescriptors()
@@ -370,6 +395,171 @@ void VkRenderer::InitBackgroundPipeline()
 	});
 }
 
+void VkRenderer::InitImgui()
+{
+	// 1: create descriptor pool for IMGUI
+	//  the size of the pool is very oversize, but it's copied from imgui demo
+	//  itself.
+	VkDescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
+
+	VkDescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	pool_info.maxSets = 1000;
+	pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+	pool_info.pPoolSizes = pool_sizes;
+
+	VkDescriptorPool imguiPool;
+	VK_CALL(vkCreateDescriptorPool(Device, &pool_info, nullptr, &imguiPool));
+
+	// 2: initialize imgui library
+
+	// this initializes the core structures of imgui
+	ImGui::CreateContext();
+
+	{
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
+
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		ImGui::StyleColorsDark();
+
+		ImGuiStyle& s = ImGui::GetStyle();
+		s.WindowMenuButtonPosition = ImGuiDir_None;
+		s.GrabRounding = 2.0f;
+		s.CellPadding = ImVec2(8, 8);
+		s.WindowPadding = ImVec2(4, 4);
+		s.ScrollbarRounding = 9.0f;
+		s.ScrollbarSize = 15.0f;
+		s.GrabMinSize = 32.0f;
+		s.TabRounding = 0;
+		s.WindowRounding = 4.0f;
+		s.ChildRounding = 4.0f;
+		s.FrameRounding = 4.0f;
+		s.GrabRounding = 0;
+		s.FramePadding = ImVec2(8, 4);
+		s.ItemSpacing = ImVec2(8, 4);
+		s.ItemInnerSpacing = ImVec2(4, 4);
+		s.TabRounding = 4.0f;
+		s.WindowBorderSize = 0.0f;
+		s.IndentSpacing = 12.0f;
+		s.ChildBorderSize = 0.0f;
+		s.PopupRounding = 4.0f;
+		s.FrameBorderSize = 0.0f;
+
+		ImVec4* colors = ImGui::GetStyle().Colors;
+		colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+		colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+		colors[ImGuiCol_WindowBg] = ImVec4(0.148f, 0.148f, 0.148f, 1.00f);
+		colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+		colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+		colors[ImGuiCol_Border] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.09f, 0.09f, 0.09f, 1.00f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+		colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.078f, 0.078f, 0.078f, 1.00f);
+		colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+		colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.00f);
+		colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.34f, 0.34f, 0.34f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.29f, 0.29f, 0.29f, 1.00f);
+		colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_CheckMark] = ImVec4(0.55f, 0.76f, 0.29f, 1.00f);
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.55f, 0.76f, 0.29f, 1.00f);
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.55f, 0.76f, 0.29f, 1.00f);
+		colors[ImGuiCol_Button] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_Header] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_HeaderActive] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+		colors[ImGuiCol_Separator] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.10f, 0.10f, 0.78f);
+		colors[ImGuiCol_SeparatorActive] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+		colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.00f);
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.00f);
+		colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.00f);
+		colors[ImGuiCol_Tab] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_TabHovered] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+		colors[ImGuiCol_TabActive] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+		colors[ImGuiCol_TabUnfocused] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+		colors[ImGuiCol_DockingPreview] = ImVec4(0.55f, 0.76f, 0.29f, 1.00f);
+		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+		colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+		colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+		colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+		colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+		colors[ImGuiCol_Border] = ImVec4(0.078f, 0.078f, 0.078f, 1.00f);
+		colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+		colors[ImGuiCol_TableBorderStrong] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_TableBorderLight] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_TableRowBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.93f, 0.27f, 0.27f, 0.00f);
+		colors[ImGuiCol_TextSelectedBg] = ImVec4(0.08f, 0.49f, 0.97f, 0.28f);
+		colors[ImGuiCol_DragDropTarget] = ImVec4(0.55f, 0.76f, 0.29f, 1.00f);
+		colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+		colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+		colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+		colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+	}
+
+	auto load_vk_func = [&](const char* fn) {
+		if (auto proc = vkGetDeviceProcAddr(Device, fn)) return proc;
+		return vkGetInstanceProcAddr(Instance, fn);
+		};
+	ImGui_ImplVulkan_LoadFunctions([](const char* fn, void* data) {
+		return (*(decltype(load_vk_func)*)data)(fn);
+	}, &load_vk_func);
+
+	// this initializes imgui for SDL
+	ImGui_ImplGlfw_InitForVulkan(Window::Get()->GetHandle(), true);
+
+	// this initializes imgui for Vulkan
+	ImGui_ImplVulkan_InitInfo init_info = {};
+	init_info.Instance = Instance;
+	init_info.PhysicalDevice = GPU;
+	init_info.Device = Device;
+	init_info.Queue = GPUQueue;
+	init_info.DescriptorPool = imguiPool;
+	init_info.MinImageCount = 3;
+	init_info.ImageCount = 3;
+	init_info.UseDynamicRendering = true;
+
+	//dynamic rendering parameters for imgui to use
+	init_info.PipelineRenderingCreateInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
+	init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+	init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &SwapchainImageFormat;
+
+
+	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+	ImGui_ImplVulkan_Init(&init_info);
+
+	ImGui_ImplVulkan_CreateFontsTexture();
+
+	// add the destroy the imgui created structures
+	MainDeletionQueue.push_function([=]() {
+		ImGui_ImplVulkan_Shutdown();
+		vkDestroyDescriptorPool(Device, imguiPool, nullptr);
+	});
+
+	
+}
+
 void VkRenderer::Draw()
 {
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
@@ -420,6 +610,15 @@ void VkRenderer::Draw()
 		// Execute a copy from the rendering image into the swapchain
 		VulkanUtil::CopyImageToImage(cmd, DrawImage.image, SwapchainImages[swapchainImageIndex], DrawExtent, SwapchainExtent);
 		
+		// set swapchain image layout to Attachment Optimal so we can draw it
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+		//draw imgui into the swapchain image
+		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
+
+		// set swapchain image layout to Present so we can draw it
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
 		// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	}
@@ -470,6 +669,43 @@ void VkRenderer::DrawBackground(VkCommandBuffer cmd)
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
 	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
 	vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
+}
+
+void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
+{
+	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(SwapchainExtent, &colorAttachment, nullptr);
+
+	vkCmdBeginRendering(cmd, &renderInfo);
+
+	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+
+	vkCmdEndRendering(cmd);
+}
+
+void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function)
+{
+	VK_CALL(vkResetFences(Device, 1, &ImguiFence));
+	VK_CALL(vkResetCommandBuffer(ImguiCommandBuffer, 0));
+
+	VkCommandBuffer cmd = ImguiCommandBuffer;
+
+	VkCommandBufferBeginInfo cmdBeginInfo = VulkanInit::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+
+	function(cmd);
+
+	VK_CALL(vkEndCommandBuffer(cmd));
+
+	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
+	VkSubmitInfo2 submit = VulkanInit::SubmitInfo(&cmdinfo, nullptr, nullptr);
+
+	// submit command buffer to the queue and execute it.
+	//  _renderFence will now block until the graphic commands finish execution
+	VK_CALL(vkQueueSubmit2(GPUQueue, 1, &submit, ImguiFence));
+
+	VK_CALL(vkWaitForFences(Device, 1, &ImguiFence, true, 9999999999));
 }
 
 
@@ -621,6 +857,41 @@ VkImageViewCreateInfo VulkanInit::ImageviewCreateInfo(VkFormat format, VkImage i
 	info.subresourceRange.aspectMask = aspectFlags;
 
 	return info;
+}
+
+VkRenderingAttachmentInfo VulkanInit::AttachmentInfo(VkImageView view, VkClearValue* clear, VkImageLayout layout)
+{
+	VkRenderingAttachmentInfo colorAttachment{};
+	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	colorAttachment.pNext = nullptr;
+
+	colorAttachment.imageView = view;
+	colorAttachment.imageLayout = layout;
+	colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	if (clear) 
+	{
+		colorAttachment.clearValue = *clear;
+	}
+
+	return colorAttachment;
+}
+
+VkRenderingInfo VulkanInit::RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment,
+	VkRenderingAttachmentInfo* depthAttachment)
+{
+	VkRenderingInfo renderInfo{};
+	renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	renderInfo.pNext = nullptr;
+
+	renderInfo.renderArea = VkRect2D{ VkOffset2D { 0, 0 }, renderExtent };
+	renderInfo.layerCount = 1;
+	renderInfo.colorAttachmentCount = 1;
+	renderInfo.pColorAttachments = colorAttachment;
+	renderInfo.pDepthAttachment = depthAttachment;
+	renderInfo.pStencilAttachment = nullptr;
+
+	return renderInfo;
 }
 
 // This is a helper to transtion images between readable, writable layouts.
