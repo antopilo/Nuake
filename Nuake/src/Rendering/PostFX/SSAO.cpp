@@ -110,7 +110,7 @@ namespace Nuake
 			auto normalTexture = gBuffer->GetTexture(GL_COLOR_ATTACHMENT1);
 
 			ImGui::Begin("debug");
-			ImGui::Image((ImTextureID)normalTexture->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
+			//ImGui::Image((ImTextureID)normalTexture->GetID(), ImGui::GetContentRegionAvail(), { 0, 1 }, { 1, 0 });
 			ImGui::End();
 
 			Shader* shader = ShaderManager::GetShader("Resources/Shaders/ssao.shader");

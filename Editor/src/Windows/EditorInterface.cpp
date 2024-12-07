@@ -57,8 +57,9 @@
 #include <src/Scene/Components/BSPBrushComponent.h>
 
 #include <src/FileSystem/FileDialog.h>
-
 #include <Tracy.hpp>
+
+#include "src/Rendering/Vulkan/VulkanRenderer.h"
 
 namespace Nuake {
     
@@ -165,7 +166,7 @@ namespace Nuake {
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 2.0f + windowPadding.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (5.0f + windowPadding.y + titlebarVerticalOffset) / 2.0);
-            ImGui::Image((ImTextureID)NuakeTexture->GetID(), ImVec2(logoWidth, logoHeight), ImVec2(0, 1), ImVec2(1, 0));
+            //ImGui::Image((ImTextureID)NuakeTexture->GetID(), ImVec2(logoWidth, logoHeight), ImVec2(0, 1), ImVec2(1, 0));
         }
 
         const float w = ImGui::GetContentRegionAvail().x;
@@ -654,7 +655,8 @@ namespace Nuake {
             Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
-            ImGui::Image((void*)texture->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Text("pointer = %p", VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet());
+            ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail);
             ImGui::PopStyleVar();
 
             const Vector2& mousePos = Input::GetMousePosition();
@@ -946,7 +948,7 @@ namespace Nuake {
                 ImGui::SameLine();
 
                 ImGui::SetCursorPosY(height / 4.0 );
-                ImGui::Image((ImTextureID)(nuakeLogoTexture->GetID()), ImVec2(logoWidth, height) * scale, ImVec2{0, 1}, ImVec2{1, 0});
+                //ImGui::Image((ImTextureID)(nuakeLogoTexture->GetID()), ImVec2(logoWidth, height) * scale, ImVec2{0, 1}, ImVec2{1, 0});
                 ImGui::EndMenuBar();
             }
             ImGui::End();
@@ -2080,7 +2082,7 @@ namespace Nuake {
                 sceneRenderer.RenderScene(*Engine::GetCurrentScene().get(), *virtualCamera.get(), false);
 
                 virtualCamera->Clear();
-                ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 640, 360 }, { 0, 1 }, {1, 0});
+                //ImGui::Image((void*)virtualCamera->GetTexture()->GetID(), { 640, 360 }, { 0, 1 }, {1, 0});
 
                 ImGui::PopStyleVar(2);
                 ImGui::PopStyleColor(4);

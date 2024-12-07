@@ -335,7 +335,7 @@ void PrefabEditorWindow::DrawViewportWindow()
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));\
 			viewportFramebuffer->QueueResize(viewportPanelSize);
-		ImGui::Image((void*)viewportFramebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
+		//ImGui::Image((void*)viewportFramebuffer->GetTexture(GL_COLOR_ATTACHMENT0)->GetID(), regionAvail, ImVec2(0, 1), ImVec2(1, 0));
 		ImGui::PopStyleVar();
 
 		const Vector2& mousePos = Input::GetMousePosition();

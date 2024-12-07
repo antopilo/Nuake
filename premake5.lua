@@ -93,7 +93,8 @@ project "Nuake"
 
         "_MBCS",
 		"IMGUI_DEFINE_MATH_OPERATORS",
-        "NK_VK"
+        "NK_VK",
+        "IMGUI_IMPL_VULKAN_NO_PROTOTYPES"
     }
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -454,6 +455,9 @@ project "Editor"
         "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
         "%{prj.name}/../Nuake/dependencies/entt/src",
+        "%{prj.name}/../Nuake/src/Vendors/vulkan",
+        "%{prj.name}/../Nuake/src/Vendors/volk",
+        "%{prj.name}/../Nuake/dependencies/vma/include"
     }
     
     libdirs 

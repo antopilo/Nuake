@@ -164,7 +164,7 @@ namespace Nuake
 			{
 				const Vector2 logoSize = _NuakeLogo->GetSize();
 				const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
-				ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
+				//ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
 			}
 
 			//ImGui::SameLine();
@@ -312,11 +312,11 @@ namespace Nuake
 
 		if (project.ProjectIcon)
 		{
-			ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		}
 		else
 		{
-			ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		}
 
 		ImGui::SameLine();

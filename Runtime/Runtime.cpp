@@ -160,7 +160,7 @@ int ApplicationMain(int argc, char* argv[])
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0, 0 });
         ImGui::Begin("Game", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
         {
-            ImGui::Image((void*)Window::Get()->GetFrameBuffer()->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+            //ImGui::Image((void*)Window::Get()->GetFrameBuffer()->GetTexture()->GetID(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
         }
         ImGui::End();
 

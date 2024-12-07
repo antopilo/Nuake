@@ -8,6 +8,7 @@
 
 #include "src/Resource/FontAwesome5.h"
 #include "src/Rendering/Textures/Texture.h"
+#include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
 
 namespace Nuake
 {
@@ -69,6 +70,8 @@ namespace Nuake
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed);
 
 		void DrawButtonImage(const Ref<Texture>& image, ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed);
+
+		void DrawImage(const Ref<VulkanImage> inImage);
 
 		ImRect RectExpanded(const ImRect& rect, float x, float y);
 

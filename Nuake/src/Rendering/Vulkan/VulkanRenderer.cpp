@@ -12,11 +12,16 @@
 #include "imgui/imgui_impl_vulkan.h"
 #include <imgui/imgui_impl_glfw.h>
 #include "src/Resource/StaticResources.h"
+#include "vk_mem_alloc.h"
+#include "VulkanInit.h"
+#include "VulkanAllocator.h"
+
+#include "VulkanCheck.h"
 
 using namespace Nuake;
 
 
-bool NKUseValidationLayer = true;
+bool NKUseValidationLayer = false;
 
 VkRenderer::~VkRenderer()
 {
@@ -45,45 +50,13 @@ void VkRenderer::Initialize()
 
 	SelectGPU();
 	
-	// Pass the vulkanFunctions struct to the VMA allocator
-	VmaAllocatorCreateInfo allocatorInfo = {};
-	allocatorInfo.physicalDevice = GPU;
-	allocatorInfo.device = Device;
-	allocatorInfo.instance = Instance;
-	allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-	allocatorInfo.pVulkanFunctions = {
-		allocatorInfo.pVulkanFunctions = new VmaVulkanFunctions{
-			.vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-			.vkGetDeviceProcAddr = vkGetDeviceProcAddr,
-			.vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
-			.vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
-			.vkAllocateMemory = vkAllocateMemory,
-			.vkFreeMemory = vkFreeMemory,
-			.vkMapMemory = vkMapMemory,
-			.vkUnmapMemory = vkUnmapMemory,
-			.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
-			.vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
-			.vkBindBufferMemory = vkBindBufferMemory,
-			.vkBindImageMemory = vkBindImageMemory,
-			.vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
-			.vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
-			.vkCreateBuffer = vkCreateBuffer,
-			.vkDestroyBuffer = vkDestroyBuffer,
-			.vkCreateImage = vkCreateImage,
-			.vkDestroyImage = vkDestroyImage,
-			.vkCmdCopyBuffer = vkCmdCopyBuffer,
-			.vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2KHR,
-			.vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2KHR,
-			.vkBindBufferMemory2KHR = vkBindBufferMemory2KHR,
-			.vkBindImageMemory2KHR = vkBindImageMemory2KHR,
-		}
-	};
+	// Initialize allocator
+	VulkanAllocator::Get().Initialize(Instance, GPU, Device);
 
-	vmaCreateAllocator(&allocatorInfo, &Allocator);
-
-	MainDeletionQueue.push_function([&]() {
-		vmaDestroyAllocator(Allocator);
-	});
+	// TODO: Find a better way to handle deletion
+	//MainDeletionQueue.push_function([&]() {
+	//	vmaDestroyAllocator(allocator.GetAllocator());
+	//});
 
 	CreateSwapchain(Window::Get()->GetSize());
 
@@ -198,6 +171,11 @@ void VkRenderer::RecreateSwapchain()
 
 void VkRenderer::CreateSwapchain(const Vector2& size)
 {
+	if (size.x == 0.0f || size.y == 0.0f)
+	{
+		return;
+	}
+
 	vkb::SwapchainBuilder swapchainBuilder{ GPU, Device, Surface};
 
 	SwapchainImageFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -206,7 +184,7 @@ void VkRenderer::CreateSwapchain(const Vector2& size)
 		//.use_default_format_selection()
 		.set_desired_format(VkSurfaceFormatKHR{ .format = SwapchainImageFormat, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
 		//use vsync present mode
-		.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+		.set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
 		.set_desired_extent(static_cast<int>(size.x), static_cast<int>(size.y))
 		.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
 		.build()
@@ -228,36 +206,7 @@ void VkRenderer::CreateSwapchain(const Vector2& size)
 		1
 	};
 
-	//hardcoding the draw format to 32 bit float
-	DrawImage.imageFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-	DrawImage.imageExtent = drawImageExtent;
-
-	VkImageUsageFlags drawImageUsages{};
-	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-	VkImageCreateInfo rimg_info = VulkanInit::ImageCreateInfo(DrawImage.imageFormat, drawImageUsages, drawImageExtent);
-
-	//for the draw image, we want to allocate it from gpu local memory
-	VmaAllocationCreateInfo rimg_allocinfo = {};
-	rimg_allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-	rimg_allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-	//allocate and create the image
-	VK_CALL(vmaCreateImage(Allocator, &rimg_info, &rimg_allocinfo, &DrawImage.image, &DrawImage.allocation, nullptr));
-
-	//build a image-view for the draw image to use for rendering
-	VkImageViewCreateInfo rview_info = VulkanInit::ImageviewCreateInfo(DrawImage.imageFormat, DrawImage.image, VK_IMAGE_ASPECT_COLOR_BIT);
-
-	VK_CALL(vkCreateImageView(Device, &rview_info, nullptr, &DrawImage.imageView));
-
-	//add to deletion queues
-	//ainDeletionQueue.push_function([=]() {
-	//	vkDestroyImageView(Device, DrawImage.imageView, nullptr);
-	//	vmaDestroyImage(Allocator, DrawImage.image, DrawImage.allocation);
-	//);
+	DrawImage = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
 }
 
 void VkRenderer::DestroySwapchain()
@@ -344,7 +293,7 @@ void VkRenderer::UpdateDescriptorSets()
 {
 	VkDescriptorImageInfo imgInfo{};
 	imgInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-	imgInfo.imageView = DrawImage.imageView;
+	imgInfo.imageView = DrawImage->GetImageView();
 
 	VkWriteDescriptorSet drawImageWrite = {};
 	drawImageWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -357,6 +306,7 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.pImageInfo = &imgInfo;
 
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
+
 }
 
 void VkRenderer::InitPipeline()
@@ -587,34 +537,35 @@ void VkRenderer::Draw()
 	// Begin the command buffer recording. We will use this command buffer exactly once, so we want to let vulkan know that
 	// Note: We might reuse them later!!!
 	VkCommandBufferBeginInfo cmdBeginInfo = VulkanInit::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	DrawExtent.width = DrawImage.imageExtent.width;
-	DrawExtent.height = DrawImage.imageExtent.height;
+	DrawExtent.width = DrawImage->GetSize().x;
+	DrawExtent.height = DrawImage->GetSize().y;
 
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 	{
 		// Transfer rendering image to general layout
-		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 		// Execute compute shader that writes to the image
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
 
-		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 		vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
 
 		// Transition rendering iamge to transfert onto swapchain images
-		VulkanUtil::TransitionImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		// Execute a copy from the rendering image into the swapchain
-		VulkanUtil::CopyImageToImage(cmd, DrawImage.image, SwapchainImages[swapchainImageIndex], DrawExtent, SwapchainExtent);
+		//VulkanUtil::CopyImageToImage(cmd, DrawImage->GetImage(), SwapchainImages[swapchainImageIndex], DrawExtent, SwapchainExtent);
+		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		//draw imgui into the swapchain image
+		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
 		
 		// set swapchain image layout to Attachment Optimal so we can draw it
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-		//draw imgui into the swapchain image
-		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
 
 		// set swapchain image layout to Present so we can draw it
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
@@ -709,251 +660,7 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 }
 
 
-// Since well only be using those settings, this is just a shorthand.
-// Well only be using VK_COMMAND_BUFFER_LEVEL_PRIMARY
-VkCommandPoolCreateInfo VulkanInit::CommandPoolCreateInfo(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags flags)
-{
-	VkCommandPoolCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	info.pNext = nullptr;
-	info.queueFamilyIndex = queueFamilyIndex;
-	info.flags = flags;
-	return info;
-}
 
-VkCommandBufferAllocateInfo VulkanInit::CommandBufferAllocateInfo(VkCommandPool pool, uint32_t count)
-{
-	VkCommandBufferAllocateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	info.pNext = nullptr;
-
-	info.commandPool = pool;
-	info.commandBufferCount = count;
-	info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	return info;
-}
-
-VkFenceCreateInfo VulkanInit::FenceCreateInfo(VkFenceCreateFlags flags)
-{
-	VkFenceCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	info.pNext = nullptr;
-	info.flags = flags;
-	return info;
-}
-
-VkSemaphoreCreateInfo VulkanInit::SemaphoreCreateInfo(VkSemaphoreCreateFlags flags)
-{
-	VkSemaphoreCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	info.pNext = nullptr;
-	info.flags = flags;
-	return info;
-}
-
-VkCommandBufferBeginInfo VulkanInit::CommandBufferBeginInfo(VkCommandBufferUsageFlags flags)
-{
-	VkCommandBufferBeginInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	info.pNext = nullptr;
-
-	info.pInheritanceInfo = nullptr;
-	info.flags = flags;
-	return info;
-}
-
-VkImageSubresourceRange VulkanInit::ImageSubResourceRange(VkImageAspectFlags aspectMask)
-{
-	VkImageSubresourceRange subImage{};
-	subImage.aspectMask = aspectMask;
-	subImage.baseMipLevel = 0;
-	subImage.levelCount = VK_REMAINING_MIP_LEVELS;
-	subImage.baseArrayLayer = 0;
-	subImage.layerCount = VK_REMAINING_ARRAY_LAYERS;
-
-	return subImage;
-}
-
-VkSemaphoreSubmitInfo VulkanInit::SemaphoreSubmitInfo(VkPipelineStageFlags2 stageMask, VkSemaphore semaphore)
-{
-	VkSemaphoreSubmitInfo submitInfo{};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
-	submitInfo.pNext = nullptr;
-	submitInfo.semaphore = semaphore;
-	submitInfo.stageMask = stageMask;
-	submitInfo.deviceIndex = 0;
-	submitInfo.value = 1;
-
-	return submitInfo;
-}
-
-VkCommandBufferSubmitInfo VulkanInit::CommandBufferSubmitInfo(VkCommandBuffer cmd)
-{
-	VkCommandBufferSubmitInfo info{};
-	info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
-	info.pNext = nullptr;
-	info.commandBuffer = cmd;
-	info.deviceMask = 0;
-
-	return info;
-}
-
-VkSubmitInfo2 VulkanInit::SubmitInfo(VkCommandBufferSubmitInfo * cmd, VkSemaphoreSubmitInfo * signalSemaphoreInfo, VkSemaphoreSubmitInfo * waitSemaphoreInfo)
-{
-	VkSubmitInfo2 info = {};
-	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
-	info.pNext = nullptr;
-
-	info.waitSemaphoreInfoCount = waitSemaphoreInfo == nullptr ? 0 : 1;
-	info.pWaitSemaphoreInfos = waitSemaphoreInfo;
-
-	info.signalSemaphoreInfoCount = signalSemaphoreInfo == nullptr ? 0 : 1;
-	info.pSignalSemaphoreInfos = signalSemaphoreInfo;
-
-	info.commandBufferInfoCount = 1;
-	info.pCommandBufferInfos = cmd;
-
-	return info;
-}
-
-VkImageCreateInfo VulkanInit::ImageCreateInfo(VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent)
-{
-	VkImageCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-	info.pNext = nullptr;
-
-	info.imageType = VK_IMAGE_TYPE_2D;
-
-	info.format = format;
-	info.extent = extent;
-
-	info.mipLevels = 1;
-	info.arrayLayers = 1;
-
-	//for MSAA. we will not be using it by default, so default it to 1 sample per pixel.
-	info.samples = VK_SAMPLE_COUNT_1_BIT;
-
-	//optimal tiling, which means the image is stored on the best gpu format
-	info.tiling = VK_IMAGE_TILING_LINEAR;
-	info.usage = usageFlags;
-
-	return info;
-}
-
-VkImageViewCreateInfo VulkanInit::ImageviewCreateInfo(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags)
-{
-	// build a image-view for the depth image to use for rendering
-	VkImageViewCreateInfo info = {};
-	info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	info.pNext = nullptr;
-
-	info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	info.image = image;
-	info.format = format;
-	info.subresourceRange.baseMipLevel = 0;
-	info.subresourceRange.levelCount = 1;
-	info.subresourceRange.baseArrayLayer = 0;
-	info.subresourceRange.layerCount = 1;
-	info.subresourceRange.aspectMask = aspectFlags;
-
-	return info;
-}
-
-VkRenderingAttachmentInfo VulkanInit::AttachmentInfo(VkImageView view, VkClearValue* clear, VkImageLayout layout)
-{
-	VkRenderingAttachmentInfo colorAttachment{};
-	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-	colorAttachment.pNext = nullptr;
-
-	colorAttachment.imageView = view;
-	colorAttachment.imageLayout = layout;
-	colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	if (clear) 
-	{
-		colorAttachment.clearValue = *clear;
-	}
-
-	return colorAttachment;
-}
-
-VkRenderingInfo VulkanInit::RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment,
-	VkRenderingAttachmentInfo* depthAttachment)
-{
-	VkRenderingInfo renderInfo{};
-	renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-	renderInfo.pNext = nullptr;
-
-	renderInfo.renderArea = VkRect2D{ VkOffset2D { 0, 0 }, renderExtent };
-	renderInfo.layerCount = 1;
-	renderInfo.colorAttachmentCount = 1;
-	renderInfo.pColorAttachments = colorAttachment;
-	renderInfo.pDepthAttachment = depthAttachment;
-	renderInfo.pStencilAttachment = nullptr;
-
-	return renderInfo;
-}
-
-// This is a helper to transtion images between readable, writable layouts.
-void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
-{
-	VkImageMemoryBarrier2 imageBarrier{ .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
-	imageBarrier.pNext = nullptr;
-
-	imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-	imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
-	imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-	imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
-	imageBarrier.oldLayout = currentLayout;
-	imageBarrier.newLayout = newLayout;
-
-	VkImageAspectFlags aspectMask = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-	imageBarrier.subresourceRange = VulkanInit::ImageSubResourceRange(aspectMask);
-	imageBarrier.image = image;
-
-	VkDependencyInfo depInfo{};
-	depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-	depInfo.pNext = nullptr;
-
-	depInfo.imageMemoryBarrierCount = 1;
-	depInfo.pImageMemoryBarriers = &imageBarrier;
-
-	vkCmdPipelineBarrier2(cmd, &depInfo);
-}
-
-void VulkanUtil::CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize)
-{
-	VkImageBlit2 blitRegion{ .sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2, .pNext = nullptr };
-
-	blitRegion.srcOffsets[1].x = srcSize.width;
-	blitRegion.srcOffsets[1].y = srcSize.height;
-	blitRegion.srcOffsets[1].z = 1;
-
-	blitRegion.dstOffsets[1].x = dstSize.width;
-	blitRegion.dstOffsets[1].y = dstSize.height;
-	blitRegion.dstOffsets[1].z = 1;
-
-	blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	blitRegion.srcSubresource.baseArrayLayer = 0;
-	blitRegion.srcSubresource.layerCount = 1;
-	blitRegion.srcSubresource.mipLevel = 0;
-
-	blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	blitRegion.dstSubresource.baseArrayLayer = 0;
-	blitRegion.dstSubresource.layerCount = 1;
-	blitRegion.dstSubresource.mipLevel = 0;
-
-	VkBlitImageInfo2 blitInfo{ .sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2, .pNext = nullptr };
-	blitInfo.dstImage = destination;
-	blitInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	blitInfo.srcImage = source;
-	blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	blitInfo.filter = VK_FILTER_LINEAR;
-	blitInfo.regionCount = 1;
-	blitInfo.pRegions = &blitRegion;
-
-	vkCmdBlitImage2(cmd, &blitInfo);
-}
 
 void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
 {

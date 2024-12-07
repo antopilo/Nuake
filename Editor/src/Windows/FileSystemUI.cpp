@@ -106,7 +106,7 @@ namespace Nuake
 
 
         ImGui::SetCursorPos(prevCursor);
-        ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        //ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 
         auto imguiStyle = ImGui::GetStyle();
 
@@ -411,7 +411,7 @@ namespace Nuake
         }
 
         ImGui::SetCursorPos(prevCursor);
-        ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        //ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
         ImGui::PopStyleVar();
         
         auto& imguiStyle = ImGui::GetStyle();

@@ -39,7 +39,7 @@ void LoadingSplash::Draw()
 		{
 			const Vector2 logoSize = _NuakeLogo->GetSize();
 			const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
-			ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
+			//ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
 		}
 
 		ImGui::Text("LOADING SCENE...");

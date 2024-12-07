@@ -324,7 +324,7 @@ namespace Nuake
 		const ImVec2 iconSize = ImVec2(50, 50.0f);
 		ImGui::SetCursorPos(ImVec2(padding.x / 2.0, padding.y / 2.0) + ImVec2(4, cursorYStart));
 
-		ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+		//ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(padding.x + iconSize.x);

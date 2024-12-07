@@ -137,7 +137,7 @@ void TrenchbroomConfiguratorWindow::DrawPrefabItem(const Nuake::FGDPointEntity& 
 
 
     ImGui::SetCursorPos(prevCursor);
-    ImGui::Image((ImTextureID)Nuake::TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+    //ImGui::Image((ImTextureID)Nuake::TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
 
     auto& imguiStyle = ImGui::GetStyle();
 
