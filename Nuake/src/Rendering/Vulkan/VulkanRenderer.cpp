@@ -21,7 +21,7 @@
 using namespace Nuake;
 
 
-bool NKUseValidationLayer = false;
+bool NKUseValidationLayer = true;
 
 VkRenderer::~VkRenderer()
 {
@@ -528,6 +528,7 @@ void VkRenderer::Draw()
 		return;
 	}
 
+	
 	VK_CALL(vkResetFences(Device, 1, &GetCurrentFrame().RenderFence));
 
 	// Note: this will be the meat of the engine that should be here.
@@ -557,18 +558,19 @@ void VkRenderer::Draw()
 		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		// Execute a copy from the rendering image into the swapchain
-		//VulkanUtil::CopyImageToImage(cmd, DrawImage->GetImage(), SwapchainImages[swapchainImageIndex], DrawExtent, SwapchainExtent);
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		
+		{
+		}
 		//draw imgui into the swapchain image
 		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
+
 		
 		// set swapchain image layout to Attachment Optimal so we can draw it
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 		// set swapchain image layout to Present so we can draw it
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
@@ -658,9 +660,6 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 
 	VK_CALL(vkWaitForFences(Device, 1, &ImguiFence, true, 9999999999));
 }
-
-
-
 
 void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
 {

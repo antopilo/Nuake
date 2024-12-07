@@ -41,6 +41,7 @@ namespace Nuake
 
 	public:
 		VulkanImage(ImageFormat format, Vector2 size);
+		VulkanImage(void* data, ImageFormat format, Vector2 size);
 		~VulkanImage() = default;
 
 		Vector2 GetSize() const { return Vector2(Extent.x, Extent.y); }

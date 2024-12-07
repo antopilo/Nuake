@@ -232,14 +232,14 @@ namespace Nuake {
             
 
 
-            const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
-            if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
-            {
-                glfwIconifyWindow(Window::Get()->GetHandle());
-            }
-            
-            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP);
+            //const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
+            //if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
+            //{
+            //    glfwIconifyWindow(Window::Get()->GetHandle());
+            //}
+            //
+            //auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            //UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP);
         }
 
         ImGui::SameLine();
@@ -251,20 +251,20 @@ namespace Nuake {
 
             const bool isMaximized = Window::Get()->IsMaximized();
 
-            if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
-            {
-                const auto window = Window::Get()->GetHandle();
-                if (isMaximized)
-                {
-                    glfwRestoreWindow(window);
-                }
-                else
-                {
-                    glfwMaximizeWindow(window);
-                }
-            }
-            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            UI::DrawButtonImage(isMaximized ? RestoreTexture : MaximizeTexture, buttonColN, buttonColH, buttonColP);
+            //if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
+            //{
+            //    const auto window = Window::Get()->GetHandle();
+            //    if (isMaximized)
+            //    {
+            //        glfwRestoreWindow(window);
+            //    }
+            //    else
+            //    {
+            //        glfwMaximizeWindow(window);
+            //    }
+            //}
+            //auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            //UI::DrawButtonImage(isMaximized ? RestoreTexture : MaximizeTexture, buttonColN, buttonColH, buttonColP);
         }
 
         // Close Button
@@ -272,12 +272,12 @@ namespace Nuake {
         {
             int iconWidth = std::max(CloseIconTexture ->GetWidth(), 24);
             int iconHeight = std::max(CloseIconTexture->GetHeight(), 24);
-            if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
-            {
-                glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
-            }
-            
-            UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
+            //if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
+            //{
+            //    glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
+            //}
+            //
+            //UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
         }
 
         // Second bar with play stop pause etc
@@ -655,7 +655,6 @@ namespace Nuake {
             Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
-            ImGui::Text("pointer = %p", VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet());
             ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail);
             ImGui::PopStyleVar();
 

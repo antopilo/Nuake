@@ -42,6 +42,12 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize) :
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
 }
 
+VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize)
+{
+	size_t data_size = inSize.x * inSize.y * 4;
+
+}
+
 VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
 {
 	if (!ImGuiDescriptorSetGenerated)
