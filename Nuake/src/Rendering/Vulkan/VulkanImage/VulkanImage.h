@@ -42,11 +42,12 @@ namespace Nuake
 	public:
 		VulkanImage(ImageFormat format, Vector2 size);
 		VulkanImage(void* data, ImageFormat format, Vector2 size);
-		~VulkanImage() = default;
+		~VulkanImage();
 
 		Vector2 GetSize() const { return Vector2(Extent.x, Extent.y); }
 		VkImageView& GetImageView() { return ImageView; }
 		VkImage& GetImage() { return Image; }
 		VkDescriptorSet& GetImGuiDescriptorSet();
+		ImageFormat GetFormat() const { return Format; }
 	};
 } 

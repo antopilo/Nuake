@@ -90,7 +90,7 @@ VkCommandBufferSubmitInfo VulkanInit::CommandBufferSubmitInfo(VkCommandBuffer cm
 	return info;
 }
 
-VkSubmitInfo2 VulkanInit::SubmitInfo(VkCommandBufferSubmitInfo * cmd, VkSemaphoreSubmitInfo * signalSemaphoreInfo, VkSemaphoreSubmitInfo * waitSemaphoreInfo)
+VkSubmitInfo2 VulkanInit::SubmitInfo(VkCommandBufferSubmitInfo* cmd, VkSemaphoreSubmitInfo * signalSemaphoreInfo, VkSemaphoreSubmitInfo * waitSemaphoreInfo)
 {
 	VkSubmitInfo2 info = {};
 	info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
@@ -102,7 +102,7 @@ VkSubmitInfo2 VulkanInit::SubmitInfo(VkCommandBufferSubmitInfo * cmd, VkSemaphor
 	info.signalSemaphoreInfoCount = signalSemaphoreInfo == nullptr ? 0 : 1;
 	info.pSignalSemaphoreInfos = signalSemaphoreInfo;
 
-	info.commandBufferInfoCount = 1;
+	info.commandBufferInfoCount = cmd == nullptr ? 0 : 1;
 	info.pCommandBufferInfos = cmd;
 
 	return info;
@@ -184,6 +184,34 @@ VkRenderingInfo VulkanInit::RenderingInfo(VkExtent2D renderExtent, VkRenderingAt
 	renderInfo.pStencilAttachment = nullptr;
 
 	return renderInfo;
+}
+
+VkPipelineLayoutCreateInfo VulkanInit::PipelineLayoutCreateInfo()
+{
+	VkPipelineLayoutCreateInfo info{};
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	info.pNext = nullptr;
+
+	// empty defaults
+	info.flags = 0;
+	info.setLayoutCount = 0;
+	info.pSetLayouts = nullptr;
+	info.pushConstantRangeCount = 0;
+	info.pPushConstantRanges = nullptr;
+	return info;
+}
+
+VkPipelineShaderStageCreateInfo VulkanInit::PipelineShaderStageCreateInfo(VkShaderStageFlagBits flags, VkShaderModule shader)
+{
+	VkPipelineShaderStageCreateInfo info{};
+	info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	info.pNext = nullptr;
+
+	// shader stage
+	info.stage = flags;
+	info.module = shader;
+	info.pName = "main";
+	return info;
 }
 
 // This is a helper to transtion images between readable, writable layouts.

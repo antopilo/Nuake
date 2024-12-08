@@ -161,8 +161,12 @@ namespace Nuake
 		VkPipeline Pipeline;
 		VkPipelineLayout PipelineLayout;
 
-		Ref<VulkanShader> BackgroundShader;
+		VkPipelineLayout TrianglePipelineLayout;
+		VkPipeline TrianglePipeline;
 
+		Ref<VulkanShader> BackgroundShader;
+		Ref<VulkanShader> TriangleVertShader;
+		Ref<VulkanShader> TriangleFragShader;
 		// Imgui
 		VkFence ImguiFence;
 		VkCommandBuffer ImguiCommandBuffer;
@@ -200,6 +204,8 @@ namespace Nuake
 		void UpdateDescriptorSets();
 		void InitPipeline();
 		void InitBackgroundPipeline();
+		void InitTrianglePipeline();
+		void DrawGeometry(VkCommandBuffer cmd);
 		void InitImgui();
 
 		void Draw();

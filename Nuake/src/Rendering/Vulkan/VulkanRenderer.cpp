@@ -17,6 +17,7 @@
 #include "VulkanAllocator.h"
 
 #include "VulkanCheck.h"
+#include "PipelineBuilder.h"
 
 using namespace Nuake;
 
@@ -70,9 +71,13 @@ void VkRenderer::Initialize()
 
 	InitDescriptors();
 
-	BackgroundShader = ShaderCompiler::Get().CompileShader("../Resources/Shaders/Vulkan/background.comp");
+	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
+	TriangleVertShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
+	BackgroundShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/background.comp");
+	TriangleFragShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
 
 	InitPipeline();
+	InitTrianglePipeline();
 
 	InitImgui();
 
@@ -306,7 +311,6 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.pImageInfo = &imgInfo;
 
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
-
 }
 
 void VkRenderer::InitPipeline()
@@ -343,6 +347,82 @@ void VkRenderer::InitBackgroundPipeline()
 		vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
 		vkDestroyPipeline(Device, Pipeline, nullptr);
 	});
+}
+
+void VkRenderer::InitTrianglePipeline()
+{
+	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
+	VK_CALL(vkCreatePipelineLayout(Device, &pipeline_layout_info, nullptr, &TrianglePipelineLayout));
+
+	PipelineBuilder pipelineBuilder;
+
+	//use the triangle layout we created
+	pipelineBuilder.PipelineLayout = TrianglePipelineLayout;
+	//connecting the vertex and pixel shaders to the pipeline
+	pipelineBuilder.SetShaders(TriangleVertShader->GetModule(), TriangleFragShader->GetModule());
+	//it will draw triangles
+	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+	//filled triangles
+	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
+	//no backface culling
+	pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
+	//no multisampling
+	pipelineBuilder.SetMultiSamplingNone();
+	//no blending
+	pipelineBuilder.DisableBlending();
+	//no depth testing
+	pipelineBuilder.DisableDepthTest();
+
+	//connect the image format we will draw into, from draw image
+	pipelineBuilder.SetColorAttachment(static_cast<VkFormat>(DrawImage->GetFormat()));
+	pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
+
+	//finally build the pipeline
+	TrianglePipeline = pipelineBuilder.BuildPipeline(Device);
+
+	//clean structures
+	//vkDestroyShaderModule(Device, Triangl, nullptr);
+	//vkDestroyShaderModule(Device, TriangleVertexShader, nullptr);
+
+	MainDeletionQueue.push_function([&]() {
+		vkDestroyPipelineLayout(Device, TrianglePipelineLayout, nullptr);
+		vkDestroyPipeline(Device, TrianglePipeline, nullptr);
+	});
+}
+
+void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
+{
+	//begin a render pass  connected to our draw image
+	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(DrawImage->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(DrawExtent, &colorAttachment, nullptr);
+	vkCmdBeginRendering(cmd, &renderInfo);
+
+	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
+
+	//set dynamic viewport and scissor
+	VkViewport viewport = {};
+	viewport.x = 0;
+	viewport.y = 0;
+	viewport.width = DrawExtent.width;
+	viewport.height = DrawExtent.height;
+	viewport.minDepth = 0.f;
+	viewport.maxDepth = 1.f;
+
+	vkCmdSetViewport(cmd, 0, 1, &viewport);
+
+	VkRect2D scissor = {};
+	scissor.offset.x = 0;
+	scissor.offset.y = 0;
+	scissor.extent.width = DrawExtent.width;
+	scissor.extent.height = DrawExtent.height;
+
+	vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+	//launch a draw command to draw 3 vertices
+	vkCmdDraw(cmd, 3, 1, 0, 0);
+
+	vkCmdEndRendering(cmd);
 }
 
 void VkRenderer::InitImgui()
@@ -514,20 +594,16 @@ void VkRenderer::Draw()
 {
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
 
-	//GetCurrentFrame().LocalDeletionQueue.flush();
+
+	if (SurfaceSize != Window::Get()->GetSize())
+	{
+		RecreateSwapchain();
+		return;
+	}
 
 	//request image from the swapchain
 	uint32_t swapchainImageIndex;
 	VkResult result = vkAcquireNextImageKHR(Device, Swapchain, 1000000000, GetCurrentFrame().SwapchainSemaphore, nullptr, &swapchainImageIndex);
-
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || SurfaceSize != Window::Get()->GetSize())
-	{
-		RecreateSwapchain();
-		//DestroySwapchain();
-		//CreateSwapchain(Window::Get()->GetSize());
-		return;
-	}
-
 	
 	VK_CALL(vkResetFences(Device, 1, &GetCurrentFrame().RenderFence));
 
@@ -541,9 +617,12 @@ void VkRenderer::Draw()
 	DrawExtent.width = DrawImage->GetSize().x;
 	DrawExtent.height = DrawImage->GetSize().y;
 
+	VkCommandBufferSubmitInfo cmdinfo;
+
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 	{
+
 		// Transfer rendering image to general layout
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -558,14 +637,13 @@ void VkRenderer::Draw()
 		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
+		DrawGeometry(cmd);
+
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		
-		{
-		}
+
 		//draw imgui into the swapchain image
 		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
 
-		
 		// set swapchain image layout to Attachment Optimal so we can draw it
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
@@ -577,7 +655,7 @@ void VkRenderer::Draw()
 	}
 	VK_CALL(vkEndCommandBuffer(cmd));
 
-	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
+	cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
 
 	// Wait for both semaphore of swapchain and the texture of the frame.
 	VkSemaphoreSubmitInfo waitInfo = VulkanInit::SemaphoreSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR, GetCurrentFrame().SwapchainSemaphore);

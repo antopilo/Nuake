@@ -10,6 +10,7 @@
 
 using namespace Nuake;
 
+#include "vk_mem_alloc.h"
 
 VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize) :
 	Format(inFormat),
@@ -46,6 +47,11 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize)
 {
 	size_t data_size = inSize.x * inSize.y * 4;
 
+}
+
+VulkanImage::~VulkanImage()
+{
+	// TODO: deletion of image
 }
 
 VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
