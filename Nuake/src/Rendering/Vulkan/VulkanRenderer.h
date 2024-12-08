@@ -6,15 +6,21 @@
 #include "vkb/VkBootstrap.h"
 
 #include "VulkanImage/VulkanImage.h"
+#include "VulkanTypes.h"
+#include "VkVertex.h"
 
 #include <functional>
 #include <span>
 
+
+#include "vk_mem_alloc.h"
+
 namespace Nuake
 {
 	class VulkanShader;
+	class GPUMeshBuffers;
 
-	struct VmaAllocation {};
+
 	struct AllocatedImage {
 		VkImage image;
 		VkImageView imageView;
@@ -149,8 +155,6 @@ namespace Nuake
 
 		DeletionQueue MainDeletionQueue;
 
-		
-		
 		// Descriptors
 		DescriptorAllocator GlobalDescriptorAllocator;
 
@@ -167,10 +171,14 @@ namespace Nuake
 		Ref<VulkanShader> BackgroundShader;
 		Ref<VulkanShader> TriangleVertShader;
 		Ref<VulkanShader> TriangleFragShader;
+		
 		// Imgui
 		VkFence ImguiFence;
 		VkCommandBuffer ImguiCommandBuffer;
 		VkCommandPool ImguiCommandPool;
+
+		// Buffers
+		Ref<GPUMeshBuffers> rectangle;
 
 	public:
 		static VkRenderer& Get()
@@ -213,6 +221,8 @@ namespace Nuake
 		void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
 
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
+
+		Ref<GPUMeshBuffers> UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices);
 
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }
