@@ -36,7 +36,7 @@ GPUMeshBuffers::GPUMeshBuffers(std::vector<VkVertex> vertices, std::vector<uint3
 	const size_t vertexBufferSize = vertices.size() * sizeof(VkVertex);
 	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
 
-	vertexBuffer = AllocatedBuffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+	vertexBuffer = AllocatedBuffer(vertexBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 	VMA_MEMORY_USAGE_GPU_ONLY);
 
 	//find the adress of the vertex buffer

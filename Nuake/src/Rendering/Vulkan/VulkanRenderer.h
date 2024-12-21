@@ -9,6 +9,8 @@
 #include "VulkanTypes.h"
 #include "VkVertex.h"
 
+#include "VulkanAllocatedBuffer.h"
+
 #include <functional>
 #include <span>
 
@@ -19,7 +21,7 @@ namespace Nuake
 {
 	class VulkanShader;
 	class GPUMeshBuffers;
-
+	
 
 	struct AllocatedImage {
 		VkImage image;
@@ -78,6 +80,8 @@ namespace Nuake
 	{
 		VkCommandPool CommandPool; // This is like the allocator for a buffer.
 		VkCommandBuffer CommandBuffer; // You send commands in there.
+
+		AllocatedBuffer CameraStagingBuffer;
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -191,8 +195,7 @@ namespace Nuake
 		// Buffers
 		Ref<GPUMeshBuffers> rectangle;
 
-		Matrix4 View;
-		Matrix4 Projection;
+		AllocatedBuffer CameraBuffer;
 
 	public:
 		static VkRenderer& Get()
@@ -238,12 +241,11 @@ namespace Nuake
 
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
+		void UploadCameraData(const CameraData& data);
 		Ref<GPUMeshBuffers> UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices);
 
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }
 	};
-
-
 	
 }

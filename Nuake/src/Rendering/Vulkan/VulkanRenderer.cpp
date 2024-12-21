@@ -106,13 +106,8 @@ void VkRenderer::Initialize()
 	camData.Projection = Matrix4(1.0f);
 
 	// init camera buffer
-	AllocatedBuffer camBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
-
-	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), camBuffer.GetAllocation(), &mappedData);
-
-	// copy vertex buffer
-	memcpy(mappedData, &camData, sizeof(CameraData));
+	CameraBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+	UploadCameraData(camData);
 
 	InitDescriptors();
 
@@ -120,9 +115,6 @@ void VkRenderer::Initialize()
 	InitTrianglePipeline();
 
 	InitImgui();
-
-	View = Matrix4(1.0f);
-	Projection = Matrix4(1.0f);
 
 	IsInitialized = true;
 }
@@ -280,6 +272,8 @@ void VkRenderer::InitCommands()
 		VkCommandBufferAllocateInfo cmdAllocInfo = VulkanInit::CommandBufferAllocateInfo(Frames[i].CommandPool, 1);
 
 		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
+
+		Frames[i].CameraStagingBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -372,6 +366,22 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.pImageInfo = &imgInfo;
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
 
+	// Update descriptor set for cameras
+	VkDescriptorBufferInfo camBufferInfo{};
+	camBufferInfo.buffer = CameraBuffer.GetBuffer();
+	camBufferInfo.offset = 0;
+	camBufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWriteCam = {};
+	bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWriteCam.pNext = nullptr;
+	bufferWriteCam.dstBinding = 0;
+	bufferWriteCam.dstSet = CameraBufferDescriptors;
+	bufferWriteCam.descriptorCount = 1;
+	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWriteCam.pBufferInfo = &camBufferInfo;
+	vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
+
 	// Update descriptor set for TriangleBufferDescriptors
 	VkDescriptorBufferInfo bufferInfo{};
 	bufferInfo.buffer = rectangle->vertexBuffer.GetBuffer();
@@ -388,21 +398,6 @@ void VkRenderer::UpdateDescriptorSets()
 	bufferWrite.pBufferInfo = &bufferInfo;
 	vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
 
-	// Update descriptor set for cameras
-	VkDescriptorBufferInfo camBufferInfo{};
-	//bufferInfo.buffer = 0;
-	bufferInfo.offset = 0;
-	bufferInfo.range = VK_WHOLE_SIZE;
-
-	VkWriteDescriptorSet bufferWriteCam = {};
-	bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWriteCam.pNext = nullptr;
-	bufferWriteCam.dstBinding = 0;
-	bufferWriteCam.dstSet = CameraBufferDescriptors;
-	bufferWriteCam.descriptorCount = 1;
-	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWriteCam.pBufferInfo = &camBufferInfo;
-	vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
 }
 
 void VkRenderer::InitPipeline()
@@ -448,11 +443,13 @@ void VkRenderer::InitTrianglePipeline()
 	bufferRange.size = sizeof(GPUDrawPushConstants);
 	bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+	VkDescriptorSetLayout layouts[] = { TriangleBufferDescriptorLayout, CameraBufferDescriptorLayout };
+
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
 	pipeline_layout_info.pPushConstantRanges = &bufferRange;
 	pipeline_layout_info.pushConstantRangeCount = 1;
-	pipeline_layout_info.pSetLayouts = &TriangleBufferDescriptorLayout;
-	pipeline_layout_info.setLayoutCount = 1;
+	pipeline_layout_info.pSetLayouts = layouts;
+	pipeline_layout_info.setLayoutCount = 2;
 
 	VK_CALL(vkCreatePipelineLayout(Device, &pipeline_layout_info, nullptr, &TrianglePipelineLayout));
 
@@ -502,6 +499,7 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
 	
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 1, &CameraBufferDescriptors, 0, nullptr);
 	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 1, &TriangleBufferDescriptors, 0, nullptr);
 
 	//set dynamic viewport and scissor
@@ -844,6 +842,22 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 	VK_CALL(vkQueueSubmit2(GPUQueue, 1, &submit, ImguiFence));
 
 	VK_CALL(vkWaitForFences(Device, 1, &ImguiFence, true, 9999999999));
+}
+
+void VkRenderer::UploadCameraData(const CameraData& data)
+{
+	void* mappedData;
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer.GetAllocation()), &mappedData);
+	memcpy(mappedData, &data, sizeof(data));
+
+	ImmediateSubmit([&](VkCommandBuffer cmd) {
+		VkBufferCopy copy{ 0 };
+		copy.dstOffset = 0;
+		copy.srcOffset = 0;
+		copy.size = sizeof(data);
+	
+		vkCmdCopyBuffer(cmd, GetCurrentFrame().CameraStagingBuffer.GetBuffer(), CameraBuffer.GetBuffer(), 1, &copy);
+	});
 }
 
 Ref<GPUMeshBuffers> VkRenderer::UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices)
