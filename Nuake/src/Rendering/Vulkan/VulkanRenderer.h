@@ -124,6 +124,7 @@ namespace Nuake
 
 	struct CameraData
 	{
+		Matrix4 Model;
 		Matrix4 View;
 		Matrix4 Projection;
 	};

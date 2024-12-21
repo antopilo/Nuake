@@ -1,9 +1,12 @@
-// struct World
-// {
-//     mat4x4 view;
-//     mat4x4 proj;
-// }
-// World worldSettings : register(t0);
+struct World
+{
+    float4x4 model;
+    float4x4 view;
+    float4x4 proj;
+};
+
+[[vk::binding(0, 0)]]
+StructuredBuffer<World> world : register(t0);
 
 struct Vertex 
 {
@@ -13,6 +16,8 @@ struct Vertex
     float uv_y;
     float4 color;
 };
+
+[[vk::binding(0, 1)]] 
 StructuredBuffer<Vertex> vertexBuffer : register(t1); 
 
 cbuffer PushConstants : register(b0) 
@@ -32,12 +37,13 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 {
     VSOutput output;
 
+    World worldData = world[0];
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
 
     // Output the position of each vertex
-    output.Position = float4(v.position, 1.0f);
-    output.Color = v.color;
+    output.Position = mul(worldData.proj, mul(worldData.view, mul(worldData.model, float4(v.position, 1.0f))));
+    output.Color = float3(v.color.xyz);
 
     return output;
 }

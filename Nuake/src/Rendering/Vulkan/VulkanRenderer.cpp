@@ -78,10 +78,10 @@ void VkRenderer::Initialize()
 	std::vector<VkVertex> rect_vertices;
 	rect_vertices.resize(4);
 
-	rect_vertices[0].position = { 0.5, -0.5, 0 };
-	rect_vertices[1].position = { 0.5, 0.5, 0 };
-	rect_vertices[2].position = { -0.5, -0.5, 0 };
-	rect_vertices[3].position = { -0.5, 0.5, 0 };
+	rect_vertices[0].position = { 1, -1, 0 };
+	rect_vertices[1].position = { 1, 1, 0 };
+	rect_vertices[2].position = { -1, -1, 0 };
+	rect_vertices[3].position = { -1, 1, 0 };
 
 	rect_vertices[0].color = { 0,0, 0,1 };
 	rect_vertices[1].color = { 0.5,0.5,0.5 ,1 };
@@ -692,7 +692,7 @@ void VkRenderer::InitImgui()
 
 void VkRenderer::BeginScene(const Matrix4 & view, const Matrix4 & projection)
 {
-
+	UploadCameraData(CameraData{ view, projection });
 }
 
 void VkRenderer::Draw()
@@ -734,8 +734,9 @@ void VkRenderer::Draw()
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
 
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-		vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
-
+		//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
+		DrawBackground(cmd);
+		
 		// Transition rendering iamge to transfert onto swapchain images
 		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -793,16 +794,16 @@ void VkRenderer::Draw()
 void VkRenderer::DrawBackground(VkCommandBuffer cmd)
 {
 	// This works
-	//VkClearColorValue clearValue;
+	VkClearColorValue clearValue;
 	//float flash = std::abs(std::sin(FrameNumber / 120.f));
-	//clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
-	//VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-	//vkCmdClearColorImage(cmd, DrawImage.image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
+	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+	vkCmdClearColorImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 
 	// This doesnt!!
-	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
-	vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
+	//vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
+	//vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
+	//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
 }
 
 void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
@@ -844,18 +845,28 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 
 void VkRenderer::UploadCameraData(const CameraData& data)
 {
+	CameraData adjustedData = data;
+
+	adjustedData.Model = glm::translate(Matrix4(1.0f), Vector3(2.0f, 0, -2.5f));
+	adjustedData.View = Matrix4(1.0f); //data.View;
+	adjustedData.View = data.View;
+	adjustedData.Projection = glm::perspective(glm::radians(70.f), (float)DrawExtent.width / (float)DrawExtent.height, 0.0001f, 10000.0f);
+	adjustedData.Projection[1][1] *= -1;
+
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer.GetAllocation()), &mappedData);
-	memcpy(mappedData, &data, sizeof(data));
+	memcpy(mappedData, &adjustedData, sizeof(CameraData));
 
 	ImmediateSubmit([&](VkCommandBuffer cmd) {
 		VkBufferCopy copy{ 0 };
 		copy.dstOffset = 0;
 		copy.srcOffset = 0;
-		copy.size = sizeof(data);
+		copy.size = sizeof(CameraData);
 	
 		vkCmdCopyBuffer(cmd, GetCurrentFrame().CameraStagingBuffer.GetBuffer(), CameraBuffer.GetBuffer(), 1, &copy);
 	});
+
+	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer.GetAllocation());
 }
 
 Ref<GPUMeshBuffers> VkRenderer::UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices)
