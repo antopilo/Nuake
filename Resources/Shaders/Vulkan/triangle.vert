@@ -8,7 +8,7 @@ struct Vertex
 };
 
 // Define the structured buffer for vertices
-StructuredBuffer<Vertex> vertexBuffer : register(t0); // Binding of vertex buffer (example: t0)
+StructuredBuffer<Vertex> vertexBuffer : register(t1); // Binding of vertex buffer (example: t0)
 
 // Define push constants block
 cbuffer PushConstants : register(b0) { // Push constants binding (example: b0)
@@ -27,13 +27,25 @@ struct VSOutput {
 VSOutput main(uint vertexIndex : SV_VertexID) {
     VSOutput output;
 
+        // Constant array of positions for the triangle
+    float3 positions[3] = {
+        float3(1.0f,  1.0f, 0.0f),
+        float3(-1.0f, 1.0f, 0.0f),
+        float3(0.0f, -1.0f, 0.0f)
+    };
+
+    // Constant array of colors for the triangle
+    float3 colors[3] = {
+        float3(1.0f, 0.0f, 0.0f), // red
+        float3(0.0f, 1.0f, 0.0f), // green
+        float3(0.0f, 0.0f, 1.0f)  // blue
+    };
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
 
-    // Transform and output vertex data
-    output.Position = mul(render_matrix, float4(v.position, 1.0f));
-    output.Color = v.color.xyz;
-    output.UV = float2(v.uv_x, v.uv_y);
+    // Output the position of each vertex
+    output.Position = float4(v.position, 1.0f);
+    output.Color = v.color;
 
     return output;
 }

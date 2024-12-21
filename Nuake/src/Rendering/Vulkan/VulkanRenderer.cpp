@@ -70,8 +70,6 @@ void VkRenderer::Initialize()
 
 	InitSync();
 
-	InitDescriptors();
-
 	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
 	TriangleVertShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
 	BackgroundShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/background.comp");
@@ -80,10 +78,10 @@ void VkRenderer::Initialize()
 	std::vector<VkVertex> rect_vertices;
 	rect_vertices.resize(4);
 
-	rect_vertices[0].position = { 0.5,-0.5, 0 };
-	rect_vertices[1].position = { 0.5,0.5, 0 };
-	rect_vertices[2].position = { -0.5,-0.5, 0 };
-	rect_vertices[3].position = { -0.5,0.5, 0 };
+	rect_vertices[0].position = { 0.5, -0.5, 0 };
+	rect_vertices[1].position = { 0.5, 0.5, 0 };
+	rect_vertices[2].position = { -0.5, -0.5, 0 };
+	rect_vertices[3].position = { -0.5, 0.5, 0 };
 
 	rect_vertices[0].color = { 0,0, 0,1 };
 	rect_vertices[1].color = { 0.5,0.5,0.5 ,1 };
@@ -103,6 +101,7 @@ void VkRenderer::Initialize()
 
 	rectangle = UploadMesh(rect_indices, rect_vertices);
 
+	InitDescriptors();
 
 	InitPipeline();
 	InitTrianglePipeline();
@@ -305,10 +304,12 @@ void VkRenderer::InitDescriptors()
 	//create a descriptor pool that will hold 10 sets with 1 image each
 	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
 	{
-		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1 }
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 50 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
 	};
 
-	GlobalDescriptorAllocator.InitPool(Device, 1, sizes);
+	GlobalDescriptorAllocator.InitPool(Device, 50, sizes);
 
 	//make the descriptor set layout for our compute draw
 	{
@@ -317,7 +318,15 @@ void VkRenderer::InitDescriptors()
 		DrawImageDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_COMPUTE_BIT);
 	}
 
+	// Triangle vertex buffer layout
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		TriangleBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_VERTEX_BIT);
+	}
+
 	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
+	TriangleBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, TriangleBufferDescriptorLayout);
 
 	UpdateDescriptorSets();
 }
@@ -339,6 +348,22 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.pImageInfo = &imgInfo;
 
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
+
+	// Update descriptor set for TriangleBufferDescriptors
+	VkDescriptorBufferInfo bufferInfo{};
+	bufferInfo.buffer = rectangle->vertexBuffer.GetBuffer();
+	bufferInfo.offset = 0;
+	bufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWrite = {};
+	bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWrite.pNext = nullptr;
+	bufferWrite.dstBinding = 1;
+	bufferWrite.dstSet = TriangleBufferDescriptors;
+	bufferWrite.descriptorCount = 1;
+	bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWrite.pBufferInfo = &bufferInfo;
+	vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
 }
 
 void VkRenderer::InitPipeline()
@@ -387,6 +412,8 @@ void VkRenderer::InitTrianglePipeline()
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
 	pipeline_layout_info.pPushConstantRanges = &bufferRange;
 	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pSetLayouts = &TriangleBufferDescriptorLayout;
+	pipeline_layout_info.setLayoutCount = 1;
 
 	VK_CALL(vkCreatePipelineLayout(Device, &pipeline_layout_info, nullptr, &TrianglePipelineLayout));
 
@@ -435,6 +462,8 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 	vkCmdBeginRendering(cmd, &renderInfo);
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
+	
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 1, &TriangleBufferDescriptors, 0, nullptr);
 
 	//set dynamic viewport and scissor
 	VkViewport viewport = {};
@@ -455,8 +484,11 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
 
+	vkCmdBindIndexBuffer(cmd, rectangle->indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+	vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 	//launch a draw command to draw 3 vertices
-	vkCmdDraw(cmd, 3, 1, 0, 0);
+	//vkCmdDraw(cmd, 3, 1, 0, 0);
 
 	vkCmdEndRendering(cmd);
 }
@@ -610,7 +642,6 @@ void VkRenderer::InitImgui()
 	init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
 	init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &SwapchainImageFormat;
 
-
 	init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
 	ImGui_ImplVulkan_Init(&init_info);
@@ -622,14 +653,11 @@ void VkRenderer::InitImgui()
 		ImGui_ImplVulkan_Shutdown();
 		vkDestroyDescriptorPool(Device, imguiPool, nullptr);
 	});
-
-	
 }
 
 void VkRenderer::Draw()
 {
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
-
 
 	if (SurfaceSize != Window::Get()->GetSize())
 	{
@@ -658,7 +686,6 @@ void VkRenderer::Draw()
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 	{
-
 		// Transfer rendering image to general layout
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -777,31 +804,33 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 
 Ref<GPUMeshBuffers> VkRenderer::UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices)
 {
-	auto newSurface =  CreateRef<GPUMeshBuffers>(vertices, indices);
+	const size_t vertexBufferSize = vertices.size() * sizeof(VkVertex);
+	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
+	auto newSurface = CreateRef<GPUMeshBuffers>(vertices, indices);
 
-	AllocatedBuffer staging = AllocatedBuffer(std::size(vertices) + std::size(indices), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+	AllocatedBuffer staging = AllocatedBuffer(vertexBufferSize + indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
 	
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), staging.GetAllocation(), &mappedData);
 
 	// copy vertex buffer
-	memcpy(mappedData, vertices.data(), std::size(vertices));
+	memcpy(mappedData, vertices.data(), vertexBufferSize);
 
 	// copy index buffer
-	memcpy((char*)mappedData + std::size(vertices), indices.data(), std::size(indices));
+	memcpy((char*)mappedData + vertexBufferSize, indices.data(), indexBufferSize);
 
 	ImmediateSubmit([&](VkCommandBuffer cmd) {
 		VkBufferCopy vertexCopy{ 0 };
 		vertexCopy.dstOffset = 0;
 		vertexCopy.srcOffset = 0;
-		vertexCopy.size = std::size(vertices);
+		vertexCopy.size = vertexBufferSize;
 
 		vkCmdCopyBuffer(cmd, staging.GetBuffer(), newSurface->vertexBuffer.GetBuffer(), 1, &vertexCopy);
 
 		VkBufferCopy indexCopy{ 0 };
 		indexCopy.dstOffset = 0;
-		indexCopy.srcOffset = std::size(vertices);
-		indexCopy.size = std::size(indices);
+		indexCopy.srcOffset = vertexBufferSize;
+		indexCopy.size = indexBufferSize;
 
 		vkCmdCopyBuffer(cmd, staging.GetBuffer(), newSurface->indexBuffer.GetBuffer(), 1, &indexCopy);
 	});
@@ -847,11 +876,15 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::Build(VkDevice device, VkShaderSt
 void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<PoolSizeRatio> poolRatios)
 {
 	std::vector<VkDescriptorPoolSize> poolSizes;
-	for (PoolSizeRatio ratio : poolRatios) {
-		poolSizes.push_back(VkDescriptorPoolSize{
-			.type = ratio.type,
-			.descriptorCount = uint32_t(ratio.ratio * maxSets)
-		});
+	for (PoolSizeRatio ratio : poolRatios) 
+	{
+		poolSizes.push_back(
+			VkDescriptorPoolSize
+			{
+				.type = ratio.type,
+				.descriptorCount = uint32_t(ratio.ratio * maxSets)
+			}
+		);
 	}
 
 	VkDescriptorPoolCreateInfo pool_info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };

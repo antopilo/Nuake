@@ -161,6 +161,10 @@ namespace Nuake
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
 
+		// Triangle descriptor set layout
+		VkDescriptorSet TriangleBufferDescriptors;
+		VkDescriptorSetLayout TriangleBufferDescriptorLayout;
+
 		// Pipeline
 		VkPipeline Pipeline;
 		VkPipelineLayout PipelineLayout;
