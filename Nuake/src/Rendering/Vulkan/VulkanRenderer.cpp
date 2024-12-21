@@ -18,7 +18,7 @@
 #include "VulkanCheck.h"
 #include "PipelineBuilder.h"
 #include "VulkanAllocatedBuffer.h"
-
+#include <array>
 
 using namespace Nuake;
 #include "vk_mem_alloc.h"
@@ -315,7 +315,7 @@ void VkRenderer::InitDescriptors()
 	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
 	{
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
-		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 50 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
 	};
 
@@ -332,14 +332,14 @@ void VkRenderer::InitDescriptors()
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL);
+		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_VERTEX_BIT);
 	}
 
 	// Triangle vertex buffer layout
 	{
 		DescriptorLayoutBuilder builder;
-		builder.AddBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		TriangleBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_VERTEX_BIT);
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		TriangleBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL);
 	}
 
 	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
@@ -391,13 +391,12 @@ void VkRenderer::UpdateDescriptorSets()
 	VkWriteDescriptorSet bufferWrite = {};
 	bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	bufferWrite.pNext = nullptr;
-	bufferWrite.dstBinding = 1;
+	bufferWrite.dstBinding = 0;
 	bufferWrite.dstSet = TriangleBufferDescriptors;
 	bufferWrite.descriptorCount = 1;
 	bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	bufferWrite.pBufferInfo = &bufferInfo;
 	vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
-
 }
 
 void VkRenderer::InitPipeline()
@@ -443,11 +442,11 @@ void VkRenderer::InitTrianglePipeline()
 	bufferRange.size = sizeof(GPUDrawPushConstants);
 	bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	VkDescriptorSetLayout layouts[] = { TriangleBufferDescriptorLayout, CameraBufferDescriptorLayout };
+	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, TriangleBufferDescriptorLayout };
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
-	pipeline_layout_info.pPushConstantRanges = &bufferRange;
-	pipeline_layout_info.pushConstantRangeCount = 1;
+	//pipeline_layout_info.pPushConstantRanges = &bufferRange;
+	pipeline_layout_info.pushConstantRangeCount = 0;
 	pipeline_layout_info.pSetLayouts = layouts;
 	pipeline_layout_info.setLayoutCount = 2;
 
@@ -499,8 +498,7 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
 	
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 1, &CameraBufferDescriptors, 0, nullptr);
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 1, &TriangleBufferDescriptors, 0, nullptr);
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 2, std::array{ CameraBufferDescriptors, TriangleBufferDescriptors }.data(), 0, nullptr);
 
 	//set dynamic viewport and scissor
 	VkViewport viewport = {};
