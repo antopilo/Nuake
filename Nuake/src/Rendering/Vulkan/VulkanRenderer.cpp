@@ -101,12 +101,28 @@ void VkRenderer::Initialize()
 
 	rectangle = UploadMesh(rect_indices, rect_vertices);
 
+	CameraData camData{};
+	camData.View = Matrix4(1.0f);
+	camData.Projection = Matrix4(1.0f);
+
+	// init camera buffer
+	AllocatedBuffer camBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+
+	void* mappedData;
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), camBuffer.GetAllocation(), &mappedData);
+
+	// copy vertex buffer
+	memcpy(mappedData, &camData, sizeof(CameraData));
+
 	InitDescriptors();
 
 	InitPipeline();
 	InitTrianglePipeline();
 
 	InitImgui();
+
+	View = Matrix4(1.0f);
+	Projection = Matrix4(1.0f);
 
 	IsInitialized = true;
 }
@@ -318,6 +334,13 @@ void VkRenderer::InitDescriptors()
 		DrawImageDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_COMPUTE_BIT);
 	}
 
+	// Camera buffer
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL);
+	}
+
 	// Triangle vertex buffer layout
 	{
 		DescriptorLayoutBuilder builder;
@@ -327,6 +350,7 @@ void VkRenderer::InitDescriptors()
 
 	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
 	TriangleBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, TriangleBufferDescriptorLayout);
+	CameraBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, CameraBufferDescriptorLayout);
 
 	UpdateDescriptorSets();
 }
@@ -346,7 +370,6 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.descriptorCount = 1;
 	drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	drawImageWrite.pImageInfo = &imgInfo;
-
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
 
 	// Update descriptor set for TriangleBufferDescriptors
@@ -364,6 +387,22 @@ void VkRenderer::UpdateDescriptorSets()
 	bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	bufferWrite.pBufferInfo = &bufferInfo;
 	vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
+
+	// Update descriptor set for cameras
+	VkDescriptorBufferInfo camBufferInfo{};
+	//bufferInfo.buffer = 0;
+	bufferInfo.offset = 0;
+	bufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWriteCam = {};
+	bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWriteCam.pNext = nullptr;
+	bufferWriteCam.dstBinding = 0;
+	bufferWriteCam.dstSet = CameraBufferDescriptors;
+	bufferWriteCam.descriptorCount = 1;
+	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWriteCam.pBufferInfo = &camBufferInfo;
+	vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
 }
 
 void VkRenderer::InitPipeline()
@@ -653,6 +692,11 @@ void VkRenderer::InitImgui()
 		ImGui_ImplVulkan_Shutdown();
 		vkDestroyDescriptorPool(Device, imguiPool, nullptr);
 	});
+}
+
+void VkRenderer::BeginScene(const Matrix4 & view, const Matrix4 & projection)
+{
+
 }
 
 void VkRenderer::Draw()

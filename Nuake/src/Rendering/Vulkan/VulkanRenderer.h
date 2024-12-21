@@ -118,7 +118,11 @@ namespace Nuake
 
 	constexpr unsigned int FRAME_OVERLAP = 2;
 
-
+	struct CameraData
+	{
+		Matrix4 View;
+		Matrix4 Projection;
+	};
 
 
 	class VkRenderer
@@ -165,6 +169,9 @@ namespace Nuake
 		VkDescriptorSet TriangleBufferDescriptors;
 		VkDescriptorSetLayout TriangleBufferDescriptorLayout;
 
+		VkDescriptorSet CameraBufferDescriptors;
+		VkDescriptorSetLayout CameraBufferDescriptorLayout;
+
 		// Pipeline
 		VkPipeline Pipeline;
 		VkPipelineLayout PipelineLayout;
@@ -183,6 +190,9 @@ namespace Nuake
 
 		// Buffers
 		Ref<GPUMeshBuffers> rectangle;
+
+		Matrix4 View;
+		Matrix4 Projection;
 
 	public:
 		static VkRenderer& Get()
@@ -219,6 +229,8 @@ namespace Nuake
 		void InitTrianglePipeline();
 		void DrawGeometry(VkCommandBuffer cmd);
 		void InitImgui();
+
+		void BeginScene(const Matrix4& view, const Matrix4& projection);
 
 		void Draw();
 		void DrawBackground(VkCommandBuffer cmd);
