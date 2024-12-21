@@ -9,6 +9,7 @@
 #include <codecvt>
 #include <locale>
 #include <vector>
+#include <src/Core/Logger.h>
 
 
 using namespace Nuake;
@@ -117,7 +118,20 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
         hres = result->GetErrorBuffer(&errorBlob);
         if (SUCCEEDED(hres) && errorBlob) 
         {
-            throw std::runtime_error("Compilation failed");
+            CComPtr<IDxcBlobEncoding> errorBlobUtf8;
+
+            library->GetBlobAsUtf8(errorBlob, &errorBlobUtf8);
+
+            const char* errorMsg = reinterpret_cast<const char*>(errorBlobUtf8->GetBufferPointer());
+            std::string errorMsgStr(errorMsg, errorBlobUtf8->GetBufferSize());
+
+            Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);
+
+            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);
+        }
+        else
+        {
+            throw std::runtime_error("Shader compilation failed, but no error message was retrieved.");
         }
     }
 
