@@ -129,7 +129,6 @@ namespace Nuake
 		Matrix4 Projection;
 	};
 
-
 	class VkRenderer
 	{
 	private:
@@ -170,7 +169,6 @@ namespace Nuake
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
 
-		// Triangle descriptor set layout
 		VkDescriptorSet TriangleBufferDescriptors;
 		VkDescriptorSetLayout TriangleBufferDescriptorLayout;
 

@@ -98,6 +98,7 @@ namespace Nuake {
 		sRendererAPI->DrawElements(mode, count, type, indices);
 	}
 
+
 	void RenderCommand::DrawArrays(int first, int count)
 	{
 		sRendererAPI->DrawArrays(first, count);

@@ -38,6 +38,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     VSOutput output;
 
     World worldData = world[0];
+    
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
 
