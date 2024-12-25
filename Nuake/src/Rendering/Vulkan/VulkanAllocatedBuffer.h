@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/Core/Maths.h"
+#include "src/Resource/UUID.h"
 #include "src/Rendering/Vulkan/VkVertex.h"
 
 #include <vector>
@@ -35,9 +36,11 @@ namespace Nuake
 	class AllocatedBuffer
 	{
 	private:
+		UUID ID;
 		VkBuffer Buffer;
 		VmaAllocation Allocation;
 		VmaAllocationInfo Info;
+		size_t Size;
 
 	public:
 		AllocatedBuffer(size_t size, BufferUsage flags, MemoryUsage usage);
@@ -46,6 +49,8 @@ namespace Nuake
 
 		VkBuffer GetBuffer() const { return Buffer; }
 		VmaAllocation GetAllocation() const { return Allocation; }
+		UUID GetID() const { return ID; }
+		size_t GetSize() const { return Size; }
 	};
 
 	// push constants for our mesh object draws
@@ -55,17 +60,4 @@ namespace Nuake
 		VkDeviceAddress vertexBuffer;
 	};
 
-	
-	// holds the resources needed for a mesh
-	class GPUMeshBuffers
-	{
-	public:
-		AllocatedBuffer indexBuffer;
-		AllocatedBuffer vertexBuffer;
-		VkDeviceAddress vertexBufferAddress;
-
-		GPUMeshBuffers(std::vector<VkVertex> vertices, std::vector<uint32_t> indices);
-		GPUMeshBuffers() = default;
-		~GPUMeshBuffers() = default;
-	};
 }

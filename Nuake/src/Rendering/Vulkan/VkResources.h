@@ -3,6 +3,7 @@
 #include "src/Resource/UUID.h"
 
 #include "VulkanAllocatedBuffer.h"
+#include <src/Core/Logger.h>
 
 namespace Nuake
 {
@@ -21,14 +22,23 @@ namespace Nuake
 		GPUResources() = default;
 		~GPUResources() = default;
 
-		bool AddBuffer(const UUID& id, const Ref<AllocatedBuffer>& buffer)
+		Ref<AllocatedBuffer> CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage)
 		{
+			Ref<AllocatedBuffer> buffer = CreateRef<AllocatedBuffer>(size, flags, usage);
+			Buffers[buffer->GetID()] = buffer;
+			return buffer;
+		}
+
+		bool AddBuffer(const Ref<AllocatedBuffer>& buffer)
+		{
+			const UUID id = buffer->GetID();
 			if (Buffers.find(id) == Buffers.end())
 			{
 				Buffers[id] = buffer;
 				return true;
 			}
 
+			Logger::Log("Buffer with ID already exists", "vulkan", CRITICAL);
 			return false;
 		}
 
@@ -39,6 +49,7 @@ namespace Nuake
 				return Buffers[id];
 			}
 
+			Logger::Log("Buffer with ID does not exist", "vulkan", CRITICAL);
 			return nullptr;
 		}
 	};

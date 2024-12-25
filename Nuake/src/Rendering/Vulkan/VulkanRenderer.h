@@ -16,6 +16,7 @@
 
 
 #include "vk_mem_alloc.h"
+#include "VkMesh.h"
 
 namespace Nuake
 {
@@ -192,7 +193,7 @@ namespace Nuake
 		VkCommandPool ImguiCommandPool;
 
 		// Buffers
-		Ref<GPUMeshBuffers> rectangle;
+		Ref<VkMesh> rectangle;
 
 		AllocatedBuffer CameraBuffer;
 
@@ -241,7 +242,6 @@ namespace Nuake
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 		void UploadCameraData(const CameraData& data);
-		Ref<GPUMeshBuffers> UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices);
 
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }

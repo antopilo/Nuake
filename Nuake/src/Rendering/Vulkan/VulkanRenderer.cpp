@@ -99,7 +99,7 @@ void VkRenderer::Initialize()
 	rect_indices[4] = 1;
 	rect_indices[5] = 3;
 
-	rectangle = UploadMesh(rect_indices, rect_vertices);
+	rectangle = CreateRef<VkMesh>(rect_vertices, rect_indices);
 
 	CameraData camData{};
 	camData.View = Matrix4(1.0f);
@@ -384,7 +384,7 @@ void VkRenderer::UpdateDescriptorSets()
 
 	// Update descriptor set for TriangleBufferDescriptors
 	VkDescriptorBufferInfo bufferInfo{};
-	bufferInfo.buffer = rectangle->vertexBuffer.GetBuffer();
+	bufferInfo.buffer = rectangle->GetVertexBuffer()->GetBuffer();
 	bufferInfo.offset = 0;
 	bufferInfo.range = VK_WHOLE_SIZE;
 
@@ -519,7 +519,7 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
 
-	vkCmdBindIndexBuffer(cmd, rectangle->indexBuffer.GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(cmd, rectangle->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 	//launch a draw command to draw 3 vertices
@@ -867,43 +867,6 @@ void VkRenderer::UploadCameraData(const CameraData& data)
 	});
 
 	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer.GetAllocation());
-}
-
-Ref<GPUMeshBuffers> VkRenderer::UploadMesh(std::vector<uint32_t> indices, std::vector<VkVertex> vertices)
-{
-	const size_t vertexBufferSize = vertices.size() * sizeof(VkVertex);
-	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
-	auto newSurface = CreateRef<GPUMeshBuffers>(vertices, indices);
-
-	AllocatedBuffer staging = AllocatedBuffer(vertexBufferSize + indexBufferSize, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
-	
-	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), staging.GetAllocation(), &mappedData);
-
-	// copy vertex buffer
-	memcpy(mappedData, vertices.data(), vertexBufferSize);
-
-	// copy index buffer
-	memcpy((char*)mappedData + vertexBufferSize, indices.data(), indexBufferSize);
-
-	ImmediateSubmit([&](VkCommandBuffer cmd) {
-		VkBufferCopy vertexCopy{ 0 };
-		vertexCopy.dstOffset = 0;
-		vertexCopy.srcOffset = 0;
-		vertexCopy.size = vertexBufferSize;
-
-		vkCmdCopyBuffer(cmd, staging.GetBuffer(), newSurface->vertexBuffer.GetBuffer(), 1, &vertexCopy);
-
-		VkBufferCopy indexCopy{ 0 };
-		indexCopy.dstOffset = 0;
-		indexCopy.srcOffset = vertexBufferSize;
-		indexCopy.size = indexBufferSize;
-
-		vkCmdCopyBuffer(cmd, staging.GetBuffer(), newSurface->indexBuffer.GetBuffer(), 1, &indexCopy);
-	});
-
-	// TODO: destroy_buffer(staging);
-	return newSurface;
 }
 
 void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
