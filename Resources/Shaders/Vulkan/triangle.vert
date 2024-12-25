@@ -14,7 +14,8 @@ struct Vertex
     float uv_x;
     float3 normal;
     float uv_y;
-    float4 color;
+    float4 tangent;
+    float4 bitangent;
 };
 
 [[vk::binding(0, 1)]] 
@@ -44,7 +45,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 
     // Output the position of each vertex
     output.Position = mul(worldData.proj, mul(worldData.view, mul(worldData.model, float4(v.position, 1.0f))));
-    output.Color = float3(v.color.xyz);
+    output.Color = float3(v.normal.xyz);
 
     return output;
 }

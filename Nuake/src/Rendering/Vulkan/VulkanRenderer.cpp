@@ -449,42 +449,25 @@ void VkRenderer::InitTrianglePipeline()
 	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, TriangleBufferDescriptorLayout };
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
-	//pipeline_layout_info.pPushConstantRanges = &bufferRange;
+	pipeline_layout_info.pPushConstantRanges = &bufferRange;
 	pipeline_layout_info.pushConstantRangeCount = 0;
 	pipeline_layout_info.pSetLayouts = layouts;
 	pipeline_layout_info.setLayoutCount = 2;
-
 	VK_CALL(vkCreatePipelineLayout(Device, &pipeline_layout_info, nullptr, &TrianglePipelineLayout));
 
-	PipelineBuilder pipelineBuilder;
-
 	//use the triangle layout we created
+	PipelineBuilder pipelineBuilder;
 	pipelineBuilder.PipelineLayout = TrianglePipelineLayout;
-	//connecting the vertex and pixel shaders to the pipeline
 	pipelineBuilder.SetShaders(TriangleVertShader->GetModule(), TriangleFragShader->GetModule());
-	//it will draw triangles
 	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-	//filled triangles
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
-	//no backface culling
 	pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
-	//no multisampling
 	pipelineBuilder.SetMultiSamplingNone();
-	//no blending
 	pipelineBuilder.DisableBlending();
-	//no depth testing
 	pipelineBuilder.DisableDepthTest();
-
-	//connect the image format we will draw into, from draw image
 	pipelineBuilder.SetColorAttachment(static_cast<VkFormat>(DrawImage->GetFormat()));
 	pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
-
-	//finally build the pipeline
 	TrianglePipeline = pipelineBuilder.BuildPipeline(Device);
-
-	//clean structures
-	//vkDestroyShaderModule(Device, Triangl, nullptr);
-	//vkDestroyShaderModule(Device, TriangleVertexShader, nullptr);
 
 	MainDeletionQueue.push_function([&]() {
 		vkDestroyPipelineLayout(Device, TrianglePipelineLayout, nullptr);
@@ -522,6 +505,8 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 	scissor.extent.height = DrawExtent.height;
 
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
+
+
 
 	vkCmdBindIndexBuffer(cmd, rectangle->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
@@ -743,10 +728,10 @@ void VkRenderer::Draw()
 		
 		// Transition rendering iamge to transfert onto swapchain images
 		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
 		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		DrawGeometry(cmd);
-
 		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		//draw imgui into the swapchain image
