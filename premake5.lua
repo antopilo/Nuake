@@ -320,7 +320,8 @@ project "NuakeRuntime"
         "yoga",
         "msdf-gen",
         "msdf-atlas-gen",
-        "Freetype"
+        "Freetype",
+        "vma"
     }
     
     defines {
@@ -490,7 +491,8 @@ project "Editor"
         "yoga",
         "msdf-gen",
         "msdf-atlas-gen",
-        "Freetype"
+        "Freetype",
+        "vma"
     }
     
     defines {
