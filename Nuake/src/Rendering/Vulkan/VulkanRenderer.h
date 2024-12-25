@@ -82,7 +82,7 @@ namespace Nuake
 		VkCommandPool CommandPool; // This is like the allocator for a buffer.
 		VkCommandBuffer CommandBuffer; // You send commands in there.
 
-		AllocatedBuffer CameraStagingBuffer;
+		Ref<AllocatedBuffer> CameraStagingBuffer;
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -195,7 +195,7 @@ namespace Nuake
 		// Buffers
 		Ref<VkMesh> rectangle;
 
-		AllocatedBuffer CameraBuffer;
+		Ref<AllocatedBuffer> CameraBuffer;
 
 	public:
 		static VkRenderer& Get()

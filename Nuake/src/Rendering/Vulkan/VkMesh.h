@@ -22,6 +22,9 @@ namespace Nuake
 
 		Ref<AllocatedBuffer> GetVertexBuffer() const { return VertexBuffer; }
 		Ref<AllocatedBuffer> GetIndexBuffer() const { return IndexBuffer; }
+
+		UUID GetID() const { return ID; }
+
 	private:
 		void UploadtoGPU(const std::vector<VkVertex>& vertices, const std::vector<uint32_t>& indices);
 	};

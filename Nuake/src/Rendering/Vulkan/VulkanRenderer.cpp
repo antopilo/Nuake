@@ -20,6 +20,8 @@
 #include "VulkanAllocatedBuffer.h"
 #include <array>
 
+#include "VkResources.h"
+
 using namespace Nuake;
 #include "vk_mem_alloc.h"
 
@@ -83,10 +85,10 @@ void VkRenderer::Initialize()
 	rect_vertices[2].position = { -1, -1, 0 };
 	rect_vertices[3].position = { -1, 1, 0 };
 
-	rect_vertices[0].color = { 0,0, 0,1 };
-	rect_vertices[1].color = { 0.5,0.5,0.5 ,1 };
-	rect_vertices[2].color = { 1,0, 0,1 };
-	rect_vertices[3].color = { 0,1, 0,1 };
+	rect_vertices[0].normal = { 0, 0, 1 };
+	rect_vertices[1].normal = { 0.5, 0.5,0.5 };
+	rect_vertices[2].normal = { 1.0, 0.0, 1.0f };
+	rect_vertices[3].normal = { 0, 1,0 };
 
 	std::vector<uint32_t> rect_indices;
 	rect_indices.resize(6);
@@ -99,14 +101,15 @@ void VkRenderer::Initialize()
 	rect_indices[4] = 1;
 	rect_indices[5] = 3;
 
-	rectangle = CreateRef<VkMesh>(rect_vertices, rect_indices);
+	GPUResources& resources = GPUResources::Get();
+	rectangle = resources.CreateMesh(rect_vertices, rect_indices);
 
 	CameraData camData{};
 	camData.View = Matrix4(1.0f);
 	camData.Projection = Matrix4(1.0f);
 
 	// init camera buffer
-	CameraBuffer = AllocatedBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
+	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
 	UploadCameraData(camData);
 
 	InitDescriptors();
@@ -273,7 +276,8 @@ void VkRenderer::InitCommands()
 
 		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
 
-		Frames[i].CameraStagingBuffer = AllocatedBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
+		GPUResources& resources = GPUResources::Get();
+		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -368,7 +372,7 @@ void VkRenderer::UpdateDescriptorSets()
 
 	// Update descriptor set for cameras
 	VkDescriptorBufferInfo camBufferInfo{};
-	camBufferInfo.buffer = CameraBuffer.GetBuffer();
+	camBufferInfo.buffer = CameraBuffer->GetBuffer();
 	camBufferInfo.offset = 0;
 	camBufferInfo.range = VK_WHOLE_SIZE;
 
@@ -854,7 +858,7 @@ void VkRenderer::UploadCameraData(const CameraData& data)
 	adjustedData.Projection[1][1] *= -1;
 
 	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer.GetAllocation()), &mappedData);
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);
 	memcpy(mappedData, &adjustedData, sizeof(CameraData));
 
 	ImmediateSubmit([&](VkCommandBuffer cmd) {
@@ -863,10 +867,10 @@ void VkRenderer::UploadCameraData(const CameraData& data)
 		copy.srcOffset = 0;
 		copy.size = sizeof(CameraData);
 	
-		vkCmdCopyBuffer(cmd, GetCurrentFrame().CameraStagingBuffer.GetBuffer(), CameraBuffer.GetBuffer(), 1, &copy);
+		vkCmdCopyBuffer(cmd, GetCurrentFrame().CameraStagingBuffer->GetBuffer(), CameraBuffer->GetBuffer(), 1, &copy);
 	});
 
-	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer.GetAllocation());
+	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer->GetAllocation());
 }
 
 void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
