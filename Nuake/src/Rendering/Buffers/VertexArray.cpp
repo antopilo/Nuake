@@ -1,7 +1,8 @@
 #include "VertexArray.h"
 #include "src/Rendering/RenderCommand.h"
 
-namespace Nuake {
+namespace Nuake 
+{
 	VertexArray::VertexArray()
 	{
 		RenderCommand::GenVertexArray(m_RendererID);

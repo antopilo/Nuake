@@ -106,7 +106,7 @@ void VkRenderer::Initialize()
 	camData.Projection = Matrix4(1.0f);
 
 	// init camera buffer
-	CameraBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_MEMORY_USAGE_GPU_ONLY);
+	CameraBuffer = AllocatedBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
 	UploadCameraData(camData);
 
 	InitDescriptors();
@@ -273,7 +273,7 @@ void VkRenderer::InitCommands()
 
 		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
 
-		Frames[i].CameraStagingBuffer = AllocatedBuffer(sizeof(CameraData), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+		Frames[i].CameraStagingBuffer = AllocatedBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -875,7 +875,7 @@ Ref<GPUMeshBuffers> VkRenderer::UploadMesh(std::vector<uint32_t> indices, std::v
 	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
 	auto newSurface = CreateRef<GPUMeshBuffers>(vertices, indices);
 
-	AllocatedBuffer staging = AllocatedBuffer(vertexBufferSize + indexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_MEMORY_USAGE_CPU_ONLY);
+	AllocatedBuffer staging = AllocatedBuffer(vertexBufferSize + indexBufferSize, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
 	
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), staging.GetAllocation(), &mappedData);
