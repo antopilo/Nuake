@@ -200,8 +200,11 @@ namespace Nuake
                 {
                     Vertex vertex;
                     try {
-                        vertex.uv_x = v["UV"]["X"];
-                        vertex.uv_y = v["UV"]["Y"];
+                        if (v.contains("UV") && v["UV"].contains("x") && v["UV"].contains("y"))
+                        {
+                            vertex.uv_x = v["UV"]["x"];
+                            vertex.uv_y = v["UV"]["x"];
+                        }
                     }
                     catch (std::exception& /*e*/) {
                         vertex.uv_x = 0.0f;

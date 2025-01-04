@@ -79,9 +79,9 @@ namespace Nuake
 			{
 				for (auto& m : j["Meshes"])
 				{
-					//Ref<Mesh> mesh = CreateRef<VkMesh>();
-					//mesh->Deserialize(m);
-					//m_Meshes.push_back(mesh);
+					Ref<Mesh> mesh = CreateRef<Mesh>();
+					mesh->Deserialize(m);
+					m_Meshes.push_back(mesh);
 				}
 			}
 		}
