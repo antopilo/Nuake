@@ -2458,7 +2458,7 @@ namespace Nuake {
 
             auto window = Window::Get();
             window->SetDecorated(true);
-            //window->ShowTitleBar(false);
+            window->ShowTitleBar(false);
             window->SetSize({ 1600, 900 });
             window->Center();
             frameCount = 0;
