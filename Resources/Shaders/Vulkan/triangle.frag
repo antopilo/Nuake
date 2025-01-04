@@ -8,11 +8,19 @@ struct PSInput {
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
+    float3 Normal : TEXCOORD2;
 };
 
-float4 main(PSInput input) : SV_Target 
+struct PSOutput {
+    float4 oColor0 : SV_TARGET;
+    float4 oNormal : SV_TARGET1;
+};
+
+PSOutput main(PSInput input)
 {
+    PSOutput output;
     float3 textureColor = myTexture.Sample(mySampler, input.UV);
-    // Return color with alpha = 1.0f
-    return float4(textureColor, 1.0f);
+    output.oColor0 = float4(textureColor, 1.0f);
+    output.oNormal = float4(input.Normal, 1.0f);
+    return output;
 }

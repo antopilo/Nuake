@@ -61,7 +61,7 @@ namespace Nuake
 
 		UUID GetID() const { return ID; }
 		VkImageView& GetImageView() { return ImageView; }
-		VkImage& GetImage() { return Image; }
+		VkImage GetImage() { return Image; }
 		VkDescriptorSet& GetImGuiDescriptorSet();
 		ImageFormat GetFormat() const { return Format; }
 	};

@@ -156,7 +156,6 @@ VkRenderingAttachmentInfo VulkanInit::AttachmentInfo(VkImageView view, VkClearVa
 	VkRenderingAttachmentInfo colorAttachment{};
 	colorAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 	colorAttachment.pNext = nullptr;
-
 	colorAttachment.imageView = view;
 	colorAttachment.imageLayout = layout;
 	colorAttachment.loadOp = clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
@@ -184,17 +183,23 @@ VkRenderingAttachmentInfo VulkanInit::DepthAttachmentInfo(VkImageView view, VkIm
 	return depthAttachment;
 }
 
-VkRenderingInfo VulkanInit::RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment,
-	VkRenderingAttachmentInfo* depthAttachment)
+VkRenderingInfo VulkanInit::RenderingInfo(Vector2 renderExtent,
+										  std::vector<VkRenderingAttachmentInfo>& colorAttachments,
+										  VkRenderingAttachmentInfo* depthAttachment
+										  )
 {
 	VkRenderingInfo renderInfo{};
 	renderInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 	renderInfo.pNext = nullptr;
 
-	renderInfo.renderArea = VkRect2D{ VkOffset2D { 0, 0 }, renderExtent };
+	renderInfo.renderArea = VkRect2D{ VkOffset2D { 0, 0 },
+									  { static_cast<uint32_t>(renderExtent.x), static_cast<uint32_t>(renderExtent.y)} };
 	renderInfo.layerCount = 1;
-	renderInfo.colorAttachmentCount = 1;
-	renderInfo.pColorAttachments = colorAttachment;
+
+	// Set color attachment count and pointer to the array
+	renderInfo.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size());
+	renderInfo.pColorAttachments = colorAttachments.data();  // Pointer to array of color attachments
+
 	renderInfo.pDepthAttachment = depthAttachment;
 	renderInfo.pStencilAttachment = nullptr;
 
@@ -256,16 +261,16 @@ void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayo
 	vkCmdPipelineBarrier2(cmd, &depInfo);
 }
 
-void VulkanUtil::CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize)
+void VulkanUtil::CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, Vector2 srcSize, Vector2 dstSize)
 {
 	VkImageBlit2 blitRegion{ .sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2, .pNext = nullptr };
 
-	blitRegion.srcOffsets[1].x = srcSize.width;
-	blitRegion.srcOffsets[1].y = srcSize.height;
+	blitRegion.srcOffsets[1].x = srcSize.x;
+	blitRegion.srcOffsets[1].y = srcSize.y;
 	blitRegion.srcOffsets[1].z = 1;
 
-	blitRegion.dstOffsets[1].x = dstSize.width;
-	blitRegion.dstOffsets[1].y = dstSize.height;
+	blitRegion.dstOffsets[1].x = dstSize.x;
+	blitRegion.dstOffsets[1].y = dstSize.y;
 	blitRegion.dstOffsets[1].z = 1;
 
 	blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

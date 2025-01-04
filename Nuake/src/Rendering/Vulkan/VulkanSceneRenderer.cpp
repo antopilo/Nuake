@@ -34,6 +34,8 @@ void VkSceneRenderer::Init()
 	CreateBuffers();
 	CreateSamplers();
 	CreateDescriptors();
+
+	SetGBufferSize({ 1280, 720 });
 	CreateBasicPipeline();
 
 	ModelMatrixMapping.clear();
@@ -61,15 +63,48 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		throw std::runtime_error("Draw image is not initialized");
 	}
 	
-	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(vk.DrawImage->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VkRenderingAttachmentInfo depthAttachment = VulkanInit::DepthAttachmentInfo(vk.DepthImage->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(vk.DrawExtent, &colorAttachment, &depthAttachment);
+
 
 	// Ensure the pipeline is valid
 	if (BasicPipeline == VK_NULL_HANDLE) {
 		throw std::runtime_error("Basic pipeline is not initialized");
 	}
 
+	VkClearColorValue clearValue;
+	//float flash = std::abs(std::sin(FrameNumber / 120.f));
+	clearValue = { { 0.0f, 1.0f, 0.0f, 1.0f } };
+	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
+	vkCmdClearColorImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	vkCmdClearColorImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	//VkClearDepthStencilValue clearDepth = { 0.0f, 0 };
+	//clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_DEPTH_BIT);
+	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearDepth, 1, &clearRange);
+
+	// Optionally, clear the image if you need to reset its contents
+	VkClearDepthStencilValue clearValue2 = {};
+	clearValue2.depth = 1.0f; // Depth to clear to
+	clearValue2.stencil = 0; // Stencil to clear to
+
+	VkImageSubresourceRange range = {};
+	range.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	range.baseMipLevel = 0;
+	range.levelCount = 1;
+	range.baseArrayLayer = 0;
+	range.layerCount = 1;
+
+	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue2, 1, &range);
+
+	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(GBufferAlbedo->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VkRenderingAttachmentInfo normalAttachment = VulkanInit::AttachmentInfo(GBufferNormal->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VkRenderingAttachmentInfo depthAttachment = VulkanInit::DepthAttachmentInfo(GBufferDepthImage->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	std::vector<VkRenderingAttachmentInfo> attachments = { colorAttachment, normalAttachment };
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(GBufferAlbedo->GetSize(), attachments, &depthAttachment);
+	renderInfo.colorAttachmentCount = 2;
+	renderInfo.pColorAttachments = attachments.data();
 	vkCmdBeginRendering(cmd, &renderInfo);
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipeline);
@@ -91,8 +126,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	VkViewport viewport = {};
 	viewport.x = 0;
 	viewport.y = 0;
-	viewport.width = vk.DrawExtent.width;
-	viewport.height = vk.DrawExtent.height;
+	viewport.width = GBufferAlbedo->GetWidth();
+	viewport.height = GBufferAlbedo->GetHeight();
 	viewport.minDepth = 0.f;
 	viewport.maxDepth = 1.f;
 	
@@ -101,8 +136,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	VkRect2D scissor = {};
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
-	scissor.extent.width = vk.DrawExtent.width;
-	scissor.extent.height = vk.DrawExtent.height;
+	scissor.extent.width = GBufferAlbedo->GetWidth();
+	scissor.extent.height = GBufferAlbedo->GetWidth();
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
 }
 
@@ -186,7 +221,18 @@ void VkSceneRenderer::DrawScene()
 
 void VkSceneRenderer::EndScene()
 {
+	auto& vk = VkRenderer::Get();
+	auto& cmd = Context.CommandBuffer;
+
 	vkCmdEndRendering(Context.CommandBuffer);
+
+	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	VulkanUtil::CopyImageToImage(cmd, GBufferNormal->GetImage(), vk.GetDrawImage()->GetImage(), GBufferNormal->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -235,9 +281,12 @@ void VkSceneRenderer::CreateBasicPipeline()
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
 	pipelineBuilder.SetCullMode(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
 	pipelineBuilder.SetMultiSamplingNone();
-	pipelineBuilder.EnableBlendingAlphaBlend();	
-	pipelineBuilder.SetColorAttachment(static_cast<VkFormat>(VkRenderer::Get().DrawImage->GetFormat()));
-	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(VkRenderer::Get().DepthImage->GetFormat()));
+	pipelineBuilder.EnableBlendingAlphaBlend();	// Target 0
+	pipelineBuilder.EnableBlendingAlphaBlend(); // Target 1
+
+	std::vector<VkFormat> formats = { static_cast<VkFormat>(GBufferAlbedo->GetFormat()), static_cast<VkFormat>(GBufferNormal->GetFormat()) };
+	pipelineBuilder.SetColorAttachments(formats);
+	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(GBufferDepthImage->GetFormat()));
 	pipelineBuilder.EnableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
 	//pipelineBuilder.DisableDepthTest();
 	BasicPipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
@@ -335,6 +384,13 @@ void VkSceneRenderer::CreateDescriptors()
 	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
 
 	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
+}
+
+void VkSceneRenderer::SetGBufferSize(const Vector2& size)
+{
+	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
+	GBufferDepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
+	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
 }
 
 void VkSceneRenderer::UpdateCameraData(const CameraData& data)

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <volk/volk.h>
+#include <src/Core/Maths.h>
+
+#include <vector>
 
 namespace Nuake
 {
@@ -26,7 +29,10 @@ namespace Nuake
 
 		static VkRenderingAttachmentInfo AttachmentInfo(VkImageView view, VkClearValue* clear, VkImageLayout layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		static VkRenderingAttachmentInfo DepthAttachmentInfo(VkImageView view, VkImageLayout layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-		static VkRenderingInfo RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo * colorAttachment, VkRenderingAttachmentInfo * depthAttachment);
+		static VkRenderingInfo RenderingInfo(Vector2 renderExtent,
+										  std::vector<VkRenderingAttachmentInfo>& colorAttachments,
+										  VkRenderingAttachmentInfo* depthAttachment
+										  );
 
 		static VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo();
 		static VkPipelineShaderStageCreateInfo PipelineShaderStageCreateInfo(VkShaderStageFlagBits flags, VkShaderModule shader);
@@ -39,6 +45,6 @@ namespace Nuake
 		~VulkanUtil() = delete;
 
 		static void TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout);
-		static void CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, VkExtent2D srcSize, VkExtent2D dstSize);
+		static void CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, Vector2 srcSize, Vector2 dstSize);
 	};
 }

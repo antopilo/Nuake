@@ -4,6 +4,7 @@
 #include "src/Rendering/Vulkan/RenderContext.h"
 #include "src/Rendering/Vulkan/VulkanShader.h"
 #include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
+#include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 
 #include <volk/volk.h>
 
@@ -60,8 +61,9 @@ namespace Nuake
 		VkDescriptorSetLayout ImageDescriptorLayout;
 
 		// GBuffer render targets
-		//Ref<VulkanImage> GBufferAlbedo;
-		//Ref<VulkanImage> GBufferDepthImage;
+		Ref<VulkanImage> GBufferAlbedo;
+		Ref<VulkanImage> GBufferNormal;
+		Ref<VulkanImage> GBufferDepthImage;
 
 	public:
 		VkSceneRenderer();
@@ -69,6 +71,7 @@ namespace Nuake
 
 		void Init();
 
+		void SetGBufferSize(const Vector2& size);
 		void UpdateCameraData(const CameraData& data);
 
 		void BeginScene(RenderContext inContext);

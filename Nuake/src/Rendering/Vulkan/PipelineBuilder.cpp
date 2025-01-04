@@ -47,8 +47,8 @@ VkPipeline PipelineBuilder::BuildPipeline(VkDevice device)
 
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY;
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &ColorBlendAttachment;
+    colorBlending.attachmentCount = ColorBlendAttachment.size();
+    colorBlending.pAttachments = ColorBlendAttachment.data();
 
     // completely clear VertexInputStateCreateInfo, as we have no need for it
     VkPipelineVertexInputStateCreateInfo _vertexInputInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
@@ -135,17 +135,27 @@ void PipelineBuilder::SetMultiSamplingNone()
 void PipelineBuilder::DisableBlending()
 {
     // default write mask
-    ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    VkPipelineColorBlendAttachmentState colorBlend = {};
+    colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     // no blending
-    ColorBlendAttachment.blendEnable = VK_FALSE;
+    colorBlend.blendEnable = VK_FALSE;
+	ColorBlendAttachment.push_back(colorBlend);
 }
 
 void PipelineBuilder::SetColorAttachment(VkFormat format)
 {
-    ColorAttachmentformat = format;
+    ColorAttachmentformats = { format };
     // connect the format to the renderInfo  structure
     RenderInfo.colorAttachmentCount = 1;
-    RenderInfo.pColorAttachmentFormats = &ColorAttachmentformat;
+    RenderInfo.pColorAttachmentFormats = ColorAttachmentformats.data();
+}
+
+void PipelineBuilder::SetColorAttachments(std::vector<VkFormat>& formats)
+{
+    ColorAttachmentformats = formats;
+    // connect the format to the renderInfo  structure
+    RenderInfo.colorAttachmentCount = std::size(formats);
+    RenderInfo.pColorAttachmentFormats = ColorAttachmentformats.data();
 }
 
 void PipelineBuilder::SetDepthFormat(VkFormat depthFormat)
@@ -179,26 +189,37 @@ void PipelineBuilder::EnableDepthTest(bool depthWriteEnable, VkCompareOp op)
     DepthStencil.maxDepthBounds = 0.f;
 }
 
+void PipelineBuilder::EnableMultiAlphaBlend(size_t count)
+{
+    VkPipelineColorBlendAttachmentState colorBlendAttachmentState[2] = {};
+}
+
 void PipelineBuilder::EnableBlendingAdditive()
 {
-    ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    ColorBlendAttachment.blendEnable = VK_TRUE;
-    ColorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    ColorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
-    ColorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    ColorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    ColorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    ColorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    VkPipelineColorBlendAttachmentState colorBlend = {};
+    colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend.blendEnable = VK_TRUE;
+    colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+    colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
+    colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	ColorBlendAttachment.push_back(colorBlend);
 }
 
 void PipelineBuilder::EnableBlendingAlphaBlend()
 {
-    ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    ColorBlendAttachment.blendEnable = VK_TRUE;
-    ColorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    ColorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    ColorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    ColorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    ColorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    ColorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    VkPipelineColorBlendAttachmentState colorBlend = {};
+    colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlend.blendEnable = VK_TRUE;
+    colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
+    colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+    colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+
+	ColorBlendAttachment.push_back(colorBlend);
 }

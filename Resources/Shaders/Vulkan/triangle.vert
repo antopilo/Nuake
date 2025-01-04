@@ -39,6 +39,7 @@ struct VSOutput {
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
+    float3 Normal : TEXCOORD2;
 };
 
 // Main vertex shader
@@ -57,5 +58,6 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     output.Position = mul(camData.proj, mul(camData.view, mul(modelData.model, float4(v.position, 1.0f))));
     output.Color = normalize(float3(v.position.xyz));
     output.UV = float2(v.uv_x, v.uv_y);
+    output.Normal = normalize(v.normal);
     return output;
 }

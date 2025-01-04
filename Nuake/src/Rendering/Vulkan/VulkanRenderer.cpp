@@ -226,6 +226,9 @@ void VkRenderer::RecreateSwapchain()
 	DestroySwapchain();
 	CreateSwapchain(Window::Get()->GetSize());
 	UpdateDescriptorSets();
+
+	// Update sceneRenderer
+	SceneRenderer->SetGBufferSize(Window::Get()->GetSize());
 }
 
 void VkRenderer::CreateSwapchain(const Vector2& size)
@@ -513,8 +516,9 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 	//begin a render pass  connected to our draw image
 	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(DrawImage->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(DrawExtent, &colorAttachment, nullptr);
-	vkCmdBeginRendering(cmd, &renderInfo);
+
+	//VkRenderingInfo renderInfo = VulkanInit::RenderingInfo({ DrawExtent.width, DrawExtent.height }, &colorAttachment, nullptr);
+	//vkCmdBeginRendering(cmd, &renderInfo);
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
 	
@@ -761,7 +765,7 @@ bool VkRenderer::Draw()
 
 	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
-	DrawBackground(cmd);
+	//DrawBackground(cmd);
 
 	// Transition rendering iamge to transfert onto swapchain images
 	//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
@@ -847,7 +851,8 @@ void VkRenderer::DrawBackground(VkCommandBuffer cmd)
 void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
 {
 	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(SwapchainExtent, &colorAttachment, nullptr);
+	std::vector<VkRenderingAttachmentInfo> attachments = { colorAttachment };
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo({ SwapchainExtent.width, SwapchainExtent.height }, attachments, nullptr);
 
 	vkCmdBeginRendering(cmd, &renderInfo);
 
