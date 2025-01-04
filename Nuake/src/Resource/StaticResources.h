@@ -116,6 +116,9 @@ namespace Nuake {
         extern const std::string Resources_Images_minimize_icon_png_path;
         extern unsigned int Resources_Images_minimize_icon_png_len;
         extern unsigned char Resources_Images_minimize_icon_png[];
+        extern const std::string Resources_Images_missing_texture_png_path;
+        extern unsigned int Resources_Images_missing_texture_png_len;
+        extern unsigned char Resources_Images_missing_texture_png[];
         extern const std::string Resources_Images_nuake_logo_png_path;
         extern unsigned int Resources_Images_nuake_logo_png_len;
         extern unsigned char Resources_Images_nuake_logo_png[];

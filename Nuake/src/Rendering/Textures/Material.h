@@ -9,6 +9,10 @@
 #include "src/Resource/Resource.h"
 #include "src/FileSystem/FileSystem.h"
 
+#include "src/Rendering/Vulkan/VkResources.h"
+#include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+
+
 namespace Nuake
 {
 	struct UBOStructure {
@@ -56,6 +60,7 @@ namespace Nuake
 			};
 		}
 	public:
+		UUID AlbedoImage;
 		Ref<Texture> m_Albedo;
 		Ref<Texture> m_AO;
 		Ref<Texture> m_Metalness;
@@ -169,8 +174,25 @@ namespace Nuake
 			{
 				const auto& texturePath = j["Albedo"]["Path"];
 				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
-				Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(absolutePath);
-				SetAlbedo(albedoTexture);
+
+				if (FileSystem::FileExists(texturePath))
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> image = CreateRef<VulkanImage>(absolutePath);
+					if (resources.AddTexture(image))
+					{
+						AlbedoImage = image->GetID();
+					}
+
+					Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(absolutePath);
+					SetAlbedo(albedoTexture);
+				}
+				else
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> missingTexture = TextureManager::Get()->GetTexture2("missing_texture");
+					AlbedoImage = missingTexture->GetID();
+				}
 			}
 
 			if (j.contains("AlbedoColor"))

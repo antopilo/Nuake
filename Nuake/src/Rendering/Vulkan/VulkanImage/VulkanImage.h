@@ -1,6 +1,7 @@
 #pragma once
 
 #include "src/Core/Maths.h"
+#include "src/Resource/UUID.h"
 
 #include "volk/volk.h"
 #include "vk_mem_alloc.h"
@@ -35,6 +36,7 @@ namespace Nuake
 	class VulkanImage
 	{
 	private:
+		UUID ID;
 		VkImage Image;
 		VkImageView ImageView;
 		VmaAllocation Allocation;
@@ -57,6 +59,7 @@ namespace Nuake
 		int GetWidth() const { return static_cast<int>(Extent.x); }
 		int GetHeight() const { return static_cast<int>(Extent.y); }
 
+		UUID GetID() const { return ID; }
 		VkImageView& GetImageView() { return ImageView; }
 		VkImage& GetImage() { return Image; }
 		VkDescriptorSet& GetImGuiDescriptorSet();

@@ -6,6 +6,8 @@
 #include "src/Rendering/Vertex.h"
 #include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+#include "src/Rendering/Vulkan/VkMesh.h"
+
 
 namespace Nuake
 {
@@ -96,5 +98,29 @@ namespace Nuake
 			Logger::Log("Mesh with ID does not exist", "vulkan", CRITICAL);
 			return nullptr;
 		}
+
+		bool AddTexture(Ref<VulkanImage> image)
+		{
+			const UUID id = image->GetID();
+			if (Images.find(id) == Images.end())
+			{
+				Images[id] = image;
+				return true;
+			}
+
+			Logger::Log("Buffer with ID already exists", "vulkan", CRITICAL);
+			return false;
+		}
+
+        Ref<VulkanImage> GetTexture(const UUID& id)
+        {
+            if (Images.find(id) != Images.end())
+            {
+                return Images[id];
+            }
+
+            Logger::Log("Mesh with ID does not exist", "vulkan", CRITICAL);
+            return nullptr;
+        }
 	};
 }

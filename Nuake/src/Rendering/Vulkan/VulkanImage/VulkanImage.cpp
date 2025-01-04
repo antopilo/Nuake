@@ -15,7 +15,8 @@ using namespace Nuake;
 
 VulkanImage::VulkanImage(const std::string & path) :
 	ImGuiDescriptorSetGenerated(false),
-	Format(ImageFormat::RGBA8)
+	Format(ImageFormat::RGBA8),
+	ID(UUID())
 {
 	int channels = 0;
 	int width = 0;
@@ -86,7 +87,8 @@ VulkanImage::VulkanImage(const std::string & path) :
 VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage) :
 	Format(inFormat),
 	Extent(inSize, 1),
-	ImGuiDescriptorSetGenerated(false)
+	ImGuiDescriptorSetGenerated(false),
+	ID(UUID())
 {
 	VkExtent3D vkExtent = 
 	{
@@ -199,7 +201,8 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 
 VulkanImage::VulkanImage(void* inData, size_t inSize) :
 	Format(ImageFormat::RGBA8),
-	ImGuiDescriptorSetGenerated(false)
+	ImGuiDescriptorSetGenerated(false),
+	ID(UUID())
 {
 	int channels = 0;
 	int width = 0;
