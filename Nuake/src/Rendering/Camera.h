@@ -27,8 +27,8 @@ namespace Nuake
 		Matrix4 m_Perspective;
 		Matrix4 m_View;
 
-		float Near = 0.001f;
-		float Far = 400.0f;
+		float Near = 400.0f;
+		float Far = 0.001f;
 
 	public:
 		float AspectRatio = 16.0f / 9.0f;

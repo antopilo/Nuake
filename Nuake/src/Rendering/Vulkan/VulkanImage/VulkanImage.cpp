@@ -12,7 +12,7 @@ using namespace Nuake;
 
 #include "vk_mem_alloc.h"
 
-VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize) :
+VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage) :
 	Format(inFormat),
 	Extent(inSize, 1),
 	ImGuiDescriptorSetGenerated(false)
@@ -25,11 +25,19 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize) :
 	};
 
 	VkImageUsageFlags drawImageUsages{};
-	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	drawImageUsages |= VK_IMAGE_USAGE_SAMPLED_BIT;
+
+	if (usage == ImageUsage::Default)
+	{
+		drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT;
+		drawImageUsages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		drawImageUsages |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+	else if (usage == ImageUsage::Depth)
+	{
+		drawImageUsages |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
 
 	VkImageCreateInfo imgCreateInfo = VulkanInit::ImageCreateInfo(static_cast<VkFormat>(inFormat), drawImageUsages, vkExtent);
 
@@ -39,7 +47,16 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize) :
 
 	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
 
-	VkImageViewCreateInfo imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(inFormat), Image, VK_IMAGE_ASPECT_COLOR_BIT);
+	VkImageViewCreateInfo imageViewCreateInfo;
+	if (usage == ImageUsage::Depth)
+	{
+		imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(inFormat), Image, VK_IMAGE_ASPECT_DEPTH_BIT);
+	}
+	else
+	{
+		imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(inFormat), Image, VK_IMAGE_ASPECT_COLOR_BIT);
+	}
+
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
 }
 

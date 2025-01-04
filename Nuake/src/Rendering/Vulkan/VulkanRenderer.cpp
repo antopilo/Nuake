@@ -24,6 +24,8 @@
 
 using namespace Nuake;
 #include "vk_mem_alloc.h"
+#include <src/Rendering/Vertex.h>
+#include "VulkanSceneRenderer.h"
 
 bool NKUseValidationLayer = true;
 
@@ -77,13 +79,13 @@ void VkRenderer::Initialize()
 	BackgroundShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/background.comp");
 	TriangleFragShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
 
-	std::vector<VkVertex> rect_vertices;
+	std::vector<Vertex> rect_vertices;
 	rect_vertices.resize(4);
 
-	rect_vertices[0].position = { 1, -1, 0 };
-	rect_vertices[1].position = { 1, 1, 0 };
-	rect_vertices[2].position = { -1, -1, 0 };
-	rect_vertices[3].position = { -1, 1, 0 };
+	rect_vertices[0].position = {  1.0f, -1.0f, 0 };
+	rect_vertices[1].position = {  1.0f,  1.0f, 0 };
+	rect_vertices[2].position = { -1.0f, -1.0f, 0 };
+	rect_vertices[3].position = { -1.0f,  1.0f, 0 };
 
 	rect_vertices[0].normal = { 0, 0, 1 };
 	rect_vertices[1].normal = { 0.5, 0.5,0.5 };
@@ -100,6 +102,17 @@ void VkRenderer::Initialize()
 	rect_indices[3] = 2;
 	rect_indices[4] = 1;
 	rect_indices[5] = 3;
+
+	// Init global pool
+	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
+	{
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
+	};
+
+	GlobalDescriptorAllocator.InitPool(Device, 1000, sizes);
+
 
 	GPUResources& resources = GPUResources::Get();
 	rectangle = resources.CreateMesh(rect_vertices, rect_indices);
@@ -118,6 +131,9 @@ void VkRenderer::Initialize()
 	InitTrianglePipeline();
 
 	InitImgui();
+
+	SceneRenderer = CreateRef<VkSceneRenderer>();
+	SceneRenderer->Init();
 
 	IsInitialized = true;
 }
@@ -250,6 +266,7 @@ void VkRenderer::CreateSwapchain(const Vector2& size)
 	};
 
 	DrawImage = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
+	DepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
 }
 
 void VkRenderer::DestroySwapchain()
@@ -278,6 +295,7 @@ void VkRenderer::InitCommands()
 
 		GPUResources& resources = GPUResources::Get();
 		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
+		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -316,14 +334,6 @@ void VkRenderer::InitSync()
 void VkRenderer::InitDescriptors()
 {
 	//create a descriptor pool that will hold 10 sets with 1 image each
-	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
-	{
-		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
-		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
-	};
-
-	GlobalDescriptorAllocator.InitPool(Device, 50, sizes);
 
 	//make the descriptor set layout for our compute draw
 	{
@@ -371,36 +381,36 @@ void VkRenderer::UpdateDescriptorSets()
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
 
 	// Update descriptor set for cameras
-	VkDescriptorBufferInfo camBufferInfo{};
-	camBufferInfo.buffer = CameraBuffer->GetBuffer();
-	camBufferInfo.offset = 0;
-	camBufferInfo.range = VK_WHOLE_SIZE;
-
-	VkWriteDescriptorSet bufferWriteCam = {};
-	bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWriteCam.pNext = nullptr;
-	bufferWriteCam.dstBinding = 0;
-	bufferWriteCam.dstSet = CameraBufferDescriptors;
-	bufferWriteCam.descriptorCount = 1;
-	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWriteCam.pBufferInfo = &camBufferInfo;
-	vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
-
-	// Update descriptor set for TriangleBufferDescriptors
-	VkDescriptorBufferInfo bufferInfo{};
-	bufferInfo.buffer = rectangle->GetVertexBuffer()->GetBuffer();
-	bufferInfo.offset = 0;
-	bufferInfo.range = VK_WHOLE_SIZE;
-
-	VkWriteDescriptorSet bufferWrite = {};
-	bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWrite.pNext = nullptr;
-	bufferWrite.dstBinding = 0;
-	bufferWrite.dstSet = TriangleBufferDescriptors;
-	bufferWrite.descriptorCount = 1;
-	bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWrite.pBufferInfo = &bufferInfo;
-	vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
+	//VkDescriptorBufferInfo camBufferInfo{};
+	//camBufferInfo.buffer = CameraBuffer->GetBuffer();
+	//camBufferInfo.offset = 0;
+	//camBufferInfo.range = VK_WHOLE_SIZE;
+	//
+	//VkWriteDescriptorSet bufferWriteCam = {};
+	//bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	//bufferWriteCam.pNext = nullptr;
+	//bufferWriteCam.dstBinding = 0;
+	//bufferWriteCam.dstSet = CameraBufferDescriptors;
+	//bufferWriteCam.descriptorCount = 1;
+	//bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	//bufferWriteCam.pBufferInfo = &camBufferInfo;
+	//vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
+	//
+	//// Update descriptor set for TriangleBufferDescriptors
+	//VkDescriptorBufferInfo bufferInfo{};
+	//bufferInfo.buffer = rectangle->GetVertexBuffer()->GetBuffer();
+	//bufferInfo.offset = 0;
+	//bufferInfo.range = VK_WHOLE_SIZE;
+	//
+	//VkWriteDescriptorSet bufferWrite = {};
+	//bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	//bufferWrite.pNext = nullptr;
+	//bufferWrite.dstBinding = 0;
+	//bufferWrite.dstSet = TriangleBufferDescriptors;
+	//bufferWrite.descriptorCount = 1;
+	//bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	//bufferWrite.pBufferInfo = &bufferInfo;
+	//vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
 }
 
 void VkRenderer::InitPipeline()
@@ -474,6 +484,14 @@ void VkRenderer::InitTrianglePipeline()
 		vkDestroyPipeline(Device, TrianglePipeline, nullptr);
 	});
 }
+
+void VkRenderer::DrawScene(RenderContext ctx)
+{
+	SceneRenderer->BeginScene(ctx);
+	SceneRenderer->DrawScene();
+	SceneRenderer->EndScene();
+}
+
 
 void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 {
@@ -679,23 +697,28 @@ void VkRenderer::InitImgui()
 	});
 }
 
-void VkRenderer::BeginScene(const Matrix4 & view, const Matrix4 & projection)
+void VkRenderer::BeginScene(const Matrix4& view, const Matrix4& projection)
 {
-	UploadCameraData(CameraData{ view, projection });
+	CameraData newData = { view, projection };
+	//UploadCameraData(newData);
+	SceneRenderer->UpdateCameraData(newData);
 }
 
-void VkRenderer::Draw()
+
+bool VkRenderer::Draw()
 {
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
 
 	if (SurfaceSize != Window::Get()->GetSize())
 	{
 		RecreateSwapchain();
-		return;
+		FrameSkipped = true;
+		return false;
 	}
 
+	FrameSkipped = false;
+
 	//request image from the swapchain
-	uint32_t swapchainImageIndex;
 	VkResult result = vkAcquireNextImageKHR(Device, Swapchain, 1000000000, GetCurrentFrame().SwapchainSemaphore, nullptr, &swapchainImageIndex);
 	
 	VK_CALL(vkResetFences(Device, 1, &GetCurrentFrame().RenderFence));
@@ -710,45 +733,54 @@ void VkRenderer::Draw()
 	DrawExtent.width = DrawImage->GetSize().x;
 	DrawExtent.height = DrawImage->GetSize().y;
 
-	VkCommandBufferSubmitInfo cmdinfo;
-
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
+	// Transfer rendering image to general layout
+	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+
+	// Execute compute shader that writes to the image
+	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
+	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
+
+	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+	//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
+	DrawBackground(cmd);
+
+	// Transition rendering iamge to transfert onto swapchain images
+	//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, DepthImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+
+	//DrawGeometry(cmd);
+
+	return true;
+}
+
+void VkRenderer::EndDraw()
+{
+	if (FrameSkipped)
 	{
-		// Transfer rendering image to general layout
-		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-
-		// Execute compute shader that writes to the image
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
-		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
-
-		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-		//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
-		DrawBackground(cmd);
-		
-		// Transition rendering iamge to transfert onto swapchain images
-		//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-		DrawGeometry(cmd);
-		VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-		//draw imgui into the swapchain image
-		DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
-
-		// set swapchain image layout to Attachment Optimal so we can draw it
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-		// set swapchain image layout to Present so we can draw it
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-		// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
-		VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+		return;
 	}
+
+	VkCommandBuffer cmd = GetCurrentFrame().CommandBuffer;
+	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	//draw imgui into the swapchain image
+	DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
+
+	// set swapchain image layout to Attachment Optimal so we can draw it
+	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+	// set swapchain image layout to Present so we can draw it
+	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+	// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
+	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	VK_CALL(vkEndCommandBuffer(cmd));
 
-	cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
+	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);
 
 	// Wait for both semaphore of swapchain and the texture of the frame.
 	VkSemaphoreSubmitInfo waitInfo = VulkanInit::SemaphoreSubmitInfo(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT_KHR, GetCurrentFrame().SwapchainSemaphore);
@@ -835,12 +867,10 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 void VkRenderer::UploadCameraData(const CameraData& data)
 {
 	CameraData adjustedData = data;
-
-	adjustedData.Model = glm::translate(Matrix4(1.0f), Vector3(2.0f, 0, -2.5f));
 	adjustedData.View = Matrix4(1.0f); //data.View;
 	adjustedData.View = data.View;
 	adjustedData.Projection = glm::perspective(glm::radians(70.f), (float)DrawExtent.width / (float)DrawExtent.height, 0.0001f, 10000.0f);
-	adjustedData.Projection[1][1] *= -1;
+	//adjustedData.Projection[1][1] *= -1;
 
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);

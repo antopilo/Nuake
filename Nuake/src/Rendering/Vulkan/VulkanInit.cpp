@@ -126,7 +126,7 @@ VkImageCreateInfo VulkanInit::ImageCreateInfo(VkFormat format, VkImageUsageFlags
 	info.samples = VK_SAMPLE_COUNT_1_BIT;
 
 	//optimal tiling, which means the image is stored on the best gpu format
-	info.tiling = VK_IMAGE_TILING_LINEAR;
+	info.tiling = VK_IMAGE_TILING_OPTIMAL;
 	info.usage = usageFlags;
 
 	return info;
@@ -167,6 +167,21 @@ VkRenderingAttachmentInfo VulkanInit::AttachmentInfo(VkImageView view, VkClearVa
 	}
 
 	return colorAttachment;
+}
+
+VkRenderingAttachmentInfo VulkanInit::DepthAttachmentInfo(VkImageView view, VkImageLayout layout)
+{
+	VkRenderingAttachmentInfo depthAttachment{};
+	depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	depthAttachment.pNext = nullptr;
+
+	depthAttachment.imageView = view;
+	depthAttachment.imageLayout = layout;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	depthAttachment.clearValue.depthStencil.depth = 0.f;
+
+	return depthAttachment;
 }
 
 VkRenderingInfo VulkanInit::RenderingInfo(VkExtent2D renderExtent, VkRenderingAttachmentInfo* colorAttachment,

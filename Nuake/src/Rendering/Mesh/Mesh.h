@@ -3,6 +3,8 @@
 #include "src/Rendering/AABB.h"
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
+#include "src/Rendering/Vulkan/VkMesh.h"
+
 
 namespace Nuake
 {
@@ -34,6 +36,11 @@ namespace Nuake
 		json Serialize() override;
 		bool Deserialize(const json& j) override;
 
+		Ref<VkMesh> GetVkMesh() 
+		{
+			return m_Mesh;
+		}
+
 	private:
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
@@ -42,9 +49,10 @@ namespace Nuake
 		uint32_t m_IndicesCount;
 		uint32_t m_VerticesCount;
 
-		Scope<VertexBuffer> m_VertexBuffer;
-		Scope<VertexArray> m_VertexArray;
-		Scope<VertexBuffer> m_ElementBuffer;
+		Ref<VkMesh> m_Mesh;
+		//Scope<VertexBuffer> m_VertexBuffer;
+		//Scope<VertexArray> m_VertexArray;
+		//Scope<VertexBuffer> m_ElementBuffer;
 
 		void SetupMesh();
 

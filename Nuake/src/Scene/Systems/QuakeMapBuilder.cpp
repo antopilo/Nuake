@@ -344,10 +344,11 @@ namespace Nuake {
 
                                     vertices.push_back(Vertex{
                                         vertexPos * (1.0f / 64.0f),
-                                        vertexUV,
+                                        vertexUV.x,
                                         vertexNormal,
-                                        vertexTangent,
-                                        vertexBitangent
+                                        vertexUV.y,
+                                        Vector4(vertexTangent, 0),
+                                        Vector4(vertexBitangent, 0)
                                     });
                                 }
 
@@ -498,10 +499,11 @@ namespace Nuake {
 
                             vertices.push_back(Vertex {
                                 vertexPos * (1.0f / 64.0f),
-                                vertexUV,
+                                vertexUV.x,
                                 vertexNormal,
-                                vertexTangent,
-                                vertexBitangent
+                                vertexUV.y,
+                                Vector4(vertexTangent, 0),
+                                Vector4(vertexBitangent, 0)
                             });
                         }
 

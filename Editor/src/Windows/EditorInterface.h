@@ -52,6 +52,7 @@ namespace Nuake
 		bool m_IsRenaming = false;
 		bool m_ShouldUnfoldEntityTree = false;
 		bool m_ShowTrenchbroomConfigurator = false;
+		bool m_ShowGpuResources = false;
 		bool m_ShowProjectSettings = false;
 		bool m_ShowMapImporter = false;
 		Vector2 m_ViewportPos = {0, 0};

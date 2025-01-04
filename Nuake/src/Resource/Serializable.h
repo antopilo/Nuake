@@ -45,6 +45,9 @@ p = j[#p]; \
 #define DESERIALIZE_VEC4(v, p) \
 	p = Vector4(v["x"], v["y"], v["z"], v["w"]);
 
+#define DESERIALIZE_VEC3_INTO4(v, p) \
+	p = Vector4(v["x"], v["y"], v["z"], 0.0f);
+
 #define DESERIALIZE_VEC3(v, p) \
 	p = Vector3(v["x"], v["y"], v["z"]);
 

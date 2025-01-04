@@ -49,54 +49,54 @@ namespace Nuake
 
     std::vector<Vertex> CubeVertices
     {
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
-        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f,  1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f,  1.0f, -1.0f), Vector2(1, 0), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f, -1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(0, 0), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f, -1.0f), Vector2(1, 0), Vector3(-1,-1, 0) },
-        { Vector3(-1.0f, -1.0f,  1.0f), Vector2(0, 1), Vector3(-1, 0, 0) },
-        { Vector3(1.0f, -1.0f,  1.0f), Vector2(1, 1), Vector3(-1, 0, 0) }
+        { Vector3(-1.0f,  1.0f, -1.0f), 0.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(-1.0f, -1.0f, -1.0f), 1.0f, Vector3(-1,-1, 0), 0.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f, -1.0f),  0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f, -1.0f), 1.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f, -1.0f, -1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f, -1.0f), 0.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(-1.0f,  1.0f, -1.0f), 1.0f, Vector3(-1,-1, 0), 0.0f },
+        { Vector3(-1.0f,  1.0f,  1.0f), 0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f, -1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f, -1.0f),  0.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  1.0f, Vector3(-1,-1, 0), 0.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(1.0f, -1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f, -1.0f), 0.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(1.0f,  1.0f, -1.0f),  1.0f, Vector3(-1,-1, 0), 0.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f,  1.0f), 0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f,  1.0f, -1.0f), 1.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(-1.0f, -1.0f, -1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  0.0f, Vector3(-1, 0, 0), 0.0f },
+        { Vector3(1.0f, -1.0f, -1.0f),  1.0f, Vector3(-1,-1, 0), 0.0f },
+        { Vector3(-1.0f, -1.0f,  1.0f), 0.0f, Vector3(-1, 0, 0), 1.0f },
+        { Vector3(1.0f, -1.0f,  1.0f),  1.0f, Vector3(-1, 0, 0), 1.0f }
     };
 
     std::vector<uint32_t> CubeIndices;
 
     std::vector<Vertex> QuadVertices
     {
-        { Vector3(-1.0f,  1.0f, 0.0f), Vector2(0.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,  1.0f, 0.0f),  Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0, 0),       Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,  -1.0f, 0.0f), Vector2(1.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(-1.0f, -1.0f, 0.0f), Vector2(0.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-        { Vector3(1.0f,   1.0f, 0.0f), Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) }
+        { Vector3(-1.0f,  1.0f, 0.0f), 0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+        { Vector3(1.0f,  1.0f, 0.0f),  1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+        { Vector3(-1.0f, -1.0f, 0.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+        { Vector3(1.0f,  -1.0f, 0.0f), 1.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+        { Vector3(-1.0f, -1.0f, 0.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+        { Vector3(1.0f,   1.0f, 0.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
     };
 
 
@@ -227,7 +227,8 @@ namespace Nuake
                 
                 s = (float)j / sectorCount * 4.f;
                 t = (float)i / stackCount * 4.f;
-                newVertex.uv = { t, s };
+                newVertex.uv_x = t;
+				newVertex.uv_y = s;
 
                 finalVertices.push_back(newVertex);
             }
@@ -399,8 +400,8 @@ namespace Nuake
         
         std::vector<Vertex> vertices
         {
-            {start, Vector2(0, 0), Vector3(-1, 0, 0)},
-            {end, Vector2(1, 0), Vector3(-1, -1, 0)}
+            {start, 0.0f, Vector3(-1, 0, 0), 1.0f},
+            {end, 1.0f, Vector3(-1, -1, 0), 0.0f}
         };
 
         VertexArray lineVertexArray = VertexArray();

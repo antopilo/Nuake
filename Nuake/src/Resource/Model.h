@@ -5,6 +5,7 @@
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Mesh/Mesh.h"
 
+
 namespace Nuake
 {
 	class Model : public Resource, ISerializable

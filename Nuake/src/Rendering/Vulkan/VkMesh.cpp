@@ -6,10 +6,10 @@
 
 using namespace Nuake;
 
-VkMesh::VkMesh(const std::vector<VkVertex>& vertices, const std::vector<uint32_t>& indices)
+VkMesh::VkMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
 	// First we allocate the buffers on the GPU
-	const size_t vertexBufferSize = vertices.size() * sizeof(VkVertex);
+	const size_t vertexBufferSize = vertices.size() * sizeof(Vertex);
 	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
 
 	GPUResources& resources = GPUResources::Get();
@@ -17,10 +17,10 @@ VkMesh::VkMesh(const std::vector<VkVertex>& vertices, const std::vector<uint32_t
 	IndexBuffer = resources.CreateBuffer(indexBufferSize, BufferUsage::INDEX_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
 
 	// Then we upload to data to those buffers.
-	UploadtoGPU(vertices, indices);
+	UploadToGPU(vertices, indices);
 }
 
-void VkMesh::UploadtoGPU(const std::vector<VkVertex>& vertices, const std::vector<uint32_t>& indices)
+void VkMesh::UploadToGPU(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
 	// Create a staging buffer
 	AllocatedBuffer staging = AllocatedBuffer(VertexBuffer->GetSize() + IndexBuffer->GetSize(), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
@@ -49,4 +49,32 @@ void VkMesh::UploadtoGPU(const std::vector<VkVertex>& vertices, const std::vecto
 
 		vkCmdCopyBuffer(cmd, staging.GetBuffer(), IndexBuffer->GetBuffer(), 1, &indexCopy);
 	});
+
+	CreateDescriptorSet();
+}
+
+void VkMesh::CreateDescriptorSet()
+{
+	DescriptorLayoutBuilder builder;
+	builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+
+	auto& vk = VkRenderer::Get();
+	auto device = vk.GetDevice();
+	DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+	DescriptorSet = vk.GetDescriptorAllocator().Allocate(device, DescriptorLayout);
+
+	VkDescriptorBufferInfo bufferInfo{};
+	bufferInfo.buffer = GetVertexBuffer()->GetBuffer();
+	bufferInfo.offset = 0;
+	bufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWrite = {};
+	bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWrite.pNext = nullptr;
+	bufferWrite.dstBinding = 0;
+	bufferWrite.dstSet = DescriptorSet;
+	bufferWrite.descriptorCount = 1;
+	bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWrite.pBufferInfo = &bufferInfo;
+	vkUpdateDescriptorSets(device, 1, &bufferWrite, 0, nullptr);
 }

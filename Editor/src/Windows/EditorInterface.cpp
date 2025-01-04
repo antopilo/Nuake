@@ -60,6 +60,7 @@
 #include <Tracy.hpp>
 
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
+#include <src/Rendering/Vulkan/VkResources.h>
 
 namespace Nuake {
     
@@ -655,7 +656,7 @@ namespace Nuake {
             Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
-            ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail);
+            ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail, { 0, 1 }, { 1, 0 });
             ImGui::PopStyleVar();
 
             const Vector2& mousePos = Input::GetMousePosition();
@@ -2335,6 +2336,12 @@ namespace Nuake {
                     Nuake::Logger::Log("Copied Nuake.Net Assemblies.");
                     SetStatusMessage("Nuake.Net assemblies succesfully copied.");
                 }
+
+                if (ImGui::MenuItem("GPU Resources", 0, m_ShowGpuResources))
+                {
+                    m_ShowGpuResources = !m_ShowGpuResources;
+
+                }
 #endif // NK_DEBUG
 
                 ImGui::EndMenu();
@@ -2538,6 +2545,36 @@ namespace Nuake {
         if (m_ShowTrenchbroomConfigurator)
         {
             m_TrenchhbroomConfigurator.Draw();
+        }
+
+        if (m_ShowGpuResources)
+        {
+            if (ImGui::Begin("GPU Resources"))
+            {
+                GPUResources& gpu = GPUResources::Get();
+                auto buffers = gpu.GetAllBuffers();
+
+                ImGui::BeginTable("Buffers", 2);
+                ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
+
+                ImGui::TableHeadersRow();
+
+                ImGui::TableNextColumn();
+
+                for (auto& buffer : buffers)
+                {
+                    ImGui::Text(std::to_string(buffer->GetID()).c_str());
+
+                    ImGui::TableNextColumn();
+
+                    ImGui::Text(std::to_string(buffer->GetSize()).c_str());
+                    ImGui::TableNextColumn();
+                }
+
+                ImGui::EndTable();
+            }
+            ImGui::End();
         }
 
         if (m_ShowMapImporter)

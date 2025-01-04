@@ -12,6 +12,7 @@
 
 #include <future>
 #include <src/Resource/ResourceLoader.h>
+#include <src/Rendering/Vulkan/VkResources.h>
 
 namespace Nuake
 {
@@ -82,43 +83,46 @@ namespace Nuake
 
     void Mesh::SetupMesh()
     {
-        m_VertexArray = CreateScope<VertexArray>();
-        m_VertexArray->Bind();
-        m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(Vertex)));
-        m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
+        GPUResources& resources = GPUResources::Get();
+        m_Mesh = resources.CreateMesh(m_Vertices, m_Indices);
 
-        VertexBufferLayout bufferLayout = VertexBufferLayout();
-        bufferLayout.Push<float>(3); // Position
-        bufferLayout.Push<float>(2); // UV
-        bufferLayout.Push<float>(3); // Normal
-        bufferLayout.Push<float>(3); // Tangent
-        bufferLayout.Push<float>(3); // Bitangent
-
-        m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
-        m_VertexArray->Unbind();
+       //m_VertexArray = CreateScope<VertexArray>();
+       //m_VertexArray->Bind();
+       //m_VertexBuffer = CreateScope<VertexBuffer>(m_Vertices.data(), static_cast<uint32_t>(m_Vertices.size() * sizeof(Vertex)));
+       //m_ElementBuffer = CreateScope<VertexBuffer>(m_Indices.data(), m_Indices.size() * sizeof(unsigned int), RendererEnum::ELEMENT_ARRAY_BUFFER);
+       //
+       //VertexBufferLayout bufferLayout = VertexBufferLayout();
+       //bufferLayout.Push<float>(3); // Position
+       //bufferLayout.Push<float>(2); // UV
+       //bufferLayout.Push<float>(3); // Normal
+       //bufferLayout.Push<float>(3); // Tangent
+       //bufferLayout.Push<float>(3); // Bitangent
+       //
+       //m_VertexArray->AddBuffer(*m_VertexBuffer, bufferLayout);
+       //m_VertexArray->Unbind();
     }
 
     void Mesh::Bind() const
     {
-        m_VertexArray->Bind();
+        //m_VertexArray->Bind();
     }
 
     void Mesh::Draw(Shader* shader, bool bindMaterial)
     {
-        if (bindMaterial)
-            m_Material->Bind(shader);
-
-        m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
+        //if (bindMaterial)
+        //    m_Material->Bind(shader);
+        //
+        //m_VertexArray->Bind();
+        //RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
     }
 
     void Mesh::DebugDraw()
     {
-        Renderer::m_DebugShader->Bind();
-        Renderer::m_DebugShader->SetUniform("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
-
-        m_VertexArray->Bind();
-        RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
+        //Renderer::m_DebugShader->Bind();
+        //Renderer::m_DebugShader->SetUniform("u_Color", 1.0f, 0.0f, 0.0f, 1.f);
+        //
+        //m_VertexArray->Bind();
+        //RenderCommand::DrawElements(RendererEnum::TRIANGLES, m_IndicesCount, RendererEnum::UINT, 0);
     }
 
     json Mesh::Serialize()
@@ -139,8 +143,8 @@ namespace Nuake
 			v["Position"]["y"] = m_Vertices[i].position.y;
 			v["Position"]["z"] = m_Vertices[i].position.z;
 
-			v["UV"]["x"] = m_Vertices[i].uv.x;
-			v["UV"]["y"] = m_Vertices[i].uv.y;
+			v["UV"]["x"] = m_Vertices[i].uv_x;
+			v["UV"]["y"] = m_Vertices[i].uv_y;
 
 			v["Normal"]["x"] = m_Vertices[i].normal.x;
 			v["Normal"]["y"] = m_Vertices[i].normal.y;
@@ -196,15 +200,17 @@ namespace Nuake
                 {
                     Vertex vertex;
                     try {
-                        DESERIALIZE_VEC2(v["UV"], vertex.uv)
+                        vertex.uv_x = v["UV"]["X"];
+                        vertex.uv_y = v["UV"]["Y"];
                     }
                     catch (std::exception& /*e*/) {
-                        vertex.uv = { 0.0, 0.0 };
+                        vertex.uv_x = 0.0f;
+                        vertex.uv_y = 1.0f;
                     }
                     DESERIALIZE_VEC3(v["Position"], vertex.position)
                     DESERIALIZE_VEC3(v["Normal"], vertex.normal)
-                    DESERIALIZE_VEC3(v["Tangent"], vertex.tangent)
-                    DESERIALIZE_VEC3(v["Bitangent"], vertex.bitangent)
+                    DESERIALIZE_VEC3_INTO4(v["Tangent"], vertex.tangent)
+                    DESERIALIZE_VEC3_INTO4(v["Bitangent"], vertex.bitangent)
                     vertices.push_back(vertex);
                 }
 

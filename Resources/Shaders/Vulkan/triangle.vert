@@ -1,12 +1,17 @@
-struct World
+struct Camera
 {
-    float4x4 model;
     float4x4 view;
     float4x4 proj;
 };
-
 [[vk::binding(0, 0)]]
-StructuredBuffer<World> world : register(t0);
+StructuredBuffer<Camera> camera : register(t0);
+
+struct ModelData
+{
+    float4x4 model;
+};
+[[vk::binding(0, 1)]]
+StructuredBuffer<ModelData> model : register(t1);
 
 struct Vertex 
 {
@@ -18,13 +23,16 @@ struct Vertex
     float4 bitangent;
 };
 
-[[vk::binding(0, 1)]] 
-StructuredBuffer<Vertex> vertexBuffer : register(t1); 
+[[vk::binding(0, 2)]] 
+StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
-cbuffer PushConstants : register(b0) 
-{ 
-    float4x4 render_matrix;
+struct ModelPushConstant
+{
+    int modelIndex;  // Push constant data
 };
+
+[[vk::push_constant]]
+ModelPushConstant pushConstants;
 
 // Outputs
 struct VSOutput {
@@ -38,14 +46,16 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 {
     VSOutput output;
 
-    World worldData = world[0];
-    
+    Camera camData = camera[0];
+
+    ModelData modelData = model[pushConstants.modelIndex];
+
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
-
+    
     // Output the position of each vertex
-    output.Position = mul(worldData.proj, mul(worldData.view, mul(worldData.model, float4(v.position, 1.0f))));
-    output.Color = float3(v.normal.xyz);
+    output.Position = mul(camData.proj, mul(camData.view, mul(modelData.model, float4(v.position, 1.0f))));
+    output.Color = normalize(float3(v.position.xyz));
 
     return output;
 }

@@ -11,7 +11,8 @@ namespace Nuake
 	enum class ImageFormat
 	{
 		RGBA8 = 41,
-		RGBA16F = 97
+		RGBA16F = 97,
+		D32F = 126,
 	};
 
 	enum class ImageUsage
@@ -23,7 +24,9 @@ namespace Nuake
 		ColorAttachment,
 		DepthStencilAttachment,
 		TransientAttachment,
-		InputAttachment
+		InputAttachment,
+		Depth,
+		Default
 	};
 
 	class VulkanImage
@@ -40,7 +43,7 @@ namespace Nuake
 		VkDescriptorSet ImGuiDescriptorSet;
 
 	public:
-		VulkanImage(ImageFormat format, Vector2 size);
+		VulkanImage(ImageFormat format, Vector2 size, ImageUsage usage = ImageUsage::Default);
 		VulkanImage(void* data, ImageFormat format, Vector2 size);
 		~VulkanImage();
 

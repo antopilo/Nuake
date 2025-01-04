@@ -36,5 +36,9 @@ namespace Nuake
         void SetColorAttachment(VkFormat format);
         void SetDepthFormat(VkFormat depthFormat);
         void DisableDepthTest();
+        void EnableDepthTest(bool depthWriteEnable, VkCompareOp op);
+
+        void EnableBlendingAdditive();
+        void EnableBlendingAlphaBlend();
 	};
 }

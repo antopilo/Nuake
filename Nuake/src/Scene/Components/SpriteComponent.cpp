@@ -26,13 +26,13 @@ namespace Nuake
 
 		std::vector<Vertex> quadVertices =
 		{
-			{ Vector3(-1.0f,  1.0f, 0.0f),	Vector2(0.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-			{ Vector3(1.0f,  1.0f, 0.0f),	Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-			{ Vector3(-1.0f, -1.0f, 0.0f),	Vector2(0, 0),		Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
+			{ Vector3(-1.0f,  1.0f, 0.0f),	0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+			{ Vector3(1.0f,  1.0f, 0.0f),	1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+			{ Vector3(-1.0f, -1.0f, 0.0f),	0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
 
-			{ Vector3(1.0f,  -1.0f, 0.0f),	Vector2(1.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-			{ Vector3(-1.0f, -1.0f, 0.0f),	Vector2(0.0f, 0.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) },
-			{ Vector3(1.0f,   1.0f, 0.0f),	Vector2(1.0f, 1.0f), Vector3(0, 0, 1), Vector3(1, 0, 0), Vector3(0, 1, 0) }
+			{ Vector3(1.0f,  -1.0f, 0.0f),	1.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+			{ Vector3(-1.0f, -1.0f, 0.0f),	0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+			{ Vector3(1.0f,   1.0f, 0.0f),	1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
 		};
 
 		SpriteMesh = CreateRef<Mesh>();

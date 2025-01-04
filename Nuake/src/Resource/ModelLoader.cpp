@@ -290,7 +290,8 @@ namespace Nuake
 				vertex.tangent = { 
 					mesh->mTangents[i].x,
 					mesh->mTangents[i].z,
-					mesh->mTangents[i].y
+					mesh->mTangents[i].y,
+					0.0f
 				} ;
 			}
 
@@ -299,19 +300,19 @@ namespace Nuake
 				vertex.bitangent = {
 					mesh->mBitangents[i].x,
 					mesh->mBitangents[i].z,
-					mesh->mBitangents[i].y
+					mesh->mBitangents[i].y,
+					0.0f
 				};
 			}
 
-			vertex.uv = glm::vec2(0.0f, 0.0f);
+			vertex.uv_x = 0.0f;
+			vertex.uv_y = 0.0f;
 
 			// Does it contain UVs?
 			if (mesh->mTextureCoords[0]) 
 			{
-				vertex.uv = {
-					mesh->mTextureCoords[0][i].x, 
-					mesh->mTextureCoords[0][i].y
-				};
+				vertex.uv_x = mesh->mTextureCoords[0][i].x;
+				vertex.uv_y = mesh->mTextureCoords[0][i].y;
 			}
 
 			vertices.push_back(std::move(vertex));

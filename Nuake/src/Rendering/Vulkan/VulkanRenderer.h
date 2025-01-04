@@ -8,12 +8,12 @@
 #include "VulkanImage/VulkanImage.h"
 #include "VulkanTypes.h"
 #include "VkVertex.h"
-
+#include "RenderContext.h"
 #include "VulkanAllocatedBuffer.h"
+#include "VulkanSceneRenderer.h"
 
 #include <functional>
 #include <span>
-
 
 #include "vk_mem_alloc.h"
 #include "VkMesh.h"
@@ -22,7 +22,7 @@ namespace Nuake
 {
 	class VulkanShader;
 	class GPUMeshBuffers;
-	
+	class Scene;
 
 	struct AllocatedImage {
 		VkImage image;
@@ -83,6 +83,7 @@ namespace Nuake
 		VkCommandBuffer CommandBuffer; // You send commands in there.
 
 		Ref<AllocatedBuffer> CameraStagingBuffer;
+		Ref<AllocatedBuffer> ModelStagingBuffer;
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -121,18 +122,21 @@ namespace Nuake
 		VkDescriptorSet Allocate(VkDevice device, VkDescriptorSetLayout layout);
 	};
 
-	constexpr unsigned int FRAME_OVERLAP = 2;
 
 	struct CameraData
 	{
-		Matrix4 Model;
 		Matrix4 View;
 		Matrix4 Projection;
 	};
 
+	// Renderer configuration
+	constexpr uint32_t FRAME_OVERLAP = 2;
+	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
+
 	class VkRenderer
 	{
 	private:
+		bool FrameSkipped = false;
 		bool IsInitialized = false;
 		Vector2 SurfaceSize;
 		VkInstance Instance;
@@ -143,7 +147,7 @@ namespace Nuake
 		vkb::Device VkbDevice;
 
 		VkSurfaceKHR Surface;
-
+		uint32_t swapchainImageIndex;
 		// Swap chain
 		VkFormat SwapchainImageFormat;
 		VkSwapchainKHR Swapchain;
@@ -154,11 +158,7 @@ namespace Nuake
 		// Frame data
 		uint32_t FrameNumber = 0;
 		FrameData Frames[FRAME_OVERLAP];
-		FrameData& GetCurrentFrame() { return Frames[FrameNumber % FRAME_OVERLAP]; };
-
-		Ref<VulkanImage> DrawImage;
-		VkExtent2D DrawExtent;
-
+		
 		VkQueue GPUQueue;
 		uint32_t GPUQueueFamily;
 
@@ -196,8 +196,15 @@ namespace Nuake
 		Ref<VkMesh> rectangle;
 
 		Ref<AllocatedBuffer> CameraBuffer;
+		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
+
+		Ref<VulkanImage> DrawImage;
+		Ref<VulkanImage> DepthImage;
+		VkExtent2D DrawExtent;
+		FrameData& GetCurrentFrame() { return Frames[FrameNumber % FRAME_OVERLAP]; };
+
 		static VkRenderer& Get()
 		{
 			static VkRenderer instance;
@@ -230,12 +237,26 @@ namespace Nuake
 		void InitPipeline();
 		void InitBackgroundPipeline();
 		void InitTrianglePipeline();
+		void DrawScene(RenderContext ctx);
 		void DrawGeometry(VkCommandBuffer cmd);
 		void InitImgui();
 
 		void BeginScene(const Matrix4& view, const Matrix4& projection);
 
-		void Draw();
+		bool Draw();
+
+		void EndDraw();
+
+		DescriptorAllocator GetDescriptorAllocator()
+		{
+			return GlobalDescriptorAllocator;
+		}
+
+		VkCommandBuffer GetCurrentCmdBuffer()
+		{
+			return GetCurrentFrame().CommandBuffer;
+		}
+
 		void DrawBackground(VkCommandBuffer cmd);
 		void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
 

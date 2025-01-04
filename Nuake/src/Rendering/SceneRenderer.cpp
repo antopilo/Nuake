@@ -102,8 +102,8 @@ namespace Nuake
 		// Generate debug meshes
 		std::vector<Vertex> lineVertices
 		{
-			{ Vector3(0, 0, 0), Vector2(0, 0), Vector3(0, 0, 0) },
-			{ Vector3(1, 1, 1), Vector2(0, 0), Vector3(0, 0, 0) }
+			{ Vector3(0, 0, 0), 0.0f, Vector3(0, 0, 0), 0.0f },
+			{ Vector3(1, 1, 1), 0.0f, Vector3(0, 0, 0), 0.0f }
 		};
 
 		std::vector<uint32_t> lineIndices
