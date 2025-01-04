@@ -10,8 +10,10 @@ namespace Nuake
 {
 	enum class ImageFormat
 	{
-		RGBA8 = 41,
+		A8 = 9,
+		RGBA8 = 37,
 		RGBA16F = 97,
+		RGBA32F = 109,
 		D32F = 126,
 	};
 

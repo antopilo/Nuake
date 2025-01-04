@@ -2793,7 +2793,7 @@ namespace Nuake {
     void EditorInterface::BuildFonts()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5f, 0.5f));
-        //FontManager::LoadFonts();
+        FontManager::LoadFonts();
     }
 
     std::string EditorInterface::GetEntityTypeName(const Entity& entity) const

@@ -60,10 +60,70 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
 }
 
-VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize)
+VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : VulkanImage(inFormat, inSize)
 {
-	size_t data_size = inSize.x * inSize.y * 4;
+	size_t data_size = inSize.x * inSize.y;
 
+	if (inFormat != ImageFormat::A8)
+	{
+		data_size *= 4;
+	}
+
+	Ref<AllocatedBuffer> uploadBuffer = CreateRef<AllocatedBuffer>(data_size, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_TO_GPU);
+	void* mappedData;
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), uploadBuffer->GetAllocation(), &mappedData);
+
+	std::memcpy(mappedData, inData, data_size);
+
+	VkExtent3D vkExtent =
+	{
+		static_cast<uint32_t>(inSize.x),
+		static_cast<uint32_t>(inSize.y),
+		1 // We dont support 3D images yet
+	};
+
+	VkImageUsageFlags drawImageUsages{};
+	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT;
+	drawImageUsages |= VK_IMAGE_USAGE_SAMPLED_BIT;
+
+	VkImageCreateInfo imgCreateInfo = VulkanInit::ImageCreateInfo(static_cast<VkFormat>(inFormat), drawImageUsages, vkExtent);
+
+	VmaAllocationCreateInfo imgAllocInfo = {};
+	imgAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+	imgAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
+
+	VkImageViewCreateInfo imageViewCreateInfo;
+	imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(inFormat), Image, VK_IMAGE_ASPECT_COLOR_BIT);
+
+	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
+
+	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
+		{
+			VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+			VkBufferImageCopy copyRegion = {};
+			copyRegion.bufferOffset = 0;
+			copyRegion.bufferRowLength = 0;
+			copyRegion.bufferImageHeight = 0;
+
+			copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			copyRegion.imageSubresource.mipLevel = 0;
+			copyRegion.imageSubresource.baseArrayLayer = 0;
+			copyRegion.imageSubresource.layerCount = 1;
+			copyRegion.imageExtent = vkExtent;
+
+			vkCmdCopyBufferToImage(cmd, uploadBuffer->GetBuffer(), Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
+			&copyRegion);
+
+			VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		}
+	);
+
+	// TODO: Clean up temporary buffer! we leak memory here
 }
 
 VulkanImage::~VulkanImage()
