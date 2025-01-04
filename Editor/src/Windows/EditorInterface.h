@@ -27,6 +27,7 @@ namespace Nuake
 {
 	class Material;
 	class FileSystemUI;
+	class VulkanImage;
 
 	class EditorInterface
 	{
@@ -83,11 +84,11 @@ namespace Nuake
 		MapImporterWindow m_MapImporter;
 
 		ProjectSettingsWindow* m_ProjectSettingsWindow;
-		Ref<Texture> NuakeTexture;
-		Ref<Texture> CloseIconTexture;
-		Ref<Texture> MaximizeTexture;
-		Ref<Texture> RestoreTexture;
-		Ref<Texture> MinimizeTexture;
+		Ref<VulkanImage> NuakeTexture;
+		Ref<VulkanImage> CloseIconTexture;
+		Ref<VulkanImage> MaximizeTexture;
+		Ref<VulkanImage> RestoreTexture;
+		Ref<VulkanImage> MinimizeTexture;
 		EditorInterface(CommandBuffer& commandBuffer);
 
 		static ImFont* bigIconFont;

@@ -8,6 +8,7 @@
 namespace Nuake
 {
 	class Texture;
+	class VulkanImage;
 	class ProjectPreview : ISerializable
 	{
 	public:
@@ -15,7 +16,7 @@ namespace Nuake
 		std::string Path;
 		std::string Description;
 
-		Ref<Texture> ProjectIcon;
+		Ref<VulkanImage> ProjectIcon;
 
 		ProjectPreview(const std::string& path);
 		ProjectPreview() = default;
@@ -33,7 +34,7 @@ namespace Nuake
 	{
 	private:
 		const std::string NUAKE_LOGO_PATH = "Resources/Images/logo_white.png";
-		Ref<Texture> _NuakeLogo;
+		Ref<VulkanImage> _NuakeLogo;
 		EditorInterface* _Editor;
 
 		std::string _RecentProjectFilePath = "";

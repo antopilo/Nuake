@@ -61,6 +61,8 @@
 
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
 #include <src/Rendering/Vulkan/VkResources.h>
+#include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
+
 
 namespace Nuake {
     
@@ -112,11 +114,11 @@ namespace Nuake {
         mCommandBuffer = &commandBuffer;
         
         // Load textures
-        NuakeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/editor-icon.png");
-        CloseIconTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/close-icon.png");
-        MaximizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/maximize-icon.png");
-        RestoreTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/restore-icon.png");
-        MinimizeTexture = Nuake::TextureManager::Get()->GetTexture("Resources/Images/minimize-icon.png");
+        NuakeTexture = Nuake::TextureManager::Get()->GetTexture2("Resources/Images/editor-icon.png");
+        CloseIconTexture = Nuake::TextureManager::Get()->GetTexture2("Resources/Images/close-icon.png");
+        MaximizeTexture = Nuake::TextureManager::Get()->GetTexture2("Resources/Images/maximize-icon.png");
+        RestoreTexture = Nuake::TextureManager::Get()->GetTexture2("Resources/Images/restore-icon.png");
+        MinimizeTexture = Nuake::TextureManager::Get()->GetTexture2("Resources/Images/minimize-icon.png");
         
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
@@ -167,7 +169,7 @@ namespace Nuake {
 
             ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 2.0f + windowPadding.x);
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (5.0f + windowPadding.y + titlebarVerticalOffset) / 2.0);
-            //ImGui::Image((ImTextureID)NuakeTexture->GetID(), ImVec2(logoWidth, logoHeight), ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image((ImTextureID)NuakeTexture->GetImGuiDescriptorSet(), ImVec2(logoWidth, logoHeight));
         }
 
         const float w = ImGui::GetContentRegionAvail().x;
@@ -231,16 +233,14 @@ namespace Nuake {
             int iconWidth = std::max(MinimizeTexture->GetWidth(), 24);
             int iconHeight = std::max(MinimizeTexture->GetHeight(), 24);
             
-
-
-            //const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
-            //if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
-            //{
-            //    glfwIconifyWindow(Window::Get()->GetHandle());
-            //}
-            //
-            //auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            //UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP);
+            const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
+            if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
+            {
+                glfwIconifyWindow(Window::Get()->GetHandle());
+            }
+            
+            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP, rect);
         }
 
         ImGui::SameLine();
@@ -252,33 +252,33 @@ namespace Nuake {
 
             const bool isMaximized = Window::Get()->IsMaximized();
 
-            //if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
-            //{
-            //    const auto window = Window::Get()->GetHandle();
-            //    if (isMaximized)
-            //    {
-            //        glfwRestoreWindow(window);
-            //    }
-            //    else
-            //    {
-            //        glfwMaximizeWindow(window);
-            //    }
-            //}
-            //auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-            //UI::DrawButtonImage(isMaximized ? RestoreTexture : MaximizeTexture, buttonColN, buttonColH, buttonColP);
+            if (ImGui::InvisibleButton("Maximize", ImVec2(buttonWidth, buttonHeight)))
+            {
+                const auto window = Window::Get()->GetHandle();
+                if (isMaximized)
+                {
+                    glfwRestoreWindow(window);
+                }
+                else
+                {
+                    glfwMaximizeWindow(window);
+                }
+            }
+            auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            UI::DrawButtonImage(isMaximized ? RestoreTexture : MaximizeTexture, buttonColN, buttonColH, buttonColP);
         }
 
         // Close Button
         ImGui::SameLine();
         {
-            int iconWidth = std::max(CloseIconTexture ->GetWidth(), 24);
+            int iconWidth = std::max(CloseIconTexture->GetWidth(), 24);
             int iconHeight = std::max(CloseIconTexture->GetHeight(), 24);
-            //if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
-            //{
-            //    glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
-            //}
-            //
-            //UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
+            if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
+            {
+                glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
+            }
+              
+            UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
         }
 
         // Second bar with play stop pause etc
@@ -656,7 +656,7 @@ namespace Nuake {
             Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
             m_ViewportPos = { imagePos.x, imagePos.y };
-            ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail, { 0, 1 }, { 1, 0 });
+            ImGui::Image(VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet(), regionAvail, {0, 1},  {1, 0});
             ImGui::PopStyleVar();
 
             const Vector2& mousePos = Input::GetMousePosition();
@@ -930,7 +930,7 @@ namespace Nuake {
                 ImGui::SameLine();
 
                 const float remainingWidth = ImGui::GetContentRegionAvail().x;
-                auto nuakeLogoTexture = TextureManager::Get()->GetTexture("Resources/Images/logo_white.png");
+                auto nuakeLogoTexture = TextureManager::Get()->GetTexture2("Resources/Images/logo_white.png");
                 auto nuakeSize = nuakeLogoTexture->GetSize();
                 float sizeDiff = height / nuakeSize.y;
                 float scale = 0.5f;
@@ -948,7 +948,7 @@ namespace Nuake {
                 ImGui::SameLine();
 
                 ImGui::SetCursorPosY(height / 4.0 );
-                //ImGui::Image((ImTextureID)(nuakeLogoTexture->GetID()), ImVec2(logoWidth, height) * scale, ImVec2{0, 1}, ImVec2{1, 0});
+                ImGui::Image((ImTextureID)(nuakeLogoTexture->GetImGuiDescriptorSet()), ImVec2(logoWidth, height) * scale);
                 ImGui::EndMenuBar();
             }
             ImGui::End();

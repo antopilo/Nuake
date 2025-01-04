@@ -10,11 +10,13 @@
 
 #include <dependencies/glfw/include/GLFW/glfw3.h>
 #include <src/Rendering/Textures/TextureManager.h>
+#include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
 
+using namespace Nuake;
 
 LoadingSplash::LoadingSplash()
 {
-	_NuakeLogo = Nuake::TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
+	_NuakeLogo = Nuake::TextureManager::Get()->GetTexture2(NUAKE_LOGO_PATH);
 
 	Nuake::Window::Get()->SetDecorated(false);
 	Nuake::Window::Get()->SetSize({ 640, 480 });
@@ -23,7 +25,6 @@ LoadingSplash::LoadingSplash()
 
 void LoadingSplash::Draw()
 {
-	using namespace Nuake;
 
 	// Make viewport fullscreen
 	ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -39,7 +40,7 @@ void LoadingSplash::Draw()
 		{
 			const Vector2 logoSize = _NuakeLogo->GetSize();
 			const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
-			//ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)_NuakeLogo->GetImGuiDescriptorSet(), imguiSize);
 		}
 
 		ImGui::Text("LOADING SCENE...");

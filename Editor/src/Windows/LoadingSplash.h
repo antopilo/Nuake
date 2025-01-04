@@ -7,13 +7,14 @@
 namespace Nuake
 {
 	class Texture;
+	class VulkanImage;
 }
 
 class LoadingSplash
 {
 private:
 	const std::string NUAKE_LOGO_PATH = "Resources/Images/logo_white.png";
-	Ref<Nuake::Texture> _NuakeLogo;
+	Ref<Nuake::VulkanImage> _NuakeLogo;
 
 public:
 	static LoadingSplash& Get()

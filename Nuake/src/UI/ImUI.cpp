@@ -217,34 +217,34 @@ namespace Nuake
 			return RectOffset(rect, xy.x, xy.y);
 		}
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 	ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 	ImVec2 rectMin, ImVec2 rectMax)
 		{
 			auto* drawList = ImGui::GetForegroundDrawList();
 			if (ImGui::IsItemActive())
-				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintPressed);
+				drawList->AddImage((ImTextureID)imagePressed->GetImGuiDescriptorSet(), rectMin, rectMax, ImVec2(0, 0), ImVec2(1, 1), tintPressed);
 			else if (ImGui::IsItemHovered())													   				 
-				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintHovered);
+				drawList->AddImage((ImTextureID)imagePressed->GetImGuiDescriptorSet(), rectMin, rectMax, ImVec2(0, 0), ImVec2(1, 1), tintHovered);
 			else																				   				 
-				drawList->AddImage((ImTextureID)imagePressed->GetID(), rectMin, rectMax, ImVec2(0, 1), ImVec2(1, 0), tintNormal);
+				drawList->AddImage((ImTextureID)imagePressed->GetImGuiDescriptorSet(), rectMin, rectMax, ImVec2(0, 0), ImVec2(1, 1), tintNormal);
 		};
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImRect rectangle)
 		{
 			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, rectangle.Min, rectangle.Max);
 		};
 
-		void DrawButtonImage(const Ref<Texture>& image,
+		void DrawButtonImage(const Ref<VulkanImage>& image,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImVec2 rectMin, ImVec2 rectMax)
 		{
 			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, rectMin, rectMax);
 		};
 
-		void DrawButtonImage(const Ref<Texture>& image,
+		void DrawButtonImage(const Ref<VulkanImage>& image,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImRect rectangle)
 		{
@@ -252,13 +252,13 @@ namespace Nuake
 		};
 
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
 		{
 			DrawButtonImage(imageNormal, imageHovered, imagePressed, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
 		};
 
-		void DrawButtonImage(const Ref<Texture>& image,
+		void DrawButtonImage(const Ref<VulkanImage>& image,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed)
 		{
 			DrawButtonImage(image, image, image, tintNormal, tintHovered, tintPressed, ImGui::GetItemRectMin(), ImGui::GetItemRectMax());

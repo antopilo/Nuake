@@ -50,26 +50,26 @@ namespace Nuake
 
 		void Tooltip(const std::string& message);
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImVec2 rectMin, ImVec2 rectMax);
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImRect rectangle);
 
-		void DrawButtonImage(const Ref<Texture>& image,
+		void DrawButtonImage(const Ref<VulkanImage>& image,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImVec2 rectMin, ImVec2 rectMax);
 
-		void DrawButtonImage(const Ref<Texture>& image,
+		void DrawButtonImage(const Ref<VulkanImage>& image,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed,
 			ImRect rectangle);
 
-		void DrawButtonImage(const Ref<Texture>& imageNormal, const Ref<Texture>& imageHovered, const Ref<Texture>& imagePressed,
+		void DrawButtonImage(const Ref<VulkanImage>& imageNormal, const Ref<VulkanImage>& imageHovered, const Ref<VulkanImage>& imagePressed,
 			ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed);
 
-		void DrawButtonImage(const Ref<Texture>& image, ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed);
+		void DrawButtonImage(const Ref<VulkanImage>& image, ImU32 tintNormal, ImU32 tintHovered, ImU32 tintPressed);
 
 		void DrawImage(const Ref<VulkanImage> inImage);
 

@@ -11,7 +11,7 @@
 #include <src/Core/Logger.h>
 #include <src/Rendering/Textures/TextureManager.h>
 #include <src/Rendering/Textures/Texture.h>
-
+#include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
 #include <json/json.hpp>
 
 #include <string>
@@ -46,7 +46,7 @@ namespace Nuake
 			}
 			else
 			{
-				//ProjectIcon = TextureManager::Get()->GetTexture("Resources/Images/nuake-logo.png");
+				ProjectIcon = TextureManager::Get()->GetTexture2("Resources/Images/nuake-logo.png");
 			}
 		}
 		else
@@ -87,7 +87,7 @@ namespace Nuake
 		}
 
 		// Load Nuake logo
-		_NuakeLogo = TextureManager::Get()->GetTexture(NUAKE_LOGO_PATH);
+		_NuakeLogo = TextureManager::Get()->GetTexture2(NUAKE_LOGO_PATH);
 	}
 
 	void WelcomeWindow::LoadQueuedProject()
@@ -164,7 +164,7 @@ namespace Nuake
 			{
 				const Vector2 logoSize = _NuakeLogo->GetSize();
 				const ImVec2 imguiSize = ImVec2(logoSize.x, logoSize.y);
-				//ImGui::Image((ImTextureID)_NuakeLogo->GetID(), imguiSize, ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image((ImTextureID)_NuakeLogo->GetImGuiDescriptorSet(), imguiSize);
 			}
 
 			//ImGui::SameLine();
@@ -312,7 +312,7 @@ namespace Nuake
 
 		if (project.ProjectIcon)
 		{
-			//ImGui::Image((ImTextureID)project.ProjectIcon->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
+			ImGui::Image((ImTextureID)project.ProjectIcon->GetImGuiDescriptorSet(), iconSize);
 		}
 		else
 		{
