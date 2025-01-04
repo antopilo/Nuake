@@ -68,6 +68,7 @@ namespace Nuake
 	{
 		//TODO: Add perspective options
 		m_Perspective = glm::perspectiveFov(glm::radians(Fov), 9.0f * AspectRatio, 9.0f, Near, Far);
+
 		return m_Perspective;
 	}
 

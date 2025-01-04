@@ -754,8 +754,7 @@ namespace Nuake {
 
             ImGuizmo::SetDrawlist();
             ImGuizmo::AllowAxisFlip(true);
-            ImGuizmo::SetRect(imagePos.x, imagePos.y + 0.0f, viewportPanelSize.x, viewportPanelSize.y);
-
+            ImGuizmo::SetRect(imagePos.x, imagePos.y, viewportPanelSize.x, viewportPanelSize.y);
             if (m_DrawGrid && !Engine::IsPlayMode())
             {
                 ImGuizmo::DrawGrid(glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
@@ -777,17 +776,19 @@ namespace Nuake {
                     Matrix4 transform = tc.GetGlobalTransform();
                     const auto& editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
                     Matrix4 cameraView = editorCam->GetTransform();
-                    Matrix4 cameraProjection = editorCam->GetPerspective();
+
+                    // Since imguizmo doesnt support reverse-Z, we need to create a new projection matrix
+                    // With a normal near and far plane.
+                    Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Far, editorCam->Near);
+
                     static Vector3 camPreviousPos = Engine::GetCurrentScene()->m_EditorCamera->Translation;
                     static Vector3 camNewPos = Vector3(0, 0, 0);
-
                     Vector3 camDelta = camNewPos - camPreviousPos;
                     Vector3 previousGlobalPos = transform[3];
-
                     // Imguizmo calculates the delta from the gizmo,
                     ImGuizmo::Manipulate(
-                        glm::value_ptr(cameraView),
-                        glm::value_ptr(cameraProjection),
+                        glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
+                        glm::value_ptr(normalZProjection),
                         CurrentOperation, CurrentMode,
                         glm::value_ptr(transform), NULL,
                         UseSnapping ? &CurrentSnapping.x : NULL
