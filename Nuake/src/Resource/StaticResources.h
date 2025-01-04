@@ -281,6 +281,21 @@ namespace Nuake {
         extern const std::string Resources_Shaders_volumetric_shader_path;
         extern unsigned int Resources_Shaders_volumetric_shader_len;
         extern unsigned char Resources_Shaders_volumetric_shader[];
+        extern const std::string Resources_Shaders_Vulkan_background_comp_path;
+        extern unsigned int Resources_Shaders_Vulkan_background_comp_len;
+        extern unsigned char Resources_Shaders_Vulkan_background_comp[];
+        extern const std::string Resources_Shaders_Vulkan_test_vert_path;
+        extern unsigned int Resources_Shaders_Vulkan_test_vert_len;
+        extern unsigned char Resources_Shaders_Vulkan_test_vert[];
+        extern const std::string Resources_Shaders_Vulkan_triangle_frag_path;
+        extern unsigned int Resources_Shaders_Vulkan_triangle_frag_len;
+        extern unsigned char Resources_Shaders_Vulkan_triangle_frag[];
+        extern const std::string Resources_Shaders_Vulkan_triangle_vert_path;
+        extern unsigned int Resources_Shaders_Vulkan_triangle_vert_len;
+        extern unsigned char Resources_Shaders_Vulkan_triangle_vert[];
+        extern const std::string Resources_Shaders_Vulkan_triangle_vert_hlsl_path;
+        extern unsigned int Resources_Shaders_Vulkan_triangle_vert_hlsl_len;
+        extern unsigned char Resources_Shaders_Vulkan_triangle_vert_hlsl[];
     }
 }
 

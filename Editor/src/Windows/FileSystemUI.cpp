@@ -379,7 +379,7 @@ namespace Nuake
         }
         else if (fileType == FileType::Audio)
         {
-            textureImage = textureMgr->GetTexture2("Resources/Images/Audio_file_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/audio_file_icon.png");
         }
         else if (fileType == FileType::Prefab)
         {
