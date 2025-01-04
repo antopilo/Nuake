@@ -29,6 +29,12 @@ AllocatedBuffer::AllocatedBuffer(size_t inSize, BufferUsage inFlags, MemoryUsage
 		&Info));
 }
 
+AllocatedBuffer::AllocatedBuffer(const std::string& name, size_t inSize, BufferUsage inFlags, MemoryUsage inUsage) :
+	AllocatedBuffer::AllocatedBuffer(inSize, inFlags, inUsage)
+{
+	Name = name.empty() ? std::to_string(ID) : name; // Default name is just ID
+}
+
 AllocatedBuffer::~AllocatedBuffer()
 {
 	// TODO: deletion of buffer

@@ -13,8 +13,8 @@ VkMesh::VkMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>&
 	const size_t indexBufferSize = indices.size() * sizeof(uint32_t);
 
 	GPUResources& resources = GPUResources::Get();
-	VertexBuffer = resources.CreateBuffer(vertexBufferSize, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
-	IndexBuffer = resources.CreateBuffer(indexBufferSize, BufferUsage::INDEX_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
+	VertexBuffer = resources.CreateBuffer(vertexBufferSize, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "VertexBuffer");
+	IndexBuffer = resources.CreateBuffer(indexBufferSize, BufferUsage::INDEX_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "IndexBuffer");
 
 	// Then we upload to data to those buffers.
 	UploadToGPU(vertices, indices);

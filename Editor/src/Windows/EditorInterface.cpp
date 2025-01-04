@@ -2564,10 +2564,10 @@ namespace Nuake {
 
                 for (auto& buffer : buffers)
                 {
-                    ImGui::Text(std::to_string(buffer->GetID()).c_str());
+                    ImGui::Text(buffer->GetName().c_str());
 
                     ImGui::TableNextColumn();
-
+                     
                     ImGui::Text(std::to_string(buffer->GetSize()).c_str());
                     ImGui::TableNextColumn();
                 }

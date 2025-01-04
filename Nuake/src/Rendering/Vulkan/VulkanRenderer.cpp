@@ -122,7 +122,7 @@ void VkRenderer::Initialize()
 	camData.Projection = Matrix4(1.0f);
 
 	// init camera buffer
-	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY);
+	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CameraBuffer");
 	UploadCameraData(camData);
 
 	InitDescriptors();
@@ -294,8 +294,8 @@ void VkRenderer::InitCommands()
 		VK_CALL(vkAllocateCommandBuffers(Device, &cmdAllocInfo, &Frames[i].CommandBuffer));
 
 		GPUResources& resources = GPUResources::Get();
-		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
-		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY);
+		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "CameraStaging" + std::to_string(i) );
+		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "TransformStaging" + std::to_string(i));
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));

@@ -1,9 +1,11 @@
 #pragma once
 #include "src/Core/Core.h"
-#include "src/Resource/UUID.h"
-#include "src/Rendering/Vertex.h"
-#include "VulkanAllocatedBuffer.h"
 #include "src/Core/Logger.h"
+#include "src/Resource/UUID.h"
+
+#include "src/Rendering/Vertex.h"
+#include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
+#include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 
 namespace Nuake
 {
@@ -12,7 +14,7 @@ namespace Nuake
 	private:
 		std::map<UUID, Ref<AllocatedBuffer>> Buffers;
 		std::map<UUID, Ref<VkMesh>> Meshes;
-
+		std::map<UUID, Ref<VulkanImage>> Images;
 
 	public:
 		static GPUResources& Get()
@@ -24,9 +26,9 @@ namespace Nuake
 		GPUResources() = default;
 		~GPUResources() = default;
 
-		Ref<AllocatedBuffer> CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage)
+		Ref<AllocatedBuffer> CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name = "")
 		{
-			Ref<AllocatedBuffer> buffer = CreateRef<AllocatedBuffer>(size, flags, usage);
+			Ref<AllocatedBuffer> buffer = CreateRef<AllocatedBuffer>(name, size, flags, usage);
 			Buffers[buffer->GetID()] = buffer;
 			return buffer;
 		}

@@ -4,6 +4,7 @@
 #include "src/Resource/UUID.h"
 #include "src/Rendering/Vulkan/VkVertex.h"
 
+#include <string>
 #include <vector>
 
 #include "volk/volk.h"
@@ -36,6 +37,7 @@ namespace Nuake
 	class AllocatedBuffer
 	{
 	private:
+		std::string Name;
 		UUID ID;
 		VkBuffer Buffer;
 		VmaAllocation Allocation;
@@ -44,6 +46,7 @@ namespace Nuake
 
 	public:
 		AllocatedBuffer(size_t size, BufferUsage flags, MemoryUsage usage);
+		AllocatedBuffer(const std::string& name, size_t size, BufferUsage flags, MemoryUsage usage);
 		AllocatedBuffer() = default;
 		~AllocatedBuffer();
 
@@ -51,6 +54,7 @@ namespace Nuake
 		VmaAllocation GetAllocation() const { return Allocation; }
 		UUID GetID() const { return ID; }
 		size_t GetSize() const { return Size; }
+		std::string GetName() const { return Name; }
 	};
 
 	// push constants for our mesh object draws
