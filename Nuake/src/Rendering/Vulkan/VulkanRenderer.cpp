@@ -361,6 +361,21 @@ void VkRenderer::InitDescriptors()
 	CameraBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, CameraBufferDescriptorLayout);
 
 	UpdateDescriptorSets();
+
+	for (int i = 0; i < FRAME_OVERLAP; i++) 
+	{
+		// create a descriptor pool
+		std::vector<DescriptorAllocatorGrowable::PoolSizeRatio> frame_sizes = 
+		{
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4 },
+		};
+
+		Frames[i].FrameDescriptors = DescriptorAllocatorGrowable{};
+		Frames[i].FrameDescriptors.Init(Device, 1000, frame_sizes);
+	}
 }
 
 void VkRenderer::UpdateDescriptorSets()
@@ -717,6 +732,8 @@ bool VkRenderer::Draw()
 	}
 
 	FrameSkipped = false;
+
+	GetCurrentFrame().FrameDescriptors.ClearPools(Device);
 
 	//request image from the swapchain
 	VkResult result = vkAcquireNextImageKHR(Device, Swapchain, 1000000000, GetCurrentFrame().SwapchainSemaphore, nullptr, &swapchainImageIndex);

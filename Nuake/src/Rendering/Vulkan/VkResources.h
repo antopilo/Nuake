@@ -7,7 +7,7 @@
 #include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 #include "src/Rendering/Vulkan/VkMesh.h"
-
+#include "src/Rendering/Textures/TextureManager.h"
 
 namespace Nuake
 {
@@ -120,7 +120,7 @@ namespace Nuake
             }
 
             Logger::Log("Mesh with ID does not exist", "vulkan", CRITICAL);
-            return nullptr;
+			return TextureManager::Get()->GetTexture2("missing_texture");
         }
 	};
 }

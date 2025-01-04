@@ -10,6 +10,8 @@
 
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
+#include "src/Rendering/Textures/Material.h"
+
 
 #include <Tracy.hpp>
 #include <src/Scene/Components/ModelComponent.h>
@@ -30,6 +32,7 @@ void VkSceneRenderer::Init()
 	// Here we will create the pipeline for rendering a scene
 	LoadShaders();
 	CreateBuffers();
+	CreateSamplers();
 	CreateDescriptors();
 	CreateBasicPipeline();
 
@@ -47,14 +50,30 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
 	auto& vk = VkRenderer::Get();
+
+	// Ensure the command buffer is valid
+	if (cmd == VK_NULL_HANDLE) {
+		throw std::runtime_error("Invalid command buffer");
+	}
+
+	// Ensure the draw image is valid
+	if (!vk.DrawImage) {
+		throw std::runtime_error("Draw image is not initialized");
+	}
 	
 	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(vk.DrawImage->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VkRenderingAttachmentInfo depthAttachment = VulkanInit::DepthAttachmentInfo(vk.DepthImage->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(vk.DrawExtent, &colorAttachment, &depthAttachment);
+
+	// Ensure the pipeline is valid
+	if (BasicPipeline == VK_NULL_HANDLE) {
+		throw std::runtime_error("Basic pipeline is not initialized");
+	}
+
 	vkCmdBeginRendering(cmd, &renderInfo);
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipeline);
-
+	
 	std::vector<VkDescriptorSet> descriptors = { CameraBufferDescriptors, ModelBufferDescriptor };
 	// Bind camera settings
 	vkCmdBindDescriptorSets(
@@ -67,7 +86,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		0,                               // dynamicOffsetCount
 		nullptr                          // dynamicOffsets
 	);
-
+	
 	// Set viewport
 	VkViewport viewport = {};
 	viewport.x = 0;
@@ -76,9 +95,9 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	viewport.height = vk.DrawExtent.height;
 	viewport.minDepth = 0.f;
 	viewport.maxDepth = 1.f;
-
+	
 	vkCmdSetViewport(cmd, 0, 1, &viewport);
-
+	
 	VkRect2D scissor = {};
 	scissor.offset.x = 0;
 	scissor.offset.y = 0;
@@ -125,6 +144,22 @@ void VkSceneRenderer::DrawScene()
 					0,                               // dynamicOffsetCount
 					nullptr                          // dynamicOffsets
 				);
+
+				// Bind texture descriptor set
+				Ref<Material> material = m->GetMaterial();
+				Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
+
+				//bind a texture
+				VkDescriptorSet imageSet = vk.GetCurrentFrame().FrameDescriptors.Allocate(vk.GetDevice(), ImageDescriptorLayout);
+				{
+					DescriptorWriter writer;
+					writer.WriteImage(0, albedo->GetImageView(), SamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
+					writer.UpdateSet(vk.GetDevice(), imageSet);
+				}
+
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 3, 1, &imageSet, 0, nullptr);
+
+				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
 
 				ModelPushConstant modelPushConstant{};
 				modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
@@ -183,13 +218,13 @@ void VkSceneRenderer::CreateBasicPipeline()
 	bufferRange.size = sizeOfThing;
 	bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, ModelBufferDescriptorLayout, TriangleBufferDescriptorLayout };
+	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, ModelBufferDescriptorLayout, TriangleBufferDescriptorLayout, ImageDescriptorLayout, SamplerDescriptorLayout };
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
 	pipeline_layout_info.pPushConstantRanges = &bufferRange;
 	pipeline_layout_info.pushConstantRangeCount = 1;
 	pipeline_layout_info.pSetLayouts = layouts;
-	pipeline_layout_info.setLayoutCount = 3;
+	pipeline_layout_info.setLayoutCount = 5;
 	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &BasicPipelineLayout));
 
 	//use the triangle layout we created
@@ -200,11 +235,27 @@ void VkSceneRenderer::CreateBasicPipeline()
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
 	pipelineBuilder.SetCullMode(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
 	pipelineBuilder.SetMultiSamplingNone();
-	pipelineBuilder.EnableBlendingAlphaBlend();
+	pipelineBuilder.EnableBlendingAlphaBlend();	
 	pipelineBuilder.SetColorAttachment(static_cast<VkFormat>(VkRenderer::Get().DrawImage->GetFormat()));
 	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(VkRenderer::Get().DepthImage->GetFormat()));
 	pipelineBuilder.EnableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
+	//pipelineBuilder.DisableDepthTest();
 	BasicPipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
+}
+
+void VkSceneRenderer::CreateSamplers()
+{
+	auto device = VkRenderer::Get().GetDevice();
+	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+
+	sampler.magFilter = VK_FILTER_NEAREST;
+	sampler.minFilter = VK_FILTER_NEAREST;
+
+	vkCreateSampler(device, &sampler, nullptr, &SamplerNearest);
+
+	sampler.magFilter = VK_FILTER_LINEAR;
+	sampler.minFilter = VK_FILTER_LINEAR;
+	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
 }
 
 void VkSceneRenderer::CreateDescriptors()
@@ -216,7 +267,7 @@ void VkSceneRenderer::CreateDescriptors()
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL);
+		CameraBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
 	}
 
 	{
@@ -227,16 +278,31 @@ void VkSceneRenderer::CreateDescriptors()
 	}
 
 	{
-		// Matrices
+		// Matrices`
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		ModelBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL);
+		ModelBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+	}
+
+	// Textures
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
+		ImageDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
+	}
+
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER);
+		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
 	}
 
 	auto allocator = vk.GetDescriptorAllocator();
 	TriangleBufferDescriptors = allocator.Allocate(device, TriangleBufferDescriptorLayout);
 	CameraBufferDescriptors = allocator.Allocate(device, CameraBufferDescriptorLayout);
 	ModelBufferDescriptor = allocator.Allocate(device, ModelBufferDescriptorLayout);
+	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
+	//SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 
 	// Update descriptor set for camera
 	VkDescriptorBufferInfo camBufferInfo{};
@@ -253,6 +319,22 @@ void VkSceneRenderer::CreateDescriptors()
 	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	bufferWriteCam.pBufferInfo = &camBufferInfo;
 	vkUpdateDescriptorSets(device, 1, &bufferWriteCam, 0, nullptr);
+
+	// Update Descriptor Set for Texture
+	VkDescriptorImageInfo textureInfo = {};
+	textureInfo.sampler = SamplerNearest;  // Your VkSampler object
+	textureInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	// Update Descriptor Set for Sampler
+	VkWriteDescriptorSet samplerWrite = {};
+	samplerWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	samplerWrite.dstBinding = 0;  // Binding for sampler (in shader)
+	samplerWrite.dstSet = SamplerDescriptor;  // The allocated descriptor set for the sampler
+	samplerWrite.descriptorCount = 1;
+	samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
+
+	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
 }
 
 void VkSceneRenderer::UpdateCameraData(const CameraData& data)

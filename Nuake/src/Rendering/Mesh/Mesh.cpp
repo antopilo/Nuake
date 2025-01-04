@@ -203,7 +203,7 @@ namespace Nuake
                         if (v.contains("UV") && v["UV"].contains("x") && v["UV"].contains("y"))
                         {
                             vertex.uv_x = v["UV"]["x"];
-                            vertex.uv_y = v["UV"]["x"];
+                            vertex.uv_y = v["UV"]["y"];
                         }
                     }
                     catch (std::exception& /*e*/) {

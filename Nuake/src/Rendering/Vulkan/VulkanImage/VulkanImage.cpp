@@ -120,7 +120,7 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 
 	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
 
-	VkImageViewCreateInfo imageViewCreateInfo;
+	VkImageViewCreateInfo imageViewCreateInfo = {};
 	if (usage == ImageUsage::Depth)
 	{
 		imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(inFormat), Image, VK_IMAGE_ASPECT_DEPTH_BIT);

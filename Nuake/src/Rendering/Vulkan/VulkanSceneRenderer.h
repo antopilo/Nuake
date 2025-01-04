@@ -51,6 +51,18 @@ namespace Nuake
 		ModelData ModelTransforms;
 		std::map<UUID, uint32_t> ModelMatrixMapping;
 
+		VkSampler SamplerLinear;
+		VkSampler SamplerNearest;
+		VkDescriptorSet SamplerDescriptor;
+		VkDescriptorSetLayout SamplerDescriptorLayout;
+
+		VkDescriptorSet ImageDescriptor;
+		VkDescriptorSetLayout ImageDescriptorLayout;
+
+		// GBuffer render targets
+		//Ref<VulkanImage> GBufferAlbedo;
+		//Ref<VulkanImage> GBufferDepthImage;
+
 	public:
 		VkSceneRenderer();
 		~VkSceneRenderer();
@@ -67,6 +79,7 @@ namespace Nuake
 		void LoadShaders();
 		void CreateBuffers();
 		void CreateBasicPipeline();
+		void CreateSamplers();
 		void CreateDescriptors();
 
 		void BuildMatrixBuffer();

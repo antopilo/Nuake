@@ -17,6 +17,7 @@
 
 #include "vk_mem_alloc.h"
 #include "VkMesh.h"
+#include "DescriptorAllocatorGrowable.h"
 
 namespace Nuake
 {
@@ -90,6 +91,8 @@ namespace Nuake
 		// Two, one for window, other for rendering
 		VkSemaphore SwapchainSemaphore, RenderSemaphore;
 		VkFence RenderFence; // CPU wait for next frame
+
+		DescriptorAllocatorGrowable FrameDescriptors;
 
 		DeletionQueue LocalDeletionQueue; // Local when destroying this frame
 	};

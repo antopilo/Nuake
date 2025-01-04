@@ -52,10 +52,10 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
-    
+
     // Output the position of each vertex
     output.Position = mul(camData.proj, mul(camData.view, mul(modelData.model, float4(v.position, 1.0f))));
     output.Color = normalize(float3(v.position.xyz));
-
+    output.UV = float2(v.uv_x, v.uv_y);
     return output;
 }
