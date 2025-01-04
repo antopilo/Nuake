@@ -42,7 +42,7 @@ namespace Nuake
 			const std::string projectIconPath = Path + "/../icon.png";
 			if (FileSystem::FileExists(projectIconPath, true))
 			{
-				//ProjectIcon = TextureManager::Get()->GetTexture(projectIconPath);
+				ProjectIcon = TextureManager::Get()->GetTexture2(projectIconPath);
 			}
 			else
 			{
@@ -313,10 +313,6 @@ namespace Nuake
 		if (project.ProjectIcon)
 		{
 			ImGui::Image((ImTextureID)project.ProjectIcon->GetImGuiDescriptorSet(), iconSize);
-		}
-		else
-		{
-			//ImGui::Image((void*)Nuake::TextureManager::Get()->GetTexture("Resources/Images/cube.png")->GetID(), iconSize, ImVec2(0, 1), ImVec2(1, 0));
 		}
 
 		ImGui::SameLine();

@@ -5,6 +5,7 @@
 #include "volk/volk.h"
 #include "vk_mem_alloc.h"
 
+#include <string>
 
 namespace Nuake
 {
@@ -45,6 +46,7 @@ namespace Nuake
 		VkDescriptorSet ImGuiDescriptorSet;
 
 	public:
+		VulkanImage(const std::string& path);
 		VulkanImage(ImageFormat format, Vector2 size, ImageUsage usage = ImageUsage::Default);
 		VulkanImage(void* data, ImageFormat format, Vector2 size);
 		VulkanImage(void* data, size_t size); // This one is for embedded files. Ignore.

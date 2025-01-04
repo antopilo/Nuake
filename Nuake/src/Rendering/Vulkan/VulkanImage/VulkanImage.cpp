@@ -13,6 +13,76 @@ using namespace Nuake;
 #include "vk_mem_alloc.h"
 #include <stb_image/stb_image.h>
 
+VulkanImage::VulkanImage(const std::string & path) :
+	ImGuiDescriptorSetGenerated(false),
+	Format(ImageFormat::RGBA8)
+{
+	int channels = 0;
+	int width = 0;
+	int height = 0;
+	void* imageData = stbi_load(path.c_str(), &width, &height, &channels, 4);
+
+	if (!imageData)
+	{
+		throw std::runtime_error("Failed to load image data using stb_image!");
+	}
+
+	// Use the loaded image data with the existing VulkanImage constructor logic
+	size_t data_size = width * height * 4; // 4 for RGBA
+
+	Ref<AllocatedBuffer> uploadBuffer = CreateRef<AllocatedBuffer>(data_size, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_TO_GPU);
+	void* mappedData;
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), uploadBuffer->GetAllocation(), &mappedData);
+
+	std::memcpy(mappedData, imageData, data_size);
+
+	// Free the image data as we no longer need it
+	stbi_image_free(imageData);
+
+	VkExtent3D vkExtent = {
+		static_cast<uint32_t>(width),
+		static_cast<uint32_t>(height),
+		1 // We don't support 3D images yet
+	};
+
+	Extent = { width, height, 1 };
+
+	VkImageUsageFlags drawImageUsages = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+
+	VkImageCreateInfo imgCreateInfo = VulkanInit::ImageCreateInfo(static_cast<VkFormat>(Format), drawImageUsages, vkExtent);
+
+	VmaAllocationCreateInfo imgAllocInfo = {};
+	imgAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+	imgAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
+
+	VkImageViewCreateInfo imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(Format), Image, VK_IMAGE_ASPECT_COLOR_BIT);
+
+	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
+
+	// Transition image and copy data to GPU
+	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd)
+	{
+		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		VkBufferImageCopy copyRegion = {};
+		copyRegion.bufferOffset = 0;
+		copyRegion.bufferRowLength = 0;
+		copyRegion.bufferImageHeight = 0;
+
+		copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		copyRegion.imageSubresource.mipLevel = 0;
+		copyRegion.imageSubresource.baseArrayLayer = 0;
+		copyRegion.imageSubresource.layerCount = 1;
+		copyRegion.imageExtent = vkExtent;
+
+		vkCmdCopyBufferToImage(cmd, uploadBuffer->GetBuffer(), Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	});
+}
+
 VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage) :
 	Format(inFormat),
 	Extent(inSize, 1),

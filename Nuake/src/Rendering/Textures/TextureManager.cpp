@@ -75,8 +75,8 @@ namespace Nuake
 
 	Ref<VulkanImage> TextureManager::GetTexture2(const std::string path)
 	{
-		//if (!IsTextureLoaded2(path))
-			//m_Registry2.emplace(path, new VulkanImage(path));
+		if (!IsTextureLoaded2(path))
+			m_Registry2.emplace(path, new VulkanImage(path));
 
 		return m_Registry2.at(path);
 	}

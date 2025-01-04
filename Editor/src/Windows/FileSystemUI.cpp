@@ -106,7 +106,7 @@ namespace Nuake
 
 
         ImGui::SetCursorPos(prevCursor);
-        //ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture("Resources/Images/folder_icon.png")->GetID(), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture2("Resources/Images/folder_icon.png")->GetImGuiDescriptorSet(), ImVec2(100, 100));
 
         auto imguiStyle = ImGui::GetStyle();
 
@@ -344,74 +344,74 @@ namespace Nuake
         }
 
 
-        Ref<Texture> textureImage = TextureManager::Get()->GetTexture("Resources/Images/file_icon.png");
+        Ref<VulkanImage> textureImage = TextureManager::Get()->GetTexture2("Resources/Images/file_icon.png");
 
         const auto textureMgr = TextureManager::Get();
         const auto fileType = file->GetFileType();
         if (fileType == FileType::Material)
         {
-            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
-            if (image)
-            {
-                textureImage = image;
-            }
+            //auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            //if (image)
+            //{
+            //    textureImage = image;
+            //}
         }
         else if (fileType == FileType::Image)
         {
             const std::string path = file->GetAbsolutePath();
-            textureImage = textureMgr->GetTexture(path);
+            textureImage = textureMgr->GetTexture2(path);
         }
         else if (fileType == FileType::Project)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/project_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/project_icon.png");
         }
         else if (fileType == FileType::NetScript)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/csharp_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/csharp_icon.png");
         }
         else if (fileType == FileType::Scene)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/scene_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/scene_icon.png");
         }
         else if (fileType == FileType::Script)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/script_file_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/script_file_icon.png");
         }
         else if (fileType == FileType::Audio)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/Audio_file_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/Audio_file_icon.png");
         }
         else if (fileType == FileType::Prefab)
         {
-            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
-            if (image)
-            {
-                textureImage = image;
-            }
+            //auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            //if (image)
+            //{
+            //    textureImage = image;
+            //}
         }
         else if (fileType == FileType::Mesh)
         {
-            auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
-            if (image)
-            {
-                textureImage = image;
-            }
+            //auto image = ThumbnailManager::Get().GetThumbnail(file->GetRelativePath());
+            //if (image)
+            //{
+            //    textureImage = image;
+            //}
         }
         else if (fileType == FileType::Solution)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/sln_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/sln_icon.png");
         }
         else if (fileType == FileType::Map)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/trenchbroom_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/trenchbroom_icon.png");
         }
         else if (fileType == FileType::Env)
         {
-            textureImage = textureMgr->GetTexture("Resources/Images/env_file_icon.png");
+            textureImage = textureMgr->GetTexture2("Resources/Images/env_file_icon.png");
         }
 
         ImGui::SetCursorPos(prevCursor);
-        //ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetID()), ImVec2(100, 100), ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetImGuiDescriptorSet()), ImVec2(100, 100));
         ImGui::PopStyleVar();
         
         auto& imguiStyle = ImGui::GetStyle();
