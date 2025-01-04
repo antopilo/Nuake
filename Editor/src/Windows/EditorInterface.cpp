@@ -233,8 +233,7 @@ namespace Nuake {
             int iconWidth = std::max(MinimizeTexture->GetWidth(), 24);
             int iconHeight = std::max(MinimizeTexture->GetHeight(), 24);
             
-            const float padY = (buttonHeight - (float)iconHeight) / 2.0f;
-            if (ImGui::InvisibleButton("Minimize", ImVec2(iconWidth, iconHeight)))
+            if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight)))
             {
                 glfwIconifyWindow(Window::Get()->GetHandle());
             }
