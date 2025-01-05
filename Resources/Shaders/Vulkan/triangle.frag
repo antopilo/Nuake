@@ -48,7 +48,7 @@ PSOutput main(PSInput input)
     float3 textureColor = albedo.Sample(mySampler, input.UV);
     output.oColor0 = float4(textureColor, 1.0f);
     output.oNormal = float4(input.Normal, 1.0f);
-    //output.oMaterial = float4(inMaterial.metalnessValue, inMaterial.aoValue, inMaterial.roughnessValue, 1.0f);
-    output.oMaterial = float4(inMaterial.albedo.xyz, 1.0f);
+    output.oMaterial = float4(inMaterial.metalnessValue, inMaterial.aoValue, inMaterial.roughnessValue, 1.0f);
+    //output.oMaterial = float4(inMaterial.albedo.xyz, 1.0f);
     return output;
 }

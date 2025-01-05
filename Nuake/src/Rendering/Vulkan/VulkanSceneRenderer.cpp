@@ -498,6 +498,8 @@ void VkSceneRenderer::BuildMatrixBuffer()
 			materialBuffer.metalnessValue = material->data.u_MetalnessValue;
 			materialBuffer.hasAO = material->HasAO();
 			materialBuffer.aoValue = material->data.u_AOValue;
+			materialBuffer.hasRoughness = material->HasRoughness();
+			materialBuffer.roughnessValue = material->data.u_RoughnessValue;
 			allMaterials[currentMaterialIndex] = materialBuffer;
 			MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
 
