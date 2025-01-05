@@ -15,6 +15,7 @@
 
 #include <Tracy.hpp>
 #include <src/Scene/Components/ModelComponent.h>
+#include "Pipeline/RenderPipeline.h"
 
 
 using namespace Nuake;
@@ -40,6 +41,30 @@ void VkSceneRenderer::Init()
 
 	ModelMatrixMapping.clear();
 	MeshMaterialMapping.clear();
+
+
+	auto renderPipelineOpaque = RenderPipeline({1280, 720});
+
+	auto& gBufferPass = renderPipelineOpaque.AddPass("GBuffer");
+	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Depth", ImageFormat::D32F);
+
+	auto& ssaoPass = renderPipelineOpaque.AddPass("SSAO");
+	ssaoPass.AddInput("Normal");
+	ssaoPass.AddInput("Depth");
+	ssaoPass.AddAttachment("SSAO", ImageFormat::RGBA8);
+
+	auto& shadingPass = renderPipelineOpaque.AddPass("Shading");
+	shadingPass.AddInput("Albedo");
+	shadingPass.AddInput("Normal");
+	shadingPass.AddInput("Material");
+	shadingPass.AddInput("SSAO");
+	shadingPass.AddInput("Depth");
+	shadingPass.AddAttachment("Output", ImageFormat::RGBA16F);
+
+
 }
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
@@ -96,6 +121,19 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 
 	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue2, 1, &range);
 
+
+	// Create Pipeline
+	// Pipeline is a graph or pass that connects with dependencies
+	// Bind framebuffer or StartRendering on a Pass
+	// 1. Transition all images
+	// 2. Create render info attachment info
+	// 3. BeginRendering
+	// 3.5 Bind pipeline & descriptor sets
+	// 4. EndRendering
+
+	//
+
+	// End rendering
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -248,7 +286,7 @@ void VkSceneRenderer::EndScene()
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, GBufferMaterial->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, GBufferNormal->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
