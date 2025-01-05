@@ -1,5 +1,5 @@
 [[vk::binding(0, 3)]]
-Texture2D<float3> albedo : register(t1); // Texture binding at slot t0
+Texture2D<float4> albedo : register(t1); // Texture binding at slot t0
 
 [[vk::binding(0, 4)]]
 SamplerState mySampler : register(s0);       // Sampler binding at slot s0
@@ -24,6 +24,7 @@ struct PSInput {
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
     float3 Normal : TEXCOORD2;
+    float3x3 TBN : TEXCOORD3;
 };
 
 struct PSOutput {
@@ -44,11 +45,59 @@ ModelPushConstant pushConstants;
 PSOutput main(PSInput input)
 {
     PSOutput output;
+
     Material inMaterial = material[pushConstants.materialIndex];
-    float3 textureColor = albedo.Sample(mySampler, input.UV);
-    output.oColor0 = float4(textureColor, 1.0f);
-    output.oNormal = float4(input.Normal, 1.0f);
-    output.oMaterial = float4(inMaterial.metalnessValue, inMaterial.aoValue, inMaterial.roughnessValue, 1.0f);
-    //output.oMaterial = float4(inMaterial.albedo.xyz, 1.0f);
+    // NORMAL
+    // TODO use TBN matrix
+    float3 normal = float3(0.0, 0.0f, 1.0f);
+    if(inMaterial.hasNormal == 1)
+    {
+        // Sample from texture.
+    }
+
+    normal = mul(input.TBN, normal);
+    normal = normal / 2.0f + 0.5f;
+    output.oNormal = float4(normal, 1.0f);
+
+    // MATERIAL
+
+    // ALBEDO COLOR
+    float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
+    if(inMaterial.hasAlbedo == 1)
+    {
+        float4 albedoTextureSample = albedo.Sample(mySampler, input.UV);
+
+        // Alpha cutout?
+        if(albedoTextureSample.a < 0.001f)
+        {
+            discard;
+        }
+
+        albedoColor.xyz = albedoTextureSample.xyz;
+    }
+    output.oColor0 = albedoColor;
+
+    // MATERIAL PROPERTIES
+    float metalnessValue = inMaterial.metalnessValue;
+    if(inMaterial.hasMetalness == 1)
+    {
+        // TODO: Sample from metal texture
+    }
+    
+    float aoValue = inMaterial.aoValue;
+    if(inMaterial.hasAO == 1)
+    {
+        // TODO: Sample from AO texture
+    }
+
+    float roughnessValue = inMaterial.roughnessValue;
+    if(inMaterial.hasRoughness == 1)
+    {
+        // TODO: Sample from roughness texture
+    }
+
+    float3 materialOuput = float3(inMaterial.metalnessValue, inMaterial.aoValue, inMaterial.roughnessValue);
+    
+    output.oMaterial = float4(materialOuput, 1.0f);
     return output;
 }

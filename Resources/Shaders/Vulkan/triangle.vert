@@ -19,8 +19,8 @@ struct Vertex
     float uv_x;
     float3 normal;
     float uv_y;
-    float4 tangent;
-    float4 bitangent;
+    float3 tangent;
+    float3 bitangent;
 };
 
 [[vk::binding(0, 2)]] 
@@ -41,6 +41,7 @@ struct VSOutput {
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
     float3 Normal : TEXCOORD2;
+    float3x3 TBN : TEXCOORD3;
 };
 
 // Main vertex shader
@@ -60,5 +61,10 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     output.Color = normalize(float3(v.position.xyz));
     output.UV = float2(v.uv_x, v.uv_y);
     output.Normal = normalize(v.normal);
+
+    float3 T = normalize(mul((float3x3)modelData.model, normalize(v.tangent.xyz)));
+    float3 B = normalize(mul((float3x3)modelData.model, normalize(v.bitangent.xyz)));
+    float3 N = normalize(mul((float3x3)modelData.model, normalize(v.normal)).xyz);
+    output.TBN = transpose(float3x3(T, B, N));
     return output;
 }

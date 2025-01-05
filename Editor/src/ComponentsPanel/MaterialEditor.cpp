@@ -89,13 +89,15 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 	{
 		ImGui::BeginChild("##albedo", TexturePanelSize, true);
 		{
-			uint32_t textureID = 0;
+			ImTextureID textureID = 0;
 			if (material->HasAlbedo())
 			{
-				textureID = material->m_Albedo->GetID();
+				auto vkTexture = GPUResources::Get().GetTexture(material->AlbedoImage);
+				
+				textureID = (ImTextureID)vkTexture->GetImGuiDescriptorSet();
 			}
 
-			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
+			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (ImTextureID)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
 				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
 				if (texture != "")
