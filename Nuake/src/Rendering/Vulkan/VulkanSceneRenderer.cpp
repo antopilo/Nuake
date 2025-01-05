@@ -39,6 +39,7 @@ void VkSceneRenderer::Init()
 	CreateBasicPipeline();
 
 	ModelMatrixMapping.clear();
+	MeshMaterialMapping.clear();
 }
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
@@ -76,6 +77,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
 	vkCmdClearColorImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	vkCmdClearColorImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+	vkCmdClearColorImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 	//VkClearDepthStencilValue clearDepth = { 0.0f, 0 };
 	//clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_DEPTH_BIT);
 	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearDepth, 1, &clearRange);
@@ -95,15 +97,17 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue2, 1, &range);
 
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(GBufferAlbedo->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VkRenderingAttachmentInfo normalAttachment = VulkanInit::AttachmentInfo(GBufferNormal->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	VkRenderingAttachmentInfo materialAttachment = VulkanInit::AttachmentInfo(GBufferMaterial->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	VkRenderingAttachmentInfo depthAttachment = VulkanInit::DepthAttachmentInfo(GBufferDepthImage->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-	std::vector<VkRenderingAttachmentInfo> attachments = { colorAttachment, normalAttachment };
+	std::vector<VkRenderingAttachmentInfo> attachments = { colorAttachment, normalAttachment, materialAttachment };
 	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(GBufferAlbedo->GetSize(), attachments, &depthAttachment);
-	renderInfo.colorAttachmentCount = 2;
+	renderInfo.colorAttachmentCount = std::size(attachments);
 	renderInfo.pColorAttachments = attachments.data();
 	vkCmdBeginRendering(cmd, &renderInfo);
 
@@ -118,6 +122,18 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		0,                               // firstSet
 		2,                               // descriptorSetCount
 		descriptors.data(),        // pointer to the descriptor set(s)
+		0,                               // dynamicOffsetCount
+		nullptr                          // dynamicOffsets
+	);
+
+	// Bind material
+	vkCmdBindDescriptorSets(
+		cmd,
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		BasicPipelineLayout,
+		5,                               // firstSet
+		1,                               // descriptorSetCount
+		&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
 		0,                               // dynamicOffsetCount
 		nullptr                          // dynamicOffsets
 	);
@@ -198,13 +214,15 @@ void VkSceneRenderer::DrawScene()
 
 				ModelPushConstant modelPushConstant{};
 				modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
+				modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
+
 				vkCmdPushConstants(
 					cmd,
 					BasicPipelineLayout,
-					VK_SHADER_STAGE_VERTEX_BIT, // Stage matching the pipeline layout
-					0,                          // Offset
-					sizeof(ModelPushConstant),           // Size of the push constant
-					&modelPushConstant                 // Pointer to the value
+					VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
+					0,									// Offset
+					sizeof(ModelPushConstant),          // Size of the push constant
+					&modelPushConstant                  // Pointer to the value
 				);
 
 				vkCmdBindIndexBuffer(cmd, vkMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
@@ -228,9 +246,11 @@ void VkSceneRenderer::EndScene()
 
 	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, GBufferNormal->GetImage(), vk.GetDrawImage()->GetImage(), GBufferNormal->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, GBufferMaterial->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
@@ -247,6 +267,7 @@ void VkSceneRenderer::CreateBuffers()
 	UpdateCameraData(camData);
 
 	ModelBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
+	MaterialBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
 }
 
 void VkSceneRenderer::LoadShaders()
@@ -262,15 +283,15 @@ void VkSceneRenderer::CreateBasicPipeline()
 	bufferRange.offset = 0;
 	auto sizeOfThing = sizeof(ModelPushConstant);
 	bufferRange.size = sizeOfThing;
-	bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	bufferRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 
-	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, ModelBufferDescriptorLayout, TriangleBufferDescriptorLayout, ImageDescriptorLayout, SamplerDescriptorLayout };
+	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, ModelBufferDescriptorLayout, TriangleBufferDescriptorLayout, ImageDescriptorLayout, SamplerDescriptorLayout, MaterialBufferDescriptorLayout };
 
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
 	pipeline_layout_info.pPushConstantRanges = &bufferRange;
 	pipeline_layout_info.pushConstantRangeCount = 1;
 	pipeline_layout_info.pSetLayouts = layouts;
-	pipeline_layout_info.setLayoutCount = 5;
+	pipeline_layout_info.setLayoutCount = 6;
 	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &BasicPipelineLayout));
 
 	//use the triangle layout we created
@@ -283,8 +304,8 @@ void VkSceneRenderer::CreateBasicPipeline()
 	pipelineBuilder.SetMultiSamplingNone();
 	pipelineBuilder.EnableBlendingAlphaBlend();	// Target 0
 	pipelineBuilder.EnableBlendingAlphaBlend(); // Target 1
-
-	std::vector<VkFormat> formats = { static_cast<VkFormat>(GBufferAlbedo->GetFormat()), static_cast<VkFormat>(GBufferNormal->GetFormat()) };
+	pipelineBuilder.EnableBlendingAlphaBlend(); // Target 2
+	std::vector<VkFormat> formats = { static_cast<VkFormat>(GBufferAlbedo->GetFormat()), static_cast<VkFormat>(GBufferNormal->GetFormat()), static_cast<VkFormat>(GBufferMaterial->GetFormat())};
 	pipelineBuilder.SetColorAttachments(formats);
 	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(GBufferDepthImage->GetFormat()));
 	pipelineBuilder.EnableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
@@ -327,7 +348,7 @@ void VkSceneRenderer::CreateDescriptors()
 	}
 
 	{
-		// Matrices`
+		// Matrices
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		ModelBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
@@ -346,11 +367,19 @@ void VkSceneRenderer::CreateDescriptors()
 		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
 	}
 
+	// Material
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		MaterialBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
+	}
+
 	auto allocator = vk.GetDescriptorAllocator();
 	TriangleBufferDescriptors = allocator.Allocate(device, TriangleBufferDescriptorLayout);
 	CameraBufferDescriptors = allocator.Allocate(device, CameraBufferDescriptorLayout);
 	ModelBufferDescriptor = allocator.Allocate(device, ModelBufferDescriptorLayout);
 	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
+	MaterialBufferDescriptor = allocator.Allocate(device, MaterialBufferDescriptorLayout);
 	//SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 
 	// Update descriptor set for camera
@@ -391,6 +420,7 @@ void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
 	GBufferDepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
 	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
+	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, size);
 }
 
 void VkSceneRenderer::UpdateCameraData(const CameraData& data)
@@ -425,8 +455,10 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	auto& scene = Context.CurrentScene;
 
 	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
+	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
 
 	uint32_t currentIndex = 0;
+	uint32_t currentMaterialIndex = 0;
 	auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 	for (auto e : view)
 	{
@@ -449,42 +481,103 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		Entity entity = Entity((entt::entity)e, scene.get());
 		ModelMatrixMapping[entity.GetID()] = currentIndex;
 
+		for (auto& m : mesh.ModelResource->GetMeshes())
+		{
+			Ref<Material> material = m->GetMaterial();
+			if (!material)
+			{
+				continue;
+			}
+
+			// TODO: Avoid duplicated materials
+			MaterialBufferStruct materialBuffer = {};
+			materialBuffer.hasAlbedo = material->HasAlbedo();
+			materialBuffer.albedo = material->data.m_AlbedoColor;
+			materialBuffer.hasNormal = material->HasNormal();
+			materialBuffer.hasMetalness = material->HasMetalness();
+			materialBuffer.metalnessValue = material->data.u_MetalnessValue;
+			materialBuffer.hasAO = material->HasAO();
+			materialBuffer.aoValue = material->data.u_AOValue;
+			allMaterials[currentMaterialIndex] = materialBuffer;
+			MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
+
+			currentMaterialIndex++;
+		}
+
 		currentIndex++;
 	}
 
 	ModelTransforms = ModelData{ allTransforms };
+	MaterialDataContainer = MaterialData{ allMaterials };
 }
 
 void VkSceneRenderer::UpdateTransformBuffer()
 {
-	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
-	memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
+	// Update tranform buffer
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
 
-	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-		VkBufferCopy copy{ 0 };
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = sizeof(ModelData);
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(ModelData);
 
-		vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
-	});
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
+		});
 
-	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
 
-	// Update descriptor set for camera
-	VkDescriptorBufferInfo transformBufferInfo{};
-	transformBufferInfo.buffer = ModelBuffer->GetBuffer();
-	transformBufferInfo.offset = 0;
-	transformBufferInfo.range = VK_WHOLE_SIZE;
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo transformBufferInfo{};
+		transformBufferInfo.buffer = ModelBuffer->GetBuffer();
+		transformBufferInfo.offset = 0;
+		transformBufferInfo.range = VK_WHOLE_SIZE;
 
-	VkWriteDescriptorSet bufferWriteModel = {};
-	bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWriteModel.pNext = nullptr;
-	bufferWriteModel.dstBinding = 0;
-	bufferWriteModel.dstSet = ModelBufferDescriptor;
-	bufferWriteModel.descriptorCount = 1;
-	bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWriteModel.pBufferInfo = &transformBufferInfo;
-	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
+		VkWriteDescriptorSet bufferWriteModel = {};
+		bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWriteModel.pNext = nullptr;
+		bufferWriteModel.dstBinding = 0;
+		bufferWriteModel.dstSet = ModelBufferDescriptor;
+		bufferWriteModel.descriptorCount = 1;
+		bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWriteModel.pBufferInfo = &transformBufferInfo;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
+	}
+
+	// Update material buffer
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &MaterialDataContainer, sizeof(MaterialData));
+
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(MaterialData);
+
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetBuffer(), MaterialBuffer->GetBuffer(), 1, &copy);
+		});
+
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation());
+
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = MaterialBuffer->GetBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet bufferWrite = {};
+		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWrite.pNext = nullptr;
+		bufferWrite.dstBinding = 0;
+		bufferWrite.dstSet = MaterialBufferDescriptor;
+		bufferWrite.descriptorCount = 1;
+		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWrite.pBufferInfo = &bufferInfo;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
+	}
 }

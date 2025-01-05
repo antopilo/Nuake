@@ -29,6 +29,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 struct ModelPushConstant
 {
     int modelIndex;  // Push constant data
+    int materialIndex;
 };
 
 [[vk::push_constant]]

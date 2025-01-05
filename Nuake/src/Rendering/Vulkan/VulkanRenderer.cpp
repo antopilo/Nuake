@@ -299,6 +299,7 @@ void VkRenderer::InitCommands()
 		GPUResources& resources = GPUResources::Get();
 		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "CameraStaging" + std::to_string(i) );
 		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "TransformStaging" + std::to_string(i));
+		Frames[i].MaterialStagingBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "MaterialStaging" + std::to_string(i));
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));

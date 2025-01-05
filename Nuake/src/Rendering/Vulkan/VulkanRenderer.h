@@ -85,6 +85,7 @@ namespace Nuake
 
 		Ref<AllocatedBuffer> CameraStagingBuffer;
 		Ref<AllocatedBuffer> ModelStagingBuffer;
+		Ref<AllocatedBuffer> MaterialStagingBuffer;
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -135,6 +136,7 @@ namespace Nuake
 	// Renderer configuration
 	constexpr uint32_t FRAME_OVERLAP = 2;
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
+	constexpr uint32_t MAX_MATERIAL = 1000;
 
 	class VkRenderer
 	{

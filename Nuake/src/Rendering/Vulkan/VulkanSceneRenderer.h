@@ -20,12 +20,34 @@ namespace Nuake
 	struct ModelPushConstant
 	{
 		int Index;
-		char padding[124];            // 124 bytes to reach 128 bytes
+		int MaterialIndex;
+		char padding[120];            // 124 bytes to reach 128 bytes
 	};
 
 	struct ModelData
 	{
 		std::array<Matrix4, 3000> Data;
+	};
+
+	// This is what is present on the shader as a structured buffer
+	struct MaterialBufferStruct
+	{
+		float hasAlbedo;
+		Vector3 albedo;
+		int hasNormal;
+		int hasMetalness;
+		int hasRoughness;
+		int hasAO;
+		float metalnessValue;
+		float roughnessValue;
+		float aoValue;
+		float pad;
+	};
+
+	// This is the *whole* buffer
+	struct MaterialData
+	{
+		std::array<MaterialBufferStruct, 1000> Data;
 	};
 
 	class VkSceneRenderer
@@ -49,8 +71,15 @@ namespace Nuake
 		VkDescriptorSet ModelBufferDescriptor;
 		VkDescriptorSetLayout ModelBufferDescriptorLayout;
 
+		Ref<AllocatedBuffer> MaterialBuffer;
+		VkDescriptorSet  MaterialBufferDescriptor;
+		VkDescriptorSetLayout  MaterialBufferDescriptorLayout;
+
 		ModelData ModelTransforms;
-		std::map<UUID, uint32_t> ModelMatrixMapping;
+		MaterialData MaterialDataContainer;
+
+		std::map<UUID, uint32_t> ModelMatrixMapping;	// Holds mapping between model entity and transform index
+		std::map<UUID, uint32_t> MeshMaterialMapping;	// Holds mapping between mesh and material index 
 
 		VkSampler SamplerLinear;
 		VkSampler SamplerNearest;
@@ -63,6 +92,7 @@ namespace Nuake
 		// GBuffer render targets
 		Ref<VulkanImage> GBufferAlbedo;
 		Ref<VulkanImage> GBufferNormal;
+		Ref<VulkanImage> GBufferMaterial;
 		Ref<VulkanImage> GBufferDepthImage;
 
 	public:
