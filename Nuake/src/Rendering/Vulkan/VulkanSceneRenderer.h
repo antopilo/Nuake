@@ -5,6 +5,7 @@
 #include "src/Rendering/Vulkan/VulkanShader.h"
 #include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+#include "src/Rendering/Vulkan/Pipeline/RenderPipeline.h"
 
 #include <volk/volk.h>
 
@@ -95,6 +96,9 @@ namespace Nuake
 		Ref<VulkanImage> GBufferMaterial;
 		Ref<VulkanImage> GBufferDepthImage;
 
+		// New pipeline stuff
+		RenderPipeline GBufferPipeline;
+
 	public:
 		VkSceneRenderer();
 		~VkSceneRenderer();
@@ -114,6 +118,7 @@ namespace Nuake
 		void CreateBasicPipeline();
 		void CreateSamplers();
 		void CreateDescriptors();
+		void CreatePipelines();
 
 		void BuildMatrixBuffer();
 		void UpdateTransformBuffer();

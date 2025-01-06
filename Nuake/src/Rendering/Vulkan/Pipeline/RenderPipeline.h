@@ -5,6 +5,8 @@
 
 #include <functional>
 #include <vector>
+#include <span>
+#include <src/Rendering/Vulkan/VulkanShader.h>
 
 
 namespace Nuake
@@ -17,15 +19,16 @@ namespace Nuake
 		VkCommandBuffer commandBuffer;
 	};
 
-	class PassAttachment
+	class TextureAttachment
 	{
 	public:
 		std::string Name;
 		ImageFormat Format;
 
 	public:
-		PassAttachment(const std::string& name, ImageFormat format);
-		~PassAttachment() = default;
+		TextureAttachment(const std::string& name, ImageFormat format);
+		TextureAttachment() = default;
+		~TextureAttachment() = default;
 	};
 
 	struct RenderPassSpec
@@ -38,8 +41,12 @@ namespace Nuake
 	{
 	private:
 		std::string Name;
-		std::vector<PassAttachment> Attachments;
-		std::vector<std::string> Inputs;
+		Ref<VulkanShader> VertShader;
+		Ref<VulkanShader> FragShader;
+
+		std::vector<TextureAttachment> Attachments;
+		TextureAttachment DepthAttachment;
+		std::vector<TextureAttachment> Inputs;
 
 		std::function<void(PassRenderContext& ctx)> PreRender;
 		std::function<void(PassRenderContext& ctx)> Render;
@@ -50,8 +57,10 @@ namespace Nuake
 		~RenderPass() = default;
 
 	public:
-		PassAttachment& AddAttachment(const std::string& name, ImageFormat format);
-		void AddInput(const std::string& name);
+		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
+		void AddInput(const TextureAttachment& attachment);
+		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
+		void Build();
 
 		// Callbacks
 		void SetPreRender(const std::function<void(PassRenderContext& ctx)>& func) { PreRender = func; }
@@ -62,14 +71,19 @@ namespace Nuake
 	class RenderPipeline
 	{
 	private:
+		bool Built;
+		
 		std::vector<RenderPass> RenderPasses;
-		Vector2 Size;
 
 	public:
-		RenderPipeline(const Vector2& size);
+		RenderPipeline();
 		~RenderPipeline() = default;
 
 	public:
 		RenderPass& AddPass(const std::string& name);
+
+		void Build();
+
+		void Execute(std::span<std::string> inputs);
 	};
 }
