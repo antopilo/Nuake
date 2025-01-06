@@ -1,14 +1,22 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
-
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 
+#include <functional>
 #include <vector>
 
 
 namespace Nuake
 {
+	class Scene;
+
+	struct PassRenderContext
+	{
+		Ref<Scene> scene;
+		VkCommandBuffer commandBuffer;
+	};
+
 	class PassAttachment
 	{
 	public:
@@ -18,7 +26,12 @@ namespace Nuake
 	public:
 		PassAttachment(const std::string& name, ImageFormat format);
 		~PassAttachment() = default;
+	};
 
+	struct RenderPassSpec
+	{
+		std::string Name;
+		bool DepthTest = true;
 	};
 
 	class RenderPass 
@@ -28,6 +41,10 @@ namespace Nuake
 		std::vector<PassAttachment> Attachments;
 		std::vector<std::string> Inputs;
 
+		std::function<void(PassRenderContext& ctx)> PreRender;
+		std::function<void(PassRenderContext& ctx)> Render;
+		std::function<void(PassRenderContext& ctx)> PostRender;
+
 	public:
 		RenderPass(const std::string& name);
 		~RenderPass() = default;
@@ -35,6 +52,11 @@ namespace Nuake
 	public:
 		PassAttachment& AddAttachment(const std::string& name, ImageFormat format);
 		void AddInput(const std::string& name);
+
+		// Callbacks
+		void SetPreRender(const std::function<void(PassRenderContext& ctx)>& func) { PreRender = func; }
+		void SetRender(const std::function<void(PassRenderContext& ctx)>& func) { Render = func; }
+		void SetPostRender(const std::function<void(PassRenderContext& ctx)>& func) { PostRender = func; }
 	};
 
 	class RenderPipeline
@@ -49,6 +71,5 @@ namespace Nuake
 
 	public:
 		RenderPass& AddPass(const std::string& name);
-
 	};
 }

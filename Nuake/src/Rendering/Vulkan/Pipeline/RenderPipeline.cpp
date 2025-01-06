@@ -10,7 +10,8 @@ RenderPass::RenderPass(const std::string& name) :
 PassAttachment& RenderPass::AddAttachment(const std::string& name, ImageFormat format)
 {
 	auto newAttachment = PassAttachment(name, format);
-	Attachments.push_back(std::move(newAttachment));
+	PassAttachment& newAttachmentRef = Attachments.emplace_back(std::move(newAttachment));
+	return newAttachmentRef;
 }
 
 void RenderPass::AddInput(const std::string& name)
