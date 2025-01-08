@@ -82,6 +82,8 @@ namespace Nuake
 		std::vector<TextureAttachment&> GetAttachments();
 
 		void AddInput(const std::string& name);
+		std::vector<std::string> GetInputs();
+
 		void SetInput(const std::string& name, TextureAttachment& attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
 
@@ -119,7 +121,7 @@ namespace Nuake
 		RenderPass& AddPass(const std::string& name);
 		RenderPass& GetRenderPass(const std::string& name);
 
-		void Build();
+		bool Build();
 
 		void Execute(PassRenderContext& ctx);
 	};

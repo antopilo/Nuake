@@ -188,6 +188,11 @@ void RenderPass::AddInput(const std::string& name)
 	InputNames.push_back(name);
 }
 
+std::vector<std::string> Nuake::RenderPass::GetInputs()
+{
+	return InputNames;
+}
+
 void RenderPass::SetInput(const std::string& name, TextureAttachment& attachment)
 {
 	Inputs[name] = attachment;
@@ -276,14 +281,23 @@ RenderPass& RenderPipeline::GetRenderPass(const std::string& name)
 	return RenderPasses[0];
 }
 
-void RenderPipeline::Build()
+bool RenderPipeline::Build()
 {
 	std::map<std::string, TextureAttachment&> attachments;
 	for (auto& pass : RenderPasses)
 	{
 		pass.Build();
 
-		
+		for (auto& input : pass.GetInputs())
+		{
+			if (attachments.find(input) == attachments.end())
+			{
+				Logger::Log("Failed to build RenderPipeline. input " + input + " not found in previous passes.", "vulkan", CRITICAL);
+				return false;
+			}
+
+			pass.SetInput(input, attachments[input]);
+		}
 
 		for (auto& attachment : pass.GetAttachments())
 		{
