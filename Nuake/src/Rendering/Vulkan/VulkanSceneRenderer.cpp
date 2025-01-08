@@ -73,10 +73,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	GBufferPipeline.Execute(passCtx);
 }
 ModelPushConstant modelPushConstant{};
-void VkSceneRenderer::DrawScene()
-{
-	
-}
 
 void VkSceneRenderer::EndScene()
 {
@@ -324,6 +320,11 @@ void VkSceneRenderer::CreatePipelines()
 		
 	});
 
+	auto& shadingPass = GBufferPipeline.AddPass("Shading");
+
+	shadingPass.AddAttachment("Output", ImageFormat::RGBA16F);
+
+
 	GBufferPipeline.Build();
 }
 
@@ -335,7 +336,6 @@ void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 void VkSceneRenderer::UpdateCameraData(const CameraData& data)
 {
 	CameraData adjustedData = data;
-	adjustedData.View = Matrix4(1.0f); //data.View;
 	adjustedData.View = data.View;
 	adjustedData.Projection = data.Projection;
 

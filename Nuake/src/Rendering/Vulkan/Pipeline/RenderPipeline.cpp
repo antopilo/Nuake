@@ -172,9 +172,25 @@ TextureAttachment& RenderPass::GetAttachment(const std::string& name)
 	return Attachments[0];
 }
 
-void RenderPass::AddInput(const TextureAttachment& name)
+std::vector<TextureAttachment&> RenderPass::GetAttachments()
 {
-	Inputs.push_back(name);
+	std::vector<TextureAttachment&> attachentRefs;
+	attachentRefs.reserve(Attachments.size());
+	for (auto& attachment : Attachments)
+	{
+		attachentRefs.push_back(attachment);
+	}
+	return attachentRefs;
+}
+
+void RenderPass::AddInput(const std::string& name)
+{
+	InputNames.push_back(name);
+}
+
+void RenderPass::SetInput(const std::string& name, TextureAttachment& attachment)
+{
+	Inputs[name] = attachment;
 }
 
 void RenderPass::SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader)
@@ -262,9 +278,21 @@ RenderPass& RenderPipeline::GetRenderPass(const std::string& name)
 
 void RenderPipeline::Build()
 {
+	std::map<std::string, TextureAttachment&> attachments;
 	for (auto& pass : RenderPasses)
 	{
 		pass.Build();
+
+		
+
+		for (auto& attachment : pass.GetAttachments())
+		{
+			attachments[attachment.Name] = attachment;
+		}
+	}
+
+	for (auto& pass : RenderPasses)
+	{
 	}
 
 	Built = true;

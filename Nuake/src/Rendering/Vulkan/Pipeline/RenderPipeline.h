@@ -51,7 +51,8 @@ namespace Nuake
 
 		std::vector<TextureAttachment> Attachments;
 		TextureAttachment DepthAttachment;
-		std::vector<TextureAttachment> Inputs;
+		std::vector<std::string> InputNames;
+		std::map<std::string, TextureAttachment> Inputs;
 
 		std::any PushConstant;
 		size_t PushConstantSize;
@@ -78,8 +79,10 @@ namespace Nuake
 		std::string GetName() const { return Name; }
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
 		TextureAttachment& GetAttachment(const std::string& name);
+		std::vector<TextureAttachment&> GetAttachments();
 
-		void AddInput(const TextureAttachment& attachment);
+		void AddInput(const std::string& name);
+		void SetInput(const std::string& name, TextureAttachment& attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
 
 		template<typename T>
@@ -107,6 +110,7 @@ namespace Nuake
 		
 		std::vector<RenderPass> RenderPasses;
 
+		
 	public:
 		RenderPipeline();
 		~RenderPipeline() = default;

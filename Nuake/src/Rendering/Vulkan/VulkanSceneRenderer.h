@@ -101,7 +101,6 @@ namespace Nuake
 		void UpdateCameraData(const CameraData& data);
 
 		void BeginScene(RenderContext inContext);
-		void DrawScene();
 		void EndScene();
 
 	private:
