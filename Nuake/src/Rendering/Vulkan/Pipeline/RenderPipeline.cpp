@@ -13,6 +13,11 @@ TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format
 	Name(name),
 	Format(format)
 {
+	Image = std::make_shared<VulkanImage>(format, Vector2(1280, 720));
+
+	// Create default texture I guess?
+	auto& gpuResources = GPUResources::Get();
+	gpuResources.AddTexture(Image);
 }
 
 RenderPass::RenderPass(const std::string& name) :
@@ -22,6 +27,24 @@ RenderPass::RenderPass(const std::string& name) :
 
 void RenderPass::ClearAttachments(PassRenderContext& ctx)
 {
+	// Resize
+	for(auto& attachment : Attachments)
+	{
+		if (attachment.Image->GetSize() == ctx.resolution)
+		{
+			continue;
+		}
+
+		auto newAttachment = std::make_shared<VulkanImage>(attachment.Format, ctx.resolution);
+		attachment.Image = newAttachment;
+
+		// Register to resource manager
+		auto& gpuResources = GPUResources::Get();
+		gpuResources.AddTexture(newAttachment);
+
+		// TODO: Queue deletion of old textures
+	}
+
 	// Clear all color attachments
 	VkClearColorValue clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
 	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -52,6 +75,7 @@ void RenderPass::Render(PassRenderContext& ctx)
 		PreRender(ctx);
 	}
 
+	
 	// Begin rendering and bind pipeline
 	std::vector<VkRenderingAttachmentInfo> renderAttachmentInfos;
 	renderAttachmentInfos.reserve(Attachments.size());
@@ -72,6 +96,24 @@ void RenderPass::Render(PassRenderContext& ctx)
 	vkCmdBeginRendering(ctx.commandBuffer, &renderInfo);
 	{
 		vkCmdBindPipeline(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
+
+		VkViewport viewport = {};
+		viewport.x = 0;
+		viewport.y = 0;
+		viewport.width = ctx.resolution.x;
+		viewport.height = ctx.resolution.y;
+		viewport.minDepth = 0.f;
+		viewport.maxDepth = 1.f;
+
+		vkCmdSetViewport(ctx.commandBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor = {};
+		scissor.offset.x = 0;
+		scissor.offset.y = 0;
+		scissor.extent.width = ctx.resolution.x;
+		scissor.extent.height = ctx.resolution.y;
+		vkCmdSetScissor(ctx.commandBuffer, 0, 1, &scissor);
+
 
 		if (RenderCb)
 		{

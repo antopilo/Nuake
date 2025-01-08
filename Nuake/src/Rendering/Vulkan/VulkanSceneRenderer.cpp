@@ -109,7 +109,8 @@ void VkSceneRenderer::Init()
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
 {
-	Context = inContext;
+	Context.CommandBuffer = inContext.CommandBuffer;
+	Context.CurrentScene = inContext.CurrentScene;
 
 	// Collect all global transform of things we will render
 	BuildMatrixBuffer();
@@ -129,7 +130,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		throw std::runtime_error("Draw image is not initialized");
 	}
 	
-	PassRenderContext passCtx = { inContext.CurrentScene, inContext.CommandBuffer };
+	PassRenderContext passCtx = { inContext.CurrentScene, inContext.CommandBuffer, Context.Size };
 	GBufferPipeline.Execute(passCtx);
 
 	// Ensure the pipeline is valid
@@ -251,7 +252,6 @@ void VkSceneRenderer::DrawScene()
 		for (auto e : view)
 		{
 			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-
 			if (!mesh.ModelResource || !visibility.Visible)
 			{
 				continue;
@@ -290,7 +290,6 @@ void VkSceneRenderer::DrawScene()
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 3, 1, &imageSet, 0, nullptr);
 
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
-
 				
 				modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 				modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
@@ -506,11 +505,14 @@ void VkSceneRenderer::CreatePipelines()
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
 	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 
+	gBufferPass.SetPreRender([](PassRenderContext& ctx) {});
+
 	GBufferPipeline.Build();
 }
 
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 {
+	Context.Size = size;
 	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
 	GBufferDepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
 	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
