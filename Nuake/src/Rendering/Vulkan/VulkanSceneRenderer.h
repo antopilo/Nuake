@@ -57,8 +57,6 @@ namespace Nuake
 		RenderContext Context;
 
 		std::map<std::string, Ref<VulkanShader>> Shaders;
-		VkPipeline BasicPipeline;
-		VkPipelineLayout BasicPipelineLayout;
 
 		Ref<AllocatedBuffer> CameraBuffer;
 
@@ -90,12 +88,6 @@ namespace Nuake
 		VkDescriptorSet ImageDescriptor;
 		VkDescriptorSetLayout ImageDescriptorLayout;
 
-		// GBuffer render targets
-		Ref<VulkanImage> GBufferAlbedo;
-		Ref<VulkanImage> GBufferNormal;
-		Ref<VulkanImage> GBufferMaterial;
-		Ref<VulkanImage> GBufferDepthImage;
-
 		// New pipeline stuff
 		RenderPipeline GBufferPipeline;
 
@@ -115,7 +107,6 @@ namespace Nuake
 	private:
 		void LoadShaders();
 		void CreateBuffers();
-		void CreateBasicPipeline();
 		void CreateSamplers();
 		void CreateDescriptors();
 		void CreatePipelines();

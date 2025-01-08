@@ -38,7 +38,6 @@ void VkSceneRenderer::Init()
 	CreateDescriptors();
 
 	SetGBufferSize({ 1280, 720 });
-	CreateBasicPipeline();
 	CreatePipelines();
 	ModelMatrixMapping.clear();
 	MeshMaterialMapping.clear();
@@ -87,7 +86,7 @@ void VkSceneRenderer::EndScene()
 	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
 	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, albedo.Image->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, albedo.Image->GetImage(), vk.GetDrawImage()->GetImage(), albedo.Image->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
@@ -112,41 +111,6 @@ void VkSceneRenderer::LoadShaders()
 	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
 	Shaders["basic_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
 	Shaders["basic_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
-}
-
-void VkSceneRenderer::CreateBasicPipeline()
-{
-	VkPushConstantRange bufferRange{};
-	bufferRange.offset = 0;
-	auto sizeOfThing = sizeof(ModelPushConstant);
-	bufferRange.size = sizeOfThing;
-	bufferRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-
-	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, ModelBufferDescriptorLayout, TriangleBufferDescriptorLayout, ImageDescriptorLayout, SamplerDescriptorLayout, MaterialBufferDescriptorLayout };
-
-	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
-	pipeline_layout_info.pPushConstantRanges = &bufferRange;
-	pipeline_layout_info.pushConstantRangeCount = 1;
-	pipeline_layout_info.pSetLayouts = layouts;
-	pipeline_layout_info.setLayoutCount = 6;
-	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &BasicPipelineLayout));
-
-	//use the triangle layout we created
-	PipelineBuilder pipelineBuilder;
-	pipelineBuilder.PipelineLayout = BasicPipelineLayout;
-	pipelineBuilder.SetShaders(Shaders["basic_vert"]->GetModule(), Shaders["basic_frag"]->GetModule());
-	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
-	pipelineBuilder.SetCullMode(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
-	pipelineBuilder.SetMultiSamplingNone();
-	pipelineBuilder.EnableBlendingAlphaBlend();	// Target 0
-	pipelineBuilder.EnableBlendingAlphaBlend(); // Target 1
-	pipelineBuilder.EnableBlendingAlphaBlend(); // Target 2
-	std::vector<VkFormat> formats = { static_cast<VkFormat>(GBufferAlbedo->GetFormat()), static_cast<VkFormat>(GBufferNormal->GetFormat()), static_cast<VkFormat>(GBufferMaterial->GetFormat())};
-	pipelineBuilder.SetColorAttachments(formats);
-	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(GBufferDepthImage->GetFormat()));
-	pipelineBuilder.EnableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
-	BasicPipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
 }
 
 void VkSceneRenderer::CreateSamplers()
@@ -366,10 +330,6 @@ void VkSceneRenderer::CreatePipelines()
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 {
 	Context.Size = size;
-	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
-	GBufferDepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
-	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
-	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, size);
 }
 
 void VkSceneRenderer::UpdateCameraData(const CameraData& data)
