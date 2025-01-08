@@ -6,11 +6,7 @@
 #include "VulkanShader.h"
 
 #include "src/Window.h"
-#include <GLFW/glfw3.h>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_vulkan.h"
-#include <imgui/imgui_impl_glfw.h>
 #include "src/Resource/StaticResources.h"
 #include "VulkanInit.h"
 #include "VulkanAllocator.h"
@@ -18,16 +14,27 @@
 #include "VulkanCheck.h"
 #include "PipelineBuilder.h"
 #include "VulkanAllocatedBuffer.h"
-#include <array>
 
 #include "VkResources.h"
 
-using namespace Nuake;
-#include "vk_mem_alloc.h"
-#include <src/Rendering/Vertex.h>
+#include "src/Rendering/Vertex.h"
 #include "VulkanSceneRenderer.h"
 
+#include "DescriptorLayoutBuilder.h"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_vulkan.h"
+#include "imgui/imgui_impl_glfw.h"
+
+#include "GLFW/glfw3.h"
+
+#include "vk_mem_alloc.h"
+
+#include <array>
+
 bool NKUseValidationLayer = true;
+
+using namespace Nuake;
 
 VkRenderer::~VkRenderer()
 {
@@ -911,39 +918,7 @@ void VkRenderer::UploadCameraData(const CameraData& data)
 	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer->GetAllocation());
 }
 
-void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
-{
-	VkDescriptorSetLayoutBinding newbind{};
-	newbind.binding = binding;
-	newbind.descriptorCount = 1;
-	newbind.descriptorType = type;
 
-	Bindings.push_back(newbind);
-}
-
-void DescriptorLayoutBuilder::Clear()
-{
-	Bindings.clear();
-}
-
-VkDescriptorSetLayout DescriptorLayoutBuilder::Build(VkDevice device, VkShaderStageFlags shaderStages, void * pNext, VkDescriptorSetLayoutCreateFlags flags)
-{
-	for (auto& b : Bindings) {
-		b.stageFlags |= shaderStages;
-	}
-
-	VkDescriptorSetLayoutCreateInfo info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-	info.pNext = pNext;
-
-	info.pBindings = Bindings.data();
-	info.bindingCount = (uint32_t)Bindings.size();
-	info.flags = flags;
-
-	VkDescriptorSetLayout set;
-	VK_CALL(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));
-
-	return set;
-}
 
 void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<PoolSizeRatio> poolRatios)
 {

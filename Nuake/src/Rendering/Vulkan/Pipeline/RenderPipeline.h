@@ -2,11 +2,12 @@
 #include "src/Core/Core.h"
 #include "src/Core/Maths.h"
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+#include "src/Rendering/Vulkan/VulkanShader.h"
 
+#include <any>
 #include <functional>
-#include <vector>
 #include <span>
-#include <src/Rendering/Vulkan/VulkanShader.h>
+#include <vector>
 
 
 namespace Nuake
@@ -17,6 +18,7 @@ namespace Nuake
 	{
 		Ref<Scene> scene;
 		VkCommandBuffer commandBuffer;
+		Vector2 resolution;
 	};
 
 	class TextureAttachment
@@ -24,6 +26,7 @@ namespace Nuake
 	public:
 		std::string Name;
 		ImageFormat Format;
+		Ref<VulkanImage> Image;
 
 	public:
 		TextureAttachment(const std::string& name, ImageFormat format);
@@ -48,24 +51,45 @@ namespace Nuake
 		TextureAttachment DepthAttachment;
 		std::vector<TextureAttachment> Inputs;
 
+		std::any PushConstant;
+		size_t PushConstantSize;
+
 		std::function<void(PassRenderContext& ctx)> PreRender;
-		std::function<void(PassRenderContext& ctx)> Render;
+		std::function<void(PassRenderContext& ctx)> RenderCb;
 		std::function<void(PassRenderContext& ctx)> PostRender;
+
+		// Vulkan structs
+		VkPipeline Pipeline;
 
 	public:
 		RenderPass(const std::string& name);
 		~RenderPass() = default;
 
+		void ClearAttachments(PassRenderContext& ctx);
+		void TransitionAttachments(PassRenderContext& ctx);
+		void Render(PassRenderContext& ctx);
+
 	public:
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
 		void AddInput(const TextureAttachment& attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
+
+		template<typename T>
+		void SetPushConstant(T& pushConstant)
+		{
+			SetPushConstant(&pushConstant, sizeof(T));
+		}
+
 		void Build();
 
 		// Callbacks
 		void SetPreRender(const std::function<void(PassRenderContext& ctx)>& func) { PreRender = func; }
-		void SetRender(const std::function<void(PassRenderContext& ctx)>& func) { Render = func; }
+		void SetRender(const std::function<void(PassRenderContext& ctx)>& func) { RenderCb = func; }
 		void SetPostRender(const std::function<void(PassRenderContext& ctx)>& func) { PostRender = func; }
+
+	private:
+		void SetPushConstant(std::any data, size_t size);
+
 	};
 
 	class RenderPipeline
@@ -84,6 +108,6 @@ namespace Nuake
 
 		void Build();
 
-		void Execute(std::span<std::string> inputs);
+		void Execute(PassRenderContext& ctx);
 	};
 }

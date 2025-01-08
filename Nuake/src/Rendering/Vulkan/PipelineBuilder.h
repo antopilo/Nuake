@@ -40,7 +40,7 @@ namespace Nuake
         void EnableDepthTest(bool depthWriteEnable, VkCompareOp op);
 
         void EnableBlendingAdditive();
-        void EnableBlendingAlphaBlend();
+        void EnableBlendingAlphaBlend(size_t count = 1);
         void EnableMultiAlphaBlend(size_t count);
 	};
 }

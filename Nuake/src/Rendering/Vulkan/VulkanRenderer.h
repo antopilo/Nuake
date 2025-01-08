@@ -83,9 +83,9 @@ namespace Nuake
 		VkCommandPool CommandPool; // This is like the allocator for a buffer.
 		VkCommandBuffer CommandBuffer; // You send commands in there.
 
-		Ref<AllocatedBuffer> CameraStagingBuffer;
-		Ref<AllocatedBuffer> ModelStagingBuffer;
-		Ref<AllocatedBuffer> MaterialStagingBuffer;
+		Ref<AllocatedBuffer> CameraStagingBuffer;	// Current camera
+		Ref<AllocatedBuffer> ModelStagingBuffer;	// Matrices
+		Ref<AllocatedBuffer> MaterialStagingBuffer;	// Materials
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -96,17 +96,6 @@ namespace Nuake
 		DescriptorAllocatorGrowable FrameDescriptors;
 
 		DeletionQueue LocalDeletionQueue; // Local when destroying this frame
-	};
-
-
-	struct DescriptorLayoutBuilder 
-	{
-
-		std::vector<VkDescriptorSetLayoutBinding> Bindings;
-
-		void AddBinding(uint32_t binding, VkDescriptorType type);
-		void Clear();
-		VkDescriptorSetLayout Build(VkDevice device, VkShaderStageFlags shaderStages, void* pNext = nullptr, VkDescriptorSetLayoutCreateFlags flags = 0);
 	};
 
 	struct DescriptorAllocator 
@@ -125,7 +114,6 @@ namespace Nuake
 
 		VkDescriptorSet Allocate(VkDevice device, VkDescriptorSetLayout layout);
 	};
-
 
 	struct CameraData
 	{

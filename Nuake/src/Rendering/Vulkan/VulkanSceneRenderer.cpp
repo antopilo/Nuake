@@ -17,6 +17,7 @@
 #include <src/Scene/Components/ModelComponent.h>
 #include "Pipeline/RenderPipeline.h"
 
+#include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
 
 using namespace Nuake;
 
@@ -38,88 +39,72 @@ void VkSceneRenderer::Init()
 
 	SetGBufferSize({ 1280, 720 });
 	CreateBasicPipeline();
-
+	CreatePipelines();
 	ModelMatrixMapping.clear();
 	MeshMaterialMapping.clear();
 
-	auto renderPipelineOpaque = RenderPipeline();
-	auto& gBufferPass = renderPipelineOpaque.AddPass("GBuffer");
-	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Depth", ImageFormat::D32F);
-	gBufferPass.SetPreRender([](PassRenderContext& context) {
-		
-	});
-	gBufferPass.SetRender([](PassRenderContext& context) {
 
-	});
-	gBufferPass.SetPostRender([](PassRenderContext& context) {
-
-	});
-	renderPipelineOpaque.Execute({});
-
-	RenderPipeline bloomPipeline = RenderPipeline();
-	auto& thresholdPass = bloomPipeline.AddPass("Threshold");
-	auto& thresholdOuput = thresholdPass.AddAttachment("ThresholdOutput", ImageFormat::RGBA16F);
-	//thresholdPass.AddInput("Source");
-
-	// Downsample
-	const uint32_t iterationCount = 4;
-	std::vector<TextureAttachment> downsampleAttachments;
-	for (int i = 0; i < iterationCount; i++)
-	{
-		const std::string passName = "Downsample" + std::to_string(i);
-		auto& downsamplePass = bloomPipeline.AddPass(passName);
-		auto& downsampleOutput = downsamplePass.AddAttachment("DownsampleOutput", ImageFormat::RGBA16F);
-		downsampleAttachments.push_back(downsampleOutput);
-
-		if (i == 0)
-		{	// Initial downsample from source
-			downsamplePass.AddInput(thresholdOuput);
-		}
-		else
-		{	// Downsample previous pass
-			const uint32_t previousIndex = iterationCount - i - 1;
-;			downsamplePass.AddInput(downsampleAttachments[previousIndex]);
-		}
-	}
-
-	// Blur & Upsample
-	std::vector<TextureAttachment> upsampleAttachments;
-	for (int i = 0; i < iterationCount; i++)
-	{
-		auto& blurHPass = bloomPipeline.AddPass("BlurH" + std::to_string(i));
-		auto& blurHOutput = blurHPass.AddAttachment("BlurHOutput", ImageFormat::RGBA16F);
-
-		blurHPass.AddInput(downsampleAttachments[4 - i - 1]);
-
-		auto& blurVPass = bloomPipeline.AddPass("BlurV" + std::to_string(i));
-		auto& blurVOutput = blurVPass.AddAttachment("BlurVOutput", ImageFormat::RGBA16F);
-		blurVPass.AddInput(blurHOutput);
-
-		auto& upsamplePass = bloomPipeline.AddPass("Upsample" + std::to_string(i));
-		auto& upsampleOutput = upsamplePass.AddAttachment("UpsampleOutput", ImageFormat::RGBA16F);
-
-		if (i == 0)
-		{
-			upsamplePass.AddInput(upsampleAttachments[i - 1]);
-		}
-		else
-		{
-			upsamplePass.AddInput(upsampleAttachments[i - 1]);
-		}
-		upsamplePass.AddInput(blurVOutput);
-
-		upsampleAttachments.push_back(upsampleOutput);
-	}
-
-	// Final composition
-	auto& finalPass = bloomPipeline.AddPass("Final");
-	finalPass.AddAttachment("FinalOutput", ImageFormat::RGBA16F);
-
-	std::vector<std::string> inputs = { "Source", "Lens"};
-	bloomPipeline.Execute(inputs);
+	//RenderPipeline bloomPipeline = RenderPipeline();
+	//auto& thresholdPass = bloomPipeline.AddPass("Threshold");
+	//auto& thresholdOuput = thresholdPass.AddAttachment("ThresholdOutput", ImageFormat::RGBA16F);
+	////thresholdPass.AddInput("Source");
+	//
+	//// Downsample
+	//const uint32_t iterationCount = 4;
+	//std::vector<TextureAttachment> downsampleAttachments;
+	//for (int i = 0; i < iterationCount; i++)
+	//{
+	//	const std::string passName = "Downsample" + std::to_string(i);
+	//	auto& downsamplePass = bloomPipeline.AddPass(passName);
+	//	auto& downsampleOutput = downsamplePass.AddAttachment("DownsampleOutput", ImageFormat::RGBA16F);
+	//	downsampleAttachments.push_back(downsampleOutput);
+	//
+	//	if (i == 0)
+	//	{	// Initial downsample from source
+	//		downsamplePass.AddInput(thresholdOuput);
+	//	}
+	//	else
+	//	{	// Downsample previous pass
+	//		const uint32_t previousIndex = iterationCount - i - 1;
+;	//		downsamplePass.AddInput(downsampleAttachments[previousIndex]);
+	//	}
+	//}
+	//
+	//// Blur & Upsample
+	//std::vector<TextureAttachment> upsampleAttachments;
+	//for (int i = 0; i < iterationCount; i++)
+	//{
+	//	auto& blurHPass = bloomPipeline.AddPass("BlurH" + std::to_string(i));
+	//	auto& blurHOutput = blurHPass.AddAttachment("BlurHOutput", ImageFormat::RGBA16F);
+	//
+	//	blurHPass.AddInput(downsampleAttachments[4 - i - 1]);
+	//
+	//	auto& blurVPass = bloomPipeline.AddPass("BlurV" + std::to_string(i));
+	//	auto& blurVOutput = blurVPass.AddAttachment("BlurVOutput", ImageFormat::RGBA16F);
+	//	blurVPass.AddInput(blurHOutput);
+	//
+	//	auto& upsamplePass = bloomPipeline.AddPass("Upsample" + std::to_string(i));
+	//	auto& upsampleOutput = upsamplePass.AddAttachment("UpsampleOutput", ImageFormat::RGBA16F);
+	//
+	//	if (i == 0)
+	//	{
+	//		upsamplePass.AddInput(upsampleAttachments[i - 1]);
+	//	}
+	//	else
+	//	{
+	//		upsamplePass.AddInput(upsampleAttachments[i - 1]);
+	//	}
+	//	upsamplePass.AddInput(blurVOutput);
+	//
+	//	upsampleAttachments.push_back(upsampleOutput);
+	//}
+	//
+	//// Final composition
+	//auto& finalPass = bloomPipeline.AddPass("Final");
+	//finalPass.AddAttachment("FinalOutput", ImageFormat::RGBA16F);
+	//
+	//std::vector<std::string> inputs = { "Source", "Lens"};
+	//bloomPipeline.Execute(inputs);
 }
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
@@ -144,7 +129,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		throw std::runtime_error("Draw image is not initialized");
 	}
 	
-
+	PassRenderContext passCtx = { inContext.CurrentScene, inContext.CommandBuffer };
+	GBufferPipeline.Execute(passCtx);
 
 	// Ensure the pipeline is valid
 	if (BasicPipeline == VK_NULL_HANDLE) {
@@ -249,7 +235,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	scissor.extent.height = GBufferAlbedo->GetWidth();
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
 }
-
+ModelPushConstant modelPushConstant{};
 void VkSceneRenderer::DrawScene()
 {
 	ZoneScoped;
@@ -305,7 +291,7 @@ void VkSceneRenderer::DrawScene()
 
 				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
 
-				ModelPushConstant modelPushConstant{};
+				
 				modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 				modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
 
@@ -511,12 +497,15 @@ void VkSceneRenderer::CreateDescriptors()
 void VkSceneRenderer::CreatePipelines()
 {
 	GBufferPipeline = RenderPipeline();
+
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);
 	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA16F);
 	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
+
 	GBufferPipeline.Build();
 }
 
