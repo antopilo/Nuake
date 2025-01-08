@@ -42,69 +42,6 @@ void VkSceneRenderer::Init()
 	CreatePipelines();
 	ModelMatrixMapping.clear();
 	MeshMaterialMapping.clear();
-
-
-	//RenderPipeline bloomPipeline = RenderPipeline();
-	//auto& thresholdPass = bloomPipeline.AddPass("Threshold");
-	//auto& thresholdOuput = thresholdPass.AddAttachment("ThresholdOutput", ImageFormat::RGBA16F);
-	////thresholdPass.AddInput("Source");
-	//
-	//// Downsample
-	//const uint32_t iterationCount = 4;
-	//std::vector<TextureAttachment> downsampleAttachments;
-	//for (int i = 0; i < iterationCount; i++)
-	//{
-	//	const std::string passName = "Downsample" + std::to_string(i);
-	//	auto& downsamplePass = bloomPipeline.AddPass(passName);
-	//	auto& downsampleOutput = downsamplePass.AddAttachment("DownsampleOutput", ImageFormat::RGBA16F);
-	//	downsampleAttachments.push_back(downsampleOutput);
-	//
-	//	if (i == 0)
-	//	{	// Initial downsample from source
-	//		downsamplePass.AddInput(thresholdOuput);
-	//	}
-	//	else
-	//	{	// Downsample previous pass
-	//		const uint32_t previousIndex = iterationCount - i - 1;
-;	//		downsamplePass.AddInput(downsampleAttachments[previousIndex]);
-	//	}
-	//}
-	//
-	//// Blur & Upsample
-	//std::vector<TextureAttachment> upsampleAttachments;
-	//for (int i = 0; i < iterationCount; i++)
-	//{
-	//	auto& blurHPass = bloomPipeline.AddPass("BlurH" + std::to_string(i));
-	//	auto& blurHOutput = blurHPass.AddAttachment("BlurHOutput", ImageFormat::RGBA16F);
-	//
-	//	blurHPass.AddInput(downsampleAttachments[4 - i - 1]);
-	//
-	//	auto& blurVPass = bloomPipeline.AddPass("BlurV" + std::to_string(i));
-	//	auto& blurVOutput = blurVPass.AddAttachment("BlurVOutput", ImageFormat::RGBA16F);
-	//	blurVPass.AddInput(blurHOutput);
-	//
-	//	auto& upsamplePass = bloomPipeline.AddPass("Upsample" + std::to_string(i));
-	//	auto& upsampleOutput = upsamplePass.AddAttachment("UpsampleOutput", ImageFormat::RGBA16F);
-	//
-	//	if (i == 0)
-	//	{
-	//		upsamplePass.AddInput(upsampleAttachments[i - 1]);
-	//	}
-	//	else
-	//	{
-	//		upsamplePass.AddInput(upsampleAttachments[i - 1]);
-	//	}
-	//	upsamplePass.AddInput(blurVOutput);
-	//
-	//	upsampleAttachments.push_back(upsampleOutput);
-	//}
-	//
-	//// Final composition
-	//auto& finalPass = bloomPipeline.AddPass("Final");
-	//finalPass.AddAttachment("FinalOutput", ImageFormat::RGBA16F);
-	//
-	//std::vector<std::string> inputs = { "Source", "Lens"};
-	//bloomPipeline.Execute(inputs);
 }
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
@@ -129,190 +66,17 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	if (!vk.DrawImage) {
 		throw std::runtime_error("Draw image is not initialized");
 	}
-	
-	PassRenderContext passCtx = { inContext.CurrentScene, inContext.CommandBuffer, Context.Size };
+
+	PassRenderContext passCtx = { };
+	passCtx.scene = inContext.CurrentScene;
+	passCtx.commandBuffer = inContext.CommandBuffer;
+	passCtx.resolution = Context.Size;
 	GBufferPipeline.Execute(passCtx);
-
-	// Ensure the pipeline is valid
-	if (BasicPipeline == VK_NULL_HANDLE) {
-		throw std::runtime_error("Basic pipeline is not initialized");
-	}
-
-	VkClearColorValue clearValue;
-	//float flash = std::abs(std::sin(FrameNumber / 120.f));
-	clearValue = { { 0.0f, 1.0f, 0.0f, 1.0f } };
-	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-	vkCmdClearColorImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-	vkCmdClearColorImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-	vkCmdClearColorImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-	//VkClearDepthStencilValue clearDepth = { 0.0f, 0 };
-	//clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_DEPTH_BIT);
-	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearDepth, 1, &clearRange);
-
-	// Optionally, clear the image if you need to reset its contents
-	VkClearDepthStencilValue clearValue2 = {};
-	clearValue2.depth = 1.0f; // Depth to clear to
-	clearValue2.stencil = 0; // Stencil to clear to
-
-	VkImageSubresourceRange range = {};
-	range.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-	range.baseMipLevel = 0;
-	range.levelCount = 1;
-	range.baseArrayLayer = 0;
-	range.layerCount = 1;
-
-	//vkCmdClearDepthStencilImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue2, 1, &range);
-
-
-	// Create Pipeline
-	// Pipeline is a graph or pass that connects with dependencies
-	// Bind framebuffer or StartRendering on a Pass
-	// 1. Transition all images
-	// 2. Create render info attachment info
-	// 3. BeginRendering
-	// 3.5 Bind pipeline & descriptor sets
-	// 4. EndRendering
-
-	//
-
-	// End rendering
-	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, GBufferDepthImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-
-	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(GBufferAlbedo->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VkRenderingAttachmentInfo normalAttachment = VulkanInit::AttachmentInfo(GBufferNormal->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VkRenderingAttachmentInfo materialAttachment = VulkanInit::AttachmentInfo(GBufferMaterial->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	VkRenderingAttachmentInfo depthAttachment = VulkanInit::DepthAttachmentInfo(GBufferDepthImage->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-	std::vector<VkRenderingAttachmentInfo> attachments = { colorAttachment, normalAttachment, materialAttachment };
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(GBufferAlbedo->GetSize(), attachments, &depthAttachment);
-	renderInfo.colorAttachmentCount = std::size(attachments);
-	renderInfo.pColorAttachments = attachments.data();
-	vkCmdBeginRendering(cmd, &renderInfo);
-
-	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipeline);
-	
-	std::vector<VkDescriptorSet> descriptors = { CameraBufferDescriptors, ModelBufferDescriptor };
-	// Bind camera settings
-	vkCmdBindDescriptorSets(
-		cmd,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		BasicPipelineLayout,
-		0,                               // firstSet
-		2,                               // descriptorSetCount
-		descriptors.data(),        // pointer to the descriptor set(s)
-		0,                               // dynamicOffsetCount
-		nullptr                          // dynamicOffsets
-	);
-
-	// Bind material
-	vkCmdBindDescriptorSets(
-		cmd,
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		BasicPipelineLayout,
-		5,                               // firstSet
-		1,                               // descriptorSetCount
-		&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
-		0,                               // dynamicOffsetCount
-		nullptr                          // dynamicOffsets
-	);
-	
-	// Set viewport
-	VkViewport viewport = {};
-	viewport.x = 0;
-	viewport.y = 0;
-	viewport.width = GBufferAlbedo->GetWidth();
-	viewport.height = GBufferAlbedo->GetHeight();
-	viewport.minDepth = 0.f;
-	viewport.maxDepth = 1.f;
-	
-	vkCmdSetViewport(cmd, 0, 1, &viewport);
-	
-	VkRect2D scissor = {};
-	scissor.offset.x = 0;
-	scissor.offset.y = 0;
-	scissor.extent.width = GBufferAlbedo->GetWidth();
-	scissor.extent.height = GBufferAlbedo->GetWidth();
-	vkCmdSetScissor(cmd, 0, 1, &scissor);
 }
 ModelPushConstant modelPushConstant{};
 void VkSceneRenderer::DrawScene()
 {
-	ZoneScoped;
-
-	auto& cmd = Context.CommandBuffer;
-	auto& scene = Context.CurrentScene;
-	auto& vk = VkRenderer::Get();
-
-	// Draw the scene
-	{
-		ZoneScopedN("Render Models");
-		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
-		for (auto e : view)
-		{
-			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-			if (!mesh.ModelResource || !visibility.Visible)
-			{
-				continue;
-			}
-
-			Entity entity = Entity((entt::entity)e, scene.get());
-			for (auto& m : mesh.ModelResource->GetMeshes())
-			{
-				Ref<VkMesh> vkMesh = m->GetVkMesh();
-				Matrix4 globalTransform = transform.GetGlobalTransform();
-
-				auto descSet = vkMesh->GetDescriptorSet();
-				vkCmdBindDescriptorSets(
-					cmd,
-					VK_PIPELINE_BIND_POINT_GRAPHICS,
-					BasicPipelineLayout,
-					2,                               // firstSet
-					1,                               // descriptorSetCount
-					&descSet,     // pointer to the descriptor set(s)
-					0,                               // dynamicOffsetCount
-					nullptr                          // dynamicOffsets
-				);
-
-				// Bind texture descriptor set
-				Ref<Material> material = m->GetMaterial();
-				Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
-
-				//bind a texture
-				VkDescriptorSet imageSet = vk.GetCurrentFrame().FrameDescriptors.Allocate(vk.GetDevice(), ImageDescriptorLayout);
-				{
-					DescriptorWriter writer;
-					writer.WriteImage(0, albedo->GetImageView(), SamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-					writer.UpdateSet(vk.GetDevice(), imageSet);
-				}
-
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 3, 1, &imageSet, 0, nullptr);
-
-				vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, BasicPipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
-				
-				modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
-				modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
-
-				vkCmdPushConstants(
-					cmd,
-					BasicPipelineLayout,
-					VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
-					0,									// Offset
-					sizeof(ModelPushConstant),          // Size of the push constant
-					&modelPushConstant                  // Pointer to the value
-				);
-
-				vkCmdBindIndexBuffer(cmd, vkMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-				vkCmdDrawIndexed(cmd, vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
-			}
-		}
-	}
-
-	// Quake
-	{
-
-	}
+	
 }
 
 void VkSceneRenderer::EndScene()
@@ -320,17 +84,12 @@ void VkSceneRenderer::EndScene()
 	auto& vk = VkRenderer::Get();
 	auto& cmd = Context.CommandBuffer;
 
-	vkCmdEndRendering(Context.CommandBuffer);
-
-	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
+	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, GBufferNormal->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, albedo.Image->GetImage(), vk.GetDrawImage()->GetImage(), GBufferAlbedo->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	VulkanUtil::TransitionImage(cmd, GBufferMaterial->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	VulkanUtil::TransitionImage(cmd, GBufferNormal->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	VulkanUtil::TransitionImage(cmd, GBufferAlbedo->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -387,7 +146,6 @@ void VkSceneRenderer::CreateBasicPipeline()
 	pipelineBuilder.SetColorAttachments(formats);
 	pipelineBuilder.SetDepthFormat(static_cast<VkFormat>(GBufferDepthImage->GetFormat()));
 	pipelineBuilder.EnableDepthTest(true, VK_COMPARE_OP_GREATER_OR_EQUAL);
-	//pipelineBuilder.DisableDepthTest();
 	BasicPipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
 }
 
@@ -505,7 +263,102 @@ void VkSceneRenderer::CreatePipelines()
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
 	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 
-	gBufferPass.SetPreRender([](PassRenderContext& ctx) {});
+	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
+		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			0,                               // firstSet
+			2,                               // descriptorSetCount
+			descriptors2.data(),        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		// Bind material
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			5,                               // firstSet
+			1,                               // descriptorSetCount
+			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+	});
+
+	gBufferPass.SetRender([&](PassRenderContext& ctx){
+		auto& cmd = ctx.commandBuffer;
+		auto& scene = ctx.scene;
+		auto& vk = VkRenderer::Get();
+
+		// Draw the scene
+		{
+			ZoneScopedN("Render Models");
+			auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+			for (auto e : view)
+			{
+				auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+				if (!mesh.ModelResource || !visibility.Visible)
+				{
+					continue;
+				}
+
+				Entity entity = Entity((entt::entity)e, scene.get());
+				for (auto& m : mesh.ModelResource->GetMeshes())
+				{
+					Ref<VkMesh> vkMesh = m->GetVkMesh();
+					Matrix4 globalTransform = transform.GetGlobalTransform();
+
+					auto descSet = vkMesh->GetDescriptorSet();
+					vkCmdBindDescriptorSets(
+						cmd,
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						ctx.renderPass->PipelineLayout,
+						2,                               // firstSet
+						1,                               // descriptorSetCount
+						&descSet,     // pointer to the descriptor set(s)
+						0,                               // dynamicOffsetCount
+						nullptr                          // dynamicOffsets
+					);
+
+					// Bind texture descriptor set
+					Ref<Material> material = m->GetMaterial();
+					Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
+
+					//bind a texture
+					VkDescriptorSet imageSet = vk.GetCurrentFrame().FrameDescriptors.Allocate(vk.GetDevice(), ImageDescriptorLayout);
+					{
+						DescriptorWriter writer;
+						writer.WriteImage(0, albedo->GetImageView(), SamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
+						writer.UpdateSet(vk.GetDevice(), imageSet);
+					}
+
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &imageSet, 0, nullptr);
+
+					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
+
+					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
+					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
+
+					vkCmdPushConstants(
+						cmd,
+						ctx.renderPass->PipelineLayout,
+						VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
+						0,									// Offset
+						sizeof(ModelPushConstant),          // Size of the push constant
+						&modelPushConstant                  // Pointer to the value
+					);
+
+					vkCmdBindIndexBuffer(cmd, vkMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+					vkCmdDrawIndexed(cmd, vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
+				}
+			}
+		}
+		
+	});
 
 	GBufferPipeline.Build();
 }
@@ -525,7 +378,6 @@ void VkSceneRenderer::UpdateCameraData(const CameraData& data)
 	adjustedData.View = Matrix4(1.0f); //data.View;
 	adjustedData.View = data.View;
 	adjustedData.Projection = data.Projection;
-	//adjustedData.Projection[1][1] *= -1;
 
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);

@@ -13,12 +13,14 @@
 namespace Nuake
 {
 	class Scene;
+	class RenderPass;
 
 	struct PassRenderContext
 	{
 		Ref<Scene> scene;
 		VkCommandBuffer commandBuffer;
 		Vector2 resolution;
+		RenderPass* renderPass = nullptr;
 	};
 
 	class TextureAttachment
@@ -29,7 +31,7 @@ namespace Nuake
 		Ref<VulkanImage> Image;
 
 	public:
-		TextureAttachment(const std::string& name, ImageFormat format);
+		TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
 		TextureAttachment() = default;
 		~TextureAttachment() = default;
 	};
@@ -59,7 +61,10 @@ namespace Nuake
 		std::function<void(PassRenderContext& ctx)> PostRender;
 
 		// Vulkan structs
+
+	public:
 		VkPipeline Pipeline;
+		VkPipelineLayout PipelineLayout;
 
 	public:
 		RenderPass(const std::string& name);
@@ -70,7 +75,10 @@ namespace Nuake
 		void Render(PassRenderContext& ctx);
 
 	public:
+		std::string GetName() const { return Name; }
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
+		TextureAttachment& GetAttachment(const std::string& name);
+
 		void AddInput(const TextureAttachment& attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
 
@@ -105,6 +113,7 @@ namespace Nuake
 
 	public:
 		RenderPass& AddPass(const std::string& name);
+		RenderPass& GetRenderPass(const std::string& name);
 
 		void Build();
 

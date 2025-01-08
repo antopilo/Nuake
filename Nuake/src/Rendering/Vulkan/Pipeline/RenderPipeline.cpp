@@ -9,11 +9,11 @@
 
 using namespace Nuake;
 
-TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format) :
+TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage) :
 	Name(name),
 	Format(format)
 {
-	Image = std::make_shared<VulkanImage>(format, Vector2(1280, 720));
+	Image = std::make_shared<VulkanImage>(format, Vector2(1280, 720), usage);
 
 	// Create default texture I guess?
 	auto& gpuResources = GPUResources::Get();
@@ -45,6 +45,15 @@ void RenderPass::ClearAttachments(PassRenderContext& ctx)
 		// TODO: Queue deletion of old textures
 	}
 
+	if (DepthAttachment.Image->GetSize() != ctx.resolution)
+	{
+		Ref<VulkanImage> newDepthAttachment = std::make_shared<VulkanImage>(DepthAttachment.Format, ctx.resolution, ImageUsage::Depth);
+		DepthAttachment.Image = newDepthAttachment;
+
+		auto& gpuResources = GPUResources::Get();
+		gpuResources.AddTexture(newDepthAttachment);
+	}
+
 	// Clear all color attachments
 	VkClearColorValue clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
 	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
@@ -70,11 +79,12 @@ void RenderPass::TransitionAttachments(PassRenderContext& ctx)
 
 void RenderPass::Render(PassRenderContext& ctx)
 {
+	ctx.renderPass = this;
+
 	if (PreRender)
 	{
 		PreRender(ctx);
 	}
-
 	
 	// Begin rendering and bind pipeline
 	std::vector<VkRenderingAttachmentInfo> renderAttachmentInfos;
@@ -114,7 +124,6 @@ void RenderPass::Render(PassRenderContext& ctx)
 		scissor.extent.height = ctx.resolution.y;
 		vkCmdSetScissor(ctx.commandBuffer, 0, 1, &scissor);
 
-
 		if (RenderCb)
 		{
 			RenderCb(ctx);
@@ -122,6 +131,13 @@ void RenderPass::Render(PassRenderContext& ctx)
 	}
 	vkCmdEndRendering(ctx.commandBuffer);
 	// End rendering
+
+	for (auto& attachment : Attachments)
+	{
+		// Transform from color attachment to transfer src for next pass
+		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	}
 
 	if (PostRender)
 	{
@@ -131,14 +147,29 @@ void RenderPass::Render(PassRenderContext& ctx)
 
 TextureAttachment& RenderPass::AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage)
 {
-	auto newAttachment = TextureAttachment(name, format);
+	auto newAttachment = TextureAttachment(name, format, usage);
 	if (usage == ImageUsage::Depth)
 	{
 		DepthAttachment = newAttachment;
+		return DepthAttachment;
 	}
 
 	TextureAttachment& newAttachmentRef = Attachments.emplace_back(std::move(newAttachment));
 	return newAttachmentRef;
+}
+
+TextureAttachment& RenderPass::GetAttachment(const std::string& name)
+{
+	for (auto& attachment : Attachments)
+	{
+		if (attachment.Name == name)
+		{
+			return attachment;
+		}
+	}
+
+	assert(false && "Attachment not found by name");
+	return Attachments[0];
 }
 
 void RenderPass::AddInput(const TextureAttachment& name)
@@ -170,14 +201,13 @@ void RenderPass::Build()
 	pipeline_layout_info.pSetLayouts = layouts.data();
 	pipeline_layout_info.setLayoutCount = layouts.size();
 
-	VkPipelineLayout pipelineLayout;
-	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &pipelineLayout));
+	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &PipelineLayout));
 
 	// Create pipeline 
 	const size_t attachmentCount = Attachments.size();
 
 	PipelineBuilder pipelineBuilder;
-	pipelineBuilder.PipelineLayout = pipelineLayout;
+	pipelineBuilder.PipelineLayout = PipelineLayout;
 	pipelineBuilder.SetShaders(VertShader->GetModule(), FragShader->GetModule());
 	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
@@ -213,6 +243,21 @@ RenderPass& RenderPipeline::AddPass(const std::string& name)
 {
 	auto newPass = RenderPass(name);
 	return RenderPasses.emplace_back(std::move(newPass));
+}
+
+RenderPass& RenderPipeline::GetRenderPass(const std::string& name)
+{
+	// Find render pass by name
+	for (auto& pass : RenderPasses)
+	{
+		if (pass.GetName() == name)
+		{
+			return pass;
+		}
+	}
+
+	assert(false && "Render pass not found by name");
+	return RenderPasses[0];
 }
 
 void RenderPipeline::Build()
