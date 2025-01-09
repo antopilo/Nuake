@@ -84,6 +84,7 @@ namespace Nuake
 
 		void AddInput(const std::string& name);
 		std::vector<std::string> GetInputs();
+		std::vector<TextureAttachment> GetInputAttachments();
 		TextureAttachment& GetDepthAttachment() { return DepthAttachment; }
 
 		void SetInput(const std::string& name, TextureAttachment attachment);
@@ -112,7 +113,7 @@ namespace Nuake
 	private:
 		bool Built;
 		std::vector<RenderPass> RenderPasses;
-		
+		TextureAttachment FinalOutput;
 	public:
 		RenderPipeline();
 		~RenderPipeline() = default;

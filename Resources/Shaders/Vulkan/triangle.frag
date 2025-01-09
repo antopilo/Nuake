@@ -15,7 +15,13 @@ struct Material
     float metalnessValue;
     float roughnessValue;
     float aoValue;
+    int albedoTextureId;
+    int normalTextureId;
+    int metalnessTextureId;
+    int roughnessTextureId;
+    int aoTextureId;
 };
+
 [[vk::binding(0, 5)]]
 StructuredBuffer<Material> material;
 
@@ -68,16 +74,15 @@ PSOutput main(PSInput input)
     float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
     if(inMaterial.hasAlbedo == 1)
     {
-        float4 testTexture = textures[pushConstants.modelIndex].Sample(mySampler, input.UV);
-        float4 albedoTextureSample = albedo.Sample(mySampler, input.UV);
+        float4 albedoSample = textures[inMaterial.albedoTextureId].Sample(mySampler, input.UV);
 
         // Alpha cutout?
-        if(albedoTextureSample.a < 0.001f)
+        if(albedoSample.a < 0.001f)
         {
             discard;
         }
 
-        albedoColor.xyz = testTexture.xyz * albedoTextureSample.xyz;
+        albedoColor.xyz = albedoSample.xyz;
     }
     output.oColor0 = albedoColor;
 

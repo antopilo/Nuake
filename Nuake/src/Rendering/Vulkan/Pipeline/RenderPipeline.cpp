@@ -211,6 +211,17 @@ std::vector<std::string> RenderPass::GetInputs()
 	return InputNames;
 }
 
+std::vector<TextureAttachment> RenderPass::GetInputAttachments()
+{
+	std::vector<TextureAttachment> inputAttachments;
+	inputAttachments.reserve(Inputs.size());
+	for (auto& [name, attachment] : Inputs)
+	{
+		inputAttachments.push_back(attachment);
+	}
+	return inputAttachments;
+}
+
 void RenderPass::SetInput(const std::string& name, TextureAttachment attachment)
 {
 	Inputs[name] = attachment;
@@ -361,12 +372,85 @@ void RenderPipeline::Execute(PassRenderContext& ctx)
 		return;
 	}
 
+	std::vector<TextureAttachment> transitionedInputs;
 	for (auto& pass : RenderPasses)
 	{
+		for (auto& input : pass.GetInputAttachments())
+		{
+			VkImageMemoryBarrier barrier{};
+			barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		
+			// Handle old and new layouts based on attachment type
+			barrier.oldLayout = input.Format != ImageFormat::D32F ? VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		
+			// Access masks for color or depth-stencil attachments
+			if (input.Format != ImageFormat::D32F) {
+				barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			}
+			else {
+				barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+				barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		
+				// Include stencil aspect if applicable
+				//if (input.HasStencilComponent()) {
+				//	barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+				//}
+			}
+		
+			// Destination access mask is always for shaders reading
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		
+			// No queue family ownership transfer in this case
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		
+			// Set the image and subresource range
+			barrier.image = input.Image->GetImage();
+			barrier.subresourceRange.baseMipLevel = 0;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
+		
+			// Choose appropriate source pipeline stage for color or depth-stencil
+			VkPipelineStageFlags srcStage = (input.Format != ImageFormat::D32F)
+				? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+				: (VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
+		
+			// Insert the pipeline barrier
+			vkCmdPipelineBarrier(
+				ctx.commandBuffer,
+				srcStage,                                // Source stage
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,  // Destination stage
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier
+			);
+
+			transitionedInputs.push_back(input);
+		}
+		
 		pass.ClearAttachments(ctx);
 		pass.TransitionAttachments(ctx);
 		pass.Render(ctx);
 		pass.UntransitionAttachments(ctx);
+
+		// Sync the attachments
+
+	}
+
+	for (auto& transitionedOutputs : transitionedInputs)
+	{
+		if (transitionedOutputs.Format == ImageFormat::D32F)
+		{
+			//VulkanUtil::TransitionImage(ctx.commandBuffer, transitionedOutputs.Image->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		}
+		else
+		{
+			VulkanUtil::TransitionImage(ctx.commandBuffer, transitionedOutputs.Image->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		}
 	}
 }
 

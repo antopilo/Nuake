@@ -80,7 +80,7 @@ void VkSceneRenderer::EndScene()
 	auto& cmd = Context.CommandBuffer;
 
 	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
-	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	VulkanUtil::CopyImageToImage(cmd, albedo.Image->GetImage(), vk.GetDrawImage()->GetImage(), albedo.Image->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
@@ -349,13 +349,12 @@ void VkSceneRenderer::CreatePipelines()
 	shadingPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 	shadingPass.AddAttachment("Output", ImageFormat::RGBA16F);
 	shadingPass.AddAttachment("DepthShading", ImageFormat::D32F, ImageUsage::Depth);
-	shadingPass.AddInput("Albedo");
-	shadingPass.AddInput("Normal");
-	shadingPass.AddInput("Material");
-	shadingPass.AddInput("Depth");
+	shadingPass.AddInput("Albedo");		// We need to sync those
+
 
 	shadingPass.SetPreRender([](PassRenderContext& ctx) {});
 	shadingPass.SetRender([](PassRenderContext& ctx) {});
+
 	GBufferPipeline.Build();
 }
 
