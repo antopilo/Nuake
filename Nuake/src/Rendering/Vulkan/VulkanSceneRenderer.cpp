@@ -52,8 +52,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	BuildMatrixBuffer();
 	UpdateTransformBuffer();
 
-
-
 	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
 	auto& vk = VkRenderer::Get();
@@ -395,6 +393,26 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	ZoneScopedN("Build Matrix Buffer");
 	auto& scene = Context.CurrentScene;
 
+	std::map<UUID, uint32_t> TextureIDMapping;
+	auto allTextures = GPUResources::Get().GetAllTextures();
+	std::vector<VkDescriptorImageInfo> imageInfos(allTextures.size());
+	for (size_t i = 0; i < allTextures.size(); i++) {
+		imageInfos[i].imageView = allTextures[i]->GetImageView();
+		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		TextureIDMapping[allTextures[i]->GetID()] = i;
+	}
+
+	VkWriteDescriptorSet write{};
+	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	write.dstSet = TextureBufferDescriptor;
+	write.dstBinding = 0; // Binding 0
+	write.dstArrayElement = 0;
+	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+	write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+	write.pImageInfo = imageInfos.data();
+
+	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
+
 	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
 	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
 
@@ -441,6 +459,11 @@ void VkSceneRenderer::BuildMatrixBuffer()
 			materialBuffer.aoValue = material->data.u_AOValue;
 			materialBuffer.hasRoughness = material->HasRoughness();
 			materialBuffer.roughnessValue = material->data.u_RoughnessValue;
+			materialBuffer.albedoTextureId = material->HasAlbedo() ? TextureIDMapping[material->AlbedoImage] : 0;
+			materialBuffer.normalTextureId = material->HasNormal() ? TextureIDMapping[material->NormalImage] : 0;
+			materialBuffer.metalnessTextureId = material->HasMetalness() ? TextureIDMapping[material->MetalnessImage] : 0;
+			materialBuffer.aoTextureId = material->HasAO() ? TextureIDMapping[material->AOImage] : 0;
+			materialBuffer.roughnessTextureId = material->HasRoughness() ? TextureIDMapping[material->RoughnessImage] : 0;
 			allMaterials[currentMaterialIndex] = materialBuffer;
 			MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
 
@@ -524,22 +547,5 @@ void VkSceneRenderer::UpdateTransformBuffer()
 		bufferWrite.pImageInfo = VK_NULL_HANDLE;
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
 	}
-
-	auto allTextures = GPUResources::Get().GetAllTextures();
-	std::vector<VkDescriptorImageInfo> imageInfos(allTextures.size());
-	for (size_t i = 0; i < allTextures.size(); i++) {
-		imageInfos[i].imageView = allTextures[i]->GetImageView();
-		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	}
-
-	VkWriteDescriptorSet write{};
-	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	write.dstSet = TextureBufferDescriptor;
-	write.dstBinding = 0; // Binding 0
-	write.dstArrayElement = 0;
-	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
-	write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	write.pImageInfo = imageInfos.data();
-
-	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
 }
+	

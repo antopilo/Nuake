@@ -61,6 +61,11 @@ namespace Nuake
 		}
 	public:
 		UUID AlbedoImage;
+		UUID AOImage;
+		UUID MetalnessImage;
+		UUID RoughnessImage;
+		UUID NormalImage;
+		
 		Ref<Texture> m_Albedo;
 		Ref<Texture> m_AO;
 		Ref<Texture> m_Metalness;
@@ -227,28 +232,72 @@ namespace Nuake
 
 			if (j.contains("Normal"))
 			{
-				const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Normal"]["Path"]);
+				const auto& texturePath = j["Normal"]["Path"];
+				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+				if (FileSystem::FileExists(texturePath))
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> image = CreateRef<VulkanImage>(absolutePath);
+					if (resources.AddTexture(image))
+					{
+						NormalImage = image->GetID();
+					}
+				}
+				
 				Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(absolutePath);
 				SetMetalness(normalTexture);
 			}
 
 			if (j.contains("AO"))
 			{
-				const std::string absolutePath = FileSystem::RelativeToAbsolute(j["AO"]["Path"]);
+				const auto& texturePath = j["AO"]["Path"];
+				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+				if (FileSystem::FileExists(texturePath))
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> image = CreateRef<VulkanImage>(absolutePath);
+					if (resources.AddTexture(image))
+					{
+						AOImage = image->GetID();
+					}
+				}
+
 				Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(absolutePath);
 				SetAO(aoTexture);
 			}
 
 			if (j.contains("Metalness"))
 			{
-				const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Metalness"]["Path"]);
+				const auto& texturePath = j["Metalness"]["Path"];
+				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+				if (FileSystem::FileExists(texturePath))
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> image = CreateRef<VulkanImage>(absolutePath);
+					if (resources.AddTexture(image))
+					{
+						MetalnessImage = image->GetID();
+					}
+				}
+
 				Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(absolutePath);
 				SetMetalness(metalTexture);
 			}
 
 			if (j.contains("Roughness"))
 			{
-				const std::string absolutePath = FileSystem::RelativeToAbsolute(j["Roughness"]["Path"]);
+				const auto& texturePath = j["Roughness"]["Path"];
+				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+				if (FileSystem::FileExists(texturePath))
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> image = CreateRef<VulkanImage>(absolutePath);
+					if (resources.AddTexture(image))
+					{
+						RoughnessImage = image->GetID();
+					}
+				}
+
 				Ref<Texture> metalTexture = TextureManager::Get()->GetTexture(absolutePath);
 				SetRoughness(metalTexture);
 			}

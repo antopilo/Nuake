@@ -42,7 +42,11 @@ namespace Nuake
 		float metalnessValue;
 		float roughnessValue;
 		float aoValue;
-		float pad;
+		int albedoTextureId;
+		int normalTextureId;
+		int metalnessTextureId;
+		int roughnessTextureId;
+		int aoTextureId;
 	};
 
 	// This is the *whole* buffer
