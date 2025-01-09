@@ -77,6 +77,16 @@ void VkRenderer::Initialize()
 	GPUQueue = VkbDevice.get_queue(vkb::QueueType::graphics).value();
 	GPUQueueFamily = VkbDevice.get_queue_index(vkb::QueueType::graphics).value();
 
+	// Init global pool
+	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
+	{
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
+	};
+
+	GlobalDescriptorAllocator.InitPool(Device, 1000, sizes);
+
 	InitCommands();
 
 	InitSync();
@@ -110,15 +120,7 @@ void VkRenderer::Initialize()
 	rect_indices[4] = 1;
 	rect_indices[5] = 3;
 
-	// Init global pool
-	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
-	{
-		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
-		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
-	};
 
-	GlobalDescriptorAllocator.InitPool(Device, 1000, sizes);
 
 
 	GPUResources& resources = GPUResources::Get();

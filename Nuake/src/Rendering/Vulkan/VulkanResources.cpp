@@ -171,6 +171,36 @@ void GPUResources::CreateBindlessLayout()
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_TEXTURES);
 		TexturesDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
+
+	TextureDescriptor = VkRenderer::Get().GetDescriptorAllocator().Allocate(VkRenderer::Get().GetDevice(), TexturesDescriptorLayout);
+}
+
+void GPUResources::RecreateBindlessTextures()
+{
+	if (!TextureDescriptor)
+	{
+		CreateBindlessLayout();
+	}
+
+	BindlessTextureMapping.clear();
+	std::vector<VkDescriptorImageInfo> imageInfos(Images.size());
+	auto allTextures = GetAllTextures();
+	for (size_t i = 0; i < Images.size(); i++) {
+		imageInfos[i].imageView = allTextures[i]->GetImageView();
+		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		BindlessTextureMapping[allTextures[i]->GetID()] = i;
+	}
+
+	VkWriteDescriptorSet write{};
+	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	write.dstSet = TextureDescriptor;
+	write.dstBinding = 0; // Binding 0
+	write.dstArrayElement = 0;
+	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+	write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+	write.pImageInfo = imageInfos.data();
+
+	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
 }
 
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
@@ -179,10 +209,14 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		CameraDescriptorLayout,
 		ModelBufferDescriptorLayout,
 		TriangleBufferDescriptorLayout,
-		ImageDescriptorLayout,
 		SamplerDescriptorLayout,
 		MaterialDescriptorLayout,
 		TexturesDescriptorLayout
 	};
 	return layouts;
+}
+
+uint32_t GPUResources::GetBindlessTextureID(const UUID & id)
+{
+	return 0;
 }

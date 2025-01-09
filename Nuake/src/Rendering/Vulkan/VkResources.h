@@ -14,11 +14,14 @@
 
 #include <volk/volk.h>
 
+#include <map>
+
 namespace Nuake
 {
 	class GPUResources
 	{
 	private:
+		bool isDirty = false;
 		std::map<UUID, Ref<AllocatedBuffer>> Buffers;
 		std::map<UUID, Ref<VkMesh>> Meshes;
 		std::map<UUID, Ref<VulkanImage>> Images;
@@ -36,9 +39,11 @@ namespace Nuake
 		VkDescriptorSet ModelDescriptor;
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
-		VkDescriptorSet TextureDescriptor;
+
+		std::map<UUID, uint32_t> BindlessTextureMapping;
 
 	public:
+		VkDescriptorSet TextureDescriptor;
 		static GPUResources& Get()
 		{
 			static GPUResources instance;
@@ -65,6 +70,9 @@ namespace Nuake
 		std::vector<Ref<VulkanImage>> GetAllTextures();
 
 		std::vector<VkDescriptorSetLayout> GetBindlessLayout();
+
+		uint32_t GetBindlessTextureID(const UUID& id);
+		void RecreateBindlessTextures();
 
 	private:
 		void CreateBindlessLayout();

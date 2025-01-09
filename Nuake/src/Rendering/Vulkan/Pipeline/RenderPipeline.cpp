@@ -372,6 +372,8 @@ void RenderPipeline::Execute(PassRenderContext& ctx)
 		return;
 	}
 
+
+
 	std::vector<TextureAttachment> transitionedInputs;
 	for (auto& pass : RenderPasses)
 	{

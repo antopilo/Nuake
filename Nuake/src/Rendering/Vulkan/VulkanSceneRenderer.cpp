@@ -29,6 +29,7 @@ VkSceneRenderer::~VkSceneRenderer()
 {
 }
 
+Ref<VkMesh> quadMesh;
 void VkSceneRenderer::Init()
 {
 	// Here we will create the pipeline for rendering a scene
@@ -41,6 +42,19 @@ void VkSceneRenderer::Init()
 	CreatePipelines();
 	ModelMatrixMapping.clear();
 	MeshMaterialMapping.clear();
+
+    std::vector<Vertex> quadVertices = {
+		{{-1.0f, -1.0f, 0.0f }, 0.0f, {}, 0.0f },
+        {{ 1.0f, -1.0f, 0.0f }, 1.0f, {}, 0.0f },
+        {{ 1.0f,  1.0f, 0.0f }, 1.0f, {}, 1.0f },
+        {{-1.0f,  1.0f, 0.0f }, 0.0f, {}, 1.0f }
+    };
+
+    std::vector<uint32_t> quadIndices = {
+        0, 1, 2, 2, 3, 0
+    };
+
+	quadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
 }
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
@@ -254,7 +268,7 @@ void VkSceneRenderer::CreatePipelines()
 			ctx.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			ctx.renderPass->PipelineLayout,
-			5,                               // firstSet
+			4,                               // firstSet
 			1,                               // descriptorSetCount
 			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
 			0,                               // dynamicOffsetCount
@@ -265,12 +279,15 @@ void VkSceneRenderer::CreatePipelines()
 			ctx.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			ctx.renderPass->PipelineLayout,
-			6,                               // firstSet
+			5,                               // firstSet
 			1,                               // descriptorSetCount
-			&TextureBufferDescriptor,        // pointer to the descriptor set(s)
+			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
 			0,                               // dynamicOffsetCount
 			nullptr                          // dynamicOffsets
 		);
+
+		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
+
 	});
 
 	gBufferPass.SetRender([&](PassRenderContext& ctx){
@@ -312,18 +329,6 @@ void VkSceneRenderer::CreatePipelines()
 					Ref<Material> material = m->GetMaterial();
 					Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
 
-					//bind a texture
-					VkDescriptorSet imageSet = vk.GetCurrentFrame().FrameDescriptors.Allocate(vk.GetDevice(), ImageDescriptorLayout);
-					{
-						DescriptorWriter writer;
-						writer.WriteImage(0, albedo->GetImageView(), SamplerNearest, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-						writer.UpdateSet(vk.GetDevice(), imageSet);
-					}
-
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &imageSet, 0, nullptr);
-
-					vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 4, 1, &SamplerDescriptor, 0, nullptr);
-
 					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
 
@@ -352,8 +357,74 @@ void VkSceneRenderer::CreatePipelines()
 	shadingPass.AddInput("Albedo");		// We need to sync those
 
 
-	shadingPass.SetPreRender([](PassRenderContext& ctx) {});
-	shadingPass.SetRender([](PassRenderContext& ctx) {});
+	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
+		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			0,                               // firstSet
+			2,                               // descriptorSetCount
+			descriptors2.data(),        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
+
+		// Bind material
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			4,                               // firstSet
+			1,                               // descriptorSetCount
+			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			5,                               // firstSet
+			1,                               // descriptorSetCount
+			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+	});
+	shadingPass.SetRender([](PassRenderContext& ctx) {
+		
+		modelPushConstant.Index = 0;
+		modelPushConstant.MaterialIndex = 0;
+
+		vkCmdPushConstants(
+			ctx.commandBuffer,
+			ctx.renderPass->PipelineLayout,
+			VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
+			0,									// Offset
+			sizeof(ModelPushConstant),          // Size of the push constant
+			&modelPushConstant                  // Pointer to the value
+		);
+		
+		auto descSet = quadMesh->GetDescriptorSet();
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			2,                               // firstSet
+			1,                               // descriptorSetCount
+			&descSet,     // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindIndexBuffer(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
+	});
 
 	GBufferPipeline.Build();
 }
@@ -392,26 +463,6 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	ZoneScopedN("Build Matrix Buffer");
 	auto& scene = Context.CurrentScene;
 
-	std::map<UUID, uint32_t> TextureIDMapping;
-	auto allTextures = GPUResources::Get().GetAllTextures();
-	std::vector<VkDescriptorImageInfo> imageInfos(allTextures.size());
-	for (size_t i = 0; i < allTextures.size(); i++) {
-		imageInfos[i].imageView = allTextures[i]->GetImageView();
-		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		TextureIDMapping[allTextures[i]->GetID()] = i;
-	}
-
-	VkWriteDescriptorSet write{};
-	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	write.dstSet = TextureBufferDescriptor;
-	write.dstBinding = 0; // Binding 0
-	write.dstArrayElement = 0;
-	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
-	write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	write.pImageInfo = imageInfos.data();
-
-	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
-
 	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
 	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
 
@@ -447,6 +498,7 @@ void VkSceneRenderer::BuildMatrixBuffer()
 				continue;
 			}
 
+			auto& res = GPUResources::Get();
 			// TODO: Avoid duplicated materials
 			MaterialBufferStruct materialBuffer = {};
 			materialBuffer.hasAlbedo = material->HasAlbedo();
@@ -458,11 +510,11 @@ void VkSceneRenderer::BuildMatrixBuffer()
 			materialBuffer.aoValue = material->data.u_AOValue;
 			materialBuffer.hasRoughness = material->HasRoughness();
 			materialBuffer.roughnessValue = material->data.u_RoughnessValue;
-			materialBuffer.albedoTextureId = material->HasAlbedo() ? TextureIDMapping[material->AlbedoImage] : 0;
-			materialBuffer.normalTextureId = material->HasNormal() ? TextureIDMapping[material->NormalImage] : 0;
-			materialBuffer.metalnessTextureId = material->HasMetalness() ? TextureIDMapping[material->MetalnessImage] : 0;
-			materialBuffer.aoTextureId = material->HasAO() ? TextureIDMapping[material->AOImage] : 0;
-			materialBuffer.roughnessTextureId = material->HasRoughness() ? TextureIDMapping[material->RoughnessImage] : 0;
+			materialBuffer.albedoTextureId = material->HasAlbedo() ? res.GetBindlessTextureID(material->AlbedoImage) : 0;
+			materialBuffer.normalTextureId = material->HasNormal() ? res.GetBindlessTextureID(material->NormalImage) : 0;
+			materialBuffer.metalnessTextureId = material->HasMetalness() ? res.GetBindlessTextureID(material->MetalnessImage) : 0;
+			materialBuffer.aoTextureId = material->HasAO() ? res.GetBindlessTextureID(material->AOImage) : 0;
+			materialBuffer.roughnessTextureId = material->HasRoughness() ? res.GetBindlessTextureID(material->RoughnessImage) : 0;
 			allMaterials[currentMaterialIndex] = materialBuffer;
 			MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
 

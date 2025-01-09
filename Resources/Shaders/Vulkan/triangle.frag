@@ -1,7 +1,4 @@
 [[vk::binding(0, 3)]]
-Texture2D<float4> albedo : register(t1); // Texture binding at slot t0
-
-[[vk::binding(0, 4)]]
 SamplerState mySampler : register(s0);       // Sampler binding at slot s0
 
 struct Material
@@ -22,11 +19,11 @@ struct Material
     int aoTextureId;
 };
 
-[[vk::binding(0, 5)]]
-StructuredBuffer<Material> material;
+[[vk::binding(0, 4)]]
+StructuredBuffer<Material> material; // array de 2000 materials
 
-[[vk::binding(0, 6)]]
-Texture2D textures[];
+[[vk::binding(0, 5)]]
+Texture2D textures[]; // Array de 500 textures
 
 struct PSInput {
     float4 Position : SV_Position;
