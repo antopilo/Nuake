@@ -74,6 +74,10 @@ namespace Nuake
 		VkDescriptorSet  MaterialBufferDescriptor;
 		VkDescriptorSetLayout  MaterialBufferDescriptorLayout;
 
+		Ref<AllocatedBuffer> TextureBuffer;
+		VkDescriptorSet  TextureBufferDescriptor;
+		VkDescriptorSetLayout  TextureBufferDescriptorLayout;
+
 		ModelData ModelTransforms;
 		MaterialData MaterialDataContainer;
 

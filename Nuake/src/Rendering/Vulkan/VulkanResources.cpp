@@ -108,6 +108,17 @@ Ref<VulkanImage> GPUResources::GetTexture(const UUID& id)
 	return TextureManager::Get()->GetTexture2("missing_texture");
 }
 
+std::vector<Ref<VulkanImage>> GPUResources::GetAllTextures()
+{
+	std::vector<Ref<VulkanImage>> allImages;
+	allImages.reserve(Images.size());
+	for (const auto& [id, image] : Images)
+	{
+		allImages.push_back(image);
+	}
+	return allImages;
+}
+
 void GPUResources::CreateBindlessLayout()
 {
 	auto& vk = VkRenderer::Get();
@@ -153,6 +164,13 @@ void GPUResources::CreateBindlessLayout()
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		MaterialDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
 	}
+
+	// Textures
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_TEXTURES);
+		TexturesDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
 }
 
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
@@ -163,7 +181,8 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		TriangleBufferDescriptorLayout,
 		ImageDescriptorLayout,
 		SamplerDescriptorLayout,
-		MaterialDescriptorLayout
+		MaterialDescriptorLayout,
+		TexturesDescriptorLayout
 	};
 	return layouts;
 }

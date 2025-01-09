@@ -52,6 +52,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	BuildMatrixBuffer();
 	UpdateTransformBuffer();
 
+
+
 	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
 	auto& vk = VkRenderer::Get();
@@ -107,6 +109,8 @@ void VkSceneRenderer::LoadShaders()
 	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
 	Shaders["basic_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
 	Shaders["basic_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
+	Shaders["shading_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag");
+	Shaders["shading_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert");
 }
 
 void VkSceneRenderer::CreateSamplers()
@@ -170,12 +174,20 @@ void VkSceneRenderer::CreateDescriptors()
 		MaterialBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
 	}
 
+	//Bindless Textures
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_TEXTURES);
+		TextureBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
+
 	auto allocator = vk.GetDescriptorAllocator();
 	TriangleBufferDescriptors = allocator.Allocate(device, TriangleBufferDescriptorLayout);
 	CameraBufferDescriptors = allocator.Allocate(device, CameraBufferDescriptorLayout);
 	ModelBufferDescriptor = allocator.Allocate(device, ModelBufferDescriptorLayout);
 	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 	MaterialBufferDescriptor = allocator.Allocate(device, MaterialBufferDescriptorLayout);
+	TextureBufferDescriptor = allocator.Allocate(device, TextureBufferDescriptorLayout);
 	//SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 
 	// Update descriptor set for camera
@@ -209,6 +221,9 @@ void VkSceneRenderer::CreateDescriptors()
 	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
 
 	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
+
+	// Textures
+
 }
 
 void VkSceneRenderer::CreatePipelines()
@@ -244,6 +259,17 @@ void VkSceneRenderer::CreatePipelines()
 			5,                               // firstSet
 			1,                               // descriptorSetCount
 			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			6,                               // firstSet
+			1,                               // descriptorSetCount
+			&TextureBufferDescriptor,        // pointer to the descriptor set(s)
 			0,                               // dynamicOffsetCount
 			nullptr                          // dynamicOffsets
 		);
@@ -321,10 +347,17 @@ void VkSceneRenderer::CreatePipelines()
 	});
 
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
-
+	shadingPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
+	shadingPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 	shadingPass.AddAttachment("Output", ImageFormat::RGBA16F);
+	shadingPass.AddAttachment("DepthShading", ImageFormat::D32F, ImageUsage::Depth);
+	shadingPass.AddInput("Albedo");
+	shadingPass.AddInput("Normal");
+	shadingPass.AddInput("Material");
+	shadingPass.AddInput("Depth");
 
-
+	shadingPass.SetPreRender([](PassRenderContext& ctx) {});
+	shadingPass.SetRender([](PassRenderContext& ctx) {});
 	GBufferPipeline.Build();
 }
 
@@ -488,6 +521,25 @@ void VkSceneRenderer::UpdateTransformBuffer()
 		bufferWrite.descriptorCount = 1;
 		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		bufferWrite.pBufferInfo = &bufferInfo;
+		bufferWrite.pImageInfo = VK_NULL_HANDLE;
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
 	}
+
+	auto allTextures = GPUResources::Get().GetAllTextures();
+	std::vector<VkDescriptorImageInfo> imageInfos(allTextures.size());
+	for (size_t i = 0; i < allTextures.size(); i++) {
+		imageInfos[i].imageView = allTextures[i]->GetImageView();
+		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	}
+
+	VkWriteDescriptorSet write{};
+	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	write.dstSet = TextureBufferDescriptor;
+	write.dstBinding = 0; // Binding 0
+	write.dstArrayElement = 0;
+	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
+	write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+	write.pImageInfo = imageInfos.data();
+
+	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
 }

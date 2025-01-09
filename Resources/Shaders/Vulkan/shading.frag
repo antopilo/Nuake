@@ -19,9 +19,6 @@ struct Material
 [[vk::binding(0, 5)]]
 StructuredBuffer<Material> material;
 
-[[vk::binding(0, 6)]]
-Texture2D textures[];
-
 struct PSInput {
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
@@ -68,7 +65,6 @@ PSOutput main(PSInput input)
     float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
     if(inMaterial.hasAlbedo == 1)
     {
-        float4 testTexture = textures[pushConstants.modelIndex].Sample(mySampler, input.UV);
         float4 albedoTextureSample = albedo.Sample(mySampler, input.UV);
 
         // Alpha cutout?
@@ -77,7 +73,7 @@ PSOutput main(PSInput input)
             discard;
         }
 
-        albedoColor.xyz = testTexture.xyz * albedoTextureSample.xyz;
+        albedoColor.xyz = albedoTextureSample.xyz;
     }
     output.oColor0 = albedoColor;
 

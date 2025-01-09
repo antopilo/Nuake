@@ -21,7 +21,8 @@ TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format
 }
 
 RenderPass::RenderPass(const std::string& name) :
-	Name(name)
+	Name(name),
+	PushConstantSize(0)
 {
 }
 
@@ -45,7 +46,7 @@ void RenderPass::ClearAttachments(PassRenderContext& ctx)
 		// TODO: Queue deletion of old textures
 	}
 
-	if (DepthAttachment.Image->GetSize() != ctx.resolution)
+	if (DepthAttachment.Image && DepthAttachment.Image->GetSize() != ctx.resolution)
 	{
 		Ref<VulkanImage> newDepthAttachment = std::make_shared<VulkanImage>(DepthAttachment.Format, ctx.resolution, ImageUsage::Depth);
 		DepthAttachment.Image = newDepthAttachment;
@@ -74,7 +75,25 @@ void RenderPass::TransitionAttachments(PassRenderContext& ctx)
 	}
 
 	// Transition depth attachment
-	VulkanUtil::TransitionImage(ctx.commandBuffer, DepthAttachment.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	if (DepthAttachment.Image)
+	{
+		VulkanUtil::TransitionImage(ctx.commandBuffer, DepthAttachment.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	}
+}
+
+void RenderPass::UntransitionAttachments(PassRenderContext& ctx)
+{
+	for (auto& attachment : Attachments)
+	{
+		// Transform from color attachment to transfer src for next pass
+		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	}
+
+	if (DepthAttachment.Image)
+	{
+		//VulkanUtil::TransitionImage(ctx.commandBuffer, DepthAttachment.Image->GetImage(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	}
 }
 
 void RenderPass::Render(PassRenderContext& ctx)
@@ -96,9 +115,13 @@ void RenderPass::Render(PassRenderContext& ctx)
 		renderAttachmentInfos.push_back(attachmentInfo);
 	}
 	
-	VkRenderingAttachmentInfo depthAttachmentInfo = VulkanInit::DepthAttachmentInfo(DepthAttachment.Image->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	VkRenderingAttachmentInfo depthAttachmentInfo = {};
+	if (DepthAttachment.Image)
+	{
+		depthAttachmentInfo = VulkanInit::DepthAttachmentInfo(DepthAttachment.Image->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+	} 
 	
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(ctx.resolution, renderAttachmentInfos, &depthAttachmentInfo);
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(ctx.resolution, renderAttachmentInfos, !DepthAttachment.Image ? nullptr : &depthAttachmentInfo);
 	renderInfo.colorAttachmentCount = std::size(renderAttachmentInfos);
 	renderInfo.pColorAttachments = renderAttachmentInfos.data();
 
@@ -132,12 +155,7 @@ void RenderPass::Render(PassRenderContext& ctx)
 	vkCmdEndRendering(ctx.commandBuffer);
 	// End rendering
 
-	for (auto& attachment : Attachments)
-	{
-		// Transform from color attachment to transfer src for next pass
-		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	}
+
 
 	if (PostRender)
 	{
@@ -172,9 +190,9 @@ TextureAttachment& RenderPass::GetAttachment(const std::string& name)
 	return Attachments[0];
 }
 
-std::vector<TextureAttachment&> RenderPass::GetAttachments()
+std::vector<TextureAttachment> RenderPass::GetAttachments()
 {
-	std::vector<TextureAttachment&> attachentRefs;
+	std::vector<TextureAttachment> attachentRefs;
 	attachentRefs.reserve(Attachments.size());
 	for (auto& attachment : Attachments)
 	{
@@ -188,12 +206,12 @@ void RenderPass::AddInput(const std::string& name)
 	InputNames.push_back(name);
 }
 
-std::vector<std::string> Nuake::RenderPass::GetInputs()
+std::vector<std::string> RenderPass::GetInputs()
 {
 	return InputNames;
 }
 
-void RenderPass::SetInput(const std::string& name, TextureAttachment& attachment)
+void RenderPass::SetInput(const std::string& name, TextureAttachment attachment)
 {
 	Inputs[name] = attachment;
 }
@@ -207,10 +225,16 @@ void RenderPass::SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> frag
 void RenderPass::Build()
 {
 	// Push constant range
+	uint32_t pushRange = 0;
 	VkPushConstantRange bufferRange{};
-	bufferRange.offset = 0;
-	bufferRange.size = PushConstantSize;
-	bufferRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+	if (PushConstantSize > 0)
+	{
+		bufferRange.offset = 0;
+		bufferRange.size = PushConstantSize;
+		bufferRange.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+
+		pushRange = 1;
+	}
 
 	// TODO: Get the bindless descriptor layout
 	std::vector<VkDescriptorSetLayout> layouts = GPUResources::Get().GetBindlessLayout();
@@ -218,7 +242,7 @@ void RenderPass::Build()
 	// Create pipeline layout
 	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
 	pipeline_layout_info.pPushConstantRanges = &bufferRange;
-	pipeline_layout_info.pushConstantRangeCount = 1;
+	pipeline_layout_info.pushConstantRangeCount = pushRange;
 	pipeline_layout_info.pSetLayouts = layouts.data();
 	pipeline_layout_info.setLayoutCount = layouts.size();
 
@@ -283,25 +307,42 @@ RenderPass& RenderPipeline::GetRenderPass(const std::string& name)
 
 bool RenderPipeline::Build()
 {
-	std::map<std::string, TextureAttachment&> attachments;
+	std::map<std::string, TextureAttachment> attachments;
 	for (auto& pass : RenderPasses)
 	{
 		pass.Build();
 
 		for (auto& input : pass.GetInputs())
 		{
+			bool alreadyFoundAttachment = false;
 			if (attachments.find(input) == attachments.end())
 			{
-				Logger::Log("Failed to build RenderPipeline. input " + input + " not found in previous passes.", "vulkan", CRITICAL);
-				return false;
+				if (pass.GetDepthAttachment().Image && pass.GetDepthAttachment().Name == input)
+				{
+					pass.SetInput(input, pass.GetDepthAttachment());
+					alreadyFoundAttachment = true;
+				}
+				else
+				{
+					Logger::Log("Failed to build RenderPipeline. input " + input + " not found in previous passes.", "vulkan", CRITICAL);
+					return false;
+				}
 			}
 
-			pass.SetInput(input, attachments[input]);
+			if (!alreadyFoundAttachment)
+			{
+				pass.SetInput(input, attachments[input]);
+			}
 		}
 
 		for (auto& attachment : pass.GetAttachments())
 		{
 			attachments[attachment.Name] = attachment;
+		}
+
+		if (pass.GetDepthAttachment().Image)
+		{
+			attachments[pass.GetDepthAttachment().Name] = pass.GetDepthAttachment();
 		}
 	}
 
@@ -325,6 +366,7 @@ void RenderPipeline::Execute(PassRenderContext& ctx)
 		pass.ClearAttachments(ctx);
 		pass.TransitionAttachments(ctx);
 		pass.Render(ctx);
+		pass.UntransitionAttachments(ctx);
 	}
 }
 

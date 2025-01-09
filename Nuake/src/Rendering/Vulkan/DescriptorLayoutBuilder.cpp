@@ -4,11 +4,11 @@
 
 using namespace Nuake;
 
-void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type)
+void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type, uint32_t count)
 {
 	VkDescriptorSetLayoutBinding newbind{};
 	newbind.binding = binding;
-	newbind.descriptorCount = 1;
+	newbind.descriptorCount = count;
 	newbind.descriptorType = type;
 
 	Bindings.push_back(newbind);

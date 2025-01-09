@@ -514,7 +514,6 @@ void VkRenderer::InitTrianglePipeline()
 void VkRenderer::DrawScene(RenderContext ctx)
 {
 	SceneRenderer->BeginScene(ctx);
-	SceneRenderer->DrawScene();
 	SceneRenderer->EndScene();
 }
 

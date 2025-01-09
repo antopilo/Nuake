@@ -110,6 +110,7 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 	else if (usage == ImageUsage::Depth)
 	{
 		drawImageUsages |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		drawImageUsages |= VK_IMAGE_USAGE_SAMPLED_BIT;
 	}
 
 	VkImageCreateInfo imgCreateInfo = VulkanInit::ImageCreateInfo(static_cast<VkFormat>(inFormat), drawImageUsages, vkExtent);

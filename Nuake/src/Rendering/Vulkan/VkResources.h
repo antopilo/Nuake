@@ -30,11 +30,13 @@ namespace Nuake
 		VkDescriptorSetLayout ImageDescriptorLayout;
 		VkDescriptorSetLayout SamplerDescriptorLayout;
 		VkDescriptorSetLayout MaterialDescriptorLayout;
+		VkDescriptorSetLayout TexturesDescriptorLayout;
 
 		VkDescriptorSet CameraDescriptor;
 		VkDescriptorSet ModelDescriptor;
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
+		VkDescriptorSet TextureDescriptor;
 
 	public:
 		static GPUResources& Get()
@@ -60,6 +62,7 @@ namespace Nuake
 
 		bool AddTexture(Ref<VulkanImage> image);
         Ref<VulkanImage> GetTexture(const UUID& id);
+		std::vector<Ref<VulkanImage>> GetAllTextures();
 
 		std::vector<VkDescriptorSetLayout> GetBindlessLayout();
 

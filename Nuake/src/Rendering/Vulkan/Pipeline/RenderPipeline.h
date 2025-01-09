@@ -73,18 +73,20 @@ namespace Nuake
 
 		void ClearAttachments(PassRenderContext& ctx);
 		void TransitionAttachments(PassRenderContext& ctx);
+		void UntransitionAttachments(PassRenderContext& ctx);
 		void Render(PassRenderContext& ctx);
 
 	public:
 		std::string GetName() const { return Name; }
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
 		TextureAttachment& GetAttachment(const std::string& name);
-		std::vector<TextureAttachment&> GetAttachments();
+		std::vector<TextureAttachment> GetAttachments();
 
 		void AddInput(const std::string& name);
 		std::vector<std::string> GetInputs();
+		TextureAttachment& GetDepthAttachment() { return DepthAttachment; }
 
-		void SetInput(const std::string& name, TextureAttachment& attachment);
+		void SetInput(const std::string& name, TextureAttachment attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
 
 		template<typename T>
@@ -109,9 +111,7 @@ namespace Nuake
 	{
 	private:
 		bool Built;
-		
 		std::vector<RenderPass> RenderPasses;
-
 		
 	public:
 		RenderPipeline();
