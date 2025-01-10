@@ -74,9 +74,9 @@ float LinearizeDepth(float depth, float nearPlane, float farPlane, bool reverseD
     }
 }
 
-const float PI = 3.141592653589793f;
 float DistributionGGX(float3 N, float3 H, float a)
 {
+    float PI = 3.141592653589793f;
     float a2 = a * a;
     float NdotH = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
@@ -130,9 +130,9 @@ PSOutput main(PSInput input)
     float3 albedo = textures[albedoTextureId].Sample(mySampler, input.UV).xyz;
     float3 normal = textures[pushConstants.NormalInputTextureId].Sample(mySampler, input.UV).rgb;
     
-    output.oColor0 = float4(normal, 1);
-    return output;
-    
+    //output.oColor0 = float4(normal, 1);
+    //return output//;
+  //  
     float4 materialSample = textures[pushConstants.MaterialInputTextureId].Sample(mySampler, input.UV);
     float metallic = materialSample.r;
     float ao = materialSample.g;
@@ -148,7 +148,7 @@ PSOutput main(PSInput input)
     float3 Lo = float3(0.0, 0.0, 0.0);
     
     // Directional light
-    float3 dir = normalize(float3(0.1, -1.0, 0.1f));
+    float3 dir = normalize(float3(0.1, 1.0, 0.1f));
     float attenuation = 1.0f;
 
     float3 L = dir;
@@ -163,16 +163,17 @@ PSOutput main(PSInput input)
     float3 specular = nominator / denominator;
 
     float3 kS = F;
-    float3 kD = float3(1.0, 1.0, 1.0) - kS;
+    float3 kD = float3(3.0, 3.0, 3.0) - kS;
     kD *= 1.0 - metallic;
 
     float NdotL = max(dot(N, L), 0.0);
+    const float PI = 3.141592653589793f;
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;
 
 
     float3 ambient = (albedo) * ao * 0.5f;
     float3 color = (ambient) + Lo;
 
-    output.oColor0 = float4(ambient, 1);
+    output.oColor0 = float4(color, 1);
     return output;
 }

@@ -98,13 +98,13 @@ void VkSceneRenderer::EndScene()
 
 	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
 	auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
-	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	VulkanUtil::TransitionImage(cmd, normal.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
+	auto& selectedOutput = shading;
+	VulkanUtil::TransitionImage(cmd, selectedOutput.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, normal.Image->GetImage(), vk.GetDrawImage()->GetImage(), albedo.Image->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	VulkanUtil::TransitionImage(cmd, normal.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, selectedOutput.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -361,7 +361,7 @@ void VkSceneRenderer::CreatePipelines()
 	shadingPass.SetDepthTest(false);
 	shadingPass.AddInput("Albedo");
 	shadingPass.AddInput("Normal");
-	//shadingPass.AddInput("Depth");
+	shadingPass.AddInput("Depth");
 	shadingPass.AddInput("Material");
 	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
 		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };

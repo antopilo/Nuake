@@ -67,6 +67,6 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     float3 T = normalize(mul((float3x3)modelData.model, normalize(v.tangent.xyz)));
     float3 B = normalize(mul((float3x3)modelData.model, normalize(v.bitangent.xyz)));
     float3 N = normalize(mul((float3x3)modelData.model, normalize(v.normal)).xyz);
-    output.TBN = float3x3(T, B, N);
+    output.TBN = transpose(float3x3(T, B, N));
     return output;
 }
