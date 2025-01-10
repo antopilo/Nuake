@@ -92,7 +92,7 @@ PSOutput main(PSInput input)
         albedoColor.xyz = albedoSample.xyz;
     }
     output.oColor0 = albedoColor;
-    output.oColor0 = float4(normal, 1.0);
+    
     // MATERIAL PROPERTIES
     float metalnessValue = inMaterial.metalnessValue;
     if(inMaterial.hasMetalness == 1)

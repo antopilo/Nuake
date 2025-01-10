@@ -50,6 +50,12 @@ VkPipeline PipelineBuilder::BuildPipeline(VkDevice device)
     colorBlending.attachmentCount = ColorBlendAttachment.size();
     colorBlending.pAttachments = ColorBlendAttachment.data();
 
+    if (ColorBlendAttachment.size() == 0)
+    {
+        Logger::Log("Forgot blend attachment!", "vulkan", CRITICAL);
+        assert(false && "Error");
+    }
+
     // completely clear VertexInputStateCreateInfo, as we have no need for it
     VkPipelineVertexInputStateCreateInfo _vertexInputInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
 
@@ -211,15 +217,18 @@ void PipelineBuilder::EnableBlendingAdditive()
 
 void PipelineBuilder::EnableBlendingAlphaBlend(size_t count)
 {
-    VkPipelineColorBlendAttachmentState colorBlend = {};
-    colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlend.blendEnable = VK_TRUE;
-    colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+    for (int i = 0; i < count; i++)
+    {
+        VkPipelineColorBlendAttachmentState colorBlend = {};
+        colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        colorBlend.blendEnable = VK_TRUE;
+        colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
+        colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
 
-    ColorBlendAttachment.push_back(colorBlend);
+        ColorBlendAttachment.push_back(colorBlend);
+    }
 }

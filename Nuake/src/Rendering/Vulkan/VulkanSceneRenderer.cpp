@@ -252,7 +252,7 @@ void VkSceneRenderer::CreatePipelines()
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);
 	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA16F);
+	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
 	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
@@ -353,7 +353,7 @@ void VkSceneRenderer::CreatePipelines()
 		
 	});
 
-	/*
+	
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
 	shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
@@ -434,7 +434,7 @@ void VkSceneRenderer::CreatePipelines()
 		vkCmdBindIndexBuffer(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
 	});
-	*/
+	
 	GBufferPipeline.Build();
 }
 

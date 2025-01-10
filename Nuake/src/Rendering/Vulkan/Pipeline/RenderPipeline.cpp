@@ -283,6 +283,7 @@ void RenderPass::Build()
 	{
 		formats.push_back(static_cast<VkFormat>(Attachments[i].Format));
 	}
+	pipelineBuilder.SetColorAttachments(formats);
 
 	// Set depth attachment, for now we assume every pass has a depth attachment
 	if (HasDepthTest)

@@ -245,6 +245,7 @@ void Window::EndDraw()
                 vkRenderer.GetCurrentCmdBuffer()
             };
 
+            GPUResources::Get().RecreateBindlessTextures();
             vkRenderer.DrawScene(ctx);
         }
     }
