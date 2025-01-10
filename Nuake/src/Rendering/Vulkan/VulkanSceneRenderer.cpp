@@ -131,6 +131,8 @@ void VkSceneRenderer::LoadShaders()
 	Shaders["basic_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
 	Shaders["shading_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag");
 	Shaders["shading_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert");
+	Shaders["shadow_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag");
+	Shaders["shadow_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert");
 }
 
 void VkSceneRenderer::CreateSamplers()
@@ -256,6 +258,62 @@ void VkSceneRenderer::CreateDescriptors()
 
 void VkSceneRenderer::CreatePipelines()
 {
+	ShadowPipeline = RenderPipeline();
+	auto& shadowPass = ShadowPipeline.AddPass("Shadow");
+	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	shadowPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
+	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
+		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			0,                               // firstSet
+			2,                               // descriptorSetCount
+			descriptors2.data(),        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		// Bind material
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			4,                               // firstSet
+			1,                               // descriptorSetCount
+			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			5,                               // firstSet
+			1,                               // descriptorSetCount
+			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			6,                               // firstSet
+			1,                               // descriptorSetCount
+			&LightBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
+	});
+	shadowPass.SetRender([&](PassRenderContext& ctx) {});
+
+
 	GBufferPipeline = RenderPipeline();
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);

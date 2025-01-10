@@ -131,7 +131,7 @@ namespace Nuake
 
 		// New pipeline stuff
 		RenderPipeline GBufferPipeline;
-
+		RenderPipeline ShadowPipeline;
 	public:
 		VkSceneRenderer();
 		~VkSceneRenderer();
