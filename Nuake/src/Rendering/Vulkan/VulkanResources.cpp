@@ -119,6 +119,34 @@ std::vector<Ref<VulkanImage>> GPUResources::GetAllTextures()
 	return allImages;
 }
 
+void GPUResources::AddCamera(const UUID& id, const CameraView& camera)
+{
+	Cameras.push_back(camera);
+	CameraMapping[id] = Cameras.size() - 1;
+}
+
+CameraView GPUResources::GetCamera(const UUID& id)
+{
+	if (CameraMapping.find(id) != CameraMapping.end())
+	{
+		return Cameras[CameraMapping[id]];
+	}
+
+	Logger::Log("Camera with ID does not exist", "vulkan", CRITICAL);
+	return Cameras[0];
+}
+
+std::vector<CameraView> GPUResources::GetAllCameras()
+{
+	return Cameras;
+}
+
+void GPUResources::ClearCameras()
+{
+	Cameras.clear();
+	CameraMapping.clear();
+}
+
 void GPUResources::CreateBindlessLayout()
 {
 	auto& vk = VkRenderer::Get();
@@ -179,7 +207,18 @@ void GPUResources::CreateBindlessLayout()
 		LightsDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
-	TextureDescriptor = VkRenderer::Get().GetDescriptorAllocator().Allocate(VkRenderer::Get().GetDevice(), TexturesDescriptorLayout);
+	// bindless cameras
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, MAX_CAMERAS);
+		CamerasDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
+
+	auto& vk = VkRenderer::Get();
+	auto device = vk.GetDevice();
+	auto allocator = vk.GetDescriptorAllocator();
+	TextureDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
+	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
 }
 
 void GPUResources::RecreateBindlessTextures()
@@ -208,6 +247,15 @@ void GPUResources::RecreateBindlessTextures()
 	write.pImageInfo = imageInfos.data();
 
 	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &write, 0, nullptr);
+}
+
+void GPUResources::RecreateBindlessCameras()
+{
+	if (!CamerasDescriptor)
+	{
+		CreateBindlessLayout();
+	}
+
 }
 
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()

@@ -18,6 +18,18 @@
 
 namespace Nuake
 {
+	struct CameraView
+	{
+		Matrix4 View;
+		Matrix4 Projection;
+		Matrix4 ViewProjection;
+		Matrix4 InverseView;
+		Matrix4 InverseProjection;
+		Vector3 Position;
+		float Near;
+		float Far;
+	};
+
 	struct LightResource
 	{
 
@@ -31,6 +43,7 @@ namespace Nuake
 		std::map<UUID, Ref<VkMesh>> Meshes;
 		std::map<UUID, Ref<VulkanImage>> Images;
 		std::map<UUID, Ref<VulkanImage>> Light;
+		std::vector<CameraView> Cameras;
 
 		// Bindless buffer layouts
 		VkDescriptorSetLayout CameraDescriptorLayout;
@@ -41,14 +54,17 @@ namespace Nuake
 		VkDescriptorSetLayout MaterialDescriptorLayout;
 		VkDescriptorSetLayout TexturesDescriptorLayout;
 		VkDescriptorSetLayout LightsDescriptorLayout;
+		VkDescriptorSetLayout CamerasDescriptorLayout;
 
 		VkDescriptorSet CameraDescriptor;
 		VkDescriptorSet ModelDescriptor;
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
 		VkDescriptorSet LightsDescriptor;
+		VkDescriptorSet CamerasDescriptor;
 
 		std::map<UUID, uint32_t> BindlessTextureMapping;
+		std::map<UUID, uint32_t> CameraMapping;
 
 	public:
 		VkDescriptorSet TextureDescriptor;
@@ -77,11 +93,16 @@ namespace Nuake
         Ref<VulkanImage> GetTexture(const UUID& id);
 		std::vector<Ref<VulkanImage>> GetAllTextures();
 
+		void AddCamera(const UUID& id, const CameraView& camera);
+		CameraView GetCamera(const UUID& id);
+		std::vector<CameraView> GetAllCameras();
+		void ClearCameras();
+
 		std::vector<VkDescriptorSetLayout> GetBindlessLayout();
 
 		uint32_t GetBindlessTextureID(const UUID& id);
 		void RecreateBindlessTextures();
-
+		void RecreateBindlessCameras();
 	private:
 		void CreateBindlessLayout();
 	};

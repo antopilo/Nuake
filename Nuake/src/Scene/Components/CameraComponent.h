@@ -6,6 +6,7 @@
 #include "src/Core/Core.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Camera.h"
+#include "src/Resource/UUID.h"
 
 namespace Nuake
 {
@@ -13,8 +14,8 @@ namespace Nuake
 	class CameraComponent : public Component
 	{
 		NUAKECOMPONENT(CameraComponent, "Camera")
-		
 	public:
+		UUID ID;
 		Ref<Camera> CameraInstance;
 		TransformComponent* transformComponent;
 

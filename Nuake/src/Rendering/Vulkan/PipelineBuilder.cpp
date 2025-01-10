@@ -52,8 +52,8 @@ VkPipeline PipelineBuilder::BuildPipeline(VkDevice device)
 
     if (ColorBlendAttachment.size() == 0)
     {
-        Logger::Log("Forgot blend attachment!", "vulkan", CRITICAL);
-        assert(false && "Error");
+        Logger::Log("Forgot blend attachment?", "vulkan", CRITICAL);
+        //assert(false && "Error");
     }
 
     // completely clear VertexInputStateCreateInfo, as we have no need for it
