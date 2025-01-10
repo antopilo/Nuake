@@ -44,14 +44,16 @@ void VkSceneRenderer::Init()
 	MeshMaterialMapping.clear();
 
     std::vector<Vertex> quadVertices = {
-		{{-1.0f, -1.0f, 0.0f }, 0.0f, {}, 0.0f },
-        {{ 1.0f, -1.0f, 0.0f }, 1.0f, {}, 0.0f },
-        {{ 1.0f,  1.0f, 0.0f }, 1.0f, {}, 1.0f },
-        {{-1.0f,  1.0f, 0.0f }, 0.0f, {}, 1.0f }
+		{ Vector3(-1.0f,  1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3(-1.0f, -1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3(1.0f,  -1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3(-1.0f, -1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3(1.0f,   1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
     };
 
     std::vector<uint32_t> quadIndices = {
-        0, 1, 2, 2, 3, 0
+        5, 4, 3, 2, 1, 0
     };
 
 	quadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
@@ -87,6 +89,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	GBufferPipeline.Execute(passCtx);
 }
 ModelPushConstant modelPushConstant{};
+ShadingPushConstant shadingPushConstant;
 
 void VkSceneRenderer::EndScene()
 {
@@ -94,10 +97,13 @@ void VkSceneRenderer::EndScene()
 	auto& cmd = Context.CommandBuffer;
 
 	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
+	auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
 	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	VulkanUtil::TransitionImage(cmd, normal.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, albedo.Image->GetImage(), vk.GetDrawImage()->GetImage(), albedo.Image->GetSize(), vk.DrawImage->GetSize());
+	VulkanUtil::CopyImageToImage(cmd, normal.Image->GetImage(), vk.GetDrawImage()->GetImage(), albedo.Image->GetSize(), vk.DrawImage->GetSize());
 	VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+	VulkanUtil::TransitionImage(cmd, normal.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, albedo.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
@@ -106,6 +112,8 @@ void VkSceneRenderer::CreateBuffers()
 	CameraData camData{};
 	camData.View = Matrix4(1.0f);
 	camData.Projection = Matrix4(1.0f);
+	camData.InvView = Matrix4(1.0f);
+	camData.InvProjection = Matrix4(1.0f);
 
 	// init camera buffer
 	GPUResources& resources = GPUResources::Get();
@@ -149,7 +157,7 @@ void VkSceneRenderer::CreateDescriptors()
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+		CameraBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
 	{
@@ -241,7 +249,6 @@ void VkSceneRenderer::CreateDescriptors()
 void VkSceneRenderer::CreatePipelines()
 {
 	GBufferPipeline = RenderPipeline();
-
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);
 	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
@@ -249,7 +256,6 @@ void VkSceneRenderer::CreatePipelines()
 	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
 	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
-
 	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
 		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
 		vkCmdBindDescriptorSets(
@@ -287,9 +293,7 @@ void VkSceneRenderer::CreatePipelines()
 		);
 
 		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
-
 	});
-
 	gBufferPass.SetRender([&](PassRenderContext& ctx){
 		auto& cmd = ctx.commandBuffer;
 		auto& scene = ctx.scene;
@@ -349,14 +353,16 @@ void VkSceneRenderer::CreatePipelines()
 		
 	});
 
+	/*
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
-	shadingPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
-	shadingPass.AddAttachment("Output", ImageFormat::RGBA16F);
-	shadingPass.AddAttachment("DepthShading", ImageFormat::D32F, ImageUsage::Depth);
-	shadingPass.AddInput("Albedo");		// We need to sync those
-
-
+	shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
+	shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
+	shadingPass.SetDepthTest(false);
+	shadingPass.AddInput("Albedo");
+	shadingPass.AddInput("Normal");
+	//shadingPass.AddInput("Depth");
+	shadingPass.AddInput("Material");
 	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
 		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
 		vkCmdBindDescriptorSets(
@@ -395,19 +401,22 @@ void VkSceneRenderer::CreatePipelines()
 			nullptr                          // dynamicOffsets
 		);
 
+		auto& gpu = GPUResources::Get();
+		auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
+		shadingPushConstant.AlbedoTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Albedo").Image->GetID());
+		shadingPushConstant.DepthTextureID = gpu.GetBindlessTextureID(gbufferPass.GetDepthAttachment().Image->GetID());
+		shadingPushConstant.NormalTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Normal").Image->GetID());
+		shadingPushConstant.MaterialTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Material").Image->GetID());
+
 	});
 	shadingPass.SetRender([](PassRenderContext& ctx) {
-		
-		modelPushConstant.Index = 0;
-		modelPushConstant.MaterialIndex = 0;
-
 		vkCmdPushConstants(
 			ctx.commandBuffer,
 			ctx.renderPass->PipelineLayout,
 			VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
 			0,									// Offset
-			sizeof(ModelPushConstant),          // Size of the push constant
-			&modelPushConstant                  // Pointer to the value
+			sizeof(ShadingPushConstant),          // Size of the push constant
+			&shadingPushConstant                  // Pointer to the value
 		);
 		
 		auto descSet = quadMesh->GetDescriptorSet();
@@ -425,7 +434,7 @@ void VkSceneRenderer::CreatePipelines()
 		vkCmdBindIndexBuffer(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
 	});
-
+	*/
 	GBufferPipeline.Build();
 }
 
@@ -439,7 +448,8 @@ void VkSceneRenderer::UpdateCameraData(const CameraData& data)
 	CameraData adjustedData = data;
 	adjustedData.View = data.View;
 	adjustedData.Projection = data.Projection;
-
+	adjustedData.InvView = data.InvView;
+	adjustedData.InvProjection = data.InvProjection;
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);
 	memcpy(mappedData, &adjustedData, sizeof(CameraData));

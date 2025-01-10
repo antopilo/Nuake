@@ -10,7 +10,6 @@ void DescriptorLayoutBuilder::AddBinding(uint32_t binding, VkDescriptorType type
 	newbind.binding = binding;
 	newbind.descriptorCount = count;
 	newbind.descriptorType = type;
-
 	Bindings.push_back(newbind);
 }
 
@@ -31,6 +30,7 @@ VkDescriptorSetLayout DescriptorLayoutBuilder::Build(VkDevice device, VkShaderSt
 	info.pBindings = Bindings.data();
 	info.bindingCount = (uint32_t)Bindings.size();
 	info.flags = flags;
+	
 
 	VkDescriptorSetLayout set;
 	VK_CALL(vkCreateDescriptorSetLayout(device, &info, nullptr, &set));

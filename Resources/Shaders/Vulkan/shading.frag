@@ -1,3 +1,13 @@
+struct Camera
+{
+    float4x4 view;
+    float4x4 proj;
+    float4x4 invView;
+    float4x4 invProj;
+};
+[[vk::binding(0, 0)]]
+StructuredBuffer<Camera> camera : register(t0);
+
 [[vk::binding(0, 3)]]
 SamplerState mySampler : register(s0);       // Sampler binding at slot s0
 
@@ -20,29 +30,149 @@ StructuredBuffer<Material> material;
 Texture2D textures[]; // Array de 500 textures
 
 struct PSInput {
+    float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
-    float4x4 InvProj : TEXCOORD1;
-    float4x4 InvView : TEXCOORD2;
 };
 
 struct PSOutput {
     float4 oColor0 : SV_TARGET;
 };
 
-struct ModelPushConstant
+struct ShadingPushConstant
 {
-    int modelIndex;  // Push constant data
-    int materialIndex;
+    int AlbedoInputTextureId;
+    int DepthInputTextureId;
+    int NormalInputTextureId;
+    int MaterialInputTextureId;
 };
 
 [[vk::push_constant]]
-ModelPushConstant pushConstants;
+ShadingPushConstant pushConstants;
+
+float3 WorldPosFromDepth(float depth, float2 uv, float4x4 invProj, float4x4 invView)
+{
+    float z = depth;
+    float4 clipSpacePosition = float4(uv.x * 2.0 - 1.0, (uv.y * 2.0 - 1.0), z, 1.0f);
+    float4 viewSpacePosition = mul(invProj, clipSpacePosition);
+    viewSpacePosition /= viewSpacePosition.w;
+
+    float4 worldSpacePosition = mul(invView, viewSpacePosition);
+    return worldSpacePosition.xyz;
+}
+
+float LinearizeDepth(float depth, float nearPlane, float farPlane, bool reverseDepth)
+{
+    if (reverseDepth)
+    {
+        // Reverse depth (near plane = 1.0, far plane = 0.0)
+        return nearPlane * farPlane / lerp(farPlane, nearPlane, depth);
+    }
+    else
+    {
+        // Standard depth (near plane = 0.0, far plane = 1.0)
+        return (2.0 * nearPlane * farPlane) / (farPlane + nearPlane - depth * (farPlane - nearPlane));
+    }
+}
+
+const float PI = 3.141592653589793f;
+float DistributionGGX(float3 N, float3 H, float a)
+{
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+
+    float nom = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return nom / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float k)
+{
+    float nom = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+
+    return nom / denom;
+}
+
+float GeometrySmith(float3 N, float3 V, float3 L, float k)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx1 = GeometrySchlickGGX(NdotV, k);
+    float ggx2 = GeometrySchlickGGX(NdotL, k);
+
+    return ggx1 * ggx2;
+}
+
+float3 fresnelSchlick(float cosTheta, float3 F0)
+{
+    return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+}
+
+float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+    float roughnessTerm = 1.0f - roughness;
+    return F0 + (max(float3(roughnessTerm, roughnessTerm, roughnessTerm), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+}
 
 PSOutput main(PSInput input)
 {
     PSOutput output;
+    Camera camData = camera[0];
+    int depthTexture = pushConstants.DepthInputTextureId;
+    float depth = textures[depthTexture].Sample(mySampler, input.UV).r;
 
-    output.oColor0 = float4(1, 0, 0, 1);
+    float3 worldPosition = WorldPosFromDepth(depth, input.UV, camData.invProj, camData.invView);
+   
+    int albedoTextureId = pushConstants.AlbedoInputTextureId;
+    float3 albedo = textures[albedoTextureId].Sample(mySampler, input.UV).xyz;
+    float3 normal = textures[pushConstants.NormalInputTextureId].Sample(mySampler, input.UV).rgb;
+    
+    output.oColor0 = float4(normal, 1);
+    return output;
+    
+    float4 materialSample = textures[pushConstants.MaterialInputTextureId].Sample(mySampler, input.UV);
+    float metallic = materialSample.r;
+    float ao = materialSample.g;
+    float roughness = materialSample.b;
 
+    float3 eyePosition = camData.view[3].xyz;
+    float3 N = normal;
+    float3 V = normalize(eyePosition - worldPosition);
+    float3 R = reflect(-V, N);
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, metallic);
+
+    float3 Lo = float3(0.0, 0.0, 0.0);
+    
+    // Directional light
+    float3 dir = normalize(float3(0.1, -1.0, 0.1f));
+    float attenuation = 1.0f;
+
+    float3 L = dir;
+    float3 radiance = float3(1, 1, 1) * attenuation;
+    float3 H = normalize(V + L);
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    float3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    
+    float3 nominator = NDF * G * F;
+    float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+    float3 specular = nominator / denominator;
+
+    float3 kS = F;
+    float3 kD = float3(1.0, 1.0, 1.0) - kS;
+    kD *= 1.0 - metallic;
+
+    float NdotL = max(dot(N, L), 0.0);
+    Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+
+
+    float3 ambient = (albedo) * ao * 0.5f;
+    float3 color = (ambient) + Lo;
+
+    output.oColor0 = float4(ambient, 1);
     return output;
 }

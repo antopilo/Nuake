@@ -235,7 +235,7 @@ VkPipelineShaderStageCreateInfo VulkanInit::PipelineShaderStageCreateInfo(VkShad
 }
 
 // This is a helper to transtion images between readable, writable layouts.
-void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout)
+void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout, bool isDepth)
 {
 	VkImageMemoryBarrier2 imageBarrier{ .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
 	imageBarrier.pNext = nullptr;
@@ -247,7 +247,7 @@ void VulkanUtil::TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayo
 	imageBarrier.oldLayout = currentLayout;
 	imageBarrier.newLayout = newLayout;
 
-	VkImageAspectFlags aspectMask = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+	VkImageAspectFlags aspectMask = (newLayout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || isDepth) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
 	imageBarrier.subresourceRange = VulkanInit::ImageSubResourceRange(aspectMask);
 	imageBarrier.image = image;
 

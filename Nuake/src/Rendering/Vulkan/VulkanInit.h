@@ -44,7 +44,7 @@ namespace Nuake
 		VulkanUtil() = delete;
 		~VulkanUtil() = delete;
 
-		static void TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout);
+		static void TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout currentLayout, VkImageLayout newLayout, bool isDepth = false);
 		static void CopyImageToImage(VkCommandBuffer cmd, VkImage source, VkImage destination, Vector2 srcSize, Vector2 dstSize);
 	};
 }

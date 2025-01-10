@@ -25,6 +25,14 @@ namespace Nuake
 		char padding[120];            // 124 bytes to reach 128 bytes
 	};
 
+	struct ShadingPushConstant
+	{
+		int AlbedoTextureID;
+		int DepthTextureID;
+		int NormalTextureID;
+		int MaterialTextureID;
+	};
+
 	struct ModelData
 	{
 		std::array<Matrix4, 3000> Data;
@@ -110,6 +118,8 @@ namespace Nuake
 
 		void BeginScene(RenderContext inContext);
 		void EndScene();
+
+		RenderPipeline& GetRenderPipeline() { return GBufferPipeline; }
 
 	private:
 		void LoadShaders();

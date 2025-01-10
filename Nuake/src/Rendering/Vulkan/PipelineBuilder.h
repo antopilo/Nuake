@@ -12,12 +12,12 @@ namespace Nuake
 
         VkPipelineInputAssemblyStateCreateInfo InputAssembly;
         VkPipelineRasterizationStateCreateInfo Rasterizer;
-        std::vector<VkPipelineColorBlendAttachmentState> ColorBlendAttachment;
+        std::vector<VkPipelineColorBlendAttachmentState> ColorBlendAttachment = std::vector<VkPipelineColorBlendAttachmentState>();
         VkPipelineMultisampleStateCreateInfo Multisampling;
         VkPipelineLayout PipelineLayout;
         VkPipelineDepthStencilStateCreateInfo DepthStencil;
         VkPipelineRenderingCreateInfo RenderInfo;
-        std::vector<VkFormat> ColorAttachmentformats;
+        std::vector<VkFormat> ColorAttachmentformats = std::vector<VkFormat>();
 
 	
         PipelineBuilder() { Clear(); }

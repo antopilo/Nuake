@@ -1,5 +1,6 @@
 #pragma once
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_ROW_MAJOR
 
 #include <glm/ext/vector_float4.hpp>
 #include <glm/ext/vector_float3.hpp>

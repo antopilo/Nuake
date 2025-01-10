@@ -128,7 +128,7 @@ void GPUResources::CreateBindlessLayout()
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+		CameraDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
 	{
@@ -216,7 +216,12 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 	return layouts;
 }
 
-uint32_t GPUResources::GetBindlessTextureID(const UUID & id)
+uint32_t GPUResources::GetBindlessTextureID(const UUID& id)
 {
-	return 0;
+	if (BindlessTextureMapping.find(id) == BindlessTextureMapping.end())
+	{
+		return 0;
+	}
+
+	return BindlessTextureMapping[id];
 }

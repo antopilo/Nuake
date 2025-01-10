@@ -136,8 +136,8 @@ void VkRenderer::Initialize()
 
 	InitDescriptors();
 
-	InitPipeline();
-	InitTrianglePipeline();
+	//InitPipeline();
+	//InitTrianglePipeline();
 
 	InitImgui();
 
@@ -204,12 +204,13 @@ void VkRenderer::SelectGPU()
 	VkPhysicalDeviceVulkan13Features features{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
 	features.dynamicRendering = true;
 	features.synchronization2 = true;
+	
 	VkPhysicalDeviceVulkan12Features features12{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
 	features12.bufferDeviceAddress = true;
 	features12.descriptorIndexing = true;
+	features12.runtimeDescriptorArray = true;
 
 	std::vector<const char*> requiredExtensions = { VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME };
-
 
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
 	vkb::PhysicalDevice physicalDevice = selector
@@ -359,7 +360,7 @@ void VkRenderer::InitDescriptors()
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_VERTEX_BIT);
+		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
 	// Triangle vertex buffer layout
@@ -727,7 +728,9 @@ void VkRenderer::InitImgui()
 
 void VkRenderer::BeginScene(const Matrix4& view, const Matrix4& projection)
 {
-	CameraData newData = { view, projection };
+	Matrix4 proj = projection;
+	//proj[1][1] *= -1.0f;
+	CameraData newData = { view, projection, glm::inverse(view), glm::inverse(proj)};
 	//UploadCameraData(newData);
 	SceneRenderer->UpdateCameraData(newData);
 }
@@ -769,8 +772,8 @@ bool VkRenderer::Draw()
 	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 	// Execute compute shader that writes to the image
-	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
+	//vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
+	//vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
 
 	VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 	//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);

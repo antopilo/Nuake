@@ -46,6 +46,7 @@ namespace Nuake
 	{
 	private:
 		std::string Name;
+		bool HasDepthTest = true;
 		Ref<VulkanShader> VertShader;
 		Ref<VulkanShader> FragShader;
 
@@ -77,6 +78,7 @@ namespace Nuake
 		void Render(PassRenderContext& ctx);
 
 	public:
+		void SetDepthTest(bool enabled) { HasDepthTest = enabled; }
 		std::string GetName() const { return Name; }
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
 		TextureAttachment& GetAttachment(const std::string& name);

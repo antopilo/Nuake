@@ -119,6 +119,8 @@ namespace Nuake
 	{
 		Matrix4 View;
 		Matrix4 Projection;
+		Matrix4 InvView;
+		Matrix4 InvProjection;
 	};
 
 	// Renderer configuration
@@ -257,7 +259,7 @@ namespace Nuake
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 		void UploadCameraData(const CameraData& data);
-
+		auto& GetRenderPipeline() { return this->SceneRenderer->GetRenderPipeline(); }
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }
 	};

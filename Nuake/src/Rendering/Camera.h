@@ -29,8 +29,8 @@ namespace Nuake
 
 
 	public:
-		float Near = 400.0f;
-		float Far = 0.001f;
+		float Near = 200.0f;
+		float Far = 0.01f;
 		float AspectRatio = 16.0f / 9.0f;
 		
 		Vector3 Direction = Vector3(0, 0, 1);

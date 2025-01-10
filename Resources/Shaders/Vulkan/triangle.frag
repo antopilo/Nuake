@@ -1,3 +1,13 @@
+struct Camera
+{
+    float4x4 view;
+    float4x4 proj;
+    float4x4 invView;
+    float4x4 invProj;
+};
+[[vk::binding(0, 0)]]
+StructuredBuffer<Camera> camera : register(t0);
+
 [[vk::binding(0, 3)]]
 SamplerState mySampler : register(s0);       // Sampler binding at slot s0
 
@@ -63,7 +73,7 @@ PSOutput main(PSInput input)
 
     normal = mul(input.TBN, normal);
     normal = normal / 2.0f + 0.5f;
-    output.oNormal = float4(normal, 1.0f);
+    output.oNormal = float4(float3(1, 0, 0), 1.0f);
 
     // MATERIAL
 
@@ -82,7 +92,7 @@ PSOutput main(PSInput input)
         albedoColor.xyz = albedoSample.xyz;
     }
     output.oColor0 = albedoColor;
-
+    output.oColor0 = float4(normal, 1.0);
     // MATERIAL PROPERTIES
     float metalnessValue = inMaterial.metalnessValue;
     if(inMaterial.hasMetalness == 1)
