@@ -65,7 +65,8 @@ VulkanImage::VulkanImage(const std::string & path) :
 	// Transition image and copy data to GPU
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd)
 	{
-		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkBufferImageCopy copyRegion = {};
 		copyRegion.bufferOffset = 0;
@@ -80,7 +81,8 @@ VulkanImage::VulkanImage(const std::string & path) :
 
 		vkCmdCopyBufferToImage(cmd, uploadBuffer->GetBuffer(), Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
-		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	});
 }
 
@@ -88,7 +90,8 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 	Format(inFormat),
 	Extent(inSize, 1),
 	ImGuiDescriptorSetGenerated(false),
-	ID(UUID())
+	ID(UUID()),
+	Usage(usage)
 {
 	VkExtent3D vkExtent = 
 	{
@@ -177,8 +180,8 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
 		{
-			VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
+			//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 			VkBufferImageCopy copyRegion = {};
 			copyRegion.bufferOffset = 0;
 			copyRegion.bufferRowLength = 0;
@@ -192,8 +195,8 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 
 			vkCmdCopyBufferToImage(cmd, uploadBuffer->GetBuffer(), Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
 			&copyRegion);
-
-			VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
 	);
 
@@ -252,8 +255,8 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 	// Transition image and copy data to GPU
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd)
 	{
-		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
+		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		VkBufferImageCopy copyRegion = {};
 		copyRegion.bufferOffset = 0;
 		copyRegion.bufferRowLength = 0;
@@ -266,14 +269,47 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 		copyRegion.imageExtent = vkExtent;
 
 		vkCmdCopyBufferToImage(cmd, uploadBuffer->GetBuffer(), Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
-
-		VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	});
 }
 
 VulkanImage::~VulkanImage()
 {
 	// TODO: deletion of image
+}
+
+void VulkanImage::TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout)
+{
+	if(!IsLayoutTransitionValid(Layout, layout))
+	{
+		throw std::runtime_error("Invalid layout transition!");
+	}
+
+	VkImageMemoryBarrier2 imageBarrier{ .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+	imageBarrier.pNext = nullptr;
+
+	imageBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+	imageBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT;
+	imageBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+	imageBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+	imageBarrier.oldLayout = Layout;
+	imageBarrier.newLayout = layout;
+
+	VkImageAspectFlags aspectMask = (layout == VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL || Usage == ImageUsage::Depth) ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+	imageBarrier.subresourceRange = VulkanInit::ImageSubResourceRange(aspectMask);
+	imageBarrier.image = GetImage();
+
+	VkDependencyInfo depInfo{};
+	depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+	depInfo.pNext = nullptr;
+
+	depInfo.imageMemoryBarrierCount = 1;
+	depInfo.pImageMemoryBarriers = &imageBarrier;
+
+	vkCmdPipelineBarrier2(cmd, &depInfo);
+
+	Layout = layout;
 }
 
 VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()

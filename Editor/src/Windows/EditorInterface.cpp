@@ -626,9 +626,9 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
 
             Ref<Texture> texture = framebuffer->GetTexture();
-            VkDescriptorSet textureDesc = VkRenderer::Get().GetDrawImage()->GetImGuiDescriptorSet();
-
             auto& pipeline = VkRenderer::Get().GetRenderPipeline();
+            VkDescriptorSet textureDesc = pipeline.GetRenderPass("Shading").GetAttachment("Output").Image->GetImGuiDescriptorSet();
+
             if (SelectedViewport == 1)
             {
                 textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Albedo").Image->GetImGuiDescriptorSet();

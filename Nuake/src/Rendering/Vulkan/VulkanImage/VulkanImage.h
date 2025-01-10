@@ -43,10 +43,10 @@ namespace Nuake
 		Vector3 Extent;
 		ImageFormat Format;
 		VkSampler Sampler;
-
+		VkImageLayout Layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		bool ImGuiDescriptorSetGenerated;
 		VkDescriptorSet ImGuiDescriptorSet;
-
+		ImageUsage Usage;
 	public:
 		VulkanImage(const std::string& path);
 		VulkanImage(ImageFormat format, Vector2 size, ImageUsage usage = ImageUsage::Default);
@@ -54,6 +54,8 @@ namespace Nuake
 		VulkanImage(void* data, size_t size); // This one is for embedded files. Ignore.
 
 		~VulkanImage();
+
+		void TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout);
 
 		Vector2 GetSize() const { return Vector2(Extent.x, Extent.y); }
 		int GetWidth() const { return static_cast<int>(Extent.x); }
@@ -64,5 +66,55 @@ namespace Nuake
 		VkImage GetImage() { return Image; }
 		VkDescriptorSet& GetImGuiDescriptorSet();
 		ImageFormat GetFormat() const { return Format; }
+		VkImageLayout GetLayout() const { return Layout; }
+		void SetLayout(VkImageLayout layout) { Layout = layout; }
+
+		bool IsLayoutTransitionValid(VkImageLayout oldLayout, VkImageLayout newLayout) {
+			switch (oldLayout) {
+			case VK_IMAGE_LAYOUT_UNDEFINED:
+				// Any layout is valid after VK_IMAGE_LAYOUT_UNDEFINED
+				return true;
+
+			case VK_IMAGE_LAYOUT_PREINITIALIZED:
+				// Only certain layouts are valid after VK_IMAGE_LAYOUT_PREINITIALIZED
+				return newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_GENERAL;
+
+			case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+				// Valid transitions for color attachments
+				return newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR ||
+					newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+			case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+				// Valid transitions for transfer source
+				return newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_GENERAL;
+
+			case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+				// Valid transitions for transfer destination
+				return newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_GENERAL;
+
+			case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+				// Valid transitions for shader read-only
+				return newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_GENERAL;
+
+			case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+				// Only transition to COLOR_ATTACHMENT_OPTIMAL for reuse
+				return newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+			case VK_IMAGE_LAYOUT_GENERAL:
+				// General layout can transition to almost anything
+				return newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ||
+					newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+			default:
+				// Add other cases as needed
+				return false;
+			}
+		}
 	};
 } 
