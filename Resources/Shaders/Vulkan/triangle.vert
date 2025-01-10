@@ -4,6 +4,7 @@ struct Camera
     float4x4 proj;
     float4x4 invView;
     float4x4 invProj;
+    float3 position;
 };
 [[vk::binding(0, 0)]]
 StructuredBuffer<Camera> camera : register(t0);
@@ -33,6 +34,22 @@ struct ModelPushConstant
     int modelIndex;  // Push constant data
     int materialIndex;
 };
+
+struct Light
+{
+    float3 position;
+    int type;
+    float4 color;
+    float3 direction;
+    float outerConeAngle;
+    float innerConeAngle;
+    bool castShadow;
+    int shadowMapTextureId;
+    int transformId;
+};
+
+[[vk::binding(0, 6)]]
+StructuredBuffer<Light> lights;
 
 [[vk::push_constant]]
 ModelPushConstant pushConstants;

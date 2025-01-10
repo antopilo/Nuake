@@ -172,6 +172,13 @@ void GPUResources::CreateBindlessLayout()
 		TexturesDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
+	// bindless lights
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		LightsDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
+
 	TextureDescriptor = VkRenderer::Get().GetDescriptorAllocator().Allocate(VkRenderer::Get().GetDevice(), TexturesDescriptorLayout);
 }
 
@@ -211,7 +218,8 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		TriangleBufferDescriptorLayout,
 		SamplerDescriptorLayout,
 		MaterialDescriptorLayout,
-		TexturesDescriptorLayout
+		TexturesDescriptorLayout,
+		LightsDescriptorLayout
 	};
 	return layouts;
 }

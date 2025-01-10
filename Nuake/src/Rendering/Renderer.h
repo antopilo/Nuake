@@ -21,7 +21,7 @@ namespace Nuake
 		LightComponent light;
 	};
 
-	struct LightData
+	struct LightDatas
 	{
 		int ShadowMapsIDs[4];
 		float CascadeDepth[4];

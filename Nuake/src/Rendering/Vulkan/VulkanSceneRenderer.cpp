@@ -114,7 +114,6 @@ void VkSceneRenderer::CreateBuffers()
 	camData.Projection = Matrix4(1.0f);
 	camData.InvView = Matrix4(1.0f);
 	camData.InvProjection = Matrix4(1.0f);
-
 	// init camera buffer
 	GPUResources& resources = GPUResources::Get();
 	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CameraBuffer");
@@ -122,6 +121,7 @@ void VkSceneRenderer::CreateBuffers()
 
 	ModelBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
 	MaterialBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
+	LightBuffer = resources.CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "LightBuffer");
 }
 
 void VkSceneRenderer::LoadShaders()
@@ -201,6 +201,13 @@ void VkSceneRenderer::CreateDescriptors()
 		TextureBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
+	// bindless lights
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		LightBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
+
 	auto allocator = vk.GetDescriptorAllocator();
 	TriangleBufferDescriptors = allocator.Allocate(device, TriangleBufferDescriptorLayout);
 	CameraBufferDescriptors = allocator.Allocate(device, CameraBufferDescriptorLayout);
@@ -208,6 +215,7 @@ void VkSceneRenderer::CreateDescriptors()
 	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 	MaterialBufferDescriptor = allocator.Allocate(device, MaterialBufferDescriptorLayout);
 	TextureBufferDescriptor = allocator.Allocate(device, TextureBufferDescriptorLayout);
+	LightBufferDescriptor = allocator.Allocate(device, LightBufferDescriptorLayout);
 	//SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
 
 	// Update descriptor set for camera
@@ -288,6 +296,17 @@ void VkSceneRenderer::CreatePipelines()
 			5,                               // firstSet
 			1,                               // descriptorSetCount
 			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			6,                               // firstSet
+			1,                               // descriptorSetCount
+			&LightBufferDescriptor,        // pointer to the descriptor set(s)
 			0,                               // dynamicOffsetCount
 			nullptr                          // dynamicOffsets
 		);
@@ -401,13 +420,23 @@ void VkSceneRenderer::CreatePipelines()
 			nullptr                          // dynamicOffsets
 		);
 
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			6,                               // firstSet
+			1,                               // descriptorSetCount
+			&LightBufferDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
 		auto& gpu = GPUResources::Get();
 		auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
 		shadingPushConstant.AlbedoTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Albedo").Image->GetID());
 		shadingPushConstant.DepthTextureID = gpu.GetBindlessTextureID(gbufferPass.GetDepthAttachment().Image->GetID());
 		shadingPushConstant.NormalTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Normal").Image->GetID());
 		shadingPushConstant.MaterialTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Material").Image->GetID());
-
 	});
 	shadingPass.SetRender([](PassRenderContext& ctx) {
 		vkCmdPushConstants(
@@ -450,6 +479,7 @@ void VkSceneRenderer::UpdateCameraData(const CameraData& data)
 	adjustedData.Projection = data.Projection;
 	adjustedData.InvView = data.InvView;
 	adjustedData.InvProjection = data.InvProjection;
+	adjustedData.Position = data.InvView[3];
 	void* mappedData;
 	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);
 	memcpy(mappedData, &adjustedData, sizeof(CameraData));
@@ -534,8 +564,44 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		currentIndex++;
 	}
 
+	currentIndex = 0;
+	LightData directionalLight = {};
+	directionalLight.castShadow = false;
+	directionalLight.color = Vector4(2.0f, 2.0f, 2.0f, 1.0f);
+	directionalLight.position = Vector3(0.0f, 0.0f, 0.0f);
+	directionalLight.type = LightType::Directional;
+	std::array<LightData, MAX_LIGHTS> allLights;
+	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+	for (auto e : lightView)
+	{
+		// Check if we've reached the maximum capacity of the array
+		if (currentIndex >= MAX_LIGHTS)
+		{
+			assert(false);
+			break;
+		}
+
+		auto [transform, lightComp] = lightView.get<TransformComponent, LightComponent>(e);
+
+		Vector3 direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
+
+		LightData light = {};
+		light.position = Vector3(transform.GetGlobalTransform()[3]);
+		light.direction = direction;
+		light.outerConeAngle = glm::cos(Rad(lightComp.OuterCutoff));
+		light.innerConeAngle = glm::cos(Rad(lightComp.Cutoff));
+		light.type = lightComp.Type;
+		light.color = Vector4(lightComp.Color * lightComp.Strength, 1.0);
+		light.castShadow = lightComp.CastShadows;
+		allLights[currentIndex] = light;
+
+		currentIndex++;
+	}
+
 	ModelTransforms = ModelData{ allTransforms };
 	MaterialDataContainer = MaterialData{ allMaterials };
+	LightDataContainerArray = LightDataContainer{ allLights };
+	shadingPushConstant.LightCount = currentIndex;
 }
 
 void VkSceneRenderer::UpdateTransformBuffer()
@@ -602,6 +668,40 @@ void VkSceneRenderer::UpdateTransformBuffer()
 		bufferWrite.pNext = nullptr;
 		bufferWrite.dstBinding = 0;
 		bufferWrite.dstSet = MaterialBufferDescriptor;
+		bufferWrite.descriptorCount = 1;
+		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWrite.pBufferInfo = &bufferInfo;
+		bufferWrite.pImageInfo = VK_NULL_HANDLE;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
+	}
+
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &LightDataContainerArray, sizeof(LightDataContainer));
+
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(LightDataContainer);
+
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetBuffer(), LightBuffer->GetBuffer(), 1, &copy);
+		});
+
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation());
+
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = LightBuffer->GetBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet bufferWrite = {};
+		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWrite.pNext = nullptr;
+		bufferWrite.dstBinding = 0;
+		bufferWrite.dstSet = LightBufferDescriptor;
 		bufferWrite.descriptorCount = 1;
 		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		bufferWrite.pBufferInfo = &bufferInfo;

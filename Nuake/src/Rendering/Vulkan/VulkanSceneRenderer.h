@@ -31,6 +31,7 @@ namespace Nuake
 		int DepthTextureID;
 		int NormalTextureID;
 		int MaterialTextureID;
+		int LightCount;
 	};
 
 	struct ModelData
@@ -63,6 +64,24 @@ namespace Nuake
 		std::array<MaterialBufferStruct, 1000> Data;
 	};
 
+	struct LightData
+	{
+		Vector3 position;
+		int type;
+		Vector4 color;
+		Vector3 direction;
+		float outerConeAngle;
+		float innerConeAngle;
+		bool castShadow;
+		int shadowMapTextureId;
+		int transformId;
+	};
+
+	struct LightDataContainer
+	{
+		std::array<LightData, 100> Data;
+	};
+
 	class VkSceneRenderer
 	{
 	private:
@@ -93,8 +112,14 @@ namespace Nuake
 		ModelData ModelTransforms;
 		MaterialData MaterialDataContainer;
 
+		LightDataContainer LightDataContainerArray;
+
 		std::map<UUID, uint32_t> ModelMatrixMapping;	// Holds mapping between model entity and transform index
 		std::map<UUID, uint32_t> MeshMaterialMapping;	// Holds mapping between mesh and material index 
+
+		Ref<AllocatedBuffer> LightBuffer;
+		VkDescriptorSet LightBufferDescriptor;
+		VkDescriptorSetLayout LightBufferDescriptorLayout;
 
 		VkSampler SamplerLinear;
 		VkSampler SamplerNearest;

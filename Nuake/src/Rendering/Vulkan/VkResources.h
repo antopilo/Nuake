@@ -18,6 +18,11 @@
 
 namespace Nuake
 {
+	struct LightResource
+	{
+
+	};
+
 	class GPUResources
 	{
 	private:
@@ -25,6 +30,7 @@ namespace Nuake
 		std::map<UUID, Ref<AllocatedBuffer>> Buffers;
 		std::map<UUID, Ref<VkMesh>> Meshes;
 		std::map<UUID, Ref<VulkanImage>> Images;
+		std::map<UUID, Ref<VulkanImage>> Light;
 
 		// Bindless buffer layouts
 		VkDescriptorSetLayout CameraDescriptorLayout;
@@ -34,11 +40,13 @@ namespace Nuake
 		VkDescriptorSetLayout SamplerDescriptorLayout;
 		VkDescriptorSetLayout MaterialDescriptorLayout;
 		VkDescriptorSetLayout TexturesDescriptorLayout;
+		VkDescriptorSetLayout LightsDescriptorLayout;
 
 		VkDescriptorSet CameraDescriptor;
 		VkDescriptorSet ModelDescriptor;
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
+		VkDescriptorSet LightsDescriptor;
 
 		std::map<UUID, uint32_t> BindlessTextureMapping;
 

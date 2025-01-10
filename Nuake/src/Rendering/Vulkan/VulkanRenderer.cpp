@@ -310,6 +310,7 @@ void VkRenderer::InitCommands()
 		Frames[i].CameraStagingBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "CameraStaging" + std::to_string(i) );
 		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "TransformStaging" + std::to_string(i));
 		Frames[i].MaterialStagingBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "MaterialStaging" + std::to_string(i));
+		Frames[i].LightStagingBuffer = resources.CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "LightStaging" + std::to_string(i));
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -904,6 +905,7 @@ void VkRenderer::UploadCameraData(const CameraData& data)
 	adjustedData.View = Matrix4(1.0f); //data.View;
 	adjustedData.View = data.View;
 	adjustedData.Projection = glm::perspective(glm::radians(70.f), (float)DrawExtent.width / (float)DrawExtent.height, 0.0001f, 10000.0f);
+	adjustedData.Position = data.View[3];
 	//adjustedData.Projection[1][1] *= -1;
 
 	void* mappedData;

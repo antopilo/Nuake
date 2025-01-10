@@ -4,6 +4,7 @@ struct Camera
     float4x4 proj;
     float4x4 invView;
     float4x4 invProj;
+    float3 position;
 };
 [[vk::binding(0, 0)]]
 StructuredBuffer<Camera> camera : register(t0);
@@ -35,6 +36,22 @@ StructuredBuffer<Material> material; // array de 2000 materials
 [[vk::binding(0, 5)]]
 Texture2D textures[]; // Array de 500 textures
 
+struct Light
+{
+    float3 position;
+    int type;
+    float4 color;
+    float3 direction;
+    float outerConeAngle;
+    float innerConeAngle;
+    bool castShadow;
+    int shadowMapTextureId;
+    int transformId;
+};
+
+[[vk::binding(0, 6)]]
+StructuredBuffer<Light> lights;
+
 struct PSInput {
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
@@ -65,14 +82,14 @@ PSOutput main(PSInput input)
     Material inMaterial = material[pushConstants.materialIndex];
     // NORMAL
     // TODO use TBN matrix
-    float3 normal = float3(0.0, 0.0f, 1.0f);
+    float3 normal = float3(0.5, 0.5, 1.0);
     if(inMaterial.hasNormal == 1)
     {
         // Sample from texture.
     }
 
     normal = mul(input.TBN, normal);
-    normal = normal / 2.0f + 0.5f;
+    normal = input.Normal / 2.0f + 0.5f;
     output.oNormal = float4(normal, 1.0f);
 
     // MATERIAL

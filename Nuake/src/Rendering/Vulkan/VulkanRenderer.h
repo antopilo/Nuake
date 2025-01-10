@@ -86,6 +86,7 @@ namespace Nuake
 		Ref<AllocatedBuffer> CameraStagingBuffer;	// Current camera
 		Ref<AllocatedBuffer> ModelStagingBuffer;	// Matrices
 		Ref<AllocatedBuffer> MaterialStagingBuffer;	// Materials
+		Ref<AllocatedBuffer> LightStagingBuffer;	// Lights
 
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
@@ -121,6 +122,7 @@ namespace Nuake
 		Matrix4 Projection;
 		Matrix4 InvView;
 		Matrix4 InvProjection;
+		Vector3 Position;
 	};
 
 	// Renderer configuration
@@ -128,7 +130,7 @@ namespace Nuake
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
 	constexpr uint32_t MAX_MATERIAL = 1000;
 	constexpr uint32_t MAX_TEXTURES = 500;
-
+	constexpr uint32_t MAX_LIGHTS = 100;
 	class VkRenderer
 	{
 	private:

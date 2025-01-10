@@ -9,7 +9,6 @@
 #include "src/Rendering/Buffers/Framebuffer.h"
 #include "VisibilityComponent.h"
 #include "../Resource/Serializable.h"
-
 #include <glm/ext/matrix_clip_space.hpp>
 
 namespace Nuake

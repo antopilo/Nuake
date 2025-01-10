@@ -4,6 +4,7 @@ struct Camera
     float4x4 proj;
     float4x4 invView;
     float4x4 invProj;
+    float3 position;
 };
 [[vk::binding(0, 0)]]
 StructuredBuffer<Camera> camera : register(t0);
@@ -28,12 +29,29 @@ struct Vertex
 [[vk::binding(0, 2)]] 
 StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
+struct Light
+{
+    float3 position;
+    int type;
+    float4 color;
+    float3 direction;
+    float outerConeAngle;
+    float innerConeAngle;
+    bool castShadow;
+    int shadowMapTextureId;
+    int transformId;
+};
+
+[[vk::binding(0, 6)]]
+StructuredBuffer<Light> lights;
+
 struct ShadingPushConstant
 {
     int AlbedoInputTextureId;
     int DepthInputTextureId;
     int NormalInputTextureId;
     int MaterialInputTextureId;
+    int LightCount;
 };
 
 [[vk::push_constant]]
