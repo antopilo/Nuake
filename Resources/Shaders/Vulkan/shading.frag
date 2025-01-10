@@ -160,16 +160,68 @@ PSOutput main(PSInput input)
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);
 
+    Light directionalLight;
+    bool foundDirectional = false;
+    for(int i = 0; i < pushConstants.LightCount; i++)
+    {
+        Light light = lights[i];
+        if(light.type == 0) 
+        {
+            directionalLight = light;
+            foundDirectional = true;
+            break;
+        }
+    }
+
     const float PI = 3.141592653589793f;
     float3 Lo = float3(0.0, 0.0, 0.0);
-    // Directional
+    //Directional
+    if(foundDirectional)
     {
-        Light light = lights[0];
+        Light light = directionalLight;
         float3 L = normalize(light.direction);
         float attenuation = 1.0f;
 
         // TODO: Shadow
         float3 radiance = light.color.rgb * attenuation;
+        float3 H = normalize(V + L);
+        float NDF = DistributionGGX(N, H, roughness);
+        float G = GeometrySmith(N, V, L, roughness);
+        float3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+
+        float3 nominator = NDF * G * F;
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0.001 to prevent divide by zero.
+        float3 specular = nominator / denominator;
+
+        float3 kS = F;
+        float3 kD = float3(1.0, 1.0, 1.0) - kS;
+        kD *= 1.0 - metallic;
+
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+    }
+
+    // other lights
+    for(int i = 0; i < pushConstants.LightCount; i++)
+    {
+        Light light = lights[i];
+        float3 L = normalize(light.position - worldPos);
+        float distance = length(light.position - worldPos);
+        float attenuation = 1.0 / (distance * distance);
+
+        float3 radiance = float3(0, 0, 0);
+        if(light.type == 1) // point light
+        {
+            radiance = light.color * attenuation;
+        }
+        else if(light.type == 2)
+        {
+            float theta = dot(L, normalize(-light.direction));
+            float epsilon = light.innerConeAngle - light.outerConeAngle;
+            float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
+            radiance = light.color * intensity;
+        }
+
         float3 H = normalize(V + L);
         float NDF = DistributionGGX(N, H, roughness);
         float G = GeometrySmith(N, V, L, roughness);
