@@ -84,20 +84,31 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	}
 
 	// Build camera view list
-	auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
-	for (auto e : view)
 	{
-		auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-		CameraView camData{};
-		camData.View = camera.CameraInstance->GetTransform();
-		camData.Projection = camera.CameraInstance->GetPerspective();
-		camData.InverseView = glm::inverse(camData.Projection);
-		camData.InverseProjection = glm::inverse(camData.Projection);
-		camData.Position = transform.GetGlobalTransform()[3];
-		camData.Near = camera.CameraInstance->Near;
-		camData.Far = camera.CameraInstance->Far;
-		GPUResources::Get().AddCamera(camera.ID, camData);
+		auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
+		for (auto e : view)
+		{
+			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
+			CameraView camData{};
+			camData.View = camera.CameraInstance->GetTransform();
+			camData.Projection = camera.CameraInstance->GetPerspective();
+			camData.InverseView = glm::inverse(camData.Projection);
+			camData.InverseProjection = glm::inverse(camData.Projection);
+			camData.Position = transform.GetGlobalTransform()[3];
+			camData.Near = camera.CameraInstance->Near;
+			camData.Far = camera.CameraInstance->Far;
+			GPUResources::Get().AddCamera(camera.ID, camData);
+		}
 	}
+	{
+		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
+		for (auto e : view)
+		{
+			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
+			light.CalculateViewProjection()
+		}
+	}
+	
 
 	// Execute light
 	PassRenderContext passCtx = { };
