@@ -627,7 +627,7 @@ namespace Nuake {
 
             Ref<Texture> texture = framebuffer->GetTexture();
             auto& pipeline = VkRenderer::Get().GetRenderPipeline();
-            VkDescriptorSet textureDesc = pipeline.GetRenderPass("Shading").GetAttachment("Output").Image->GetImGuiDescriptorSet();
+            VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
 
             if (SelectedViewport == 1)
             {

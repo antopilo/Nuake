@@ -213,7 +213,7 @@ void Window::Draw()
         ZoneScopedN("Non-playmode Draw");
         float resolutionScale = glm::clamp(Engine::GetProject()->Settings.ResolutionScale, 0.5f, 2.0f);
         this->scene->m_EditorCamera->OnWindowResize(size.x * resolutionScale, size.y * resolutionScale);
-        VkRenderer::Get().BeginScene(scene->m_EditorCamera->GetTransform(), scene->m_EditorCamera->GetPerspective());
+        VkRenderer::Get().BeginScene(scene->m_EditorCamera->ID);
         this->scene->Draw(*this->framebuffer.get(), this->scene->m_EditorCamera->GetPerspective(), this->scene->m_EditorCamera->GetTransform());
     }
 

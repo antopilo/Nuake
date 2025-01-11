@@ -214,8 +214,6 @@ void GPUResources::CreateBindlessLayout()
 		CamerasDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
-	auto& vk = VkRenderer::Get();
-	auto device = vk.GetDevice();
 	auto allocator = vk.GetDescriptorAllocator();
 	TextureDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
 	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);

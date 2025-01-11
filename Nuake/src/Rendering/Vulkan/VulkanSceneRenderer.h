@@ -133,9 +133,9 @@ namespace Nuake
 		RenderPipeline GBufferPipeline;
 		RenderPipeline ShadowPipeline;
 
-		UUID CurrentCamera;
 
 	public:
+		UUID CurrentCamera;
 		VkSceneRenderer();
 		~VkSceneRenderer();
 

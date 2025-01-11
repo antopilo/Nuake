@@ -311,6 +311,7 @@ void VkRenderer::InitCommands()
 		Frames[i].ModelStagingBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "TransformStaging" + std::to_string(i));
 		Frames[i].MaterialStagingBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "MaterialStaging" + std::to_string(i));
 		Frames[i].LightStagingBuffer = resources.CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "LightStaging" + std::to_string(i));
+		Frames[i].CamerasStagingBuffer = resources.CreateBuffer(sizeof(CameraView) * MAX_CAMERAS, BufferUsage::TRANSFER_SRC, MemoryUsage::CPU_ONLY, "CamerasStaging" + std::to_string(i));
 	}
 
 	VK_CALL(vkCreateCommandPool(Device, &cmdPoolInfo, nullptr, &ImguiCommandPool));
@@ -409,38 +410,6 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	drawImageWrite.pImageInfo = &imgInfo;
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
-
-	// Update descriptor set for cameras
-	//VkDescriptorBufferInfo camBufferInfo{};
-	//camBufferInfo.buffer = CameraBuffer->GetBuffer();
-	//camBufferInfo.offset = 0;
-	//camBufferInfo.range = VK_WHOLE_SIZE;
-	//
-	//VkWriteDescriptorSet bufferWriteCam = {};
-	//bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	//bufferWriteCam.pNext = nullptr;
-	//bufferWriteCam.dstBinding = 0;
-	//bufferWriteCam.dstSet = CameraBufferDescriptors;
-	//bufferWriteCam.descriptorCount = 1;
-	//bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	//bufferWriteCam.pBufferInfo = &camBufferInfo;
-	//vkUpdateDescriptorSets(Device, 1, &bufferWriteCam, 0, nullptr);
-	//
-	//// Update descriptor set for TriangleBufferDescriptors
-	//VkDescriptorBufferInfo bufferInfo{};
-	//bufferInfo.buffer = rectangle->GetVertexBuffer()->GetBuffer();
-	//bufferInfo.offset = 0;
-	//bufferInfo.range = VK_WHOLE_SIZE;
-	//
-	//VkWriteDescriptorSet bufferWrite = {};
-	//bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	//bufferWrite.pNext = nullptr;
-	//bufferWrite.dstBinding = 0;
-	//bufferWrite.dstSet = TriangleBufferDescriptors;
-	//bufferWrite.descriptorCount = 1;
-	//bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	//bufferWrite.pBufferInfo = &bufferInfo;
-	//vkUpdateDescriptorSets(Device, 1, &bufferWrite, 0, nullptr);
 }
 
 void VkRenderer::InitPipeline()
@@ -553,8 +522,6 @@ void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
 	scissor.extent.height = DrawExtent.height;
 
 	vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-
 
 	vkCmdBindIndexBuffer(cmd, rectangle->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
@@ -727,15 +694,10 @@ void VkRenderer::InitImgui()
 	});
 }
 
-void VkRenderer::BeginScene(const Matrix4& view, const Matrix4& projection)
+void VkRenderer::BeginScene(const UUID& camera)
 {
-	Matrix4 proj = projection;
-	//proj[1][1] *= -1.0f;
-	CameraData newData = { view, projection, glm::inverse(view), glm::inverse(proj)};
-	//UploadCameraData(newData);
-	SceneRenderer->UpdateCameraData(newData);
+	SceneRenderer->CurrentCamera = camera;
 }
-
 
 bool VkRenderer::Draw()
 {
@@ -807,6 +769,7 @@ void VkRenderer::EndDraw()
 
 	// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	VK_CALL(vkEndCommandBuffer(cmd));
 
 	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);

@@ -4,6 +4,8 @@
 #include "src/Resource/Serializable.h"
 #include "Frustum.h"
 #include <src/Rendering/AABB.h>
+#include "src/Resource/UUID.h"
+
 
 namespace Nuake
 {
@@ -27,7 +29,6 @@ namespace Nuake
 		Matrix4 m_Perspective;
 		Matrix4 m_View;
 
-
 	public:
 		float Near = 200.0f;
 		float Far = 0.01f;
@@ -41,7 +42,7 @@ namespace Nuake
 		float Exposure = 1.0f;
 		float Gamma = 2.2f;
 		float Speed = 1.0f;
-
+		UUID ID;
 		Camera();
 		Camera(CAMERA_TYPE type, Vector3 position);
 

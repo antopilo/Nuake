@@ -281,6 +281,11 @@ VulkanImage::~VulkanImage()
 
 void VulkanImage::TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout)
 {
+	if (Layout == layout)
+	{
+		return;
+	}
+
 	if(!IsLayoutTransitionValid(Layout, layout))
 	{
 		throw std::runtime_error("Invalid layout transition!");

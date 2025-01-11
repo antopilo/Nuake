@@ -105,10 +105,9 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
-			light.CalculateViewProjection()
+			light.CalculateViewProjection();
 		}
 	}
-	
 
 	// Execute light
 	PassRenderContext passCtx = { };
@@ -133,13 +132,9 @@ void VkSceneRenderer::EndScene()
 	auto& selectedOutput = shading;
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//VulkanUtil::TransitionImage(cmd, selectedOutput.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	//VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-	//VulkanUtil::TransitionImage(cmd, vk.DrawImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-	//VulkanUtil::TransitionImage(cmd, selectedOutput.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -621,7 +616,7 @@ void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 	Context.Size = size;
 }
 
-void VkSceneRenderer::UpdateCameraData(const CameraData& data)
+void VkSceneRenderer::UpdateCameraData(const camera& data)
 {
 	CameraData adjustedData = data;
 	adjustedData.View = data.View;

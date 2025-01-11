@@ -87,7 +87,7 @@ namespace Nuake
 		Ref<AllocatedBuffer> ModelStagingBuffer;	// Matrices
 		Ref<AllocatedBuffer> MaterialStagingBuffer;	// Materials
 		Ref<AllocatedBuffer> LightStagingBuffer;	// Lights
-
+		Ref<AllocatedBuffer> CamerasStagingBuffer;	// Draw image
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
 		// Two, one for window, other for rendering
@@ -240,7 +240,7 @@ namespace Nuake
 		void DrawGeometry(VkCommandBuffer cmd);
 		void InitImgui();
 
-		void BeginScene(const Matrix4& view, const Matrix4& projection);
+		void BeginScene(const UUID& camera);
 
 		bool Draw();
 
