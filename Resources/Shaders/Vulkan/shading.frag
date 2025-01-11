@@ -46,6 +46,7 @@ struct Light
 [[vk::binding(0, 6)]]
 StructuredBuffer<Light> lights;
 
+
 struct CameraView {
     float4x4 View;
     float4x4 Projection;

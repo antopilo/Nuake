@@ -28,9 +28,13 @@ namespace Nuake
 		Vector3 Position;
 		float Near;
 		float Far;
+		float pad;
+		float pad2;
+		float pad3;
+		//char padding[64];            // 124 bytes to reach 128 bytes
 	};
 
-	struct LightResource
+	struct LightResources
 	{
 
 	};
@@ -45,6 +49,7 @@ namespace Nuake
 		std::map<UUID, Ref<VulkanImage>> Light;
 		std::vector<CameraView> Cameras;
 
+		std::array<CameraView, MAX_CAMERAS> CamerasData;
 		// Bindless buffer layouts
 		VkDescriptorSetLayout CameraDescriptorLayout;
 		VkDescriptorSetLayout TriangleBufferDescriptorLayout;

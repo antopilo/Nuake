@@ -87,7 +87,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     Vertex v = vertexBuffer[vertexIndex];
 
     // Output the position of each vertex
-    output.Position = mul(camView.Projection, mul(camView.View, mul(modelData.model, float4(v.position, 1.0f))));
+    output.Position = mul(camView.Projection, mul(camView.View,mul(modelData.model, float4(v.position, 1.0f))));
 
     return output;
 }

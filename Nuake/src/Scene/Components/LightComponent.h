@@ -18,6 +18,14 @@ namespace Nuake
         Directional, Point, Spot
     };
 
+    struct LightView
+    {
+		UUID CameraID;
+
+        Matrix4 View;
+        Matrix4 Proj;
+    };
+
     const int CSM_AMOUNT = 4;
     class LightComponent : public Component
     {
@@ -38,6 +46,7 @@ namespace Nuake
 
         Ref<FrameBuffer> m_Framebuffers[CSM_AMOUNT];
         Matrix4 mViewProjections[CSM_AMOUNT];
+        std::vector<LightView> m_LightViews;
         float mCascadeSplitDepth[CSM_AMOUNT];
         float mCascadeSplits[CSM_AMOUNT];
 
@@ -52,7 +61,9 @@ namespace Nuake
 
         void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
         {
-            glm::mat4 viewProjection = projection * view;
+            Matrix4 normalProj = projection;
+            normalProj *= -1.0f;
+            glm::mat4 viewProjection = normalProj * view;
             glm::mat4 inverseViewProjection = glm::inverse(viewProjection);
 
             // TODO: Automate this
@@ -146,6 +157,10 @@ namespace Nuake
                 roundOffset.z = 0.0f;
                 roundOffset.w = 0.0f;
                 lightProjectionMatrix[3] += roundOffset;
+
+                m_LightViews[cascade].View = view;
+                m_LightViews[cascade].Proj = projection;
+				//m_LightViews[cascade].Proj[1][1] *= -1.0f;
 
                 // Store SplitDistance and ViewProjection-Matrix
                 mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;

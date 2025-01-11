@@ -234,6 +234,7 @@ void Window::EndDraw()
     }
 
     auto& vkRenderer = VkRenderer::Get();
+    GPUResources::Get().RecreateBindlessTextures();
     if(vkRenderer.Draw())
     {
         // Render whatever we want in here :)
@@ -242,10 +243,11 @@ void Window::EndDraw()
             RenderContext ctx
             {
                 scene,
-                vkRenderer.GetCurrentCmdBuffer()
+                vkRenderer.GetCurrentCmdBuffer(),
+                Vector2{},
+				scene->GetCurrentCamera()->ID
             };
 
-            GPUResources::Get().RecreateBindlessTextures();
             vkRenderer.DrawScene(ctx);
         }
     }

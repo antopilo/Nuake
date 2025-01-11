@@ -13,7 +13,13 @@ namespace Nuake
         Color(1, 1, 1),
         Strength(10.0f),
         Direction(0, 1, 0)
+		
     {
+		m_LightViews = std::vector<LightView>(CSM_AMOUNT);
+		for (int i = 0; i < CSM_AMOUNT; i++)
+		{
+            m_LightViews[i] = LightView{};
+		}
     }
 
     void LightComponent::SetCastShadows(bool toggle)

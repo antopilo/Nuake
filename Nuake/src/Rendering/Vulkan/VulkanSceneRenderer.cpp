@@ -96,6 +96,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		camData.Near = camera->Near;
 		camData.Far = camera->Far;
 		GPUResources::Get().AddCamera(camera->ID, camData);
+		GPUResources::Get().AddCamera(camera->ID + 1, camData);
 
 		auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto e : view)
@@ -112,12 +113,36 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			GPUResources::Get().AddCamera(camera.ID, camData);
 		}
 	}
+
+	// Build light view list
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
-			//light.CalculateViewProjection();
+
+			for (int i = 0; i < light.m_LightViews.size(); i++)
+			{
+				LightView& view = light.m_LightViews[i];
+				CameraView viewData{};
+				viewData.View = view.View;
+				viewData.Projection = view.Proj;
+				viewData.InverseView = glm::inverse(view.View);
+				viewData.InverseProjection = glm::inverse(view.Proj);
+				viewData.Position = transform.GetGlobalTransform()[3];
+				viewData.Near = 25.0;
+				viewData.Far = -25.0;
+				GPUResources::Get().AddCamera(view.CameraID, viewData);
+			}
+		}
+	}
+	{
+		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
+		for (auto e : view)
+		{
+			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
+			auto cam = GPUResources::Get().GetCamera(inContext.CameraID);
+			light.CalculateViewProjection(cam.View, cam.Projection);
 		}
 	}
 
@@ -128,9 +153,28 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	passCtx.scene = inContext.CurrentScene;
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.resolution = Context.Size;
-	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	
-	//ShadowPipeline.Execute(passCtx);
+	auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
+	for (auto e : view)
+	{
+		auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
+
+		if (light.Type != LightType::Directional)
+		{
+			continue;
+		}
+
+		passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
+		ShadowPipeline.Execute(passCtx);
+
+		for (int i = 0; i < CSM_AMOUNT; i++)
+		{
+			
+		}
+	}
+
+
+	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	GBufferPipeline.Execute(passCtx);
 }
 ModelPushConstant modelPushConstant{};

@@ -83,7 +83,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     VSOutput output;
 
     Camera camData = camera[0];
-    CameraView camView = cameras[pushConstants.cameraID];
+    CameraView camView = cameras[1];
     ModelData modelData = model[pushConstants.modelIndex];
 
     // Load vertex data from the buffer

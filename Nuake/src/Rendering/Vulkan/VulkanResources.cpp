@@ -212,7 +212,7 @@ void GPUResources::CreateBindlessLayout()
 	// bindless cameras
 	{
 		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, MAX_CAMERAS);
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		CamerasDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
@@ -257,6 +257,13 @@ void GPUResources::RecreateBindlessCameras()
 	if (!CamerasDescriptor)
 	{
 		CreateBindlessLayout();
+	}
+
+	int i = 0;
+	for (auto& c : Cameras)
+	{
+		CamerasData[i] = c;
+		i++;
 	}
 
 	void* mappedData;
