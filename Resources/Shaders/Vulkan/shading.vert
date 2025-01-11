@@ -45,6 +45,19 @@ struct Light
 [[vk::binding(0, 6)]]
 StructuredBuffer<Light> lights;
 
+struct CameraView {
+    float4x4 View;
+    float4x4 Projection;
+    float4x4 ViewProjection;
+    float4x4 InverseView;
+    float4x4 InverseProjection;
+    float3 Position;
+    float Near;
+    float Far;
+};
+[[vk::binding(0, 7)]]
+StructuredBuffer<CameraView> cameras;
+
 struct ShadingPushConstant
 {
     int AlbedoInputTextureId;
@@ -52,6 +65,7 @@ struct ShadingPushConstant
     int NormalInputTextureId;
     int MaterialInputTextureId;
     int LightCount;
+    int CameraID;
 };
 
 [[vk::push_constant]]

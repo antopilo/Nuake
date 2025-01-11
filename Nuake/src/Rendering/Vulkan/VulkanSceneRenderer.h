@@ -22,6 +22,7 @@ namespace Nuake
 	{
 		int Index;
 		int MaterialIndex;
+		int CameraID;
 		char padding[120];            // 124 bytes to reach 128 bytes
 	};
 
@@ -32,6 +33,7 @@ namespace Nuake
 		int NormalTextureID;
 		int MaterialTextureID;
 		int LightCount;
+		int CameraID;
 	};
 
 	struct ModelData

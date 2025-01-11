@@ -21,6 +21,7 @@ namespace Nuake
 		VkCommandBuffer commandBuffer;
 		Vector2 resolution;
 		RenderPass* renderPass = nullptr;
+		UUID cameraID;
 	};
 
 	class TextureAttachment

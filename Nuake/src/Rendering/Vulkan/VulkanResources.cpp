@@ -1,5 +1,7 @@
 #include "VkResources.h"
 
+#include "VulkanAllocator.h"
+
 using namespace Nuake;
 
 GPUResources::GPUResources()
@@ -10,7 +12,7 @@ GPUResources::GPUResources()
 void GPUResources::Init()
 {
 	CreateBindlessLayout();
-
+	CamerasBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CamerasBuffer");
 }
 
 Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name)
@@ -221,6 +223,9 @@ void GPUResources::CreateBindlessLayout()
 
 void GPUResources::RecreateBindlessTextures()
 {
+	// Ideally wed have update bit enabled ondescriptors
+
+	vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
 	if (!TextureDescriptor)
 	{
 		CreateBindlessLayout();
@@ -254,6 +259,37 @@ void GPUResources::RecreateBindlessCameras()
 		CreateBindlessLayout();
 	}
 
+	void* mappedData;
+	auto allocator = VulkanAllocator::Get().GetAllocator();
+	vmaMapMemory(allocator, (VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation()), &mappedData);
+	memcpy(mappedData, Cameras.data(), sizeof(CameraView) * Cameras.size());
+
+	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+		VkBufferCopy copy{ 0 };
+		copy.dstOffset = 0;
+		copy.srcOffset = 0;
+		copy.size = sizeof(CameraView) * MAX_CAMERAS;
+
+		vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetBuffer(), CamerasBuffer->GetBuffer(), 1, &copy);
+	});
+
+	vmaUnmapMemory(allocator, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation());
+
+	// Update descriptor set for camera
+	VkDescriptorBufferInfo transformBufferInfo{};
+	transformBufferInfo.buffer = CamerasBuffer->GetBuffer();
+	transformBufferInfo.offset = 0;
+	transformBufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWriteModel = {};
+	bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWriteModel.pNext = nullptr;
+	bufferWriteModel.dstBinding = 0;
+	bufferWriteModel.dstSet = CamerasDescriptor;
+	bufferWriteModel.descriptorCount = 1;
+	bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWriteModel.pBufferInfo = &transformBufferInfo;
+	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
 }
 
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
@@ -265,7 +301,8 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		SamplerDescriptorLayout,
 		MaterialDescriptorLayout,
 		TexturesDescriptorLayout,
-		LightsDescriptorLayout
+		LightsDescriptorLayout,
+		CamerasDescriptorLayout
 	};
 	return layouts;
 }
@@ -278,4 +315,14 @@ uint32_t GPUResources::GetBindlessTextureID(const UUID& id)
 	}
 
 	return BindlessTextureMapping[id];
+}
+
+uint32_t GPUResources::GetBindlessCameraID(const UUID& id)
+{
+	if (CameraMapping.find(id) == CameraMapping.end())
+	{
+		return 0;
+	}
+
+	return CameraMapping[id];
 }

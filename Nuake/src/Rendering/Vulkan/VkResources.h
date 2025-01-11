@@ -8,7 +8,7 @@
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 #include "src/Rendering/Vulkan/VkMesh.h"
 #include "src/Rendering/Textures/TextureManager.h"
-
+#include "src/Rendering/Vulkan/VulkanAllocatedBuffer.h"
 #include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
 
@@ -61,13 +61,16 @@ namespace Nuake
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
 		VkDescriptorSet LightsDescriptor;
-		VkDescriptorSet CamerasDescriptor;
 
 		std::map<UUID, uint32_t> BindlessTextureMapping;
 		std::map<UUID, uint32_t> CameraMapping;
 
+		Ref<AllocatedBuffer> CamerasBuffer;
+
 	public:
 		VkDescriptorSet TextureDescriptor;
+		VkDescriptorSet CamerasDescriptor;
+
 		static GPUResources& Get()
 		{
 			static GPUResources instance;
@@ -101,6 +104,8 @@ namespace Nuake
 		std::vector<VkDescriptorSetLayout> GetBindlessLayout();
 
 		uint32_t GetBindlessTextureID(const UUID& id);
+		uint32_t GetBindlessCameraID(const UUID& id);
+
 		void RecreateBindlessTextures();
 		void RecreateBindlessCameras();
 	private:

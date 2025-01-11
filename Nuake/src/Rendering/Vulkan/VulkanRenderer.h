@@ -158,7 +158,6 @@ namespace Nuake
 		uint32_t FrameNumber = 0;
 		FrameData Frames[FRAME_OVERLAP];
 		
-		VkQueue GPUQueue;
 		uint32_t GPUQueueFamily;
 
 		DeletionQueue MainDeletionQueue;
@@ -198,6 +197,7 @@ namespace Nuake
 		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
+		VkQueue GPUQueue;
 
 		Ref<VulkanImage> DrawImage;
 		Ref<VulkanImage> DepthImage;

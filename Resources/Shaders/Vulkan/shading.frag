@@ -46,6 +46,19 @@ struct Light
 [[vk::binding(0, 6)]]
 StructuredBuffer<Light> lights;
 
+struct CameraView {
+    float4x4 View;
+    float4x4 Projection;
+    float4x4 ViewProjection;
+    float4x4 InverseView;
+    float4x4 InverseProjection;
+    float3 Position;
+    float Near;
+    float Far;
+};
+[[vk::binding(0, 7)]]
+StructuredBuffer<CameraView> cameras;
+
 struct PSInput {
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
@@ -62,6 +75,7 @@ struct ShadingPushConstant
     int NormalInputTextureId;
     int MaterialInputTextureId;
     int LightCount;
+    int CameraID;
 };
 
 [[vk::push_constant]]
@@ -139,10 +153,13 @@ PSOutput main(PSInput input)
 {
     PSOutput output;
     Camera camData = camera[0];
+    CameraView camView = cameras[pushConstants.CameraID];
+
     int depthTexture = pushConstants.DepthInputTextureId;
     float depth = textures[depthTexture].Sample(mySampler, input.UV).r;
 
-    float3 worldPos = WorldPosFromDepth(depth, input.UV, camData.invProj, camData.invView);
+
+    float3 worldPos = WorldPosFromDepth(depth, input.UV, camView.InverseProjection, camView.InverseView);
    
     int albedoTextureId = pushConstants.AlbedoInputTextureId;
     float3 albedo = textures[albedoTextureId].Sample(mySampler, input.UV).xyz;
@@ -155,7 +172,7 @@ PSOutput main(PSInput input)
     float roughness = materialSample.b;
     
     float3 N = normal;
-    float3 V = normalize(camData.position - worldPos);
+    float3 V = normalize(camView.Position - worldPos);
     float3 R = reflect(-V, N);
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, albedo, metallic);

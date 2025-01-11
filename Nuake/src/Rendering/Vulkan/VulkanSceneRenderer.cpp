@@ -64,6 +64,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 {
 	Context.CommandBuffer = inContext.CommandBuffer;
 	Context.CurrentScene = inContext.CurrentScene;
+	Context.CameraID = inContext.CameraID;
 
 	// Collect all global transform of things we will render
 	BuildMatrixBuffer();
@@ -85,6 +86,17 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 
 	// Build camera view list
 	{
+		auto camera = scene->m_EditorCamera;
+		CameraView camData{};
+		camData.View = camera->GetTransform();
+		camData.Projection = camera->GetPerspective();
+		camData.InverseView = glm::inverse(camData.View);
+		camData.InverseProjection = glm::inverse(camData.Projection);
+		camData.Position = camera->GetTranslation();
+		camData.Near = camera->Near;
+		camData.Far = camera->Far;
+		GPUResources::Get().AddCamera(camera->ID, camData);
+
 		auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto e : view)
 		{
@@ -92,7 +104,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			CameraView camData{};
 			camData.View = camera.CameraInstance->GetTransform();
 			camData.Projection = camera.CameraInstance->GetPerspective();
-			camData.InverseView = glm::inverse(camData.Projection);
+			camData.InverseView = glm::inverse(camData.View);
 			camData.InverseProjection = glm::inverse(camData.Projection);
 			camData.Position = transform.GetGlobalTransform()[3];
 			camData.Near = camera.CameraInstance->Near;
@@ -105,17 +117,20 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
-			light.CalculateViewProjection();
+			//light.CalculateViewProjection();
 		}
 	}
+
+	GPUResources::Get().RecreateBindlessCameras();
 
 	// Execute light
 	PassRenderContext passCtx = { };
 	passCtx.scene = inContext.CurrentScene;
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.resolution = Context.Size;
-
-	ShadowPipeline.Execute(passCtx);
+	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
+	
+	//ShadowPipeline.Execute(passCtx);
 	GBufferPipeline.Execute(passCtx);
 }
 ModelPushConstant modelPushConstant{};
@@ -129,12 +144,15 @@ void VkSceneRenderer::EndScene()
 	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
 	auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
 	auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
+	auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
 	auto& selectedOutput = shading;
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+	GPUResources::Get().ClearCameras();
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -340,6 +358,17 @@ void VkSceneRenderer::CreatePipelines()
 			nullptr                          // dynamicOffsets
 		);
 
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			7,                               // firstSet
+			1,                               // descriptorSetCount
+			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
 		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
 	});
 	shadowPass.SetRender([&](PassRenderContext& ctx) {
@@ -383,7 +412,7 @@ void VkSceneRenderer::CreatePipelines()
 
 					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
-
+					modelPushConstant.CameraID = ctx.cameraID;
 					vkCmdPushConstants(
 						cmd,
 						ctx.renderPass->PipelineLayout,
@@ -456,6 +485,17 @@ void VkSceneRenderer::CreatePipelines()
 			nullptr                          // dynamicOffsets
 		);
 
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			7,                               // firstSet
+			1,                               // descriptorSetCount
+			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
 		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx){
@@ -499,7 +539,7 @@ void VkSceneRenderer::CreatePipelines()
 
 					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
-
+					modelPushConstant.CameraID = ctx.cameraID;
 					vkCmdPushConstants(
 						cmd,
 						ctx.renderPass->PipelineLayout,
@@ -575,12 +615,24 @@ void VkSceneRenderer::CreatePipelines()
 			nullptr                          // dynamicOffsets
 		);
 
+		vkCmdBindDescriptorSets(
+			ctx.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			ctx.renderPass->PipelineLayout,
+			7,                               // firstSet
+			1,                               // descriptorSetCount
+			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
+			0,                               // dynamicOffsetCount
+			nullptr                          // dynamicOffsets
+		);
+
 		auto& gpu = GPUResources::Get();
 		auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
 		shadingPushConstant.AlbedoTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Albedo").Image->GetID());
 		shadingPushConstant.DepthTextureID = gpu.GetBindlessTextureID(gbufferPass.GetDepthAttachment().Image->GetID());
 		shadingPushConstant.NormalTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Normal").Image->GetID());
 		shadingPushConstant.MaterialTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Material").Image->GetID());
+		shadingPushConstant.CameraID = ctx.cameraID;
 	});
 	shadingPass.SetRender([](PassRenderContext& ctx) {
 		vkCmdPushConstants(
@@ -609,6 +661,7 @@ void VkSceneRenderer::CreatePipelines()
 	});
 	
 	GBufferPipeline.Build();
+	ShadowPipeline.Build();
 }
 
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)
@@ -616,7 +669,7 @@ void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 	Context.Size = size;
 }
 
-void VkSceneRenderer::UpdateCameraData(const camera& data)
+void VkSceneRenderer::UpdateCameraData(const CameraData& data)
 {
 	CameraData adjustedData = data;
 	adjustedData.View = data.View;

@@ -33,6 +33,7 @@ struct ModelPushConstant
 {
     int modelIndex;  // Push constant data
     int materialIndex;
+    int cameraID;
 };
 
 struct Light
@@ -50,6 +51,19 @@ struct Light
 
 [[vk::binding(0, 6)]]
 StructuredBuffer<Light> lights;
+
+struct CameraView {
+    float4x4 View;
+    float4x4 Projection;
+    float4x4 ViewProjection;
+    float4x4 InverseView;
+    float4x4 InverseProjection;
+    float3 Position;
+    float Near;
+    float Far;
+};
+[[vk::binding(0, 7)]]
+StructuredBuffer<CameraView> cameras;
 
 [[vk::push_constant]]
 ModelPushConstant pushConstants;
@@ -69,14 +83,14 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     VSOutput output;
 
     Camera camData = camera[0];
-
+    CameraView camView = cameras[pushConstants.cameraID];
     ModelData modelData = model[pushConstants.modelIndex];
 
     // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
 
     // Output the position of each vertex
-    output.Position = mul(camData.proj, mul(camData.view, mul(modelData.model, float4(v.position, 1.0f))));
+    output.Position = mul(camView.Projection, mul(camView.View, mul(modelData.model, float4(v.position, 1.0f))));
     output.Color = normalize(float3(v.position.xyz));
     output.UV = float2(v.uv_x, v.uv_y);
     output.Normal = normalize(v.normal);
