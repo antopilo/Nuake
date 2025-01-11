@@ -825,6 +825,7 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		auto [transform, lightComp] = lightView.get<TransformComponent, LightComponent>(e);
 
 		Vector3 direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
+		lightComp.Direction = direction;
 
 		LightData light = {};
 		light.position = Vector3(transform.GetGlobalTransform()[3]);

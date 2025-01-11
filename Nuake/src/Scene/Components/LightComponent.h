@@ -62,7 +62,7 @@ namespace Nuake
         void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
         {
             Matrix4 normalProj = projection;
-            normalProj *= -1.0f;
+            //normalProj *= -1.0f;
             glm::mat4 viewProjection = normalProj * view;
             glm::mat4 inverseViewProjection = glm::inverse(viewProjection);
 
@@ -158,9 +158,8 @@ namespace Nuake
                 roundOffset.w = 0.0f;
                 lightProjectionMatrix[3] += roundOffset;
 
-                m_LightViews[cascade].View = view;
-                m_LightViews[cascade].Proj = projection;
-				//m_LightViews[cascade].Proj[1][1] *= -1.0f;
+                m_LightViews[cascade].View = lightViewMatrix;
+                m_LightViews[cascade].Proj = lightProjectionMatrix;
 
                 // Store SplitDistance and ViewProjection-Matrix
                 mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;

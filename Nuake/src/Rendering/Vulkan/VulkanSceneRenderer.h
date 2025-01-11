@@ -149,8 +149,7 @@ namespace Nuake
 		void BeginScene(RenderContext inContext);
 		void EndScene();
 
-		RenderPipeline& GetRenderPipeline() { return GBufferPipeline; }
-
+		RenderPipeline& GetRenderPipeline() { return ShadowPipeline; }
 	private:
 		void LoadShaders();
 		void CreateBuffers();

@@ -62,8 +62,7 @@
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
 #include <src/Rendering/Vulkan/VkResources.h>
 #include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
-
-
+#include <volk/volk.h>
 namespace Nuake {
     
     ImFont* normalFont;
@@ -631,23 +630,24 @@ namespace Nuake {
 
             if (SelectedViewport == 1)
             {
-                textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Albedo").Image->GetImGuiDescriptorSet();
+				//pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->TransitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+                textureDesc = pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetImGuiDescriptorSet();
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT0);
             }
             else if (SelectedViewport == 2)
             {
-                textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Normal").Image->GetImGuiDescriptorSet();
-                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT1);
+                //textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Normal").Image->GetImGuiDescriptorSet();
+                //texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT1);
             }
             else if (SelectedViewport == 3)
             {
-                textureDesc = pipeline.GetRenderPass("GBuffer").GetDepthAttachment().Image->GetImGuiDescriptorSet();
-                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetScaledDepthTexture();
+                //textureDesc = pipeline.GetRenderPass("GBuffer").GetDepthAttachment().Image->GetImGuiDescriptorSet();
+                //texture = Engine::GetCurrentScene()->m_SceneRenderer->GetScaledDepthTexture();
             }
             else if (SelectedViewport == 4)
             {
-                textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Material").Image->GetImGuiDescriptorSet();
-                texture = Engine::GetCurrentScene()->m_SceneRenderer->GetVelocityTexture();
+                //textureDesc = pipeline.GetRenderPass("GBuffer").GetAttachment("Material").Image->GetImGuiDescriptorSet();
+                //texture = Engine::GetCurrentScene()->m_SceneRenderer->GetVelocityTexture();
             }
 
             ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
