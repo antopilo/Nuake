@@ -3,7 +3,7 @@
 #include "src/Core/Maths.h"
 #include "src/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 #include "src/Rendering/Vulkan/VulkanShader.h"
-
+#include "src/Rendering/Vulkan/Cmd.h"
 #include <any>
 #include <functional>
 #include <span>
@@ -18,7 +18,7 @@ namespace Nuake
 	struct PassRenderContext
 	{
 		Ref<Scene> scene;
-		VkCommandBuffer commandBuffer;
+		Cmd commandBuffer;
 		Vector2 resolution;
 		RenderPass* renderPass = nullptr;
 		UUID cameraID;

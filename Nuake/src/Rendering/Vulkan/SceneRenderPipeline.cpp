@@ -1,7 +1,8 @@
 #include "SceneRenderPipeline.h"
 
-#include "src/Rendering/Vulkan/ShaderManager.h"
+#include "src/Rendering/Vulkan/VkShaderManager.h"
 #include "src/Rendering/Vulkan/VkResources.h"
+#include <Tracy.hpp>
 
 using namespace Nuake;
 
@@ -17,17 +18,33 @@ SceneRenderPipeline::SceneRenderPipeline()
 	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
+		auto layout = ctx.renderPass->PipelineLayout;
+		auto vk = VkRenderer::Get();
+		ctx.commandBuffer.BindDescriptorSet(layout, vk.CameraBufferDescriptors, 0);
+		//ctx.commandBuffer.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
+		//ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
+		//ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+		//ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
+		//ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+		//ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
+	});
+	gBufferPass.SetRender([&](PassRenderContext& ctx) {
+		
+	});
 	//gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
-	//shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
+	//shadingPass.SetPushConstant<ShadingPushConstant>(ShadingPushConstant()));
 	shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
 	shadingPass.SetDepthTest(false);
 	shadingPass.AddInput("Albedo");
 	shadingPass.AddInput("Normal");
 	shadingPass.AddInput("Depth");
 	shadingPass.AddInput("Material");
+
+	GBufferPipeline.Build();
 }
 
 void SceneRenderPipeline::SetCamera(UUID camera)
@@ -46,8 +63,9 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 
 	PipelineAttachments pipelineInputs
 	{
-		{ GBufferMaterial, GBufferDepth, GBufferNormal, GBufferMaterial }, // GBuffer
-		{ ShadingOutput } // Shading
+		{ GBufferMaterial, GBufferDepth, GBufferNormal, GBufferMaterial },	// GBuffer
+		{ ShadingOutput }													// Shading
+		// ... other passes
 	};
 
 	ctx.cameraID = CurrentCameraID;

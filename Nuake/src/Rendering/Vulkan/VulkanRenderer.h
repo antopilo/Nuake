@@ -19,6 +19,8 @@
 #include "VkMesh.h"
 #include "DescriptorAllocatorGrowable.h"
 
+#include "src/Rendering/Vulkan/Cmd.h"
+
 namespace Nuake
 {
 	class VulkanShader;
@@ -165,6 +167,7 @@ namespace Nuake
 		// Descriptors
 		DescriptorAllocator GlobalDescriptorAllocator;
 
+	public:
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
 
@@ -237,7 +240,6 @@ namespace Nuake
 		void InitBackgroundPipeline();
 		void InitTrianglePipeline();
 		void DrawScene(RenderContext ctx);
-		void DrawGeometry(VkCommandBuffer cmd);
 		void InitImgui();
 
 		void BeginScene(const UUID& camera);
@@ -251,9 +253,9 @@ namespace Nuake
 			return GlobalDescriptorAllocator;
 		}
 
-		VkCommandBuffer GetCurrentCmdBuffer()
+		Cmd GetCurrentCmdBuffer()
 		{
-			return GetCurrentFrame().CommandBuffer;
+			return Cmd(GetCurrentFrame().CommandBuffer);
 		}
 
 		void DrawBackground(VkCommandBuffer cmd);

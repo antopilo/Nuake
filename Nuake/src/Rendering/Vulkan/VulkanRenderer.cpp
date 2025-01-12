@@ -490,48 +490,6 @@ void VkRenderer::DrawScene(RenderContext ctx)
 	SceneRenderer->EndScene();
 }
 
-
-void VkRenderer::DrawGeometry(VkCommandBuffer cmd)
-{
-	//begin a render pass  connected to our draw image
-	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(DrawImage->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-
-	//VkRenderingInfo renderInfo = VulkanInit::RenderingInfo({ DrawExtent.width, DrawExtent.height }, &colorAttachment, nullptr);
-	//vkCmdBeginRendering(cmd, &renderInfo);
-
-	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipeline);
-	
-	vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, TrianglePipelineLayout, 0, 2, std::array{ CameraBufferDescriptors, TriangleBufferDescriptors }.data(), 0, nullptr);
-
-	//set dynamic viewport and scissor
-	VkViewport viewport = {};
-	viewport.x = 0;
-	viewport.y = 0;
-	viewport.width = DrawExtent.width;
-	viewport.height = DrawExtent.height;
-	viewport.minDepth = 0.f;
-	viewport.maxDepth = 1.f;
-
-	vkCmdSetViewport(cmd, 0, 1, &viewport);
-
-	VkRect2D scissor = {};
-	scissor.offset.x = 0;
-	scissor.offset.y = 0;
-	scissor.extent.width = DrawExtent.width;
-	scissor.extent.height = DrawExtent.height;
-
-	vkCmdSetScissor(cmd, 0, 1, &scissor);
-
-	vkCmdBindIndexBuffer(cmd, rectangle->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-	vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
-	//launch a draw command to draw 3 vertices
-	//vkCmdDraw(cmd, 3, 1, 0, 0);
-
-	vkCmdEndRendering(cmd);
-}
-
 void VkRenderer::InitImgui()
 {
 	// 1: create descriptor pool for IMGUI

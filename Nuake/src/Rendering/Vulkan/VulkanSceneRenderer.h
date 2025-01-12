@@ -96,7 +96,7 @@ namespace Nuake
 
 	class VkSceneRenderer
 	{
-	private:
+	public:
 		RenderContext Context;
 
 		std::map<std::string, Ref<VulkanShader>> Shaders;

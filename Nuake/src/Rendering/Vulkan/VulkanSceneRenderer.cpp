@@ -18,8 +18,10 @@
 #include "Pipeline/RenderPipeline.h"
 
 #include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
-#include <src\Scene\Components\CameraComponent.h>
-#include "src/Rendering/Vulkan/ShaderManager.h"
+#include "src/Scene/Components/CameraComponent.h"
+#include "src/Rendering/Vulkan/VkShaderManager.h"
+
+
 using namespace Nuake;
 
 VkSceneRenderer::VkSceneRenderer()
@@ -69,16 +71,9 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	Context.CameraID = inContext.CameraID;
 
 	// Collect all global transform of things we will render
-
-
 	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
 	auto& vk = VkRenderer::Get();
-
-	// Ensure the command buffer is valid
-	if (cmd == VK_NULL_HANDLE) {
-		throw std::runtime_error("Invalid command buffer");
-	}
 
 	// Ensure the draw image is valid
 	if (!vk.DrawImage) {
@@ -189,6 +184,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 
 	//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	//GBufferPipeline.Execute(passCtx);
+
+	sceneRenderPipeline.Render(passCtx);
 }
 ModelPushConstant modelPushConstant{};
 ShadingPushConstant shadingPushConstant;
@@ -203,12 +200,14 @@ void VkSceneRenderer::EndScene()
 	auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
 	auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
 	auto& selectedOutput = shading;
-	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	shadow.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
-	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+
+	cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	cmd.CopyImageToImage(selectedOutput.Image, vk.GetDrawImage());
+	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_GENERAL);
+	cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_GENERAL);
+
+	cmd.TransitionImageLayout(shadow.Image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -379,64 +378,14 @@ void VkSceneRenderer::CreatePipelines()
 	shadowPass.SetShaders(Shaders["shadow_vert"], Shaders["shadow_frag"]);
 	shadowPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
-		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			0,                               // firstSet
-			2,                               // descriptorSetCount
-			descriptors2.data(),        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		// Bind material
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			4,                               // firstSet
-			1,                               // descriptorSetCount
-			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			5,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			6,                               // firstSet
-			1,                               // descriptorSetCount
-			&LightBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			7,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
+		auto layout = ctx.renderPass->PipelineLayout;
+		ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+		ctx.commandBuffer.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
+		ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
+		ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
+		ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
 	});
 	shadowPass.SetRender([&](PassRenderContext& ctx) {
 		auto& cmd = ctx.commandBuffer;
@@ -462,16 +411,7 @@ void VkSceneRenderer::CreatePipelines()
 					Matrix4 globalTransform = transform.GetGlobalTransform();
 
 					auto descSet = vkMesh->GetDescriptorSet();
-					vkCmdBindDescriptorSets(
-						cmd,
-						VK_PIPELINE_BIND_POINT_GRAPHICS,
-						ctx.renderPass->PipelineLayout,
-						2,                               // firstSet
-						1,                               // descriptorSetCount
-						&descSet,     // pointer to the descriptor set(s)
-						0,                               // dynamicOffsetCount
-						nullptr                          // dynamicOffsets
-					);
+					cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
 
 					// Bind texture descriptor set
 					Ref<Material> material = m->GetMaterial();
@@ -480,17 +420,10 @@ void VkSceneRenderer::CreatePipelines()
 					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
 					modelPushConstant.CameraID = ctx.cameraID;
-					vkCmdPushConstants(
-						cmd,
-						ctx.renderPass->PipelineLayout,
-						VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
-						0,									// Offset
-						sizeof(ModelPushConstant),          // Size of the push constant
-						&modelPushConstant                  // Pointer to the value
-					);
 
-					vkCmdBindIndexBuffer(cmd, vkMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-					vkCmdDrawIndexed(cmd, vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
+					cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
+					cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
+					cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
 				}
 			}
 		}
@@ -506,64 +439,14 @@ void VkSceneRenderer::CreatePipelines()
 	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
 	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
 	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
-		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			0,									// firstSet
-			2,									// descriptorSetCount
-			descriptors2.data(),				// pointer to the descriptor set(s)
-			0,									// dynamicOffsetCount
-			nullptr								// dynamicOffsets
-		);
-
-		// Bind material
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			4,                               // firstSet
-			1,                               // descriptorSetCount
-			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			5,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			6,                               // firstSet
-			1,                               // descriptorSetCount
-			&LightBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			7,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
+		auto layout = ctx.renderPass->PipelineLayout;
+		ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+		ctx.commandBuffer.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
+		ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
+		ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
+		ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx){
 		auto& cmd = ctx.commandBuffer;
@@ -589,16 +472,7 @@ void VkSceneRenderer::CreatePipelines()
 					Matrix4 globalTransform = transform.GetGlobalTransform();
 
 					auto descSet = vkMesh->GetDescriptorSet();
-					vkCmdBindDescriptorSets(
-						cmd,
-						VK_PIPELINE_BIND_POINT_GRAPHICS,
-						ctx.renderPass->PipelineLayout,
-						2,                               // firstSet
-						1,                               // descriptorSetCount
-						&descSet,     // pointer to the descriptor set(s)
-						0,                               // dynamicOffsetCount
-						nullptr                          // dynamicOffsets
-					);
+					cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
 
 					// Bind texture descriptor set
 					Ref<Material> material = m->GetMaterial();
@@ -607,17 +481,10 @@ void VkSceneRenderer::CreatePipelines()
 					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
 					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
 					modelPushConstant.CameraID = ctx.cameraID;
-					vkCmdPushConstants(
-						cmd,
-						ctx.renderPass->PipelineLayout,
-						VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
-						0,									// Offset
-						sizeof(ModelPushConstant),          // Size of the push constant
-						&modelPushConstant                  // Pointer to the value
-					);
+					cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
 
-					vkCmdBindIndexBuffer(cmd, vkMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-					vkCmdDrawIndexed(cmd, vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
+					cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
+					cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
 				}
 			}
 		}
@@ -634,64 +501,15 @@ void VkSceneRenderer::CreatePipelines()
 	shadingPass.AddInput("Depth");
 	shadingPass.AddInput("Material");
 	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
-		std::vector<VkDescriptorSet> descriptors2 = { CameraBufferDescriptors, ModelBufferDescriptor };
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			0,                               // firstSet
-			2,                               // descriptorSetCount
-			descriptors2.data(),        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.renderPass->PipelineLayout, 3, 1, &SamplerDescriptor, 0, nullptr);
-
-		// Bind material
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			4,                               // firstSet
-			1,                               // descriptorSetCount
-			&MaterialBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			5,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().TextureDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			6,                               // firstSet
-			1,                               // descriptorSetCount
-			&LightBufferDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
-
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			7,                               // firstSet
-			1,                               // descriptorSetCount
-			&GPUResources::Get().CamerasDescriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
+		auto layout = ctx.renderPass->PipelineLayout;
+		auto cmd = ctx.commandBuffer;
+		cmd.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+		cmd.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
+		cmd.BindDescriptorSet(layout, SamplerDescriptor, 3);
+		cmd.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+		cmd.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
+		cmd.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+		cmd.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
 
 		auto& gpu = GPUResources::Get();
 		auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
@@ -702,29 +520,13 @@ void VkSceneRenderer::CreatePipelines()
 		shadingPushConstant.CameraID = ctx.cameraID;
 	});
 	shadingPass.SetRender([](PassRenderContext& ctx) {
-		vkCmdPushConstants(
-			ctx.commandBuffer,
-			ctx.renderPass->PipelineLayout,
-			VK_SHADER_STAGE_ALL_GRAPHICS,			// Stage matching the pipeline layout
-			0,									// Offset
-			sizeof(ShadingPushConstant),          // Size of the push constant
-			&shadingPushConstant                  // Pointer to the value
-		);
-		
-		auto descSet = quadMesh->GetDescriptorSet();
-		vkCmdBindDescriptorSets(
-			ctx.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			ctx.renderPass->PipelineLayout,
-			2,                               // firstSet
-			1,                               // descriptorSetCount
-			&descSet,     // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
-		);
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingPushConstant), &shadingPushConstant);
 
-		vkCmdBindIndexBuffer(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(ctx.commandBuffer, quadMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t), 1, 0, 0, 0);
+		// Draw full screen quad
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 2);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
 	});
 	
 	GBufferPipeline.Build();

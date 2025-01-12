@@ -37,13 +37,11 @@ void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
 	// Clear all color attachments
-	VkClearColorValue clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
-	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
 	for (auto& attachment : inputs)
 	{
 		if (attachment->GetUsage() != ImageUsage::Depth)
 		{
-			vkCmdClearColorImage(ctx.commandBuffer, attachment->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+			ctx.commandBuffer.ClearColorImage(attachment);
 		}
 	}
 }
@@ -55,7 +53,7 @@ void RenderPass::TransitionAttachments(PassRenderContext& ctx, PassAttachments& 
 	{
 		if (attachment->GetUsage() != ImageUsage::Depth)
 		{
-			attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+			ctx.commandBuffer.TransitionImageLayout(attachment, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 		}
 	}
 }
@@ -65,8 +63,8 @@ void RenderPass::UntransitionAttachments(PassRenderContext& ctx, PassAttachments
 	for (auto& attachment : inputs)
 	{
 		// Transform from color attachment to transfer src for next pass
-		attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
+		ctx.commandBuffer.TransitionImageLayout(attachment, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		ctx.commandBuffer.TransitionImageLayout(attachment, VK_IMAGE_LAYOUT_GENERAL);
 	}
 }
 
@@ -102,33 +100,19 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 	renderInfo.colorAttachmentCount = std::size(renderAttachmentInfos);
 	renderInfo.pColorAttachments = renderAttachmentInfos.data();
 
-	vkCmdBeginRendering(ctx.commandBuffer, &renderInfo);
+	auto& cmd = ctx.commandBuffer;
+	cmd.BeginRendering(renderInfo);
 	{
-		vkCmdBindPipeline(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
-
-		VkViewport viewport = {};
-		viewport.x = 0;
-		viewport.y = 0;
-		viewport.width = ctx.resolution.x;
-		viewport.height = ctx.resolution.y;
-		viewport.minDepth = 0.f;
-		viewport.maxDepth = 1.f;
-
-		vkCmdSetViewport(ctx.commandBuffer, 0, 1, &viewport);
-
-		VkRect2D scissor = {};
-		scissor.offset.x = 0;
-		scissor.offset.y = 0;
-		scissor.extent.width = ctx.resolution.x;
-		scissor.extent.height = ctx.resolution.y;
-		vkCmdSetScissor(ctx.commandBuffer, 0, 1, &scissor);
+		cmd.BindPipeline(Pipeline);
+		cmd.SetViewport(ctx.resolution);
+		cmd.SetScissor(ctx.resolution);
 
 		if (RenderCb)
 		{
 			RenderCb(ctx);
 		}
 	}
-	vkCmdEndRendering(ctx.commandBuffer);
+	cmd.EndRendering();
 
 	if (PostRender)
 	{
