@@ -6,6 +6,8 @@
 
 using namespace Nuake;
 
+RenderPipeline SceneRenderPipeline::GBufferPipeline;
+
 SceneRenderPipeline::SceneRenderPipeline()
 {
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
