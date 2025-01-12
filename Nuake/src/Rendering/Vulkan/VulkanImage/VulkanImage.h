@@ -68,7 +68,7 @@ namespace Nuake
 		ImageFormat GetFormat() const { return Format; }
 		VkImageLayout GetLayout() const { return Layout; }
 		void SetLayout(VkImageLayout layout) { Layout = layout; }
-
+		ImageUsage GetUsage() const { return Usage; }
 		bool IsLayoutTransitionValid(VkImageLayout oldLayout, VkImageLayout newLayout) {
 			switch (oldLayout) {
 			case VK_IMAGE_LAYOUT_UNDEFINED:

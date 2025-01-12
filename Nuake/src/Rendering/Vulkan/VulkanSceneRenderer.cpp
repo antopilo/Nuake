@@ -164,7 +164,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.resolution = Context.Size;
 	
-	
 	auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : view)
 	{
@@ -175,12 +174,12 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			continue;
 		}
 
-		passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
-		ShadowPipeline.Execute(passCtx);
+		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
+		//ShadowPipeline.Execute(passCtx);
 		
 		light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
 
-			//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
+		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		for (int i = 0; i < CSM_AMOUNT; i++)
 		{
 			//ShadowPipeline.Execute(passCtx);
@@ -188,8 +187,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	}
 
 
-	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
-	GBufferPipeline.Execute(passCtx);
+	//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
+	//GBufferPipeline.Execute(passCtx);
 }
 ModelPushConstant modelPushConstant{};
 ShadingPushConstant shadingPushConstant;
@@ -210,8 +209,6 @@ void VkSceneRenderer::EndScene()
 	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-
-	
 }
 
 void VkSceneRenderer::CreateBuffers()

@@ -86,6 +86,13 @@ namespace Nuake
 		std::array<LightData, 100> Data;
 	};
 
+
+
+	struct CameraSceneRenderer
+	{
+		
+	};
+
 	class VkSceneRenderer
 	{
 	private:

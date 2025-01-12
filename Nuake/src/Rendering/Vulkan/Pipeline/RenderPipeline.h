@@ -43,6 +43,9 @@ namespace Nuake
 		bool DepthTest = true;
 	};
 
+	using PassAttachments = std::vector<Ref<VulkanImage>>;
+	
+
 	class RenderPass 
 	{
 	private:
@@ -62,9 +65,6 @@ namespace Nuake
 		std::function<void(PassRenderContext& ctx)> PreRender;
 		std::function<void(PassRenderContext& ctx)> RenderCb;
 		std::function<void(PassRenderContext& ctx)> PostRender;
-
-		// Vulkan structs
-
 	public:
 		VkPipeline Pipeline;
 		VkPipelineLayout PipelineLayout;
@@ -73,10 +73,13 @@ namespace Nuake
 		RenderPass(const std::string& name);
 		~RenderPass() = default;
 
-		void ClearAttachments(PassRenderContext& ctx);
-		void TransitionAttachments(PassRenderContext& ctx);
-		void UntransitionAttachments(PassRenderContext& ctx);
-		void Render(PassRenderContext& ctx);
+		void Render(PassRenderContext& ctx, PassAttachments& inputs);
+
+	private:
+		void Execute(PassRenderContext& ctx, PassAttachments& inputs);
+		void ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs);
+		void TransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs);
+		void UntransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs);
 
 	public:
 		void SetDepthTest(bool enabled) { HasDepthTest = enabled; }
@@ -111,12 +114,13 @@ namespace Nuake
 
 	};
 
+	using PipelineAttachments = std::vector<PassAttachments>;
+
 	class RenderPipeline
 	{
 	private:
 		bool Built;
 		std::vector<RenderPass> RenderPasses;
-		TextureAttachment FinalOutput;
 	public:
 		RenderPipeline();
 		~RenderPipeline() = default;
@@ -126,7 +130,6 @@ namespace Nuake
 		RenderPass& GetRenderPass(const std::string& name);
 
 		bool Build();
-
-		void Execute(PassRenderContext& ctx);
+		void Execute(PassRenderContext& ctx, PipelineAttachments& inputs);
 	};
 }

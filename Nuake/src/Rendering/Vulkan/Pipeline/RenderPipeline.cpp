@@ -26,87 +26,51 @@ RenderPass::RenderPass(const std::string& name) :
 {
 }
 
-void RenderPass::ClearAttachments(PassRenderContext& ctx)
+void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 {
-	// Resize
-	for(auto& attachment : Attachments)
-	{
-		if (attachment.Image->GetSize() == ctx.resolution)
-		{
-			continue;
-		}
+	ClearAttachments(ctx, inputs);
+	TransitionAttachments(ctx, inputs);
+	Render(ctx, inputs);
+	UntransitionAttachments(ctx, inputs);
+}
 
-		auto newAttachment = std::make_shared<VulkanImage>(attachment.Format, ctx.resolution);
-		attachment.Image = newAttachment;
-
-		// Register to resource manager
-		auto& gpuResources = GPUResources::Get();
-		gpuResources.AddTexture(newAttachment);
-
-		newAttachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, newAttachment->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-
-		// TODO: Queue deletion of old textures
-	}
-
-	if (DepthAttachment.Image && DepthAttachment.Image->GetSize() != ctx.resolution)
-	{
-		Ref<VulkanImage> newDepthAttachment = std::make_shared<VulkanImage>(DepthAttachment.Format, ctx.resolution, ImageUsage::Depth);
-		DepthAttachment.Image = newDepthAttachment;
-
-		auto& gpuResources = GPUResources::Get();
-		gpuResources.AddTexture(newDepthAttachment);
-
-		newDepthAttachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, newDepthAttachment->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, true);
-	}
-
+void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs)
+{
 	// Clear all color attachments
 	VkClearColorValue clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
 	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-	for (auto& attachment : Attachments)
+	for (auto& attachment : inputs)
 	{
-		vkCmdClearColorImage(ctx.commandBuffer,attachment.Image->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+		if (attachment->GetUsage() != ImageUsage::Depth)
+		{
+			vkCmdClearColorImage(ctx.commandBuffer, attachment->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+		}
 	}
-
-	// Clear depth?
 }
 
-void RenderPass::TransitionAttachments(PassRenderContext& ctx)
+void RenderPass::TransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
 	// Transition all color attachments
-	for (auto& attachment : Attachments)
+	for (auto& attachment : inputs)
 	{
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-		attachment.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-	}
-
-	// Transition depth attachment
-	if (DepthAttachment.Image)
-	{
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, DepthAttachment.Image->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-		//DepthAttachment.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		if (attachment->GetUsage() != ImageUsage::Depth)
+		{
+			attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+		}
 	}
 }
 
-void RenderPass::UntransitionAttachments(PassRenderContext& ctx)
+void RenderPass::UntransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
-	for (auto& attachment : Attachments)
+	for (auto& attachment : inputs)
 	{
 		// Transform from color attachment to transfer src for next pass
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		attachment.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, attachment.Image->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-		attachment.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
-	}
-
-	if (DepthAttachment.Image)
-	{
-		//VulkanUtil::TransitionImage(ctx.commandBuffer, DepthAttachment.Image->GetImage(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+		attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+		attachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
 	}
 }
 
-void RenderPass::Render(PassRenderContext& ctx)
+void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 {
 	ctx.renderPass = this;
 
@@ -117,27 +81,27 @@ void RenderPass::Render(PassRenderContext& ctx)
 	
 	// Begin rendering and bind pipeline
 	std::vector<VkRenderingAttachmentInfo> renderAttachmentInfos;
-	renderAttachmentInfos.reserve(Attachments.size());
-
-	for (auto& attachment : Attachments)
-	{
-		VkRenderingAttachmentInfo attachmentInfo = VulkanInit::AttachmentInfo(attachment.Image->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-		renderAttachmentInfos.push_back(attachmentInfo);
-	}
-
 	VkRenderingAttachmentInfo depthAttachmentInfo = {};
-	if (DepthAttachment.Image)
+	renderAttachmentInfos.reserve(Attachments.size());
+	bool hasDepthAttachment = false;
+	for (auto& attachment : inputs)
 	{
-		depthAttachmentInfo = VulkanInit::DepthAttachmentInfo(DepthAttachment.Image->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+		if (attachment->GetUsage() != ImageUsage::Depth)
+		{
+			VkRenderingAttachmentInfo attachmentInfo = VulkanInit::AttachmentInfo(attachment->GetImageView(), nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+			renderAttachmentInfos.push_back(attachmentInfo);
+		}
+		else
+		{
+			depthAttachmentInfo = VulkanInit::DepthAttachmentInfo(attachment->GetImageView(), VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
+			hasDepthAttachment = true;
+		}
 	}
 
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(ctx.resolution, renderAttachmentInfos, !DepthAttachment.Image ? nullptr : &depthAttachmentInfo);
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(ctx.resolution, renderAttachmentInfos, !hasDepthAttachment ? nullptr : &depthAttachmentInfo);
 	renderInfo.colorAttachmentCount = std::size(renderAttachmentInfos);
 	renderInfo.pColorAttachments = renderAttachmentInfos.data();
 
-
-
-	// Begin render!
 	vkCmdBeginRendering(ctx.commandBuffer, &renderInfo);
 	{
 		vkCmdBindPipeline(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
@@ -165,9 +129,6 @@ void RenderPass::Render(PassRenderContext& ctx)
 		}
 	}
 	vkCmdEndRendering(ctx.commandBuffer);
-	// End rendering
-
-
 
 	if (PostRender)
 	{
@@ -380,7 +341,7 @@ bool RenderPipeline::Build()
 	Built = true;
 }
 
-void RenderPipeline::Execute(PassRenderContext& ctx)
+void RenderPipeline::Execute(PassRenderContext& ctx, PipelineAttachments& inputs)
 {
 	if (!Built)
 	{
@@ -388,92 +349,18 @@ void RenderPipeline::Execute(PassRenderContext& ctx)
 		return;
 	}
 
-	std::vector<TextureAttachment> transitionedInputs;
+	int passIndex = 0;
 	for (auto& pass : RenderPasses)
 	{
 		for (auto& input : pass.GetInputAttachments())
 		{
-			input.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			//input.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		}
-		//	//VkImageMemoryBarrier barrier{};
-		//	//barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		//
-		//	//// Handle old and new layouts based on attachment type
-		//	//barrier.oldLayout = input.Format != ImageFormat::D32F ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		//	//barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		//
-		//	//input.Image->SetLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		//
-		//	//// Access masks for color or depth-stencil attachments
-		//	//if (input.Format != ImageFormat::D32F) {
-		//	//	barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		//	//	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		//	//}
-		//	//else {
-		//	//	barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		//	//	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-		//
-		//	//	// Include stencil aspect if applicable
-		//	//	//if (input.HasStencilComponent()) {
-		//	//	//	barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-		//	//	//}
-		//	//}
-		//
-		//	//// Destination access mask is always for shaders reading
-		//	//barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		//
-		//	//// No queue family ownership transfer in this case
-		//	//barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//	//barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		//
-		//	//// Set the image and subresource range
-		//	//barrier.image = input.Image->GetImage();
-		//	//barrier.subresourceRange.baseMipLevel = 0;
-		//	//barrier.subresourceRange.levelCount = 1;
-		//	//barrier.subresourceRange.baseArrayLayer = 0;
-		//	//barrier.subresourceRange.layerCount = 1;
-		//
-		//	//// Choose appropriate source pipeline stage for color or depth-stencil
-		//	//VkPipelineStageFlags srcStage = (input.Format != ImageFormat::D32F)
-		//	//	? VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-		//	//	: (VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT);
-		//
-		//	//// Insert the pipeline barrier
-		//	//vkCmdPipelineBarrier(
-		//	//	ctx.commandBuffer,
-		//	//	srcStage,                                // Source stage
-		//	//	VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,  // Destination stage
-		//	//	0,
-		//	//	0, nullptr,
-		//	//	0, nullptr,
-		//	//	1, &barrier
-		//	//);
-		//
-		//	transitionedInputs.push_back(input);
-		//}
 		
-		pass.ClearAttachments(ctx);
-		pass.TransitionAttachments(ctx);
-		pass.Render(ctx);
-		pass.UntransitionAttachments(ctx);
+		auto& passInputs = inputs[passIndex];
+		pass.Render(ctx, inputs[passIndex]);
 
-		// Sync the attachments
-
+		passIndex++;
 	}
-
-	
-	for (auto& transitionedOutputs : transitionedInputs)
-	{
-		if (transitionedOutputs.Format == ImageFormat::D32F)
-		{
-			//VulkanUtil::TransitionImage(ctx.commandBuffer, transitionedOutputs.Image->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
-		}
-		else
-		{
-			//VulkanUtil::TransitionImage(ctx.commandBuffer, transitionedOutputs.Image->GetImage(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-			//transitionedOutputs.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
-		}
-	}
-	
 }
 
