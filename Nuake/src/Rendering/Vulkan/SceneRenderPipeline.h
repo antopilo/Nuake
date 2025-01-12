@@ -41,13 +41,11 @@ namespace Nuake
 		// Holds all the texture attachments
 		static RenderPipeline GBufferPipeline;
 
-
 	public:
-		SceneRenderPipeline(UUID camera);
-
-		SceneRenderPipeline() = default;
+		SceneRenderPipeline();
 		~SceneRenderPipeline() = default;
 
+		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
 		Ref<VulkanImage> GetOutput() { return ShadingOutput; }
 

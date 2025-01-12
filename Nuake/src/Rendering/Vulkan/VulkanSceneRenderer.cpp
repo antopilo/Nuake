@@ -19,7 +19,7 @@
 
 #include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
 #include <src\Scene\Components\CameraComponent.h>
-
+#include "src/Rendering/Vulkan/ShaderManager.h"
 using namespace Nuake;
 
 VkSceneRenderer::VkSceneRenderer()
@@ -230,8 +230,17 @@ void VkSceneRenderer::CreateBuffers()
 
 void VkSceneRenderer::LoadShaders()
 {
+	// TODO: load embedded shaders in the future
+	VkShaderManager& shaderMgr = VkShaderManager::Get();
 	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
-	Shaders["basic_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
+	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag"));
+	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert"));
+	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag"));
+	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
+	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
+	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
+
+	// TODO: remove this.
 	Shaders["basic_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
 	Shaders["shading_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag");
 	Shaders["shading_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert");
@@ -362,6 +371,8 @@ void VkSceneRenderer::CreateDescriptors()
 
 void VkSceneRenderer::CreatePipelines()
 {
+	sceneRenderPipeline = SceneRenderPipeline();
+
 	ShadowPipeline = RenderPipeline();
 	auto& shadowPass = ShadowPipeline.AddPass("Shadow");
 	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);

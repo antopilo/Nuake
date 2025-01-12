@@ -12,6 +12,7 @@
 #include <array>
 #include <map>
 #include <string>
+#include "SceneRenderPipeline.h"
 
 
 namespace Nuake
@@ -144,7 +145,7 @@ namespace Nuake
 		RenderPipeline GBufferPipeline;
 		RenderPipeline ShadowPipeline;
 
-
+		SceneRenderPipeline sceneRenderPipeline;
 	public:
 		UUID CurrentCamera;
 		VkSceneRenderer();

@@ -1,12 +1,38 @@
 #include "SceneRenderPipeline.h"
-#include "VkResources.h"
+
+#include "src/Rendering/Vulkan/ShaderManager.h"
+#include "src/Rendering/Vulkan/VkResources.h"
 
 using namespace Nuake;
 
-SceneRenderPipeline::SceneRenderPipeline(UUID camera) :
-	CurrentCameraID(camera)
+SceneRenderPipeline::SceneRenderPipeline()
 {
+	VkShaderManager& shaderMgr = VkShaderManager::Get();
 
+	GBufferPipeline = RenderPipeline();
+
+	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
+	gBufferPass.SetShaders(shaderMgr.GetShader("basic_vert"), shaderMgr.GetShader("basic_frag"));
+	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
+	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	//gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
+
+	auto& shadingPass = GBufferPipeline.AddPass("Shading");
+	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
+	//shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
+	shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
+	shadingPass.SetDepthTest(false);
+	shadingPass.AddInput("Albedo");
+	shadingPass.AddInput("Normal");
+	shadingPass.AddInput("Depth");
+	shadingPass.AddInput("Material");
+}
+
+void SceneRenderPipeline::SetCamera(UUID camera)
+{
+	CurrentCameraID = camera;
 }
 
 void SceneRenderPipeline::Render(PassRenderContext& ctx)
@@ -24,6 +50,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ ShadingOutput } // Shading
 	};
 
+	ctx.cameraID = CurrentCameraID;
 	GBufferPipeline.Execute(ctx, pipelineInputs);
 }
 
