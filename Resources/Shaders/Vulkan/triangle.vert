@@ -45,8 +45,8 @@ struct Light
     float outerConeAngle;
     float innerConeAngle;
     bool castShadow;
-    int shadowMapTextureId;
-    int transformId;
+    int shadowMapTextureId[4];
+    int transformId[4];
 };
 
 [[vk::binding(0, 6)]]

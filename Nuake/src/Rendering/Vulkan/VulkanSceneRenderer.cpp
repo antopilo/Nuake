@@ -123,7 +123,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
 
-			for (int i = 0; i < light.m_LightViews.size(); i++)
+			for (int i = 0; i < CSM_AMOUNT; i++)
 			{
 				LightView& view = light.m_LightViews[i];
 				CameraView viewData{};
@@ -132,8 +132,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 				viewData.InverseView = glm::inverse(view.View);
 				viewData.InverseProjection = glm::inverse(view.Proj);
 				viewData.Position = transform.GetGlobalTransform()[3];
-				viewData.Near = 25.0;
-				viewData.Far = -25.0;
+				viewData.Near = 0;
+				viewData.Far = 0;
 				GPUResources::Get().AddCamera(view.CameraID, viewData);
 			}
 		}
@@ -850,8 +850,11 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		light.type = lightComp.Type;
 		light.color = Vector4(lightComp.Color * lightComp.Strength, 1.0);
 		light.castShadow = lightComp.CastShadows;
-		light.transformId = GPUResources::Get().GetBindlessCameraID(lightComp.m_LightViews[0].CameraID);
-		light.shadowMapTextureId = GPUResources::Get().GetBindlessTextureID(lightComp.LightMapID);
+		for (int i = 0; i < CSM_AMOUNT; i++)
+		{
+			light.transformId[i] = GPUResources::Get().GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
+			light.shadowMapTextureId[i] = GPUResources::Get().GetBindlessTextureID(lightComp.LightMapID);
+		}
 
 		allLights[currentIndex] = light;
 
@@ -862,6 +865,12 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	MaterialDataContainer = MaterialData{ allMaterials };
 	LightDataContainerArray = LightDataContainer{ allLights };
 	shadingPushConstant.LightCount = currentIndex;
+
+	// Copy CSM split depths
+	for (int i = 0; i < CSM_AMOUNT; i++)
+	{
+		shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
+	}
 }
 
 void VkSceneRenderer::UpdateTransformBuffer()

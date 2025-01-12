@@ -47,7 +47,7 @@ namespace Nuake
         Ref<FrameBuffer> m_Framebuffers[CSM_AMOUNT];
         Matrix4 mViewProjections[CSM_AMOUNT];
         std::vector<LightView> m_LightViews;
-        float mCascadeSplitDepth[CSM_AMOUNT];
+        static float mCascadeSplitDepth[CSM_AMOUNT];
         float mCascadeSplits[CSM_AMOUNT];
 
     public:
@@ -223,7 +223,7 @@ namespace Nuake
         bool Deserialize(const json& j)
         {
             if (j.contains("Type"))
-                Type = (LightType)j["Type"];
+                Type = static_cast<LightType>(j["Type"]);
             if (j.contains("IsVolumetric"))
                 IsVolumetric = j["IsVolumetric"];
             if (j.contains("Color"))

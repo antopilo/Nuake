@@ -9,6 +9,7 @@
 
 namespace Nuake 
 {
+    float LightComponent::mCascadeSplitDepth[CSM_AMOUNT];
     LightComponent::LightComponent() :
         Color(1, 1, 1),
         Strength(10.0f),

@@ -34,6 +34,7 @@ namespace Nuake
 		int MaterialTextureID;
 		int LightCount;
 		int CameraID;
+		float CascadeSplits[4];
 	};
 
 	struct ModelData
@@ -75,8 +76,9 @@ namespace Nuake
 		float outerConeAngle;
 		float innerConeAngle;
 		bool castShadow;
-		int shadowMapTextureId;
-		int transformId;
+		int shadowMapTextureId[4];
+		int transformId[4];
+		float pad[2];
 	};
 
 	struct LightDataContainer
