@@ -51,9 +51,11 @@ namespace Nuake
         float mCascadeSplits[CSM_AMOUNT];
 
     public:
+
         LightComponent();
         ~LightComponent() = default;
 
+        UUID LightMapID;
         void SetCastShadows(bool toggle);
 
         Matrix4 GetProjection();
@@ -62,13 +64,18 @@ namespace Nuake
         void CalculateViewProjection(glm::mat4& view, const glm::mat4& projection)
         {
             Matrix4 normalProj = projection;
+
+            // Convert to normal Z
+            //normalProj[2][2] = -normalProj[2][2];  // Restore the sign
+            //normalProj[2][3] = -normalProj[2][3];  // Restore the far depth term sign
+
             //normalProj *= -1.0f;
             glm::mat4 viewProjection = normalProj * view;
             glm::mat4 inverseViewProjection = glm::inverse(viewProjection);
 
             // TODO: Automate this
             const float nearClip = 0.01f;
-            const float farClip = 800.0f;
+            const float farClip = 200.0f;
             const float clipRange = farClip - nearClip;
 
             const float mCascadeNearPlaneOffset = -100.0f;
@@ -100,16 +107,16 @@ namespace Nuake
                 glm::vec4 frustumCorners[8] =
                 {
                     //Near face
-                    {  1.0f,  1.0f, -1.0f, 1.0f },
-                    { -1.0f,  1.0f, -1.0f, 1.0f },
-                    {  1.0f, -1.0f, -1.0f, 1.0f },
-                    { -1.0f, -1.0f, -1.0f, 1.0f },
+                    {  1.0f, -1.0f,  1.0f, 1.0f },
+                    { -1.0f, -1.0f,  1.0f, 1.0f },
+                    {  1.0f,  1.0f,  1.0f, 1.0f },
+                    { -1.0f,  1.0f,  1.0f, 1.0f },
 
-                    //Far face
-                    {  1.0f,  1.0f, 1.0f, 1.0f },
-                    { -1.0f,  1.0f, 1.0f, 1.0f },
-                    {  1.0f, -1.0f, 1.0f, 1.0f },
-                    { -1.0f, -1.0f, 1.0f, 1.0f },
+                    // Far face (z = 0.0)
+                    {  1.0f, -1.0f,  0.0f, 1.0f },
+                    { -1.0f, -1.0f,  0.0f, 1.0f },
+                    {  1.0f,  1.0f,  0.0f, 1.0f },
+                    { -1.0f,  1.0f,  0.0f, 1.0f },
                 };
 
                 // Project frustum corners into world space from clip space
@@ -144,19 +151,41 @@ namespace Nuake
 
                 // Calculate the view and projection matrix
                 glm::vec3 lightDir = -this->Direction;
-                glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 0.0f, 1.0f));
+                lightDir.y *= -1.0f;
+                lightDir.x *= -1.0f;
+                lightDir.z *= -1.0f;
+                glm::mat4 lightViewMatrix = glm::lookAt(frustumCenter - lightDir * -minExtents.z, frustumCenter, glm::vec3(0.0f, 1.0, 0.0f));
                 glm::mat4 lightProjectionMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f + mCascadeNearPlaneOffset, maxExtents.z - minExtents.z + mCascadeFarPlaneOffset);
-
+                 
+                //lightDir.y *= -1.0f;
+                //
+                //glm::mat4 lightViewMatrix = glm::lookAt(
+                //    frustumCenter + lightDir * -minExtents.z,
+                //    frustumCenter,
+                //    glm::vec3(0.0f, 1.0f, 0.0f)
+                //);
+                //glm::mat4 lightProjectionMatrix = glm::ortho(
+                //    minExtents.x, maxExtents.x,
+                //    minExtents.y, maxExtents.y, // Y-flip for Vulkan
+                //    0.0f + mCascadeNearPlaneOffset,
+                //    maxExtents.z - minExtents.z + mCascadeFarPlaneOffset
+                //);
+				//lightProjectionMatrix = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, 100.0f, -100.0f);
                 // Offset to texel space to avoid shimmering ->(https://stackoverflow.com/questions/33499053/cascaded-shadow-map-shimmering)
                 glm::mat4 shadowMatrix = lightProjectionMatrix * lightViewMatrix;
-                const float ShadowMapResolution = 4096;
-                glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
-                glm::vec4 roundedOrigin = glm::round(shadowOrigin);
-                glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
-                roundOffset = roundOffset * 2.0f / ShadowMapResolution;
-                roundOffset.z = 0.0f;
-                roundOffset.w = 0.0f;
-                lightProjectionMatrix[3] += roundOffset;
+               //const float ShadowMapResolution = 4096;
+               //glm::vec4 shadowOrigin = (shadowMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) * ShadowMapResolution / 2.0f;
+               //glm::vec4 roundedOrigin = glm::round(shadowOrigin);
+               //glm::vec4 roundOffset = roundedOrigin - shadowOrigin;
+               //roundOffset = roundOffset * 2.0f / ShadowMapResolution;
+               //roundOffset.z = 0.0f;
+               //roundOffset.w = 0.0f;
+               //lightProjectionMatrix[3] += roundOffset;
+                float near_plane = 0.01f, far_plane = 100.0f;
+                //glm::mat4 lightProjection = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, 25.0f, -25.0f);
+
+                //lightProjectionMatrix[2][2] = -lightProjectionMatrix[2][2];  // Flip the sign
+                //lightProjectionMatrix[2][3] = -lightProjectionMatrix[2][3];  // Flip the sign of the far depth term
 
                 m_LightViews[cascade].View = lightViewMatrix;
                 m_LightViews[cascade].Proj = lightProjectionMatrix;
@@ -165,6 +194,8 @@ namespace Nuake
                 mCascadeSplitDepth[cascade] = (nearClip + splitDist * clipRange) * 1.0f;
                 mViewProjections[cascade] = shadowMatrix;
                 lastSplitDist = mCascadeSplits[cascade];
+
+
 
                 // -----------------------Debug only-----------------------
                 // RendererDebug::BeginScene(viewProjection);

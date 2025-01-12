@@ -150,6 +150,32 @@ float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
     return F0 + (max(float3(roughnessTerm, roughnessTerm, roughnessTerm), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 
+float linearDepth(float z, float near, float far) {
+    return near * far / (far - z * (far - near));
+}
+
+float ShadowCalculation(Light light, float3 fragPos, float3 normal)
+{
+    CameraView camView = cameras[pushConstants.CameraID];
+    float depth = length(fragPos - camView.Position);
+
+    CameraView lightView = cameras[light.transformId];
+    int shadowMap = light.shadowMapTextureId;
+    float4 fragLightSpace = mul(lightView.Projection, mul(lightView.View, float4(fragPos, 1.0)));
+    float3 projCoords = fragLightSpace.xyz / fragLightSpace.w;
+    projCoords.xy = projCoords.xy * 0.5 + 0.5;
+
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 || projCoords.y < 0.0 || projCoords.y > 1.0) {
+        return 1.0;
+    }
+
+    //projCoords.y = 1.0 - projCoords.y;
+    float currentDepth = projCoords.z;
+    float bias = max(0.005 * (1.0 - dot(normal, light.direction)), 0.0005);
+    float shadowMapDepth = textures[light.shadowMapTextureId].Sample(mySampler, projCoords.xy).r;
+
+    return (currentDepth > shadowMapDepth);//> 0.0 ? 1.0 : 0.0;
+}
 PSOutput main(PSInput input)
 {
     PSOutput output;
@@ -193,12 +219,26 @@ PSOutput main(PSInput input)
 
     const float PI = 3.141592653589793f;
     float3 Lo = float3(0.0, 0.0, 0.0);
+    float shadow = 1.0f;
+
+    if(foundDirectional == false)
+    {
+        shadow = 1.0f;
+    }
+
     //Directional
     if(foundDirectional)
     {
         Light light = directionalLight;
         float3 L = normalize(light.direction);
         float attenuation = 1.0f;
+
+        if(light.castShadow == true)
+        {
+            shadow *= ShadowCalculation(light, worldPos, N);
+            //output.oColor0 = float4(albedo * 0.1 + float3(shadow, shadow, shadow), 1);
+            //return output;
+        }
 
         // TODO: Shadow
         float3 radiance = light.color.rgb * attenuation;
@@ -216,7 +256,7 @@ PSOutput main(PSInput input)
         kD *= 1.0 - metallic;
 
         float NdotL = max(dot(N, L), 0.0);
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL * shadow;
     }
 
     // other lights

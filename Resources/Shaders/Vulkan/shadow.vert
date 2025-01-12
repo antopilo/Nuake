@@ -73,6 +73,20 @@ struct VSOutput {
     float4 Position : SV_Position;
 };
 
+float LinearizeDepth(float depth, float nearPlane, float farPlane, bool reverseDepth)
+{
+    if (reverseDepth)
+    {
+        // Reverse depth (near plane = 1.0, far plane = 0.0)
+        return nearPlane * farPlane / lerp(farPlane, nearPlane, depth);
+    }
+    else
+    {
+        // Standard depth (near plane = 0.0, far plane = 1.0)
+        return (2.0 * nearPlane * farPlane) / (farPlane + nearPlane - depth * (farPlane - nearPlane));
+    }
+}
+
 // Main vertex shader
 VSOutput main(uint vertexIndex : SV_VertexID) 
 {
@@ -89,5 +103,6 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     // Output the position of each vertex
     output.Position = mul(camView.Projection, mul(camView.View,mul(modelData.model, float4(v.position, 1.0f))));
 
+    //output.Position.z = LinearizeDepth(output.Position.z, camView.Near, camView.Far, false);
     return output;
 }

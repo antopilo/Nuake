@@ -62,13 +62,14 @@ void VkSceneRenderer::Init()
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
 {
+	GPUResources::Get().ClearCameras();
+
 	Context.CommandBuffer = inContext.CommandBuffer;
 	Context.CurrentScene = inContext.CurrentScene;
 	Context.CameraID = inContext.CameraID;
 
 	// Collect all global transform of things we will render
-	BuildMatrixBuffer();
-	UpdateTransformBuffer();
+
 
 	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
@@ -115,6 +116,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	}
 
 	// Build light view list
+
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
@@ -136,13 +138,21 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			}
 		}
 	}
+
+	BuildMatrixBuffer();
+	UpdateTransformBuffer();
+
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
 			auto cam = GPUResources::Get().GetCamera(inContext.CameraID);
-			light.CalculateViewProjection(cam.View, cam.Projection);
+
+			if (light.Type == LightType::Directional)
+			{
+				light.CalculateViewProjection(cam.View, cam.Projection);
+			}
 		}
 	}
 
@@ -153,6 +163,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	passCtx.scene = inContext.CurrentScene;
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.resolution = Context.Size;
+	
 	
 	auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : view)
@@ -166,10 +177,13 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 
 		passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		ShadowPipeline.Execute(passCtx);
+		
+		light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
 
+			//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		for (int i = 0; i < CSM_AMOUNT; i++)
 		{
-			
+			//ShadowPipeline.Execute(passCtx);
 		}
 	}
 
@@ -192,11 +206,12 @@ void VkSceneRenderer::EndScene()
 	auto& selectedOutput = shading;
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	shadow.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	VulkanUtil::CopyImageToImage(cmd, selectedOutput.Image->GetImage(), vk.GetDrawImage()->GetImage(), selectedOutput.Image->GetSize(), vk.DrawImage->GetSize());
 	vk.DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	selectedOutput.Image->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
-	GPUResources::Get().ClearCameras();
+	
 }
 
 void VkSceneRenderer::CreateBuffers()
@@ -835,6 +850,9 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		light.type = lightComp.Type;
 		light.color = Vector4(lightComp.Color * lightComp.Strength, 1.0);
 		light.castShadow = lightComp.CastShadows;
+		light.transformId = GPUResources::Get().GetBindlessCameraID(lightComp.m_LightViews[0].CameraID);
+		light.shadowMapTextureId = GPUResources::Get().GetBindlessTextureID(lightComp.LightMapID);
+
 		allLights[currentIndex] = light;
 
 		currentIndex++;
