@@ -60,7 +60,7 @@ void VkMesh::CreateDescriptorSet()
 
 	auto& vk = VkRenderer::Get();
 	auto device = vk.GetDevice();
-	DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+	DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	DescriptorSet = vk.GetDescriptorAllocator().Allocate(device, DescriptorLayout);
 
 	VkDescriptorBufferInfo bufferInfo{};

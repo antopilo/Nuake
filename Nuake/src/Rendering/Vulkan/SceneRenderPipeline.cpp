@@ -2,22 +2,29 @@
 
 #include "src/Rendering/Vulkan/VkShaderManager.h"
 #include "src/Rendering/Vulkan/VkResources.h"
+
+#include "src/Scene/Scene.h"
+#include "src/Scene/Entities/Entity.h"
+#include "src/Scene/Components/TransformComponent.h"
+#include "src/Scene/Components/ModelComponent.h"
+
+#include "src/Rendering/Textures/Material.h"
+
 #include <Tracy.hpp>
+
 
 using namespace Nuake;
 
 RenderPipeline SceneRenderPipeline::GBufferPipeline;
-
-
 
 SceneRenderPipeline::SceneRenderPipeline()
 {
 	// Initialize render targets
 	const Vector2 defaultSize = { 1280, 720 };
 	GBufferAlbedo = std::make_shared<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
-	GBufferDepth = std::make_shared<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
 	GBufferNormal = std::make_shared<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	GBufferMaterial = std::make_shared<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferDepth = std::make_shared<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
 	ShadingOutput = std::make_shared<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 
 	// Initialize pipeline
@@ -26,10 +33,10 @@ SceneRenderPipeline::SceneRenderPipeline()
 	GBufferPipeline = RenderPipeline();
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(shaderMgr.GetShader("basic_vert"), shaderMgr.GetShader("basic_frag"));
-	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	gBufferPass.AddAttachment("Albedo", GBufferAlbedo->GetFormat());
+	gBufferPass.AddAttachment("Normal", GBufferNormal->GetFormat());
+	gBufferPass.AddAttachment("Material", GBufferMaterial->GetFormat());
+	gBufferPass.AddAttachment("Depth", GBufferDepth->GetFormat(), ImageUsage::Depth);
 	gBufferPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
 		auto& layout = ctx.renderPass->PipelineLayout;
@@ -42,7 +49,38 @@ SceneRenderPipeline::SceneRenderPipeline()
 		ctx.commandBuffer.BindDescriptorSet(layout, gpu.CamerasDescriptor, 6);
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx) {
-		
+		auto& cmd = ctx.commandBuffer;
+		auto& scene = ctx.scene;
+		auto& vk = VkRenderer::Get();
+		auto& gpu = GPUResources::Get();
+
+		ZoneScopedN("Render Models");
+
+		gbufferConstant.CameraID = ctx.cameraID;
+
+		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+		for (auto e : view)
+		{
+			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+			if (!mesh.ModelResource || !visibility.Visible)
+			{
+				continue;
+			}
+
+			gbufferConstant.Index = gpu.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()];
+
+			for (auto& m : mesh.ModelResource->GetMeshes())
+			{
+				Ref<VkMesh> vkMesh = m->GetVkMesh();
+
+				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, vkMesh->GetDescriptorSet(), 1);
+				gbufferConstant.MaterialIndex = gpu.MeshMaterialMapping[vkMesh->GetID()];
+
+				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(GBufferConstant), &gbufferConstant);
+				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
+				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
+			}
+		}
 	});
 
 	//auto& shadingPass = GBufferPipeline.AddPass("Shading");
