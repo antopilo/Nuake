@@ -41,7 +41,5 @@ namespace Nuake
 
 	private:
 		void LoadShaders();
-		void CreatePipelines();
-		void BuildMatrixBuffer();
 	};
 }

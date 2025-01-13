@@ -61,8 +61,8 @@ namespace Nuake
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
 
-		// Holds all the texture attachments
 		static RenderPipeline GBufferPipeline;
+		static RenderPipeline ShadowPipeline;
 
 	public:
 		SceneRenderPipeline();
