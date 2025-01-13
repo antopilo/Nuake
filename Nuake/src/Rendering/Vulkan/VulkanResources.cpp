@@ -388,6 +388,7 @@ void GPUResources::UpdateBuffers()
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
 	}
 
+	// Lights
 	{
 		void* mappedData;
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);

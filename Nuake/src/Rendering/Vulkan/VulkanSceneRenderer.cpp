@@ -25,25 +25,15 @@
 
 using namespace Nuake;
 
-VkSceneRenderer::VkSceneRenderer()
-{
-}
-
-VkSceneRenderer::~VkSceneRenderer()
-{
-}
-
 Ref<VkMesh> quadMesh;
 void VkSceneRenderer::Init()
 {
-	// Here we will create the pipeline for rendering a scene
 	LoadShaders();
-	CreateDescriptors();
-
 	SetGBufferSize({ 1280, 720 });
 	CreatePipelines();
 
-    std::vector<Vertex> quadVertices = {
+    const std::vector<Vertex> quadVertices 
+	{
 		{ Vector3(-1.0f,  1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
 		{ Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
 		{ Vector3(-1.0f, -1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
@@ -52,13 +42,15 @@ void VkSceneRenderer::Init()
 		{ Vector3(1.0f,   1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
     };
 
-    std::vector<uint32_t> quadIndices = {
+    const std::vector<uint32_t> quadIndices
+	{
         5, 4, 3, 2, 1, 0
     };
 
 	quadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
 }
 
+// This will prepare all the data and upload it to the GPU before rendering the scene.
 void VkSceneRenderer::BeginScene(RenderContext inContext)
 {
 	Context.CommandBuffer = inContext.CommandBuffer;
@@ -131,16 +123,136 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		}
 	}
 
-	BuildMatrixBuffer();
-	UpdateTransformBuffer();
+	// All transforms & materials
+	{
+		uint32_t currentIndex = 0;
+		uint32_t currentMaterialIndex = 0;
+		std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
+		std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
+		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+		for (auto e : view)
+		{
+			// Check if we've reached the maximum capacity of the array
+			if (currentIndex >= MAX_MODEL_MATRIX)
+			{
+				assert(false && "Max model matrix reached!");
+				break;
+			}
 
-	// Calculate light CSM views from current camera
+			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+			if (!mesh.ModelResource || !visibility.Visible)
+			{
+				continue;
+			}
+
+			// Upload transforms to GPU resources
+			allTransforms[currentIndex] = transform.GetGlobalTransform();
+			gpu.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()] = currentIndex;
+
+			// Upload mesh material to GPU resources
+			for (auto& m : mesh.ModelResource->GetMeshes())
+			{
+				Ref<Material> material = m->GetMaterial();
+				if (!material)
+				{
+					continue;
+				}
+
+				// TODO: Avoid duplicated materials
+				MaterialBufferStruct materialBuffer
+				{
+					.HasAlbedo = material->HasAlbedo(),
+					.AlbedoColor = material->data.m_AlbedoColor,
+					.HasNormal = material->HasNormal(),
+					.HasMetalness = material->HasMetalness(),
+					.HasRoughness = material->HasRoughness(),
+					.HasAO = material->HasAO(),
+					.MetalnessValue = material->data.u_MetalnessValue,
+					.RoughnessValue = material->data.u_RoughnessValue,
+					.AoValue = material->data.u_AOValue,
+					.AlbedoTextureId = material->HasAlbedo() ? gpu.GetBindlessTextureID(material->AlbedoImage) : 0,
+					.NormalTextureId = material->HasNormal() ? gpu.GetBindlessTextureID(material->NormalImage) : 0,
+					.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
+					.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
+					.AoTextureId = material->HasAO() ? gpu.GetBindlessTextureID(material->AOImage) : 0,
+				};
+
+				// Save bindless mapping index
+				allMaterials[currentMaterialIndex] = std::move(materialBuffer);
+				gpu.MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
+				currentMaterialIndex++;
+			}
+
+			currentIndex++;
+		}
+
+		gpu.ModelTransforms = ModelData{ allTransforms };
+		gpu.MaterialDataContainer = MaterialData{ allMaterials };
+	}
+
+	// All lights
+	{
+		uint32_t lightCount = 0;
+		std::array<LightData, MAX_LIGHTS> allLights;
+		auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+		for (auto e : lightView)
+		{
+			if (lightCount >= MAX_LIGHTS)
+			{
+				assert(false && "Max amount of light reached!");
+				break;
+			}
+
+			auto [transform, lightComp] = lightView.get<TransformComponent, LightComponent>(e);
+
+			// Update light direction with transform, shouldn't be here!
+			// TODO: Move to transform system
+			lightComp.Direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
+
+			LightData light
+			{
+				.Position = Vector3(transform.GetGlobalTransform()[3]),
+				.Type = lightComp.Type,
+				.Color = Vector4(lightComp.Color * lightComp.Strength, 1.0),
+				.Direction = lightComp.Direction,
+				.OuterConeAngle = glm::cos(Rad(lightComp.OuterCutoff)),
+				.InnerConeAngle = glm::cos(Rad(lightComp.Cutoff)),
+				.CastShadow = lightComp.CastShadows,
+			};
+
+			for (int i = 0; i < CSM_AMOUNT; i++)
+			{
+				light.TransformId[i] = gpu.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
+				light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.LightMapID);
+			}
+
+			allLights[lightCount] = std::move(light);
+
+			lightCount++;
+		}
+
+		gpu.LightDataContainerArray = LightDataContainer{ allLights };
+		gpu.LightCount = lightCount;
+	}
+
+
+	// Copy CSM split depths
+	for (int i = 0; i < CSM_AMOUNT; i++)
+	{
+		//shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
+	}
+
+	// Update transforms, materials and lights.
+	// We need to push lights first to have bindless mapping for CSM
+	gpu.UpdateBuffers();
+
+	// Update light CSM
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
-			auto cam = GPUResources::Get().GetCamera(inContext.CameraID);
+			auto cam = gpu.GetCamera(inContext.CameraID);
 
 			if (light.Type == LightType::Directional)
 			{
@@ -149,7 +261,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		}
 	}
 
-	GPUResources::Get().RecreateBindlessCameras();
+	gpu.RecreateBindlessCameras();
 
 	// Execute light
 	PassRenderContext passCtx = { };
@@ -166,8 +278,10 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		{
 			continue;
 		}
+		
+		// TODO: Execute shadow pipeline for each light
 
-		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
+		passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		//ShadowPipeline.Execute(passCtx);
 		
 		//light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
@@ -197,6 +311,8 @@ void VkSceneRenderer::EndScene()
 	//auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
 	//auto& selectedOutput = shading;
 
+	// Copy final output to DrawImage.
+
 	//cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	//cmd.CopyImageToImage(selectedOutput.Image, vk.GetDrawImage());
@@ -217,17 +333,6 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
 	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
 	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
-
-	// TODO: remove this.
-	Shaders["basic_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
-	Shaders["shading_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag");
-	Shaders["shading_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert");
-	Shaders["shadow_frag"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag");
-	Shaders["shadow_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert");
-}
-
-void VkSceneRenderer::CreateDescriptors()
-{
 }
 
 void VkSceneRenderer::CreatePipelines()
@@ -410,123 +515,5 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	auto& scene = Context.CurrentScene;
 	auto& res = GPUResources::Get();
 
-	uint32_t currentIndex = 0;
-	uint32_t currentMaterialIndex = 0;
-	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
-	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
-	auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
-	for (auto e : view)
-	{
-		// Check if we've reached the maximum capacity of the array
-		if (currentIndex >= MAX_MODEL_MATRIX)
-		{
-			assert(false && "Max model matrix reached!");
-			break;
-		}
-
-		auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-
-		if (!mesh.ModelResource || !visibility.Visible)
-		{
-			continue;
-		}
-
-		// Upload transforms to GPU resources
-		allTransforms[currentIndex] = transform.GetGlobalTransform();
-		Entity entity = Entity((entt::entity)e, scene.get());
-		res.ModelMatrixMapping[entity.GetID()] = currentIndex;
-
-		// Upload mesh material to GPU resources
-		for (auto& m : mesh.ModelResource->GetMeshes())
-		{
-			Ref<Material> material = m->GetMaterial();
-			if (!material)
-			{
-				continue;
-			}
-
-			// TODO: Avoid duplicated materials
-			MaterialBufferStruct materialBuffer 
-			{
-				.HasAlbedo = material->HasAlbedo(),
-				.AlbedoColor = material->data.m_AlbedoColor,
-				.HasNormal = material->HasNormal(),
-				.HasMetalness = material->HasMetalness(),
-				.HasRoughness = material->HasRoughness(),
-				.HasAO = material->HasAO(),
-				.MetalnessValue = material->data.u_MetalnessValue,
-				.RoughnessValue = material->data.u_RoughnessValue,
-				.AoValue = material->data.u_AOValue,
-				.AlbedoTextureId = material->HasAlbedo() ? res.GetBindlessTextureID(material->AlbedoImage) : 0,
-				.NormalTextureId = material->HasNormal() ? res.GetBindlessTextureID(material->NormalImage) : 0,
-				.MetalnessTextureId = material->HasMetalness() ? res.GetBindlessTextureID(material->MetalnessImage) : 0,
-				.RoughnessTextureId = material->HasRoughness() ? res.GetBindlessTextureID(material->RoughnessImage) : 0,
-				.AoTextureId = material->HasAO() ? res.GetBindlessTextureID(material->AOImage) : 0,
-			};
-
-			// Save bindless mapping index
-			allMaterials[currentMaterialIndex] = std::move(materialBuffer);
-			res.MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
-			currentMaterialIndex++;
-		}
-
-		currentIndex++;
-	}
-
-	uint32_t lightCount = 0;
-	std::array<LightData, MAX_LIGHTS> allLights;
-	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
-	for (auto e : lightView)
-	{
-		if (lightCount >= MAX_LIGHTS)
-		{
-			assert(false && "Max amount of light reached!");
-			break;
-		}
-
-		auto [transform, lightComp] = lightView.get<TransformComponent, LightComponent>(e);
-
-		// Update light direction with transform, shouldn't be here!
-		// TODO: Move to transform system
-		lightComp.Direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
-
-		LightData light
-		{
-			.Position = Vector3(transform.GetGlobalTransform()[3]),
-			.Type = lightComp.Type,
-			.Color = Vector4(lightComp.Color * lightComp.Strength, 1.0),
-			.Direction = lightComp.Direction,
-			.OuterConeAngle = glm::cos(Rad(lightComp.OuterCutoff)),
-			.InnerConeAngle = glm::cos(Rad(lightComp.Cutoff)),
-			.CastShadow = lightComp.CastShadows,
-		};
-		
-		for (int i = 0; i < CSM_AMOUNT; i++)
-		{
-			light.TransformId[i] = res.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
-			light.ShadowMapTextureId[i] = res.GetBindlessTextureID(lightComp.LightMapID);
-		}
-
-		allLights[lightCount] = std::move(light);
-
-		lightCount++;
-	}
-
-	// Copy to GPU resources
-	res.ModelTransforms = ModelData { allTransforms };
-	res.MaterialDataContainer = MaterialData { allMaterials };
-	res.LightDataContainerArray = LightDataContainer { allLights };
-	res.LightCount = currentIndex;
-
-	// Copy CSM split depths
-	for (int i = 0; i < CSM_AMOUNT; i++)
-	{
-		//shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
-	}
-}
-
-void VkSceneRenderer::UpdateTransformBuffer()
-{
-
-}
 	
+}
