@@ -118,7 +118,6 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		// ... other passes
 	};
 
-	ctx.cameraID = CurrentCameraID;
 	GBufferPipeline.Execute(ctx, pipelineInputs);
 }
 

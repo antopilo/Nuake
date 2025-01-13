@@ -119,7 +119,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		}
 	}
 
-	// All transforms & materials
+	// All transforms & materials`
 	{
 		uint32_t currentIndex = 0;
 		uint32_t currentMaterialIndex = 0;
@@ -290,9 +290,10 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		}
 	}
 
-	//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	//GBufferPipeline.Execute(passCtx);
 
+	// Set back the camera ID to the actual desired camera.
+	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(inContext.CameraID);
 	sceneRenderPipeline->Render(passCtx);
 }
 

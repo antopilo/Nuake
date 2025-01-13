@@ -320,6 +320,7 @@ void GPUResources::RecreateBindlessCameras()
 
 void GPUResources::UpdateBuffers()
 {
+	// Tranforms
 	{
 		void* mappedData;
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);

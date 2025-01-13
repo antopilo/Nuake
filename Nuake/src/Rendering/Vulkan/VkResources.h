@@ -27,12 +27,12 @@ namespace Nuake
 	// This is what is present on the shader as a structured buffer
 	struct MaterialBufferStruct
 	{
-		bool HasAlbedo;
+		int HasAlbedo;
 		Vector3 AlbedoColor;
-		bool HasNormal;
-		bool HasMetalness;
-		bool HasRoughness;
-		bool HasAO;
+		int HasNormal;
+		int HasMetalness;
+		int HasRoughness;
+		int HasAO;
 		float MetalnessValue;
 		float RoughnessValue;
 		float AoValue;
