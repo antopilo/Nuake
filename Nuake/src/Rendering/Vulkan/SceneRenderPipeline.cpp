@@ -14,7 +14,7 @@
 using namespace Nuake;
 
 RenderPipeline SceneRenderPipeline::GBufferPipeline;
-
+RenderPipeline SceneRenderPipeline::ShadowPipeline;
 SceneRenderPipeline::SceneRenderPipeline()
 {
 	// Initialize render targets

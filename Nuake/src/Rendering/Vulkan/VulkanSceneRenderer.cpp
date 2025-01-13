@@ -25,18 +25,22 @@ using namespace Nuake;
 Ref<VkMesh> VkSceneRenderer::QuadMesh;
 
 void VkSceneRenderer::Init()
+	
 {
 	LoadShaders();
+
 	SetGBufferSize({ 1280, 720 });
+
+	sceneRenderPipeline = CreateRef<SceneRenderPipeline>();
 
     const std::vector<Vertex> quadVertices 
 	{
 		{ Vector3(-1.0f,  1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
-		{ Vector3(1.0f,  1.0f,  1.0f),  1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3( 1.0f, 1.0f,  1.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
 		{ Vector3(-1.0f, -1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
-		{ Vector3(1.0f,  -1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
+		{ Vector3( 1.0f, -1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
 		{ Vector3(-1.0f, -1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 0.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
-		{ Vector3(1.0f,   1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
+		{ Vector3( 1.0f,  1.0f, 1.0f), 1.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) }
     };
 
     const std::vector<uint32_t> quadIndices
@@ -45,6 +49,19 @@ void VkSceneRenderer::Init()
     };
 
 	QuadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
+}
+
+void VkSceneRenderer::LoadShaders()
+{
+	// TODO: load embedded shaders in the future
+	VkShaderManager& shaderMgr = VkShaderManager::Get();
+	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
+	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag"));
+	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert"));
+	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag"));
+	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
+	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
+	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
 }
 
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)
@@ -58,6 +75,9 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	Context.CommandBuffer = inContext.CommandBuffer;
 	Context.CurrentScene = inContext.CurrentScene;
 	Context.CameraID = inContext.CameraID;
+
+	// TODO: We shouldnt recopy everything if nothing has changed.
+
 
 	auto& scene = Context.CurrentScene;
 	auto& gpu = GPUResources::Get();
@@ -235,12 +255,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	}
 
 
-	// Copy CSM split depths
-	for (int i = 0; i < CSM_AMOUNT; i++)
-	{
-		//shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
-	}
-
 	// Update transforms, materials and lights.
 	// We need to push lights first to have bindless mapping for CSM
 	gpu.UpdateBuffers();
@@ -295,6 +309,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 
 	//GBufferPipeline.Execute(passCtx);
 
+
+
 	// Set back the camera ID to the actual desired camera.
 	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(inContext.CameraID);
 	sceneRenderPipeline->Render(passCtx);
@@ -312,17 +328,4 @@ void VkSceneRenderer::EndScene()
 	cmd.CopyImageToImage(output, drawImage);
 	cmd.TransitionImageLayout(drawImage, VK_IMAGE_LAYOUT_GENERAL);
 	cmd.TransitionImageLayout(output, VK_IMAGE_LAYOUT_GENERAL);
-}
-
-void VkSceneRenderer::LoadShaders()
-{
-	// TODO: load embedded shaders in the future
-	VkShaderManager& shaderMgr = VkShaderManager::Get();
-	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
-	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag"));
-	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert"));
-	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag"));
-	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
-	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
-	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
 }

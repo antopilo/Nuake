@@ -16,6 +16,7 @@
 namespace Nuake
 {
 	class SceneRenderPipeline;
+
 	class VkMesh;
 
 	class VkSceneRenderer

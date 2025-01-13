@@ -337,13 +337,7 @@ void RenderPipeline::Execute(PassRenderContext& ctx, PipelineAttachments& inputs
 	int passIndex = 0;
 	for (auto& pass : RenderPasses)
 	{
-		for (auto& input : pass.GetInputAttachments())
-		{
-			//input.Image->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		}
-		
-		auto& passInputs = inputs[passIndex];
-		pass.Render(ctx, inputs[passIndex]);
+		pass.Execute(ctx, inputs[passIndex]);
 
 		passIndex++;
 	}

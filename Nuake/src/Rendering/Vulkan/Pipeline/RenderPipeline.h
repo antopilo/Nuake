@@ -73,10 +73,10 @@ namespace Nuake
 		RenderPass(const std::string& name);
 		~RenderPass() = default;
 
-		void Render(PassRenderContext& ctx, PassAttachments& inputs);
+		void Execute(PassRenderContext& ctx, PassAttachments& inputs);
 
 	private:
-		void Execute(PassRenderContext& ctx, PassAttachments& inputs);
+		void Render(PassRenderContext& ctx, PassAttachments& inputs);
 		void ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs);
 		void TransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs);
 		void UntransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs);
