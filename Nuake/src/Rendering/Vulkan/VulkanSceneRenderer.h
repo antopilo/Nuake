@@ -16,9 +16,13 @@
 namespace Nuake
 {
 	class SceneRenderPipeline;
+	class VkMesh;
 
 	class VkSceneRenderer
 	{
+	private:
+		Ref<VkMesh> QuadMesh;
+
 	public:
 		RenderContext Context;
 		Ref<SceneRenderPipeline> sceneRenderPipeline;

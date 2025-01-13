@@ -1,31 +1,27 @@
-#include "PipelineBuilder.h"
-#include "ShaderCompiler.h"
-#include "VulkanCheck.h"
 #include "VulkanSceneRenderer.h"
 
+#include "src/Rendering/Textures/Material.h"
+
+#include "src/Rendering/Vulkan/Pipeline/RenderPipeline.h"
+#include "src/Rendering/Vulkan/SceneRenderPipeline.h"
+#include "src/Rendering/Vulkan/ShaderCompiler.h"
+#include "src/Rendering/Vulkan/VkMesh.h"
+#include "src/Rendering/Vulkan/VkResources.h"
+#include "src/Rendering/Vulkan/VkShaderManager.h"
 #include "src/Rendering/Vulkan/VulkanAllocator.h"
+#include "src/Rendering/Vulkan/VulkanCheck.h"
 #include "src/Rendering/Vulkan/VulkanInit.h"
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
-#include "src/Rendering/Vulkan/VkResources.h"
 
 #include "src/Scene/Scene.h"
 #include "src/Scene/Entities/Entity.h"
-#include "src/Rendering/Textures/Material.h"
-
+#include "src/Scene/Components/ModelComponent.h"
+#include "src/Scene/Components/CameraComponent.h"
 
 #include <Tracy.hpp>
-#include <src/Scene/Components/ModelComponent.h>
-#include "Pipeline/RenderPipeline.h"
-
-#include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
-#include "src/Scene/Components/CameraComponent.h"
-#include "src/Rendering/Vulkan/VkShaderManager.h"
-#include "src/Rendering/Vulkan/SceneRenderPipeline.h"
-
 
 using namespace Nuake;
 
-Ref<VkMesh> quadMesh;
 void VkSceneRenderer::Init()
 {
 	LoadShaders();
@@ -47,7 +43,7 @@ void VkSceneRenderer::Init()
         5, 4, 3, 2, 1, 0
     };
 
-	quadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
+	QuadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
 }
 
 // This will prepare all the data and upload it to the GPU before rendering the scene.
