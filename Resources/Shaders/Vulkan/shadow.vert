@@ -1,21 +1,12 @@
-struct Camera
-{
-    float4x4 view;
-    float4x4 proj;
-    float4x4 invView;
-    float4x4 invProj;
-    float3 position;
-};
-[[vk::binding(0, 0)]]
-StructuredBuffer<Camera> camera : register(t0);
-
+// Transforms
 struct ModelData
 {
     float4x4 model;
 };
-[[vk::binding(0, 1)]]
+[[vk::binding(0, 0)]]
 StructuredBuffer<ModelData> model : register(t1);
 
+// Vertex
 struct Vertex 
 {
     float3 position;
@@ -26,16 +17,39 @@ struct Vertex
     float3 bitangent;
 };
 
-[[vk::binding(0, 2)]] 
+[[vk::binding(0, 1)]] 
 StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
-struct ModelPushConstant
-{
-    int modelIndex;  // Push constant data
-    int materialIndex;
-    int cameraID;
-};
+// Samplers
+[[vk::binding(0, 2)]]
+SamplerState mySampler : register(s0);
 
+// Materials
+struct Material
+{
+    float hasAlbedo;
+    float3 albedo;
+    int hasNormal;
+    int hasMetalness;
+    int hasRoughness;
+    int hasAO;
+    float metalnessValue;
+    float roughnessValue;
+    float aoValue;
+    int albedoTextureId;
+    int normalTextureId;
+    int metalnessTextureId;
+    int roughnessTextureId;
+    int aoTextureId;
+};
+[[vk::binding(0, 3)]]
+StructuredBuffer<Material> material;
+
+// Textures
+[[vk::binding(0, 4)]]
+Texture2D textures[];
+
+// Lights
 struct Light
 {
     float3 position;
@@ -49,9 +63,10 @@ struct Light
     int transformId[4];
 };
 
-[[vk::binding(0, 6)]]
+[[vk::binding(0, 5)]]
 StructuredBuffer<Light> lights;
 
+// Cameras
 struct CameraView {
     float4x4 View;
     float4x4 Projection;
@@ -62,8 +77,15 @@ struct CameraView {
     float Near;
     float Far;
 };
-[[vk::binding(0, 7)]]
+[[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
+
+struct ModelPushConstant
+{
+    int modelIndex;  // Push constant data
+    int materialIndex;
+    int cameraID;
+};
 
 [[vk::push_constant]]
 ModelPushConstant pushConstants;
@@ -92,9 +114,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 {
     VSOutput output;
 
-    Camera camData = camera[0];
     ModelData modelData = model[pushConstants.modelIndex];
-
     CameraView  camView = cameras[pushConstants.cameraID];
 
     // Load vertex data from the buffer

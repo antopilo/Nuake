@@ -20,6 +20,7 @@
 #include "src/Rendering/Vulkan/DescriptorLayoutBuilder.h"
 #include "src/Scene/Components/CameraComponent.h"
 #include "src/Rendering/Vulkan/VkShaderManager.h"
+#include "src/Rendering/Vulkan/SceneRenderPipeline.h"
 
 
 using namespace Nuake;
@@ -37,14 +38,10 @@ void VkSceneRenderer::Init()
 {
 	// Here we will create the pipeline for rendering a scene
 	LoadShaders();
-	CreateBuffers();
-	CreateSamplers();
 	CreateDescriptors();
 
 	SetGBufferSize({ 1280, 720 });
 	CreatePipelines();
-	ModelMatrixMapping.clear();
-	MeshMaterialMapping.clear();
 
     std::vector<Vertex> quadVertices = {
 		{ Vector3(-1.0f,  1.0f, 1.0f), 0.0f, Vector3(0, 0, 1), 1.0f, Vector4(1, 0, 0, 0), Vector4(0, 1, 0, 0) },
@@ -172,7 +169,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		//ShadowPipeline.Execute(passCtx);
 		
-		light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
+		//light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
 
 		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
 		for (int i = 0; i < CSM_AMOUNT; i++)
@@ -185,46 +182,28 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	//GBufferPipeline.Execute(passCtx);
 
-	sceneRenderPipeline.Render(passCtx);
+	sceneRenderPipeline->Render(passCtx);
 }
-ModelPushConstant modelPushConstant{};
-ShadingPushConstant shadingPushConstant;
+
 
 void VkSceneRenderer::EndScene()
 {
 	auto& vk = VkRenderer::Get();
 	auto& cmd = Context.CommandBuffer;
 
-	auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
-	auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
-	auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
-	auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
-	auto& selectedOutput = shading;
+	//auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
+	//auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
+	//auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
+	//auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
+	//auto& selectedOutput = shading;
 
-	cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	//cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	cmd.CopyImageToImage(selectedOutput.Image, vk.GetDrawImage());
+	//cmd.CopyImageToImage(selectedOutput.Image, vk.GetDrawImage());
 	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_GENERAL);
-	cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_GENERAL);
+	//cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_GENERAL);
 
-	cmd.TransitionImageLayout(shadow.Image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-}
-
-void VkSceneRenderer::CreateBuffers()
-{
-	CameraData camData{};
-	camData.View = Matrix4(1.0f);
-	camData.Projection = Matrix4(1.0f);
-	camData.InvView = Matrix4(1.0f);
-	camData.InvProjection = Matrix4(1.0f);
-	// init camera buffer
-	GPUResources& resources = GPUResources::Get();
-	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CameraBuffer");
-	UpdateCameraData(camData);
-
-	ModelBuffer = resources.CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
-	MaterialBuffer = resources.CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
-	LightBuffer = resources.CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "LightBuffer");
+	//cmd.TransitionImageLayout(shadow.Image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void VkSceneRenderer::LoadShaders()
@@ -247,319 +226,180 @@ void VkSceneRenderer::LoadShaders()
 	Shaders["shadow_vert"] = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert");
 }
 
-void VkSceneRenderer::CreateSamplers()
-{
-	auto device = VkRenderer::Get().GetDevice();
-	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-
-	sampler.magFilter = VK_FILTER_NEAREST;
-	sampler.minFilter = VK_FILTER_NEAREST;
-
-	vkCreateSampler(device, &sampler, nullptr, &SamplerNearest);
-
-	sampler.magFilter = VK_FILTER_LINEAR;
-	sampler.minFilter = VK_FILTER_LINEAR;
-	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
-}
-
 void VkSceneRenderer::CreateDescriptors()
 {
-	auto vk = VkRenderer::Get();
-	auto device = vk.GetDevice();
-
-	// Camera
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
-	}
-
-	{
-		// Triangle vertex buffer layout
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		TriangleBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
-	}
-
-	{
-		// Matrices
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		ModelBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
-	}
-
-	// Textures
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		ImageDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
-	}
-
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER);
-		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
-	}
-
-	// Material
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		MaterialBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
-	}
-
-	//Bindless Textures
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_TEXTURES);
-		TextureBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
-	}
-
-	// bindless lights
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		LightBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
-	}
-
-	auto allocator = vk.GetDescriptorAllocator();
-	TriangleBufferDescriptors = allocator.Allocate(device, TriangleBufferDescriptorLayout);
-	CameraBufferDescriptors = allocator.Allocate(device, CameraBufferDescriptorLayout);
-	ModelBufferDescriptor = allocator.Allocate(device, ModelBufferDescriptorLayout);
-	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
-	MaterialBufferDescriptor = allocator.Allocate(device, MaterialBufferDescriptorLayout);
-	TextureBufferDescriptor = allocator.Allocate(device, TextureBufferDescriptorLayout);
-	LightBufferDescriptor = allocator.Allocate(device, LightBufferDescriptorLayout);
-	//SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
-
-	// Update descriptor set for camera
-	VkDescriptorBufferInfo camBufferInfo{};
-	camBufferInfo.buffer = CameraBuffer->GetBuffer();
-	camBufferInfo.offset = 0;
-	camBufferInfo.range = VK_WHOLE_SIZE;
-
-	VkWriteDescriptorSet bufferWriteCam = {};
-	bufferWriteCam.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWriteCam.pNext = nullptr;
-	bufferWriteCam.dstBinding = 0;
-	bufferWriteCam.dstSet = CameraBufferDescriptors;
-	bufferWriteCam.descriptorCount = 1;
-	bufferWriteCam.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWriteCam.pBufferInfo = &camBufferInfo;
-	vkUpdateDescriptorSets(device, 1, &bufferWriteCam, 0, nullptr);
-
-	// Update Descriptor Set for Texture
-	VkDescriptorImageInfo textureInfo = {};
-	textureInfo.sampler = SamplerNearest;  // Your VkSampler object
-	textureInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-	// Update Descriptor Set for Sampler
-	VkWriteDescriptorSet samplerWrite = {};
-	samplerWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	samplerWrite.dstBinding = 0;  // Binding for sampler (in shader)
-	samplerWrite.dstSet = SamplerDescriptor;  // The allocated descriptor set for the sampler
-	samplerWrite.descriptorCount = 1;
-	samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
-
-	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
-
-	// Textures
-
 }
 
 void VkSceneRenderer::CreatePipelines()
 {
-	sceneRenderPipeline = SceneRenderPipeline();
+	sceneRenderPipeline = CreateRef<SceneRenderPipeline>();
 
-	ShadowPipeline = RenderPipeline();
-	auto& shadowPass = ShadowPipeline.AddPass("Shadow");
-	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
-	shadowPass.SetShaders(Shaders["shadow_vert"], Shaders["shadow_frag"]);
-	shadowPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
-	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
-		auto layout = ctx.renderPass->PipelineLayout;
-		ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
-		ctx.commandBuffer.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
-		ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
-		ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
-		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
-		ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
-		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
-	});
-	shadowPass.SetRender([&](PassRenderContext& ctx) {
-		auto& cmd = ctx.commandBuffer;
-		auto& scene = ctx.scene;
-		auto& vk = VkRenderer::Get();
-
-		// Draw the scene
-		{
-			ZoneScopedN("Render Models");
-			auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
-			for (auto e : view)
-			{
-				auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-				if (!mesh.ModelResource || !visibility.Visible)
-				{
-					continue;
-				}
-
-				Entity entity = Entity((entt::entity)e, scene.get());
-				for (auto& m : mesh.ModelResource->GetMeshes())
-				{
-					Ref<VkMesh> vkMesh = m->GetVkMesh();
-					Matrix4 globalTransform = transform.GetGlobalTransform();
-
-					auto descSet = vkMesh->GetDescriptorSet();
-					cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
-
-					// Bind texture descriptor set
-					Ref<Material> material = m->GetMaterial();
-					Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
-
-					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
-					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
-					modelPushConstant.CameraID = ctx.cameraID;
-
-					cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
-					cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
-					cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
-				}
-			}
-		}
-	});
-	ShadowPipeline.Build();
-
-	GBufferPipeline = RenderPipeline();
-	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
-	gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);
-	gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
-	gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
-	gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
-	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
-		auto layout = ctx.renderPass->PipelineLayout;
-		ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
-		ctx.commandBuffer.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
-		ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
-		ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
-		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
-		ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
-		ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
-	});
-	gBufferPass.SetRender([&](PassRenderContext& ctx){
-		auto& cmd = ctx.commandBuffer;
-		auto& scene = ctx.scene;
-		auto& vk = VkRenderer::Get();
-
-		// Draw the scene
-		{
-			ZoneScopedN("Render Models");
-			auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
-			for (auto e : view)
-			{
-				auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-				if (!mesh.ModelResource || !visibility.Visible)
-				{
-					continue;
-				}
-
-				Entity entity = Entity((entt::entity)e, scene.get());
-				for (auto& m : mesh.ModelResource->GetMeshes())
-				{
-					Ref<VkMesh> vkMesh = m->GetVkMesh();
-					Matrix4 globalTransform = transform.GetGlobalTransform();
-
-					auto descSet = vkMesh->GetDescriptorSet();
-					cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
-
-					// Bind texture descriptor set
-					Ref<Material> material = m->GetMaterial();
-					Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
-
-					modelPushConstant.Index = ModelMatrixMapping[entity.GetID()];
-					modelPushConstant.MaterialIndex = MeshMaterialMapping[vkMesh->GetID()];
-					modelPushConstant.CameraID = ctx.cameraID;
-					cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
-
-					cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
-					cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
-				}
-			}
-		}
-		
-	});
-	
-	auto& shadingPass = GBufferPipeline.AddPass("Shading");
-	shadingPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
-	shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
-	shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
-	shadingPass.SetDepthTest(false);
-	shadingPass.AddInput("Albedo");
-	shadingPass.AddInput("Normal");
-	shadingPass.AddInput("Depth");
-	shadingPass.AddInput("Material");
-	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
-		auto layout = ctx.renderPass->PipelineLayout;
-		auto cmd = ctx.commandBuffer;
-		cmd.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
-		cmd.BindDescriptorSet(layout, ModelBufferDescriptor, 1);
-		cmd.BindDescriptorSet(layout, SamplerDescriptor, 3);
-		cmd.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
-		cmd.BindDescriptorSet(layout, GPUResources::Get().TextureDescriptor, 5);
-		cmd.BindDescriptorSet(layout, LightBufferDescriptor, 6);
-		cmd.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
-
-		auto& gpu = GPUResources::Get();
-		auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
-		shadingPushConstant.AlbedoTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Albedo").Image->GetID());
-		shadingPushConstant.DepthTextureID = gpu.GetBindlessTextureID(gbufferPass.GetDepthAttachment().Image->GetID());
-		shadingPushConstant.NormalTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Normal").Image->GetID());
-		shadingPushConstant.MaterialTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Material").Image->GetID());
-		shadingPushConstant.CameraID = ctx.cameraID;
-	});
-	shadingPass.SetRender([](PassRenderContext& ctx) {
-		auto& cmd = ctx.commandBuffer;
-		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingPushConstant), &shadingPushConstant);
-
-		// Draw full screen quad
-		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 2);
-		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-		cmd.DrawIndexed(6);
-	});
-	
-	GBufferPipeline.Build();
-	ShadowPipeline.Build();
+	//ShadowPipeline = RenderPipeline();
+	//auto& shadowPass = ShadowPipeline.AddPass("Shadow");
+	//shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	//shadowPass.SetShaders(Shaders["shadow_vert"], Shaders["shadow_frag"]);
+	//shadowPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
+	//shadowPass.SetPreRender([&](PassRenderContext& ctx) {
+	//	auto layout = ctx.renderPass->PipelineLayout;
+	//	ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().ModelDescriptor, 1);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TexturesDescriptor, 5);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
+	//});
+	//shadowPass.SetRender([&](PassRenderContext& ctx) {
+	//	auto& cmd = ctx.commandBuffer;
+	//	auto& scene = ctx.scene;
+	//	auto& vk = VkRenderer::Get();
+	//
+	//	// Draw the scene
+	//	{
+	//		ZoneScopedN("Render Models");
+	//		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+	//		for (auto e : view)
+	//		{
+	//			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+	//			if (!mesh.ModelResource || !visibility.Visible)
+	//			{
+	//				continue;
+	//			}
+	//
+	//			Entity entity = Entity((entt::entity)e, scene.get());
+	//			for (auto& m : mesh.ModelResource->GetMeshes())
+	//			{
+	//				Ref<VkMesh> vkMesh = m->GetVkMesh();
+	//				Matrix4 globalTransform = transform.GetGlobalTransform();
+	//
+	//				auto descSet = vkMesh->GetDescriptorSet();
+	//				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
+	//
+	//				// Bind texture descriptor set
+	//				Ref<Material> material = m->GetMaterial();
+	//				Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
+	//
+	//
+	//
+	//				modelPushConstant.Index = GPUResources::Get().GetBindlessTransformID(entity.GetID());
+	//				modelPushConstant.MaterialIndex = GPUResources::Get().GetBindlessMaterialID(entity.GetID());
+	//				modelPushConstant.CameraID = ctx.cameraID;
+	//
+	//				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
+	//				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
+	//				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
+	//			}
+	//		}
+	//	}
+	//});
+	//ShadowPipeline.Build();
+	//
+	//GBufferPipeline = RenderPipeline();
+	//auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
+	//gBufferPass.SetShaders(Shaders["basic_vert"], Shaders["basic_frag"]);
+	//gBufferPass.AddAttachment("Albedo", ImageFormat::RGBA8);
+	//gBufferPass.AddAttachment("Normal", ImageFormat::RGBA8);
+	//gBufferPass.AddAttachment("Material", ImageFormat::RGBA8);
+	//gBufferPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	//gBufferPass.SetPushConstant<ModelPushConstant>(modelPushConstant);
+	//gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
+	//	auto layout = ctx.renderPass->PipelineLayout;
+	//	ctx.commandBuffer.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().ModelDescriptor, 1);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, SamplerDescriptor, 3);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().TexturesDescriptor, 5);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+	//	ctx.commandBuffer.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
+	//});
+	//gBufferPass.SetRender([&](PassRenderContext& ctx){
+	//	auto& cmd = ctx.commandBuffer;
+	//	auto& scene = ctx.scene;
+	//	auto& vk = VkRenderer::Get();
+	//
+	//	// Draw the scene
+	//	{
+	//		ZoneScopedN("Render Models");
+	//		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
+	//		for (auto e : view)
+	//		{
+	//			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+	//			if (!mesh.ModelResource || !visibility.Visible)
+	//			{
+	//				continue;
+	//			}
+	//
+	//			Entity entity = Entity((entt::entity)e, scene.get());
+	//			for (auto& m : mesh.ModelResource->GetMeshes())
+	//			{
+	//				Ref<VkMesh> vkMesh = m->GetVkMesh();
+	//				Matrix4 globalTransform = transform.GetGlobalTransform();
+	//
+	//				auto descSet = vkMesh->GetDescriptorSet();
+	//				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, descSet, 2);
+	//
+	//				// Bind texture descriptor set
+	//				Ref<Material> material = m->GetMaterial();
+	//				Ref<VulkanImage> albedo = GPUResources::Get().GetTexture(material->AlbedoImage);
+	//
+	//				modelPushConstant.Index = GPUResources::Get().GetBindlessTransformID(entity.GetID());
+	//				modelPushConstant.MaterialIndex = GPUResources::Get().GetBindlessMaterialID(entity.GetID());
+	//				modelPushConstant.CameraID = ctx.cameraID;
+	//				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ModelPushConstant), &modelPushConstant);
+	//
+	//				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
+	//				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
+	//			}
+	//		}
+	//	}
+	//	
+	//});
+	//
+	//auto& shadingPass = GBufferPipeline.AddPass("Shading");
+	//shadingPass.SetShaders(Shaders["shading_vert"], Shaders["shading_frag"]);
+	//shadingPass.SetPushConstant<ShadingPushConstant>(shadingPushConstant);
+	//shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
+	//shadingPass.SetDepthTest(false);
+	//shadingPass.AddInput("Albedo");
+	//shadingPass.AddInput("Normal");
+	//shadingPass.AddInput("Depth");
+	//shadingPass.AddInput("Material");
+	//shadingPass.SetPreRender([&](PassRenderContext& ctx) {
+	//	auto layout = ctx.renderPass->PipelineLayout;
+	//	auto cmd = ctx.commandBuffer;
+	//	cmd.BindDescriptorSet(layout, CameraBufferDescriptors, 0);
+	//	cmd.BindDescriptorSet(layout, GPUResources::Get().ModelDescriptor, 1);
+	//	cmd.BindDescriptorSet(layout, SamplerDescriptor, 3);
+	//	cmd.BindDescriptorSet(layout, MaterialBufferDescriptor, 4);
+	//	cmd.BindDescriptorSet(layout, GPUResources::Get().TexturesDescriptor, 5);
+	//	cmd.BindDescriptorSet(layout, LightBufferDescriptor, 6);
+	//	cmd.BindDescriptorSet(layout, GPUResources::Get().CamerasDescriptor, 7);
+	//
+	//	auto& gpu = GPUResources::Get();
+	//	auto& gbufferPass = GBufferPipeline.GetRenderPass("GBuffer");
+	//	shadingPushConstant.AlbedoTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Albedo").Image->GetID());
+	//	shadingPushConstant.DepthTextureID = gpu.GetBindlessTextureID(gbufferPass.GetDepthAttachment().Image->GetID());
+	//	shadingPushConstant.NormalTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Normal").Image->GetID());
+	//	shadingPushConstant.MaterialTextureID = gpu.GetBindlessTextureID(gbufferPass.GetAttachment("Material").Image->GetID());
+	//	shadingPushConstant.CameraID = ctx.cameraID;
+	//});
+	//shadingPass.SetRender([](PassRenderContext& ctx) {
+	//	auto& cmd = ctx.commandBuffer;
+	//	cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingPushConstant), &shadingPushConstant);
+	//
+	//	// Draw full screen quad
+	//	cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 2);
+	//	cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+	//	cmd.DrawIndexed(6);
+	//});
+	//
+	//GBufferPipeline.Build();
+	//ShadowPipeline.Build();
 }
 
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)
 {
 	Context.Size = size;
-}
-
-void VkSceneRenderer::UpdateCameraData(const CameraData& data)
-{
-	CameraData adjustedData = data;
-	adjustedData.View = data.View;
-	adjustedData.Projection = data.Projection;
-	adjustedData.InvView = data.InvView;
-	adjustedData.InvProjection = data.InvProjection;
-	adjustedData.Position = data.InvView[3];
-	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);
-	memcpy(mappedData, &adjustedData, sizeof(CameraData));
-
-	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-		VkBufferCopy copy{ 0 };
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = sizeof(CameraData);
-
-		vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetBuffer(), CameraBuffer->GetBuffer(), 1, &copy);
-	});
-
-	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().CameraStagingBuffer->GetAllocation());
 }
 
 void VkSceneRenderer::BuildMatrixBuffer()
@@ -594,7 +434,8 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		allTransforms[currentIndex] = transform.GetGlobalTransform();
 
 		Entity entity = Entity((entt::entity)e, scene.get());
-		ModelMatrixMapping[entity.GetID()] = currentIndex;
+
+		GPUResources::Get().ModelMatrixMapping[entity.GetID()] = currentIndex;
 
 		for (auto& m : mesh.ModelResource->GetMeshes())
 		{
@@ -622,7 +463,7 @@ void VkSceneRenderer::BuildMatrixBuffer()
 			materialBuffer.aoTextureId = material->HasAO() ? res.GetBindlessTextureID(material->AOImage) : 0;
 			materialBuffer.roughnessTextureId = material->HasRoughness() ? res.GetBindlessTextureID(material->RoughnessImage) : 0;
 			allMaterials[currentMaterialIndex] = materialBuffer;
-			MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
+			GPUResources::Get().MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
 
 			currentMaterialIndex++;
 		}
@@ -671,121 +512,22 @@ void VkSceneRenderer::BuildMatrixBuffer()
 		currentIndex++;
 	}
 
-	ModelTransforms = ModelData{ allTransforms };
-	MaterialDataContainer = MaterialData{ allMaterials };
-	LightDataContainerArray = LightDataContainer{ allLights };
-	shadingPushConstant.LightCount = currentIndex;
+	auto& gpu = GPUResources::Get();
+	gpu.ModelTransforms = ModelData{ allTransforms };
+	gpu.MaterialDataContainer = MaterialData{ allMaterials };
+	gpu.LightDataContainerArray = LightDataContainer{ allLights };
+
+	//shadingPushConstant.LightCount = currentIndex;
 
 	// Copy CSM split depths
 	for (int i = 0; i < CSM_AMOUNT; i++)
 	{
-		shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
+		//shadingPushConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
 	}
 }
 
 void VkSceneRenderer::UpdateTransformBuffer()
 {
-	// Update tranform buffer
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
 
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(ModelData);
-
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
-		});
-
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
-
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo transformBufferInfo{};
-		transformBufferInfo.buffer = ModelBuffer->GetBuffer();
-		transformBufferInfo.offset = 0;
-		transformBufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet bufferWriteModel = {};
-		bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWriteModel.pNext = nullptr;
-		bufferWriteModel.dstBinding = 0;
-		bufferWriteModel.dstSet = ModelBufferDescriptor;
-		bufferWriteModel.descriptorCount = 1;
-		bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWriteModel.pBufferInfo = &transformBufferInfo;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
-	}
-
-	// Update material buffer
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &MaterialDataContainer, sizeof(MaterialData));
-
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(MaterialData);
-
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetBuffer(), MaterialBuffer->GetBuffer(), 1, &copy);
-		});
-
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation());
-
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = MaterialBuffer->GetBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet bufferWrite = {};
-		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWrite.pNext = nullptr;
-		bufferWrite.dstBinding = 0;
-		bufferWrite.dstSet = MaterialBufferDescriptor;
-		bufferWrite.descriptorCount = 1;
-		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWrite.pBufferInfo = &bufferInfo;
-		bufferWrite.pImageInfo = VK_NULL_HANDLE;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
-	}
-
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &LightDataContainerArray, sizeof(LightDataContainer));
-
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(LightDataContainer);
-
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetBuffer(), LightBuffer->GetBuffer(), 1, &copy);
-		});
-
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation());
-
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = LightBuffer->GetBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet bufferWrite = {};
-		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWrite.pNext = nullptr;
-		bufferWrite.dstBinding = 0;
-		bufferWrite.dstSet = LightBufferDescriptor;
-		bufferWrite.descriptorCount = 1;
-		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWrite.pBufferInfo = &bufferInfo;
-		bufferWrite.pImageInfo = VK_NULL_HANDLE;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
-	}
 }
 	

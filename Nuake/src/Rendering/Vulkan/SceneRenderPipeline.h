@@ -3,6 +3,7 @@
 #include "src/Resource/UUID.h"
 
 #include "src/Rendering/Vulkan/Pipeline/RenderPipeline.h"
+#include "src/Rendering/Vulkan/VkResources.h"
 
 namespace Nuake
 {
@@ -23,6 +24,25 @@ namespace Nuake
 		Ref<VulkanImage> GetOutput() { return DepthTexture; }
 	};
 
+	struct GBufferConstant
+	{
+		int Index;
+		int MaterialIndex;
+		int CameraID;
+		char padding[120];            // 124 bytes to reach 128 bytes
+	};
+
+	struct ShadingConstant
+	{
+		int AlbedoTextureID;
+		int DepthTextureID;
+		int NormalTextureID;
+		int MaterialTextureID;
+		int LightCount;
+		int CameraID;
+		float CascadeSplits[4];
+	};
+
 	// This class handles all the rendering of the scene
 	class SceneRenderPipeline
 	{
@@ -37,6 +57,9 @@ namespace Nuake
 
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
+
+		GBufferConstant gbufferConstant;
+		ShadingConstant shadingConstant;
 
 		// Holds all the texture attachments
 		static RenderPipeline GBufferPipeline;

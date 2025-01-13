@@ -625,13 +625,13 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
 
             Ref<Texture> texture = framebuffer->GetTexture();
-            auto& pipeline = VkRenderer::Get().GetRenderPipeline();
+            //auto& pipeline = VkRenderer::Get().GetRenderPipeline();
             VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
 
             if (SelectedViewport == 1)
             {
 				//pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->TransitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-                textureDesc = pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetImGuiDescriptorSet();
+                //textureDesc = pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetImGuiDescriptorSet();
                 texture = Engine::GetCurrentScene()->m_SceneRenderer->GetGBuffer().GetTexture(GL_COLOR_ATTACHMENT0);
             }
             else if (SelectedViewport == 2)

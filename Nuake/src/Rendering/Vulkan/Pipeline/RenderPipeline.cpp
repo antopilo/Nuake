@@ -284,38 +284,38 @@ bool RenderPipeline::Build()
 	{
 		pass.Build();
 
-		for (auto& input : pass.GetInputs())
-		{
-			bool alreadyFoundAttachment = false;
-			if (attachments.find(input) == attachments.end())
-			{
-				if (pass.GetDepthAttachment().Image && pass.GetDepthAttachment().Name == input)
-				{
-					pass.SetInput(input, pass.GetDepthAttachment());
-					alreadyFoundAttachment = true;
-				}
-				else
-				{
-					Logger::Log("Failed to build RenderPipeline. input " + input + " not found in previous passes.", "vulkan", CRITICAL);
-					return false;
-				}
-			}
+		//for (auto& input : pass.GetInputs())
+		//{
+		//	bool alreadyFoundAttachment = false;
+		//	if (attachments.find(input) == attachments.end())
+		//	{
+		//		if (pass.GetDepthAttachment().Image && pass.GetDepthAttachment().Name == input)
+		//		{
+		//			pass.SetInput(input, pass.GetDepthAttachment());
+		//			alreadyFoundAttachment = true;
+		//		}
+		//		else
+		//		{
+		//			Logger::Log("Failed to build RenderPipeline. input " + input + " not found in previous passes.", "vulkan", CRITICAL);
+		//			return false;
+		//		}
+		//	}
+		//
+		//	if (!alreadyFoundAttachment)
+		//	{
+		//		pass.SetInput(input, attachments[input]);
+		//	}
+		//}
 
-			if (!alreadyFoundAttachment)
-			{
-				pass.SetInput(input, attachments[input]);
-			}
-		}
-
-		for (auto& attachment : pass.GetAttachments())
-		{
-			attachments[attachment.Name] = attachment;
-		}
-
-		if (pass.GetDepthAttachment().Image)
-		{
-			attachments[pass.GetDepthAttachment().Name] = pass.GetDepthAttachment();
-		}
+		//for (auto& attachment : pass.GetAttachments())
+		//{
+		//	attachments[attachment.Name] = attachment;
+		//}
+		//
+		//if (pass.GetDepthAttachment().Image)
+		//{
+		//	attachments[pass.GetDepthAttachment().Name] = pass.GetDepthAttachment();
+		//}
 	}
 
 	for (auto& pass : RenderPasses)
@@ -323,6 +323,7 @@ bool RenderPipeline::Build()
 	}
 
 	Built = true;
+	return true;
 }
 
 void RenderPipeline::Execute(PassRenderContext& ctx, PipelineAttachments& inputs)

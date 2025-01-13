@@ -1,17 +1,30 @@
-struct Camera
+// Transforms
+struct ModelData
 {
-    float4x4 view;
-    float4x4 proj;
-    float4x4 invView;
-    float4x4 invProj;
-    float3 position;
+    float4x4 model;
 };
 [[vk::binding(0, 0)]]
-StructuredBuffer<Camera> camera : register(t0);
+StructuredBuffer<ModelData> model : register(t1);
 
-[[vk::binding(0, 3)]]
-SamplerState mySampler : register(s0);       // Sampler binding at slot s0
+// Vertex
+struct Vertex 
+{
+    float3 position;
+    float uv_x;
+    float3 normal;
+    float uv_y;
+    float3 tangent;
+    float3 bitangent;
+};
 
+[[vk::binding(0, 1)]] 
+StructuredBuffer<Vertex> vertexBuffer : register(t2);
+
+// Samplers
+[[vk::binding(0, 2)]]
+SamplerState mySampler : register(s0);
+
+// Materials
 struct Material
 {
     float hasAlbedo;
@@ -29,13 +42,14 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
 };
+[[vk::binding(0, 3)]]
+StructuredBuffer<Material> material;
 
+// Textures
 [[vk::binding(0, 4)]]
-StructuredBuffer<Material> material; // array de 2000 materials
+Texture2D textures[];
 
-[[vk::binding(0, 5)]]
-Texture2D textures[]; // Array de 500 textures
-
+// Lights
 struct Light
 {
     float3 position;
@@ -49,9 +63,10 @@ struct Light
     int transformId[4];
 };
 
-[[vk::binding(0, 6)]]
+[[vk::binding(0, 5)]]
 StructuredBuffer<Light> lights;
 
+// Cameras
 struct CameraView {
     float4x4 View;
     float4x4 Projection;
@@ -62,7 +77,7 @@ struct CameraView {
     float Near;
     float Far;
 };
-[[vk::binding(0, 7)]]
+[[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
 struct PSInput {
@@ -103,7 +118,7 @@ PSOutput main(PSInput input)
     }
 
     normal = mul(input.TBN, normal);
-    normal = input.Normal / 2.0f + 0.5f;
+    normal = normal / 2.0f + 0.5f;
     output.oNormal = float4(normal, 1.0f);
 
     // MATERIAL

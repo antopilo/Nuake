@@ -14,10 +14,64 @@
 
 #include <volk/volk.h>
 
+#include <array>
 #include <map>
 
 namespace Nuake
 {
+	struct CameraData;
+
+	
+
+	struct ModelData
+	{
+		std::array<Matrix4, 3000> Data;
+	};
+
+	// This is what is present on the shader as a structured buffer
+	struct MaterialBufferStruct
+	{
+		float hasAlbedo;
+		Vector3 albedo;
+		int hasNormal;
+		int hasMetalness;
+		int hasRoughness;
+		int hasAO;
+		float metalnessValue;
+		float roughnessValue;
+		float aoValue;
+		int albedoTextureId;
+		int normalTextureId;
+		int metalnessTextureId;
+		int roughnessTextureId;
+		int aoTextureId;
+	};
+
+	// This is the *whole* buffer
+	struct MaterialData
+	{
+		std::array<MaterialBufferStruct, 1000> Data;
+	};
+
+	struct LightData
+	{
+		Vector3 position;
+		int type;
+		Vector4 color;
+		Vector3 direction;
+		float outerConeAngle;
+		float innerConeAngle;
+		bool castShadow;
+		int shadowMapTextureId[4];
+		int transformId[4];
+		float pad[2];
+	};
+
+	struct LightDataContainer
+	{
+		std::array<LightData, 100> Data;
+	};
+
 	struct CameraView
 	{
 		Matrix4 View;
@@ -39,6 +93,12 @@ namespace Nuake
 
 	};
 
+	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
+	constexpr uint32_t MAX_MATERIAL = 1000;
+	constexpr uint32_t MAX_TEXTURES = 500;
+	constexpr uint32_t MAX_CAMERAS = 100;
+	constexpr uint32_t MAX_LIGHTS = 100;
+
 	class GPUResources
 	{
 	private:
@@ -50,30 +110,44 @@ namespace Nuake
 		std::vector<CameraView> Cameras;
 
 		std::array<CameraView, MAX_CAMERAS> CamerasData;
+
 		// Bindless buffer layouts
-		VkDescriptorSetLayout CameraDescriptorLayout;
+		VkDescriptorSetLayout ModelDescriptorLayout;
 		VkDescriptorSetLayout TriangleBufferDescriptorLayout;
-		VkDescriptorSetLayout ModelBufferDescriptorLayout;
-		VkDescriptorSetLayout ImageDescriptorLayout;
 		VkDescriptorSetLayout SamplerDescriptorLayout;
 		VkDescriptorSetLayout MaterialDescriptorLayout;
 		VkDescriptorSetLayout TexturesDescriptorLayout;
 		VkDescriptorSetLayout LightsDescriptorLayout;
 		VkDescriptorSetLayout CamerasDescriptorLayout;
 
-		VkDescriptorSet CameraDescriptor;
-		VkDescriptorSet ModelDescriptor;
-		VkDescriptorSet SamplerDescriptor;
-		VkDescriptorSet MaterialDescriptor;
-		VkDescriptorSet LightsDescriptor;
-
 		std::map<UUID, uint32_t> BindlessTextureMapping;
 		std::map<UUID, uint32_t> CameraMapping;
 
 		Ref<AllocatedBuffer> CamerasBuffer;
+		Ref<AllocatedBuffer> ModelBuffer;
+		Ref<AllocatedBuffer> MaterialBuffer;
+		Ref<AllocatedBuffer> LightBuffer;
+
+		// Samplers
+		VkSampler SamplerLinear;
+		VkSampler SamplerNearest;
 
 	public:
-		VkDescriptorSet TextureDescriptor;
+		ModelData ModelTransforms;
+		MaterialData MaterialDataContainer;
+
+		LightDataContainer LightDataContainerArray;
+
+	public:
+		std::map<UUID, uint32_t> ModelMatrixMapping;	// Holds mapping between model entity and transform index
+		std::map<UUID, uint32_t> MeshMaterialMapping;	// Holds mapping between mesh and material index 
+
+		VkDescriptorSet ModelDescriptor;
+		VkDescriptorSet TriangleBufferDescriptor;
+		VkDescriptorSet SamplerDescriptor;
+		VkDescriptorSet MaterialDescriptor;
+		VkDescriptorSet TexturesDescriptor;
+		VkDescriptorSet LightsDescriptor;
 		VkDescriptorSet CamerasDescriptor;
 
 		static GPUResources& Get()
@@ -107,12 +181,15 @@ namespace Nuake
 		void ClearCameras();
 
 		std::vector<VkDescriptorSetLayout> GetBindlessLayout();
-
+		std::vector<VkDescriptorSet> GetBindlessDescriptorSets();
 		uint32_t GetBindlessTextureID(const UUID& id);
 		uint32_t GetBindlessCameraID(const UUID& id);
+		uint32_t GetBindlessTransformID(const UUID& id);
+		uint32_t GetBindlessMaterialID(const UUID& id);
 
 		void RecreateBindlessTextures();
 		void RecreateBindlessCameras();
+		void UpdateBuffers();
 	private:
 		void CreateBindlessLayout();
 	};

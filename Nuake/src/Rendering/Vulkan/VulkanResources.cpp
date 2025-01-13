@@ -13,6 +13,9 @@ void GPUResources::Init()
 {
 	CreateBindlessLayout();
 	CamerasBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CamerasBuffer");
+	ModelBuffer = CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
+	MaterialBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
+	LightBuffer = CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "LightBuffer");
 }
 
 Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name)
@@ -154,45 +157,32 @@ void GPUResources::CreateBindlessLayout()
 	auto& vk = VkRenderer::Get();
 	auto device = vk.GetDevice();
 
-	// Camera
+	// Matrices
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		ModelDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
+	// Triangles
 	{
-		// Triangle vertex buffer layout
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		TriangleBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
+		TriangleBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
-	{
-		// Matrices
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		ModelBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_VERTEX_BIT);
-	}
-
-	// Textures
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE);
-		ImageDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
-	}
-
+	// Samplers
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER);
-		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
+		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
 	// Material
 	{
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		MaterialDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_FRAGMENT_BIT);
+		MaterialDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
 	// Textures
@@ -217,16 +207,45 @@ void GPUResources::CreateBindlessLayout()
 	}
 
 	auto allocator = vk.GetDescriptorAllocator();
-	TextureDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
+	TexturesDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
 	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
+	TriangleBufferDescriptor = allocator.Allocate(device, TriangleBufferDescriptorLayout);
+	SamplerDescriptor = allocator.Allocate(device, SamplerDescriptorLayout);
+	ModelDescriptor = allocator.Allocate(device, ModelDescriptorLayout);
+	LightsDescriptor = allocator.Allocate(device, LightsDescriptorLayout);
+	MaterialDescriptor = allocator.Allocate(device, MaterialDescriptorLayout);
+	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
+
+	// Samplers
+	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+	sampler.magFilter = VK_FILTER_NEAREST;
+	sampler.minFilter = VK_FILTER_NEAREST;
+	vkCreateSampler(device, &sampler, nullptr, &SamplerNearest);
+
+	sampler.magFilter = VK_FILTER_LINEAR;
+	sampler.minFilter = VK_FILTER_LINEAR;
+	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
+
+	VkDescriptorImageInfo textureInfo = {};
+	textureInfo.sampler = SamplerNearest;  // Your VkSampler object
+	textureInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	VkWriteDescriptorSet samplerWrite = {};
+	samplerWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	samplerWrite.dstBinding = 0;  // Binding for sampler (in shader)
+	samplerWrite.dstSet = SamplerDescriptor;  // The allocated descriptor set for the sampler
+	samplerWrite.descriptorCount = 1;
+	samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
+
+	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
 }
 
 void GPUResources::RecreateBindlessTextures()
 {
 	// Ideally wed have update bit enabled ondescriptors
-
 	vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
-	if (!TextureDescriptor)
+	if (!TexturesDescriptor)
 	{
 		CreateBindlessLayout();
 	}
@@ -242,7 +261,7 @@ void GPUResources::RecreateBindlessTextures()
 
 	VkWriteDescriptorSet write{};
 	write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	write.dstSet = TextureDescriptor;
+	write.dstSet = TexturesDescriptor;
 	write.dstBinding = 0; // Binding 0
 	write.dstArrayElement = 0;
 	write.descriptorCount = static_cast<uint32_t>(imageInfos.size());
@@ -299,11 +318,115 @@ void GPUResources::RecreateBindlessCameras()
 	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
 }
 
+void GPUResources::UpdateBuffers()
+{
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
+
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(ModelData);
+
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
+		});
+
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
+
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo transformBufferInfo{};
+		transformBufferInfo.buffer = ModelBuffer->GetBuffer();
+		transformBufferInfo.offset = 0;
+		transformBufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet bufferWriteModel = {};
+		bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWriteModel.pNext = nullptr;
+		bufferWriteModel.dstBinding = 0;
+		bufferWriteModel.dstSet = ModelDescriptor;
+		bufferWriteModel.descriptorCount = 1;
+		bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWriteModel.pBufferInfo = &transformBufferInfo;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
+	}
+
+	// Update material buffer
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &MaterialDataContainer, sizeof(MaterialData));
+
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(MaterialData);
+
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetBuffer(), MaterialBuffer->GetBuffer(), 1, &copy);
+		});
+
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation());
+
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = MaterialBuffer->GetBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet bufferWrite = {};
+		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWrite.pNext = nullptr;
+		bufferWrite.dstBinding = 0;
+		bufferWrite.dstSet = MaterialDescriptor;
+		bufferWrite.descriptorCount = 1;
+		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWrite.pBufferInfo = &bufferInfo;
+		bufferWrite.pImageInfo = VK_NULL_HANDLE;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
+	}
+
+	{
+		void* mappedData;
+		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);
+		memcpy(mappedData, &LightDataContainerArray, sizeof(LightDataContainer));
+
+		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+			VkBufferCopy copy{ 0 };
+			copy.dstOffset = 0;
+			copy.srcOffset = 0;
+			copy.size = sizeof(LightDataContainer);
+
+			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetBuffer(), LightBuffer->GetBuffer(), 1, &copy);
+		});
+
+		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation());
+
+		// Update descriptor set for camera
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = LightBuffer->GetBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = VK_WHOLE_SIZE;
+
+		VkWriteDescriptorSet bufferWrite = {};
+		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		bufferWrite.pNext = nullptr;
+		bufferWrite.dstBinding = 0;
+		bufferWrite.dstSet = LightsDescriptor;
+		bufferWrite.descriptorCount = 1;
+		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bufferWrite.pBufferInfo = &bufferInfo;
+		bufferWrite.pImageInfo = VK_NULL_HANDLE;
+		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
+	}
+}
+
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 {
 	std::vector<VkDescriptorSetLayout> layouts = {
-		CameraDescriptorLayout,
-		ModelBufferDescriptorLayout,
+		ModelDescriptorLayout,
 		TriangleBufferDescriptorLayout,
 		SamplerDescriptorLayout,
 		MaterialDescriptorLayout,
@@ -312,6 +435,20 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		CamerasDescriptorLayout
 	};
 	return layouts;
+}
+
+std::vector<VkDescriptorSet> GPUResources::GetBindlessDescriptorSets()
+{
+	std::vector<VkDescriptorSet> descriptors = {
+		ModelDescriptor,
+		TriangleBufferDescriptor,
+		SamplerDescriptor,
+		MaterialDescriptor,
+		TexturesDescriptor,
+		LightsDescriptor,
+		CamerasDescriptor
+	};
+	return descriptors;
 }
 
 uint32_t GPUResources::GetBindlessTextureID(const UUID& id)
@@ -332,4 +469,23 @@ uint32_t GPUResources::GetBindlessCameraID(const UUID& id)
 	}
 
 	return CameraMapping[id];
+}
+
+uint32_t GPUResources::GetBindlessTransformID(const UUID& id)
+{
+	if (ModelMatrixMapping.find(id) == ModelMatrixMapping.end())
+	{
+		return 0;
+	}
+
+	return ModelMatrixMapping[id];
+}
+
+uint32_t GPUResources::GetBindlessMaterialID(const UUID& id)
+{
+	if (MeshMaterialMapping.find(id) == MeshMaterialMapping.end())
+	{
+		return 0;
+	}
+	return MeshMaterialMapping[id];
 }

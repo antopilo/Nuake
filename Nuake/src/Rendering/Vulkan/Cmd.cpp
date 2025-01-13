@@ -57,11 +57,11 @@ void Cmd::BindDescriptorSet(VkPipelineLayout pipeline, VkDescriptorSet descripto
 			CmdBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipeline,
-			0,                               // firstSet
-			set,                               // descriptorSetCount
+			set,                // firstSet
+			1,					// descriptorSetCount
 			&descriptor,        // pointer to the descriptor set(s)
-			0,                               // dynamicOffsetCount
-			nullptr                          // dynamicOffsets
+			0,                  // dynamicOffsetCount
+			nullptr             // dynamicOffsets
 	);
 }
 

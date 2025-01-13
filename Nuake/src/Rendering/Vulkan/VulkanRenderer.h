@@ -129,11 +129,7 @@ namespace Nuake
 
 	// Renderer configuration
 	constexpr uint32_t FRAME_OVERLAP = 2;
-	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
-	constexpr uint32_t MAX_MATERIAL = 1000;
-	constexpr uint32_t MAX_TEXTURES = 500;
-	constexpr uint32_t MAX_CAMERAS = 100;
-	constexpr uint32_t MAX_LIGHTS = 100;
+
 	class VkRenderer
 	{
 	private:
@@ -264,7 +260,7 @@ namespace Nuake
 		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 
 		void UploadCameraData(const CameraData& data);
-		auto& GetRenderPipeline() { return this->SceneRenderer->GetRenderPipeline(); }
+		//auto& GetRenderPipeline() { return this->SceneRenderer->GetRenderPipeline(); }
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }
 	};
