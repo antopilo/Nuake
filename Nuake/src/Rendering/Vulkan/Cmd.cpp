@@ -1,4 +1,5 @@
 #include "Cmd.h"
+
 using namespace Nuake;
 
 void Cmd::BeginRendering(VkRenderingInfo renderInfo)
@@ -16,7 +17,7 @@ void Cmd::BindPipeline(VkPipeline pipeline) const
 	vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 }
 
-void Cmd::SetViewport(const Vector2 & size)
+void Cmd::SetViewport(const Vector2 & size) const
 {
 	VkViewport viewport = {};
 	viewport.x = 0;
@@ -29,7 +30,7 @@ void Cmd::SetViewport(const Vector2 & size)
 	vkCmdSetViewport(CmdBuffer, 0, 1, &viewport);
 }
 
-void Cmd::SetScissor(const Vector2 & size)
+void Cmd::SetScissor(const Vector2 & size) const
 {
 	VkRect2D scissor = {};
 	scissor.offset.x = 0;
@@ -97,7 +98,7 @@ void Cmd::CopyBuffer(VkBuffer src, VkBuffer dst, size_t size) const
 	vkCmdCopyBuffer(CmdBuffer, src, dst, 1, &copy);
 }
 
-void Cmd::TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout)
+void Cmd::TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const
 {
 	img->TransitionLayout(CmdBuffer, layout);
 }

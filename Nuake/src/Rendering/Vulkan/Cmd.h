@@ -23,15 +23,15 @@ namespace Nuake
 		void EndRendering();
 
 		void BindPipeline(VkPipeline pipeline) const;
-		void SetViewport(const Vector2& size);
-		void SetScissor(const Vector2& size);
+		void SetViewport(const Vector2& size) const;
+		void SetScissor(const Vector2& size) const;
 		void ClearColorImage(Ref<VulkanImage> img, Color color = Color(0, 0, 0, 1)) const;
 		void BindDescriptorSet(VkPipelineLayout pipeline, VkDescriptorSet descriptor, uint32_t set) const;
 		void BindIndexBuffer(VkBuffer buffer) const;
 		void DrawIndexed(uint32_t count) const;
 		void PushConstants(VkPipelineLayout pipeline, size_t size, void* data ) const;
 		void CopyBuffer(VkBuffer src, VkBuffer dst, size_t size) const;
-		void TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout);
+		void TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const;
 		void CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const;
 	};
 }
