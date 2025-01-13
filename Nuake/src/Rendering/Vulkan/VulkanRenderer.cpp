@@ -105,7 +105,7 @@ void VkRenderer::Initialize()
 	rect_vertices[3].position = { -1.0f,  1.0f, 0 };
 
 	rect_vertices[0].normal = { 0, 0, 1 };
-	rect_vertices[1].normal = { 0.5, 0.5,0.5 };
+	rect_vertices[1].normal = { 0.5, 0.5, 0.5 };
 	rect_vertices[2].normal = { 1.0, 0.0, 1.0f };
 	rect_vertices[3].normal = { 0, 1,0 };
 
@@ -120,11 +120,8 @@ void VkRenderer::Initialize()
 	rect_indices[4] = 1;
 	rect_indices[5] = 3;
 
-
-
-
 	GPUResources& resources = GPUResources::Get();
-	rectangle = resources.CreateMesh(rect_vertices, rect_indices);
+	Rect = resources.CreateMesh(rect_vertices, rect_indices);
 
 	CameraData camData{};
 	camData.View = Matrix4(1.0f);

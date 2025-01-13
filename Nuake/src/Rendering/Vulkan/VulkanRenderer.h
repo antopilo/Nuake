@@ -190,12 +190,12 @@ namespace Nuake
 		VkCommandPool ImguiCommandPool;
 
 		// Buffers
-		Ref<VkMesh> rectangle;
 
 		Ref<AllocatedBuffer> CameraBuffer;
 		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
+		Ref<VkMesh> Rect;
 		VkQueue GPUQueue;
 
 		Ref<VulkanImage> DrawImage;

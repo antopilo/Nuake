@@ -70,7 +70,7 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return GBufferAlbedo; }
+		Ref<VulkanImage> GetOutput() { return ShadingOutput; }
 
 	private:
 		Ref<VulkanImage> ResizeImage(Ref<VulkanImage> image, const Vector2& size);

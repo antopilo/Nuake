@@ -255,7 +255,7 @@ PSOutput main(PSInput input)
 
         if(light.castShadow == true)
         {
-            shadow *= ShadowCalculation(light, worldPos, N);
+            //shadow *= ShadowCalculation(light, worldPos, N);
             //output.oColor0 = float4(albedo * 0.1 + float3(shadow, shadow, shadow), 1);
             //return output;
         }

@@ -10,6 +10,8 @@
 
 #include "src/Rendering/Textures/Material.h"
 
+#include "src/Rendering/Vulkan/SceneRenderPipeline.h"
+
 #include <Tracy.hpp>
 
 
@@ -84,15 +86,55 @@ SceneRenderPipeline::SceneRenderPipeline()
 		}
 	});
 
-	//auto& shadingPass = GBufferPipeline.AddPass("Shading");
-	//shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
-	//shadingPass.SetPushConstant<ShadingConstant>(shadingConstant);
-	//shadingPass.AddAttachment("Output", ImageFormat::RGBA8);
-	//shadingPass.SetDepthTest(false);
-	//shadingPass.AddInput("Albedo");
-	//shadingPass.AddInput("Normal");
-	//shadingPass.AddInput("Depth");
-	//shadingPass.AddInput("Material");
+	auto& shadingPass = GBufferPipeline.AddPass("Shading");
+	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
+	shadingPass.SetPushConstant<ShadingConstant>(shadingConstant);
+	shadingPass.AddAttachment("Output", ShadingOutput->GetFormat());
+	shadingPass.SetDepthTest(false);
+	shadingPass.AddInput("Albedo");
+	shadingPass.AddInput("Normal");
+	shadingPass.AddInput("Depth");
+	shadingPass.AddInput("Material");
+	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		Cmd& cmd = ctx.commandBuffer;
+
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+
+		// Inputs
+		shadingConstant.AlbedoTextureID = res.GetBindlessTextureID(GBufferAlbedo->GetID());
+		shadingConstant.DepthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
+		shadingConstant.NormalTextureID = res.GetBindlessTextureID(GBufferNormal->GetID());
+		shadingConstant.MaterialTextureID = res.GetBindlessTextureID(GBufferMaterial->GetID());
+
+		// Camera
+		shadingConstant.CameraID = ctx.cameraID;
+
+		// Light
+		shadingConstant.LightCount = res.LightCount;
+		for (int i = 0; i < CSM_AMOUNT; i++)
+		{
+			shadingConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
+		}
+	});
+	shadingPass.SetRender([&](PassRenderContext& ctx) {
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingConstant), &shadingConstant);
+		
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	GBufferPipeline.Build();
 }

@@ -57,7 +57,7 @@ namespace Nuake
 		Vector3 Direction;
 		float OuterConeAngle;
 		float InnerConeAngle;
-		bool CastShadow;
+		int CastShadow;
 		int ShadowMapTextureId[4];
 		int TransformId[4];
 		float pad[2];

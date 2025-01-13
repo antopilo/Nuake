@@ -20,8 +20,8 @@ namespace Nuake
 
 	class VkSceneRenderer
 	{
-	private:
-		Ref<VkMesh> QuadMesh;
+	public:
+		static Ref<VkMesh> QuadMesh;
 
 	public:
 		RenderContext Context;
