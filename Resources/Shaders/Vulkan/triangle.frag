@@ -27,12 +27,12 @@ SamplerState mySampler : register(s0);
 // Materials
 struct Material
 {
-    float hasAlbedo;
+    bool hasAlbedo;
     float3 albedo;
-    int hasNormal;
-    int hasMetalness;
-    int hasRoughness;
-    int hasAO;
+    bool hasNormal;
+    bool hasMetalness;
+    bool hasRoughness;
+    bool hasAO;
     float metalnessValue;
     float roughnessValue;
     float aoValue;
@@ -116,9 +116,8 @@ PSOutput main(PSInput input)
     {
         // Sample from texture.
     }
-
     normal = mul(input.TBN, normal);
-    normal = normal / 2.0f + 0.5f;
+    normal = input.Normal / 2.0f + 0.5f;
     output.oNormal = float4(normal, 1.0f);
 
     // MATERIAL

@@ -27,12 +27,12 @@ SamplerState mySampler : register(s0);
 // Materials
 struct Material
 {
-    float hasAlbedo;
+    bool hasAlbedo;
     float3 albedo;
-    int hasNormal;
-    int hasMetalness;
-    int hasRoughness;
-    int hasAO;
+    bool hasNormal;
+    bool hasMetalness;
+    bool hasRoughness;
+    bool hasAO;
     float metalnessValue;
     float roughnessValue;
     float aoValue;
