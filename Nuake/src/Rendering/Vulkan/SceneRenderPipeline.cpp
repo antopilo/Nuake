@@ -21,11 +21,12 @@ SceneRenderPipeline::SceneRenderPipeline()
 {
 	// Initialize render targets
 	const Vector2 defaultSize = { 1280, 720 };
-	GBufferAlbedo = std::make_shared<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
-	GBufferNormal = std::make_shared<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
-	GBufferMaterial = std::make_shared<VulkanImage>(ImageFormat::RGBA8, defaultSize);
-	GBufferDepth = std::make_shared<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
-	ShadingOutput = std::make_shared<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferDepth = CreateRef<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
+
+	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 
 	// Initialize pipeline
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
@@ -40,22 +41,22 @@ SceneRenderPipeline::SceneRenderPipeline()
 	gBufferPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
 		auto& layout = ctx.renderPass->PipelineLayout;
-		auto& gpu = GPUResources::Get();
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.ModelDescriptor, 0);
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.SamplerDescriptor, 2);
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.MaterialDescriptor, 3);
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.TexturesDescriptor, 4);
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.LightsDescriptor, 5);
-		ctx.commandBuffer.BindDescriptorSet(layout, gpu.CamerasDescriptor, 6);
+		auto& res = GPUResources::Get();
+
+		Cmd& cmd = ctx.commandBuffer;
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx) {
-		auto& cmd = ctx.commandBuffer;
-		auto& scene = ctx.scene;
-		auto& vk = VkRenderer::Get();
-		auto& gpu = GPUResources::Get();
+		Cmd& cmd = ctx.commandBuffer;
+		Ref<Scene> scene = ctx.scene;
+		auto& res = GPUResources::Get();
 
 		ZoneScopedN("Render Models");
-
 		gbufferConstant.CameraID = ctx.cameraID;
 
 		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
@@ -67,14 +68,14 @@ SceneRenderPipeline::SceneRenderPipeline()
 				continue;
 			}
 
-			gbufferConstant.Index = gpu.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()];
+			gbufferConstant.Index = res.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()];
 
 			for (auto& m : mesh.ModelResource->GetMeshes())
 			{
 				Ref<VkMesh> vkMesh = m->GetVkMesh();
 
 				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, vkMesh->GetDescriptorSet(), 1);
-				gbufferConstant.MaterialIndex = gpu.MeshMaterialMapping[vkMesh->GetID()];
+				gbufferConstant.MaterialIndex = res.MeshMaterialMapping[vkMesh->GetID()];
 
 				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(GBufferConstant), &gbufferConstant);
 				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());

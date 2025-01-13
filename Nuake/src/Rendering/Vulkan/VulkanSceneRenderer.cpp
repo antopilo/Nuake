@@ -264,7 +264,8 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	passCtx.scene = inContext.CurrentScene;
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.resolution = Context.Size;
-	
+	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(inContext.CameraID);
+
 	auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : view)
 	{
@@ -295,27 +296,18 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	sceneRenderPipeline->Render(passCtx);
 }
 
-
 void VkSceneRenderer::EndScene()
 {
-	auto& vk = VkRenderer::Get();
-	auto& cmd = Context.CommandBuffer;
-
-	//auto& albedo = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Albedo");
-	//auto& normal = GBufferPipeline.GetRenderPass("GBuffer").GetAttachment("Normal");
-	//auto& shading = GBufferPipeline.GetRenderPass("Shading").GetAttachment("Output");
-	//auto& shadow = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment();
-	//auto& selectedOutput = shading;
-
 	// Copy final output to DrawImage.
-
-	//cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//cmd.CopyImageToImage(selectedOutput.Image, vk.GetDrawImage());
-	cmd.TransitionImageLayout(vk.DrawImage, VK_IMAGE_LAYOUT_GENERAL);
-	//cmd.TransitionImageLayout(selectedOutput.Image, VK_IMAGE_LAYOUT_GENERAL);
-
-	//cmd.TransitionImageLayout(shadow.Image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	Ref<VulkanImage> drawImage = VkRenderer::Get().GetDrawImage();
+	Ref<VulkanImage> output = sceneRenderPipeline->GetOutput();
+	
+	Cmd& cmd = Context.CommandBuffer;
+	cmd.TransitionImageLayout(output, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	cmd.TransitionImageLayout(drawImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	cmd.CopyImageToImage(output, drawImage);
+	cmd.TransitionImageLayout(drawImage, VK_IMAGE_LAYOUT_GENERAL);
+	cmd.TransitionImageLayout(output, VK_IMAGE_LAYOUT_GENERAL);
 }
 
 void VkSceneRenderer::LoadShaders()

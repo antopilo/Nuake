@@ -19,10 +19,6 @@
 
 namespace Nuake
 {
-	struct CameraData;
-
-	
-
 	struct ModelData
 	{
 		std::array<Matrix4, 3000> Data;
@@ -86,11 +82,6 @@ namespace Nuake
 		float pad2;
 		float pad3;
 		//char padding[64];            // 124 bytes to reach 128 bytes
-	};
-
-	struct LightResources
-	{
-
 	};
 
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
