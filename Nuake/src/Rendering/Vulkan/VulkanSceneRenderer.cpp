@@ -61,72 +61,72 @@ void VkSceneRenderer::Init()
 
 void VkSceneRenderer::BeginScene(RenderContext inContext)
 {
-	GPUResources::Get().ClearCameras();
-
 	Context.CommandBuffer = inContext.CommandBuffer;
 	Context.CurrentScene = inContext.CurrentScene;
 	Context.CameraID = inContext.CameraID;
 
-	// Collect all global transform of things we will render
-	auto& cmd = Context.CommandBuffer;
 	auto& scene = Context.CurrentScene;
-	auto& vk = VkRenderer::Get();
+	auto& gpu = GPUResources::Get();
 
-	// Ensure the draw image is valid
-	if (!vk.DrawImage) {
-		throw std::runtime_error("Draw image is not initialized");
-	}
-
-	// Build camera view list
+	// CameraView
 	{
-		auto camera = scene->m_EditorCamera;
-		CameraView camData{};
-		camData.View = camera->GetTransform();
-		camData.Projection = camera->GetPerspective();
-		camData.InverseView = glm::inverse(camData.View);
-		camData.InverseProjection = glm::inverse(camData.Projection);
-		camData.Position = camera->GetTranslation();
-		camData.Near = camera->Near;
-		camData.Far = camera->Far;
-		GPUResources::Get().AddCamera(camera->ID, camData);
-		GPUResources::Get().AddCamera(camera->ID + 1, camData);
+		// Clear last frame's cameras
+		gpu.ClearCameras();
 
+		// Editor camera, maybe strip this out in runtime?
+		const auto& camera = scene->m_EditorCamera;
+		CameraView cameraView 
+		{
+			.View = camera->GetTransform(),
+			.Projection = camera->GetPerspective(),
+			.InverseView = glm::inverse(cameraView.View),
+			.InverseProjection = glm::inverse(cameraView.Projection),
+			.Position = camera->GetTranslation(),
+			.Near = camera->Near,
+			.Far = camera->Far,
+		};
+		gpu.AddCamera(camera->ID, std::move(cameraView));
+
+		// Add scene cameras
 		auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
 		for (auto e : view)
 		{
-			auto [transform, camera] = view.get<TransformComponent, CameraComponent>(e);
-			CameraView camData{};
-			camData.View = camera.CameraInstance->GetTransform();
-			camData.Projection = camera.CameraInstance->GetPerspective();
-			camData.InverseView = glm::inverse(camData.View);
-			camData.InverseProjection = glm::inverse(camData.Projection);
-			camData.Position = transform.GetGlobalTransform()[3];
-			camData.Near = camera.CameraInstance->Near;
-			camData.Far = camera.CameraInstance->Far;
-			GPUResources::Get().AddCamera(camera.ID, camData);
+			const auto& [transform, cameraComponent] = view.get<TransformComponent, CameraComponent>(e);
+			const Ref<Camera> camera = cameraComponent.CameraInstance;
+
+			CameraView cameraView
+			{
+				.View = camera->GetTransform(),
+				.Projection = camera->GetPerspective(),
+				.InverseView = glm::inverse(cameraView.View),
+				.InverseProjection = glm::inverse(cameraView.Projection),
+				.Position = camera->GetTranslation(),
+				.Near = camera->Near,
+				.Far = camera->Far,
+			};
+			gpu.AddCamera(camera->ID, std::move(cameraView));
 		}
 	}
 
-	// Build light view list
-
+	// CSM Light's view
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
 		{
 			auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
-
-			for (int i = 0; i < CSM_AMOUNT; i++)
+			for (auto& view : light.m_LightViews)
 			{
-				LightView& view = light.m_LightViews[i];
-				CameraView viewData{};
-				viewData.View = view.View;
-				viewData.Projection = view.Proj;
-				viewData.InverseView = glm::inverse(view.View);
-				viewData.InverseProjection = glm::inverse(view.Proj);
-				viewData.Position = transform.GetGlobalTransform()[3];
-				viewData.Near = 0;
-				viewData.Far = 0;
-				GPUResources::Get().AddCamera(view.CameraID, viewData);
+				CameraView cameraView
+				{
+					.View = view.View,
+					.Projection = view.Proj,
+					.InverseView = glm::inverse(view.View),
+					.InverseProjection = glm::inverse(view.Proj),
+					.Position = transform.GetGlobalTransform()[3],
+					.Near = 0,
+					.Far = 0,
+				};
+				gpu.AddCamera(view.CameraID, std::move(cameraView));
 			}
 		}
 	}
@@ -134,6 +134,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	BuildMatrixBuffer();
 	UpdateTransformBuffer();
 
+	// Calculate light CSM views from current camera
 	{
 		auto view = scene->m_Registry.view<TransformComponent, LightComponent>();
 		for (auto e : view)
@@ -177,7 +178,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			//ShadowPipeline.Execute(passCtx);
 		}
 	}
-
 
 	//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(Context.CameraID);
 	//GBufferPipeline.Execute(passCtx);
@@ -408,19 +408,19 @@ void VkSceneRenderer::BuildMatrixBuffer()
 	// It will create a mapping between UUID and the corresponding index for the model matrix
 	ZoneScopedN("Build Matrix Buffer");
 	auto& scene = Context.CurrentScene;
-
-	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
-	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
+	auto& res = GPUResources::Get();
 
 	uint32_t currentIndex = 0;
 	uint32_t currentMaterialIndex = 0;
+	std::array<Matrix4, MAX_MODEL_MATRIX> allTransforms;
+	std::array<MaterialBufferStruct, MAX_MATERIAL> allMaterials;
 	auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 	for (auto e : view)
 	{
 		// Check if we've reached the maximum capacity of the array
 		if (currentIndex >= MAX_MODEL_MATRIX)
 		{
-			assert(false);
+			assert(false && "Max model matrix reached!");
 			break;
 		}
 
@@ -431,12 +431,12 @@ void VkSceneRenderer::BuildMatrixBuffer()
 			continue;
 		}
 
+		// Upload transforms to GPU resources
 		allTransforms[currentIndex] = transform.GetGlobalTransform();
-
 		Entity entity = Entity((entt::entity)e, scene.get());
+		res.ModelMatrixMapping[entity.GetID()] = currentIndex;
 
-		GPUResources::Get().ModelMatrixMapping[entity.GetID()] = currentIndex;
-
+		// Upload mesh material to GPU resources
 		for (auto& m : mesh.ModelResource->GetMeshes())
 		{
 			Ref<Material> material = m->GetMaterial();
@@ -445,79 +445,78 @@ void VkSceneRenderer::BuildMatrixBuffer()
 				continue;
 			}
 
-			auto& res = GPUResources::Get();
 			// TODO: Avoid duplicated materials
-			MaterialBufferStruct materialBuffer = {};
-			materialBuffer.hasAlbedo = material->HasAlbedo();
-			materialBuffer.albedo = material->data.m_AlbedoColor;
-			materialBuffer.hasNormal = material->HasNormal();
-			materialBuffer.hasMetalness = material->HasMetalness();
-			materialBuffer.metalnessValue = material->data.u_MetalnessValue;
-			materialBuffer.hasAO = material->HasAO();
-			materialBuffer.aoValue = material->data.u_AOValue;
-			materialBuffer.hasRoughness = material->HasRoughness();
-			materialBuffer.roughnessValue = material->data.u_RoughnessValue;
-			materialBuffer.albedoTextureId = material->HasAlbedo() ? res.GetBindlessTextureID(material->AlbedoImage) : 0;
-			materialBuffer.normalTextureId = material->HasNormal() ? res.GetBindlessTextureID(material->NormalImage) : 0;
-			materialBuffer.metalnessTextureId = material->HasMetalness() ? res.GetBindlessTextureID(material->MetalnessImage) : 0;
-			materialBuffer.aoTextureId = material->HasAO() ? res.GetBindlessTextureID(material->AOImage) : 0;
-			materialBuffer.roughnessTextureId = material->HasRoughness() ? res.GetBindlessTextureID(material->RoughnessImage) : 0;
-			allMaterials[currentMaterialIndex] = materialBuffer;
-			GPUResources::Get().MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
+			MaterialBufferStruct materialBuffer 
+			{
+				.HasAlbedo = material->HasAlbedo(),
+				.AlbedoColor = material->data.m_AlbedoColor,
+				.HasNormal = material->HasNormal(),
+				.HasMetalness = material->HasMetalness(),
+				.HasRoughness = material->HasRoughness(),
+				.HasAO = material->HasAO(),
+				.MetalnessValue = material->data.u_MetalnessValue,
+				.RoughnessValue = material->data.u_RoughnessValue,
+				.AoValue = material->data.u_AOValue,
+				.AlbedoTextureId = material->HasAlbedo() ? res.GetBindlessTextureID(material->AlbedoImage) : 0,
+				.NormalTextureId = material->HasNormal() ? res.GetBindlessTextureID(material->NormalImage) : 0,
+				.MetalnessTextureId = material->HasMetalness() ? res.GetBindlessTextureID(material->MetalnessImage) : 0,
+				.RoughnessTextureId = material->HasRoughness() ? res.GetBindlessTextureID(material->RoughnessImage) : 0,
+				.AoTextureId = material->HasAO() ? res.GetBindlessTextureID(material->AOImage) : 0,
+			};
 
+			// Save bindless mapping index
+			allMaterials[currentMaterialIndex] = std::move(materialBuffer);
+			res.MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
 			currentMaterialIndex++;
 		}
 
 		currentIndex++;
 	}
 
-	currentIndex = 0;
-	LightData directionalLight = {};
-	directionalLight.castShadow = false;
-	directionalLight.color = Vector4(2.0f, 2.0f, 2.0f, 1.0f);
-	directionalLight.position = Vector3(0.0f, 0.0f, 0.0f);
-	directionalLight.type = LightType::Directional;
+	uint32_t lightCount = 0;
 	std::array<LightData, MAX_LIGHTS> allLights;
 	auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 	for (auto e : lightView)
 	{
-		// Check if we've reached the maximum capacity of the array
-		if (currentIndex >= MAX_LIGHTS)
+		if (lightCount >= MAX_LIGHTS)
 		{
-			assert(false);
+			assert(false && "Max amount of light reached!");
 			break;
 		}
 
 		auto [transform, lightComp] = lightView.get<TransformComponent, LightComponent>(e);
 
-		Vector3 direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
-		lightComp.Direction = direction;
+		// Update light direction with transform, shouldn't be here!
+		// TODO: Move to transform system
+		lightComp.Direction = transform.GetGlobalRotation() * Vector3(0, 0, -1);
 
-		LightData light = {};
-		light.position = Vector3(transform.GetGlobalTransform()[3]);
-		light.direction = direction;
-		light.outerConeAngle = glm::cos(Rad(lightComp.OuterCutoff));
-		light.innerConeAngle = glm::cos(Rad(lightComp.Cutoff));
-		light.type = lightComp.Type;
-		light.color = Vector4(lightComp.Color * lightComp.Strength, 1.0);
-		light.castShadow = lightComp.CastShadows;
+		LightData light
+		{
+			.Position = Vector3(transform.GetGlobalTransform()[3]),
+			.Type = lightComp.Type,
+			.Color = Vector4(lightComp.Color * lightComp.Strength, 1.0),
+			.Direction = lightComp.Direction,
+			.OuterConeAngle = glm::cos(Rad(lightComp.OuterCutoff)),
+			.InnerConeAngle = glm::cos(Rad(lightComp.Cutoff)),
+			.CastShadow = lightComp.CastShadows,
+		};
+		
 		for (int i = 0; i < CSM_AMOUNT; i++)
 		{
-			light.transformId[i] = GPUResources::Get().GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
-			light.shadowMapTextureId[i] = GPUResources::Get().GetBindlessTextureID(lightComp.LightMapID);
+			light.TransformId[i] = res.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
+			light.ShadowMapTextureId[i] = res.GetBindlessTextureID(lightComp.LightMapID);
 		}
 
-		allLights[currentIndex] = light;
+		allLights[lightCount] = std::move(light);
 
-		currentIndex++;
+		lightCount++;
 	}
 
-	auto& gpu = GPUResources::Get();
-	gpu.ModelTransforms = ModelData{ allTransforms };
-	gpu.MaterialDataContainer = MaterialData{ allMaterials };
-	gpu.LightDataContainerArray = LightDataContainer{ allLights };
-
-	//shadingPushConstant.LightCount = currentIndex;
+	// Copy to GPU resources
+	res.ModelTransforms = ModelData { allTransforms };
+	res.MaterialDataContainer = MaterialData { allMaterials };
+	res.LightDataContainerArray = LightDataContainer { allLights };
+	res.LightCount = currentIndex;
 
 	// Copy CSM split depths
 	for (int i = 0; i < CSM_AMOUNT; i++)

@@ -31,20 +31,20 @@ namespace Nuake
 	// This is what is present on the shader as a structured buffer
 	struct MaterialBufferStruct
 	{
-		float hasAlbedo;
-		Vector3 albedo;
-		int hasNormal;
-		int hasMetalness;
-		int hasRoughness;
-		int hasAO;
-		float metalnessValue;
-		float roughnessValue;
-		float aoValue;
-		int albedoTextureId;
-		int normalTextureId;
-		int metalnessTextureId;
-		int roughnessTextureId;
-		int aoTextureId;
+		bool HasAlbedo;
+		Vector3 AlbedoColor;
+		bool HasNormal;
+		bool HasMetalness;
+		bool HasRoughness;
+		bool HasAO;
+		float MetalnessValue;
+		float RoughnessValue;
+		float AoValue;
+		uint32_t AlbedoTextureId;
+		uint32_t NormalTextureId;
+		uint32_t MetalnessTextureId;
+		uint32_t RoughnessTextureId;
+		uint32_t AoTextureId;
 	};
 
 	// This is the *whole* buffer
@@ -55,15 +55,15 @@ namespace Nuake
 
 	struct LightData
 	{
-		Vector3 position;
-		int type;
-		Vector4 color;
-		Vector3 direction;
-		float outerConeAngle;
-		float innerConeAngle;
-		bool castShadow;
-		int shadowMapTextureId[4];
-		int transformId[4];
+		Vector3 Position;
+		int Type;
+		Vector4 Color;
+		Vector3 Direction;
+		float OuterConeAngle;
+		float InnerConeAngle;
+		bool CastShadow;
+		int ShadowMapTextureId[4];
+		int TransformId[4];
 		float pad[2];
 	};
 
@@ -137,7 +137,7 @@ namespace Nuake
 		MaterialData MaterialDataContainer;
 
 		LightDataContainer LightDataContainerArray;
-
+		uint32_t LightCount = 0;
 	public:
 		std::map<UUID, uint32_t> ModelMatrixMapping;	// Holds mapping between model entity and transform index
 		std::map<UUID, uint32_t> MeshMaterialMapping;	// Holds mapping between mesh and material index 
