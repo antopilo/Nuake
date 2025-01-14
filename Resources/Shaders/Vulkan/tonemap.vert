@@ -80,20 +80,15 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct ShadingPushConstant
+struct TonemapPushConstant
 {
-    int AlbedoInputTextureId;
-    int DepthInputTextureId;
-    int NormalInputTextureId;
-    int MaterialInputTextureId;
-    int LightCount;
-    int CameraID;
-    float cascadeDepth[4];
-    float AmbientTerm;
+    float Exposure;
+    float Gamma;
+    int SourceTextureID;
 };
 
 [[vk::push_constant]]
-ShadingPushConstant pushConstants;
+TonemapPushConstant pushConstants;
 
 // Outputs
 struct VSOutput {

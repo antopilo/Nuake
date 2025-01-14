@@ -90,7 +90,9 @@ SceneRenderPipeline::SceneRenderPipeline()
 	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	GBufferDepth = CreateRef<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
 
-	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+
+	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 
 	// Initialize pipeline
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
@@ -151,7 +153,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
 	shadingPass.SetPushConstant<ShadingConstant>(shadingConstant);
-	shadingPass.AddAttachment("Output", ShadingOutput->GetFormat());
+	shadingPass.AddAttachment("ShadingOutput", ShadingOutput->GetFormat());
 	shadingPass.SetDepthTest(false);
 	shadingPass.AddInput("Albedo");
 	shadingPass.AddInput("Normal");
@@ -175,6 +177,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 		shadingConstant.DepthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
 		shadingConstant.NormalTextureID = res.GetBindlessTextureID(GBufferNormal->GetID());
 		shadingConstant.MaterialTextureID = res.GetBindlessTextureID(GBufferMaterial->GetID());
+		shadingConstant.AmbientTerm = ctx.scene->GetEnvironment()->AmbientTerm;
 
 		// Camera
 		shadingConstant.CameraID = ctx.cameraID;
@@ -189,7 +192,43 @@ SceneRenderPipeline::SceneRenderPipeline()
 	shadingPass.SetRender([&](PassRenderContext& ctx) {
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingConstant), &shadingConstant);
-		
+
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
+	auto& tonemapPass = GBufferPipeline.AddPass("Tonemap");
+	tonemapPass.SetShaders(shaderMgr.GetShader("tonemap_vert"), shaderMgr.GetShader("tonemap_frag"));
+	tonemapPass.SetPushConstant<TonemapConstant>(tonemapConstant);
+	tonemapPass.AddAttachment("TonemapOutput", TonemappedOutput->GetFormat());
+	tonemapPass.SetDepthTest(false);
+	tonemapPass.AddInput("ShadingOutput");
+	tonemapPass.SetPreRender([&](PassRenderContext& ctx) {
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+
+		// Inputs
+		tonemapConstant.Exposure = ctx.scene->GetEnvironment()->Exposure;
+		tonemapConstant.SourceTextureID = res.GetBindlessTextureID(ShadingOutput->GetID());
+		tonemapConstant.Gamma = ctx.scene->GetEnvironment()->Gamma;
+	});
+	tonemapPass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(TonemapConstant), &tonemapConstant);
+
 		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
@@ -213,12 +252,13 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	GBufferNormal = ResizeImage(GBufferNormal, ctx.resolution);
 	GBufferMaterial = ResizeImage(GBufferMaterial, ctx.resolution);
 	ShadingOutput = ResizeImage(ShadingOutput, ctx.resolution);
+	TonemappedOutput = ResizeImage(TonemappedOutput, ctx.resolution);
 
 	PipelineAttachments pipelineInputs
 	{
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial },	// GBuffer
-		{ ShadingOutput }													// Shading
-		// ... other passes
+		{ ShadingOutput },													// Shading
+		{ TonemappedOutput }
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);

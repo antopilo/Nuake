@@ -63,6 +63,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
 	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
 	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
+	shaderMgr.AddShader("tonemap_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/tonemap.frag"));
+	shaderMgr.AddShader("tonemap_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/tonemap.vert"));
 }
 
 void VkSceneRenderer::SetGBufferSize(const Vector2& size)

@@ -98,6 +98,7 @@ struct ShadingPushConstant
     int LightCount;
     int CameraID;
     float cascadeDepth[4];
+    float AmbientTerm;
 };
 
 [[vk::push_constant]]
@@ -340,7 +341,7 @@ PSOutput main(PSInput input)
     float3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    float3 ambient = (albedo) * ao  * 0.5f;
+    float3 ambient = (albedo) * ao  * pushConstants.AmbientTerm;
     float3 color = (ambient) + Lo;
 
     output.oColor0 = float4(color, 1);

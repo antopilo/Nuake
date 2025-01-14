@@ -38,6 +38,14 @@ namespace Nuake
 		int LightCount;
 		int CameraID;
 		float CascadeSplits[4];
+		float AmbientTerm;
+	};
+
+	struct TonemapConstant
+	{
+		float Exposure;
+		float Gamma;
+		int SourceTextureID;
 	};
 
 	// This class handles all the rendering of the scene
@@ -55,9 +63,11 @@ namespace Nuake
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
 
+		Ref<VulkanImage> TonemappedOutput;
+
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
-
+		TonemapConstant tonemapConstant;
 		static RenderPipeline GBufferPipeline;
 
 	public:
@@ -66,7 +76,7 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return ShadingOutput; }
+		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
 
 	private:
 		Ref<VulkanImage> ResizeImage(Ref<VulkanImage> image, const Vector2& size);

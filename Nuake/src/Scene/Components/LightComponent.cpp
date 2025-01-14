@@ -32,10 +32,8 @@ namespace Nuake
             {
 				for (int i = 0; i < CSM_AMOUNT; i++)
 				{
-					m_Framebuffers[i] = CreateRef<FrameBuffer>(false, glm::vec2(4096, 4096));
-					auto texture = CreateRef<Texture>(glm::vec2(4096, 4096), GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT);
-					texture->SetParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-					m_Framebuffers[i]->SetTexture(texture, GL_DEPTH_ATTACHMENT);
+                    m_ShadowMaps[i] = CreateRef<VulkanImage>(ImageFormat::D32F, Vector2{ 4096, 4096 }, ImageUsage::Depth);
+					GPUResources::Get().AddTexture(m_ShadowMaps[i]);
 				}
             }
         }
@@ -43,7 +41,7 @@ namespace Nuake
         {
             for (int i = 0; i < CSM_AMOUNT; i++)
             {
-                m_Framebuffers[i] = nullptr;
+                // TODO: Delete old shadowmaps
             }
         }
     }

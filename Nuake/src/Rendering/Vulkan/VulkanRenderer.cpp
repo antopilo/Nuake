@@ -32,7 +32,7 @@
 
 #include <array>
 
-bool NKUseValidationLayer = false;
+bool NKUseValidationLayer = true;
 
 using namespace Nuake;
 
