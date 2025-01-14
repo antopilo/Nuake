@@ -7,29 +7,26 @@
 
 namespace Nuake
 {
-	class ShadowRenderPipeline
-	{
-	private:
-		UUID CurrentLightID;
-		Ref<VulkanImage> DepthTexture;
-
-		static RenderPipeline ShadowPipeline;
-		
-	public:
-		ShadowRenderPipeline() = default;
-		~ShadowRenderPipeline() = default;
-
-		void Render();
-
-		Ref<VulkanImage> GetOutput() { return DepthTexture; }
-	};
-
 	struct GBufferConstant
 	{
 		int Index;
 		int MaterialIndex;
 		int CameraID;
 		char padding[120];            // 124 bytes to reach 128 bytes
+	};
+
+	class ShadowRenderPipeline
+	{
+	private:
+		UUID CurrentLightID;
+
+		static RenderPipeline ShadowPipeline;
+		GBufferConstant gbufferConstant;
+	public:
+		ShadowRenderPipeline();
+		~ShadowRenderPipeline() = default;
+
+		void Render(PassRenderContext& ctx, Ref<VulkanImage> output);
 	};
 
 	struct ShadingConstant
@@ -62,7 +59,6 @@ namespace Nuake
 		ShadingConstant shadingConstant;
 
 		static RenderPipeline GBufferPipeline;
-		static RenderPipeline ShadowPipeline;
 
 	public:
 		SceneRenderPipeline();

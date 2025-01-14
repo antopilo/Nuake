@@ -14,19 +14,10 @@
 using namespace Nuake;
 
 RenderPipeline SceneRenderPipeline::GBufferPipeline;
-RenderPipeline SceneRenderPipeline::ShadowPipeline;
-SceneRenderPipeline::SceneRenderPipeline()
+RenderPipeline ShadowRenderPipeline::ShadowPipeline;
+
+ShadowRenderPipeline::ShadowRenderPipeline()
 {
-	// Initialize render targets
-	const Vector2 defaultSize = { 1, 1 };
-	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
-	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
-	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
-	GBufferDepth = CreateRef<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
-
-	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
-
-	// Initialize pipeline
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
 
 	ShadowPipeline = RenderPipeline();
@@ -50,7 +41,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 		auto& cmd = ctx.commandBuffer;
 		auto& scene = ctx.scene;
 		auto& vk = VkRenderer::Get();
-	
+
 		ZoneScopedN("Render Models");
 		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		for (auto e : view)
@@ -60,7 +51,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 			{
 				continue;
 			}
-	
+
 			const int entityId = Entity((entt::entity)e, scene.get()).GetID();
 			for (auto& m : mesh.ModelResource->GetMeshes())
 			{
@@ -69,13 +60,40 @@ SceneRenderPipeline::SceneRenderPipeline()
 
 				gbufferConstant.Index = GPUResources::Get().GetBindlessTransformID(entityId);
 				gbufferConstant.CameraID = ctx.cameraID;
-	
+
 				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(GBufferConstant), &gbufferConstant);
 				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
 				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
 			}
 		}
 	});
+
+	ShadowPipeline.Build();
+}
+
+void ShadowRenderPipeline::Render(PassRenderContext& ctx, Ref<VulkanImage> output)
+{
+	PipelineAttachments pipelineInputs
+	{
+		{ output },	
+	};
+
+	ShadowPipeline.Execute(ctx, pipelineInputs);
+}
+
+SceneRenderPipeline::SceneRenderPipeline()
+{
+	// Initialize render targets
+	const Vector2 defaultSize = { 1, 1 };
+	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferDepth = CreateRef<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
+
+	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+
+	// Initialize pipeline
+	VkShaderManager& shaderMgr = VkShaderManager::Get();
 
 	GBufferPipeline = RenderPipeline();
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
@@ -179,7 +197,6 @@ SceneRenderPipeline::SceneRenderPipeline()
 		cmd.DrawIndexed(6);
 	});
 
-	ShadowPipeline.Build();
 	GBufferPipeline.Build();
 }
 

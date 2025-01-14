@@ -31,6 +31,7 @@ void VkSceneRenderer::Init()
 
 	SetGBufferSize({ 1280, 720 });
 
+	shadowRenderPipeline = CreateRef<ShadowRenderPipeline>();
 	sceneRenderPipeline = CreateRef<SceneRenderPipeline>();
 
     const std::vector<Vertex> quadVertices 
@@ -75,9 +76,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	Context.CommandBuffer = inContext.CommandBuffer;
 	Context.CurrentScene = inContext.CurrentScene;
 	Context.CameraID = inContext.CameraID;
-
-	// TODO: We shouldnt recopy everything if nothing has changed.
-
 
 	auto& scene = Context.CurrentScene;
 	auto& gpu = GPUResources::Get();
@@ -145,7 +143,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 		}
 	}
 
-	// All transforms & materials`
+	// All transforms & materials
 	{
 		uint32_t currentIndex = 0;
 		uint32_t currentMaterialIndex = 0;
@@ -239,10 +237,15 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 				.CastShadow = lightComp.CastShadows,
 			};
 
-			for (int i = 0; i < CSM_AMOUNT; i++)
+			if (lightComp.CastShadows && lightComp.Type == LightType::Directional)
 			{
-				light.TransformId[i] = gpu.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
-				light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.LightMapID);
+				for (int i = 0; i < CSM_AMOUNT; i++)
+				{
+					light.TransformId[i] = gpu.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
+
+				
+					light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.m_ShadowMaps[i]->GetID());
+				}
 			}
 
 			allLights[lightCount] = std::move(light);
@@ -288,31 +291,24 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 	{
 		auto [transform, light] = view.get<TransformComponent, LightComponent>(e);
 
-		if (light.Type != LightType::Directional)
+		if (light.Type != LightType::Directional || !light.CastShadows)
 		{
 			continue;
 		}
-		
-		// TODO: Execute shadow pipeline for each light
 
-		passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
-		//ShadowPipeline.Execute(passCtx);
-		
-		//light.LightMapID = ShadowPipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->GetID();
-
-		//passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[0].CameraID);
+		light.LightMapIDs.clear();
 		for (int i = 0; i < CSM_AMOUNT; i++)
 		{
-			//ShadowPipeline.Execute(passCtx);
+			light.LightMapIDs.push_back(light.m_ShadowMaps[i]->GetID());
+			passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(light.m_LightViews[i].CameraID);
+			passCtx.resolution = Vector2{ 4096, 4096 };
+			shadowRenderPipeline->Render(passCtx, light.m_ShadowMaps[i]);
 		}
 	}
 
-	//GBufferPipeline.Execute(passCtx);
-
-
-
 	// Set back the camera ID to the actual desired camera.
 	passCtx.cameraID = GPUResources::Get().GetBindlessCameraID(inContext.CameraID);
+	passCtx.resolution = Context.Size;
 	sceneRenderPipeline->Render(passCtx);
 }
 

@@ -16,6 +16,7 @@
 namespace Nuake
 {
 	class SceneRenderPipeline;
+	class ShadowRenderPipeline;
 
 	class VkMesh;
 
@@ -27,6 +28,7 @@ namespace Nuake
 	public:
 		RenderContext Context;
 		Ref<SceneRenderPipeline> sceneRenderPipeline;
+		Ref<ShadowRenderPipeline> shadowRenderPipeline;
 
 	public:
 		UUID CurrentCamera;

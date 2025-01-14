@@ -717,167 +717,167 @@ namespace Nuake
 
 				for (int i = 0; i < CSM_AMOUNT; i++)
 				{
-					light.m_Framebuffers[i]->Bind();
-					light.m_Framebuffers[i]->Clear();
-					{
-						shader->SetUniform("u_LightTransform", light.mViewProjections[i]);
-						for (auto e : meshView)
-						{
-							auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-							if (mesh.ModelResource != nullptr && visibility.Visible)
-							{
-								for (auto& m : mesh.ModelResource->GetMeshes())
-									Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-							}
-						}
-
-						for (auto e : quakeView)
-						{
-							auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
-
-							if (model.IsTransparent || !visibility.Visible)
-								continue;
-
-							
-						}
-						Renderer::Flush(shader, true);
-
-						auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
-						for (auto e : spriteView)
-						{
-							auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
-
-							if (!visibility.Visible || !sprite.SpriteMesh)
-								continue;
-
-							auto finalQuadTransform = transform.GetGlobalTransform();
-							if (sprite.Billboard)
-							{
-								if (sprite.PositionFacing)
-								{
-									const Matrix4& invView = glm::inverse(mView);
-									const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
-									const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
-									const Vector3& direction = cameraPosition - spritePosition;
-									finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
-								}
-								else
-								{
-									finalQuadTransform = glm::inverse(mView);
-
-								}
-
-								if (sprite.LockYRotation)
-								{
-									// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
-									finalQuadTransform[1] = Vector4(0, 1, 0, 0);
-									finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
-									finalQuadTransform = finalQuadTransform;
-								}
-
-								finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
-
-								// Scale
-								finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
-							}
-
-							Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
-						}
-
-						Renderer::Flush(shader, true);
-					}
+					//light.m_Framebuffers[i]->Bind();
+					//light.m_Framebuffers[i]->Clear();
+					//{
+					//	shader->SetUniform("u_LightTransform", light.mViewProjections[i]);
+					//	for (auto e : meshView)
+					//	{
+					//		auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+					//		if (mesh.ModelResource != nullptr && visibility.Visible)
+					//		{
+					//			for (auto& m : mesh.ModelResource->GetMeshes())
+					//				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+					//		}
+					//	}
+					//
+					//	for (auto e : quakeView)
+					//	{
+					//		auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
+					//
+					//		if (model.IsTransparent || !visibility.Visible)
+					//			continue;
+					//
+					//		
+					//	}
+					//	Renderer::Flush(shader, true);
+					//
+					//	auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
+					//	for (auto e : spriteView)
+					//	{
+					//		auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
+					//
+					//		if (!visibility.Visible || !sprite.SpriteMesh)
+					//			continue;
+					//
+					//		auto finalQuadTransform = transform.GetGlobalTransform();
+					//		if (sprite.Billboard)
+					//		{
+					//			if (sprite.PositionFacing)
+					//			{
+					//				const Matrix4& invView = glm::inverse(mView);
+					//				const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+					//				const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+					//				const Vector3& direction = cameraPosition - spritePosition;
+					//				finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+					//			}
+					//			else
+					//			{
+					//				finalQuadTransform = glm::inverse(mView);
+					//
+					//			}
+					//
+					//			if (sprite.LockYRotation)
+					//			{
+					//				// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
+					//				finalQuadTransform[1] = Vector4(0, 1, 0, 0);
+					//				finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
+					//				finalQuadTransform = finalQuadTransform;
+					//			}
+					//
+					//			finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
+					//
+					//			// Scale
+					//			finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
+					//		}
+					//
+					//		Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
+					//	}
+					//
+					//	Renderer::Flush(shader, true);
+					//}
 				}
 			}
 			else if (light.Type == LightType::Spot)
 			{
 				RenderCommand::Disable(RendererEnum::FACE_CULL);
 
-				light.m_Framebuffers[0]->Bind();
-				light.m_Framebuffers[0]->Clear();
-				{
-					Matrix4 spotLightTransform = Matrix4(1.0f);
-
-
-					Vector3 pos = lightTransform.GetGlobalPosition();
-					pos.y *= -1.0f;
-					pos.x *= -1.0f;
-					pos.z *= -1.0f;
-					spotLightTransform = glm::translate(spotLightTransform, pos);
-
-					Vector3 direction = lightTransform.GetGlobalRotation() * Vector3(0, 0, 1);
-					auto lookatAt = lookAt(Vector3(), direction, Vector3(0, 1, 0));
-					Quat offset = QuatFromEuler(0, -90.0f, 0);
-					Quat offset2 = QuatFromEuler(180.0f, 0.0f, 0);
-					
-					const Quat& globalRotation = glm::normalize(lightTransform.GetGlobalRotation());
-					const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
-
-					shader->SetUniform("u_LightTransform", light.GetProjection() * glm::inverse(lightTransform.GetGlobalTransform()));
-					for (auto e : meshView)
-					{
-						auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-						if (mesh.ModelResource != nullptr && visibility.Visible)
-						{
-							for (auto& m : mesh.ModelResource->GetMeshes())
-								Renderer::SubmitMesh(m, transform.GetGlobalTransform());
-						}
-					}
-
-					for (auto e : quakeView)
-					{
-						auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
-
-						if (model.IsTransparent || !visibility.Visible)
-							continue;
-
-						
-					}
-					Renderer::Flush(shader, true);
-
-					auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
-					for (auto e : spriteView)
-					{
-						auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
-
-						if (!visibility.Visible || !sprite.SpriteMesh)
-							continue;
-
-						auto finalQuadTransform = transform.GetGlobalTransform();
-						if (sprite.Billboard)
-						{
-							if (sprite.PositionFacing)
-							{
-								const Matrix4& invView = glm::inverse(mView);
-								const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
-								const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
-								const Vector3& direction = cameraPosition - spritePosition;
-								finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
-							}
-							else
-							{
-								finalQuadTransform = glm::inverse(mView);
-
-							}
-
-							if (sprite.LockYRotation)
-							{
-								// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
-								finalQuadTransform[1] = Vector4(0, 1, 0, 0);
-								finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
-								finalQuadTransform = finalQuadTransform;
-							}
-
-							finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
-
-							// Scale
-							finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
-						}
-
-						Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
-					}
-
-					Renderer::Flush(shader, true);
-				}
+				//light.m_Framebuffers[0]->Bind();
+				//light.m_Framebuffers[0]->Clear();
+				//{
+				//	Matrix4 spotLightTransform = Matrix4(1.0f);
+				//
+				//
+				//	Vector3 pos = lightTransform.GetGlobalPosition();
+				//	pos.y *= -1.0f;
+				//	pos.x *= -1.0f;
+				//	pos.z *= -1.0f;
+				//	spotLightTransform = glm::translate(spotLightTransform, pos);
+				//
+				//	Vector3 direction = lightTransform.GetGlobalRotation() * Vector3(0, 0, 1);
+				//	auto lookatAt = lookAt(Vector3(), direction, Vector3(0, 1, 0));
+				//	Quat offset = QuatFromEuler(0, -90.0f, 0);
+				//	Quat offset2 = QuatFromEuler(180.0f, 0.0f, 0);
+				//	
+				//	const Quat& globalRotation = glm::normalize(lightTransform.GetGlobalRotation());
+				//	const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+				//
+				//	shader->SetUniform("u_LightTransform", light.GetProjection() * glm::inverse(lightTransform.GetGlobalTransform()));
+				//	for (auto e : meshView)
+				//	{
+				//		auto [transform, mesh, visibility] = meshView.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
+				//		if (mesh.ModelResource != nullptr && visibility.Visible)
+				//		{
+				//			for (auto& m : mesh.ModelResource->GetMeshes())
+				//				Renderer::SubmitMesh(m, transform.GetGlobalTransform());
+				//		}
+				//	}
+				//
+				//	for (auto e : quakeView)
+				//	{
+				//		auto [transform, model, visibility] = quakeView.get<TransformComponent, BSPBrushComponent, VisibilityComponent>(e);
+				//
+				//		if (model.IsTransparent || !visibility.Visible)
+				//			continue;
+				//
+				//		
+				//	}
+				//	Renderer::Flush(shader, true);
+				//
+				//	auto spriteView = scene.m_Registry.view<TransformComponent, SpriteComponent, VisibilityComponent>();
+				//	for (auto e : spriteView)
+				//	{
+				//		auto [transform, sprite, visibility] = spriteView.get<TransformComponent, SpriteComponent, VisibilityComponent>(e);
+				//
+				//		if (!visibility.Visible || !sprite.SpriteMesh)
+				//			continue;
+				//
+				//		auto finalQuadTransform = transform.GetGlobalTransform();
+				//		if (sprite.Billboard)
+				//		{
+				//			if (sprite.PositionFacing)
+				//			{
+				//				const Matrix4& invView = glm::inverse(mView);
+				//				const Vector3& cameraPosition = Vector3(invView[3][0], invView[3][1], invView[3][2]);
+				//				const Vector3& spritePosition = Vector3(finalQuadTransform[3][0], finalQuadTransform[3][1], finalQuadTransform[3][2]);
+				//				const Vector3& direction = cameraPosition - spritePosition;
+				//				finalQuadTransform = glm::inverse(glm::lookAt(Vector3(), direction, Vector3(0, 1, 0)));
+				//			}
+				//			else
+				//			{
+				//				finalQuadTransform = glm::inverse(mView);
+				//
+				//			}
+				//
+				//			if (sprite.LockYRotation)
+				//			{
+				//				// This locks the pitch rotation on the billboard, useful for trees, lamps, etc.
+				//				finalQuadTransform[1] = Vector4(0, 1, 0, 0);
+				//				finalQuadTransform[2] = Vector4(finalQuadTransform[2][0], 0, finalQuadTransform[2][2], 0);
+				//				finalQuadTransform = finalQuadTransform;
+				//			}
+				//
+				//			finalQuadTransform[3] = Vector4(Vector3(transform.GetGlobalTransform()[3]), 1.0f);
+				//
+				//			// Scale
+				//			finalQuadTransform = glm::scale(finalQuadTransform, transform.GetGlobalScale());
+				//		}
+				//
+				//		Renderer::SubmitMesh(sprite.SpriteMesh, finalQuadTransform, (uint32_t)e);
+				//	}
+				//
+				//	Renderer::Flush(shader, true);
+				//}
 
 				lightDebug = light;
 			}
@@ -899,24 +899,24 @@ namespace Nuake
 		
 			for (int i = 0; i < CSM_AMOUNT; i++)
 			{
-				light.m_Framebuffers[i]->Bind();
-				{
-					gBufferSkinnedMeshShader->SetUniform("u_LightTransform", light.mViewProjections[i]);
-					for (auto e : skinnedView)
-					{
-						auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
-						if (mesh.ModelResource != nullptr && visibility.Visible)
-						{
-							auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
-							SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
-
-							for (auto& m : mesh.ModelResource->GetMeshes())
-							{
-								m->Draw(gBufferSkinnedMeshShader, false);
-							}
-						}
-					}
-				}
+				//light.m_Framebuffers[i]->Bind();
+				//{
+				//	gBufferSkinnedMeshShader->SetUniform("u_LightTransform", light.mViewProjections[i]);
+				//	for (auto e : skinnedView)
+				//	{
+				//		auto [transform, mesh, visibility] = skinnedView.get<TransformComponent, SkinnedModelComponent, VisibilityComponent>(e);
+				//		if (mesh.ModelResource != nullptr && visibility.Visible)
+				//		{
+				//			auto& rootBoneNode = mesh.ModelResource->GetSkeletonRootNode();
+				//			SetSkeletonBoneTransformRecursive(scene, rootBoneNode, gBufferSkinnedMeshShader);
+				//
+				//			for (auto& m : mesh.ModelResource->GetMeshes())
+				//			{
+				//				m->Draw(gBufferSkinnedMeshShader, false);
+				//			}
+				//		}
+				//	}
+				//}
 			}
 		}
 

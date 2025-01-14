@@ -330,7 +330,7 @@ namespace Nuake
             {
                 for (int i = 0; i < CSM_AMOUNT; i++)
                 {
-                    light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
+                    //light.m_Framebuffers[i]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(17 + i);
                     const int shadowMapId = shadowmapAmount + i;
                     deferredShader->SetUniform("ShadowMaps[" + std::to_string(shadowMapId) + "]", 17 + i);
                     deferredShader->SetUniform("u_DirectionalLight.CascadeDepth[" + std::to_string(i) + "]", light.mCascadeSplitDepth[i]);
@@ -372,7 +372,7 @@ namespace Nuake
                     deferredShader->SetUniform(uniformAccessor + "ShadowMapID", spotShadowMapCount);
                     deferredShader->SetUniform(uniformAccessor + "Transform", light.GetProjection() * glm::inverse(transform.GetGlobalTransform()));
 
-                    light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(shadowMapTextureSlot);
+                    //light.m_Framebuffers[0]->GetTexture(GL_DEPTH_ATTACHMENT)->Bind(shadowMapTextureSlot);
                     deferredShader->SetUniform("SpotShadowMaps[" + std::to_string(spotShadowMapCount) + "]", shadowMapTextureSlot);
                     spotShadowMapCount++;
                 }

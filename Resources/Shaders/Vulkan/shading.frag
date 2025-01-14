@@ -175,12 +175,30 @@ float linearDepth(float z, float near, float far) {
     return near * far / (far - z * (far - near));
 }
 
+int GetCSMSplit(float depth)
+{
+    for(int i = 0; i < 4; i++)
+    {
+        float csmSplitDepth = pushConstants.cascadeDepth[i];
+
+        if(depth < csmSplitDepth + 0.000001)
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
 float ShadowCalculation(Light light, float3 fragPos, float3 normal)
 {
+    // Find correct CSM splits from depth
     CameraView camView = cameras[pushConstants.CameraID];
     float depth = length(fragPos - camView.Position);
+    int splitIndex = GetCSMSplit(depth);
 
-    CameraView lightView = cameras[light.transformId[0]];
+    // Calculate shadows for found split
+    CameraView lightView = cameras[light.transformId[splitIndex]];
     int shadowMap = light.shadowMapTextureId[0];
     float4 fragLightSpace = mul(lightView.Projection, mul(lightView.View, float4(fragPos, 1.0)));
     float3 projCoords = fragLightSpace.xyz / fragLightSpace.w;
@@ -193,7 +211,7 @@ float ShadowCalculation(Light light, float3 fragPos, float3 normal)
     //projCoords.y = 1.0 - projCoords.y;
     float currentDepth = projCoords.z;
     float bias = max(0.005 * (1.0 - dot(normal, light.direction)), 0.0005);
-    float shadowMapDepth = textures[light.shadowMapTextureId[0]].Sample(mySampler, projCoords.xy).r;
+    float shadowMapDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler, projCoords.xy).r;
 
     return (currentDepth > shadowMapDepth);//> 0.0 ? 1.0 : 0.0;
 }
@@ -255,7 +273,7 @@ PSOutput main(PSInput input)
 
         if(light.castShadow == true)
         {
-            //shadow *= ShadowCalculation(light, worldPos, N);
+            shadow *= ShadowCalculation(light, worldPos, N);
             //output.oColor0 = float4(albedo * 0.1 + float3(shadow, shadow, shadow), 1);
             //return output;
         }
