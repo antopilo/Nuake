@@ -94,6 +94,22 @@ SceneRenderPipeline::SceneRenderPipeline()
 
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 
+	// Setup bloom targets
+	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	BloomThreshold = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+
+	//Vector2 currentSize;
+	//for (int i = 0; i < BloomIteration; i++)
+	//{
+	//	Ref<VulkanImage> downSample = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	//	BloomDownSample.push_back(downSample);
+	//
+	//	m_DownSampleFB.push_back(downSample);
+	//	m_UpSampleFB.push_back(upSample);
+	//	m_HBlurFB.push_back(hBlur);
+	//	m_VBlurFB.push_back(vBlur);
+	//}
+
 	// Initialize pipeline
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
 

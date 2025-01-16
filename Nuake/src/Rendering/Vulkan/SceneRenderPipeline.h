@@ -48,6 +48,18 @@ namespace Nuake
 		int SourceTextureID;
 	};
 
+	struct BloomConstant
+	{
+		int Stage;
+		int SourceTextureID;
+		int HasLensDirt;
+		int LensDirtTextureID;
+		float LensDirtIntensity;
+		float Threshold;
+		float BlurAmount;
+		int BlurDirection;
+	};
+
 	// This class handles all the rendering of the scene
 	class SceneRenderPipeline
 	{
@@ -65,9 +77,22 @@ namespace Nuake
 
 		Ref<VulkanImage> TonemappedOutput;
 
+		// Bloom
+		const int BloomIteration = 4;
+		const float DownsampleScale = 0.4f;
+		Ref<VulkanImage> BloomThreshold;
+		std::vector<Ref<VulkanImage>> BloomDownSample;
+		std::vector<Ref<VulkanImage>> BloomUpSample;
+		std::vector<Ref<VulkanImage>> BloomHBlur;
+		std::vector<Ref<VulkanImage>> BloomVBlur;
+		Ref<VulkanImage> BloomOutput;
+
+		// Push constant
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
 		TonemapConstant tonemapConstant;
+		BloomConstant bloomConstant;
+
 		static RenderPipeline GBufferPipeline;
 
 	public:
