@@ -660,7 +660,7 @@ namespace Nuake
 			}
 		}
 
-		entityToManagedObjects.emplace(entity.GetID(), classInstance);
+		
 
 		// Override with user values set in the editor.
 		for (auto& exposedVarUserValue : component.ExposedVar)
@@ -726,6 +726,8 @@ namespace Nuake
 				classInstance.SetFieldValue(exposedVarUserValue.Name, exposedVarUserValue.Value);
 			}
 		}
+
+		entityToManagedObjects.emplace(entity.GetID(), std::move(classInstance));
 	}
 
 	Coral::ManagedObject* ScriptingEngineNet::GetEntityScript(const Entity& entity)

@@ -7,16 +7,20 @@ namespace Nuake.Net
     public class Scene
     {
         internal static unsafe delegate*<NativeString, int> GetEntityIcall;
-        internal static unsafe delegate*<NativeString, NativeInstance<Entity>> GetEntityScriptFromNameIcall;
+        internal static unsafe delegate*<NativeString, NativeInstance<object>*, void> GetEntityScriptFromNameIcall;
         internal static unsafe delegate*<int, NativeInstance<Entity>> GetEntityScriptFromHandleIcall;
         internal static unsafe delegate*<NativeString, int> InstancePrefabIcall;
 
         public static T? GetEntity<T>(string entityName) where T : class
         {
-            NativeInstance<Entity> handle;
-            unsafe { handle = GetEntityScriptFromNameIcall(entityName); }
+            NativeInstance<object> handle;
 
-            Entity? entity = handle.Get();
+            // This doesnt :(
+            unsafe { GetEntityScriptFromNameIcall(entityName, &handle); }
+
+
+            object? entity = handle.Get();
+            Engine.Log("Fetched entityL: " + entity);
             if (entity != null && entity is T)
             {
                 return entity as T;
