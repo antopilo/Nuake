@@ -9,6 +9,8 @@ project "NuakeNet"
     vsprops {
        AppendTargetFrameworkToOutputPath =  "false",
        Nullable = "enable",
+       CopyLocalLockFileAssemblies = "true",
+       EnableDynamicLoading = "true",
     }
 
     files 

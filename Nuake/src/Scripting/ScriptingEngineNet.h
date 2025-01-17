@@ -101,7 +101,7 @@ namespace Nuake
 
 		void CreateEntityScript(const std::string& path, const std::string& entityName);
 		void RegisterEntityScript(Entity& entity);
-		Coral::ManagedObject GetEntityScript(const Entity& entity);
+		Coral::ManagedObject* GetEntityScript(const Entity& entity);
 		bool HasEntityScriptInstance(const Entity& entity);
 		std::string FindClassNameInScript(const std::string& filePath);
 

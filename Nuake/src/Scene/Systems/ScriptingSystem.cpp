@@ -56,7 +56,7 @@ namespace Nuake
 			{
 				// We can now call on init on it.
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-				scriptInstance.InvokeMethod("OnInit");
+				scriptInstance->InvokeMethod("OnInit");
 			}
 		}
 		
@@ -113,7 +113,7 @@ namespace Nuake
 			{
 				// We can now call on init on it.
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(e);
-				scriptInstance.InvokeMethod("OnInit");
+				scriptInstance->InvokeMethod("OnInit");
 			}
 		}
 
@@ -127,7 +127,7 @@ namespace Nuake
 
 			auto entity = Entity{ e, m_Scene };
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnUpdate", ts.GetSeconds());
+			scriptInstance->InvokeMethod("OnUpdate", ts.GetSeconds());
 		}
 
 		for (auto& widget : CanvasParser::Get().GetAllCustomWidgetInstance())
@@ -160,7 +160,7 @@ namespace Nuake
 
 			auto entity = Entity{ e, m_Scene };
 			auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-			scriptInstance.InvokeMethod("OnFixedUpdate", ts.GetSeconds());
+			scriptInstance->InvokeMethod("OnFixedUpdate", ts.GetSeconds());
 		}
 	}
 
@@ -180,7 +180,7 @@ namespace Nuake
 			{
 				Logger::Log(entity.GetComponent<NameComponent>().Name);
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity);
-				scriptInstance.InvokeMethod("OnDestroy");
+				scriptInstance->InvokeMethod("OnDestroy");
 			}
 		}
 
@@ -226,14 +226,14 @@ namespace Nuake
 			if (entity1.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity1))
 			{
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity1);
-				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity2);
+				scriptInstance->InvokeMethod("OnCollisionInternal", (int)col.Entity2);
 			}
 
 			Entity entity2 = { (entt::entity)col.Entity2, m_Scene };
 			if (entity2.IsValid() && scriptingEngineNet.HasEntityScriptInstance(entity2))
 			{
 				auto scriptInstance = scriptingEngineNet.GetEntityScript(entity2);
-				scriptInstance.InvokeMethod("OnCollisionInternal", (int)col.Entity1);
+				scriptInstance->InvokeMethod("OnCollisionInternal", (int)col.Entity1);
 			}
 		}
 

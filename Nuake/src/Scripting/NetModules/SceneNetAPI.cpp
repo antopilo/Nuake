@@ -43,12 +43,12 @@ namespace Nuake {
 		return scene->GetEntity(entityName).GetHandle();
 	}
 
-	Coral::ManagedObject GetEntityScriptFromName(Coral::String entityName)
+	Coral::ManagedObject* GetEntityScriptFromName(Coral::String entityName)
 	{
 		auto scene = Engine::GetCurrentScene();
-		if (!scene->EntityExists(entityName))
+		if (!scene->EntityExists(std::string(entityName)))
 		{
-			return Coral::ManagedObject(); // Error code: entity not found.
+			return nullptr; // Error code: entity not found.
 		}
 
 		Entity entity = scene->GetEntity(entityName);
@@ -62,14 +62,14 @@ namespace Nuake {
 
 	}
 
-	Coral::ManagedObject GetEntityScriptFromHandle(int entityHandle)
+	Coral::ManagedObject* GetEntityScriptFromHandle(int entityHandle)
 	{
 		auto scene = Engine::GetCurrentScene();
 
 		Entity entity = { (entt::entity)(entityHandle), scene.get()};
 		if (!entity.IsValid())
 		{
-			return Coral::ManagedObject(); // Error code: entity not found.
+			return nullptr; // Error code: entity not found.
 		}
 
 		auto& scriptingEngine = ScriptingEngineNet::Get();

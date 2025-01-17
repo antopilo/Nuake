@@ -688,8 +688,8 @@ namespace Nuake
 						{
 							// In the case the entity has a script & instance, we pass that.
 							// This gives access to the objects scripts.
-							auto scriptInstance = GetEntityScript(scriptEntity);
-							classInstance.SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, scriptInstance);
+							//Coral::ManagedObject* scriptInstance = GetEntityScript(scriptEntity);
+							//classInstance->SetFieldValue<Coral::ManagedObject>(exposedVarUserValue.Name, scriptInstance);
 						}
 						else
 						{
@@ -728,17 +728,17 @@ namespace Nuake
 		}
 	}
 
-	Coral::ManagedObject ScriptingEngineNet::GetEntityScript(const Entity& entity)
+	Coral::ManagedObject* ScriptingEngineNet::GetEntityScript(const Entity& entity)
 	{
 		if (!HasEntityScriptInstance(entity))
 		{
 			std::string name = entity.GetComponent<NameComponent>().Name;
 			Logger::Log(name);
 			Logger::Log("Failed to get entity .Net script instance, doesn't exist", ".net", CRITICAL);
-			return Coral::ManagedObject();
+			return nullptr;
 		}
 
-		return entityToManagedObjects[entity.GetID()];
+		return &entityToManagedObjects[entity.GetID()];
 	}
 
 	bool ScriptingEngineNet::HasEntityScriptInstance(const Entity& entity)
