@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <src/Resource/Serializer/BinarySerializer.h>
 
 
 namespace Nuake {
@@ -55,8 +56,12 @@ namespace Nuake {
 				j["Brushes"][i] = m_Brushes[i].GetID();
 			}
 
+			BinarySerializer serializer;
 			for (unsigned int i = 0; i < m_Meshes.size(); i++)
 			{
+				const std::string& path = FileSystem::RelativeToAbsolute("mesh" + std::to_string(i) + ".mesh");
+				serializer.SerializeMesh(path, m_Meshes[i]);
+
 				j["Meshes"][i] = m_Meshes[i]->Serialize();
 			}
 			

@@ -60,7 +60,7 @@ namespace Nuake
 			};
 		}
 	public:
-		UUID AlbedoImage;
+		UUID AlbedoImage = UUID(0);
 		UUID AOImage;
 		UUID MetalnessImage;
 		UUID RoughnessImage;
@@ -99,7 +99,7 @@ namespace Nuake
 		inline void SetUnlit(bool value) { data.u_Unlit = value; }
 		inline bool GetUnlit() { return data.u_Unlit == 1; }
 
-		bool HasAlbedo() { return m_Albedo != nullptr; }
+		bool HasAlbedo() { return (m_Albedo != nullptr || AlbedoImage != UUID(0)); }
 		void SetAlbedo(const std::string path) { m_Albedo = CreateRef<Texture>(path); }
 		void SetAlbedo(Ref<Texture> texture) { m_Albedo = texture; }
 
@@ -174,6 +174,7 @@ namespace Nuake
 
 		bool Deserialize(const json& j) override
 		{
+			ID = static_cast<uint64_t>(j["UUID"]);
 
 			if (j.contains("Albedo"))
 			{

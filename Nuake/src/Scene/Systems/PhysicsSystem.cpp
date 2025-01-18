@@ -205,18 +205,18 @@ namespace Nuake
 			{
 				const auto& modelComponent = entity.GetComponent<ModelComponent>();
 
-				if (modelComponent.ModelResource)
-				{
-					uint32_t subMeshId = meshColliderComponent.SubMesh;
-					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
-					if (subMeshId >= submeshes.size())
-					{
-						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
-					}
-
-					Ref<Mesh> mesh = submeshes[subMeshId];
-					meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
-				}
+				//if (modelComponent.ModelResource.Get<Model>())
+				//{
+				//	uint32_t subMeshId = meshColliderComponent.SubMesh;
+				//	const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
+				//	if (subMeshId >= submeshes.size())
+				//	{
+				//		Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
+				//	}
+				//
+				//	Ref<Mesh> mesh = submeshes[subMeshId];
+				//	meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
+				//}
 			}
 		}
 	}
@@ -281,18 +281,19 @@ namespace Nuake
 
 				isTrigger = component.IsTrigger;
 
-				if (modelComponent.ModelResource)
-				{
-					uint32_t subMeshId = component.SubMesh;
-					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource->GetMeshes();
-					if (subMeshId >= submeshes.size())
-					{
-						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
-					}
-
-					Ref<Mesh> mesh = submeshes[subMeshId];
-					shape = CreateRef<Physics::MeshShape>(mesh);
-				}
+				//modelComponent.ModelResource.Data()
+				//if (modelComponent.ModelResource.Get<Model>())
+				//{
+				//	uint32_t subMeshId = component.SubMesh;
+				//	const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
+				//	if (subMeshId >= submeshes.size())
+				//	{
+				//		Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
+				//	}
+				//
+				//	Ref<Mesh> mesh = submeshes[subMeshId];
+				//	shape = CreateRef<Physics::MeshShape>(mesh);
+				//}
 			}
 
 			if (!shape)

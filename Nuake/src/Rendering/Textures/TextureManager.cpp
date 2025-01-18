@@ -58,6 +58,8 @@ namespace Nuake
 		m_Registry2.emplace(Resources_Images_folder_icon_png_path, CreateRef<VulkanImage>(Resources_Images_folder_icon_png, Resources_Images_folder_icon_png_len));
 		m_Registry2.emplace(Resources_Images_audio_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_audio_file_icon_png, Resources_Images_audio_file_icon_png_len));
 		m_Registry2.emplace("missing_texture", CreateRef<VulkanImage>(Resources_Images_missing_texture_png, Resources_Images_missing_texture_png_len));
+
+		GPUResources::Get().AddTexture(m_Registry2["missing_texture"]);
 		//
 		//unsigned char whitePixel[] = { 255, 255, 255, 255 };
 		//m_Registry.emplace("Resources/Textures/Default.png", CreateRef<Texture>(Vector2( 1, 1 ), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &whitePixel));

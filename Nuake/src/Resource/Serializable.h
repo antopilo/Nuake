@@ -1,11 +1,15 @@
 #pragma once
 #include <string>
 #include <json/json.hpp>
+
+#include "src/Core/Core.h"
+
 using json = nlohmann::json;
 
 #define BEGIN_SERIALIZE() json j;
 #define SERIALIZE_VAL_LBL(lbl, v) j[lbl] = v;
 #define SERIALIZE_VAL(v) j[#v] = this->v;
+#define SERIALIZE_RID(lbl, v) j[#lbl] = static_cast<uint64_t>(v);
 #define SERIALIZE_RES_FILE(v) \
 	bool validFile = this->v.file != nullptr && this->v.file->Exist(); \
 	j["validFile"#v] = validFile; \
@@ -90,9 +94,35 @@ p = j[#p]; \
 		if(HasComponent<c>()) \
 			GetComponent<c>().PostDeserialize(*m_Scene);
 
-class ISerializable
+namespace Nuake
 {
-public:
-	virtual json Serialize() = 0;
-	virtual bool Deserialize(const json& j) = 0;
-};
+	class Mesh;
+	class Model;
+	class Material;
+
+	class ISerializer
+	{
+	public:
+		virtual Ref<Material> DeserializeMaterial(const std::string& path) = 0;
+		virtual bool SerializeMaterial(const std::string& path, Ref<Material> material) = 0;
+
+		virtual bool SerializeModel(const std::string& path, Ref<Model> model) = 0;
+		virtual Ref<Model> DeserializeModel(const std::string& path) = 0;
+
+		virtual Ref<Mesh> DeserializeMesh(const std::string& path) = 0;
+		virtual bool SerializeMesh(const std::string& path, Ref<Mesh> mesh) = 0;
+
+	private:
+
+	};
+
+	class ISerializable
+	{
+	public:
+		virtual json Serialize() = 0;
+		virtual bool Deserialize(const json& j) = 0;
+
+		virtual void AcceptSerialize(ISerializer& serializer) {};
+	};
+}
+

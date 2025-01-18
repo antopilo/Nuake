@@ -41,18 +41,7 @@ Ref<Material> ResourceLoader::LoadMaterial(const std::string& path)
 	UUID uuid = ReadUUID(j);
 
 	// Check if resource is already loaded.
-	if (ResourceManager::IsResourceLoaded(uuid))
-	{
-		return ResourceManager::GetResource<Material>(uuid);
-	}
-
-	Ref<Material> material = CreateRef<Material>();
-	material->ID = uuid;
-	material->Path = path;
-	material->Deserialize(j);
-	ResourceManager::RegisterResource(material);
-
-	return material;
+	return ResourceManager::GetResource<Material>(uuid);
 }
 
 Ref<Model> ResourceLoader::LoadModel(const std::string& path)

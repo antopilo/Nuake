@@ -122,7 +122,6 @@ namespace Nuake
 	{
 		if (j.contains("Path"))
 		{
-			this->IsEmbedded = true;
 
 			ModelLoader loader;
 			auto otherModel = loader.LoadSkinnedModel(j["Path"], false);

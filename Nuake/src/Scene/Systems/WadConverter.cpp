@@ -450,8 +450,6 @@ namespace Nuake
 		for (auto& t : ConvertedTextures)
 		{
 			Ref<Material> material = CreateRef<Material>();
-			material->IsEmbedded = false;
-
 
 			if (t.fullbright)
 			{

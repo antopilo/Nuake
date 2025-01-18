@@ -47,13 +47,13 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 		for (auto e : view)
 		{
 			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-			if (!mesh.ModelResource || !visibility.Visible)
+			if (!mesh.ModelResource.Get<Model>() || !visibility.Visible)
 			{
 				continue;
 			}
 
 			const int entityId = Entity((entt::entity)e, scene.get()).GetID();
-			for (auto& m : mesh.ModelResource->GetMeshes())
+			for (auto& m : mesh.ModelResource.Get<Model>()->GetMeshes())
 			{
 				Ref<VkMesh> vkMesh = m->GetVkMesh();
 				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, vkMesh->GetDescriptorSet(), 1);
@@ -145,14 +145,14 @@ SceneRenderPipeline::SceneRenderPipeline()
 		for (auto e : view)
 		{
 			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-			if (!mesh.ModelResource || !visibility.Visible)
+			if (!mesh.ModelResource.Get<Model>() || !visibility.Visible)
 			{
 				continue;
 			}
 
 			gbufferConstant.Index = res.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()];
 
-			for (auto& m : mesh.ModelResource->GetMeshes())
+			for (auto& m : mesh.ModelResource.Get<Model>()->GetMeshes())
 			{
 				Ref<VkMesh> vkMesh = m->GetVkMesh();
 

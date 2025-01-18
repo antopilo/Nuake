@@ -3,6 +3,7 @@
 #include "src/Core/Logger.h"
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Resource/ModelLoader.h"
+#include "Serializer/BinarySerializer.h"
 
 namespace Nuake
 {
@@ -48,8 +49,11 @@ namespace Nuake
 		else
 		{
 			j["UUID"] = static_cast<uint64_t>(ID);
+
+			BinarySerializer serializer;
 			for (uint32_t i = 0; i < std::size(m_Meshes); i++)
 			{
+				serializer.SerializeMesh(FileSystem::RelativeToAbsolute("mesh" + std::to_string(i) + ".nkmesh"), m_Meshes[i]);
 				j["Meshes"][i] = m_Meshes[i]->Serialize();
 			}
 		}
@@ -60,7 +64,7 @@ namespace Nuake
 	{
 		if (j.contains("Path"))
 		{
-			this->IsEmbedded = true;
+			
 
 			ModelLoader loader;
 			auto otherModel = loader.LoadModel(j["Path"], false);

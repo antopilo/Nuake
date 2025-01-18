@@ -162,7 +162,10 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			}
 
 			auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
-			if (!mesh.ModelResource || !visibility.Visible)
+
+			// Get() will load the resource if its not loaded already
+			Ref<Model> modelResource = mesh.ModelResource.Get<Model>();
+			if (!modelResource || !visibility.Visible)
 			{
 				continue;
 			}
@@ -172,11 +175,12 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			gpu.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()] = currentIndex;
 
 			// Upload mesh material to GPU resources
-			for (auto& m : mesh.ModelResource->GetMeshes())
+			for (auto& m : modelResource->GetMeshes())
 			{
 				// TODO: Avoid duplicated materials
 				if (Ref<Material> material = m->GetMaterial(); material)
 				{
+					auto missingTextureID = TextureManager::Get()->GetTexture2("missing_texture")->GetID();
 					MaterialBufferStruct materialBuffer
 					{
 						.HasAlbedo = material->HasAlbedo(),
@@ -188,7 +192,7 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 						.MetalnessValue = material->data.u_MetalnessValue,
 						.RoughnessValue = material->data.u_RoughnessValue,
 						.AoValue = material->data.u_AOValue,
-						.AlbedoTextureId = material->HasAlbedo() ? gpu.GetBindlessTextureID(material->AlbedoImage) : 0,
+						.AlbedoTextureId = material->HasAlbedo() ? gpu.GetBindlessTextureID(material->AlbedoImage) : gpu.GetBindlessTextureID(missingTextureID),
 						.NormalTextureId = material->HasNormal() ? gpu.GetBindlessTextureID(material->NormalImage) : 0,
 						.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
 						.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
@@ -244,8 +248,6 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 				for (int i = 0; i < CSM_AMOUNT; i++)
 				{
 					light.TransformId[i] = gpu.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
-
-				
 					light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.m_ShadowMaps[i]->GetID());
 				}
 			}

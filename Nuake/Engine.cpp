@@ -26,6 +26,8 @@
 #endif
 #include <imgui/imgui_impl_vulkan.h>
 
+#include <src/Resource/Resolvers/MeshResolver.h>
+
 
 namespace Nuake
 {
@@ -68,6 +70,11 @@ namespace Nuake
 		Modules::StartupModules();
 
 		InitializeCoreSubsystems();
+
+		// Init base resolvers
+		auto& resolvers = ResourceResolverManager::Get();
+		resolvers.RegisterResolver(CreateRef<MeshResolver>());
+		resolvers.RegisterResolver(CreateRef<MaterialResolver>());
 	}
 
 	void Engine::Tick()

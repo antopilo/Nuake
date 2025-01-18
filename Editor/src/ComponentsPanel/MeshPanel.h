@@ -44,10 +44,10 @@ public:
 
             std::string label = "None";
 
-            const bool isModelNone = component.ModelResource == nullptr;
+            const bool isModelNone = component.ModelResource.Get<Model>() == nullptr;
             if (!isModelNone)
             {
-                label = std::to_string(component.ModelResource->ID);
+                label = std::to_string(component.ModelResource.ID);
             }
 
             if (ImGui::Button(label.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0)))
@@ -56,7 +56,7 @@ public:
                 {
                     if (!_expanded)
                     {
-                        _modelInspector = CreateScope<ModelResourceInspector>(component.ModelResource);
+                        _modelInspector = CreateScope<ModelResourceInspector>(component.ModelResource.Get<Model>());
                     }
 
                     _expanded = !_expanded;
@@ -80,19 +80,19 @@ public:
                     if (Nuake::String::EndsWith(fullPath, ".mesh"))
                     {
                         component.ModelPath = fullPath;
-                        component.ModelResource = ResourceLoader::LoadModel(fullPath);
+                        //component.ModelResource = ResourceLoader::LoadModel(fullPath);
                     }
                     else
                     {
                         // Convert to .Model
-                        component.ModelPath = fullPath;
-                        component.LoadModel();
-
-                        _importedPathMesh = fullPath;
-
-                        auto loader = ModelLoader();
-                        auto modelResource = loader.LoadModel(fullPath);
-                        shouldConvert = true;
+                        //component.ModelPath = fullPath;
+                        //component.LoadModel();
+                        //
+                        //_importedPathMesh = fullPath;
+                        //
+                        //auto loader = ModelLoader();
+                        //auto modelResource = loader.LoadModel(fullPath);
+                        //shouldConvert = true;
                     }
                 }
                 ImGui::EndDragDropTarget();
@@ -101,20 +101,20 @@ public:
             if (PopupHelper::DefineConfirmationDialog("##ConvertAsset", "Convert Asset"))
             {
                 // Convert to disk
-                auto loader = ModelLoader();
-                Ref<Model> modelResource = loader.LoadModel(_importedPathMesh);
-                json serializedData = modelResource->SerializeData();
-
-                const std::string exportedMeshPath = _importedPathMesh + ".mesh";
-                FileSystem::BeginWriteFile(exportedMeshPath);
-                FileSystem::WriteLine(serializedData.dump());
-                FileSystem::EndWriteFile();
-
-                ResourceManager::RegisterResource(modelResource);
-
-                // Update component
-                component.ModelPath = exportedMeshPath;
-                component.ModelResource = modelResource;
+                //auto loader = ModelLoader();
+                //Ref<Model> modelResource = loader.LoadModel(_importedPathMesh);
+                //json serializedData = modelResource->SerializeData();
+                //
+                //const std::string exportedMeshPath = _importedPathMesh + ".mesh";
+                //FileSystem::BeginWriteFile(exportedMeshPath);
+                //FileSystem::WriteLine(serializedData.dump());
+                //FileSystem::EndWriteFile();
+                //
+                //ResourceManager::RegisterResource(modelResource);
+                //
+                //// Update component
+                //component.ModelPath = exportedMeshPath;
+                //component.ModelResource = modelResource;
             }
 
             if (shouldConvert)

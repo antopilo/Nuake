@@ -718,18 +718,18 @@ namespace Nuake {
 
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
                 {
-                    char* file = (char*)payload->Data;
-                    std::string fullPath = std::string(file, 256);
-                    fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
-
-                    auto loader = ModelLoader();
-                    auto modelResource = loader.LoadModel(fullPath);
-
-                    auto entity = Engine::GetCurrentScene()->CreateEntity(FileSystem::GetFileNameFromPath(fullPath));
-                    ModelComponent& modelComponent = entity.AddComponent<ModelComponent>();
-                    modelComponent.ModelPath = fullPath;
-                    modelComponent.ModelResource = modelResource;
-                    entity.GetComponent<TransformComponent>().SetLocalPosition(dragnDropWorldPos);
+                    //char* file = (char*)payload->Data;
+                    //std::string fullPath = std::string(file, 256);
+                    //fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
+                    //
+                    //auto loader = ModelLoader();
+                    //auto modelResource = loader.LoadModel(fullPath);
+                    //
+                    //auto entity = Engine::GetCurrentScene()->CreateEntity(FileSystem::GetFileNameFromPath(fullPath));
+                    //ModelComponent& modelComponent = entity.AddComponent<ModelComponent>();
+                    //modelComponent.ModelPath = fullPath;
+                    //modelComponent.ModelResource = modelResource;
+                    //entity.GetComponent<TransformComponent>().SetLocalPosition(dragnDropWorldPos);
                 }
 
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Map"))

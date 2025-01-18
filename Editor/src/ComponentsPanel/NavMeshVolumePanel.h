@@ -363,7 +363,7 @@ public:
 
                                 auto& transformComponent = brush.GetComponent<TransformComponent>();
                                 auto& modelComponent = brush.GetComponent<ModelComponent>();
-                                for (auto& mesh : modelComponent.ModelResource->GetMeshes())
+                                for (auto& mesh : modelComponent.ModelResource.Get<Model>()->GetMeshes())
                                 {
                                     Nuake::NavManager::Get().PushMesh(mesh, transformComponent.GetGlobalTransform());
                                 }

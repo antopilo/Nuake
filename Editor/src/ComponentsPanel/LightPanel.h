@@ -58,7 +58,23 @@ public:
                 ImGui::TableNextColumn();
 
                 const char* lightTypes[] = { "Directional", "Point", "Spot" };
-                ComponentDropDown(lightTypes, Nuake::LightType, component.Type)
+                const char* current_item = lightTypes[(int)component.Type];           \
+                    if (ImGui::BeginCombo("Type", current_item))                \
+                    {                                                           \
+                        for (int n = 0; n < IM_ARRAYSIZE(lightTypes); n++)       \
+                        {                                                       \
+                            bool is_selected = (current_item == lightTypes[n]);  \
+                            if (ImGui::Selectable(lightTypes[n], is_selected))   \
+                            {                                                   \
+                                current_item = lightTypes[n];                    \
+                                component.Type = (Nuake::LightType)n;                            \
+                            }                                                   \
+                                if (is_selected)                                    \
+                                    ImGui::SetItemDefaultFocus();                   \
+                        }                                                       \
+                            ImGui::EndCombo();                                      \
+                    }
+                //ComponentDropDown(lightTypes, Nuake::LightType, component.Type)
                 
                 ImGui::TableNextColumn();
                 ComponentTableReset(component.Type, Nuake::LightType::Point);

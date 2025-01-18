@@ -30,6 +30,8 @@ extern "C" {
 #include <src/Scripting/ScriptingEngineNet.h>
 #include <src/Resource/FGD/FGDFile.h>
 
+#include "src/Resource/ResourceManager.h"
+
 #include <vector>
 #include <map>
 
@@ -286,9 +288,8 @@ namespace Nuake {
                                 if (std::string(texture->name) != "__TB_empty")
                                 {
                                     std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
-
-                                    if (const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
-                                        FileSystem::FileExists(materialPath))
+                                    const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
+                                    if (FileSystem::FileExists(materialPath))
                                     {
                                         Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
                                         m_Materials[path] = material;
@@ -297,7 +298,14 @@ namespace Nuake {
                                     {
                                         if (m_Materials.find(path) == m_Materials.end())
                                         {
-                                            m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+                                            Ref<Material> newMaterial = CreateRef<Material>(path);
+                                            auto materialJson = newMaterial->Serialize().dump(4);
+                                            FileSystem::BeginWriteFile(materialPath);
+                                            FileSystem::WriteLine(materialJson);
+                                            FileSystem::EndWriteFile();
+                                            ResourceManager::RegisterResource(newMaterial);
+                                            ResourceManager::Manifest.RegisterResource(newMaterial->ID, materialPath);
+                                            m_Materials[path] = newMaterial;
                                         }
                                     }
 
@@ -375,7 +383,7 @@ namespace Nuake {
                         //    CreateBrush(brush_inst, brush_geo_inst, m_Scene, newEntity, target, targetname);
                     }
 
-                    // Batching process
+                    // Batching process`
                     Ref<Model> model = CreateRef<Model>();
                     for (auto& mat : m_StaticWorld)
                     {
@@ -402,7 +410,7 @@ namespace Nuake {
                     if (!bsp.IsTrigger)
                     {
                         ModelComponent& modelComponent = currentNonWorldEntity.AddComponent<ModelComponent>();
-                        modelComponent.ModelResource = model;
+                        //modelComponent.ModelResource = model;
                     }
                 }
             }
@@ -411,7 +419,8 @@ namespace Nuake {
                 std::map<std::string, Ref<Material>> m_Materials;
                 std::map<Ref<Material>, std::vector<ProcessedMesh>> m_StaticWorld;
 
-                Entity brushEntity = m_Scene->CreateEntity("Brush " + std::to_string(e));
+                const std::string entityName = "Brush " + std::to_string(e);
+                Entity brushEntity = m_Scene->CreateEntity(entityName);
                 worldspawnEntity.AddChild(brushEntity);
 
                 auto& transformComponent = brushEntity.GetComponent<TransformComponent>();
@@ -440,24 +449,43 @@ namespace Nuake {
                         if (std::string(texture->name) != "__TB_empty")
                         {
                             std::string path = FileSystem::Root + "Textures/" + std::string(texture->name) + ".png";
-
-                            if (const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
-                                FileSystem::FileExists(materialPath))
+                            const std::string materialPath = "Materials/" + std::string(texture->name) + ".material";
+                            if (FileSystem::FileExists(materialPath))
                             {
-                                Ref<Material> material = ResourceLoader::LoadMaterial(materialPath);
-                                m_Materials[path] = material;
+                                currentMaterial = ResourceManager::GetResourceFromFile<Material>(FileSystem::GetFile(materialPath));
+                                m_Materials[path] = currentMaterial;
                             }
                             else
                             {
                                 if (m_Materials.find(path) == m_Materials.end())
                                 {
-                                    m_Materials[path] = MaterialManager::Get()->GetMaterial(path);
+                                    Ref<Material> newMaterial = CreateRef<Material>(path);
+                                    newMaterial->AlbedoImage = TextureManager::Get()->GetTexture2(path)->GetID();
+                                    
+                                    auto materialJson = newMaterial->Serialize().dump(4);
+                                    FileSystem::BeginWriteFile(materialPath);
+                                    FileSystem::WriteLine(materialJson);
+                                    FileSystem::EndWriteFile();
+
+                                    FileSystem::Scan();
+
+                                    if (auto file = FileSystem::GetFile(materialPath); file != nullptr)
+                                    {
+                                        ResourceManager::RegisterUnregisteredRessource(file);
+                                    }
+                                    else
+                                    {
+                                        Logger::Log("File at path: " + materialPath + " was not found in internal file system", "FS", CRITICAL);
+                                    }
+
+                                    m_Materials[path] = newMaterial;
+                                    currentMaterial = newMaterial;
                                 }
                             }
 
                             currentMaterial = m_Materials[path];
-                            texture->height = currentMaterial->m_Albedo->GetHeight();
-                            texture->width = currentMaterial->m_Albedo->GetWidth();
+                            texture->height = 64;
+                            texture->width = 64;
                         }
                         else
                         {
@@ -553,8 +581,15 @@ namespace Nuake {
                     //bsp.Meshes.push_back(mesh);
                 }
 
+                BinarySerializer serializer;
+                const std::string assetPath = quakeMapC.Path.GetAbsolutePath() + "." + entityName + ".nkmesh";
+                serializer.SerializeModel(assetPath, model);
+
+                ResourceManager::RegisterResource(model);
+                ResourceManager::Manifest.RegisterResource(model->ID, FileSystem::AbsoluteToRelative(assetPath));
+
                 ModelComponent& modelComponent = brushEntity.AddComponent<ModelComponent>();
-                modelComponent.ModelResource = model;
+                modelComponent.ModelResource = model->ID;
             }
             
             isEntity = false;

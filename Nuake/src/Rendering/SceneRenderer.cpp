@@ -233,7 +233,7 @@ namespace Nuake
 			if (!entity.IsValid())
 				continue;
 
-			if (mesh.ModelResource && visibility.Visible)
+			if (mesh.ModelResource.Get<Model>() && visibility.Visible)
 			{
 				transform.PreviousTransform = mProjection * mView * transform.GetGlobalTransform();
 			}
@@ -965,9 +965,9 @@ namespace Nuake
 				{
 					auto [transform, mesh, visibility] = view.get<TransformComponent, ModelComponent, VisibilityComponent>(e);
 
-					if (mesh.ModelResource && visibility.Visible)
+					if (mesh.ModelResource.Get<Model>() && visibility.Visible)
 					{
-						for (auto& m : mesh.ModelResource->GetMeshes())
+						for (auto& m : mesh.ModelResource.Get<Model>()->GetMeshes())
 						{
 							Renderer::SubmitMesh(m, transform.GetGlobalTransform(), (uint32_t)e, transform.PreviousTransform);
 						}

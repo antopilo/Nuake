@@ -13,6 +13,8 @@
 #include <future>
 #include <src/Resource/ResourceLoader.h>
 #include <src/Rendering/Vulkan/VkResources.h>
+#include <src/Resource/Serializer/BinarySerializer.h>
+#include "src/Resource/ResourceManager.h"
 
 namespace Nuake
 {
@@ -50,12 +52,19 @@ namespace Nuake
 
     Ref<Material> Mesh::GetMaterial() const
     {
-        return m_Material;
+		Ref<Material> material = ResourceManager::GetResource<Material>(MaterialResource.ID);
+        if (!material)
+        {
+            assert(false && "material not found");
+        }
+
+        return material;
     }
 
     void Mesh::SetMaterial(Ref<Material> material)
     {
         m_Material = material;
+        MaterialResource = material->ID;
         MaterialManager::Get()->RegisterMaterial(material);
     }
 	
@@ -127,6 +136,9 @@ namespace Nuake
 
     json Mesh::Serialize()
     {
+
+        
+
         BEGIN_SERIALIZE();
 
         if (m_Material)
@@ -160,7 +172,6 @@ namespace Nuake
 
             j["Vertices"][i] = v;
         }
-
 
         END_SERIALIZE();
     }

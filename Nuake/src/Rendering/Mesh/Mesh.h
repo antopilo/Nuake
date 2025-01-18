@@ -4,7 +4,7 @@
 #include "src/Resource/Resource.h"
 #include "src/Resource/Serializable.h"
 #include "src/Rendering/Vulkan/VkMesh.h"
-
+#include "src/Resource/RID.h"
 
 namespace Nuake
 {
@@ -41,7 +41,9 @@ namespace Nuake
 			return m_Mesh;
 		}
 
+		RID MaterialResource;
 	private:
+
 		Ref<Material> m_Material = nullptr;
 		std::vector<uint32_t> m_Indices;
 		std::vector<Vertex> m_Vertices;

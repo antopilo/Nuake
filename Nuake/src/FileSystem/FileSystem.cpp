@@ -278,7 +278,7 @@ Ref<File> FileSystem::GetFile(const std::string& inPath)
 		// Find in files if can't find in directories.
 		for (auto& f : currentDirComparator->Files)
 		{
-			if (f->GetName() == currentDirName)
+			if (f->GetName() == currentDirName || f->GetFullName() == currentDirName)
 			{
 				return f;
 			}

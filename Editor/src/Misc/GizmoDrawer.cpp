@@ -433,12 +433,12 @@ void GizmoDrawer::DrawShapes(Ref<Scene> scene, bool occluded)
 		auto [transform, mesh, model] = scene->m_Registry.get<TransformComponent, MeshColliderComponent, ModelComponent>(e);
 
 		// Component has no mesh set.
-		if (!model.ModelResource)
+		if (!model.ModelResource.Get<Model>())
 		{
 			continue;
 		}
 
-		auto& resource = model.ModelResource;
+		auto resource = model.ModelResource.Get<Model>();
 
 		const auto& meshes = resource->GetMeshes();
 		if (mesh.SubMesh >= meshes.size())

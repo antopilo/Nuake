@@ -677,7 +677,6 @@ namespace Nuake
                         }
 
 						Ref<Material> material = CreateRef<Material>();
-						material->IsEmbedded = false;
 						auto jsonData = material->Serialize();
 
 						FileSystem::BeginWriteFile(finalPath, true);
@@ -699,7 +698,6 @@ namespace Nuake
                         }
 
                         Ref<SkyResource> sky = CreateRef<SkyResource>(FileSystem::AbsoluteToRelative(finalPath));
-                        sky->IsEmbedded = false;
                         auto jsonData = sky->Serialize();
  
                         FileSystem::BeginWriteFile(finalPath, true);
@@ -721,7 +719,6 @@ namespace Nuake
                         }
 
                         Ref<Environment> env = CreateRef<Environment>(FileSystem::AbsoluteToRelative(finalPath));
-                        env->IsEmbedded = false;
                         auto jsonData = env->Serialize();
 
                         FileSystem::BeginWriteFile(finalPath, true);

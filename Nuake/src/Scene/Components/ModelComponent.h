@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Component.h"
-
+#include "src/Resource/RID.h"
 #include "src/Core/String.h"
 #include "src/Resource/Model.h"
 #include "src/Resource/ResourceLoader.h"
@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <src/Resource/Serializer/BinarySerializer.h>
 
 
 namespace Nuake
@@ -17,7 +18,8 @@ namespace Nuake
     {
         NUAKECOMPONENT(ModelComponent, "Model")
 
-        Ref<Model> ModelResource;
+        RID ModelResource;
+        //Ref<Model> ModelResource;
         std::string ModelPath;
 
         ModelComponent();
@@ -30,30 +32,39 @@ namespace Nuake
         {
             BEGIN_SERIALIZE();
             SERIALIZE_VAL(ModelPath);
-            if (ModelResource)
-            {
-                SERIALIZE_OBJECT(ModelResource);
-            }
+            SERIALIZE_RID(ModelResource, ModelResource.ID);
+            //if (ModelResource)
+            //{
+            //    BinarySerializer serializer;
+            //    serializer.SerializeModel(FileSystem::RelativeToAbsolute("model.nkmesh"), ModelResource);
+            //    SERIALIZE_OBJECT(ModelResource);
+            //}
             END_SERIALIZE();
         }
 
         bool Deserialize(const json& j) 
         {
             ModelPath = j["ModelPath"];
-            ModelResource = CreateRef<Model>();
 
-            if (ModelPath.empty() || !String::EndsWith(ModelPath, ".mesh"))
+            if (j.contains("ModelResource"))
             {
-                if (j.contains("ModelResource"))
-                {
-                    auto& res = j["ModelResource"];
-                    ModelResource->Deserialize(res);
-                }
+                ModelResource.ID = UUID(j["ModelResource"]);
             }
-            else
-            {
-                ModelResource = ResourceLoader::LoadModel(ModelPath);
-            }
+
+            //ModelResource = CreateRef<Model>();
+            //
+            //if (ModelPath.empty() || !String::EndsWith(ModelPath, ".mesh"))
+            //{
+            //    if (j.contains("ModelResource"))
+            //    {
+            //        auto& res = j["ModelResource"];
+            //        ModelResource->Deserialize(res);
+            //    }
+            //}
+            //else
+            //{
+            //    ModelResource = ResourceLoader::LoadModel(ModelPath);
+            //}
 
             return true;
         }

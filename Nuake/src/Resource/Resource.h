@@ -1,6 +1,5 @@
 #pragma once
 #include "src/Resource/UUID.h"
-
 #include <string>
 
 namespace Nuake 
@@ -9,12 +8,6 @@ namespace Nuake
 	{
 	public:
 		UUID ID;
-
-		bool IsEmbedded = false;
-		std::string Path; // Only if embedded
-
-		void MakeExternal();
-		void Duplicate();
-		void MakeEmbedded();
+		std::string Path;
 	};
 }

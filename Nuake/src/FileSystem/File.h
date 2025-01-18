@@ -16,6 +16,7 @@ namespace Nuake
 
 	public:
 		std::string GetName() const { return name; }
+		std::string GetFullName() const { return name + GetExtension(); }
 		std::string GetExtension() const { return type; }
 		std::string GetRelativePath() const { return relativePath; }
 		std::string GetAbsolutePath() const { return absolutePath; }
