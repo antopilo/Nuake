@@ -178,32 +178,38 @@ void VkSceneRenderer::BeginScene(RenderContext inContext)
 			for (auto& m : modelResource->GetMeshes())
 			{
 				// TODO: Avoid duplicated materials
-				if (Ref<Material> material = m->GetMaterial(); material)
+				Ref<Material> material = m->GetMaterial();
+				if (!material)
 				{
-					auto missingTextureID = TextureManager::Get()->GetTexture2("missing_texture")->GetID();
-					MaterialBufferStruct materialBuffer
-					{
-						.HasAlbedo = material->HasAlbedo(),
-						.AlbedoColor = material->data.m_AlbedoColor,
-						.HasNormal = material->HasNormal(),
-						.HasMetalness = material->HasMetalness(),
-						.HasRoughness = material->HasRoughness(),
-						.HasAO = material->HasAO(),
-						.MetalnessValue = material->data.u_MetalnessValue,
-						.RoughnessValue = material->data.u_RoughnessValue,
-						.AoValue = material->data.u_AOValue,
-						.AlbedoTextureId = material->HasAlbedo() ? gpu.GetBindlessTextureID(material->AlbedoImage) : gpu.GetBindlessTextureID(missingTextureID),
-						.NormalTextureId = material->HasNormal() ? gpu.GetBindlessTextureID(material->NormalImage) : 0,
-						.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
-						.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
-						.AoTextureId = material->HasAO() ? gpu.GetBindlessTextureID(material->AOImage) : 0,
-					};
+					// insert missing material.
+					static Ref<Material> missingMaterial = CreateRef<Material>();
+					missingMaterial->AlbedoImage = TextureManager::Get()->GetTexture2("missing_texture")->GetID();
 
-					// Save bindless mapping index
-					allMaterials[currentMaterialIndex] = std::move(materialBuffer);
-					gpu.MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
-					currentMaterialIndex++;
+					material = missingMaterial;
 				}
+
+				MaterialBufferStruct materialBuffer
+				{
+					.HasAlbedo = material->HasAlbedo(),
+					.AlbedoColor = material->data.m_AlbedoColor,
+					.HasNormal = material->HasNormal(),
+					.HasMetalness = material->HasMetalness(),
+					.HasRoughness = material->HasRoughness(),
+					.HasAO = material->HasAO(),
+					.MetalnessValue = material->data.u_MetalnessValue,
+					.RoughnessValue = material->data.u_RoughnessValue,
+					.AoValue = material->data.u_AOValue,
+					.AlbedoTextureId = material->HasAlbedo() ? gpu.GetBindlessTextureID(material->AlbedoImage) : 0,
+					.NormalTextureId = material->HasNormal() ? gpu.GetBindlessTextureID(material->NormalImage) : 0,
+					.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
+					.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
+					.AoTextureId = material->HasAO() ? gpu.GetBindlessTextureID(material->AOImage) : 0,
+				};
+
+				// Save bindless mapping index
+				allMaterials[currentMaterialIndex] = std::move(materialBuffer);
+				gpu.MeshMaterialMapping[m->GetVkMesh()->GetID()] = currentMaterialIndex;
+				currentMaterialIndex++;
 			}
 
 			currentIndex++;

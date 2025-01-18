@@ -55,7 +55,7 @@ namespace Nuake
 		Ref<Material> material = ResourceManager::GetResource<Material>(MaterialResource.ID);
         if (!material)
         {
-            assert(false && "material not found");
+            //assert(false && "material not found");
         }
 
         return material;
