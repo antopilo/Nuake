@@ -22,15 +22,15 @@ namespace Nuake.Net
     [StructLayout(LayoutKind.Sequential)]
     public class Entity
     {
-        internal static unsafe delegate*<int, int, bool> EntityHasComponentIcall;
-        internal static unsafe delegate*<int, int, void> EntityAddComponentIcall;
-        internal static unsafe delegate*<int, bool> EntityHasManagedInstanceIcall;
-        internal static unsafe delegate*<int, NativeString, int> EntityGetEntityIcall;
-        internal static unsafe delegate*<int, NativeString> EntityGetNameIcall;
-        internal static unsafe delegate*<int, NativeString, void> EntitySetNameIcall;
-        internal static unsafe delegate*<int, bool> EntityIsValidIcall;
-        internal static unsafe delegate*<NativeString, NativeArray<int>> EntityGetTargetsIcall;
-        internal static unsafe delegate*<int, NativeString> EntityGetTargetIcall;
+        internal static unsafe delegate* unmanaged<int, int, bool> EntityHasComponentIcall;
+        internal static unsafe delegate* unmanaged<int, int, void> EntityAddComponentIcall;
+        internal static unsafe delegate* unmanaged<int, bool> EntityHasManagedInstanceIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString, int> EntityGetEntityIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString> EntityGetNameIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString, void> EntitySetNameIcall;
+        internal static unsafe delegate* unmanaged<int, bool> EntityIsValidIcall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeArray<int>> EntityGetTargetsIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString> EntityGetTargetIcall;
 
         public enum ComponentTypes
         {
@@ -272,7 +272,7 @@ namespace Nuake.Net
 
     public class Prefab
     {
-        internal static unsafe delegate*<NativeString, Vector3, float, float, float, float, int> PrefabInstanceIcall;
+        internal static unsafe delegate* unmanaged<NativeString, Vector3, float, float, float, float, int> PrefabInstanceIcall;
 
         string Path {  get; set; }
 

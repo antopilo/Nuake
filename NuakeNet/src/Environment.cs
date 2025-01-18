@@ -9,8 +9,8 @@ namespace Nuake.Net
 {
     public class Environment
     {
-        internal static unsafe delegate*<float, void> SetFocusDistanceIcall;
-        internal static unsafe delegate*<float> GetFocusDistanceIcall;
+        internal static unsafe delegate* unmanaged<float, void> SetFocusDistanceIcall;
+        internal static unsafe delegate* unmanaged<float> GetFocusDistanceIcall;
 
         public static void SetFocusDistance(float distance)
         {

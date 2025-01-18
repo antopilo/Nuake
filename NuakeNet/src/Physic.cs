@@ -120,11 +120,11 @@ namespace Nuake.Net
             SENSORS = 5
         }
 
-        internal static unsafe delegate*<float, float, float, float, float, float, NativeArray<float>> RayCastIcall;
-        internal static unsafe delegate*<float, float, float, float, float, float, BoxInternal, NativeArray<float>> ShapeCastBoxIcall;
-        internal static unsafe delegate*<float, float, float, float, float, float, float, NativeArray<float>> ShapeCastSphereIcall;
-        internal static unsafe delegate*<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCapsuleIcall;
-        internal static unsafe delegate*<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCylinderIcall;
+        internal static unsafe delegate* unmanaged<float, float, float, float, float, float, NativeArray<float>> RayCastIcall;
+        internal static unsafe delegate* unmanaged<float, float, float, float, float, float, BoxInternal, NativeArray<float>> ShapeCastBoxIcall;
+        internal static unsafe delegate* unmanaged<float, float, float, float, float, float, float, NativeArray<float>> ShapeCastSphereIcall;
+        internal static unsafe delegate* unmanaged<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCapsuleIcall;
+        internal static unsafe delegate* unmanaged<float, float, float, float, float, float, CapsuleInternal, NativeArray<float>> ShapeCastCylinderIcall;
 
         public static List<ShapeCastResult> RayCast(Vector3 from, Vector3 to)
         {

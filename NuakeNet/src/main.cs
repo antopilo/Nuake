@@ -17,9 +17,9 @@ namespace Nuake.Net
     /// </summary>
     public class Engine
     {
-        internal static unsafe delegate*<NativeString, void> LoggerLogIcall;
-        internal static unsafe delegate*<NativeString, void> LoadSceneIcall;
-        internal static unsafe delegate*<NativeString, NativeInstance<EngineSubsystem>> GetSubsystemByNameIcall;
+        internal static unsafe delegate* unmanaged<NativeString, void> LoggerLogIcall;
+        internal static unsafe delegate* unmanaged<NativeString, void> LoadSceneIcall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeInstance<EngineSubsystem>> GetSubsystemByNameIcall;
         
         public Engine() { }
 
@@ -147,14 +147,14 @@ namespace Nuake.Net
 
     public class Debug
     {
-        internal static unsafe delegate*</* start */ float, float, float,
+        internal static unsafe delegate* unmanaged</* start */ float, float, float,
                                          /* end */   float, float, float,
                                          /* color */ float, float, float, float,
                                         /* life */   float,
                                                      float,
                                                      void> DrawLineIcall;
 
-        internal static unsafe delegate*</* position */ Vector3,
+        internal static unsafe delegate* unmanaged</* position */ Vector3,
                                          /* rotation */ Quaternion,
                                          /* shape */    Vector3,
                                          /* color */    Vector4,
@@ -162,7 +162,7 @@ namespace Nuake.Net
                                                         float,
                                                         void> DrawShapeBoxIcall;
 
-        internal static unsafe delegate*</* position */ Vector3,
+        internal static unsafe delegate* unmanaged</* position */ Vector3,
                                          /* rotation */ Quaternion,
                                          /* shape */    float,
                                          /* color */    Vector4,
@@ -170,7 +170,7 @@ namespace Nuake.Net
                                                         float,
                                                         void> DrawShapeSphereIcall;
 
-        internal static unsafe delegate*</* position */ Vector3,
+        internal static unsafe delegate* unmanaged</* position */ Vector3,
                                          /* rotation */ Quaternion,
                                          /* shape */    float, float,
                                          /* color */    Vector4,
@@ -178,7 +178,7 @@ namespace Nuake.Net
                                                         float,
                                                         void> DrawShapeCylinderIcall;
 
-        internal static unsafe delegate*</* position */ Vector3,
+        internal static unsafe delegate* unmanaged</* position */ Vector3,
                                          /* rotation */ Quaternion,
                                          /* shape */    float, float,
                                          /* color */    Vector4,

@@ -175,15 +175,15 @@ namespace Nuake.Net
 
     public class Input
     {
-        internal static unsafe delegate*<bool, void> ShowMouseIcall;
-        internal static unsafe delegate*<int, bool> IsKeyDownIcall;
-        internal static unsafe delegate*<int, bool> IsKeyPressedIcall;
-        internal static unsafe delegate*<int, bool> IsMouseButtonDownIcall;
-        internal static unsafe delegate*<NativeArray<float>> GetMousePositionIcall;
-        internal static unsafe delegate*<int, bool> IsControllerConnectedIcall;
-        internal static unsafe delegate*<int, NativeString> GetControllerNameIcall;
-        internal static unsafe delegate*<int, int, bool> IsControllerButtonPressedIcall;
-        internal static unsafe delegate*<int, int, float> GetControllerAxisIcall;
+        internal static unsafe delegate* unmanaged<bool, void> ShowMouseIcall;
+        internal static unsafe delegate* unmanaged<int, bool> IsKeyDownIcall;
+        internal static unsafe delegate* unmanaged<int, bool> IsKeyPressedIcall;
+        internal static unsafe delegate* unmanaged<int, bool> IsMouseButtonDownIcall;
+        internal static unsafe delegate* unmanaged<NativeArray<float>> GetMousePositionIcall;
+        internal static unsafe delegate* unmanaged<int, bool> IsControllerConnectedIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString> GetControllerNameIcall;
+        internal static unsafe delegate* unmanaged<int, int, bool> IsControllerButtonPressedIcall;
+        internal static unsafe delegate* unmanaged<int, int, float> GetControllerAxisIcall;
 
 
         public static bool IsMouseButtonDown(MouseButton button)
