@@ -54,11 +54,8 @@ namespace Nuake {
 		Entity entity = scene->GetEntity(entityName);
 
 		auto& scriptingEngine = ScriptingEngineNet::Get();
-		if (scriptingEngine.HasEntityScriptInstance(entity))
-		{
-			auto instance = scriptingEngine.GetEntityScript(entity);
-			outInstance->m_Handle = instance->m_Handle;
-			outInstance->m_Type = instance->m_Type;
+		if (auto instance = scriptingEngine.GetEntityScript(entity); instance) {
+			*outInstance = *instance;
 		}
 	}
 

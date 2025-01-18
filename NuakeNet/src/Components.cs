@@ -22,7 +22,7 @@ namespace Nuake.Net
     }
     public class NameComponent : IComponent
     {
-        internal static unsafe delegate*<int, NativeString> GetNameIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString> GetNameIcall;
 
         public NameComponent(int entityId)
         {
@@ -51,11 +51,11 @@ namespace Nuake.Net
 
     public class TransformComponent : IComponent
     {
-        internal static unsafe delegate*<int, NativeArray<float>> GetGlobalPositionIcall;
-        internal static unsafe delegate*<int, NativeArray<float>> GetPositionIcall;
-        internal static unsafe delegate*<int, float, float, float, void> SetPositionIcall;
-        internal static unsafe delegate*<int, float, float, float, float, float, float, void> LookAtIcall;
-        internal static unsafe delegate*<int, float, float, float, void> RotateIcall;
+        internal static unsafe delegate* unmanaged<int, NativeArray<float>> GetGlobalPositionIcall;
+        internal static unsafe delegate* unmanaged<int, NativeArray<float>> GetPositionIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, void> SetPositionIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, float, float, float, void> LookAtIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, void> RotateIcall;
 
         public TransformComponent(int entityId)
         {
@@ -124,9 +124,9 @@ namespace Nuake.Net
 
     public class LightComponent : IComponent
     {
-        internal static unsafe delegate*<int, float> GetLightIntensityIcall;
-        internal static unsafe delegate*<int, float, void> SetLightIntensityIcall;
-        internal static unsafe delegate*<int, float, float, float, void> SetLightColorIcall;
+        internal static unsafe delegate* unmanaged<int, float> GetLightIntensityIcall;
+        internal static unsafe delegate* unmanaged<int, float, void> SetLightIntensityIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, void> SetLightColorIcall;
         public enum LightType
         {
             Directional,
@@ -175,9 +175,9 @@ namespace Nuake.Net
 
     public class CameraComponent : IComponent
     {
-        internal static unsafe delegate*<int, NativeArray<float>> GetDirectionIcall;
-        internal static unsafe delegate*<int, float, void> SetCameraFOVIcall;
-        internal static unsafe delegate*<int, float> GetCameraFOVIcall;
+        internal static unsafe delegate* unmanaged<int, NativeArray<float>> GetDirectionIcall;
+        internal static unsafe delegate* unmanaged<int, float, void> SetCameraFOVIcall;
+        internal static unsafe delegate* unmanaged<int, float> GetCameraFOVIcall;
 
         public CameraComponent(int entityId)
         {
@@ -212,8 +212,8 @@ namespace Nuake.Net
 
     public class AudioEmitterComponent : IComponent
     {
-        internal static unsafe delegate*<int, bool> GetIsPlayingIcall;
-        internal static unsafe delegate*<int, bool, void> SetIsPlayingIcall;
+        internal static unsafe delegate* unmanaged<int, bool> GetIsPlayingIcall;
+        internal static unsafe delegate* unmanaged<int, bool, void> SetIsPlayingIcall;
 
         public AudioEmitterComponent(int entityId)
         {
@@ -243,7 +243,7 @@ namespace Nuake.Net
 
     public class SkinnedModelComponent : IComponent
     {
-        internal static unsafe delegate*<int, NativeString, void> PlayIcall;
+        internal static unsafe delegate* unmanaged<int, NativeString, void> PlayIcall;
 
         public SkinnedModelComponent(int entityId) 
         {
@@ -328,10 +328,10 @@ namespace Nuake.Net
 
     public class CharacterControllerComponent : IComponent
     {
-        internal static unsafe delegate*<int, float, float, float, void> MoveAndSlideIcall;
-        internal static unsafe delegate*<int, bool> IsOnGroundIcall;
-        internal static unsafe delegate*<int, NativeArray<float>> GetGroundVelocityIcall;
-        internal static unsafe delegate*<int, NativeArray<float>> GetGroundNormalIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, void> MoveAndSlideIcall;
+        internal static unsafe delegate* unmanaged<int, bool> IsOnGroundIcall;
+        internal static unsafe delegate* unmanaged<int, NativeArray<float>> GetGroundVelocityIcall;
+        internal static unsafe delegate* unmanaged<int, NativeArray<float>> GetGroundNormalIcall;
 
         public CharacterControllerComponent(int entityId)
         {
@@ -401,7 +401,7 @@ namespace Nuake.Net
 
     public class NavMeshVolumeComponent : IComponent
     {
-        internal static unsafe delegate*<int, float, float, float, float, float, float, NativeArray<float>> FindPathIcall;
+        internal static unsafe delegate* unmanaged<int, float, float, float, float, float, float, NativeArray<float>> FindPathIcall;
 
         public NavMeshVolumeComponent(int entityId) {  EntityID = entityId; }
 

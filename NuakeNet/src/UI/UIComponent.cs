@@ -78,16 +78,16 @@ namespace Nuake.Net
 
     public class Node
     {
-        internal static unsafe delegate*<NativeString, NativeString, NativeString, NativeString> FindChildByIDICall;
-        internal static unsafe delegate*<NativeString, NativeString, bool> HasNativeInstanceICall;
-        internal static unsafe delegate*<NativeString, NativeString, NativeInstance<Node>> GetNativeInstanceNodeICall;
-        internal static unsafe delegate*<NativeString, NativeString, Bool32, void> SetVisibilityICall;
-        internal static unsafe delegate*<NativeString, NativeString, Bool32> GetVisibilityICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, NativeString, NativeString> FindChildByIDICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, bool> HasNativeInstanceICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, NativeInstance<Node>> GetNativeInstanceNodeICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, Bool32, void> SetVisibilityICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, Bool32> GetVisibilityICall;
 
-        internal static unsafe delegate*<NativeString, NativeString, float> GetHeightPercentageICall;
-        internal static unsafe delegate*<NativeString, NativeString, float, void> SetHeightPercentageICall;
-        internal static unsafe delegate*<NativeString, NativeString, float> GetWidthPercentageICall;
-        internal static unsafe delegate*<NativeString, NativeString, float, void> SetWidthPercentageICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, float> GetHeightPercentageICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, float, void> SetHeightPercentageICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, float> GetWidthPercentageICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, float, void> SetWidthPercentageICall;
 
         public string UUID;
         public string CanvasUUID;
@@ -202,8 +202,8 @@ namespace Nuake.Net
 
     public class TextNode : Node
     {
-        internal static unsafe delegate*<NativeString, NativeString, NativeString, void> SetTextNodeTextICall;
-        internal static unsafe delegate*<NativeString, NativeString, NativeString> GetTextNodeTextICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, NativeString, void> SetTextNodeTextICall;
+        internal static unsafe delegate* unmanaged<NativeString, NativeString, NativeString> GetTextNodeTextICall;
 
         public string Text 
         { 

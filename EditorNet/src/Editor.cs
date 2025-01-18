@@ -8,8 +8,8 @@ namespace Nuake
 {
     class Editor
     {
-        internal static unsafe delegate*<int, void> SetSelectedEntityIcall;
-        internal static unsafe delegate*<int> GetSelectedEntityIcall;
+        internal static unsafe delegate* unmanaged<int, void> SetSelectedEntityIcall;
+        internal static unsafe delegate* unmanaged<int> GetSelectedEntityIcall;
 
         static int STACK_CAPACITY = 32;
         private static Stack<ICommand> CommandStack = new(STACK_CAPACITY);

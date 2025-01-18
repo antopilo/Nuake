@@ -2,8 +2,8 @@
 {
     public class EngineSubsystem
     {
-        internal static unsafe delegate*<int, bool, void> SetCanTickIcall;
-        internal static unsafe delegate*<int, bool> GetCanTickIcall;
+        internal static unsafe delegate* unmanaged<int, bool, void> SetCanTickIcall;
+        internal static unsafe delegate* unmanaged<int, bool> GetCanTickIcall;
     
         public int EngineSubsystemID { get; protected set; }
 
