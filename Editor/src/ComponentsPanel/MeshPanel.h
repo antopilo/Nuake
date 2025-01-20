@@ -101,8 +101,8 @@ public:
             if (PopupHelper::DefineConfirmationDialog("##ConvertAsset", "Convert Asset"))
             {
                 // Convert to disk
-                //auto loader = ModelLoader();
-                //Ref<Model> modelResource = loader.LoadModel(_importedPathMesh);
+                auto loader = ModelLoader();
+                Ref<Model> modelResource = loader.LoadModel(_importedPathMesh);
                 //json serializedData = modelResource->SerializeData();
                 //
                 //const std::string exportedMeshPath = _importedPathMesh + ".mesh";
