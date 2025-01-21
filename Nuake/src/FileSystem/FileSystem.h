@@ -2,6 +2,8 @@
 #include "src/Core/Core.h"
 #include "FileTypes.h"
 
+#include <functional>
+
 namespace filewatch
 {
 	template<typename T>
@@ -21,7 +23,13 @@ namespace Nuake
 		static Ref<filewatch::FileWatch<std::string>> RootFileWatch;
 
 		static void SetRootDirectory(const std::string path);
-
+		
+		// Starts from root
+		static void ForeachFile(std::function<void(Ref<File>)> func);
+		
+		// Strats from specified folder
+		static void ForeachFile(std::function<void(Ref<File>)> func, Ref<Directory> dir);
+		
 		static void Scan();
 		static std::string AbsoluteToRelative(const std::string& path);
 		static std::string RelativeToAbsolute(const std::string& path);

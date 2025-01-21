@@ -3,6 +3,8 @@
 #include "src/Core/Core.h"
 #include "src/FileSystem/File.h"
 
+#include <set>
+#include <span>
 #include <string>
 
 namespace Nuake
@@ -10,14 +12,20 @@ namespace Nuake
 	class IAssetBaker
 	{
 	private:
-		std::string Extension;
-
+		std::set<std::string> Extensions;
+		
 	public:
-		IAssetBaker(const std::string& extension) : Extension(extension) {}
+		IAssetBaker(const std::string& extension) : Extensions { extension } {}
+		IAssetBaker(std::initializer_list<std::string> extension) : Extensions(extension.begin(), extension.end()) {}
 		virtual ~IAssetBaker() = default;
 
-		std::string GetExtension() const { return Extension; }
-
+		std::set<std::string> GetExtensions() const { return Extensions; }
+		
+		inline bool CanBakeFile(const Ref<File>& file) const
+		{
+			return Extensions.find(file->GetExtension()) != Extensions.end();
+		}
+		
 	public:
 		virtual Ref<File> Bake(const Ref<File>& file) = 0;
 	};

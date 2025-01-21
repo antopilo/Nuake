@@ -30,7 +30,7 @@ namespace Nuake
 	class GLTFBaker : public IAssetBaker
 	{
 	public:
-		GLTFBaker() : IAssetBaker(".glb") {}
+		GLTFBaker() : IAssetBaker({".glb", ".gltf", "fbx"}) {}
 		
 		Ref<File> Bake(const Ref<File>& file) override;
 		

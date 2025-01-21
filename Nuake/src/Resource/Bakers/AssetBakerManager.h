@@ -22,7 +22,11 @@ namespace Nuake
 		
 		void RegisterBaker(Ref<IAssetBaker> baker)
 		{
-			Bakers[baker->GetExtension()] = baker;
+			// Latest registered baker overwrites previous
+			for(const auto& extension : baker->GetExtensions())
+			{
+				Bakers[extension] = baker;
+			}
 		}
 		
 		Ref<File> Bake(const Ref<File>& file)

@@ -74,7 +74,7 @@ FileType File::GetFileType() const
 		return FileType::Solution;
 	}
 
-	if (ext == ".mesh")
+	if (ext == ".nkmesh")
 	{
 		return FileType::Mesh;
 	}

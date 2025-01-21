@@ -103,6 +103,7 @@ namespace Nuake
 
 	struct DescriptorAllocator 
 	{
+		uint32_t NumAllocation = 0;
 		struct PoolSizeRatio 
 		{
 			VkDescriptorType type;
@@ -244,7 +245,7 @@ namespace Nuake
 
 		void EndDraw();
 
-		DescriptorAllocator GetDescriptorAllocator()
+		DescriptorAllocator& GetDescriptorAllocator()
 		{
 			return GlobalDescriptorAllocator;
 		}

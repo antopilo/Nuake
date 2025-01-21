@@ -80,9 +80,9 @@ void VkRenderer::Initialize()
 	// Init global pool
 	std::vector<DescriptorAllocator::PoolSizeRatio> sizes =
 	{
-		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 8 },
-		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 50 }
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 4096 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4096 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 }
 	};
 
 	GlobalDescriptorAllocator.InitPool(Device, 1000, sizes);
@@ -882,6 +882,8 @@ VkDescriptorSet DescriptorAllocator::Allocate(VkDevice device, VkDescriptorSetLa
 
 	VkDescriptorSet ds;
 	VK_CALL(vkAllocateDescriptorSets(device, &allocInfo, &ds));
+
+	NumAllocation++;
 
 	return ds;
 }

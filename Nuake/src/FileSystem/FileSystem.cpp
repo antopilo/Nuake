@@ -17,7 +17,25 @@ std::string FileSystem::Root = "";
 
 Ref<Directory> FileSystem::RootDirectory;
 Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
+
+void FileSystem::ForeachFile(std::function<void(Ref<File>)> func)
+{
+	ForeachFile(func, RootDirectory);
+}
+
+void FileSystem::ForeachFile(std::function<void(Ref<File>)> func, Ref<Directory> dir)
+{
+	for(auto& file : RootDirectory->Files)
+	{
+		func(file);
+	}
 	
+	for(auto& dir : RootDirectory->Directories)
+	{
+		ForeachFile(func, dir);
+	}
+}
+
 void FileSystem::ScanDirectory(Ref<Directory> directory)
 {
 	directory->Files.clear();

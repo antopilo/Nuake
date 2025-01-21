@@ -6,7 +6,8 @@
 
 using namespace Nuake;
 
-VkMesh::VkMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices)
+VkMesh::VkMesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) :
+	DescriptorLayout(nullptr)
 {
 	// First we allocate the buffers on the GPU
 	const size_t vertexBufferSize = vertices.size() * sizeof(Vertex);
@@ -55,13 +56,16 @@ void VkMesh::UploadToGPU(const std::vector<Vertex>& vertices, const std::vector<
 
 void VkMesh::CreateDescriptorSet()
 {
-	DescriptorLayoutBuilder builder;
-	builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-
 	auto& vk = VkRenderer::Get();
 	auto device = vk.GetDevice();
-	DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
-	DescriptorSet = vk.GetDescriptorAllocator().Allocate(device, DescriptorLayout);
+
+	if (!DescriptorLayout)
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		DescriptorSet = vk.GetDescriptorAllocator().Allocate(device, DescriptorLayout);
+	}
 
 	VkDescriptorBufferInfo bufferInfo{};
 	bufferInfo.buffer = GetVertexBuffer()->GetBuffer();
