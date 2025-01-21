@@ -19,7 +19,12 @@ namespace Nuake
 	public:
 		Mesh();
 		~Mesh();
-
+		
+		// This sets the data of the mesh without uploading it to the GPU.
+		// Useful for async asset baking
+		void SetData(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
+		
+		// This sets the data and uploads it to the GPU
 		void AddSurface(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
 		std::vector<Vertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();

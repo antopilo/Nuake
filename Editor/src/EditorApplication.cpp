@@ -10,13 +10,18 @@
 #include "src/UI/NuakeUI.h"
 #include "src/UI/UIInputManager.h"
 
-
+#include "src/Resource/Bakers/AssetBakerManager.h"
+#include "src/Resource/Bakers/GLTFBaker.h"
 
 void EditorApplication::OnInit()
 {
     using namespace Nuake;
-
     Engine::Init();
+	
+	// Register bakers, these can convert files into nuake resources
+	AssetBakerManager& assetBakerMgr = AssetBakerManager::Get();
+	assetBakerMgr.RegisterBaker(CreateRef<GLTFBaker>());
+	
     m_Window = Engine::GetCurrentWindow();
     m_Window->SetSize({ m_Specification.WindowWidth, m_Specification.WindowHeight });
     m_Window->SetTitle(m_Specification.Name);

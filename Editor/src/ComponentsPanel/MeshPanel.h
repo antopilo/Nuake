@@ -12,15 +12,17 @@
 
 #include <src/Core/String.h>
 #include <src/Resource/ModelLoader.h>
+#include "src/Resource/Bakers/AssetBakerManager.h"
+#include "src/Resource/ResourceManager.h"
 
 class MeshPanel : ComponentPanel 
 {
-private:
+	private:
     Scope<ModelResourceInspector> _modelInspector;
     bool _expanded = false;
-
+	
     std::string _importedPathMesh;
-public:
+	public:
     MeshPanel() 
     {
         CreateScope<ModelResourceInspector>();
@@ -73,55 +75,31 @@ public:
             {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_Model"))
                 {
-                    char* file = (char*)payload->Data;
-                    std::string fullPath = std::string(file, 256);
+					// Convert payload to relative path
+                    std::string fullPath = std::string(static_cast<char*>(payload->Data), 256);
                     fullPath = Nuake::FileSystem::AbsoluteToRelative(fullPath);
                     
-                    if (Nuake::String::EndsWith(fullPath, ".mesh"))
-                    {
-                        component.ModelPath = fullPath;
-                        //component.ModelResource = ResourceLoader::LoadModel(fullPath);
-                    }
-                    else
-                    {
-                        // Convert to .Model
-                        //component.ModelPath = fullPath;
-                        //component.LoadModel();
-                        //
-                        //_importedPathMesh = fullPath;
-                        //
-                        //auto loader = ModelLoader();
-                        //auto modelResource = loader.LoadModel(fullPath);
-                        //shouldConvert = true;
-                    }
+					auto file = Nuake::FileSystem::GetFile(fullPath);
+					if(file)
+					{
+						// TODO(antopilo) use file type instead of extension
+						if(file->GetExtension() == ".nkmesh")
+						{
+							auto modelResource = ResourceManager::GetResourceFromFile<Model>(file);
+							component.ModelResource = modelResource->ID;
+						}
+						else
+						{
+							// Check if we can bake this filetype
+							AssetBakerManager& bakerMgr = AssetBakerManager::Get();
+							bakerMgr.Bake(file);
+						}
+						
+					}
                 }
                 ImGui::EndDragDropTarget();
             }
-
-            if (PopupHelper::DefineConfirmationDialog("##ConvertAsset", "Convert Asset"))
-            {
-                // Convert to disk
-                auto loader = ModelLoader();
-                Ref<Model> modelResource = loader.LoadModel(_importedPathMesh);
-                //json serializedData = modelResource->SerializeData();
-                //
-                //const std::string exportedMeshPath = _importedPathMesh + ".mesh";
-                //FileSystem::BeginWriteFile(exportedMeshPath);
-                //FileSystem::WriteLine(serializedData.dump());
-                //FileSystem::EndWriteFile();
-                //
-                //ResourceManager::RegisterResource(modelResource);
-                //
-                //// Update component
-                //component.ModelPath = exportedMeshPath;
-                //component.ModelResource = modelResource;
-            }
-
-            if (shouldConvert)
-            {
-                PopupHelper::OpenPopup("##ConvertAsset");
-            }
-
+	
             ImGui::TableNextColumn();
             ComponentTableReset(component.ModelPath, "");
         }

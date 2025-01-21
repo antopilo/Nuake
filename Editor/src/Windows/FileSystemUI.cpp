@@ -305,7 +305,7 @@ namespace Nuake
             {
                 dragType = "_Material";
             }
-            else if (fileExtension == ".mesh" || fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
+            else if (fileExtension == ".nkmesh" || fileExtension == ".obj" || fileExtension == ".mdl" || fileExtension == ".gltf" || fileExtension == ".md3" || fileExtension == ".fbx" || fileExtension == ".glb")
             {
                 dragType = "_Model";
             }

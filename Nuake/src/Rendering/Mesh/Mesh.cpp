@@ -20,11 +20,19 @@ namespace Nuake
 {
     Mesh::Mesh() {}
     Mesh::~Mesh() {}
-
+	
+	void Mesh::SetData(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
+	{
+		m_Vertices = vertices;
+        m_Indices = indices;
+		m_IndicesCount = static_cast<uint32_t>(m_Indices.size());
+        m_VerticesCount = static_cast<uint32_t>(m_Vertices.size());
+	}
+	
     void Mesh::AddSurface(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
     {
-        this->m_Vertices = vertices;
-        this->m_Indices = indices;
+		SetData(vertices, indices);
+        
 
         SetupMesh();
         CalculateAABB();
@@ -34,8 +42,7 @@ namespace Nuake
             m_Material = MaterialManager::Get()->GetMaterial("default");
         }
 
-        m_IndicesCount = static_cast<uint32_t>(m_Indices.size());
-        m_VerticesCount = static_cast<uint32_t>(m_Vertices.size());
+       
 
         //m_Indices.clear();
     }
@@ -237,5 +244,5 @@ namespace Nuake
 
 		SetupMesh();
         return true;
-    }
+	}
 }
