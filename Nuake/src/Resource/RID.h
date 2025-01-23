@@ -7,6 +7,7 @@
 namespace Nuake
 {
 	class Resource;
+
 	class RID
 	{
 	public:

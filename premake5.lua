@@ -288,6 +288,9 @@ project "NuakeRuntime"
         "%{prj.name}/../Nuake/dependencies/freetype/include",
 	    "%{prj.name}/../Nuake/dependencies/tracy/public/tracy",
         "%{prj.name}/../Nuake/dependencies/entt/src",
+		"%{prj.name}/../Nuake/src/Vendors/vulkan",
+        "%{prj.name}/../Nuake/src/Vendors/volk",
+        "%{prj.name}/../Nuake/dependencies/vma/include"
     }
 
     libdirs 
@@ -341,9 +344,11 @@ project "NuakeRuntime"
 
         externalincludedirs { "%{prj.name}/../Nuake/dependencies/Coral/Coral.Native/Include/" }
     
+		--[[
         postbuildcommands {
             '{COPYFILE} "%{wks.location}/Nuake/dependencies/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/%{prj.name}"'
         }
+		]]--
 
     filter { "system:windows", "action:vs*" }
         flags

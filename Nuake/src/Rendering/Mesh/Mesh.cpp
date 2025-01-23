@@ -57,8 +57,10 @@ namespace Nuake
         return m_Indices;
     }
 
-    Ref<Material> Mesh::GetMaterial() const
+    Ref<Material> Mesh::GetMaterial()
     {
+        return MaterialResource.Get<Material>();
+
 		Ref<Material> material = ResourceManager::GetResource<Material>(MaterialResource.ID);
         if (!material)
         {

@@ -60,29 +60,43 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 		
 		if(!materialData.albedo.empty())
 		{			
-			material->SetAlbedo(materialData.albedo);
+			material->SetAlbedo(absolutePath + "/../" + materialData.albedo);
 		}
 		
 		if(!materialData.normal.empty())
 		{			
-			material->SetNormal(materialData.normal);
+			material->SetNormal(absolutePath + "/../" + materialData.normal);
 		}
 		
 		if(!materialData.ao.empty())
 		{			
-			material->SetAO(materialData.ao);
+			material->SetAO(absolutePath + "/../" + materialData.ao);
 		}
 		
 		if(!materialData.metallic.empty())
 		{			
-			material->SetMetalness(materialData.metallic);
+			material->SetMetalness(absolutePath + "/../" + materialData.metallic);
 		}
 		
 		if(!materialData.roughness.empty())
 		{			
-			material->SetRoughness(materialData.roughness);
+			material->SetRoughness(absolutePath + "/../" + materialData.roughness);
 		}
 		
+		std::string materialPath;
+		if(!materialData.albedo.empty())
+		{
+			materialPath = file->GetRelativePath() + "." + materialData.albedo + ".material";
+		}
+		ResourceManager::RegisterResource(material);
+		ResourceManager::Manifest.RegisterResource(material->ID, materialPath);
+		
+		std::string materialJson = material->Serialize().dump(4);
+		FileSystem::BeginWriteFile(materialPath);
+		FileSystem::WriteLine(materialJson);
+		FileSystem::EndWriteFile();
+		
+		mesh->MaterialResource = RID(material->ID);
 		model->AddMesh(std::move(mesh));
 	}
 	

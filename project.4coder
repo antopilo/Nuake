@@ -24,11 +24,17 @@ load_paths = {
 		{ {"."}, .recursive = false, .relative = true }, .os = "win"
 	},
 	{
-		{ {"Nuake"}, .recursive = false, .relative = true }, .os = "win"
+		{ {"Nuake/src"}, .recursive = true, .relative = true }, .os = "win"
 	},
 	{
-		{ {"Nuake/src"}, .recursive = true, .relative = true }, .os = "win"
-	}
+		{ {"Editor/src"}, .recursive = true, .relative = true }, .os = "win"
+	},
+	{
+		{ {"NuakeNet/src"}, .recursive = true, .relative = true }, .os = "win"
+	},
+	{
+		{ {"Runtime"}, .recursive = true, .relative = true }, .os = "win"
+	}		
 };
 
 command_list = {

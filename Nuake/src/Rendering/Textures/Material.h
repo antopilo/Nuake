@@ -61,12 +61,12 @@ namespace Nuake
 		}
 	public:
 		UUID AlbedoImage = UUID(0);
-		UUID AOImage;
-		UUID MetalnessImage;
-		UUID RoughnessImage;
-		UUID NormalImage;
+		UUID AOImage = UUID(0);
+		UUID MetalnessImage = UUID(0);
+		UUID RoughnessImage = UUID(0);
+		UUID NormalImage = UUID(0);
 		
-		Ref<Texture> m_Albedo;
+		Ref<Texture> m_Albedo; 
 		Ref<Texture> m_AO;
 		Ref<Texture> m_Metalness;
 		Ref<Texture> m_Roughness;
@@ -130,6 +130,14 @@ namespace Nuake
 			j["Path"] = Path;
 			j["UUID"] = static_cast<uint64_t>(ID);
 			j["HasAlbedo"] = this->HasAlbedo();
+
+			// new UUID
+			if (AlbedoImage != 0)
+			{
+				j["AlbedoImage"] = static_cast<uint64_t>(AlbedoImage);
+			}
+			// TODO others.
+
 			if (HasAlbedo())
 			{
 				j["Albedo"] = this->m_Albedo->Serialize();
@@ -175,6 +183,11 @@ namespace Nuake
 		bool Deserialize(const json& j) override
 		{
 			ID = static_cast<uint64_t>(j["UUID"]);
+
+			if (j.contains("AlbedoImage"))
+			{
+				AlbedoImage = static_cast<uint64_t>(j["AlbedoImage"]);
+			}
 
 			if (j.contains("Albedo"))
 			{

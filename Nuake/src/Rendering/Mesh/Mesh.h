@@ -29,7 +29,7 @@ namespace Nuake
 		std::vector<Vertex>& GetVertices();
 		std::vector<uint32_t>& GetIndices();
 
-		Ref<Material> GetMaterial() const;
+		Ref<Material> GetMaterial();
 		void SetMaterial(Ref<Material> material);
 
 		void Bind() const;
