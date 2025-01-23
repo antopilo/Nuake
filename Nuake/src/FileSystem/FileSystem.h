@@ -15,6 +15,8 @@ namespace Nuake
 	class Directory;
 	class File;
 
+	using OnFileFunc = std::function<void(Ref<File>)>;
+
 	class FileSystem
 	{
 	public:
@@ -25,10 +27,10 @@ namespace Nuake
 		static void SetRootDirectory(const std::string path);
 		
 		// Starts from root
-		static void ForeachFile(std::function<void(Ref<File>)> func);
+		static void ForeachFile(OnFileFunc func);
 		
 		// Strats from specified folder
-		static void ForeachFile(std::function<void(Ref<File>)> func, Ref<Directory> dir);
+		static void ForeachFile(OnFileFunc func, Ref<Directory> dir);
 		
 		static void Scan();
 		static std::string AbsoluteToRelative(const std::string& path);

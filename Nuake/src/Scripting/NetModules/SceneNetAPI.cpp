@@ -57,8 +57,7 @@ namespace Nuake {
 		if (scriptingEngine.HasEntityScriptInstance(entity))
 		{
 			auto instance = scriptingEngine.GetEntityScript(entity);
-			outInstance->m_Handle = instance->m_Handle;
-			outInstance->m_Type = instance->m_Type;
+			*outInstance= *instance;
 		}
 	}
 

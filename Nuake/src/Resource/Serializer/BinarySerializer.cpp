@@ -77,6 +77,19 @@ public:
 	}
 };
 
+UUID BinarySerializer::DeserializeUUID(const std::string& path)
+{
+	BinaryReader reader = BinaryReader(FileSystem::RelativeToAbsolute(path));
+	if (!reader.IsOpen())
+	{
+		return UUID(0);
+	}
+
+	uint64_t rid;
+	reader.Read<uint64_t>(&rid);
+	return rid;
+}
+
 Ref<Material> BinarySerializer::DeserializeMaterial(const std::string& path)
 {
 	BinaryReader reader = BinaryReader(path);

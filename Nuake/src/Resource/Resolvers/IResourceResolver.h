@@ -20,6 +20,7 @@ namespace Nuake
 		virtual ~IResourceResolver() = default;
 
 		// Converts a file to a resource UUID
+		virtual UUID ResolveUUID(const Ref<File>& file) = 0;
 		virtual Ref<Resource> Resolve(const Ref<File>& file) = 0;
 
 		std::string GetExtension() const { return Extension; }

@@ -85,6 +85,8 @@ namespace Nuake
 		static Timestep timeStep;
 		static float timeScale;
 
+	private:
+		static void GenerateManifest();
 	};
 }
 

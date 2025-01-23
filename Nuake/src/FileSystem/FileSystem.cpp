@@ -18,12 +18,12 @@ std::string FileSystem::Root = "";
 Ref<Directory> FileSystem::RootDirectory;
 Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
 
-void FileSystem::ForeachFile(std::function<void(Ref<File>)> func)
+void FileSystem::ForeachFile(OnFileFunc func)
 {
 	ForeachFile(func, RootDirectory);
 }
 
-void FileSystem::ForeachFile(std::function<void(Ref<File>)> func, Ref<Directory> dir)
+void FileSystem::ForeachFile(OnFileFunc func, Ref<Directory> dir)
 {
 	for(auto& file : RootDirectory->Files)
 	{

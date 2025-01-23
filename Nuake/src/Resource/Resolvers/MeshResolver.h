@@ -9,6 +9,7 @@ namespace Nuake
 	{
 	public:
 		MeshResolver() : IResourceResolver(".nkmesh") {}
+		UUID ResolveUUID(const Ref<File>& file) override;
 		Ref<Resource> Resolve(const Ref<File>& file) override;
 	};
 
@@ -16,6 +17,7 @@ namespace Nuake
 	{
 	public:
 		MaterialResolver() : IResourceResolver(".material") {}
+		UUID ResolveUUID(const Ref<File>& file) override;
 		Ref<Resource> Resolve(const Ref<File>& file) override;
 	};
 }

@@ -21,6 +21,8 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
 
+#include <functional>
+
 #ifdef NK_VK
 	#include "src/Rendering/Vulkan/VulkanRenderer.h"
 #endif
@@ -371,12 +373,17 @@ namespace Nuake
 	{
 		currentProject = project;
 
+		// TODO(antopilo) only generate manifest in editor context
+		
+		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
+
+		GenerateManifest(project);
+
 		if (!Engine::SetCurrentScene(currentProject->DefaultScene))
 		{
 			return false;
 		}
 
-		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
 		ScriptingEngineNet::Get().Initialize();
 		ScriptingEngineNet::Get().LoadProjectAssembly(project);
 
@@ -386,5 +393,26 @@ namespace Nuake
 	Ref<Window> Engine::GetCurrentWindow()
 	{
 		return currentWindow;
+	}
+
+	void Engine::GenerateManifest()
+	{
+		// This will auto generate a manifest entry for all assets in the project
+		ResourceManifest& manifest = ResourceManager::Manifest;
+		ResourceResolverManager& resolverManager = ResourceResolverManager::Get();
+		OnFileFunc onFileScanFunc = [&resolverManager, &manifest](Ref<File> file)
+		{
+			if (!resolverManager.IsFileTypeResolvable(file->GetExtension()))
+			{
+				return; // We don't care about this file type, we dont support it.
+			}
+
+			// Register the resource in the manifest
+			const std::string& path = file->GetRelativePath();
+			const UUID uuid = resolverManager.ResolveUUID(file);
+			manifest.RegisterResource(uuid, path);
+		};
+
+		FileSystem::ForeachFile(onFileScanFunc);
 	}
 }
