@@ -15,7 +15,7 @@ namespace Nuake
 		~BinarySerializer() = default;
 
 	public:
-		UUID DeserializeUUID(const std::string& path);
+		UUID DeserializeUUID(const std::string& path) override;
 
 		Ref<Material> DeserializeMaterial(const std::string& path) override;
 		bool SerializeMaterial(const std::string& path, Ref<Material> material) override;

@@ -384,8 +384,7 @@ namespace Nuake
 		// TODO(antopilo) only generate manifest in editor context
 		
 		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
-
-		GenerateManifest(project);
+		GenerateManifest();
 
 		if (!Engine::SetCurrentScene(currentProject->DefaultScene))
 		{
@@ -405,6 +404,7 @@ namespace Nuake
 
 	void Engine::GenerateManifest()
 	{
+		Logger::Log("Generating project manifest", "manifest", VERBOSE);
 		// This will auto generate a manifest entry for all assets in the project
 		ResourceManifest& manifest = ResourceManager::Manifest;
 		ResourceResolverManager& resolverManager = ResourceResolverManager::Get();
@@ -414,6 +414,8 @@ namespace Nuake
 			{
 				return; // We don't care about this file type, we dont support it.
 			}
+
+			Logger::Log("Adding " + file->GetName() + " to manifest", "manifest", VERBOSE);
 
 			// Register the resource in the manifest
 			const std::string& path = file->GetRelativePath();

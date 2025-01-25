@@ -3,6 +3,7 @@
 #include <json/json.hpp>
 
 #include "src/Core/Core.h"
+#include "src/Resource/UUID.h"
 
 using json = nlohmann::json;
 
@@ -103,6 +104,7 @@ namespace Nuake
 	class ISerializer
 	{
 	public:
+		virtual UUID DeserializeUUID(const std::string& file) = 0;
 		virtual Ref<Material> DeserializeMaterial(const std::string& path) = 0;
 		virtual bool SerializeMaterial(const std::string& path, Ref<Material> material) = 0;
 

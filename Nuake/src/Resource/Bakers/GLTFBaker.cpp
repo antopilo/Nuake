@@ -2,7 +2,7 @@
 
 #include "src/Core/Logger.h"
 #include "src/Core/String.h"
-
+#include "src/FileSystem/Directory.h"
 #include "src/Rendering/Textures/Material.h"
 #include "src/Rendering/Mesh/Mesh.h"
 #include "src/Resource/Model.h"
@@ -46,9 +46,10 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 	
 	importer.FreeScene();
 	
-	// Write those meshes to disk!
+	// Write to disk
 	std::vector<Mesh> meshes;
 	
+	std::map<std::string, Ref<Material>> materialCache;
 	Ref<Model> model = CreateRef<Model>();
 	for(auto& meshData : meshesData)
 	{
@@ -56,46 +57,58 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 		mesh->SetData(meshData.vertices, meshData.indices);
 		
 		const BakerMaterialData materialData = meshData.material;
-		Ref<Material> material = CreateRef<Material>();
-		
-		if(!materialData.albedo.empty())
-		{			
-			material->SetAlbedo(absolutePath + "/../" + materialData.albedo);
-		}
-		
-		if(!materialData.normal.empty())
-		{			
-			material->SetNormal(absolutePath + "/../" + materialData.normal);
-		}
-		
-		if(!materialData.ao.empty())
-		{			
-			material->SetAO(absolutePath + "/../" + materialData.ao);
-		}
-		
-		if(!materialData.metallic.empty())
-		{			
-			material->SetMetalness(absolutePath + "/../" + materialData.metallic);
-		}
-		
-		if(!materialData.roughness.empty())
-		{			
-			material->SetRoughness(absolutePath + "/../" + materialData.roughness);
-		}
-		
+
 		std::string materialPath;
-		if(!materialData.albedo.empty())
+		Ref<Material> material;
+		if (!materialData.albedo.empty())
 		{
-			materialPath = file->GetRelativePath() + "." + materialData.albedo + ".material";
+			materialPath = FileSystem::GetParentPath(file->GetRelativePath()) +  FileSystem::GetFileNameFromPath(materialData.albedo) + ".material";
 		}
-		ResourceManager::RegisterResource(material);
-		ResourceManager::Manifest.RegisterResource(material->ID, materialPath);
-		
-		std::string materialJson = material->Serialize().dump(4);
-		FileSystem::BeginWriteFile(materialPath);
-		FileSystem::WriteLine(materialJson);
-		FileSystem::EndWriteFile();
-		
+
+		if (materialCache.find(materialPath) != materialCache.end())
+		{
+			material = materialCache[materialPath];
+		}
+		else
+		{
+			material = CreateRef<Material>();
+			if (!materialData.albedo.empty())
+			{
+				material->SetAlbedo(absolutePath + "/../" + materialData.albedo);
+			}
+
+			if (!materialData.normal.empty())
+			{
+				material->SetNormal(absolutePath + "/../" + materialData.normal);
+			}
+
+			if (!materialData.ao.empty())
+			{
+				material->SetAO(absolutePath + "/../" + materialData.ao);
+			}
+
+			if (!materialData.metallic.empty())
+			{
+				material->SetMetalness(absolutePath + "/../" + materialData.metallic);
+			}
+
+			if (!materialData.roughness.empty())
+			{
+				material->SetRoughness(absolutePath + "/../" + materialData.roughness);
+			}
+
+
+			ResourceManager::RegisterResource(material);
+			ResourceManager::Manifest.RegisterResource(material->ID, materialPath);
+
+			std::string materialJson = material->Serialize().dump(4);
+			FileSystem::BeginWriteFile(materialPath);
+			FileSystem::WriteLine(materialJson);
+			FileSystem::EndWriteFile();
+
+			materialCache[materialPath] = material;
+		}
+
 		mesh->MaterialResource = RID(material->ID);
 		model->AddMesh(std::move(mesh));
 	}

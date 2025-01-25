@@ -25,12 +25,12 @@ void FileSystem::ForeachFile(OnFileFunc func)
 
 void FileSystem::ForeachFile(OnFileFunc func, Ref<Directory> dir)
 {
-	for(auto& file : RootDirectory->Files)
+	for(auto& file : dir->Files)
 	{
 		func(file);
 	}
 	
-	for(auto& dir : RootDirectory->Directories)
+	for(auto& dir : dir->Directories)
 	{
 		ForeachFile(func, dir);
 	}
