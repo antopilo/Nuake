@@ -90,6 +90,7 @@ namespace Nuake
 		Ref<AllocatedBuffer> MaterialStagingBuffer;	// Materials
 		Ref<AllocatedBuffer> LightStagingBuffer;	// Lights
 		Ref<AllocatedBuffer> CamerasStagingBuffer;	// Draw image
+
 		// Semaphore are for GPU -> GPU sync
 		// Fence are for CPU -> GPU
 		// Two, one for window, other for rendering
@@ -160,50 +161,20 @@ namespace Nuake
 		uint32_t GPUQueueFamily;
 
 		DeletionQueue MainDeletionQueue;
-
-		// Descriptors
 		DescriptorAllocator GlobalDescriptorAllocator;
 
 	public:
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
-
-		VkDescriptorSet TriangleBufferDescriptors;
-		VkDescriptorSetLayout TriangleBufferDescriptorLayout;
-
-		VkDescriptorSet CameraBufferDescriptors;
-		VkDescriptorSetLayout CameraBufferDescriptorLayout;
-
-		// Pipeline
-		VkPipeline Pipeline;
-		VkPipelineLayout PipelineLayout;
-
-		VkPipelineLayout TrianglePipelineLayout;
-		VkPipeline TrianglePipeline;
-
-		Ref<VulkanShader> BackgroundShader;
-		Ref<VulkanShader> TriangleVertShader;
-		Ref<VulkanShader> TriangleFragShader;
 		
-		// Imgui
+		// Imgui stuff
 		VkFence ImguiFence;
 		VkCommandBuffer ImguiCommandBuffer;
 		VkCommandPool ImguiCommandPool;
 
-		// Buffers
-
-		Ref<AllocatedBuffer> CameraBuffer;
 		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
-		Ref<VkMesh> Rect;
-		VkQueue GPUQueue;
-
-		Ref<VulkanImage> DrawImage;
-		Ref<VulkanImage> DepthImage;
-		VkExtent2D DrawExtent;
-		FrameData& GetCurrentFrame() { return Frames[FrameNumber % FRAME_OVERLAP]; };
-
 		static VkRenderer& Get()
 		{
 			static VkRenderer instance;
@@ -213,10 +184,13 @@ namespace Nuake
 		VkRenderer() = default;
 		~VkRenderer();
 
-		VkDevice GetDevice() const
-		{
-			return Device;
-		}
+	public:
+		Ref<VkMesh> Rect;
+		VkQueue GPUQueue;
+
+		Ref<VulkanImage> DrawImage;
+		Ref<VulkanImage> DepthImage;
+		VkExtent2D DrawExtent;
 
 	public:
 		void Initialize();
@@ -233,17 +207,23 @@ namespace Nuake
 		void InitSync();
 		void InitDescriptors();
 		void UpdateDescriptorSets();
-		void InitPipeline();
-		void InitBackgroundPipeline();
-		void InitTrianglePipeline();
 		void DrawScene(RenderContext ctx);
 		void InitImgui();
 
 		void BeginScene(const UUID& camera);
-
 		bool Draw();
-
 		void EndDraw();
+
+	public:
+		VkDevice GetDevice() const
+		{
+			return Device;
+		}
+
+		FrameData& GetCurrentFrame() 
+		{ 
+			return Frames[FrameNumber % FRAME_OVERLAP]; 
+		};
 
 		DescriptorAllocator& GetDescriptorAllocator()
 		{
@@ -255,15 +235,10 @@ namespace Nuake
 			return Cmd(GetCurrentFrame().CommandBuffer);
 		}
 
-		void DrawBackground(VkCommandBuffer cmd);
-		void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
-
-		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
-
-		void UploadCameraData(const CameraData& data);
-		//auto& GetRenderPipeline() { return this->SceneRenderer->GetRenderPipeline(); }
 		VkDescriptorSet GetViewportDescriptor() const { return DrawImageDescriptors; }
 		Ref<VulkanImage> GetDrawImage() const { return DrawImage; }
+
+		void DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView);
+		void ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function);
 	};
-	
 }

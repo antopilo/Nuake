@@ -32,7 +32,7 @@
 
 #include <array>
 
-bool NKUseValidationLayer = true;
+bool NKUseValidationLayer = false;
 
 using namespace Nuake;
 
@@ -91,11 +91,6 @@ void VkRenderer::Initialize()
 
 	InitSync();
 
-	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
-	TriangleVertShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert");
-	BackgroundShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/background.comp");
-	TriangleFragShader = shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag");
-
 	std::vector<Vertex> rect_vertices;
 	rect_vertices.resize(4);
 
@@ -128,13 +123,7 @@ void VkRenderer::Initialize()
 	camData.Projection = Matrix4(1.0f);
 
 	// init camera buffer
-	CameraBuffer = resources.CreateBuffer(sizeof(CameraData), BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CameraBuffer");
-	UploadCameraData(camData);
-
 	InitDescriptors();
-
-	//InitPipeline();
-	//InitTrianglePipeline();
 
 	InitImgui();
 
@@ -178,7 +167,6 @@ void VkRenderer::CleanUp()
 	vkb::destroy_debug_utils_messenger(Instance, VkDebugMessenger);
 	vkDestroyInstance(Instance, nullptr);
 }
-
 
 void VkRenderer::GetInstance()
 {
@@ -234,7 +222,6 @@ void VkRenderer::RecreateSwapchain()
 	CreateSwapchain(Window::Get()->GetSize());
 	UpdateDescriptorSets();
 
-	// Update sceneRenderer
 	SceneRenderer->SetGBufferSize(Window::Get()->GetSize());
 }
 
@@ -355,23 +342,7 @@ void VkRenderer::InitDescriptors()
 		DrawImageDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_COMPUTE_BIT);
 	}
 
-	// Camera buffer
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		CameraBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL_GRAPHICS);
-	}
-
-	// Triangle vertex buffer layout
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
-		TriangleBufferDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_ALL);
-	}
-
 	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
-	TriangleBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, TriangleBufferDescriptorLayout);
-	CameraBufferDescriptors = GlobalDescriptorAllocator.Allocate(Device, CameraBufferDescriptorLayout);
 
 	UpdateDescriptorSets();
 
@@ -407,78 +378,6 @@ void VkRenderer::UpdateDescriptorSets()
 	drawImageWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 	drawImageWrite.pImageInfo = &imgInfo;
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
-}
-
-void VkRenderer::InitPipeline()
-{
-	InitBackgroundPipeline();
-}
-
-void VkRenderer::InitBackgroundPipeline()
-{
-	VkPipelineLayoutCreateInfo computeLayout{};
-	computeLayout.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	computeLayout.pNext = nullptr;
-	computeLayout.pSetLayouts = &DrawImageDescriptorLayout;
-	computeLayout.setLayoutCount = 1;
-
-	VK_CALL(vkCreatePipelineLayout(Device, &computeLayout, nullptr, &PipelineLayout));
-
-	VkPipelineShaderStageCreateInfo stageinfo{};
-	stageinfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	stageinfo.pNext = nullptr;
-	stageinfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-	stageinfo.module = BackgroundShader->GetModule();
-	stageinfo.pName = "main";
-
-	VkComputePipelineCreateInfo computePipelineCreateInfo{};
-	computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-	computePipelineCreateInfo.pNext = nullptr;
-	computePipelineCreateInfo.layout = PipelineLayout;
-	computePipelineCreateInfo.stage = stageinfo;
-
-	VK_CALL(vkCreateComputePipelines(Device, VK_NULL_HANDLE, 1, &computePipelineCreateInfo, nullptr, &Pipeline));
-
-	MainDeletionQueue.push_function([&]() {
-		vkDestroyPipelineLayout(Device, PipelineLayout, nullptr);
-		vkDestroyPipeline(Device, Pipeline, nullptr);
-	});
-}
-
-void VkRenderer::InitTrianglePipeline()
-{
-	VkPushConstantRange bufferRange{};
-	bufferRange.offset = 0;
-	bufferRange.size = sizeof(GPUDrawPushConstants);
-	bufferRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-	VkDescriptorSetLayout layouts[] = { CameraBufferDescriptorLayout, TriangleBufferDescriptorLayout };
-
-	VkPipelineLayoutCreateInfo pipeline_layout_info = VulkanInit::PipelineLayoutCreateInfo();
-	pipeline_layout_info.pPushConstantRanges = &bufferRange;
-	pipeline_layout_info.pushConstantRangeCount = 0;
-	pipeline_layout_info.pSetLayouts = layouts;
-	pipeline_layout_info.setLayoutCount = 2;
-	VK_CALL(vkCreatePipelineLayout(Device, &pipeline_layout_info, nullptr, &TrianglePipelineLayout));
-
-	//use the triangle layout we created
-	PipelineBuilder pipelineBuilder;
-	pipelineBuilder.PipelineLayout = TrianglePipelineLayout;
-	pipelineBuilder.SetShaders(TriangleVertShader->GetModule(), TriangleFragShader->GetModule());
-	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
-	pipelineBuilder.SetCullMode(VK_CULL_MODE_NONE, VK_FRONT_FACE_CLOCKWISE);
-	pipelineBuilder.SetMultiSamplingNone();
-	pipelineBuilder.DisableBlending();
-	pipelineBuilder.DisableDepthTest();
-	pipelineBuilder.SetColorAttachment(static_cast<VkFormat>(DrawImage->GetFormat()));
-	pipelineBuilder.SetDepthFormat(VK_FORMAT_UNDEFINED);
-	TrianglePipeline = pipelineBuilder.BuildPipeline(Device);
-
-	MainDeletionQueue.push_function([&]() {
-		vkDestroyPipelineLayout(Device, TrianglePipelineLayout, nullptr);
-		vkDestroyPipeline(Device, TrianglePipeline, nullptr);
-	});
 }
 
 void VkRenderer::DrawScene(RenderContext ctx)
@@ -759,21 +658,6 @@ void VkRenderer::EndDraw()
 	FrameNumber++;
 }
 
-void VkRenderer::DrawBackground(VkCommandBuffer cmd)
-{
-	// This works
-	VkClearColorValue clearValue;
-	//float flash = std::abs(std::sin(FrameNumber / 120.f));
-	clearValue = { { 0.0f, 0.0f, 0.0f, 1.0f } };
-	VkImageSubresourceRange clearRange = VulkanInit::ImageSubResourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-	vkCmdClearColorImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
-
-	// This doesnt!!
-	//vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, Pipeline);
-	//vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, PipelineLayout, 0, 1, &DrawImageDescriptors, 0, nullptr);
-	//vkCmdDispatch(cmd, std::ceil(DrawExtent.width / 16.0), std::ceil(DrawExtent.height / 16.0), 1);
-}
-
 void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
 {
 	VkRenderingAttachmentInfo colorAttachment = VulkanInit::AttachmentInfo(targetImageView, nullptr, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -811,33 +695,6 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 
 	VK_CALL(vkWaitForFences(Device, 1, &ImguiFence, true, 9999999999));
 }
-
-void VkRenderer::UploadCameraData(const CameraData& data)
-{
-	CameraData adjustedData = data;
-	adjustedData.View = Matrix4(1.0f); //data.View;
-	adjustedData.View = data.View;
-	adjustedData.Projection = glm::perspective(glm::radians(70.f), (float)DrawExtent.width / (float)DrawExtent.height, 0.0001f, 10000.0f);
-	adjustedData.Position = data.View[3];
-	//adjustedData.Projection[1][1] *= -1;
-
-	void* mappedData;
-	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (GetCurrentFrame().CameraStagingBuffer->GetAllocation()), &mappedData);
-	memcpy(mappedData, &adjustedData, sizeof(CameraData));
-
-	ImmediateSubmit([&](VkCommandBuffer cmd) {
-		VkBufferCopy copy{ 0 };
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = sizeof(CameraData);
-	
-		vkCmdCopyBuffer(cmd, GetCurrentFrame().CameraStagingBuffer->GetBuffer(), CameraBuffer->GetBuffer(), 1, &copy);
-	});
-
-	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), GetCurrentFrame().CameraStagingBuffer->GetAllocation());
-}
-
-
 
 void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<PoolSizeRatio> poolRatios)
 {
