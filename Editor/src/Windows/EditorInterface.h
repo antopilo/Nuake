@@ -102,6 +102,8 @@ namespace Nuake
 		bool BeginMenubar(const ImRect& barRectangle);
 		void EndMenubar();
 
+		void OnSceneLoaded(Ref<Scene> scene);
+
 		void SetStatusMessage(const std::string& msg, const Color& color = Color(0.08f, 0.08f, 0.08f, 1.0f)) { m_StatusMessage = msg; m_StatusBarColor = color; }
 		void DrawViewport();
 		void DrawStatusBar();

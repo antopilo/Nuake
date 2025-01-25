@@ -5,6 +5,8 @@
 #include "src/Rendering/Vulkan/Pipeline/RenderPipeline.h"
 #include "src/Rendering/Vulkan/VkResources.h"
 
+#include "src/Core/MulticastDelegate.h"
+
 namespace Nuake
 {
 	struct GBufferConstant
@@ -95,6 +97,9 @@ namespace Nuake
 
 		static RenderPipeline GBufferPipeline;
 
+		// Delegates
+		MulticastDelegate<> DebugDrawDelegate;
+
 	public:
 		SceneRenderPipeline();
 		~SceneRenderPipeline() = default;
@@ -102,6 +107,8 @@ namespace Nuake
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
 		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
+
+		MulticastDelegate<>& OnDebugDraw() { return DebugDrawDelegate; }
 
 	private:
 		Ref<VulkanImage> ResizeImage(Ref<VulkanImage> image, const Vector2& size);

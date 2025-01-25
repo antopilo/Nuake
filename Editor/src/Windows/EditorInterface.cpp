@@ -142,6 +142,8 @@ namespace Nuake {
         Window::Get()->SetTitlebarHitTestCallback([&](Window& window, int x, int y, bool& hit) {
             hit = m_TitleBarHovered;
         });
+
+		Engine::OnSceneLoaded.AddRaw(this, &EditorInterface::OnSceneLoaded);
     }
 
     void EditorInterface::DrawTitlebar(float& outHeight)
@@ -2431,6 +2433,11 @@ namespace Nuake {
         window->DC.LayoutType = ImGuiLayoutType_Vertical;
         window->DC.NavLayerCurrent = ImGuiNavLayer_Main;
         window->DC.MenuBarAppending = false;
+    }
+
+    void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
+    {
+        Logger::Log("On Scene loaded");
     }
 
     bool isLoadingProject = false;

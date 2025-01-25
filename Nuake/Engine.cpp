@@ -46,6 +46,8 @@ namespace Nuake
 	Timestep Engine::timeStep = 0.f;
 	float Engine::timeScale = 1.0f;
 
+	MulticastDelegate<Ref<Scene>> Engine::OnSceneLoaded;
+
 	void Engine::Init()
 	{
 		//Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
@@ -64,7 +66,7 @@ namespace Nuake
 		currentWindow = Window::Get();
 
 		Input::Init();
-		//Renderer2D::Init();
+
 		Logger::Log("Engine initialized");
 
 		RegisterCoreTypes::RegisterCoreComponents();
@@ -250,7 +252,13 @@ namespace Nuake
 
 	bool Engine::SetCurrentScene(Ref<Scene> scene)
 	{
-		return currentWindow->SetScene(scene);
+		bool result = currentWindow->SetScene(scene);
+		if (result)
+		{
+			OnSceneLoaded.Broadcast(scene);
+		}
+
+		return result;
 	}
 
 	bool Engine::QueueSceneSwitch(const std::string& scenePath)

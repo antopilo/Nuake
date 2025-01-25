@@ -274,10 +274,14 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	{
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial },	// GBuffer
 		{ ShadingOutput },													// Shading
-		{ TonemappedOutput }
+		{ TonemappedOutput },												// Tonemap
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);
+
+	// Debug drawing
+	// Get delegate
+
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const Vector2& size)

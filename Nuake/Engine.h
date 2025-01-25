@@ -3,6 +3,7 @@
 #include "src/Core/Core.h"
 #include "src/Core/Logger.h"
 #include "src/Window.h"
+#include "src/Core/MulticastDelegate.h"
 
 // Welcome to the Nuake source code.
 namespace Nuake
@@ -84,6 +85,9 @@ namespace Nuake
 		static float time;
 		static Timestep timeStep;
 		static float timeScale;
+
+	public:
+		static MulticastDelegate<Ref<Scene>> OnSceneLoaded;
 
 	private:
 		static void GenerateManifest();
