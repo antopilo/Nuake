@@ -1255,7 +1255,7 @@ namespace Nuake {
         ImGui::PopFont();
     }
 
-
+    
 
     void EditorInterface::DrawSceneTree()
     {
@@ -2741,11 +2741,10 @@ namespace Nuake {
         ImGuiWindowClass top_level_class;
         top_level_class.ClassId = ImHashStr("SceneEditor");
         top_level_class.DockingAllowUnclassed = false;
-
         ImGui::DockSpace(ImGui::GetID("SceneEditorDockSpace"), {0, 0}, 0, &top_level_class);
-        style.WindowMinSize.x = minWinSizeX;
+
         ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 64);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 32);
         if(ImGui::DockNodeBeginAmendTabBar(node))
         {
             ImGui::SetNextItemWidth(48);

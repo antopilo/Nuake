@@ -1,16 +1,15 @@
 #include "SceneEditorWindow.h"
 
-#include "SelectionPropertyWidget.h"
-#include "SceneHierarchyWidget.h"
+#include "Widgets/SceneHierarchyWidget.h"
+#include "Widgets/SelectionPropertyWidget.h"
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
+#include <src/UI/ImUI.h>
 
 using namespace Nuake;
 
 SceneEditorWindow::SceneEditorWindow(Ref<Scene> inScene)
 {
-	editorContext = EditorContext(inScene);
+	editorContext = EditorContext(inScene, inScene->GetName());
 
 	RegisterWidget<SceneHierarchyWidget>();
 	RegisterWidget<SelectionPropertyWidget>();
@@ -30,9 +29,8 @@ void SceneEditorWindow::Draw()
 	const std::string sceneName = scene->GetName();
 
 	// This is to prevent other windows of other scene editors to dock 
-	// into this window
 	ImGuiWindowClass windowClass;
-	windowClass.ClassId = ImHashStr("SceneEditor");
+	windowClass.ClassId = ImHashStr(editorContext.GetWindowClass().data());
 	windowClass.DockingAllowUnclassed = false;
 	ImGui::SetNextWindowClass(&windowClass);
 

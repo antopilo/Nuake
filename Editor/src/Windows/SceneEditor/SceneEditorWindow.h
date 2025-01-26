@@ -1,11 +1,13 @@
 #pragma once
 #include "src/Core/Core.h"
 
-#include "IEditorWidget.h"
 #include "EditorContext.h"
+
+#include "Widgets/IEditorWidget.h"
 
 #include <string>
 #include <vector>
+#include <concepts>
 
 // Forward declarations
 namespace Nuake
@@ -14,7 +16,8 @@ namespace Nuake
 	class Entity;
 }
 
-class SceneHierarchyWidget;
+template <typename T>
+concept DerivedFromEditorWidget = std::derived_from<T, IEditorWidget>;
 
 class SceneEditorWindow
 {
@@ -33,10 +36,9 @@ public:
 	void Draw();
 
 private:
-	template<class T>
+	template<DerivedFromEditorWidget T>
 	inline void RegisterWidget()
 	{
 		widgets.push_back(CreateScope<T>(editorContext));
 	}
-
 };

@@ -8,7 +8,7 @@
 #include "src/Scene/Entities/Entity.h"
 #include "src/Scene/Components.h"
 
-#include "SceneEditorWindow.h"
+
 #include <src/Core/Input.h>
 #include <src/FileSystem/FileDialog.h>
 #include "Engine.h"
@@ -16,27 +16,31 @@
 
 using namespace Nuake;
 
-SceneHierarchyWidget::SceneHierarchyWidget(EditorContext& inCtx) : IEditorWidget(inCtx)
+SceneHierarchyWidget::SceneHierarchyWidget(EditorContext& inCtx) : 
+	IEditorWidget(inCtx),
+	isRenaming(false),
+	searchQuery("")
 {
 
 }
 
 void SceneHierarchyWidget::Update(float ts)
 {
-	//std::string searchQuery = "";
-	//
-	//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 8, 8 });
-	//ImGui::InputTextWithHint("##search", "Search entity", &searchQuery, 0, 0, 0);
-	//ImGui::PopStyleVar();
+	
 }
 
 void SceneHierarchyWidget::Draw()
 {
-	DrawSearchBar();
+	if (BeginWidgetWindow("Scene Hierarchy"))
+	{
+		DrawSearchBar();
 
-	DrawCreateEntityButton();
+		DrawCreateEntityButton();
 
-	DrawEntityTree();
+		DrawEntityTree();
+
+		ImGui::End();
+	}
 }
 
 void SceneHierarchyWidget::DrawSearchBar()

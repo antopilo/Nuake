@@ -1,8 +1,8 @@
 #pragma once
 #include "src/Core/Core.h"
 #include "src/Core/MulticastDelegate.h"
+#include "../../Actions/EditorSelection.h"
 
-#include "src/Actions/EditorSelection.h"
 
 namespace Nuake
 {
@@ -14,17 +14,20 @@ class EditorContext
 private:
 	EditorSelection selection;
 	Ref<Nuake::Scene> scene;
+	std::string windowClass;
 
 public:
 	EditorContext() = default;
 	~EditorContext() = default;
 
-	EditorContext(Ref<Nuake::Scene> inScene)
-		: scene(inScene)
+	EditorContext(Ref<Nuake::Scene> inScene, std::string inWindowClass) : 
+		scene(inScene),
+		windowClass(inWindowClass)
 	{
 	}
 
 public:
+	const std::string_view GetWindowClass() const { return windowClass; }
 	MulticastDelegate<EditorSelection> OnSelectionChanged;
 
 	const EditorSelection& GetSelection() const { return selection; }

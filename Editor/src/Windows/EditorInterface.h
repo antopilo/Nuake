@@ -19,7 +19,8 @@
 #include <src/Scripting/ScriptingEngineNet.h>
 #include "ProjectSettings/ProjectSettingsWindow.h"
 #include "PrefabEditor/PrefabEditorWindow.h"
-#include "../../SceneEditorWindow.h"
+
+#include "SceneEditor/SceneEditorWindow.h"
 
 
 using namespace NuakeEditor;
