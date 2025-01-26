@@ -63,6 +63,9 @@
 #include <src/Rendering/Vulkan/VkResources.h>
 #include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>
 #include <volk/volk.h>
+
+#include "src/Rendering/Vulkan/SceneRenderPipeline.h"
+
 namespace Nuake {
     
     ImFont* normalFont;
@@ -589,7 +592,6 @@ namespace Nuake {
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_AutoHideTabBar;
 
-
         //ImGuiViewport* viewport = ImGui::GetMainViewport();
         //ImGui::SetNextWindowPos(viewport->Pos);
         //ImGui::SetNextWindowSize(viewport->Size);
@@ -627,9 +629,7 @@ namespace Nuake {
                 framebuffer->QueueResize(viewportPanelSize * Engine::GetProject()->Settings.ResolutionScale);
 
             Ref<Texture> texture = framebuffer->GetTexture();
-            //auto& pipeline = VkRenderer::Get().GetRenderPipeline();
             VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
-
             if (SelectedViewport == 1)
             {
 				//pipeline.GetRenderPass("Shadow").GetDepthAttachment().Image->TransitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -2438,6 +2438,13 @@ namespace Nuake {
     void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
     {
         Logger::Log("On Scene loaded");
+
+        VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
+    }
+
+    void EditorInterface::OnDebugDraw()
+    {
+        Logger::Log("On debug draw");
     }
 
     bool isLoadingProject = false;

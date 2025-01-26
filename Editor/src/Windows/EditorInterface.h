@@ -103,6 +103,7 @@ namespace Nuake
 		void EndMenubar();
 
 		void OnSceneLoaded(Ref<Scene> scene);
+		void OnDebugDraw();
 
 		void SetStatusMessage(const std::string& msg, const Color& color = Color(0.08f, 0.08f, 0.08f, 1.0f)) { m_StatusMessage = msg; m_StatusBarColor = color; }
 		void DrawViewport();

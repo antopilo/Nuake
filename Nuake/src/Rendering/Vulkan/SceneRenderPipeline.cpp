@@ -281,7 +281,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 
 	// Debug drawing
 	// Get delegate
-
+	OnDebugDraw().Broadcast();
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const Vector2& size)
