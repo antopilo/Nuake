@@ -10,6 +10,7 @@
 #include "src/Scene/Components/ModelComponent.h"
 
 #include <Tracy.hpp>
+#include "DebugCmd.h"
 
 using namespace Nuake;
 
@@ -280,8 +281,8 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	GBufferPipeline.Execute(ctx, pipelineInputs);
 
 	// Debug drawing
-	// Get delegate
-	OnDebugDraw().Broadcast();
+	DebugCmd debugCmd = DebugCmd(ctx.commandBuffer);
+	OnDebugDraw().Broadcast(debugCmd);
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const Vector2& size)

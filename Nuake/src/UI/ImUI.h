@@ -5,7 +5,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "../../../Editor/src/Misc/InterfaceFonts.h"
-
+#include "imgui/imgui_stdlib.h"
 #include "src/Resource/FontAwesome5.h"
 #include "src/Rendering/Textures/Texture.h"
 #include <src/Rendering/Vulkan/VulkanImage/VulkanImage.h>

@@ -19,6 +19,7 @@
 #include <src/Scripting/ScriptingEngineNet.h>
 #include "ProjectSettings/ProjectSettingsWindow.h"
 #include "PrefabEditor/PrefabEditorWindow.h"
+#include "../../SceneEditorWindow.h"
 
 
 using namespace NuakeEditor;
@@ -28,6 +29,7 @@ namespace Nuake
 	class Material;
 	class FileSystemUI;
 	class VulkanImage;
+	class DebugCmd;
 
 	class EditorInterface
 	{
@@ -35,6 +37,8 @@ namespace Nuake
 		bool m_TitleBarHovered = false;
 		std::vector<CompilationError> errors;
 		std::vector<Ref<PrefabEditorWindow>> prefabEditors;
+		std::vector<Ref<SceneEditorWindow>> sceneEditors;
+
 		Ref<Scene> SceneSnapshot;
 		static NuakeEditor::CommandBuffer* mCommandBuffer;
 
@@ -103,7 +107,7 @@ namespace Nuake
 		void EndMenubar();
 
 		void OnSceneLoaded(Ref<Scene> scene);
-		void OnDebugDraw();
+		void OnDebugDraw(Nuake::DebugCmd& cmd);
 
 		void SetStatusMessage(const std::string& msg, const Color& color = Color(0.08f, 0.08f, 0.08f, 1.0f)) { m_StatusMessage = msg; m_StatusBarColor = color; }
 		void DrawViewport();
@@ -116,6 +120,8 @@ namespace Nuake
 		void Overlay();
 
 		void OpenPrefabWindow(const std::string& prefabPath);
+		void OpenSceneWindow(const std::string& scenePath);
+
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
 		bool ShouldDrawShapes() const { return m_DrawShapes; }
 		bool ShouldDrawGizmos() const { return m_DrawGizmos; }

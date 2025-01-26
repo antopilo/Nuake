@@ -65,6 +65,7 @@
 #include <volk/volk.h>
 
 #include "src/Rendering/Vulkan/SceneRenderPipeline.h"
+#include <src/Rendering/Vulkan/DebugCmd.h>
 
 namespace Nuake {
     
@@ -182,7 +183,7 @@ namespace Nuake {
         // Title bar drag area
         // On Windows we hook into the GLFW win32 window internals
         ImGui::SetCursorPos(ImVec2(windowPadding.x, windowPadding.y + titlebarVerticalOffset)); // Reset cursor pos
-        
+
         const auto titleBarDragSize = ImVec2(w - buttonsAreaWidth, titlebarHeight);
 
         if (Window::Get()->IsMaximized())
@@ -191,7 +192,7 @@ namespace Nuake {
             if (windowMousePosY >= 0.0f && windowMousePosY <= 5.0f)
                 m_TitleBarHovered = true; // Account for the top-most pixels which don't register
         }
-           
+
         auto curPos = ImGui::GetCursorPos();
         bool isOnMenu = false;
         {
@@ -204,7 +205,7 @@ namespace Nuake {
             }
 
         }
-        
+
 
         {
             // Centered Window title
@@ -236,12 +237,12 @@ namespace Nuake {
         {
             int iconWidth = std::max(MinimizeTexture->GetWidth(), 24);
             int iconHeight = std::max(MinimizeTexture->GetHeight(), 24);
-            
+
             if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight)))
             {
                 glfwIconifyWindow(Window::Get()->GetHandle());
             }
-            
+
             auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
             UI::DrawButtonImage(MinimizeTexture, buttonColN, buttonColH, buttonColP, rect);
         }
@@ -280,19 +281,38 @@ namespace Nuake {
             {
                 glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
             }
-              
+
             UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
         }
 
         // Second bar with play stop pause etc
-        ImGui::SetCursorPosX(windowPadding.x);
+        ImGui::SetCursorPosX(windowPadding.x + NuakeTexture->GetSize().x);
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
 
-
+        //ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, ImGui::GetStyle().WindowPadding.y));
+        //ImGui::PushStyleVar(ImGuiStyleVar_TabBarBorderSize, 0);
+        //
+        //ImGui::SetNextWindowSize({ 300.0f, 25.0f });
+        //if (ImGui::BeginTabBar("SceneTabsBar", ImGuiTabBarFlags_None))
+        //{
+        //    ImGui::BeginTabItem("Scene 1");
+        //    ImGui::BeginTabItem("Scene 2");
+        //    ImGui::BeginTabItem("Scene 3");
+        //    ImGui::EndTabItem();
+        //
+        //    ImGui::EndTabBar();
+        //}
+        //
+        //ImGui::PopStyleVar(2);
+        //
+        //
+        //ImGui::SameLine();
         ImGui::Dummy({ ImGui::GetContentRegionAvail().x / 2.0f - (76.0f / 2.0f), 8.0f });
         ImGui::SameLine();
+        //ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 6.0f);
+
 
         if (Engine::IsPlayMode() && Engine::GetTimeScale() != 0.0f)
         {
@@ -607,8 +627,8 @@ namespace Nuake {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         std::string name = ICON_FA_GAMEPAD + std::string("  Scene");
         ImGuiWindowClass window_class;
-        window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
-        ImGui::SetNextWindowClass(&window_class);
+        //window_class.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoTabBar;
+        //ImGui::SetNextWindowClass(&window_class);
 
         if (ImGui::Begin(name.c_str(), 0, ImGuiWindowFlags_NoDecoration))
         {
@@ -1471,8 +1491,6 @@ namespace Nuake {
                             // Recursively draw childrens if not searching
                             const std::string entityName = e.GetComponent<NameComponent>().Name;
 
-
-
                             DrawEntityTree(e, displayAllHierarchy);
 
                             ImGui::PopFont();
@@ -2107,6 +2125,19 @@ namespace Nuake {
         prefabEditors.push_back(CreateRef<PrefabEditorWindow>(newPrefab));
     }
 
+	void EditorInterface::OpenSceneWindow(const std::string& scenePath)
+	{
+		if (!FileSystem::FileExists(scenePath))
+		{
+			return;
+		}
+
+		Ref<Scene> newScene = Scene::New();
+		newScene->Path = scenePath;
+        newScene->Deserialize(json::parse(FileSystem::ReadFile(scenePath)));
+		sceneEditors.push_back(CreateRef<SceneEditorWindow>(newScene));
+	}
+
     void NewProject()
     {
         if (Engine::GetProject() && Engine::GetProject()->FileExist())
@@ -2442,9 +2473,11 @@ namespace Nuake {
         VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
     }
 
-    void EditorInterface::OnDebugDraw()
+    void EditorInterface::OnDebugDraw(DebugCmd& cmd)
     {
-        Logger::Log("On debug draw");
+        
+		//cmd.DrawLine({ 0, 0, 0 }, { 10, 10, 10 }, { 1, 0, 0, 1 });
+		//cmd.DrawCube({ 0, 0, 0 }, { 1, 1, 1 }, { 0, 1, 0, 1 });
     }
 
     bool isLoadingProject = false;
@@ -2699,12 +2732,40 @@ namespace Nuake {
         float titleBarHeight;
         DrawTitlebar(titleBarHeight);
         ImGui::SetCursorPosY(titleBarHeight);
+
         ImGuiIO& io = ImGui::GetIO();
         ImGuiStyle& style = ImGui::GetStyle();
         float minWinSizeX = style.WindowMinSize.x;
         style.WindowMinSize.x = 370.0f;
-        ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+
+        ImGuiWindowClass top_level_class;
+        top_level_class.ClassId = ImHashStr("SceneEditor");
+        top_level_class.DockingAllowUnclassed = false;
+
+        ImGui::DockSpace(ImGui::GetID("SceneEditorDockSpace"), {0, 0}, 0, &top_level_class);
         style.WindowMinSize.x = minWinSizeX;
+        ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 64);
+        if(ImGui::DockNodeBeginAmendTabBar(node))
+        {
+            ImGui::SetNextItemWidth(48);
+            if (ImGui::BeginTabItem("##logoPadding", 0, ImGuiTabItemFlags_Leading))
+            {
+
+                ImGui::EndTabItem();
+            }
+            ImGui::DockNodeEndAmendTabBar();
+        }
+
+        ImGui::SetNextWindowClass(&top_level_class);
+        ImGui::Begin("SceneEditor");
+        {
+            ImGuiWindowClass inside_document_class;
+            inside_document_class.ClassId = ImHashStr("SceneEditor1");
+            ImGui::DockSpace(ImGui::GetID("SceneEditorWindowDockspace"), ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_None, &inside_document_class);
+        }
+        ImGui::End();
+
         ImGui::End();
         //DrawMenuBar();
         //DrawMenuBars();
@@ -2721,6 +2782,12 @@ namespace Nuake {
         {
             prefabEditors->Draw();
         }
+
+		for (auto& sceneEditor : sceneEditors)
+		{
+			sceneEditor->Draw();
+		}
+
 		//pInterface.DrawEntitySettings();
         DrawViewport();
         DrawSceneTree();
@@ -2812,6 +2879,7 @@ namespace Nuake {
     std::string EditorInterface::GetEntityTypeName(const Entity& entity) const
     {
         std::string entityTypeName = "";
+        
         
         if (entity.HasComponent<LightComponent>())
         {

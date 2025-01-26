@@ -62,6 +62,8 @@ namespace Nuake
 		int BlurDirection;
 	};
 
+	class DebugCmd;
+
 	// This class handles all the rendering of the scene
 	class SceneRenderPipeline
 	{
@@ -98,7 +100,7 @@ namespace Nuake
 		static RenderPipeline GBufferPipeline;
 
 		// Delegates
-		MulticastDelegate<> DebugDrawDelegate;
+		MulticastDelegate<DebugCmd&> DebugDrawDelegate;
 
 	public:
 		SceneRenderPipeline();
@@ -108,7 +110,7 @@ namespace Nuake
 		void Render(PassRenderContext& ctx);
 		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
 
-		MulticastDelegate<>& OnDebugDraw() { return DebugDrawDelegate; }
+		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 
 	private:
 		Ref<VulkanImage> ResizeImage(Ref<VulkanImage> image, const Vector2& size);
