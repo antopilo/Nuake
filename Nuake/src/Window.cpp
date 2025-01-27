@@ -258,8 +258,8 @@ void Window::EndDraw()
     if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
+        //ImGui::UpdatePlatformWindows();
+        //ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
 
@@ -471,7 +471,7 @@ void Window::InitImgui()
     io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
 
     ImGuiStyle& s = ImGui::GetStyle();

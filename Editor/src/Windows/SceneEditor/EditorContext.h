@@ -33,7 +33,7 @@ public:
 	const EditorSelection& GetSelection() const { return selection; }
 	void SetSelection(EditorSelection inSelection)
 	{
-		selection = selection;
+		selection = inSelection;
 		OnSelectionChanged.Broadcast(selection);
 	}
 

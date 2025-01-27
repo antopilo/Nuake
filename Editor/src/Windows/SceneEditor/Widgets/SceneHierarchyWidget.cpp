@@ -38,9 +38,8 @@ void SceneHierarchyWidget::Draw()
 		DrawCreateEntityButton();
 
 		DrawEntityTree();
-
-		ImGui::End();
 	}
+	ImGui::End();
 }
 
 void SceneHierarchyWidget::DrawSearchBar()
@@ -202,7 +201,6 @@ void SceneHierarchyWidget::DrawEntityTree()
 			ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
 			ImGui::TableSetupColumn("Script", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
 			ImGui::TableSetupColumn("Visibility   ", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
-			ImGui::TableHeadersRow();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 

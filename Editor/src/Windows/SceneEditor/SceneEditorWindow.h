@@ -22,6 +22,7 @@ concept DerivedFromEditorWidget = std::derived_from<T, IEditorWidget>;
 class SceneEditorWindow
 {
 private:
+	bool layoutInitialized;
 	std::string windowID; // This is used for imgui docking
 
 	EditorContext editorContext;

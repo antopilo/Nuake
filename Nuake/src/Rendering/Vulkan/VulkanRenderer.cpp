@@ -423,7 +423,7 @@ void VkRenderer::InitImgui()
 		io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		ImGui::StyleColorsDark();
 
 		ImGuiStyle& s = ImGui::GetStyle();
@@ -653,6 +653,15 @@ void VkRenderer::EndDraw()
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
 	VK_CALL(vkQueuePresentKHR(GPUQueue, &presentInfo));
+
+	auto& io = ImGui::GetIO();
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	 //Update and Render additional Platform Windows
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 
 	// Increase the number of frames drawn
 	FrameNumber++;

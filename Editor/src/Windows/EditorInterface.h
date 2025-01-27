@@ -22,7 +22,6 @@
 
 #include "SceneEditor/SceneEditorWindow.h"
 
-
 using namespace NuakeEditor;
 
 namespace Nuake
@@ -71,6 +70,10 @@ namespace Nuake
 		Ref<Material> m_SelectedMaterial;
 		Ref<Directory> m_CurrentDirectory;
 
+		// Filebrowser
+		bool showFloatingFileBrowser;
+		bool showFloatingLogger;
+
 		bool m_IsMaterialSelected = false;
 
 		std::string m_StatusMessage = "";
@@ -82,6 +85,8 @@ namespace Nuake
 
 		AudioWindow* _audioWindow;
 		FileSystemUI* filesystem;
+
+		//Scope<FileSystemUI> floatingFileBrowser;
 		bool isNewProject = false;
 		static EditorSelection Selection;
 		EditorSelectionPanel* SelectionPanel;
@@ -120,6 +125,7 @@ namespace Nuake
 		void DrawProjectSettings();
 		void Overlay();
 
+		void OnRequestLoadScene(Ref<File> file);
 		void OpenPrefabWindow(const std::string& prefabPath);
 		void OpenSceneWindow(const std::string& scenePath);
 

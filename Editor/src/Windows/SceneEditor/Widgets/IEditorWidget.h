@@ -9,6 +9,9 @@ class IEditorWidget
 protected:
 	EditorContext& editorContext;
 
+private:
+	std::string widgetName;
+
 public:
 	IEditorWidget(EditorContext& inContext) : editorContext(inContext) {}
 	virtual ~IEditorWidget() {};
@@ -16,6 +19,11 @@ public:
 public:
 	virtual void Update(float ts) = 0;
 	virtual void Draw() = 0;
+
+	void DockTo(uint32_t dockId)
+	{
+		ImGui::DockBuilderDockWindow(widgetName.c_str(), dockId);
+	}
 
 	bool BeginWidgetWindow(const std::string_view& name)
 	{
@@ -29,7 +37,7 @@ public:
 		windowClass.DockingAllowUnclassed = false;
 		ImGui::SetNextWindowClass(&windowClass);
 
-		std::string nameStr = std::string(name) + "##" + editorContext.GetScene()->GetName();
-		return ImGui::Begin(nameStr.c_str());
+		widgetName = std::string(name) + "##" + editorContext.GetScene()->Path;
+		return ImGui::Begin(widgetName.c_str());
 	}
 };

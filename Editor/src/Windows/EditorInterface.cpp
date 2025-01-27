@@ -67,6 +67,8 @@
 #include "src/Rendering/Vulkan/SceneRenderPipeline.h"
 #include <src/Rendering/Vulkan/DebugCmd.h>
 
+#include "../Events/EditorRequests.h"
+
 namespace Nuake {
     
     ImFont* normalFont;
@@ -126,6 +128,8 @@ namespace Nuake {
         Logger::Log("Creating editor windows", "window", VERBOSE);
         filesystem = new FileSystemUI(this);
         
+        //floatingFileBrowser = CreateScope<FileSystemUI>(this);
+
         _WelcomeWindow = new WelcomeWindow(this);
         _NewProjectWindow = new NewProjectWindow(this);
         _audioWindow = new AudioWindow();
@@ -146,6 +150,9 @@ namespace Nuake {
         Window::Get()->SetTitlebarHitTestCallback([&](Window& window, int x, int y, bool& hit) {
             hit = m_TitleBarHovered;
         });
+
+        EditorRequests& requests = EditorRequests::Get();
+        requests.OnRequestLoadScene().AddRaw(this, &EditorInterface::OnRequestLoadScene);
 
 		Engine::OnSceneLoaded.AddRaw(this, &EditorInterface::OnSceneLoaded);
     }
@@ -946,6 +953,16 @@ namespace Nuake {
         if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags)) {
             if (ImGui::BeginMenuBar()) 
             {
+                if (ImGui::Button("File Browser"))
+                {
+                    this->showFloatingFileBrowser = !this->showFloatingFileBrowser;
+                }
+
+                if (ImGui::Button("Logger"))
+                {
+                    this->showFloatingLogger = !this->showFloatingLogger;
+                }
+
                 ImGui::Text(m_StatusMessage.c_str());
 
                 ImGui::SameLine();
@@ -2112,6 +2129,11 @@ namespace Nuake {
         }
     }
 
+    void EditorInterface::OnRequestLoadScene(Ref<File> file)
+    {
+        OpenSceneWindow(file->GetRelativePath());
+    }
+
     void EditorInterface::OpenPrefabWindow(const std::string& prefabPath)
     {
         if (!FileSystem::FileExists(prefabPath))
@@ -2500,6 +2522,10 @@ namespace Nuake {
         if (isLoadingProjectQueue)
         {
             _WelcomeWindow->LoadQueuedProject();
+
+            auto project = Engine::GetProject();
+            OpenSceneWindow(project->DefaultScene->Path);
+
             isLoadingProjectQueue = false;
 
             auto window = Window::Get();
@@ -2741,31 +2767,30 @@ namespace Nuake {
         ImGuiWindowClass top_level_class;
         top_level_class.ClassId = ImHashStr("SceneEditor");
         top_level_class.DockingAllowUnclassed = false;
-        ImGui::DockSpace(ImGui::GetID("SceneEditorDockSpace"), {0, 0}, 0, &top_level_class);
+
+        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoSplit;
+        ImGui::DockSpace(ImGui::GetID("SceneEditorDockSpace"), {0, 0}, flags, &top_level_class);
 
         ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 32);
-        if(ImGui::DockNodeBeginAmendTabBar(node))
+        if (node)
         {
-            ImGui::SetNextItemWidth(48);
-            if (ImGui::BeginTabItem("##logoPadding", 0, ImGuiTabItemFlags_Leading))
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 32);
+            if (ImGui::DockNodeBeginAmendTabBar(node))
             {
+                ImGui::SetNextItemWidth(48);
+                if (ImGui::BeginTabItem("##logoPadding", 0, ImGuiTabItemFlags_Leading))
+                {
 
-                ImGui::EndTabItem();
+                    ImGui::EndTabItem();
+                }
+                ImGui::DockNodeEndAmendTabBar();
             }
-            ImGui::DockNodeEndAmendTabBar();
         }
 
-        ImGui::SetNextWindowClass(&top_level_class);
-        ImGui::Begin("SceneEditor");
-        {
-            ImGuiWindowClass inside_document_class;
-            inside_document_class.ClassId = ImHashStr("SceneEditor1");
-            ImGui::DockSpace(ImGui::GetID("SceneEditorWindowDockspace"), ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_None, &inside_document_class);
-        }
         ImGui::End();
 
-        ImGui::End();
+
+
         //DrawMenuBar();
         //DrawMenuBars();
 
@@ -2788,12 +2813,16 @@ namespace Nuake {
 		}
 
 		//pInterface.DrawEntitySettings();
-        DrawViewport();
-        DrawSceneTree();
-        SelectionPanel->Draw(Selection);
-        DrawLogger();
-        filesystem->Draw();
-        filesystem->DrawDirectoryExplorer();
+        //DrawViewport();
+        //DrawSceneTree();
+        //SelectionPanel->Draw(Selection);
+        //DrawLogger();
+        //
+        //if (this->showFloatingFileBrowser)
+        //{
+        //    filesystem->Draw();
+        //    filesystem->DrawDirectoryExplorer();
+        //}
 
         //auto node = ImGui::DockBuilderGetNode(1);
         //node->SizeRef = { node->Size.x, 50.0f };
