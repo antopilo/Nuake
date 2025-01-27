@@ -498,9 +498,7 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
                 OS::OpenIn(file->GetAbsolutePath());
                 break;
             case FileType::Scene:
-                //shouldOpenScene = true;
                 EditorRequests::Get().RequestLoadScene(file);
-                //this->Editor->OpenSceneWindow(file->GetRelativePath());
                 break;
             case FileType::Solution:
                 OS::OpenIn(file->GetAbsolutePath());

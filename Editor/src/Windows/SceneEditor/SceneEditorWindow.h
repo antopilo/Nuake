@@ -36,6 +36,8 @@ public:
 	void Update(float ts);
 	void Draw();
 
+	std::string GetWindowName() const;
+
 private:
 	template<DerivedFromEditorWidget T>
 	inline void RegisterWidget()

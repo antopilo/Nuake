@@ -153,6 +153,7 @@ namespace Nuake {
 
         EditorRequests& requests = EditorRequests::Get();
         requests.OnRequestLoadScene().AddRaw(this, &EditorInterface::OnRequestLoadScene);
+        requests.OnRequestCloseEditorWindow().AddRaw(this, &EditorInterface::OnRequestCloseEditorWindow);
 
 		Engine::OnSceneLoaded.AddRaw(this, &EditorInterface::OnSceneLoaded);
     }
@@ -2134,6 +2135,19 @@ namespace Nuake {
         OpenSceneWindow(file->GetRelativePath());
     }
 
+    void EditorInterface::OnRequestCloseEditorWindow(std::string windowName)
+    {
+        for (size_t i = 0; i < std::size(sceneEditors); i++)
+        {
+            // Erase window from sceneEditors
+            if (auto window = sceneEditors[i]; window->GetWindowName() == windowName)
+            {
+                sceneEditors.erase(std::begin(sceneEditors) + i);
+                return;
+            }
+        }
+    }
+
     void EditorInterface::OpenPrefabWindow(const std::string& prefabPath)
     {
         if (!FileSystem::FileExists(prefabPath))
@@ -2807,7 +2821,9 @@ namespace Nuake {
             prefabEditors->Draw();
         }
 
-		for (auto& sceneEditor : sceneEditors)
+        // We need to cache, because we might delete one while iterating
+        auto cachedEditors = sceneEditors;
+		for (auto& sceneEditor : cachedEditors)
 		{
 			sceneEditor->Draw();
 		}

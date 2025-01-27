@@ -9,6 +9,7 @@
 #include "src/Scene/Scene.h"
 
 #include "src/UI/ImUI.h"
+#include "../../Events/EditorRequests.h"
 
 using namespace Nuake;
 
@@ -33,8 +34,7 @@ void SceneEditorWindow::Update(float ts)
 
 void SceneEditorWindow::Draw()
 {
-	Ref<Scene> scene = editorContext.GetScene();
-	const std::string sceneName = scene->Path;
+	const std::string sceneName = editorContext.GetScene()->Path;
 
 	// This is to prevent other windows of other scene editors to dock 
 	ImGuiWindowClass windowClass;
@@ -43,7 +43,8 @@ void SceneEditorWindow::Draw()
 	ImGui::SetNextWindowClass(&windowClass);
 
 	ImGui::SetNextWindowSizeConstraints({1280, 720}, { FLT_MAX, FLT_MAX });
-	if (ImGui::Begin(std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("  ") + sceneName).c_str()))
+	bool shouldStayOpen = true;
+	if (ImGui::Begin(std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("  ") + sceneName).c_str(), &shouldStayOpen))
 	{
 		ImGuiWindowClass localSceneEditorClass;
 		localSceneEditorClass.ClassId = ImHashStr(sceneName.c_str());
@@ -73,5 +74,14 @@ void SceneEditorWindow::Draw()
 		}
 	}
 	ImGui::End();
+
+	if (!shouldStayOpen)
+	{
+		EditorRequests::Get().RequestCloseEditorWindow(editorContext.GetScene()->Path);
+	}
 }
 
+std::string SceneEditorWindow::GetWindowName() const
+{
+	return editorContext.GetScene()->Path;
+}

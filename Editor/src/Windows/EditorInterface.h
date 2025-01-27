@@ -125,7 +125,10 @@ namespace Nuake
 		void DrawProjectSettings();
 		void Overlay();
 
+		// Signals
 		void OnRequestLoadScene(Ref<File> file);
+		void OnRequestCloseEditorWindow(std::string windowName);
+
 		void OpenPrefabWindow(const std::string& prefabPath);
 		void OpenSceneWindow(const std::string& scenePath);
 
