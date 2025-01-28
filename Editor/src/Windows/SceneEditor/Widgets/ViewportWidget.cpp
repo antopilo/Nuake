@@ -14,7 +14,6 @@ using namespace Nuake;
 
 ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
 {
-    
 	const Vector2& defaultSize = { 1280, 720 };
 	const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
     auto& vkRenderer = Nuake::VkRenderer::Get();
@@ -47,7 +46,7 @@ void ViewportWidget::Draw()
 		Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
 		// This is important for make UI mouse coord relative to viewport
-		// Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
+		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
 
 		VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
 

@@ -16,7 +16,7 @@
 #include "VulkanAllocatedBuffer.h"
 
 #include "VkResources.h"
-
+#include "SceneViewport.h"
 #include "src/Rendering/Vertex.h"
 #include "VulkanSceneRenderer.h"
 
@@ -362,6 +362,12 @@ void VkRenderer::InitDescriptors()
 	}
 }
 
+void VkRenderer::DrawScene(RenderContext ctx)
+{
+	SceneRenderer->BeginScene(ctx);
+	SceneRenderer->EndScene();
+}
+
 void VkRenderer::UpdateDescriptorSets()
 {
 	VkDescriptorImageInfo imgInfo{};
@@ -382,15 +388,35 @@ void VkRenderer::UpdateDescriptorSets()
 
 Ref<Viewport> VkRenderer::CreateViewport(const UUID& viewId, const Vector2& size)
 {
-
 	Ref<Viewport> newViewport = CreateRef<Viewport>(viewId, size);
-	Viewports[viewId] = newViewport;
+	Viewports[newViewport->GetID()] = newViewport;
 	return newViewport;
 }
 
 void VkRenderer::RemoveViewport(const UUID& viewportId)
 {
 	Viewports.erase(viewportId);
+
+	// Make sure we erase them from the Scene -> Viewport map.
+	// Also remove the scene if the view count reaches 0 to avoid
+	// dangling reference to the scenes. We should use Scene ID instead
+	// of shared pointers.
+	// 
+	// TODO(antopilo) make scene resources.
+	for (auto& [scene, views] : SceneViewports)
+	{
+		auto it = std::find(views.begin(), views.end(), viewportId);
+		if (it != views.end())
+		{
+			views.erase(it);
+
+			if (SceneViewports[scene].empty())
+			{
+				SceneViewports.erase(scene);
+				return;
+			}
+		}
+	}
 }
 
 void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)

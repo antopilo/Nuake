@@ -6,7 +6,7 @@
 
 class EditorContext;
 
-namespace MyNamespace
+namespace Nuake
 {
 	class Viewport;
 }
@@ -14,7 +14,7 @@ namespace MyNamespace
 class ViewportWidget : public IEditorWidget
 {
 private:
-	Ref<Viewport> sceneViewport;
+	Ref<Nuake::Viewport> sceneViewport;
 
 	ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
@@ -22,7 +22,7 @@ private:
 	Nuake::Vector3 CurrentSnapping = { 0.05f, 0.05f, 0.05f };
 
 public:
-	ViewportWidget(EditorContext& context) : IEditorWidget(context);
+	ViewportWidget(EditorContext& context);
 	~ViewportWidget();
 
 public:
