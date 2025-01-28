@@ -12,6 +12,8 @@
 #include "VulkanAllocatedBuffer.h"
 #include "VulkanSceneRenderer.h"
 
+#include "src/Resource/UUID.h"
+
 #include <functional>
 #include <span>
 
@@ -131,6 +133,8 @@ namespace Nuake
 
 	// Renderer configuration
 	constexpr uint32_t FRAME_OVERLAP = 2;
+	
+	class Viewport;
 
 	class VkRenderer
 	{
@@ -163,6 +167,8 @@ namespace Nuake
 		DeletionQueue MainDeletionQueue;
 		DescriptorAllocator GlobalDescriptorAllocator;
 
+
+
 	public:
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
@@ -173,6 +179,8 @@ namespace Nuake
 		VkCommandPool ImguiCommandPool;
 
 		Ref<VkSceneRenderer> SceneRenderer;
+
+
 
 	public:
 		static VkRenderer& Get()
@@ -192,6 +200,9 @@ namespace Nuake
 		Ref<VulkanImage> DepthImage;
 		VkExtent2D DrawExtent;
 
+		std::map<UUID, Ref<Viewport>> Viewports;
+		std::map<Ref<Scene>, std::vector<UUID>> SceneViewports;
+
 	public:
 		void Initialize();
 		void CleanUp();
@@ -209,6 +220,15 @@ namespace Nuake
 		void UpdateDescriptorSets();
 		void DrawScene(RenderContext ctx);
 		void InitImgui();
+
+		Ref<Viewport> CreateViewport(const UUID& viewId, const Vector2& size);
+		void RemoveViewport(const UUID& viewportId);
+
+		void RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
+		void UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
+
+		void PrepareSceneData(const Ref<Scene>& scene);
+		void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
 		void BeginScene(const UUID& camera);
 		bool Draw();

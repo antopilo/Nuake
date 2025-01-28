@@ -5,9 +5,28 @@
 
 #include "../../EditorInterface.h"
 
+#include "src/Rendering/Vulkan/VulkanRenderer.h"
+#include "src/Rendering/Vulkan/SceneViewport.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Nuake;
+
+ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
+{
+    
+	const Vector2& defaultSize = { 1280, 720 };
+	const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
+    auto& vkRenderer = Nuake::VkRenderer::Get();
+    auto viewport = vkRenderer.CreateViewport(viewId, defaultSize);
+    vkRenderer.RegisterSceneViewport(context.GetScene(), viewport->GetID());
+	sceneViewport = viewport;
+}
+
+ViewportWidget::~ViewportWidget()
+{
+    Nuake::VkRenderer::Get().RemoveViewport(sceneViewport->GetID());
+}
 
 void ViewportWidget::Update(float ts)
 {

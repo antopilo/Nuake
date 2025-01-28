@@ -380,10 +380,55 @@ void VkRenderer::UpdateDescriptorSets()
 	vkUpdateDescriptorSets(Device, 1, &drawImageWrite, 0, nullptr);
 }
 
-void VkRenderer::DrawScene(RenderContext ctx)
+Ref<Viewport> VkRenderer::CreateViewport(const UUID& viewId, const Vector2& size)
 {
-	SceneRenderer->BeginScene(ctx);
-	SceneRenderer->EndScene();
+
+	Ref<Viewport> newViewport = CreateRef<Viewport>(viewId, size);
+	Viewports[viewId] = newViewport;
+	return newViewport;
+}
+
+void VkRenderer::RemoveViewport(const UUID& viewportId)
+{
+	Viewports.erase(viewportId);
+}
+
+void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)
+{
+	if (Viewports.find(viewportId) == Viewports.end())
+	{
+		Logger::Log("Failed to register scene viewport: viewport not found", "vulkan", CRITICAL);
+		return;
+	}
+
+	SceneViewports[scene].push_back(viewportId);
+}
+
+void VkRenderer::UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)
+{
+	if (SceneViewports.find(scene) == SceneViewports.end())
+	{
+		Logger::Log("Failed to unregister scene viewport: scene not found", "vulkan", CRITICAL);
+		return;
+	}
+
+	auto& viewports = SceneViewports[scene];
+	auto it = std::find(viewports.begin(), viewports.end(), viewportId);
+	if (it != viewports.end())
+	{
+		viewports.erase(it);
+	}
+}
+
+void PrepareSceneData(const Ref<Scene>& scene)
+{
+	// Prepare scene data
+
+}
+
+void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)
+{
+	// Draw scene viewport
 }
 
 void VkRenderer::InitImgui()
