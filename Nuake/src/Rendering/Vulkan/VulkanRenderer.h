@@ -227,7 +227,8 @@ namespace Nuake
 		void RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 		void UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
-		void PrepareSceneData(const Ref<Scene>& scene);
+		void PrepareSceneData(RenderContext ctx);
+		void DrawScenes();
 		void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
 		void BeginScene(const UUID& camera);

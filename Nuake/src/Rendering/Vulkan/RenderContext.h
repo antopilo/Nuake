@@ -15,7 +15,6 @@ namespace Nuake
 		Cmd CommandBuffer;  // The command buffer we are recording into
 		Vector2 Size;
 		UUID CameraID;
-		// ...
 		// We might add more to this!
 	};
 }

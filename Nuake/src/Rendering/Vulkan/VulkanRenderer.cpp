@@ -32,7 +32,7 @@
 
 #include <array>
 
-bool NKUseValidationLayer = false;
+bool NKUseValidationLayer = true;
 
 using namespace Nuake;
 
@@ -362,6 +362,40 @@ void VkRenderer::InitDescriptors()
 	}
 }
 
+void VkRenderer::PrepareSceneData(RenderContext ctx)
+{
+	std::vector<Ref<Scene>> scenes;
+	scenes.reserve(SceneViewports.size());
+
+	for (auto& [scene, _] : SceneViewports)
+	{
+		scenes.push_back(scene);
+	}
+
+	SceneRenderer->PrepareScenes(scenes, ctx);
+}
+
+void VkRenderer::DrawScenes()
+{
+	RenderContext ctx;
+	ctx.CommandBuffer = GetCurrentCmdBuffer();
+
+	for (auto& [scene, views] : SceneViewports)
+	{
+		ctx.CurrentScene = scene;
+
+		for (auto& view : views)
+		{
+			Ref<Viewport> viewport = Viewports[view];
+			assert(viewport);
+
+			ctx.CameraID = viewport->GetViewID();
+			ctx.Size = viewport->GetViewportSize();
+			SceneRenderer->DrawSceneView(ctx);
+		}
+	}
+}
+
 void VkRenderer::DrawScene(RenderContext ctx)
 {
 	SceneRenderer->BeginScene(ctx);
@@ -444,12 +478,6 @@ void VkRenderer::UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& vi
 	{
 		viewports.erase(it);
 	}
-}
-
-void PrepareSceneData(const Ref<Scene>& scene)
-{
-	// Prepare scene data
-
 }
 
 void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)

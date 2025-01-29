@@ -23,12 +23,14 @@ namespace Nuake
 
 	public:
 		UUID GetID() const { return id; }
+		UUID GetViewID() const { return viewId; }
 
 		const Vector2& GetViewportSize() const { return viewportSize; }
 		void SetViewportSize(const Vector2& size)
 		{
 			viewportSize = size;
 		}
+
 
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }
 	};

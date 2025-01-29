@@ -9,7 +9,7 @@
 
 #include <volk/volk.h>
 
-#include <array>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -17,6 +17,7 @@ namespace Nuake
 {
 	class SceneRenderPipeline;
 	class ShadowRenderPipeline;
+	class Scene;
 
 	class VkMesh;
 
@@ -39,6 +40,8 @@ namespace Nuake
 		void Init();
 		void SetGBufferSize(const Vector2& size);
 
+		void PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext);
+		void DrawSceneView(RenderContext inContext);
 		void BeginScene(RenderContext inContext);
 		void EndScene();
 
