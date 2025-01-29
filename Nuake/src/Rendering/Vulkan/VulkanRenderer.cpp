@@ -391,6 +391,7 @@ void VkRenderer::DrawScenes()
 
 			ctx.CameraID = viewport->GetViewID();
 			ctx.Size = viewport->GetViewportSize();
+			ctx.ViewportImage = viewport->GetRenderTarget();
 			SceneRenderer->DrawSceneView(ctx);
 		}
 	}
@@ -686,6 +687,11 @@ bool VkRenderer::Draw()
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 	// Transfer rendering image to general layout
 
+	for (auto& [_id, viewport] : Viewports)
+	{
+		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+	}
+
 	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
@@ -717,12 +723,21 @@ void VkRenderer::EndDraw()
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	for (auto& [_id, viewport] : Viewports)
+	{
+		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	}
+
 	// VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	DrawImgui(cmd, SwapchainImageViews[swapchainImageIndex]);
 
 	// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+	for (auto& [_id, viewport] : Viewports)
+	{
+		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
+	}
 	VK_CALL(vkEndCommandBuffer(cmd));
 
 	VkCommandBufferSubmitInfo cmdinfo = VulkanInit::CommandBufferSubmitInfo(cmd);

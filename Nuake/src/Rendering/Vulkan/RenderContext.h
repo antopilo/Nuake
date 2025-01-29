@@ -8,6 +8,7 @@
 namespace Nuake
 {
 	class Scene;
+	class VulkanImage;
 
 	struct RenderContext
 	{
@@ -15,6 +16,7 @@ namespace Nuake
 		Cmd CommandBuffer;  // The command buffer we are recording into
 		Vector2 Size;
 		UUID CameraID;
+		Ref<VulkanImage> ViewportImage;
 		// We might add more to this!
 	};
 }

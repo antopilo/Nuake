@@ -48,7 +48,8 @@ void ViewportWidget::Draw()
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
 
-		VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
+		VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
+        //VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
 
 		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 		// Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
