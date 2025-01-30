@@ -9,7 +9,17 @@ Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 	viewportSize(inViewportSize),
 	viewId(inViewId)
 {
-	// Create render target
 	renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
+}
+
+bool Viewport::Resize()
+{
+	if (renderTarget->GetSize() != viewportSize)
+	{
+		renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
+		return true;
+	}
+
+	return false;
 }
 

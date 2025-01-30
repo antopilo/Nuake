@@ -2912,6 +2912,11 @@ namespace Nuake {
         {
             Selection = EditorSelection();
         }
+
+        for (auto& sceneEditors : sceneEditors)
+        {
+            sceneEditors->Update(ts);
+        }
     }
 
     void EditorInterface::BuildFonts()

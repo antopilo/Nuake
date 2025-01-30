@@ -31,7 +31,7 @@ namespace Nuake
 			viewportSize = size;
 		}
 
-
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }
+		bool Resize();
 	};
 }

@@ -221,8 +221,6 @@ void VkRenderer::RecreateSwapchain()
 	DestroySwapchain();
 	CreateSwapchain(Window::Get()->GetSize());
 	UpdateDescriptorSets();
-
-	SceneRenderer->SetGBufferSize(Window::Get()->GetSize());
 }
 
 void VkRenderer::CreateSwapchain(const Vector2& size)
@@ -392,6 +390,7 @@ void VkRenderer::DrawScenes()
 			ctx.CameraID = viewport->GetViewID();
 			ctx.Size = viewport->GetViewportSize();
 			ctx.ViewportImage = viewport->GetRenderTarget();
+			
 			SceneRenderer->DrawSceneView(ctx);
 		}
 	}
@@ -399,8 +398,8 @@ void VkRenderer::DrawScenes()
 
 void VkRenderer::DrawScene(RenderContext ctx)
 {
-	SceneRenderer->BeginScene(ctx);
-	SceneRenderer->EndScene();
+	//SceneRenderer->BeginScene(ctx);
+	//SceneRenderer->EndScene();
 }
 
 void VkRenderer::UpdateDescriptorSets()
@@ -650,7 +649,7 @@ void VkRenderer::InitImgui()
 
 void VkRenderer::BeginScene(const UUID& camera)
 {
-	SceneRenderer->CurrentCamera = camera;
+	
 }
 
 bool VkRenderer::Draw()

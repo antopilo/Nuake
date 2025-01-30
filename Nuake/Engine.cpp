@@ -208,8 +208,6 @@ namespace Nuake
 
 		//ImGui::ShowDemoWindow();
 
-		
-
 		RenderCommand::Clear();
 
 		// Start imgui frame
@@ -225,8 +223,6 @@ namespace Nuake
 
 		// Draw scene
 		Window::Get()->Draw();
-
-
 	}
 
 	void Engine::EndDraw()

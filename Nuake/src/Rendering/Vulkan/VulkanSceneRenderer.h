@@ -27,23 +27,18 @@ namespace Nuake
 		static Ref<VkMesh> QuadMesh;
 
 	public:
-		RenderContext Context;
+		//RenderContext Context;
 		Ref<SceneRenderPipeline> sceneRenderPipeline;
 		Ref<ShadowRenderPipeline> shadowRenderPipeline;
 
 	public:
-		UUID CurrentCamera;
-
 		VkSceneRenderer() = default;
 		~VkSceneRenderer() = default;
 
 		void Init();
-		void SetGBufferSize(const Vector2& size);
 
 		void PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext);
 		void DrawSceneView(RenderContext inContext);
-		void BeginScene(RenderContext inContext);
-		void EndScene();
 
 	private:
 		void LoadShaders();
