@@ -761,6 +761,8 @@ void VkRenderer::EndDraw()
 		ImGui::RenderPlatformWindowsDefault();
 	}
 
+	GPUResources::Get().CleanUp();
+
 	// Increase the number of frames drawn
 	FrameNumber++;
 }

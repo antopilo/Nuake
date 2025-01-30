@@ -167,8 +167,6 @@ namespace Nuake
 		DeletionQueue MainDeletionQueue;
 		DescriptorAllocator GlobalDescriptorAllocator;
 
-
-
 	public:
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
@@ -179,8 +177,6 @@ namespace Nuake
 		VkCommandPool ImguiCommandPool;
 
 		Ref<VkSceneRenderer> SceneRenderer;
-
-
 
 	public:
 		static VkRenderer& Get()
@@ -227,9 +223,10 @@ namespace Nuake
 		void RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 		void UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
+		// Actual rendering
+	public:
 		void PrepareSceneData(RenderContext ctx);
 		void DrawScenes();
-		void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
 		void BeginScene(const UUID& camera);
 		bool Draw();

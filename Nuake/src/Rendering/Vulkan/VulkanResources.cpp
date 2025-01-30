@@ -491,3 +491,18 @@ uint32_t GPUResources::GetBindlessMaterialID(const UUID& id)
 	}
 	return MeshMaterialMapping[id];
 }
+
+void GPUResources::QueueDeletion(std::function<void()> func)
+{
+	DeletionQueue.push(func);
+}
+
+void GPUResources::CleanUp()
+{
+	while (!DeletionQueue.empty())
+	{
+		DeletionQueue.top()();
+		DeletionQueue.pop();
+		Logger::Log("Deleted GPU resource", "vulkan", VERBOSE);
+	}
+}

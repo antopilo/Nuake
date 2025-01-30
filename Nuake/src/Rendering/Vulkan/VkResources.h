@@ -14,6 +14,7 @@
 
 #include <volk/volk.h>
 
+#include <stack>
 #include <array>
 #include <map>
 
@@ -123,6 +124,7 @@ namespace Nuake
 		VkSampler SamplerLinear;
 		VkSampler SamplerNearest;
 
+		std::stack<std::function<void()>> DeletionQueue;
 
 	public:
 		ModelData ModelTransforms;
@@ -182,6 +184,9 @@ namespace Nuake
 		void RecreateBindlessTextures();
 		void RecreateBindlessCameras();
 		void UpdateBuffers();
+
+		void QueueDeletion(std::function<void()> func);
+		void CleanUp();
 	private:
 		void CreateBindlessLayout();
 	};
