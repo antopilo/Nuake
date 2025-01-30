@@ -41,7 +41,8 @@ We are currently looking for contributors, feel free to join the discord if you 
 
 ## Compiling the engine
 1. Clone the repos using `git clone --recurse-submodules https://github.com/antopilo/Nuake.git`
-2. Run the `generate.bat` to generate the sln files.
+2. Run the `clone-deps.bat` to copy the dependencies to the correct location.
+2. Run the `generate.bat` to generate the solution files.
 3. Open `Nuake.sln`
 4. Build and run
 
