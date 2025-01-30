@@ -31,6 +31,3 @@
 [submodule "Nuake/dependencies/glfw"]
 	path = Nuake/dependencies/glfw
 	url = https://github.com/antopilo/glfw.git
-[submodule "Nuake/dependencies/vma"]
-	path = Nuake/dependencies/vma
-	url = https://github.com/antopilo/VulkanMemoryAllocatorPremake5.git
