@@ -315,6 +315,9 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 
 	sceneRenderPipeline->Render(passCtx);
 
+	// in case we just resized
+	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_GENERAL);
+
 	inContext.CommandBuffer.TransitionImageLayout(sceneRenderPipeline->GetOutput(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	inContext.CommandBuffer.CopyImageToImage(sceneRenderPipeline->GetOutput(), inContext.ViewportImage);

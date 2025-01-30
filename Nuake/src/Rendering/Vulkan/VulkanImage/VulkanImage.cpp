@@ -1,9 +1,12 @@
 #include "VulkanImage.h"
 
+#include "src/Core/Logger.h"
+
 #include "src/Rendering/Vulkan/VulkanInit.h"
 #include "src/Rendering/Vulkan/VulkanCheck.h"
 #include "src/Rendering/Vulkan/VulkanAllocator.h"
 #include "src/Rendering/Vulkan/VulkanRenderer.h"
+
 
 #include <volk/volk.h>
 #include <imgui/imgui_impl_vulkan.h>
@@ -136,6 +139,8 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 	}
 
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
+
+	Logger::Log("Image created", "vulkan", VERBOSE);
 }
 
 VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : VulkanImage(inFormat, inSize)
@@ -278,6 +283,7 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 VulkanImage::~VulkanImage()
 {
 	// TODO: deletion of image
+	Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
 }
 
 void VulkanImage::TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout)

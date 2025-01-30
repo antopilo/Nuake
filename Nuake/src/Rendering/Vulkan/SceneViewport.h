@@ -12,6 +12,7 @@ namespace Nuake
 	{
 	private:
 		UUID id;
+		Vector2 queuedResize;
 		Vector2 viewportSize;
 
 		UUID viewId;
@@ -29,6 +30,11 @@ namespace Nuake
 		void SetViewportSize(const Vector2& size)
 		{
 			viewportSize = size;
+		}
+
+		void QueueResize(const Vector2& inSize)
+		{
+			queuedResize = inSize;
 		}
 
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }

@@ -45,7 +45,7 @@ void ViewportWidget::Draw()
 		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
 		Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
-        //this->sceneViewport->SetViewportSize(viewportPanelSize);
+        sceneViewport->QueueResize(viewportPanelSize);
 
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);

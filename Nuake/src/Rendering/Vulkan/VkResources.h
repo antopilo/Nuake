@@ -123,6 +123,7 @@ namespace Nuake
 		VkSampler SamplerLinear;
 		VkSampler SamplerNearest;
 
+
 	public:
 		ModelData ModelTransforms;
 		MaterialData MaterialDataContainer;

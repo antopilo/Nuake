@@ -220,7 +220,6 @@ void VkRenderer::RecreateSwapchain()
 
 	DestroySwapchain();
 	CreateSwapchain(Window::Get()->GetSize());
-	UpdateDescriptorSets();
 }
 
 void VkRenderer::CreateSwapchain(const Vector2& size)
@@ -331,19 +330,6 @@ void VkRenderer::InitSync()
 
 void VkRenderer::InitDescriptors()
 {
-	//create a descriptor pool that will hold 10 sets with 1 image each
-
-	//make the descriptor set layout for our compute draw
-	{
-		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-		DrawImageDescriptorLayout = builder.Build(Device, VK_SHADER_STAGE_COMPUTE_BIT);
-	}
-
-	DrawImageDescriptors = GlobalDescriptorAllocator.Allocate(Device, DrawImageDescriptorLayout);
-
-	UpdateDescriptorSets();
-
 	for (int i = 0; i < FRAME_OVERLAP; i++) 
 	{
 		// create a descriptor pool
@@ -365,8 +351,13 @@ void VkRenderer::PrepareSceneData(RenderContext ctx)
 	std::vector<Ref<Scene>> scenes;
 	scenes.reserve(SceneViewports.size());
 
-	for (auto& [scene, _] : SceneViewports)
+	for (auto& [scene, views] : SceneViewports)
 	{
+		for (auto& view : views)
+		{
+			//Viewports[view]->Resize();
+		}
+
 		scenes.push_back(scene);
 	}
 
@@ -385,10 +376,10 @@ void VkRenderer::DrawScenes()
 		for (auto& view : views)
 		{
 			Ref<Viewport> viewport = Viewports[view];
-			assert(viewport);
+			assert(viewport && "Viewport is null");
 
 			ctx.CameraID = viewport->GetViewID();
-			ctx.Size = viewport->GetViewportSize();
+			ctx.Size = viewport->GetRenderTarget()->GetSize();
 			ctx.ViewportImage = viewport->GetRenderTarget();
 			
 			SceneRenderer->DrawSceneView(ctx);
@@ -663,6 +654,11 @@ bool VkRenderer::Draw()
 		return false;
 	}
 
+	for (auto& [_id, viewport] : Viewports)
+	{
+		//viewport->Resize();
+	}
+
 	FrameSkipped = false;
 
 	GetCurrentFrame().FrameDescriptors.ClearPools(Device);
@@ -691,16 +687,7 @@ bool VkRenderer::Draw()
 		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	}
 
-	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-	//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
-
-	// Transition rendering iamge to transfert onto swapchain images
-	//VulkanUtil::TransitionImage(cmd, DrawImage->GetImage(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-
-	//SwapchainImages[swapchainImageIndex]->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
-	//DepthImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//VulkanUtil::TransitionImage(cmd, DepthImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL);
 
 	//DrawGeometry(cmd);
 
@@ -721,7 +708,6 @@ void VkRenderer::EndDraw()
 	// set swapchain image layout to Attachment Optimal so we can draw it
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	for (auto& [_id, viewport] : Viewports)
 	{
 		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -732,7 +718,6 @@ void VkRenderer::EndDraw()
 
 	// Transition the swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR for presentation
 	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-	DrawImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 	for (auto& [_id, viewport] : Viewports)
 	{
 		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);

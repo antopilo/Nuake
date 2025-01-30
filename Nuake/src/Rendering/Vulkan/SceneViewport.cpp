@@ -7,6 +7,7 @@ using namespace Nuake;
 Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 	id(UUID()),
 	viewportSize(inViewportSize),
+	queuedResize(inViewportSize),
 	viewId(inViewId)
 {
 	renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
@@ -14,8 +15,10 @@ Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 
 bool Viewport::Resize()
 {
-	if (renderTarget->GetSize() != viewportSize)
+	if (viewportSize != queuedResize)
 	{
+		viewportSize = queuedResize;
+
 		renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
 		return true;
 	}

@@ -299,6 +299,6 @@ Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const 
 	gpuResources.AddTexture(newAttachment);
 
 	// We might need to do this?
-	// newAttachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
+	//newAttachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
 	return newAttachment;
 }
