@@ -24,6 +24,9 @@ newaction {
 -- ╚═══════════════════════════════════════╝
 workspace "Nuake"
     conformancemode "On"
+	
+	startproject "Editor"
+	
     configurations
     {
         "Debug",
