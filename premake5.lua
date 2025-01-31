@@ -11,12 +11,22 @@ newaction {
    end
 }
 
+newaction {
+    trigger     = "copy-deps",
+    description = "Copies the necessary DLLs to the working directory",
+    execute     = function ()
+        os.copyfile("Nuake/dependencies/dxc/bin/x64/dxcompiler.dll", "Editor/dxcompiler.dll")
+    end
+}
 
 -- ╔═══════════════════════════════════════╗
 -- ║               WORKSPACE               ║
 -- ╚═══════════════════════════════════════╝
 workspace "Nuake"
     conformancemode "On"
+	
+	startproject "Editor"
+	
     configurations
     {
         "Debug",
