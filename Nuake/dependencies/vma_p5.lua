@@ -9,7 +9,7 @@ project "vma"
     -- Include the headers
     includedirs {
         "vma/include",
-        "../src/Vendors/vulkan",
+        "../Vendors/vulkan",
     }
 
     files {

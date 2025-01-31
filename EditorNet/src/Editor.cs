@@ -117,14 +117,14 @@ namespace Nuake
 
                 if (componentType == null)
                 {
-                    Nuake.Net.Engine.Log($"Component '{componentName}' not found in the Nuake.Net assembly.");
+                    //Nuake.Net.Engine.Log($"Component '{componentName}' not found in the Nuake.Net assembly.");
                 }
 
                 // Find the field within the component class
                 PropertyInfo = componentType.GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (PropertyInfo == null)
                 {
-                    Nuake.Net.Engine.Log(($"Field '{fieldName}' not found in component '{componentName}'."));
+                    //Nuake.Net.Engine.Log(($"Field '{fieldName}' not found in component '{componentName}'."));
                 }
 
                 // Assume we have an instance of the component (you would need to pass the correct instance here)
@@ -136,12 +136,12 @@ namespace Nuake
                 PropertyOldValue = PropertyInfo.GetValue(Instance);
                 PropertyValue = convertedValue;
 
-                Nuake.Net.Engine.Log($"Set '{fieldName}' of '{componentName}' to '{value}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"Set '{fieldName}' of '{componentName}' to '{value}' in Nuake.Net.");
             }
 
             public virtual void Do()
             {
-                Nuake.Net.Engine.Log($"'{PropertyValue}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"'{PropertyValue}' in Nuake.Net.");
                 PropertyInfo.SetValue(Instance, PropertyValue);
 
             }
@@ -155,7 +155,7 @@ namespace Nuake
             {
                 PropertyInfo.SetValue(Instance, PropertyOldValue);
 
-                Nuake.Net.Engine.Log($"'{PropertyOldValue}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"'{PropertyOldValue}' in Nuake.Net.");
 
                 return true;
             }
@@ -194,14 +194,14 @@ namespace Nuake
 
                 if (componentType == null)
                 {
-                    Nuake.Net.Engine.Log($"Component '{componentName}' not found in the Nuake.Net assembly.");
+                    //Nuake.Net.Engine.Log($"Component '{componentName}' not found in the Nuake.Net assembly.");
                 }
 
                 // Find the field within the component class
                 PropertyInfo = componentType.GetProperty(fieldName, BindingFlags.Static | BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (PropertyInfo == null)
                 {
-                    Nuake.Net.Engine.Log(($"Static Field '{fieldName}' not found in component '{componentName}'."));
+                    //Nuake.Net.Engine.Log(($"Static Field '{fieldName}' not found in component '{componentName}'."));
                 }
                 
                 // Convert the value to the correct type and set the property
@@ -210,14 +210,14 @@ namespace Nuake
                 PropertyOldValue = PropertyInfo.GetValue(null);
                 PropertyValue = convertedValue;
 
-                Nuake.Net.Engine.Log($"Set '{fieldName}' of '{componentName}' to '{value}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"Set '{fieldName}' of '{componentName}' to '{value}' in Nuake.Net.");
             }
 
             public virtual void Do()
             {
                 PropertyInfo.SetValue(null, PropertyValue);
 
-                Nuake.Net.Engine.Log($"'{PropertyValue}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"'{PropertyValue}' in Nuake.Net.");
             }
 
             public string GetName()
@@ -229,7 +229,7 @@ namespace Nuake
             {
                 PropertyInfo.SetValue(null, PropertyOldValue);
 
-                Nuake.Net.Engine.Log($"'{PropertyOldValue}' in Nuake.Net.");
+                //Nuake.Net.Engine.Log($"'{PropertyOldValue}' in Nuake.Net.");
 
                 return true;
             }
