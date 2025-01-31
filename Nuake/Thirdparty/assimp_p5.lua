@@ -27,7 +27,7 @@ project 'assimp'
 	}
 
 	files {
-		'build/assimp',
+		'build/assimp/**',
 		-- Thirdparty
 		'assimp/contrib/unzip/**',
 		'assimp/contrib/irrXML/**',
