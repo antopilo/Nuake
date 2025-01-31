@@ -1,33 +1,33 @@
-[submodule "Nuake/dependencies/assimp"]
-	path = Nuake/dependencies/assimp
+[submodule "Nuake/Thirdparty/assimp"]
+	path = Nuake/Thirdparty/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "Nuake/dependencies/JoltPhysics"]
-	path = Nuake/dependencies/JoltPhysics
+[submodule "Nuake/Thirdparty/JoltPhysics"]
+	path = Nuake/Thirdparty/JoltPhysics
 	url = https://github.com/antopilo/JoltPhysics.git
-[submodule "Nuake/dependencies/soloud"]
-	path = Nuake/dependencies/soloud
+[submodule "Nuake/Thirdparty/soloud"]
+	path = Nuake/Thirdparty/soloud
 	url = https://github.com/antopilo/soloud.git
-[submodule "Nuake/dependencies/Coral"]
-	path = Nuake/dependencies/Coral
+[submodule "Nuake/Thirdparty/Coral"]
+	path = Nuake/Thirdparty/Coral
 	url = https://github.com/antopilo/Coral.git
-[submodule "Nuake/dependencies/recastnavigation"]
-	path = Nuake/dependencies/recastnavigation
+[submodule "Nuake/Thirdparty/recastnavigation"]
+	path = Nuake/Thirdparty/recastnavigation
 	url = https://github.com/antopilo/recastnavigation.git
-[submodule "Nuake/dependencies/tracy"]
-	path = Nuake/dependencies/tracy
+[submodule "Nuake/Thirdparty/tracy"]
+	path = Nuake/Thirdparty/tracy
 	url = https://github.com/wolfpld/tracy.git
-[submodule "Nuake/dependencies/msdf-atlas-gen"]
-	path = Nuake/dependencies/msdf-atlas-gen
+[submodule "Nuake/Thirdparty/msdf-atlas-gen"]
+	path = Nuake/Thirdparty/msdf-atlas-gen
 	url = https://github.com/antopilo/msdf-atlas-gen.git
-[submodule "Nuake/dependencies/yoga"]
-	path = Nuake/dependencies/yoga
+[submodule "Nuake/Thirdparty/yoga"]
+	path = Nuake/Thirdparty/yoga
 	url = https://github.com/facebook/yoga.git
-[submodule "Nuake/dependencies/freetype"]
-	path = Nuake/dependencies/freetype
+[submodule "Nuake/Thirdparty/freetype"]
+	path = Nuake/Thirdparty/freetype
 	url = https://github.com/freetype/freetype.git
-[submodule "Nuake/dependencies/entt"]
-	path = Nuake/dependencies/entt
+[submodule "Nuake/Thirdparty/entt"]
+	path = Nuake/Thirdparty/entt
 	url = https://github.com/skypjack/entt.git
-[submodule "Nuake/dependencies/glfw"]
-	path = Nuake/dependencies/glfw
+[submodule "Nuake/Thirdparty/glfw"]
+	path = Nuake/Thirdparty/glfw
 	url = https://github.com/antopilo/glfw.git
