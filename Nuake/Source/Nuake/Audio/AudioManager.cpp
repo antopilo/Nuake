@@ -5,8 +5,8 @@
 #include <soloud.h>
 #include "soloud_speech.h"
 #include "soloud_thread.h"
-#include <dependencies/soloud/include/soloud_wav.h>
-#include <dependencies/soloud/include/soloud_wavstream.h>
+#include <Thirdparty/soloud/include/soloud_wav.h>
+#include <Thirdparty/soloud/include/soloud_wavstream.h>
 
 
 namespace Nuake {

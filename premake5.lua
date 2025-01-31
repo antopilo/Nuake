@@ -2,7 +2,7 @@
 -- ║               ACTIONS                 ║
 -- ╚═══════════════════════════════════════╝
 
-include "Scripts/BuildAssets.lua"
+include "BuildScripts/BuildAssets.lua"
 newaction {
    trigger     = "build-assets",
    description = "",
@@ -15,7 +15,7 @@ newaction {
     trigger     = "copy-deps",
     description = "Copies the necessary DLLs to the working directory",
     execute     = function ()
-        os.copyfile("Nuake/dependencies/dxc/bin/x64/dxcompiler.dll", "Editor/dxcompiler.dll")
+        os.copyfile("Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll", "Editor/dxcompiler.dll")
     end
 }
 
@@ -72,23 +72,23 @@ globalDefines = {
     "NK_WIN"
 }
 
-group "Dependencies"
-    include "Nuake/dependencies/glfw_p5.lua"
-    include "Nuake/dependencies/glad_p5.lua"
-    include "Nuake/dependencies/assimp_p5.lua"
-    include "Nuake/dependencies/jolt_p5.lua"
-    include "Nuake/dependencies/soloud_p5.lua"
-    include "Nuake/dependencies/coral_p5.lua"
-    include "Nuake/dependencies/recastnavigation_p5.lua"
-    include "Nuake/dependencies/tracy_p5.lua"
-    include "Nuake/dependencies/yoga_p5.lua"
-    include "Nuake/dependencies/msdf-atlas-gen_p5.lua"
-    include "Nuake/dependencies/freetype_p5.lua"
-    include "Nuake/dependencies/vma_p5.lua"
+group "Thirdparty"
+    include "Nuake/Thirdparty/glfw_p5.lua"
+    include "Nuake/Thirdparty/glad_p5.lua"
+    include "Nuake/Thirdparty/assimp_p5.lua"
+    include "Nuake/Thirdparty/jolt_p5.lua"
+    include "Nuake/Thirdparty/soloud_p5.lua"
+    include "Nuake/Thirdparty/coral_p5.lua"
+    include "Nuake/Thirdparty/recastnavigation_p5.lua"
+    include "Nuake/Thirdparty/tracy_p5.lua"
+    include "Nuake/Thirdparty/yoga_p5.lua"
+    include "Nuake/Thirdparty/msdf-atlas-gen_p5.lua"
+    include "Nuake/Thirdparty/freetype_p5.lua"
+    include "Nuake/Thirdparty/vma_p5.lua"
 group ""
 
 include "Nuake/premake5.lua"
-include "NuakeEditor/premake5.lua"
-include "NuakeRuntime/premake5.lua"
+include "Editor/premake5.lua"
+include "Runtime/premake5.lua"
 include "NuakeNet/premake5.lua"
 include "EditorNet/premake5.lua"

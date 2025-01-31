@@ -8,6 +8,11 @@
 #include "Nuake/Resource/Model.h"
 #include "Nuake/Resource/Serializer/BinarySerializer.h"
 
+#include <assimp/matrix4x4.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 using namespace Nuake;
 
 // Converts a GLTF file to a .nkmesh binary file
@@ -135,6 +140,18 @@ void GLTFBaker::ProcessNode(aiNode* node, const aiScene* scene, std::vector<Mesh
 	{
 		ProcessNode(node->mChildren[i], scene, meshes);
 	}
+}
+
+Matrix4 ConvertAssimpToGLM(const aiMatrix4x4& from)
+{
+	Matrix4 to;
+
+	to[0][0] = from.a1; to[0][1] = from.b1;  to[0][2] = from.c1; to[0][3] = from.d1;
+	to[1][0] = from.a2; to[1][1] = from.b2;  to[1][2] = from.c2; to[1][3] = from.d2;
+	to[2][0] = from.a3; to[2][1] = from.b3;  to[2][2] = from.c3; to[2][3] = from.d3;
+	to[3][0] = from.a4; to[3][1] = from.b4;  to[3][2] = from.c4; to[3][3] = from.d4;
+
+	return to;
 }
 
 MeshData GLTFBaker::ProcessMesh(aiNode* node, aiMesh* meshNode, const aiScene* scene)
@@ -299,3 +316,5 @@ std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& 
 	
 	return std::move(path);
 }
+
+

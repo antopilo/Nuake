@@ -34,7 +34,7 @@
 
 #include <Jolt/Core/TempAllocator.h>
 
-#include <dependencies/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
+#include <Thirdparty/JoltPhysics/Jolt/Physics/Collision/CollisionCollectorImpl.h>
 #include "Nuake/Scene/Components/ParentComponent.h"
 #include <cstdarg>
 

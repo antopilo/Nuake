@@ -6,7 +6,7 @@
 
 #include "Nuake/Rendering/Textures/Texture.h"
 
-#include <Dependencies/msdf-atlas-gen/msdfgen/core/BitmapRef.hpp>
+#include <Thirdparty/msdf-atlas-gen/msdfgen/core/BitmapRef.hpp>
 
 typedef unsigned char byte;
 

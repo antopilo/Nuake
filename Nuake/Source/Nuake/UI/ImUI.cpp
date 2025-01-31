@@ -3,7 +3,7 @@
 #include "Nuake/Resource/Project.h"
 
 #include <imgui/imgui_internal.h>
-#include "../../../NuakeEditor/Source/Editor/Misc/InterfaceFonts.h"
+#include "../../../Editor/Source/Editor/Misc/InterfaceFonts.h"
 
 namespace Nuake 
 {

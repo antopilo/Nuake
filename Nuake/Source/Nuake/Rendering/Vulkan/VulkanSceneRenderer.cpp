@@ -55,14 +55,14 @@ void VkSceneRenderer::LoadShaders()
 	// TODO: load embedded shaders in the future
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
 	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
-	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.frag"));
-	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/triangle.vert"));
-	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.frag"));
-	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shading.vert"));
-	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.frag"));
-	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/shadow.vert"));
-	shaderMgr.AddShader("tonemap_frag", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/tonemap.frag"));
-	shaderMgr.AddShader("tonemap_vert", shaderCompiler.CompileShader("../Resources/Shaders/Vulkan/tonemap.vert"));
+	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/triangle.frag"));
+	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/triangle.vert"));
+	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shading.frag"));
+	shaderMgr.AddShader("shading_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shading.vert"));
+	shaderMgr.AddShader("shadow_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shadow.frag"));
+	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shadow.vert"));
+	shaderMgr.AddShader("tonemap_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/tonemap.frag"));
+	shaderMgr.AddShader("tonemap_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/tonemap.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)
