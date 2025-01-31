@@ -1,4 +1,4 @@
-![Nuake](Resources/Images/logo.png)
+![Nuake](Data/Images/logo.png)
 
 [Nuake](https://nuake.antopilo.dev) is a *boutique* game engine inspired by Quake. It focuses on fast level design iteration time that integrates with quake level editing software. 
 
@@ -29,10 +29,10 @@ You can also join the discord server for updates and screenshots:
 - Quake map loader
 - Spatialized audio
 - Runtime 
-
+- NuakeUI integration
+- 
 ## Planned features
 - Custom Shaders
-- NuakeUI integration
 - Dynamic global illumination
 - Asset packing
 
@@ -41,11 +41,10 @@ We are currently looking for contributors, feel free to join the discord if you 
 
 ## Compiling the engine
 1. Clone the repos using `git clone --recurse-submodules https://github.com/antopilo/Nuake.git`
-2. Run the `clone-deps.bat` to copy the dependencies to the correct location.
-2. Run the `generate.bat` to generate the solution files.
+2. Run the `BuildScripts/generate-sln.bat` to generate the solution files.
 3. Open `Nuake.sln`
 4. Build and run
 
 # Documentation
-Coming soon! 🕒
+The current documentation can be accessed [*here*! ](https://docs.antopilo.dev/s/2b239c4c-0499-4059-8de9-b240f71887c0)
 > Due to the constant change in the API and general refactors. It is hard to keep an up-to-date documentation before alpha release.
