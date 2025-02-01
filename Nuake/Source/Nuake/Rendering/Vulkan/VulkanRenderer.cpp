@@ -681,6 +681,17 @@ bool VkRenderer::Draw()
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
 
+	VulkanUtil::TransitionImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+	Color color = { 0,0,0,1 };
+	VkClearColorValue clearValue = { {color.r, color.g, color.b, color.a } };
+	VkImageSubresourceRange clearRange{};
+	clearRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	clearRange.baseMipLevel = 0;
+	clearRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	clearRange.baseArrayLayer = 0;
+	clearRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+	vkCmdClearColorImage(cmd, SwapchainImages[swapchainImageIndex], VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+
 	for (auto& [_id, viewport] : Viewports)
 	{
 		viewport->GetRenderTarget()->TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
