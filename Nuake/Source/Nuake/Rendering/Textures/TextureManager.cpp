@@ -41,7 +41,6 @@ namespace Nuake
 		m_Registry2.emplace(Resources_Gizmos_sound_emitter_png_path, CreateRef<VulkanImage>(Resources_Gizmos_sound_emitter_png, Resources_Gizmos_sound_emitter_png_len));
 		
 		m_Registry2.emplace(Resources_Images_cube_png_path, CreateRef<VulkanImage>(Resources_Images_cube_png, Resources_Images_cube_png_len));
-		m_Registry2.emplace(Resources_Images_logo_white_png_path, CreateRef<VulkanImage>(Resources_Images_logo_white_png, Resources_Images_logo_white_png_len));
 		m_Registry2.emplace(Resources_Images_logo_png_path, CreateRef<VulkanImage>(Resources_Images_logo_png, Resources_Images_logo_png_len));
 		m_Registry2.emplace(Resources_Images_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_file_icon_png, Resources_Images_file_icon_png_len));
 		m_Registry2.emplace(Resources_Images_env_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_env_file_icon_png, Resources_Images_env_file_icon_png_len));
