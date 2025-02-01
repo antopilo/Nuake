@@ -49,7 +49,7 @@ function generateModulesFile(modules, outputFilePath, sourceDir)
     outputFile:write("void Nuake::Modules::StartupModules()\n{\n")
     for _, module in ipairs(modules) do
         outputFile:write("    Logger::Log(\"Starting ".. module._name .."\", \"modules\");\n")
-        outputFile:write("    Module_".. module._name .."_Startup();\n")
+        outputFile:write("    ".. module._name .."_Startup();\n")
     end
     outputFile:write("}\n\n")
 
@@ -57,7 +57,7 @@ function generateModulesFile(modules, outputFilePath, sourceDir)
     outputFile:write("void Nuake::Modules::ShutdownModules()\n{\n")
     for _, module in ipairs(modules) do
         outputFile:write("    Logger::Log(\"Shutting down ".. module._name .."\", \"modules\");\n")
-        outputFile:write("    Module_".. module._name .."_Shutdown();\n")
+        outputFile:write("    ".. module._name .."_Shutdown();\n")
     end
     outputFile:write("}\n")
 
