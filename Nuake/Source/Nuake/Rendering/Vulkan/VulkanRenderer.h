@@ -159,7 +159,6 @@ namespace Nuake
 		std::vector<VkImageView> SwapchainImageViews;
 
 		// Frame data
-		uint32_t FrameNumber = 0;
 		FrameData Frames[FRAME_OVERLAP];
 		
 		uint32_t GPUQueueFamily;
@@ -168,6 +167,7 @@ namespace Nuake
 		DescriptorAllocator GlobalDescriptorAllocator;
 
 	public:
+		uint32_t FrameNumber = 0;
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;
 		

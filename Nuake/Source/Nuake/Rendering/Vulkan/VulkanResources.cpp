@@ -9,6 +9,11 @@ using namespace Nuake;
 GPUResources::GPUResources()
 {
 	Init();
+
+	for (int i = 0; i < FRAME_OVERLAP; i++)
+	{
+		DeletionQueue.push_back(CleanUpStack());
+	}
 }
 
 void GPUResources::Init()
@@ -507,25 +512,32 @@ uint32_t GPUResources::GetBindlessMaterialID(const UUID& id)
 
 void GPUResources::QueueDeletion(CleanUpStack cleanUpStack)
 {
+	CleanUpStack& deletionQueue = GetFrameCleanUpStack(VkRenderer::Get().FrameNumber);
 	// Push content of cleanUpStack into deletionQueue
 	while (!cleanUpStack.empty())
 	{
-		DeletionQueue.push(cleanUpStack.top());
+		deletionQueue.push(cleanUpStack.top());
 		cleanUpStack.pop();
 	}
 }
 
-void GPUResources::CleanUp()
+void GPUResources::CleanUp(uint32_t frame)
 {
-	if (!DeletionQueue.empty())
+	auto& deletionQueue = GetFrameCleanUpStack(frame);
+	if (!deletionQueue.empty())
 	{
 		vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
 	}
 
-	while (!DeletionQueue.empty())
+	while (!deletionQueue.empty())
 	{
-		DeletionQueue.top()();
-		DeletionQueue.pop();
+		deletionQueue.top()();
+		deletionQueue.pop();
 		Logger::Log("Deleted GPU resource", "vulkan", VERBOSE);
 	}
+}
+
+CleanUpStack& GPUResources::GetFrameCleanUpStack(uint32_t frame)
+{
+	return DeletionQueue[frame % FRAME_OVERLAP];
 }

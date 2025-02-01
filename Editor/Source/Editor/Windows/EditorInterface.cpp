@@ -2499,8 +2499,7 @@ namespace Nuake {
 
     void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
     {
-        Logger::Log("On Scene loaded");
-
+        Window::Get()->SetDecorated(true);
         VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
     }
 
@@ -2536,7 +2535,6 @@ namespace Nuake {
             isLoadingProjectQueue = false;
 
             auto window = Window::Get();
-            window->SetDecorated(true);
             window->ShowTitleBar(false);
             window->SetSize({ 1600, 900 });
             window->Center();

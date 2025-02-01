@@ -124,7 +124,7 @@ namespace Nuake
 		VkSampler SamplerLinear;
 		VkSampler SamplerNearest;
 
-		std::stack<std::function<void()>> DeletionQueue;
+		std::vector<CleanUpStack> DeletionQueue;
 
 	public:
 		ModelData ModelTransforms;
@@ -187,8 +187,9 @@ namespace Nuake
 		void UpdateBuffers();
 
 		void QueueDeletion(CleanUpStack func);
-		void CleanUp();
+		void CleanUp(uint32_t frame);
 	private:
 		void CreateBindlessLayout();
+		CleanUpStack& GetFrameCleanUpStack(uint32_t frame);
 	};
 }
