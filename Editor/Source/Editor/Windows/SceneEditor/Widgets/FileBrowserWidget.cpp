@@ -15,7 +15,7 @@ using namespace Nuake;
 
 FileBrowserWidget::FileBrowserWidget(EditorContext& inCtx) : IEditorWidget(inCtx)
 {
-	
+    currentDirectory = FileSystem::RootDirectory;
 }
 
 void FileBrowserWidget::Update(float ts)
