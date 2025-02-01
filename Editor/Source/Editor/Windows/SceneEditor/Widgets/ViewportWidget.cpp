@@ -32,6 +32,9 @@ void ViewportWidget::Update(float ts)
 	editorContext.GetScene()->Update(ts);
     auto& editorCam = editorContext.GetScene()->m_EditorCamera;
     editorCam->Update(ts, isHoveringViewport);
+
+    const Vector2 viewportSize = sceneViewport->GetViewportSize();
+    editorCam->OnWindowResize(viewportSize.x, viewportSize.y);
 }
 
 void ViewportWidget::Draw()
