@@ -90,20 +90,20 @@ void ViewportWidget::Draw()
             {
                 TransformComponent& tc = selection.Entity.GetComponent<TransformComponent>();
                 Matrix4 transform = tc.GetGlobalTransform();
-                const auto& editorCam = Engine::GetCurrentScene()->GetCurrentCamera();
+                const auto& editorCam = editorContext.GetScene()->GetCurrentCamera();
                 Matrix4 cameraView = editorCam->GetTransform();
 
                 // Since imguizmo doesnt support reverse-Z, we need to create a new projection matrix
                 // With a normal near and far plane.
                 Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Far, editorCam->Near);
 
-                static Vector3 camPreviousPos = Engine::GetCurrentScene()->m_EditorCamera->Translation;
+                static Vector3 camPreviousPos = editorContext.GetScene()->m_EditorCamera->Translation;
                 static Vector3 camNewPos = Vector3(0, 0, 0);
                 Vector3 camDelta = camNewPos - camPreviousPos;
                 Vector3 previousGlobalPos = transform[3];
                 // Imguizmo calculates the delta from the gizmo,
                 ImGuizmo::Manipulate(
-                    glm::value_ptr(Engine::GetCurrentScene()->GetCurrentCamera()->GetTransform()),
+                    glm::value_ptr(editorContext.GetScene()->GetCurrentCamera()->GetTransform()),
                     glm::value_ptr(normalZProjection),
                     CurrentOperation, CurrentMode,
                     glm::value_ptr(transform), NULL,
@@ -121,8 +121,8 @@ void ViewportWidget::Draw()
                     if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
                     {
                         Vector3 positionDelta = newGlobalPos - previousGlobalPos;
-                        Engine::GetCurrentScene()->m_EditorCamera->Translation += positionDelta;
-                        camNewPos = Engine::GetCurrentScene()->m_EditorCamera->Translation;
+                        editorContext.GetScene()->m_EditorCamera->Translation += positionDelta;
+                        camNewPos = editorContext.GetScene()->m_EditorCamera->Translation;
                     }
 
                     ParentComponent& parent = selection.Entity.GetComponent<ParentComponent>();
