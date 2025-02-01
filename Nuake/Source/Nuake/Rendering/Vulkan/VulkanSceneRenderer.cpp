@@ -96,8 +96,6 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 				.Far = camera->Far,
 			};
 			Vector3 pos = cameraView.View[3];
-			std::string msg = std::string("Pos X:") + std::to_string(pos.x) + " Y:" + std::to_string(pos.y) + " Z:" + std::to_string(pos.z);
-			Logger::Log(msg, "camera", VERBOSE);
 			gpu.AddCamera(camera->ID, std::move(cameraView));
 
 			auto view = scene->m_Registry.view<TransformComponent, CameraComponent>();
