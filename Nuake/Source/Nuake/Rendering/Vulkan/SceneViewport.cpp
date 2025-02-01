@@ -20,6 +20,7 @@ bool Viewport::Resize()
 		viewportSize = queuedResize;
 
 		renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
+		renderTarget->GetImGuiDescriptorSet();
 		return true;
 	}
 

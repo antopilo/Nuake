@@ -252,6 +252,7 @@ namespace Nuake
 
 		SetDirection(glm::normalize(Direction));
 
+
 		
 		mouseLastX = x;
 		mouseLastY = y;

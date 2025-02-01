@@ -32,9 +32,11 @@ namespace Nuake
 			viewportSize = size;
 		}
 
-		void QueueResize(const Vector2& inSize)
+		bool QueueResize(const Vector2& inSize)
 		{
 			queuedResize = inSize;
+
+			return queuedResize != viewportSize;
 		}
 
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }

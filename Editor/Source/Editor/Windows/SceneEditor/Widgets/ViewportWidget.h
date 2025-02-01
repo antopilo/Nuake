@@ -21,6 +21,7 @@ private:
 	bool UseSnapping = true;
 	Nuake::Vector3 CurrentSnapping = { 0.05f, 0.05f, 0.05f };
 
+	bool isHoveringViewport;
 public:
 	ViewportWidget(EditorContext& context);
 	~ViewportWidget();

@@ -30,6 +30,8 @@ ViewportWidget::~ViewportWidget()
 void ViewportWidget::Update(float ts)
 {
 	editorContext.GetScene()->Update(ts);
+    auto& editorCam = editorContext.GetScene()->m_EditorCamera;
+    editorCam->Update(ts, isHoveringViewport);
 }
 
 void ViewportWidget::Draw()
@@ -45,13 +47,12 @@ void ViewportWidget::Draw()
 		ImVec2 regionAvail = ImGui::GetContentRegionAvail();
 		Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
-        sceneViewport->QueueResize(viewportPanelSize);
+        bool needsResize = sceneViewport->QueueResize(viewportPanelSize);
 
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
 
 		VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
-        //VkDescriptorSet textureDesc = VkRenderer::Get().DrawImage->GetImGuiDescriptorSet();
 
 		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
 		// Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
@@ -67,7 +68,7 @@ void ViewportWidget::Draw()
 		const ImVec2& windowSize = ImGui::GetWindowSize();
 		const bool isInsideWidth = mousePos.x > windowPos.x && mousePos.x < windowPos.x + windowSize.x;
 		const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
-		// m_IsHoveringViewport = isInsideWidth && isInsideHeight;
+		this->isHoveringViewport = isInsideWidth && isInsideHeight;
 
 		// TODO(antopilo) drag n drop
 		ImGuizmo::SetDrawlist();

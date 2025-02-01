@@ -368,13 +368,23 @@ void VkRenderer::DrawScenes()
 			Ref<Viewport> viewport = Viewports[view];
 			assert(viewport && "Viewport is null");
 
-			viewport->Resize();
-
 			ctx.CameraID = viewport->GetViewID();
 			ctx.Size = viewport->GetRenderTarget()->GetSize();
 			ctx.ViewportImage = viewport->GetRenderTarget();
 			
 			SceneRenderer->DrawSceneView(ctx);
+		}
+	}
+}
+
+void VkRenderer::ResizeViewports()
+{
+	for (auto& [scene, views] : SceneViewports)
+	{
+		for (auto& view : views)
+		{
+			Ref<Viewport> viewport = Viewports[view];
+			viewport->Resize();
 		}
 	}
 }
@@ -738,6 +748,8 @@ void VkRenderer::EndDraw()
 	presentInfo.waitSemaphoreCount = 1;
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
+
+	ResizeViewports();
 
 	VK_CALL(vkQueuePresentKHR(GPUQueue, &presentInfo));
 

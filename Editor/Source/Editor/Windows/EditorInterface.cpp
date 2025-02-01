@@ -2881,7 +2881,7 @@ namespace Nuake {
         }
 
         auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
-        isControllingCamera = editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
+       // isControllingCamera = editorCam->Update(ts, m_IsHoveringViewport && m_IsViewportFocused);
 
         const bool entityIsSelected = Selection.Type == EditorSelectionType::Entity && Selection.Entity.IsValid();
         if (entityIsSelected && Input::IsKeyPressed(Key::F))

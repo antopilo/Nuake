@@ -227,6 +227,7 @@ namespace Nuake
 	public:
 		void PrepareSceneData(RenderContext ctx);
 		void DrawScenes();
+		void ResizeViewports();
 
 		void BeginScene(const UUID& camera);
 		bool Draw();
