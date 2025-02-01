@@ -2788,13 +2788,10 @@ namespace Nuake {
         }
 
         // We need to cache, because we might delete one while iterating
-        auto cachedEditors = sceneEditors;
-        for (auto& sceneEditor : cachedEditors)
+        for (auto& sceneEditor : sceneEditors)
         {
             sceneEditor->Draw();
         }
-        //ImGuiID node2 = ImGui::DockBuilderAddNode(dockspaceNodeId, ImGuiDockNodeFlags_DockSpace);
-        //ImGui::DockBuilderSetNodeSize(node2, dockSize);
 
         ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
         if (node)
