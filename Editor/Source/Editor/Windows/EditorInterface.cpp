@@ -2793,12 +2793,6 @@ namespace Nuake {
         {
             sceneEditor->Draw();
         }
-
-        ImGui::SetNextWindowDockID(dockspaceNodeId);
-        ImGui::Begin("test");
-
-        ImGui::End();
-
         //ImGuiID node2 = ImGui::DockBuilderAddNode(dockspaceNodeId, ImGuiDockNodeFlags_DockSpace);
         //ImGui::DockBuilderSetNodeSize(node2, dockSize);
 
