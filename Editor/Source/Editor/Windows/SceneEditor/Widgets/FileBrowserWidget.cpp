@@ -360,7 +360,7 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 
 
 	ImGui::SetCursorPos(prevCursor);
-	ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture2("Resources/Images/folder_icon.png")->GetImGuiDescriptorSet(), ImVec2(100, 100));
+	ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture2("Resources/Images/folder_icon.png")->GetImGuiDescriptorSet(), ImVec2(100, 100), {0, 1}, {1, 0});
 
 	auto imguiStyle = ImGui::GetStyle();
 
@@ -643,7 +643,7 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
     }
 
     ImGui::SetCursorPos(prevCursor);
-    ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetImGuiDescriptorSet()), ImVec2(100, 100));
+    ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetImGuiDescriptorSet()), ImVec2(100, 100), { 0, 1 }, { 1, 0 });
     ImGui::PopStyleVar();
 
     auto& imguiStyle = ImGui::GetStyle();

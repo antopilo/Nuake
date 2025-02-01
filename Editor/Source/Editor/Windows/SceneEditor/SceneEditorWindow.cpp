@@ -46,10 +46,10 @@ void SceneEditorWindow::Draw()
 	windowClass.ClassId = ImHashStr("SceneEditor");
 	windowClass.DockingAllowUnclassed = false;
 	ImGui::SetNextWindowClass(&windowClass);
-
+	ImGui::SetNextWindowDockID(ImGui::GetID("SceneEditorDockSpace"));
 	ImGui::SetNextWindowSizeConstraints({1280, 720}, { FLT_MAX, FLT_MAX });
 	bool shouldStayOpen = true;
-	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("  ") + sceneName);
+	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("   ") + sceneName);
 	if (ImGui::Begin(windowName.c_str(), &shouldStayOpen))
 	{
 		ImGuiWindowClass localSceneEditorClass;
@@ -78,9 +78,11 @@ void SceneEditorWindow::Draw()
 		}
 	}
 	ImGui::End();
-	ImGui::DockBuilderDockWindow(windowName.c_str(), dockId);
 	if (!layoutInitialized)
 	{
+		//ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Down, 0.3f, nullptr, &dockId);
+		//ImGui::DockBuilderDockWindow(windowName.c_str(), dockId);
+
 		if (dockId != 0)
 		{
 			//ImGui::DockBuilderDockWindow(windowName.c_str(), dockId);

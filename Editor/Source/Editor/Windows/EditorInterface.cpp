@@ -2774,7 +2774,7 @@ namespace Nuake {
 
         ImGuiWindowClass top_level_class;
         top_level_class.ClassId = ImHashStr("SceneEditor");
-        top_level_class.DockingAllowUnclassed = false;
+        top_level_class.DockingAllowUnclassed = true;
 
         ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoSplit | ImGuiDockNodeFlags_NoResize;
         ImGuiID dockspaceNodeId = ImGui::GetID("SceneEditorDockSpace");
@@ -2786,6 +2786,18 @@ namespace Nuake {
         {
             SceneEditorDockspaceNodeID = ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
         }
+
+        // We need to cache, because we might delete one while iterating
+        auto cachedEditors = sceneEditors;
+        for (auto& sceneEditor : cachedEditors)
+        {
+            sceneEditor->Draw();
+        }
+
+        ImGui::SetNextWindowDockID(dockspaceNodeId);
+        ImGui::Begin("test");
+
+        ImGui::End();
 
         //ImGuiID node2 = ImGui::DockBuilderAddNode(dockspaceNodeId, ImGuiDockNodeFlags_DockSpace);
         //ImGui::DockBuilderSetNodeSize(node2, dockSize);
@@ -2826,12 +2838,7 @@ namespace Nuake {
             prefabEditors->Draw();
         }
 
-        // We need to cache, because we might delete one while iterating
-        auto cachedEditors = sceneEditors;
-		for (auto& sceneEditor : cachedEditors)
-		{
-			sceneEditor->Draw();
-		}
+
 
 		//pInterface.DrawEntitySettings();
         //DrawViewport();
