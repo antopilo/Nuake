@@ -1,9 +1,8 @@
 # These are supported funding model platforms
 
 
-patreon: # Replace with a single Patreon username
+patreon: nuakeengine # Replace with a single Patreon username
 open_collective: # Replace with a single Open Collective username
-ko_fi: antopilo # Replace with a single Ko-fi username
 tidelift: # Replace with a single Tidelift platform-name/package-name e.g., npm/babel
 community_bridge: # Replace with a single Community Bridge project-name e.g., cloud-foundry
 liberapay: # Replace with a single Liberapay username
