@@ -36,10 +36,10 @@ namespace Nuake
 		// The systems are what updates the components.
 		// You can create a new system(see 'Systems/'.) and register it
 		// In the scene constructor.
-		std::vector<Ref<System>> m_Systems;
 		static Ref<Environment> m_Environment;
 
 	public:
+		std::vector<Ref<System>> m_Systems;
 		Ref<EditorCamera> m_EditorCamera;
 		entt::registry m_Registry;
 		std::unordered_map<uint32_t, Entity> m_EntitiesIDMap;

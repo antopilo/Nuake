@@ -21,7 +21,6 @@
 #include "Nuake/Rendering/Renderer.h"
 #include "Nuake/Rendering/Textures/MaterialManager.h"
 
-#include <glad/glad.h>
 
 #include "Engine.h"
 #include "Nuake/Core/Maths.h"
@@ -34,6 +33,7 @@
 #include "Nuake/Scene/Components/SkinnedModelComponent.h"
 #include "Nuake/Scene/Components/BoneComponent.h"
 
+#include "Nuake/Scene/SceneSystems.h"
 
 #include <Tracy.hpp>
 
@@ -65,13 +65,16 @@ namespace Nuake
 		scriptingSystem = CreateRef<ScriptingSystem>(this);
 
 		// Adding systems - Order is important
+
+		SceneSystemDB::Get().InstantiateSystems(this);
+
 		m_Systems.push_back(physicsSystem);
 		m_Systems.push_back(CreateRef<UISystem>(this));
 		m_Systems.push_back(scriptingSystem);
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
-		m_Systems.push_back(CreateRef<AudioSystem>(this));
+		//m_Systems.push_back(CreateRef<AudioSystem>(this));
 
 		m_SceneRenderer = CreateRef<SceneRenderer>();
 		m_SceneRenderer->Init();

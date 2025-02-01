@@ -4,13 +4,25 @@
 #include "Nuake/Core/Core.h"
 #include "Nuake/Core/MulticastDelegate.h"
 
+#include <concepts>
+
 namespace Nuake
 {
+	class System;
+
+	template<typename T>
+	concept IsSceneSystem = std::derived_from<T, System>;
+
 	class Scene;
 	class System {
 	public:
 		Scene* m_Scene;
 
+		template<IsSceneSystem T>
+		static Ref<System> Instantiate(Scene* scene)
+		{
+			return std::static_pointer_cast<System>(CreateRef<T>(scene));
+		}
 
 		virtual bool Init() = 0;
 

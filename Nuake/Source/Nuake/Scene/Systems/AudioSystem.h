@@ -1,6 +1,5 @@
 #pragma once
 #include "Nuake/Scene/Systems/System.h"
-#include "Nuake/Core/Maths.h"
 
 namespace Nuake
 {
