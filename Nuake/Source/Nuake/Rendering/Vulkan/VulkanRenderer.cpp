@@ -512,7 +512,7 @@ void VkRenderer::InitImgui()
 
 	{
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
+		io.Fonts->AddFontFromMemoryTTF(StaticResources::Data_Fonts_Poppins_Regular_ttf, StaticResources::Data_Fonts_Poppins_Regular_ttf_len, 16.0);
 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;

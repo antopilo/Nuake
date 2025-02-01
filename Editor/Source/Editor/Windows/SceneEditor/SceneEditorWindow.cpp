@@ -36,6 +36,11 @@ void SceneEditorWindow::Draw()
 {
 	const std::string sceneName = editorContext.GetScene()->Path;
 
+	ImGuiID editorDockspaceId = ImGui::GetID("SceneEditorDockSpace");
+	if (!layoutInitialized) 
+	{
+		
+	}
 	// This is to prevent other windows of other scene editors to dock 
 	ImGuiWindowClass windowClass;
 	windowClass.ClassId = ImHashStr("SceneEditor");
@@ -44,7 +49,8 @@ void SceneEditorWindow::Draw()
 
 	ImGui::SetNextWindowSizeConstraints({1280, 720}, { FLT_MAX, FLT_MAX });
 	bool shouldStayOpen = true;
-	if (ImGui::Begin(std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("  ") + sceneName).c_str(), &shouldStayOpen))
+	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("  ") + sceneName);
+	if (ImGui::Begin(windowName.c_str(), &shouldStayOpen))
 	{
 		ImGuiWindowClass localSceneEditorClass;
 		localSceneEditorClass.ClassId = ImHashStr(sceneName.c_str());
@@ -52,7 +58,6 @@ void SceneEditorWindow::Draw()
 
 		ImGuiID dockspaceId = ImGui::GetID(dockspaceName.c_str());
 		ImGui::DockSpace(dockspaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_None, &localSceneEditorClass);
-
 		for (auto& widget : widgets)
 		{
 			widget->Draw();
@@ -70,10 +75,18 @@ void SceneEditorWindow::Draw()
 			widgets[2]->DockTo(dockbottomId);
 			widgets[3]->DockTo(dockspaceId);
 			widgets[4]->DockTo(dockbottomId);
-			layoutInitialized = true;
 		}
 	}
 	ImGui::End();
+	ImGui::DockBuilderDockWindow(windowName.c_str(), dockId);
+	if (!layoutInitialized)
+	{
+		if (dockId != 0)
+		{
+			//ImGui::DockBuilderDockWindow(windowName.c_str(), dockId);
+		}
+		layoutInitialized = true;
+	}
 
 	if (!shouldStayOpen)
 	{

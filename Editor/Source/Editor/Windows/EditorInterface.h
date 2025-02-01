@@ -41,6 +41,7 @@ namespace Nuake
 
 		Ref<Scene> SceneSnapshot;
 		static NuakeEditor::CommandBuffer* mCommandBuffer;
+		ImGuiID SceneEditorDockspaceNodeID;
 
 		std::string searchQuery = "";
 		bool isControllingCamera = false;

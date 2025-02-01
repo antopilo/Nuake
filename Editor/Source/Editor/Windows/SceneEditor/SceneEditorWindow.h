@@ -27,6 +27,8 @@ private:
 
 	EditorContext editorContext;
 
+	ImGuiID dockId = 0;
+
 	std::vector<Scope<IEditorWidget>> widgets;
 public:
 	SceneEditorWindow(Ref<Nuake::Scene> scene);
@@ -37,6 +39,10 @@ public:
 	void Draw();
 
 	std::string GetWindowName() const;
+	void DockTo(ImGuiID id)
+	{
+		dockId = id;
+	}
 
 private:
 	template<DerivedFromEditorWidget T>

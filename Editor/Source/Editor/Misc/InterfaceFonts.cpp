@@ -19,21 +19,21 @@ void FontManager::LoadFonts()
 
 	using namespace Nuake::StaticResources;
 	
-	mFonts[Normal] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_fa_solid_900_ttf, Resources_Fonts_fa_solid_900_ttf_len, 11.f, &icons_config, icons_ranges);
+	mFonts[Normal] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_fa_solid_900_ttf, Data_Fonts_fa_solid_900_ttf_len, 11.f, &icons_config, icons_ranges);
 	
 	ImFontConfig iconsConfigBold;
 	icons_config.PixelSnapH = true;
-	mFonts[Bold] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_FiraMono_Bold_ttf, Resources_Fonts_FiraMono_Bold_ttf_len, 16.0);
+	mFonts[Bold] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_FiraMono_Bold_ttf, Data_Fonts_FiraMono_Bold_ttf_len, 16.0);
 	iconsConfigBold.MergeMode = true;
-	io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_fa_solid_900_ttf, Resources_Fonts_fa_solid_900_ttf_len, 16.f, &iconsConfigBold, icons_ranges);
+	io.Fonts->AddFontFromMemoryTTF(Data_Fonts_fa_solid_900_ttf, Data_Fonts_fa_solid_900_ttf_len, 16.f, &iconsConfigBold, icons_ranges);
 	iconsConfigBold.MergeMode = false;
 
-	mFonts[LargeBold] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_FiraMono_Regular_ttf, Resources_Fonts_FiraMono_Regular_ttf_len, 32);
+	mFonts[LargeBold] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_FiraMono_Regular_ttf, Data_Fonts_FiraMono_Regular_ttf_len, 32);
 
-	mFonts[Title] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_FiraMono_Bold_ttf, Resources_Fonts_FiraMono_Bold_ttf_len, 50.0);
-	mFonts[SubTitle] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_FiraMono_Regular_ttf, Resources_Fonts_FiraMono_Regular_ttf_len, 24.0);
+	mFonts[Title] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_FiraMono_Bold_ttf, Data_Fonts_FiraMono_Bold_ttf_len, 50.0);
+	mFonts[SubTitle] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_FiraMono_Regular_ttf, Data_Fonts_FiraMono_Regular_ttf_len, 24.0);
 	ImGui::GetIO().Fonts->AddFontDefault();
-	mFonts[BigIcon] = io.Fonts->AddFontFromMemoryTTF(Resources_Fonts_fa_solid_900_ttf, Resources_Fonts_fa_solid_900_ttf_len, 42.0f, &icons_config, icons_ranges);
+	mFonts[BigIcon] = io.Fonts->AddFontFromMemoryTTF(Data_Fonts_fa_solid_900_ttf, Data_Fonts_fa_solid_900_ttf_len, 42.0f, &icons_config, icons_ranges);
 
 	unsigned char* font_data = nullptr;
 	int width = 0, height = 0, bytes_per_pixel = 0;

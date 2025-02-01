@@ -361,7 +361,7 @@ void Window::ShowTitleBar(bool visible)
 void Window::SetWindowIcon(const std::string& path)
 {
     GLFWimage images[1];
-    images[0].pixels = stbi_load_from_memory(StaticResources::Resources_Images_editor_icon_png, StaticResources::Resources_Images_editor_icon_png_len, &images[0].width, &images[0].height, 0, 4);
+    images[0].pixels = stbi_load_from_memory(StaticResources::Data_Images_editor_icon_png, StaticResources::Data_Images_editor_icon_png_len, &images[0].width, &images[0].height, 0, 4);
     glfwSetWindowIcon(this->window, 1, images);
     stbi_image_free(images[0].pixels);
 }
@@ -453,7 +453,7 @@ void Window::InitImgui()
 {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.Fonts->AddFontFromMemoryTTF(StaticResources::Resources_Fonts_Poppins_Regular_ttf, StaticResources::Resources_Fonts_Poppins_Regular_ttf_len, 16.0);
+    io.Fonts->AddFontFromMemoryTTF(StaticResources::Data_Fonts_Poppins_Regular_ttf, StaticResources::Data_Fonts_Poppins_Regular_ttf_len, 16.0);
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;

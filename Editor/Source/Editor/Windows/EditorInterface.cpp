@@ -137,7 +137,7 @@ namespace Nuake {
         
         Logger::Log("Loading imgui from mem", "window", VERBOSE);
         using namespace Nuake::StaticResources;
-        ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Resources_default_layout_ini);
+        ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Data_default_layout_ini);
         
         virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 640, 360 });
         //ScriptingContext::Get().Initialize();
@@ -2166,7 +2166,10 @@ namespace Nuake {
 		Ref<Scene> newScene = Scene::New();
 		newScene->Path = scenePath;
         newScene->Deserialize(json::parse(FileSystem::ReadFile(scenePath)));
-		sceneEditors.push_back(CreateRef<SceneEditorWindow>(newScene));
+
+        Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(newScene);
+        sceneEditor->DockTo(SceneEditorDockspaceNodeID);
+		sceneEditors.push_back(sceneEditor);
 	}
 
     void NewProject()
@@ -2773,8 +2776,19 @@ namespace Nuake {
         top_level_class.ClassId = ImHashStr("SceneEditor");
         top_level_class.DockingAllowUnclassed = false;
 
-        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoSplit;
-        ImGui::DockSpace(ImGui::GetID("SceneEditorDockSpace"), {0, 0}, flags, &top_level_class);
+        ImGuiDockNodeFlags flags = ImGuiDockNodeFlags_NoSplit | ImGuiDockNodeFlags_NoResize;
+        ImGuiID dockspaceNodeId = ImGui::GetID("SceneEditorDockSpace");
+        ImVec2 dockSize = ImGui::GetContentRegionAvail();
+        
+        ImGuiID dockspaceId = ImGui::DockSpace(dockspaceNodeId, dockSize, flags, &top_level_class);
+
+        if (ImGui::DockBuilderGetNode(SceneEditorDockspaceNodeID) == 0)
+        {
+            SceneEditorDockspaceNodeID = ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
+        }
+
+        //ImGuiID node2 = ImGui::DockBuilderAddNode(dockspaceNodeId, ImGuiDockNodeFlags_DockSpace);
+        //ImGui::DockBuilderSetNodeSize(node2, dockSize);
 
         ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
         if (node)

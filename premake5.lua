@@ -7,7 +7,7 @@ newaction {
    trigger     = "build-assets",
    description = "",
    execute     = function ()
-      generateStaticResources("Resources", "Nuake/Source/Nuake/Resource/StaticResources.h", "Nuake/Source/Nuake/Resource/StaticResources.cpp")
+      generateStaticResources("Data", "Nuake/Source/Nuake/Resource/StaticResources.h", "Nuake/Source/Nuake/Resource/StaticResources.cpp")
    end
 }
 

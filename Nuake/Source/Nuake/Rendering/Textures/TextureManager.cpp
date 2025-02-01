@@ -28,35 +28,35 @@ namespace Nuake
 	void TextureManager::LoadStaticTextures()
 	{
 		using namespace StaticResources;
-		m_Registry2.emplace(Resources_Images_nuake_logo_png_path, CreateRef<VulkanImage>(Resources_Images_nuake_logo_png, Resources_Images_nuake_logo_png_len));
-		m_Registry2.emplace(Resources_Images_logo_white_png_path, CreateRef<VulkanImage>(Resources_Images_logo_white_png, Resources_Images_logo_white_png_len));
-		m_Registry2.emplace(Resources_Gizmos_bone_png_path, CreateRef<VulkanImage>(Resources_Gizmos_bone_png, Resources_Gizmos_bone_png_len));
-		m_Registry2.emplace(Resources_Gizmos_camera_png_path, CreateRef<VulkanImage>(Resources_Gizmos_camera_png, Resources_Gizmos_camera_png_len));
-		m_Registry2.emplace(Resources_Gizmos_light_png_path, CreateRef<VulkanImage>(Resources_Gizmos_light_png, Resources_Gizmos_light_png_len));
-		m_Registry2.emplace(Resources_Gizmos_light_directional_png_path, CreateRef<VulkanImage>(Resources_Gizmos_light_directional_png, Resources_Gizmos_light_directional_png_len));
-		m_Registry2.emplace(Resources_Gizmos_light_spot_png_path, CreateRef<VulkanImage>(Resources_Gizmos_light_spot_png, Resources_Gizmos_light_spot_png_len));
-		m_Registry2.emplace(Resources_Gizmos_player_png_path, CreateRef<VulkanImage>(Resources_Gizmos_player_png, Resources_Gizmos_player_png_len));
-		m_Registry2.emplace(Resources_Gizmos_particles_png_path, CreateRef<VulkanImage>(Resources_Gizmos_particles_png, Resources_Gizmos_particles_png_len));
-		m_Registry2.emplace(Resources_Gizmos_rigidbody_png_path, CreateRef<VulkanImage>(Resources_Gizmos_rigidbody_png, Resources_Gizmos_rigidbody_png_len));
-		m_Registry2.emplace(Resources_Gizmos_sound_emitter_png_path, CreateRef<VulkanImage>(Resources_Gizmos_sound_emitter_png, Resources_Gizmos_sound_emitter_png_len));
+		m_Registry2.emplace(Data_Images_nuake_logo_png_path, CreateRef<VulkanImage>(Data_Images_nuake_logo_png, Data_Images_nuake_logo_png_len));
+		m_Registry2.emplace(Data_Images_logo_white_png_path, CreateRef<VulkanImage>(Data_Images_logo_white_png, Data_Images_logo_white_png_len));
+		m_Registry2.emplace(Data_Gizmos_bone_png_path, CreateRef<VulkanImage>(Data_Gizmos_bone_png, Data_Gizmos_bone_png_len));
+		m_Registry2.emplace(Data_Gizmos_camera_png_path, CreateRef<VulkanImage>(Data_Gizmos_camera_png, Data_Gizmos_camera_png_len));
+		m_Registry2.emplace(Data_Gizmos_light_png_path, CreateRef<VulkanImage>(Data_Gizmos_light_png, Data_Gizmos_light_png_len));
+		m_Registry2.emplace(Data_Gizmos_light_directional_png_path, CreateRef<VulkanImage>(Data_Gizmos_light_directional_png, Data_Gizmos_light_directional_png_len));
+		m_Registry2.emplace(Data_Gizmos_light_spot_png_path, CreateRef<VulkanImage>(Data_Gizmos_light_spot_png, Data_Gizmos_light_spot_png_len));
+		m_Registry2.emplace(Data_Gizmos_player_png_path, CreateRef<VulkanImage>(Data_Gizmos_player_png, Data_Gizmos_player_png_len));
+		m_Registry2.emplace(Data_Gizmos_particles_png_path, CreateRef<VulkanImage>(Data_Gizmos_particles_png, Data_Gizmos_particles_png_len));
+		m_Registry2.emplace(Data_Gizmos_rigidbody_png_path, CreateRef<VulkanImage>(Data_Gizmos_rigidbody_png, Data_Gizmos_rigidbody_png_len));
+		m_Registry2.emplace(Data_Gizmos_sound_emitter_png_path, CreateRef<VulkanImage>(Data_Gizmos_sound_emitter_png, Data_Gizmos_sound_emitter_png_len));
 		
-		m_Registry2.emplace(Resources_Images_cube_png_path, CreateRef<VulkanImage>(Resources_Images_cube_png, Resources_Images_cube_png_len));
-		m_Registry2.emplace(Resources_Images_logo_png_path, CreateRef<VulkanImage>(Resources_Images_logo_png, Resources_Images_logo_png_len));
-		m_Registry2.emplace(Resources_Images_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_file_icon_png, Resources_Images_file_icon_png_len));
-		m_Registry2.emplace(Resources_Images_env_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_env_file_icon_png, Resources_Images_env_file_icon_png_len));
-		m_Registry2.emplace(Resources_Images_scene_icon_png_path, CreateRef<VulkanImage>(Resources_Images_scene_icon_png, Resources_Images_scene_icon_png_len));
-		m_Registry2.emplace(Resources_Images_project_icon_png_path, CreateRef<VulkanImage>(Resources_Images_project_icon_png, Resources_Images_project_icon_png_len));
-		m_Registry2.emplace(Resources_Images_csharp_icon_png_path, CreateRef<VulkanImage>(Resources_Images_csharp_icon_png, Resources_Images_csharp_icon_png_len));
-		m_Registry2.emplace(Resources_Images_sln_icon_png_path, CreateRef<VulkanImage>(Resources_Images_sln_icon_png, Resources_Images_sln_icon_png_len));
-		m_Registry2.emplace(Resources_Images_trenchbroom_icon_png_path, CreateRef<VulkanImage>(Resources_Images_trenchbroom_icon_png, Resources_Images_trenchbroom_icon_png_len));
-		m_Registry2.emplace(Resources_Images_editor_icon_png_path, CreateRef<VulkanImage>(Resources_Images_editor_icon_png, Resources_Images_editor_icon_png_len));
-		m_Registry2.emplace(Resources_Images_close_icon_png_path, CreateRef<VulkanImage>(Resources_Images_close_icon_png, Resources_Images_close_icon_png_len));
-		m_Registry2.emplace(Resources_Images_maximize_icon_png_path, CreateRef<VulkanImage>(Resources_Images_maximize_icon_png, Resources_Images_maximize_icon_png_len));
-		m_Registry2.emplace(Resources_Images_minimize_icon_png_path, CreateRef<VulkanImage>(Resources_Images_minimize_icon_png, Resources_Images_minimize_icon_png_len));
-		m_Registry2.emplace(Resources_Images_restore_icon_png_path, CreateRef<VulkanImage>(Resources_Images_restore_icon_png, Resources_Images_restore_icon_png_len));
-		m_Registry2.emplace(Resources_Images_folder_icon_png_path, CreateRef<VulkanImage>(Resources_Images_folder_icon_png, Resources_Images_folder_icon_png_len));
-		m_Registry2.emplace(Resources_Images_audio_file_icon_png_path, CreateRef<VulkanImage>(Resources_Images_audio_file_icon_png, Resources_Images_audio_file_icon_png_len));
-		m_Registry2.emplace("missing_texture", CreateRef<VulkanImage>(Resources_Images_missing_texture_png, Resources_Images_missing_texture_png_len));
+		m_Registry2.emplace(Data_Images_cube_png_path, CreateRef<VulkanImage>(Data_Images_cube_png, Data_Images_cube_png_len));
+		m_Registry2.emplace(Data_Images_logo_png_path, CreateRef<VulkanImage>(Data_Images_logo_png, Data_Images_logo_png_len));
+		m_Registry2.emplace(Data_Images_file_icon_png_path, CreateRef<VulkanImage>(Data_Images_file_icon_png, Data_Images_file_icon_png_len));
+		m_Registry2.emplace(Data_Images_env_file_icon_png_path, CreateRef<VulkanImage>(Data_Images_env_file_icon_png, Data_Images_env_file_icon_png_len));
+		m_Registry2.emplace(Data_Images_scene_icon_png_path, CreateRef<VulkanImage>(Data_Images_scene_icon_png, Data_Images_scene_icon_png_len));
+		m_Registry2.emplace(Data_Images_project_icon_png_path, CreateRef<VulkanImage>(Data_Images_project_icon_png, Data_Images_project_icon_png_len));
+		m_Registry2.emplace(Data_Images_csharp_icon_png_path, CreateRef<VulkanImage>(Data_Images_csharp_icon_png, Data_Images_csharp_icon_png_len));
+		m_Registry2.emplace(Data_Images_sln_icon_png_path, CreateRef<VulkanImage>(Data_Images_sln_icon_png, Data_Images_sln_icon_png_len));
+		m_Registry2.emplace(Data_Images_trenchbroom_icon_png_path, CreateRef<VulkanImage>(Data_Images_trenchbroom_icon_png, Data_Images_trenchbroom_icon_png_len));
+		m_Registry2.emplace(Data_Images_editor_icon_png_path, CreateRef<VulkanImage>(Data_Images_editor_icon_png, Data_Images_editor_icon_png_len));
+		m_Registry2.emplace(Data_Images_close_icon_png_path, CreateRef<VulkanImage>(Data_Images_close_icon_png, Data_Images_close_icon_png_len));
+		m_Registry2.emplace(Data_Images_maximize_icon_png_path, CreateRef<VulkanImage>(Data_Images_maximize_icon_png, Data_Images_maximize_icon_png_len));
+		m_Registry2.emplace(Data_Images_minimize_icon_png_path, CreateRef<VulkanImage>(Data_Images_minimize_icon_png, Data_Images_minimize_icon_png_len));
+		m_Registry2.emplace(Data_Images_restore_icon_png_path, CreateRef<VulkanImage>(Data_Images_restore_icon_png, Data_Images_restore_icon_png_len));
+		m_Registry2.emplace(Data_Images_folder_icon_png_path, CreateRef<VulkanImage>(Data_Images_folder_icon_png, Data_Images_folder_icon_png_len));
+		m_Registry2.emplace(Data_Images_audio_file_icon_png_path, CreateRef<VulkanImage>(Data_Images_audio_file_icon_png, Data_Images_audio_file_icon_png_len));
+		m_Registry2.emplace("missing_texture", CreateRef<VulkanImage>(Data_Images_missing_texture_png, Data_Images_missing_texture_png_len));
 
 		GPUResources::Get().AddTexture(m_Registry2["missing_texture"]);
 		//
