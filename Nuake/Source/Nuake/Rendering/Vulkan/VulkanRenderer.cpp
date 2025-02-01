@@ -251,16 +251,6 @@ void VkRenderer::CreateSwapchain(const Vector2& size)
 	SwapchainImageViews = vkbSwapchain.get_image_views().value();
 
 	SurfaceSize = size;
-
-	//draw image size will match the window
-	VkExtent3D drawImageExtent = {
-		size.x,
-		size.y,
-		1
-	};
-
-	DrawImage = CreateRef<VulkanImage>(ImageFormat::RGBA16F, size);
-	DepthImage = CreateRef<VulkanImage>(ImageFormat::D32F, size, ImageUsage::Depth);
 }
 
 void VkRenderer::DestroySwapchain()
@@ -377,6 +367,8 @@ void VkRenderer::DrawScenes()
 		{
 			Ref<Viewport> viewport = Viewports[view];
 			assert(viewport && "Viewport is null");
+
+			viewport->Resize();
 
 			ctx.CameraID = viewport->GetViewID();
 			ctx.Size = viewport->GetRenderTarget()->GetSize();
@@ -675,12 +667,9 @@ bool VkRenderer::Draw()
 	// Begin the command buffer recording. We will use this command buffer exactly once, so we want to let vulkan know that
 	// Note: We might reuse them later!!!
 	VkCommandBufferBeginInfo cmdBeginInfo = VulkanInit::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	DrawExtent.width = DrawImage->GetSize().x;
-	DrawExtent.height = DrawImage->GetSize().y;
 
 	// Create commands
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
-	// Transfer rendering image to general layout
 
 	for (auto& [_id, viewport] : Viewports)
 	{

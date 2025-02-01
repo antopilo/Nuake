@@ -3,8 +3,11 @@
 #include "Nuake/Core/Maths.h"
 #include "Nuake/Resource/UUID.h"
 
+#include "Nuake/Rendering/Vulkan/GPUManaged.h"
+
 #include "volk/volk.h"
 #include "vk_mem_alloc.h"
+
 #include <string>
 
 namespace Nuake
@@ -32,7 +35,14 @@ namespace Nuake
 		Default
 	};
 
-	class VulkanImage
+	struct VulkanImageCleanUpData
+	{
+		VmaAllocation Allocation;
+		VkImageView ImageView;
+		VkImage Image;
+	};
+
+	class VulkanImage : public GPUManaged
 	{
 	private:
 		UUID ID;
@@ -46,6 +56,7 @@ namespace Nuake
 		bool ImGuiDescriptorSetGenerated;
 		VkDescriptorSet ImGuiDescriptorSet;
 		ImageUsage Usage;
+
 	public:
 		VulkanImage(const std::string& path);
 		VulkanImage(ImageFormat format, Vector2 size, ImageUsage usage = ImageUsage::Default);
@@ -53,6 +64,9 @@ namespace Nuake
 		VulkanImage(void* data, size_t size); // This one is for embedded files. Ignore.
 
 		~VulkanImage();
+
+	public:
+		void SetDebugName(const std::string& name) override;
 
 		void TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout);
 

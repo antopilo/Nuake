@@ -2,6 +2,8 @@
 
 #include "VulkanAllocator.h"
 
+#include "GPUManaged.h"
+
 using namespace Nuake;
 
 GPUResources::GPUResources()
@@ -100,6 +102,17 @@ bool GPUResources::AddTexture(Ref<VulkanImage> image)
 
 	Logger::Log("Buffer with ID already exists", "vulkan", CRITICAL);
 	return false;
+}
+
+void GPUResources::RemoveTexture(Ref<VulkanImage> image)
+{
+	const UUID id = image->GetID();
+	if (Images.find(id) == Images.end())
+	{
+		return;
+	}
+
+	Images.erase(id);
 }
 
 Ref<VulkanImage> GPUResources::GetTexture(const UUID& id)
@@ -492,13 +505,23 @@ uint32_t GPUResources::GetBindlessMaterialID(const UUID& id)
 	return MeshMaterialMapping[id];
 }
 
-void GPUResources::QueueDeletion(std::function<void()> func)
+void GPUResources::QueueDeletion(CleanUpStack cleanUpStack)
 {
-	DeletionQueue.push(func);
+	// Push content of cleanUpStack into deletionQueue
+	while (!cleanUpStack.empty())
+	{
+		DeletionQueue.push(cleanUpStack.top());
+		cleanUpStack.pop();
+	}
 }
 
 void GPUResources::CleanUp()
 {
+	if (!DeletionQueue.empty())
+	{
+		vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
+	}
+
 	while (!DeletionQueue.empty())
 	{
 		DeletionQueue.top()();

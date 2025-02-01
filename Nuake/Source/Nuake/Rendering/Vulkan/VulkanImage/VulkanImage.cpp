@@ -15,6 +15,7 @@ using namespace Nuake;
 
 #include "vk_mem_alloc.h"
 #include <stb_image/stb_image.h>
+#include <Nuake/Rendering/Vulkan/VkResources.h>
 
 VulkanImage::VulkanImage(const std::string & path) :
 	ImGuiDescriptorSetGenerated(false),
@@ -126,7 +127,7 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 	imgAllocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 	imgAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
+	VK_CALL(vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr));
 
 	VkImageViewCreateInfo imageViewCreateInfo = {};
 	if (usage == ImageUsage::Depth)
@@ -140,7 +141,27 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
 
-	Logger::Log("Image created", "vulkan", VERBOSE);
+	VulkanImageCleanUpData cleanUpData
+	{
+		Allocation,
+		ImageView,
+		Image
+	};
+
+	AddGPUCleanUpFunc([=]() {
+		VulkanImageCleanUpData dataCopy = cleanUpData;
+
+		VmaAllocationInfo info;
+		vmaGetAllocationInfo(VulkanAllocator::Get().GetAllocator(), dataCopy.Allocation, &info);
+
+		if (info.pName)
+		{
+			Logger::Log("Deleting " + std::string(info.pName), "Vulkan", VERBOSE);
+		}
+
+		vkDestroyImageView(VkRenderer::Get().GetDevice(), dataCopy.ImageView, nullptr);
+		vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), dataCopy.Image, dataCopy.Allocation);
+	});
 }
 
 VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : VulkanImage(inFormat, inSize)
@@ -206,7 +227,10 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 		}
 	);
 
-	// TODO: Clean up temporary buffer! we leak memory here
+	AddGPUCleanUpFunc([=]() {
+		//vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
+		//vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
+	});
 }
 
 VulkanImage::VulkanImage(void* inData, size_t inSize) :
@@ -253,6 +277,7 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 	imgAllocInfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
+	
 
 	VkImageViewCreateInfo imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(Format), Image, VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -278,12 +303,24 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 		TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	});
+
+	AddGPUCleanUpFunc([=]() {
+		//vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
+		//vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
+	});
 }
 
 VulkanImage::~VulkanImage()
 {
-	// TODO: deletion of image
 	Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
+	GPUResources::Get().QueueDeletion(GetGPUCleanUpStack());
+}
+
+void VulkanImage::SetDebugName(const std::string& name)
+{
+	GPUManaged::SetDebugName(name);
+
+	vmaSetAllocationName(VulkanAllocator::Get().GetAllocator(), Allocation, GetDebugName().data());
 }
 
 void VulkanImage::TransitionLayout(VkCommandBuffer cmd, VkImageLayout layout)
@@ -345,6 +382,24 @@ VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
 		ImGuiDescriptorSet = ImGui_ImplVulkan_AddTexture(Sampler, ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		ImGuiDescriptorSetGenerated = true;
+
+		struct cleanUpData
+		{
+			VkDescriptorSet descriptorSet;
+			VkSampler sampler;
+		};
+
+		cleanUpData dataToCleanUp
+		{
+			ImGuiDescriptorSet,
+			Sampler
+		};
+
+		AddGPUCleanUpFunc([=]() {
+			cleanUpData data = dataToCleanUp;
+			ImGui_ImplVulkan_RemoveTexture(data.descriptorSet);
+			vkDestroySampler(VkRenderer::Get().GetDevice(), data.sampler, nullptr);
+		});
 	}
 
 	return ImGuiDescriptorSet;

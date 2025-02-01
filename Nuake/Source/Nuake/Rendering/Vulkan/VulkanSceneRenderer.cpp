@@ -323,6 +323,8 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 	inContext.CommandBuffer.CopyImageToImage(sceneRenderPipeline->GetOutput(), inContext.ViewportImage);
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_GENERAL);
 	inContext.CommandBuffer.TransitionImageLayout(sceneRenderPipeline->GetOutput(), VK_IMAGE_LAYOUT_GENERAL);
+
+	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 // This will prepare all the data and upload it to the GPU before rendering the scene.

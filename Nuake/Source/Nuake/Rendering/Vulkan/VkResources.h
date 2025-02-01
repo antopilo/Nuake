@@ -3,13 +3,13 @@
 #include "Nuake/Core/Logger.h"
 #include "Nuake/Resource/UUID.h"
 
+#include "Nuake/Rendering/Textures/TextureManager.h"
 #include "Nuake/Rendering/Vertex.h"
+#include "Nuake/Rendering/Vulkan/DescriptorLayoutBuilder.h"
+#include "Nuake/Rendering/Vulkan/GPUManaged.h"
+#include "Nuake/Rendering/Vulkan/VkMesh.h"
 #include "Nuake/Rendering/Vulkan/VulkanAllocatedBuffer.h"
 #include "Nuake/Rendering/Vulkan/VulkanImage/VulkanImage.h"
-#include "Nuake/Rendering/Vulkan/VkMesh.h"
-#include "Nuake/Rendering/Textures/TextureManager.h"
-#include "Nuake/Rendering/Vulkan/VulkanAllocatedBuffer.h"
-#include "Nuake/Rendering/Vulkan/DescriptorLayoutBuilder.h"
 #include "Nuake/Rendering/Vulkan/VulkanRenderer.h"
 
 #include <volk/volk.h>
@@ -166,6 +166,7 @@ namespace Nuake
 		Ref<VkMesh> GetMesh(const UUID& id);
 
 		bool AddTexture(Ref<VulkanImage> image);
+		void RemoveTexture(Ref<VulkanImage> image);
         Ref<VulkanImage> GetTexture(const UUID& id);
 		std::vector<Ref<VulkanImage>> GetAllTextures();
 
@@ -185,7 +186,7 @@ namespace Nuake
 		void RecreateBindlessCameras();
 		void UpdateBuffers();
 
-		void QueueDeletion(std::function<void()> func);
+		void QueueDeletion(CleanUpStack func);
 		void CleanUp();
 	private:
 		void CreateBindlessLayout();

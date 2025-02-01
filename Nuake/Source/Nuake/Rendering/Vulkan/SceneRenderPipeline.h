@@ -113,6 +113,6 @@ namespace Nuake
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 
 	private:
-		Ref<VulkanImage> ResizeImage(Ref<VulkanImage> image, const Vector2& size);
+		Ref<VulkanImage> ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size);
 	};
 }

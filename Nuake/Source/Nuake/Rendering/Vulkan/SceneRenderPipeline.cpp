@@ -87,13 +87,22 @@ SceneRenderPipeline::SceneRenderPipeline()
 	// Initialize render targets
 	const Vector2 defaultSize = { 1, 1 };
 	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferAlbedo->SetDebugName("GBufferAlbedo");
+
 	GBufferNormal = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferNormal->SetDebugName("GBufferNormal");
+
 	GBufferMaterial = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferMaterial->SetDebugName("GBufferMaterial");
+
 	GBufferDepth = CreateRef<VulkanImage>(ImageFormat::D32F, defaultSize, ImageUsage::Depth);
+	GBufferDepth->SetDebugName("GBufferDepth");
 
 	ShadingOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferDepth->SetDebugName("ShadingOutput");
 
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	TonemappedOutput->SetDebugName("TonemappedOutput");
 
 	// Setup bloom targets
 	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
@@ -264,12 +273,12 @@ void SceneRenderPipeline::SetCamera(UUID camera)
 void SceneRenderPipeline::Render(PassRenderContext& ctx)
 {
 	// Resize textures
-	GBufferAlbedo = ResizeImage(GBufferAlbedo, ctx.resolution);
-	GBufferDepth = ResizeImage(GBufferDepth, ctx.resolution);
-	GBufferNormal = ResizeImage(GBufferNormal, ctx.resolution);
-	GBufferMaterial = ResizeImage(GBufferMaterial, ctx.resolution);
-	ShadingOutput = ResizeImage(ShadingOutput, ctx.resolution);
-	TonemappedOutput = ResizeImage(TonemappedOutput, ctx.resolution);
+	GBufferAlbedo = ResizeImage(ctx, GBufferAlbedo, ctx.resolution);
+	GBufferDepth = ResizeImage(ctx, GBufferDepth, ctx.resolution);
+	GBufferNormal = ResizeImage(ctx, GBufferNormal, ctx.resolution);
+	GBufferMaterial = ResizeImage(ctx, GBufferMaterial, ctx.resolution);
+	ShadingOutput = ResizeImage(ctx, ShadingOutput, ctx.resolution);
+	TonemappedOutput = ResizeImage(ctx, TonemappedOutput, ctx.resolution);
 
 	PipelineAttachments pipelineInputs
 	{
@@ -285,7 +294,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	OnDebugDraw().Broadcast(debugCmd);
 }
 
-Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const Vector2& size)
+Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size)
 {
 	if (image->GetSize() == size)
 	{
@@ -293,12 +302,14 @@ Ref<VulkanImage> SceneRenderPipeline::ResizeImage(Ref<VulkanImage> image, const 
 	}
 
 	Ref<VulkanImage> newAttachment = std::make_shared<VulkanImage>(image->GetFormat(), size, image->GetUsage());
-	
+	newAttachment->SetDebugName(image->GetDebugName().data());
+
 	// Register to resource manager
 	GPUResources& gpuResources = GPUResources::Get();
 	gpuResources.AddTexture(newAttachment);
+	gpuResources.RemoveTexture(image);
 
 	// We might need to do this?
-	//newAttachment->TransitionLayout(ctx.commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
+	ctx.commandBuffer.TransitionImageLayout(newAttachment, VK_IMAGE_LAYOUT_GENERAL);
 	return newAttachment;
 }
