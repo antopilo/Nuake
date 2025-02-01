@@ -6,7 +6,6 @@
 #include <mutex>
 #include <thread>
 
-
 namespace SoLoud
 {
 	class Soloud;

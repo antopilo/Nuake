@@ -11,7 +11,5 @@ namespace Nuake
 	public:
 		AudioSource() = default;
 		~AudioSource() = default;
-
-
 	};
 }
