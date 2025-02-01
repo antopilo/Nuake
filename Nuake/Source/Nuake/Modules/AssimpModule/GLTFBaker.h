@@ -1,4 +1,4 @@
-#include "IAssetBaker.h"
+#include "Nuake/Resource/Bakers/IAssetBaker.h"
 
 #include "Nuake/Rendering/Vertex.h"
 
