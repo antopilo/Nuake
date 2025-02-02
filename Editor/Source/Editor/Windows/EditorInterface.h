@@ -131,6 +131,7 @@ namespace Nuake
 		void OnRequestCloseEditorWindow(std::string windowName);
 
 		void OpenPrefabWindow(const std::string& prefabPath);
+		void OpenSceneWindow(Ref<Scene> scene);
 		void OpenSceneWindow(const std::string& scenePath);
 
 		bool ShouldDrawAxis() const { return m_DrawAxis; }

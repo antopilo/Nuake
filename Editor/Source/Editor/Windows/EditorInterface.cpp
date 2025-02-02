@@ -2166,6 +2166,13 @@ namespace Nuake {
         prefabEditors.push_back(CreateRef<PrefabEditorWindow>(newPrefab));
     }
 
+    void EditorInterface::OpenSceneWindow(Ref<Scene> scene)
+    {
+        Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(scene);
+        sceneEditor->DockTo(SceneEditorDockspaceNodeID);
+        sceneEditors.push_back(sceneEditor);
+    }
+
 	void EditorInterface::OpenSceneWindow(const std::string& scenePath)
 	{
 		if (!FileSystem::FileExists(scenePath))
@@ -2548,7 +2555,14 @@ namespace Nuake {
             _WelcomeWindow->LoadQueuedProject();
 
             auto project = Engine::GetProject();
-            OpenSceneWindow(project->DefaultScene->Path);
+
+            auto sceneToLoad = project->DefaultScene;
+            if (!sceneToLoad)
+            {
+                sceneToLoad = CreateRef<Scene>();
+            }
+
+            OpenSceneWindow(sceneToLoad);
 
             isLoadingProjectQueue = false;
 
