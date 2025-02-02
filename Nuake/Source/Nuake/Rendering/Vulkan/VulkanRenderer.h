@@ -1,27 +1,24 @@
 #pragma once
 #include "Nuake/Core/Core.h"
 #include "Nuake/Core/Maths.h"
+#include "Nuake/Resource/UUID.h"
+
+#include "Nuake/Rendering/Vulkan/Cmd.h"
+#include "Nuake/Rendering/Vulkan/DescriptorAllocatorGrowable.h"
+#include "Nuake/Rendering/Vulkan/RenderContext.h"
+#include "Nuake/Rendering/Vulkan/VkMesh.h"
+#include "Nuake/Rendering/Vulkan/VkVertex.h"
+#include "Nuake/Rendering/Vulkan/VulkanAllocatedBuffer.h"
+#include "Nuake/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+#include "Nuake/Rendering/Vulkan/VulkanSceneRenderer.h"
 
 #include <volk/volk.h>
 #include "vkb/VkBootstrap.h"
-
-#include "VulkanImage/VulkanImage.h"
-#include "VulkanTypes.h"
-#include "VkVertex.h"
-#include "RenderContext.h"
-#include "VulkanAllocatedBuffer.h"
-#include "VulkanSceneRenderer.h"
-
-#include "Nuake/Resource/UUID.h"
+#include "vk_mem_alloc.h"
 
 #include <functional>
+#include <map>
 #include <span>
-
-#include "vk_mem_alloc.h"
-#include "VkMesh.h"
-#include "DescriptorAllocatorGrowable.h"
-
-#include "Nuake/Rendering/Vulkan/Cmd.h"
 
 namespace Nuake
 {
@@ -29,7 +26,8 @@ namespace Nuake
 	class GPUMeshBuffers;
 	class Scene;
 
-	struct AllocatedImage {
+	struct AllocatedImage 
+	{
 		VkImage image;
 		VkImageView imageView;
 		VmaAllocation allocation;
