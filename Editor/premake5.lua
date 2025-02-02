@@ -33,6 +33,7 @@ project "Editor"
         "../Nuake/Vendors",
         "../Nuake/Vendors/volk",
         "../Nuake/Vendors/vulkan",
+	"../Nuake/Thirdparty/build",
         "../Nuake/Thirdparty/yoga",
         "../Nuake/Thirdparty/Coral/Coral.Native/Include/",
         "../Nuake/Thirdparty/entt/src",
