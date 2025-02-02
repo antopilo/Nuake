@@ -34,7 +34,7 @@ void SceneEditorWindow::Update(float ts)
 
 void SceneEditorWindow::Draw()
 {
-	const std::string sceneName = editorContext.GetScene()->Path;
+	std::string sceneName = editorContext.GetScene()->Path.empty() ? "New Scene" : editorContext.GetScene()->Path;
 
 	ImGuiID editorDockspaceId = ImGui::GetID("SceneEditorDockSpace");
 	if (!layoutInitialized) 

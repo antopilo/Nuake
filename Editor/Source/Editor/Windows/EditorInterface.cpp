@@ -2138,9 +2138,19 @@ namespace Nuake {
             if (auto window = sceneEditors[i]; window->GetWindowName() == windowName)
             {
                 sceneEditors.erase(std::begin(sceneEditors) + i);
-                return;
             }
         }
+
+        // When closing all editors, it should open a new scene
+		if (sceneEditors.empty())
+		{
+            auto newScene = CreateRef<Scene>();
+			newScene->SetName("New Scene");
+
+            Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(newScene);
+            sceneEditor->DockTo(SceneEditorDockspaceNodeID);
+            sceneEditors.push_back(sceneEditor);
+		}
     }
 
     void EditorInterface::OpenPrefabWindow(const std::string& prefabPath)
