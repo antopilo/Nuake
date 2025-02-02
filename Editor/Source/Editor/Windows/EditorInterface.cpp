@@ -2292,29 +2292,34 @@ namespace Nuake {
                     Selection = EditorSelection();
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Set current scene as default"))
+                if (ImGui::MenuItem("Set Scene As Default"))
                 {
                     Engine::GetProject()->DefaultScene = Engine::GetCurrentScene();
                     SetStatusMessage("Current scene set as project default.");
                 }
                 ImGui::Separator();
-                if (ImGui::MenuItem("New scene"))
+                if (ImGui::MenuItem("New Scene"))
                 {
-                    Engine::SetCurrentScene(Scene::New());
+                    Ref<Scene> newScene = Scene::New();
+
+                    Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(newScene);
+                    sceneEditor->DockTo(SceneEditorDockspaceNodeID);
+                    sceneEditors.push_back(sceneEditor);
+                    
                     Selection = EditorSelection();
                     SetStatusMessage("New scene created.");
                 }
-                if (ImGui::MenuItem("Open scene...", "CTRL+O"))
+                if (ImGui::MenuItem("Open Scene...", "CTRL+O"))
                 {
                     OpenScene();
                     Selection = EditorSelection();
                 }
-                if (ImGui::MenuItem("Save scene", "CTR+SHIFT+L+S"))
+                if (ImGui::MenuItem("Save Scene", "CTR+SHIFT+L+S"))
                 {
                     Engine::GetCurrentScene()->Save();
                     SetStatusMessage("Scene saved succesfully.");
                 }
-                if (ImGui::MenuItem("Save scene as...", "CTRL+SHIFT+S"))
+                if (ImGui::MenuItem("Save Sene As...", "CTRL+SHIFT+S"))
                 {
                     std::string savePath = FileDialog::SaveFile("*.scene");
                     Engine::GetCurrentScene()->SaveAs(savePath);
