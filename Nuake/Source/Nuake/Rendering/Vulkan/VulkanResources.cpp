@@ -155,7 +155,7 @@ CameraView GPUResources::GetCamera(const UUID& id)
 		return Cameras[CameraMapping[id]];
 	}
 
-	Logger::Log("Camera with ID does not exist", "vulkan", CRITICAL);
+	// Logger::Log("Camera with ID does not exist", "vulkan", CRITICAL);
 	return Cameras[0];
 }
 
