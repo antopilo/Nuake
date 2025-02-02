@@ -278,6 +278,7 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 
 	gpu.UpdateBuffers();
 
+	// TODO: Move shadow map creation into its own pass per scene renderer
 	for (auto& scene : scenes)
 	{
 		PassRenderContext passCtx = { };

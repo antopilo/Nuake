@@ -111,7 +111,7 @@ namespace Nuake
 		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
 
-		static RenderPipeline GBufferPipeline;
+		RenderPipeline GBufferPipeline;
 
 		// Delegates
 		MulticastDelegate<DebugCmd&> DebugDrawDelegate;

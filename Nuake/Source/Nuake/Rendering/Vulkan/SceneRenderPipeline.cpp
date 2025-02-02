@@ -14,7 +14,6 @@
 
 using namespace Nuake;
 
-RenderPipeline SceneRenderPipeline::GBufferPipeline;
 RenderPipeline ShadowRenderPipeline::ShadowPipeline;
 
 ShadowRenderPipeline::ShadowRenderPipeline()

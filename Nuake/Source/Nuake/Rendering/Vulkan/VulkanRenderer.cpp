@@ -372,7 +372,8 @@ void VkRenderer::DrawScenes()
 			ctx.Size = viewport->GetRenderTarget()->GetSize();
 			ctx.ViewportImage = viewport->GetRenderTarget();
 			ctx.SelectedEntityID = viewport->GetSelectedEntityID();
-			SceneRenderer->DrawSceneView(ctx);
+
+			SceneRenderers[view]->DrawSceneView(ctx);
 		}
 	}
 }
@@ -428,7 +429,6 @@ void VkRenderer::RemoveViewport(const UUID& viewportId)
 	// Also remove the scene if the view count reaches 0 to avoid
 	// dangling reference to the scenes. We should use Scene ID instead
 	// of shared pointers.
-	// 
 	// TODO(antopilo) make scene resources.
 	for (auto& [scene, views] : SceneViewports)
 	{
@@ -467,7 +467,10 @@ void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& view
 	SceneViewports[scene].push_back(viewportId);
 
 	// Each viewport has its own scene renderer
-	SceneRenderers[viewportId] = CreateRef<VkSceneRenderer>();
+	Ref<VkSceneRenderer> sceneRenderer = CreateRef<VkSceneRenderer>();
+	sceneRenderer->Init();
+
+	SceneRenderers[viewportId] = std::move(sceneRenderer);
 }
 
 void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)
@@ -480,7 +483,9 @@ void VkRenderer::InitImgui()
 	// 1: create descriptor pool for IMGUI
 	//  the size of the pool is very oversize, but it's copied from imgui demo
 	//  itself.
-	VkDescriptorPoolSize pool_sizes[] = { { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+	VkDescriptorPoolSize pool_sizes[] 
+	{ 
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
 		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
@@ -490,7 +495,8 @@ void VkRenderer::InitImgui()
 		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
 		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
 		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } };
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 } 
+	};
 
 	VkDescriptorPoolCreateInfo pool_info = {};
 	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -503,10 +509,7 @@ void VkRenderer::InitImgui()
 	VK_CALL(vkCreateDescriptorPool(Device, &pool_info, nullptr, &imguiPool));
 
 	// 2: initialize imgui library
-
-	// this initializes the core structures of imgui
 	ImGui::CreateContext();
-
 	{
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.Fonts->AddFontFromMemoryTTF(StaticResources::Data_Fonts_Poppins_Regular_ttf, StaticResources::Data_Fonts_Poppins_Regular_ttf_len, 16.0);
