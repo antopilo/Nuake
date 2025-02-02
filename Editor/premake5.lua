@@ -33,7 +33,7 @@ project "Editor"
         "../Nuake/Vendors",
         "../Nuake/Vendors/volk",
         "../Nuake/Vendors/vulkan",
-	"../Nuake/Thirdparty/build",
+	    "../Nuake/Thirdparty/build",
         "../Nuake/Thirdparty/yoga",
         "../Nuake/Thirdparty/Coral/Coral.Native/Include/",
         "../Nuake/Thirdparty/entt/src",
@@ -81,6 +81,7 @@ project "Editor"
         '{ECHO} Copying Coral to Working directory...',
         '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
         '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
+        '{COPYFILE} "%{wks.location}NuakeNet/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll" "%{cfg.debugdir}/"',
         'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
     }
 
