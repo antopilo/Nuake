@@ -122,7 +122,7 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return OutlineOutput; }
+		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 
