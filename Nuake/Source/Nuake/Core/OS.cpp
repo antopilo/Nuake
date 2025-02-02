@@ -31,7 +31,7 @@
 #include <codecvt>
 #include <filesystem>
 
-//#include <Subprocess.hpp>
+#include <Subprocess.hpp>
 
 namespace Nuake {
 
@@ -176,40 +176,39 @@ namespace Nuake {
 		}
 
 		command_line.back() = nullptr;
-		
-		int result = 0;
-		//struct subprocess_s subprocess;
+
+		struct subprocess_s subprocess;
 		char output[1024];
-		//int result = subprocess_create(command_line.data(), subprocess_option_inherit_environment, &subprocess);
-		//if (0 != result) {
-		//	// an error occurred!
-		//}
-		//
-		//int process_return;
-		//result = subprocess_join(&subprocess, &process_return);
-		//if (0 != result) {
-		//	// an error occurred!
-		//}
-		//
-		//FILE* p_stdout = subprocess_stdout(&subprocess);
-		//
-		//std::string stdout_output;
-		//fgets(output, 1024, p_stdout);
-		//while (fgets(output, sizeof(output), p_stdout)) 
-		//{
-		//	stdout_output += output;
-		//}
-		//
-		//FILE* p_stderr = subprocess_stderr(&subprocess);
-		//std::string stderr_output;
-		//char errOutput[1024];
-		//while (fgets(errOutput, sizeof(errOutput), p_stderr)) 
-		//{
-		//	stderr_output += errOutput;
-		//}
-		//
-		//out = stdout_output;
-		//err = stderr_output;
+		int result = subprocess_create(command_line.data(), subprocess_option_inherit_environment, &subprocess);
+		if (0 != result) {
+			// an error occurred!
+		}
+		
+		int process_return;
+		result = subprocess_join(&subprocess, &process_return);
+		if (0 != result) {
+			// an error occurred!
+		}
+		
+		FILE* p_stdout = subprocess_stdout(&subprocess);
+		
+		std::string stdout_output;
+		fgets(output, 1024, p_stdout);
+		while (fgets(output, sizeof(output), p_stdout)) 
+		{
+			stdout_output += output;
+		}
+		
+		FILE* p_stderr = subprocess_stderr(&subprocess);
+		std::string stderr_output;
+		char errOutput[1024];
+		while (fgets(errOutput, sizeof(errOutput), p_stderr)) 
+		{
+			stderr_output += errOutput;
+		}
+		
+		out = stdout_output;
+		err = stderr_output;
 
 		return result;
 	}
