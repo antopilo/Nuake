@@ -2787,8 +2787,9 @@ namespace Nuake {
             SceneEditorDockspaceNodeID = ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
         }
 
-        // We need to cache, because we might delete one while iterating
-        for (auto& sceneEditor : sceneEditors)
+        // We need to make a copy, because we might delete one while iterating
+        std::vector<Ref<SceneEditorWindow>> cachedEditors = sceneEditors;
+        for (auto& sceneEditor : cachedEditors)
         {
             sceneEditor->Draw();
         }
