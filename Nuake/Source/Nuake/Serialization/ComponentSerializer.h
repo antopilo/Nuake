@@ -7,7 +7,7 @@ namespace Nuake
 	private:
 		
 	public:
-		virtual void VisitNameComponent(const NameComponent& name)
+		
 
 	};
 }
