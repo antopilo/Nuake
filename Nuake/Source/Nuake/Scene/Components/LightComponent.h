@@ -33,18 +33,36 @@ namespace Nuake
     {
         NUAKECOMPONENT(LightComponent, "Light")
 
+        static void InitializeComponentClass()
+        {
+            BindComponentField<&LightComponent::Type>("Type", "Type");
+            BindComponentField<&LightComponent::Direction>("Direction", "Direction");
+            BindComponentField<&LightComponent::Cutoff>("Cutoff", "Cutoff");
+            BindComponentField<&LightComponent::OuterCutoff>("OuterCutoff", "OuterCutoff");
+            BindComponentField<&LightComponent::Color>("Color", "Color");
+            BindComponentField<&LightComponent::IsVolumetric>("IsVolumetric", "Is Volumetric");
+            BindComponentField<&LightComponent::Strength>("Strength", "Strength");
+            BindComponentField<&LightComponent::SyncDirectionWithSky>("SyncDirectionWithSky", "SyncDirectionWithSky");
+            BindComponentField<&LightComponent::CastShadows>("CastShadows", "CastShadows");
+        }
+
     public:
-        LightType Type = Point;
+        // All lights
+        int32_t Type = Point;
+        Vector3 Color;
+        float Strength;
+        bool CastShadows = false;
+        bool IsVolumetric = false;
+
+        // Directional specific
         Vector3 Direction;
+        bool SyncDirectionWithSky = false;
+
+        // Spot light specific
         float Cutoff = 12.5f;
         float OuterCutoff = 20.0f;
-        Vector3 Color;
 
-        bool IsVolumetric = false;
-        float Strength;
-
-        bool SyncDirectionWithSky = false;
-        bool CastShadows = false;
+        // Transient
 		Ref<VulkanImage> m_ShadowMaps[CSM_AMOUNT];
         Matrix4 mViewProjections[CSM_AMOUNT];
         std::vector<LightView> m_LightViews;
