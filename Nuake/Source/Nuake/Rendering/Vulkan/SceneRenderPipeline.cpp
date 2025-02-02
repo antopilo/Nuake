@@ -104,6 +104,12 @@ SceneRenderPipeline::SceneRenderPipeline()
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	TonemappedOutput->SetDebugName("TonemappedOutput");
 
+	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::R32F, defaultSize);
+	GBufferEntityID->SetDebugName("GBufferEntityID");
+
+	OutlineOutput =CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	OutlineOutput->SetDebugName("OutlineOutput");
+
 	// Setup bloom targets
 	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	BloomThreshold = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
@@ -129,6 +135,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	gBufferPass.AddAttachment("Albedo", GBufferAlbedo->GetFormat());
 	gBufferPass.AddAttachment("Normal", GBufferNormal->GetFormat());
 	gBufferPass.AddAttachment("Material", GBufferMaterial->GetFormat());
+	gBufferPass.AddAttachment("EntityID", GBufferEntityID->GetFormat());
 	gBufferPass.AddAttachment("Depth", GBufferDepth->GetFormat(), ImageUsage::Depth);
 	gBufferPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
@@ -161,6 +168,10 @@ SceneRenderPipeline::SceneRenderPipeline()
 			}
 
 			gbufferConstant.Index = res.ModelMatrixMapping[Entity((entt::entity)e, scene.get()).GetID()];
+			
+			// Set entity ID
+			Entity entity = { (entt::entity)e, scene.get() };
+			gbufferConstant.EntityID = static_cast<float>(entity.GetHandle());
 
 			for (auto& m : mesh.ModelResource.Get<Model>()->GetMeshes())
 			{
@@ -262,6 +273,45 @@ SceneRenderPipeline::SceneRenderPipeline()
 		cmd.DrawIndexed(6);
 	});
 
+	auto& outlinePass = GBufferPipeline.AddPass("Outline");
+	outlinePass.SetShaders(shaderMgr.GetShader("outline_vert"), shaderMgr.GetShader("outline_frag"));
+	outlinePass.SetPushConstant<OutlineConstant>(outlineConstant);
+	outlinePass.AddAttachment("OutlineOutput", ImageFormat::RGBA8);
+	outlinePass.SetDepthTest(false);
+	outlinePass.AddInput("ShadingOutput");
+	outlinePass.AddInput("EntityID");
+	outlinePass.SetPreRender([&](PassRenderContext& ctx) {
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	outlinePass.SetRender([&](PassRenderContext& ctx)
+	{
+		outlineConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(ShadingOutput->GetID());
+		outlineConstant.EntityIDTextureID = GPUResources::Get().GetBindlessTextureID(GBufferEntityID->GetID());
+		outlineConstant.DepthTextureID = GPUResources::Get().GetBindlessTextureID(GBufferDepth->GetID());
+		outlineConstant.SelectedEntityID = ctx.selectedEntity;
+		outlineConstant.Color = Vector4(1, 0, 0, 1);
+		outlineConstant.Thickness = 4.0f;
+
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(OutlineConstant), &outlineConstant);
+
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
 	GBufferPipeline.Build();
 }
 
@@ -277,14 +327,19 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	GBufferDepth = ResizeImage(ctx, GBufferDepth, ctx.resolution);
 	GBufferNormal = ResizeImage(ctx, GBufferNormal, ctx.resolution);
 	GBufferMaterial = ResizeImage(ctx, GBufferMaterial, ctx.resolution);
+	GBufferEntityID = ResizeImage(ctx, GBufferEntityID, ctx.resolution);
+
 	ShadingOutput = ResizeImage(ctx, ShadingOutput, ctx.resolution);
 	TonemappedOutput = ResizeImage(ctx, TonemappedOutput, ctx.resolution);
 
+	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
+
 	PipelineAttachments pipelineInputs
 	{
-		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial },	// GBuffer
+		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial, GBufferEntityID },	// GBuffer
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
+		{ OutlineOutput }
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);

@@ -18,6 +18,7 @@ namespace Nuake
 		UUID viewId;
 		Ref<VulkanImage> renderTarget;
 
+		int selectedEntityID;
 	public:
 		Viewport(UUID viewId, const Vector2& size);
 		~Viewport() = default;
@@ -38,6 +39,9 @@ namespace Nuake
 
 			return queuedResize != viewportSize;
 		}
+
+		void SetSelectedEntityID(int id) { selectedEntityID = id; }
+		int GetSelectedEntityID() const { return selectedEntityID; }
 
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }
 		bool Resize();

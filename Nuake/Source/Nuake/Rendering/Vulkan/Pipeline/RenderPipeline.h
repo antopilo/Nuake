@@ -22,6 +22,7 @@ namespace Nuake
 		Vector2 resolution;
 		RenderPass* renderPass = nullptr;
 		UUID cameraID;
+		float selectedEntity;
 	};
 
 	class TextureAttachment

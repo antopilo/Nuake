@@ -63,6 +63,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("shadow_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shadow.vert"));
 	shaderMgr.AddShader("tonemap_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/tonemap.frag"));
 	shaderMgr.AddShader("tonemap_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/tonemap.vert"));
+	shaderMgr.AddShader("outline_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/outline.frag"));
+	shaderMgr.AddShader("outline_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/outline.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)
@@ -313,7 +315,7 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 	passCtx.resolution = inContext.Size;
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.scene = inContext.CurrentScene;
-
+	passCtx.selectedEntity = static_cast<float>(inContext.SelectedEntityID);
 	sceneRenderPipeline->Render(passCtx);
 
 	// in case we just resized

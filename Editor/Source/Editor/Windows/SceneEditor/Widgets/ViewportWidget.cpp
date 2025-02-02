@@ -35,6 +35,15 @@ void ViewportWidget::Update(float ts)
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
     editorCam->OnWindowResize(viewportSize.x, viewportSize.y);
+
+	if (editorContext.GetSelection().Type == EditorSelectionType::Entity)
+	{
+		sceneViewport->SetSelectedEntityID(editorContext.GetSelection().Entity.GetHandle());
+	}
+    else
+    {
+        sceneViewport->SetSelectedEntityID(-1);
+    }
 }
 
 void ViewportWidget::Draw()

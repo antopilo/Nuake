@@ -17,6 +17,7 @@ namespace Nuake
 		Vector2 Size;
 		UUID CameraID;
 		Ref<VulkanImage> ViewportImage;
+		int SelectedEntityID = -1;
 		// We might add more to this!
 	};
 }

@@ -92,6 +92,7 @@ struct PSOutput {
     float4 oColor0 : SV_TARGET;
     float4 oNormal : SV_TARGET1;
     float4 oMaterial : SV_TARGET2;
+    float4 oEntityID : SV_TARGET3;
 };
 
 struct ModelPushConstant
@@ -99,6 +100,7 @@ struct ModelPushConstant
     int modelIndex;  // Push constant data
     int materialIndex;
     int cameraID;
+    float entityID;
 };
 
 [[vk::push_constant]]
@@ -160,5 +162,8 @@ PSOutput main(PSInput input)
     float3 materialOuput = float3(inMaterial.metalnessValue, inMaterial.aoValue, inMaterial.roughnessValue);
     
     output.oMaterial = float4(materialOuput, 1.0f);
+
+    output.oEntityID = float4(pushConstants.entityID, pushConstants.entityID, pushConstants.entityID, pushConstants.entityID);
+
     return output;
 }

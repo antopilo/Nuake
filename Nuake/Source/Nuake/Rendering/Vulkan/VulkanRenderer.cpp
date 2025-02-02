@@ -371,7 +371,7 @@ void VkRenderer::DrawScenes()
 			ctx.CameraID = viewport->GetViewID();
 			ctx.Size = viewport->GetRenderTarget()->GetSize();
 			ctx.ViewportImage = viewport->GetRenderTarget();
-			
+			ctx.SelectedEntityID = viewport->GetSelectedEntityID();
 			SceneRenderer->DrawSceneView(ctx);
 		}
 	}

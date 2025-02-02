@@ -14,7 +14,7 @@ namespace Nuake
 		int Index;
 		int MaterialIndex;
 		int CameraID;
-		char padding[120];            // 124 bytes to reach 128 bytes
+		float EntityID;
 	};
 
 	class ShadowRenderPipeline
@@ -50,6 +50,16 @@ namespace Nuake
 		int SourceTextureID;
 	};
 
+	struct OutlineConstant
+	{
+		Vector4 Color;
+		float Thickness;
+		int SourceTextureID;
+		int EntityIDTextureID;
+		int DepthTextureID;
+		float SelectedEntityID;
+	};
+
 	struct BloomConstant
 	{
 		int Stage;
@@ -75,11 +85,14 @@ namespace Nuake
 		Ref<VulkanImage> GBufferDepth;
 		Ref<VulkanImage> GBufferNormal;
 		Ref<VulkanImage> GBufferMaterial;
+		Ref<VulkanImage> GBufferEntityID;
 
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
 
 		Ref<VulkanImage> TonemappedOutput;
+
+		Ref<VulkanImage> OutlineOutput;
 
 		// Bloom
 		const int BloomIteration = 4;
@@ -95,6 +108,7 @@ namespace Nuake
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
 		TonemapConstant tonemapConstant;
+		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
 
 		static RenderPipeline GBufferPipeline;
@@ -108,7 +122,7 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
+		Ref<VulkanImage> GetOutput() { return OutlineOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 

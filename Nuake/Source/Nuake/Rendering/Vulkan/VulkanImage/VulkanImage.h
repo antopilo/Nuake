@@ -19,6 +19,9 @@ namespace Nuake
 		RGBA16F = 97,
 		RGBA32F = 109,
 		D32F = 126,
+		R32UINT = 98,
+		R32INT = 99,
+		R32F = 100,
 	};
 
 	enum class ImageUsage

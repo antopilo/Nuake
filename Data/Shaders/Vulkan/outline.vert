@@ -80,24 +80,23 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct ModelPushConstant
+struct OutlinePushConstant
 {
-    int modelIndex;  // Push constant data
-    int materialIndex;
-    int cameraID;
-    float entityID;
+    float4 Color;
+    float Thickness;
+    int SourceTextureID;
+    int EntityIDTextureID;
+    int DepthTextureID;
+    float SelectedEntity;
 };
 
 [[vk::push_constant]]
-ModelPushConstant pushConstants;
+OutlinePushConstant pushConstants;
 
 // Outputs
 struct VSOutput {
     float4 Position : SV_Position;
-    float3 Color : TEXCOORD0;
-    float2 UV : TEXCOORD1;
-    float3 Normal : TEXCOORD2;
-    float3x3 TBN : TEXCOORD3;
+    float2 UV : TEXCOORD0;
 };
 
 // Main vertex shader
@@ -105,21 +104,9 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 {
     VSOutput output;
 
-    CameraView camView = cameras[pushConstants.cameraID];
-    ModelData modelData = model[pushConstants.modelIndex];
-
-    // Load vertex data from the buffer
     Vertex v = vertexBuffer[vertexIndex];
-
-    // Output the position of each vertex
-    output.Position = mul(camView.Projection, mul(camView.View, mul(modelData.model, float4(v.position, 1.0f))));
-    output.Color = normalize(float3(v.position.xyz));
     output.UV = float2(v.uv_x, v.uv_y);
-    output.Normal = normalize(v.normal);
-
-    float3 T = normalize(mul((float3x3)modelData.model, normalize(v.tangent.xyz)));
-    float3 B = normalize(mul((float3x3)modelData.model, normalize(v.bitangent.xyz)));
-    float3 N = normalize(mul((float3x3)modelData.model, normalize(v.normal)).xyz);
-    output.TBN = transpose(float3x3(T, B, N));
+    output.Position = float4(v.position, 1.0f);
+    
     return output;
 }
