@@ -433,15 +433,25 @@ void VkRenderer::RemoveViewport(const UUID& viewportId)
 	for (auto& [scene, views] : SceneViewports)
 	{
 		auto it = std::find(views.begin(), views.end(), viewportId);
-		if (it != views.end())
+		if (it == std::end(views))
 		{
-			views.erase(it);
+			continue;
+		}
 
-			if (SceneViewports[scene].empty())
-			{
-				SceneViewports.erase(scene);
-				return;
-			}
+		views.erase(it);
+
+		// Erase scene renderer associated with scene viewport
+		if (auto sceneRendererIt = SceneRenderers.find(viewportId); 
+			sceneRendererIt != std::end(SceneRenderers))
+		{
+			SceneRenderers.erase(sceneRendererIt);
+		}
+
+		// Erase link between scene and viewport
+		if (SceneViewports[scene].empty())
+		{
+			SceneViewports.erase(scene);
+			return;
 		}
 	}
 }
@@ -455,22 +465,9 @@ void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& view
 	}
 
 	SceneViewports[scene].push_back(viewportId);
-}
 
-void VkRenderer::UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)
-{
-	if (SceneViewports.find(scene) == SceneViewports.end())
-	{
-		Logger::Log("Failed to unregister scene viewport: scene not found", "vulkan", CRITICAL);
-		return;
-	}
-
-	auto& viewports = SceneViewports[scene];
-	auto it = std::find(viewports.begin(), viewports.end(), viewportId);
-	if (it != viewports.end())
-	{
-		viewports.erase(it);
-	}
+	// Each viewport has its own scene renderer
+	SceneRenderers[viewportId] = CreateRef<VkSceneRenderer>();
 }
 
 void DrawSceneViewport(const Ref<Scene>& scene, const UUID& viewportId)

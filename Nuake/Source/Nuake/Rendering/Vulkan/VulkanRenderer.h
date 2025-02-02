@@ -174,6 +174,7 @@ namespace Nuake
 		VkCommandBuffer ImguiCommandBuffer;
 		VkCommandPool ImguiCommandPool;
 
+		std::map<UUID, Ref<VkSceneRenderer>> SceneRenderers;
 		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
@@ -217,11 +218,8 @@ namespace Nuake
 
 		Ref<Viewport> CreateViewport(const UUID& viewId, const Vector2& size);
 		void RemoveViewport(const UUID& viewportId);
-
 		void RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
-		void UnRegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
-		// Actual rendering
 	public:
 		void PrepareSceneData(RenderContext ctx);
 		void DrawScenes();
