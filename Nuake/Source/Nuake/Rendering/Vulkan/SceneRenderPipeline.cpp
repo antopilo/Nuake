@@ -156,7 +156,6 @@ SceneRenderPipeline::SceneRenderPipeline()
 
 		ZoneScopedN("Render Models");
 		gbufferConstant.CameraID = ctx.cameraID;
-
 		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		for (auto e : view)
 		{
@@ -229,6 +228,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingConstant), &shadingConstant);
 
+		ctx.renderPass->SetClearColor(ctx.scene->GetEnvironment()->AmbientColor);
 		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
@@ -264,6 +264,8 @@ SceneRenderPipeline::SceneRenderPipeline()
 	{
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(TonemapConstant), &tonemapConstant);
+
+		ctx.renderPass->SetClearColor(ctx.scene->GetEnvironment()->AmbientColor);
 
 		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
@@ -332,6 +334,9 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	TonemappedOutput = ResizeImage(ctx, TonemappedOutput, ctx.resolution);
 
 	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
+
+	Color clearColor = ctx.scene->GetEnvironment()->AmbientColor;
+	ctx.clearColor = clearColor;
 
 	PipelineAttachments pipelineInputs
 	{

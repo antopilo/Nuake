@@ -41,7 +41,7 @@ void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& input
 	{
 		if (attachment->GetUsage() != ImageUsage::Depth)
 		{
-			ctx.commandBuffer.ClearColorImage(attachment);
+			ctx.commandBuffer.ClearColorImage(attachment, this->ClearColor);
 		}
 	}
 }
@@ -188,6 +188,11 @@ void RenderPass::SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> frag
 {
 	VertShader = vertShader;
 	FragShader = fragShader;
+}
+
+void RenderPass::SetClearColor(const Color& clearColor)
+{
+	this->ClearColor = clearColor;
 }
 
 void RenderPass::Build()

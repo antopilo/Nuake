@@ -23,6 +23,7 @@ namespace Nuake
 		RenderPass* renderPass = nullptr;
 		UUID cameraID;
 		float selectedEntity;
+		Color clearColor;
 	};
 
 	class TextureAttachment
@@ -63,6 +64,8 @@ namespace Nuake
 		std::any PushConstant;
 		size_t PushConstantSize;
 
+		Color ClearColor;
+
 		std::function<void(PassRenderContext& ctx)> PreRender;
 		std::function<void(PassRenderContext& ctx)> RenderCb;
 		std::function<void(PassRenderContext& ctx)> PostRender;
@@ -96,6 +99,8 @@ namespace Nuake
 
 		void SetInput(const std::string& name, TextureAttachment attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
+
+		void SetClearColor(const Color& color);
 
 		template<typename T>
 		void SetPushConstant(T& pushConstant)

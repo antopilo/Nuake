@@ -224,6 +224,10 @@ PSOutput main(PSInput input)
     int depthTexture = pushConstants.DepthInputTextureId;
     float depth = textures[depthTexture].Sample(mySampler, input.UV).r;
 
+    if(depth == 0.0f)
+    {
+        discard;
+    }
 
     float3 worldPos = WorldPosFromDepth(depth, input.UV, camView.InverseProjection, camView.InverseView);
    
