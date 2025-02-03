@@ -37,5 +37,6 @@ public:
 		OnSelectionChanged.Broadcast(selection);
 	}
 
+	void SetScene(Ref<Nuake::Scene> inScene) { scene = inScene; }
 	Ref<Nuake::Scene> GetScene() const { return scene; }
 };

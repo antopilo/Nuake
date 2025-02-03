@@ -314,13 +314,22 @@ bool Project::Deserialize(const json& j)
 
 	Logger::Log("Starting deserializing scene", "window", VERBOSE);
 	std::string sceneContent = FileSystem::ReadFile(scenePath, false);
-	if (!DefaultScene->Deserialize(nlohmann::json::parse(sceneContent)))
-	{
-		Logger::Log("Error loading scene: " + scenePath, "project", CRITICAL);
-	}
 
-	DefaultScene->Path = scenePath;
-	Logger::Log("Loaded scene: " + scenePath);
+	try
+	{
+		if (!DefaultScene->Deserialize(nlohmann::json::parse(sceneContent)))
+		{
+			Logger::Log("Error loading scene: " + scenePath, "project", CRITICAL);
+		}
+
+		DefaultScene->Path = scenePath;
+		Logger::Log("Loaded scene: " + scenePath);
+
+	}
+	catch (...)
+	{
+
+	}
 
 	return true; // Success
 }

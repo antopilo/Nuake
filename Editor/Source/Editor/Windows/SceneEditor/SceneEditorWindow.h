@@ -28,13 +28,15 @@ private:
 	EditorContext editorContext;
 
 	ImGuiID dockId = 0;
-
+	bool isFocused;
 	std::vector<Scope<IEditorWidget>> widgets;
+
 public:
 	SceneEditorWindow(Ref<Nuake::Scene> scene);
 	~SceneEditorWindow() = default;
 
 public:
+	void Save();
 	void Update(float ts);
 	void Draw();
 
@@ -43,6 +45,10 @@ public:
 	{
 		dockId = id;
 	}
+
+	bool IsFocused() const;
+	Ref<Nuake::Scene> GetScene() const;
+	void SetScene(Ref<Nuake::Scene> scene);
 
 private:
 	template<DerivedFromEditorWidget T>

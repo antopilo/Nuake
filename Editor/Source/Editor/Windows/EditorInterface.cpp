@@ -377,21 +377,21 @@ namespace Nuake {
                 }
                 else
                 {
-                    this->SceneSnapshot = Engine::GetCurrentScene()->Copy();
+                    this->SceneSnapshot = GetFocusedSceneEditor()->GetScene()->Copy();
 
                     std::string statusMessage = ICON_FA_HAMMER + std::string("  Building .Net solution...");
                     SetStatusMessage(statusMessage);
 
                     auto job = [this]()
                     {
-                            auto project = Engine::GetProject();
-                            auto& scriptingEngine = ScriptingEngineNet::Get();
-                            const std::string& assemblyPath = scriptingEngine.GetGameAssemblyPath(project);
-                            if (FileSystem::FileExists(assemblyPath))
-                            {
-                                this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
-                                FileSystem::GetFile(assemblyPath)->SetHasBeenModified(false);
-                            }
+                        auto project = Engine::GetProject();
+                        auto& scriptingEngine = ScriptingEngineNet::Get();
+                        const std::string& assemblyPath = scriptingEngine.GetGameAssemblyPath(project);
+                        if (FileSystem::FileExists(assemblyPath))
+                        {
+                            this->errors = ScriptingEngineNet::Get().BuildProjectAssembly(Engine::GetProject());
+                            FileSystem::GetFile(assemblyPath)->SetHasBeenModified(false);
+                        }
                     };
 
                     Selection = EditorSelection();
@@ -448,7 +448,8 @@ namespace Nuake {
         {
             Engine::ExitPlayMode();
 
-            Engine::SetCurrentScene(SceneSnapshot);
+            GetFocusedSceneEditor()->SetScene(SceneSnapshot);
+            Engine::SetCurrentScene(SceneSnapshot);;
             Selection = EditorSelection();
             SetStatusMessage("Ready");
         }
@@ -949,16 +950,6 @@ namespace Nuake {
         if (ImGui::BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags)) {
             if (ImGui::BeginMenuBar()) 
             {
-                if (ImGui::Button("File Browser"))
-                {
-                    this->showFloatingFileBrowser = !this->showFloatingFileBrowser;
-                }
-
-                if (ImGui::Button("Logger"))
-                {
-                    this->showFloatingLogger = !this->showFloatingLogger;
-                }
-
                 ImGui::Text(m_StatusMessage.c_str());
 
                 ImGui::SameLine();
@@ -2189,6 +2180,20 @@ namespace Nuake {
 		sceneEditors.push_back(sceneEditor);
 	}
 
+    Ref<SceneEditorWindow> EditorInterface::GetFocusedSceneEditor() const
+    {
+        for (auto& sceneEditor : sceneEditors)
+        {
+            if (sceneEditor->IsFocused())
+            {
+                return sceneEditor;
+            }
+        }
+
+        assert(false && "Should never happen");
+        return nullptr;
+    }
+
     void NewProject()
     {
         if (Engine::GetProject() && Engine::GetProject()->FileExist())
@@ -2555,22 +2560,30 @@ namespace Nuake {
             _WelcomeWindow->LoadQueuedProject();
 
             auto project = Engine::GetProject();
-
-            auto sceneToLoad = project->DefaultScene;
-            if (!sceneToLoad)
+            if (project)
             {
-                sceneToLoad = CreateRef<Scene>();
+                auto sceneToLoad = project->DefaultScene;
+                if (!sceneToLoad)
+                {
+                    sceneToLoad = CreateRef<Scene>();
+                }
+
+                OpenSceneWindow(sceneToLoad);
+
+                isLoadingProjectQueue = false;
+
+                auto window = Window::Get();
+                window->ShowTitleBar(false);
+                window->SetSize({ 1600, 900 });
+                window->Center();
+                frameCount = 0;
             }
+            else
+            {
+                isLoadingProjectQueue = false;
 
-            OpenSceneWindow(sceneToLoad);
-
-            isLoadingProjectQueue = false;
-
-            auto window = Window::Get();
-            window->ShowTitleBar(false);
-            window->SetSize({ 1600, 900 });
-            window->Center();
-            frameCount = 0;
+            }
+            
             return;
         }
 
@@ -2605,8 +2618,11 @@ namespace Nuake {
             if(ImGui::IsKeyPressed(ImGuiKey_S, false))
             {
                 Engine::GetProject()->Save();
-                Engine::GetCurrentScene()->Save();
 
+                for (auto& editor : sceneEditors)
+                {
+                    editor->Save();
+                }
             }
             else if(ImGui::IsKeyPressed(ImGuiKey_O, false))
             {

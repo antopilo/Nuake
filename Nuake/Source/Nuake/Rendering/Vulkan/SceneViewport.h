@@ -26,7 +26,7 @@ namespace Nuake
 	public:
 		UUID GetID() const { return id; }
 		UUID GetViewID() const { return viewId; }
-
+		void SetViewID(UUID inViewID) { this->viewId = inViewID; }
 		const Vector2& GetViewportSize() const { return viewportSize; }
 		void SetViewportSize(const Vector2& size)
 		{

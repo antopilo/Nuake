@@ -133,6 +133,7 @@ namespace Nuake
 		void OpenPrefabWindow(const std::string& prefabPath);
 		void OpenSceneWindow(Ref<Scene> scene);
 		void OpenSceneWindow(const std::string& scenePath);
+		Ref<SceneEditorWindow> GetFocusedSceneEditor() const;
 
 		bool ShouldDrawAxis() const { return m_DrawAxis; }
 		bool ShouldDrawShapes() const { return m_DrawShapes; }

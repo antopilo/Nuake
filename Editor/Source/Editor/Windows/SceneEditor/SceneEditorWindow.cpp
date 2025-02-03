@@ -24,6 +24,11 @@ SceneEditorWindow::SceneEditorWindow(Ref<Scene> inScene) :
 	RegisterWidget<FileBrowserWidget>();
 }
 
+void SceneEditorWindow::Save()
+{
+	editorContext.GetScene()->Save();
+}
+
 void SceneEditorWindow::Update(float ts)
 {
 	for (auto& widget : widgets)
@@ -50,8 +55,11 @@ void SceneEditorWindow::Draw()
 	ImGui::SetNextWindowSizeConstraints({1280, 720}, { FLT_MAX, FLT_MAX });
 	bool shouldStayOpen = true;
 	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("   ") + sceneName);
+	
 	if (ImGui::Begin(windowName.c_str(), &shouldStayOpen))
 	{
+		this->isFocused = true;
+
 		ImGuiWindowClass localSceneEditorClass;
 		localSceneEditorClass.ClassId = ImHashStr(sceneName.c_str());
 		std::string dockspaceName = std::string("Dockspace##" + sceneName);
@@ -77,6 +85,10 @@ void SceneEditorWindow::Draw()
 			widgets[4]->DockTo(dockbottomId);
 		}
 	}
+	else
+	{
+		this->isFocused = false;
+	}
 	ImGui::End();
 	if (!layoutInitialized)
 	{
@@ -99,4 +111,19 @@ void SceneEditorWindow::Draw()
 std::string SceneEditorWindow::GetWindowName() const
 {
 	return editorContext.GetScene()->Path;
+}
+
+bool SceneEditorWindow::IsFocused() const
+{
+	return this->isFocused;
+}
+
+void SceneEditorWindow::SetScene(Ref<Scene> scene)
+{
+	editorContext.SetScene(scene);
+}
+
+Ref<Scene> SceneEditorWindow::GetScene() const
+{
+	return this->editorContext.GetScene();
 }
