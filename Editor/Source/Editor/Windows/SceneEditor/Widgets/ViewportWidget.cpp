@@ -30,7 +30,7 @@ ViewportWidget::~ViewportWidget()
 void ViewportWidget::Update(float ts)
 {
 	editorContext.GetScene()->Update(ts);
-    auto& editorCam = editorContext.GetScene()->m_EditorCamera;
+    auto editorCam = (EditorCamera*)(editorContext.GetScene()->GetCurrentCamera().get());
     editorCam->Update(ts, isHoveringViewport);
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
@@ -67,6 +67,7 @@ void ViewportWidget::Draw()
 		VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
 
 		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+        ImVec2 viewportMin = ImGui::GetCursorScreenPos();
 		// Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		//m_ViewportPos = { imagePos.x, imagePos.y };
@@ -85,7 +86,7 @@ void ViewportWidget::Draw()
 		// TODO(antopilo) drag n drop
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::AllowAxisFlip(true);
-		ImGuizmo::SetRect(imagePos.x, imagePos.y, viewportPanelSize.x, viewportPanelSize.y);
+		ImGuizmo::SetRect(viewportMin.x, viewportMin.y, regionAvail.x, regionAvail.y);
 
 		// TODO(grid)
         auto selection = editorContext.GetSelection();
@@ -99,20 +100,19 @@ void ViewportWidget::Draw()
             {
                 TransformComponent& tc = selection.Entity.GetComponent<TransformComponent>();
                 Matrix4 transform = tc.GetGlobalTransform();
-                const auto& editorCam = editorContext.GetScene()->GetCurrentCamera();
+                auto editorCam = editorContext.GetScene()->GetCurrentCamera();
                 Matrix4 cameraView = editorCam->GetTransform();
 
                 // Since imguizmo doesnt support reverse-Z, we need to create a new projection matrix
                 // With a normal near and far plane.
-                Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Far, editorCam->Near);
-
+                Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Near, editorCam->Far);
                 static Vector3 camPreviousPos = editorContext.GetScene()->m_EditorCamera->Translation;
                 static Vector3 camNewPos = Vector3(0, 0, 0);
                 Vector3 camDelta = camNewPos - camPreviousPos;
                 Vector3 previousGlobalPos = transform[3];
                 // Imguizmo calculates the delta from the gizmo,
                 ImGuizmo::Manipulate(
-                    glm::value_ptr(editorContext.GetScene()->GetCurrentCamera()->GetTransform()),
+                    glm::value_ptr(editorCam->GetTransform()),
                     glm::value_ptr(normalZProjection),
                     CurrentOperation, CurrentMode,
                     glm::value_ptr(transform), NULL,

@@ -47,7 +47,7 @@ namespace Nuake
 	// This is the *whole* buffer
 	struct MaterialData
 	{
-		std::array<MaterialBufferStruct, 1000> Data;
+		std::array<MaterialBufferStruct, 3000> Data;
 	};
 
 	struct LightData
@@ -86,7 +86,7 @@ namespace Nuake
 	};
 
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
-	constexpr uint32_t MAX_MATERIAL = 1000;
+	constexpr uint32_t MAX_MATERIAL = 3000;
 	constexpr uint32_t MAX_TEXTURES = 500;
 	constexpr uint32_t MAX_CAMERAS = 100;
 	constexpr uint32_t MAX_LIGHTS = 100;

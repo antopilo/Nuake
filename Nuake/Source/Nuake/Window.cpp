@@ -195,13 +195,6 @@ void Window::Draw()
     {
         return;
     }
-
-    // We cannot render to a framebuffer that is smaller than 1x1.
-    Vector2 size = this->framebuffer->GetSize();
-    size.x = std::max(size.x, 1.0f);
-    size.y = std::max(size.y, 1.0f);
-
-    cam->AspectRatio = size.x / size.y;
 }
 
 void Window::EndDraw()

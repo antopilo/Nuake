@@ -31,6 +31,7 @@
 #include "vk_mem_alloc.h"
 
 #include <array>
+#include <algorithm>
 
 bool NKUseValidationLayer = true;
 
@@ -85,7 +86,7 @@ void VkRenderer::Initialize()
 		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1024 }
 	};
 
-	GlobalDescriptorAllocator.InitPool(Device, 1000, sizes);
+	GlobalDescriptorAllocator.InitPool(Device, 5000, sizes);
 
 	InitCommands();
 
@@ -325,9 +326,9 @@ void VkRenderer::InitDescriptors()
 		// create a descriptor pool
 		std::vector<DescriptorAllocatorGrowable::PoolSizeRatio> frame_sizes = 
 		{
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 3 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 3 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 64 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 64 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 64 },
 			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 4 },
 		};
 
@@ -341,13 +342,8 @@ void VkRenderer::PrepareSceneData(RenderContext ctx)
 	std::vector<Ref<Scene>> scenes;
 	scenes.reserve(SceneViewports.size());
 
-	for (auto& [scene, views] : SceneViewports)
+	for (auto& [scene, _] : SceneViewports)
 	{
-		for (auto& view : views)
-		{
-			//Viewports[view]->Resize();
-		}
-
 		scenes.push_back(scene);
 	}
 
@@ -831,8 +827,10 @@ void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<
 		);
 	}
 
+	
+
 	VkDescriptorPoolCreateInfo pool_info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-	pool_info.flags = 0;
+	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 	pool_info.maxSets = maxSets;
 	pool_info.poolSizeCount = (uint32_t)poolSizes.size();
 	pool_info.pPoolSizes = poolSizes.data();
