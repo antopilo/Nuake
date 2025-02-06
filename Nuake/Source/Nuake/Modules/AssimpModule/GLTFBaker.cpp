@@ -13,6 +13,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "stb_write.h"
+
 using namespace Nuake;
 
 // Converts a GLTF file to a .nkmesh binary file
@@ -309,7 +311,12 @@ std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& 
 	if(String::BeginsWith(path, "*"))
 	{
 		// TODO(antopilo): Figure out how to handle embedded textures.
-		
+		// future antoine: We should write them to disk and return the path
+		// for now as we dont have a custom binary format for textures
+
+		uint32_t textureIndex = std::atoi(String::Split(path, '*')[1].c_str());
+		const aiTexture* aitexture = scene->GetEmbeddedTexture(path.c_str());
+		//stbi_write_png("test.png", 0, 0, 0, nullptr, 0);
 		Logger::Log("Embedded textures not supported", "GLTFBaker", WARNING);
 		return "";
 	}
