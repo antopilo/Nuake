@@ -29,4 +29,5 @@ public:
 public:
 	void Update(float ts) override;
 	void Draw() override;
+	void OnSceneChanged(Ref<Nuake::Scene> scene) override;
 };

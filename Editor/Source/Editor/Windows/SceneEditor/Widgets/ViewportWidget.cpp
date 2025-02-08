@@ -183,3 +183,21 @@ void ViewportWidget::Draw()
 	}
 	ImGui::End();
 }
+
+void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
+{
+    auto& vkRenderer = Nuake::VkRenderer::Get();
+
+    // Recreate new viewport with new scene with the same resolution
+    const Vector2 currentResolution = sceneViewport->GetViewportSize();
+
+    // Remove old viewport
+    vkRenderer.RemoveViewport(sceneViewport->GetID());
+
+    // Create new viewport with same reoslution
+    const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
+    auto viewport = vkRenderer.CreateViewport(viewId, currentResolution);
+    vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
+
+    sceneViewport = viewport;
+}

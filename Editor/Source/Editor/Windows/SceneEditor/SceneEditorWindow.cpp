@@ -121,6 +121,11 @@ bool SceneEditorWindow::IsFocused() const
 void SceneEditorWindow::SetScene(Ref<Scene> scene)
 {
 	editorContext.SetScene(scene);
+
+	for (auto& widget : widgets)
+	{
+		widget->OnSceneChanged(scene);
+	}
 }
 
 Ref<Scene> SceneEditorWindow::GetScene() const

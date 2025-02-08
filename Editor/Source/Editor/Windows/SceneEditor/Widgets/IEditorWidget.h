@@ -20,6 +20,8 @@ public:
 	virtual void Update(float ts) = 0;
 	virtual void Draw() = 0;
 
+	virtual void OnSceneChanged(Ref<Nuake::Scene> scene) {}
+
 	void DockTo(uint32_t dockId)
 	{
 		ImGui::DockBuilderDockWindow(widgetName.c_str(), dockId);
