@@ -332,6 +332,7 @@ std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& 
 			
 			if (data)
 			{
+				stbi_flip_vertically_on_write(true);
 				stbi_write_png(pngPath.c_str(), width, height, 4, data, width * 4);
 				stbi_image_free(data);
 			}
@@ -343,6 +344,7 @@ std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& 
 		}
 		else
 		{
+			stbi_flip_vertically_on_write(true);
 			stbi_write_png(pngPath.c_str(), aitexture->mWidth, aitexture->mHeight, 4, aitexture->pcData, aitexture->mWidth * 4);
 		}
 
