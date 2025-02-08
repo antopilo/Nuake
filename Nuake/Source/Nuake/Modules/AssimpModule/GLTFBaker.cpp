@@ -27,6 +27,8 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 	// NOTE: This function should not interact with the rest
 	// of the engine and be thread-safe in order to be ran from jobs.
 	
+	currentPath = file->GetAbsolutePath();
+
 	// Load into assimp
 	Assimp::Importer importer;
 	importer.SetPropertyFloat("PP_GSN_MAX_SMOOTHING_ANGLE", 90);
@@ -104,7 +106,6 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 				material->SetRoughness(absolutePath + "/../" + materialData.roughness);
 			}
 
-
 			ResourceManager::RegisterResource(material);
 			ResourceManager::Manifest.RegisterResource(material->ID, materialPath);
 
@@ -173,7 +174,7 @@ MeshData GLTFBaker::ProcessMesh(aiNode* node, aiMesh* meshNode, const aiScene* s
 		ProcessMaterials(scene, meshNode)
 	};
 	
-	return std::move(meshData);
+	return meshData;
 }
 
 std::vector<Vertex> GLTFBaker::ProcessVertices(aiMesh* mesh)
@@ -282,28 +283,28 @@ BakerMaterialData GLTFBaker::ProcessMaterials(const aiScene* scene, aiMesh* mesh
 	if(materialNode->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 	{
 		materialNode->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-		materialData.albedo = std::string(str.C_Str());
+		materialData.albedo = ProcessTextures(scene, str.C_Str());
 	}
 	
 	if(materialNode->GetTextureCount(aiTextureType_NORMALS) > 0)
 	{
 		materialNode->GetTexture(aiTextureType_NORMALS, 0, &str);
-		materialData.normal = std::string(str.C_Str());
+		materialData.normal = ProcessTextures(scene, str.C_Str());
 	}
 	
 	if(materialNode->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION) > 0)
 	{
 		materialNode->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &str);
-		materialData.ao = std::string(str.C_Str());
+		materialData.ao = ProcessTextures(scene, str.C_Str());
 	}
 	
 	if(materialNode->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS) > 0)
 	{
 		materialNode->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &str);
-		materialData.roughness = std::string(str.C_Str());
+		materialData.roughness = ProcessTextures(scene, str.C_Str());
 	}
 	
-	return std::move(materialData);
+	return materialData;
 }
 
 std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& path)
@@ -313,15 +314,42 @@ std::string GLTFBaker::ProcessTextures(const aiScene* scene, const std::string& 
 		// TODO(antopilo): Figure out how to handle embedded textures.
 		// future antoine: We should write them to disk and return the path
 		// for now as we dont have a custom binary format for textures
-
-		uint32_t textureIndex = std::atoi(String::Split(path, '*')[1].c_str());
+		const uint32_t textureIndex = std::atoi(String::Split(path, '*')[1].c_str());
 		const aiTexture* aitexture = scene->GetEmbeddedTexture(path.c_str());
-		//stbi_write_png("test.png", 0, 0, 0, nullptr, 0);
-		Logger::Log("Embedded textures not supported", "GLTFBaker", WARNING);
-		return "";
+
+		std::string aiTextureNameStr = std::string(aitexture->mFilename.C_Str());
+		std::string fileName = aiTextureNameStr.empty() ? std::to_string(textureIndex) : aiTextureNameStr;
+
+		const std::string& textureName = fileName + ".png";
+		std::string pngPath = FileSystem::GetParentPath(currentPath);
+		pngPath += textureName;
+
+		const bool isCompressed = aitexture->mHeight == 0;
+		if (isCompressed)
+		{
+			int width, height, channels;
+			unsigned char* data = stbi_load_from_memory(reinterpret_cast<stbi_uc*>(aitexture->pcData), aitexture->mWidth, &width, &height, &channels, 4);
+			
+			if (data)
+			{
+				stbi_write_png(pngPath.c_str(), width, height, 4, data, width * 4);
+				stbi_image_free(data);
+			}
+			else
+			{
+				Logger::Log("Failed to load compressed texture from memory", "GLTFBaker", WARNING);
+				return "";
+			}
+		}
+		else
+		{
+			stbi_write_png(pngPath.c_str(), aitexture->mWidth, aitexture->mHeight, 4, aitexture->pcData, aitexture->mWidth * 4);
+		}
+
+		return textureName;
 	}
 	
-	return std::move(path);
+	return path;
 }
 
 

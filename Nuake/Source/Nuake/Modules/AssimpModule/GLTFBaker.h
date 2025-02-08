@@ -29,6 +29,9 @@ namespace Nuake
 	
 	class GLTFBaker : public IAssetBaker
 	{
+	private:
+		std::string currentPath;
+
 	public:
 		GLTFBaker() : IAssetBaker({".glb", ".gltf", "fbx"}) {}
 		

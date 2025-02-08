@@ -527,6 +527,7 @@ namespace Nuake
 	{
 		// Load embedded textures, a texture is embedded is the path
 		// starts with a '*'.
+		// *wallTexture.png
 		if (String::BeginsWith(path, "*"))
 		{
 			uint32_t textureIndex = std::atoi(String::Split(path, '*')[1].c_str());
