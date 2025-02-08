@@ -138,6 +138,26 @@ namespace Nuake
 			}
 			// TODO others.
 
+			if (NormalImage != 0)
+			{
+				j["NormalImage"] = static_cast<uint64_t>(NormalImage);
+			}
+
+			if (RoughnessImage != 0)
+			{
+				j["RoughnessImage"] = static_cast<uint64_t>(RoughnessImage);
+			}
+
+			if (MetalnessImage != 0)
+			{
+				j["MetalnessImage"] = static_cast<uint64_t>(MetalnessImage);
+			}
+
+			if (AOImage != 0)
+			{
+				j["AOImage"] = static_cast<uint64_t>(AOImage);
+			}
+
 			if (HasAlbedo())
 			{
 				j["Albedo"] = this->m_Albedo->Serialize();
@@ -187,6 +207,26 @@ namespace Nuake
 			if (j.contains("AlbedoImage"))
 			{
 				AlbedoImage = static_cast<uint64_t>(j["AlbedoImage"]);
+			}
+
+			if (j.contains("NormalImage"))
+			{
+				NormalImage = static_cast<uint64_t>(j["NormalImage"]);
+			}
+
+			if (j.contains("AOImage"))
+			{
+				AOImage = static_cast<uint64_t>(j["AOImage"]);
+			}
+
+			if (j.contains("RoughnessImage"))
+			{
+				RoughnessImage = static_cast<uint64_t>(j["RoughnessImage"]);
+			}
+
+			if (j.contains("MetalnessImage"))
+			{
+				MetalnessImage = static_cast<uint64_t>(j["MetalnessImage"]);
 			}
 
 			if (j.contains("Albedo"))
@@ -248,6 +288,7 @@ namespace Nuake
 			{
 				const auto& texturePath = j["Normal"]["Path"];
 				const std::string absolutePath = FileSystem::RelativeToAbsolute(texturePath);
+
 				if (FileSystem::FileExists(texturePath))
 				{
 					GPUResources& resources = GPUResources::Get();
@@ -256,11 +297,18 @@ namespace Nuake
 					{
 						NormalImage = image->GetID();
 					}
+
+					Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(absolutePath);
+					SetNormal(normalTexture);
 				}
-				
-				Ref<Texture> normalTexture = TextureManager::Get()->GetTexture(absolutePath);
-				SetMetalness(normalTexture);
+				else
+				{
+					GPUResources& resources = GPUResources::Get();
+					Ref<VulkanImage> missingTexture = TextureManager::Get()->GetTexture2("missing_texture");
+					NormalImage = missingTexture->GetID();
+				}
 			}
+			
 
 			if (j.contains("AO"))
 			{
