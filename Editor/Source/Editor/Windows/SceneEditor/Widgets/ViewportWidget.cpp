@@ -195,7 +195,7 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     vkRenderer.RemoveViewport(sceneViewport->GetID());
 
     // Create new viewport with same reoslution
-    const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
+    const UUID viewId = editorContext.GetScene()->GetCurrentCamera()->ID;
     auto viewport = vkRenderer.CreateViewport(viewId, currentResolution);
     vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
 

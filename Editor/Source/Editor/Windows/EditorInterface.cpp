@@ -424,6 +424,8 @@ namespace Nuake {
                             PushCommand(SetGameState(GameState::Playing));
                             std::string statusMessage = ICON_FA_RUNNING + std::string(" Playing...");
                             SetStatusMessage(statusMessage.c_str(), Engine::GetProject()->Settings.PrimaryColor);
+
+                            GetFocusedSceneEditor()->SetScene(GetFocusedSceneEditor()->GetScene());
                         }
                     });
                 }
