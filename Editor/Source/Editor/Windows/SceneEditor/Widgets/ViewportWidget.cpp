@@ -34,7 +34,7 @@ void ViewportWidget::Update(float ts)
     editorCam->Update(ts, isHoveringViewport);
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
-    editorCam->OnWindowResize(viewportSize.x, viewportSize.y);
+    editorContext.GetScene()->GetCurrentCamera()->OnWindowResize(viewportSize.x, viewportSize.y);
 
 	if (editorContext.GetSelection().Type == EditorSelectionType::Entity)
 	{
