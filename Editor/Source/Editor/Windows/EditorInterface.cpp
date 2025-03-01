@@ -2161,9 +2161,9 @@ namespace Nuake {
 
     void EditorInterface::OpenSceneWindow(Ref<Scene> scene)
     {
-        Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(scene);
+        auto sceneEditor = CreateRef<SceneEditorWindow>(scene);
         sceneEditor->DockTo(SceneEditorDockspaceNodeID);
-        sceneEditors.push_back(sceneEditor);
+        sceneEditors.push_back(std::move(sceneEditor));
     }
 
 	void EditorInterface::OpenSceneWindow(const std::string& scenePath)
@@ -2326,9 +2326,7 @@ namespace Nuake {
                 {
                     Ref<Scene> newScene = Scene::New();
 
-                    Ref<SceneEditorWindow> sceneEditor = CreateRef<SceneEditorWindow>(newScene);
-                    sceneEditor->DockTo(SceneEditorDockspaceNodeID);
-                    sceneEditors.push_back(sceneEditor);
+                    OpenSceneWindow(newScene);
                     
                     Selection = EditorSelection();
                     SetStatusMessage("New scene created.");

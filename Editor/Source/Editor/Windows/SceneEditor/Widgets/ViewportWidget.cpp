@@ -17,9 +17,8 @@ ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
 	const Vector2& defaultSize = { 1280, 720 };
 	const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
     auto& vkRenderer = Nuake::VkRenderer::Get();
-    auto viewport = vkRenderer.CreateViewport(viewId, defaultSize);
-    vkRenderer.RegisterSceneViewport(context.GetScene(), viewport->GetID());
-	sceneViewport = viewport;
+
+    OnSceneChanged(context.GetScene());
 }
 
 ViewportWidget::~ViewportWidget()
@@ -30,8 +29,12 @@ ViewportWidget::~ViewportWidget()
 void ViewportWidget::Update(float ts)
 {
 	editorContext.GetScene()->Update(ts);
-    auto editorCam = (EditorCamera*)(editorContext.GetScene()->GetCurrentCamera().get());
-    editorCam->Update(ts, isHoveringViewport);
+
+    if (!Engine::IsPlayMode())
+    {
+        Ref<EditorCamera> editorCam = editorContext.GetScene()->m_EditorCamera;
+        editorCam->Update(ts, isHoveringViewport);
+    }
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
     editorContext.GetScene()->GetCurrentCamera()->OnWindowResize(viewportSize.x, viewportSize.y);
@@ -189,13 +192,18 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     auto& vkRenderer = Nuake::VkRenderer::Get();
 
     // Recreate new viewport with new scene with the same resolution
-    const Vector2 currentResolution = sceneViewport->GetViewportSize();
+    Vector2 currentResolution = Vector2{ 1, 1 };
 
-    // Remove old viewport
-    vkRenderer.RemoveViewport(sceneViewport->GetID());
+    if (sceneViewport)
+    {
+        currentResolution = sceneViewport->GetViewportSize();
+
+        // Remove old viewport
+        vkRenderer.RemoveViewport(sceneViewport->GetID());
+    }
 
     // Create new viewport with same reoslution
-    const UUID viewId = editorContext.GetScene()->GetCurrentCamera()->ID;
+    const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
     auto viewport = vkRenderer.CreateViewport(viewId, currentResolution);
     vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
 
