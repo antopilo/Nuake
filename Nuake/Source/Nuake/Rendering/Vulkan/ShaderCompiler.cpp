@@ -2,7 +2,11 @@
 
 #include "VulkanShader.h"
 
+#if NK_WIN
 #include <atlbase.h>
+#else
+#define __EMULATE_UUID 1
+#endif
 #include "dxcapi.h"
 #include <stdexcept>
 #include <string>

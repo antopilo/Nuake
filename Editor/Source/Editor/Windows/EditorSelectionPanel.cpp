@@ -308,7 +308,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture1"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Top, FileSystem::AbsoluteToRelative(texture));
@@ -335,7 +335,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture2"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Bottom, FileSystem::AbsoluteToRelative(texture));
@@ -362,7 +362,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture3"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Left, FileSystem::AbsoluteToRelative(texture));
@@ -389,7 +389,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture4"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Right, FileSystem::AbsoluteToRelative(texture));
@@ -416,7 +416,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture5"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Front, FileSystem::AbsoluteToRelative(texture));
@@ -443,7 +443,7 @@ void EditorSelectionPanel::DrawFile(Ref<Nuake::File> file)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#skytexture6"), (void*)textureId, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (!texture.empty())
 				{
 					sky->SetTextureFace(SkyFaces::Back, FileSystem::AbsoluteToRelative(texture));
@@ -1587,7 +1587,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetAlbedo(TextureManager::Get()->GetTexture(texture));
@@ -1621,7 +1621,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetNormal(TextureManager::Get()->GetTexture(texture));
@@ -1652,7 +1652,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetAO(TextureManager::Get()->GetTexture(texture));
@@ -1683,7 +1683,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetMetalness(TextureManager::Get()->GetTexture(texture));
@@ -1717,7 +1717,7 @@ void EditorSelectionPanel::DrawMaterialPanel(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetRoughness(TextureManager::Get()->GetTexture(texture));
@@ -2040,10 +2040,10 @@ void EditorSelectionPanel::DrawFieldTypeString(entt::meta_data& field, entt::met
 			std::string controlId = std::string("##") + displayName;
 			ImGui::InputText(controlId.c_str(), &fieldValProxy);
 
-			//if (fieldValProxy != fieldVal)
-			//{
-			//	Engine::GetProject()->IsDirty = true;
-			//}
+			if (fieldValProxy != (const char*)fieldVal.data())
+			{
+				Engine::GetProject()->IsDirty = true;
+			}
 		}
 		else
 		{

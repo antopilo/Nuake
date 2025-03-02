@@ -45,6 +45,16 @@ project 'Soloud'
 			"soloud/src/backend/alsa/soloud_alsa.cpp"
 		}
 
+	filter "system:bsd"
+		-- assuming we're on FreeBSD, for other *BSD you may need portaudio or miniaudio
+		defines {
+			"WITH_OSS"
+		}
+		files
+		{
+			"soloud/src/backend/oss/soloud_oss.cpp"
+		}
+
 	filter "configurations:Debug"
 		cppdialect "C++17"
 		runtime "Debug"

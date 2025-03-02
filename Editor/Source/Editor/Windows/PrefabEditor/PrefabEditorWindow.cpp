@@ -1,7 +1,7 @@
 #include "PrefabEditorWindow.h"
 
 #include <Nuake/Core/Input.h>
-#include <Nuake/Rendering/Buffers/FrameBuffer.h>
+#include <Nuake/Rendering/Buffers/Framebuffer.h>
 #include <Nuake/Rendering/SceneRenderer.h>
 #include <Nuake/Resource/Prefab.h>
 #include <Nuake/Scene/Scene.h>

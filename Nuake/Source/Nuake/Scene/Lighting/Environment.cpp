@@ -1,4 +1,3 @@
-#pragma once
 #include "Environment.h"
 
 #include "Nuake/Core/Core.h"

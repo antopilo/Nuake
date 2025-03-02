@@ -16,7 +16,7 @@
 
 #define CompononentPropertyName(name) \
 ImGui::AlignTextToFramePadding(); \
-ImGui::Text(##name);
+ImGui::Text(name);
 
 #define BeginComponentTable(name, component)                                            \
     UIFont* boldFont = new UIFont(Fonts::Bold);                                         \

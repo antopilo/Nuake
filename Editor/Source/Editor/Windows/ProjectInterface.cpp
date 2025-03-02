@@ -54,7 +54,7 @@ namespace Nuake {
             ImGui::SameLine();
             if (ImGui::Button("Browse"))
             {
-                std::string path = FileDialog::OpenFile("*.exe");
+                std::string path = FileDialog::OpenFile("Windows Executable\0*.exe");
                 if (path != "")
                 {
                     path += "/../";

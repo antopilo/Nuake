@@ -475,11 +475,11 @@ namespace Nuake
 
 		if (!wad_R_fp)
 		{
-			printf("WAD2_OpenRead: no such file: %s\n", filename);
+			printf("WAD2_OpenRead: no such file: %s\n", filename.c_str());
 			return;
 		}
 
-		printf("Opened WAD2 file: %s\n", filename);
+		printf("Opened WAD2 file: %s\n", filename.c_str());
 
 		if (fread(&wad_R_header, sizeof(wad_R_header), 1, wad_R_fp) != 1)
 		{

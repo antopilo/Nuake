@@ -61,7 +61,6 @@ globalDefines = {
     "TRACY_ON_DEMAND",
     "NK_VK",
     "IMGUI_DEFINE_MATH_OPERATORS",
-    "NK_WIN"
 }
 
 group "Thirdparty"

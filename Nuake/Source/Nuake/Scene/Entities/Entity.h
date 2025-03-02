@@ -128,7 +128,7 @@ namespace Nuake
 		}
 
 		json Serialize() override;
-		bool Deserialize(const json& str);
+		bool Deserialize(const json& str) override;
 		bool DeserializeComponents(const json& str);
 
 		void PostDeserialize();

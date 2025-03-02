@@ -99,7 +99,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image1"), (ImTextureID)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetAlbedo(TextureManager::Get()->GetTexture(texture));
@@ -133,7 +133,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetNormal(TextureManager::Get()->GetTexture(texture));
@@ -164,7 +164,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image2"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("Image files (*.png) | *.png | Image files (*.jpg) | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetAO(TextureManager::Get()->GetTexture(texture));
@@ -198,7 +198,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image4"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetMetalness(TextureManager::Get()->GetTexture(texture));
@@ -232,7 +232,7 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image5"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 0), ImVec4(1, 1, 1, 1)))
 			{
-				std::string texture = FileDialog::OpenFile("*.png | *.jpg");
+				std::string texture = FileDialog::OpenFile("Image Files\0*.png|*.jpg");
 				if (texture != "")
 				{
 					material->SetRoughness(TextureManager::Get()->GetTexture(texture));

@@ -18,7 +18,7 @@ namespace Nuake {
 			g_ApplicationRunning = false;
 		}
 
-		return 1;
+		return 0;
 	}
 }
 

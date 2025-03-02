@@ -19,6 +19,11 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <Tracy.hpp>
 
+// Linux
+#ifdef NK_LINUX
+#include "gtk/gtk.h"
+#endif
+
 using namespace Nuake;
 
 Window::Window() :
@@ -53,9 +58,15 @@ bool Window::ShouldClose()
 
 int Window::Init()
 {
+#ifdef NK_LINUX
+    gtk_init(NULL, NULL);
+#endif
+
     if (!glfwInit())
     {
-        Logger::Log("GLFW initialization failed", "window", CRITICAL);
+        const char* description;
+        glfwGetError(&description);
+        Logger::Log("GLFW initialization failed: " + std::string(description), "window", CRITICAL);
         return -1;
     }
 

@@ -4,7 +4,7 @@
 #include "LayerStack.h"
 
 #include <string>
-#include <Vector>
+#include <vector>
 #include "Nuake/Window.h"
 
 

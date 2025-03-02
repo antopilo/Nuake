@@ -637,61 +637,61 @@ namespace Nuake {
 	void Nuake::SceneNetAPI::RegisterMethods()
 	{
 		// Entity
-		RegisterMethod("Entity.EntityHasComponentIcall", &EntityHasComponent);
-		RegisterMethod("Entity.EntityAddComponentIcall", &EntityAddComponent);
-		RegisterMethod("Entity.EntityHasManagedInstanceIcall", &EntityHasManagedInstance);
-		RegisterMethod("Entity.EntityGetEntityIcall", &EntityGetEntity);
-		RegisterMethod("Entity.EntityGetNameIcall", &EntityGetName);
-		RegisterMethod("Entity.EntitySetNameIcall", &EntitySetName);
-		RegisterMethod("Entity.EntityIsValidIcall", &EntityIsValid);
-		RegisterMethod("Entity.EntityGetTargetsIcall", &EntityGetTargets);
-		RegisterMethod("Entity.EntityGetTargetIcall", &EntityGetTarget);
+		RegisterMethod("Entity.EntityHasComponentIcall", (void*)(&EntityHasComponent));
+		RegisterMethod("Entity.EntityAddComponentIcall", (void*)(&EntityAddComponent));
+		RegisterMethod("Entity.EntityHasManagedInstanceIcall", (void*)(&EntityHasManagedInstance));
+		RegisterMethod("Entity.EntityGetEntityIcall", (void*)(&EntityGetEntity));
+		RegisterMethod("Entity.EntityGetNameIcall", (void*)(&EntityGetName));
+		RegisterMethod("Entity.EntitySetNameIcall", (void*)(&EntitySetName));
+		RegisterMethod("Entity.EntityIsValidIcall", (void*)(&EntityIsValid));
+		RegisterMethod("Entity.EntityGetTargetsIcall", (void*)(&EntityGetTargets));
+		RegisterMethod("Entity.EntityGetTargetIcall", (void*)(&EntityGetTarget));
 
 		// Prefab
-		RegisterMethod("Prefab.PrefabInstanceIcall", &PrefabInstance);
+		RegisterMethod("Prefab.PrefabInstanceIcall", (void*)(&PrefabInstance));
 
 		// Scene
-		RegisterMethod("Scene.GetEntityIcall", &GetEntity);
-		RegisterMethod("Scene.GetEntityScriptFromNameIcall", &GetEntityScriptFromName);
-		RegisterMethod("Scene.GetEntityScriptFromHandleIcall", &GetEntityScriptFromHandle);
-		RegisterMethod("Scene.InstancePrefabIcall", &InstancePrefab);
+		RegisterMethod("Scene.GetEntityIcall", (void*)(&GetEntity));
+		RegisterMethod("Scene.GetEntityScriptFromNameIcall", (void*)(&GetEntityScriptFromName));
+		RegisterMethod("Scene.GetEntityScriptFromHandleIcall", (void*)(&GetEntityScriptFromHandle));
+		RegisterMethod("Scene.InstancePrefabIcall", (void*)(&InstancePrefab));
 
 		// Components
 		// Transform
-		RegisterMethod("TransformComponent.SetPositionIcall", &TransformSetPosition);
-		RegisterMethod("TransformComponent.GetPositionIcall", &TransformGetPosition);
-		RegisterMethod("TransformComponent.GetGlobalPositionIcall", &TransformGetGlobalPosition);
-		RegisterMethod("TransformComponent.RotateIcall", &TransformRotate);
-		RegisterMethod("TransformComponent.LookAtIcall", &TransformLookAt);
+		RegisterMethod("TransformComponent.SetPositionIcall", (void*)(&TransformSetPosition));
+		RegisterMethod("TransformComponent.GetPositionIcall", (void*)(&TransformGetPosition));
+		RegisterMethod("TransformComponent.GetGlobalPositionIcall", (void*)(&TransformGetGlobalPosition));
+		RegisterMethod("TransformComponent.RotateIcall", (void*)(&TransformRotate));
+		RegisterMethod("TransformComponent.LookAtIcall", (void*)(&TransformLookAt));
 
 		// Lights
-		RegisterMethod("LightComponent.GetLightIntensityIcall", &LightGetIntensity);
-		RegisterMethod("LightComponent.SetLightIntensityIcall", &LightSetIntensity);
-		RegisterMethod("LightComponent.SetLightColorIcall", &LightSetColor);
+		RegisterMethod("LightComponent.GetLightIntensityIcall", (void*)(&LightGetIntensity));
+		RegisterMethod("LightComponent.SetLightIntensityIcall", (void*)(&LightSetIntensity));
+		RegisterMethod("LightComponent.SetLightColorIcall", (void*)(&LightSetColor));
 
 		// Camera
-		RegisterMethod("CameraComponent.GetDirectionIcall", &CameraGetDirection);
-		RegisterMethod("CameraComponent.GetCameraFOVIcall", &CameraGetFOV);
-		RegisterMethod("CameraComponent.SetCameraFOVIcall", &CameraSetFOV);
+		RegisterMethod("CameraComponent.GetDirectionIcall", (void*)(&CameraGetDirection));
+		RegisterMethod("CameraComponent.GetCameraFOVIcall", (void*)(&CameraGetFOV));
+		RegisterMethod("CameraComponent.SetCameraFOVIcall", (void*)(&CameraSetFOV));
 
 		// Character Controller
-		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", &MoveAndSlide);
-		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", &IsOnGround);
-		RegisterMethod("CharacterControllerComponent.GetGroundVelocityIcall", &GetGroundVelocity);
-		RegisterMethod("CharacterControllerComponent.GetGroundNormalIcall", &GetGroundNormal);
+		RegisterMethod("CharacterControllerComponent.MoveAndSlideIcall", (void*)(&MoveAndSlide));
+		RegisterMethod("CharacterControllerComponent.IsOnGroundIcall", (void*)(&IsOnGround));
+		RegisterMethod("CharacterControllerComponent.GetGroundVelocityIcall", (void*)(&GetGroundVelocity));
+		RegisterMethod("CharacterControllerComponent.GetGroundNormalIcall", (void*)(&GetGroundNormal));
 
 		// Skinned 
-		RegisterMethod("SkinnedModelComponent.PlayIcall", &Play);
+		RegisterMethod("SkinnedModelComponent.PlayIcall", (void*)(&Play));
 
 		// Navigation Mesh
-		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", &NavMeshComponentFindPath);
+		RegisterMethod("NavMeshVolumeComponent.FindPathIcall", (void*)(&NavMeshComponentFindPath));
 
 		// Audio Emitter
-		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", &AudioEmitterGetIsPlaying);
-		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", &AudioEmitterSetIsPlaying);
+		RegisterMethod("AudioEmitterComponent.GetIsPlayingIcall", (void*)(&AudioEmitterGetIsPlaying));
+		RegisterMethod("AudioEmitterComponent.SetIsPlayingIcall", (void*)(&AudioEmitterSetIsPlaying));
 
-		RegisterMethod("Environment.SetFocusDistanceIcall", &EnvironmentDepthOfFieldSetFocusDistanceIcall);
-		RegisterMethod("Environment.GetFocusDistanceIcall", &EnvironmentDepthOfFieldGetFocusDistanceIcall);
+		RegisterMethod("Environment.SetFocusDistanceIcall", (void*)(&EnvironmentDepthOfFieldSetFocusDistanceIcall));
+		RegisterMethod("Environment.GetFocusDistanceIcall", (void*)(&EnvironmentDepthOfFieldGetFocusDistanceIcall));
 	}
 
 }

@@ -1,5 +1,4 @@
-#pragma once
-//#include <imgui\imgui.h>
+//#include <imgui/imgui.h>
 #include "LightComponent.h"
 #include "Nuake/Rendering/Renderer.h"
 

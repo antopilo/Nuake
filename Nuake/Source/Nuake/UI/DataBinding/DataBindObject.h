@@ -100,6 +100,8 @@ namespace NuakeUI
 					return dataObject.GetType();
 				}
 			}
+
+			assert(false);
 		}
 
 		template<typename T>
@@ -138,6 +140,8 @@ namespace NuakeUI
 					return *data;
 				}
 			}
+
+			assert(false);
 		}
 
 		template<>
@@ -154,6 +158,8 @@ namespace NuakeUI
 					return *data;
 				}
 			}
+
+			assert(false);
 		}
 
 		template<>
@@ -170,6 +176,8 @@ namespace NuakeUI
 					return *data;
 				}
 			}
+
+			assert(false);
 		}
 
 		template<>
@@ -186,6 +194,8 @@ namespace NuakeUI
 					return *data;
 				}
 			}
+
+			assert(false);
 		}
 	};
 }

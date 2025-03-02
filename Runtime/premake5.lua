@@ -1,6 +1,7 @@
 project "Runtime"
     kind "ConsoleApp"
     language "C++"
+    cppdialect "C++20"
 
 	debugdir (binaryOutputDir)
     targetdir (binaryOutputDir)
@@ -72,20 +73,13 @@ project "Runtime"
         "msdf-gen",
         "msdf-atlas-gen",
         "Freetype",
-        "vma"
+        "vma",
+        "dxcompiler"
     }
+    libdirs { "../Nuake/Thirdparty/dxc/lib/x64" }
     
     defines {
         table.unpack(globalDefines)
-    }
-
-    prebuildcommands {
-        '{ECHO} "Copying dxcompiler.dll to Working directory..."',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll" "%{cfg.debugdir}/"',
-        '{ECHO} Copying Coral to Working directory...',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
-        'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
     }
 
     filter "system:windows"
@@ -95,6 +89,15 @@ project "Runtime"
             "NK_WIN"
         }
         externalincludedirs { "../Nuake/Thirdparty/Coral/Coral.Native/Include/" }
+
+        prebuildcommands {
+            '{ECHO} "Copying dxcompiler.dll to Working directory..."',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll" "%{cfg.debugdir}/"',
+            '{ECHO} Copying Coral to Working directory...',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
+            'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
+        }
 
     filter { "system:windows", "action:vs*" }
         flags
@@ -112,18 +115,43 @@ project "Runtime"
             "asound",
             "glib-2.0",
             "gtk-3",
-		    "gobject-2.0"
+            "gobject-2.0"
         }
 
         includedirs
         {
-        	"/usr/include/gtk-3.0/",
-        	"/usr/lib/glib-2.0/include",
-		    "/usr/include/glib-2.0",
+                "/usr/include/gtk-3.0/",
+                "/usr/lib/glib-2.0/include",
+                "/usr/include/glib-2.0",
         }
-        
-        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk-3 atk tk-3.0 glib-2.0`" }
-    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk-3 glib-2.0 lgobject-2.0`" }
+
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 atk glib-2.0`" }
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 glib-2.0 gobject-2.0`" }
+
+    filter "system:bsd"
+        links
+        {
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
+            "glib-2.0",
+            "gtk-3",
+            "gobject-2.0",
+            "pthread",
+            "execinfo"
+        }
+
+        includedirs
+        {
+                "/usr/local/include/gtk-3.0/",
+                "/usr/local/lib/glib-2.0/include",
+                "/usr/local/include/glib-2.0",
+        }
+
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 atk glib-2.0`" }
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 glib-2.0 gobject-2.0`" }
 
     filter "configurations:Debug"
         runtime "Debug"

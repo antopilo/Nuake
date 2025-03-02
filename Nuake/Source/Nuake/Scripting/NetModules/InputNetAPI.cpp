@@ -63,17 +63,17 @@ namespace Nuake {
 
 	void InputNetAPI::RegisterMethods()
 	{
-		RegisterMethod("Input.ShowMouseIcall", &ShowMouse);
-		RegisterMethod("Input.IsKeyDownIcall", &IsKeyDown);
-		RegisterMethod("Input.IsKeyPressedIcall", &IsKeyPressed);
+		RegisterMethod("Input.ShowMouseIcall", (void*)(&ShowMouse));
+		RegisterMethod("Input.IsKeyDownIcall", (void*)(&IsKeyDown));
+		RegisterMethod("Input.IsKeyPressedIcall", (void*)(&IsKeyPressed));
 
-		RegisterMethod("Input.IsMouseButtonDownIcall", &IsMouseButtonDown);
-		RegisterMethod("Input.GetMousePositionIcall", &GetMousePosition);
+		RegisterMethod("Input.IsMouseButtonDownIcall", (void*)(&IsMouseButtonDown));
+		RegisterMethod("Input.GetMousePositionIcall", (void*)(&GetMousePosition));
 
-		RegisterMethod("Input.IsControllerConnectedIcall", &IsControllerConnected);
-		RegisterMethod("Input.GetControllerNameIcall", &GetControllerName);
-		RegisterMethod("Input.IsControllerButtonPressedIcall", &IsControllerButtonPressed);
-		RegisterMethod("Input.GetControllerAxisIcall", &GetControllerAxis);
+		RegisterMethod("Input.IsControllerConnectedIcall", (void*)(&IsControllerConnected));
+		RegisterMethod("Input.GetControllerNameIcall", (void*)(&GetControllerName));
+		RegisterMethod("Input.IsControllerButtonPressedIcall", (void*)(&IsControllerButtonPressed));
+		RegisterMethod("Input.GetControllerAxisIcall", (void*)(&GetControllerAxis));
 
 	}
 

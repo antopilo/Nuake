@@ -140,10 +140,13 @@ namespace Nuake {
 		{
 			path = "";
 		}
-#endif
 
-#ifdef NK_LINUX
-		path = "~/.config";
+#elif defined(NK_LINUX)
+		const char* homeDir = getenv("HOME");
+		// fallback, should be almost impossible in almost all desktop setups
+		if (homeDir[0] == '\0')
+			homeDir = "/root";
+		path = std::string(homeDir) + "/.config";
 #endif
 
 		return path;

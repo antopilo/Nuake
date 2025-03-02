@@ -1,4 +1,3 @@
-#pragma once
 #include "RigidbodyComponent.h"
 
 #include "Nuake/Physics/Rigibody.h"

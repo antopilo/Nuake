@@ -4,11 +4,13 @@
 
 #include <functional>
 
+#ifndef NK_BSD
 namespace filewatch
 {
 	template<typename T>
 	class FileWatch;
 }
+#endif
 
 namespace Nuake
 {
@@ -22,7 +24,9 @@ namespace Nuake
 	public:
 		static std::string Root;
 		static Ref<Directory> RootDirectory;
+#ifndef NK_BSD
 		static Ref<filewatch::FileWatch<std::string>> RootFileWatch;
+#endif
 
 		static void SetRootDirectory(const std::string path);
 		

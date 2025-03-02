@@ -47,7 +47,7 @@ void MapImporterWindow::Draw()
 		using namespace Nuake;
 		if (ImGui::Button(buttonLbl.c_str()))
 		{
-			std::string selectedFile = FileDialog::OpenFile("*.map");
+			std::string selectedFile = FileDialog::OpenFile("Quake maps\0*.map");
 			std::string relativePath = FileSystem::AbsoluteToRelative(selectedFile);
 			if (!selectedFile.empty() && FileSystem::FileExists(relativePath))
 			{

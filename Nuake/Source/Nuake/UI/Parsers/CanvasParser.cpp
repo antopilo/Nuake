@@ -94,10 +94,14 @@ void CanvasParser::WriteValueFromString(std::variant<int, float, bool, std::stri
 	}
 	else if (str.find(".") != std::string::npos)
 	{
+#ifdef _LIBCPP_VERSION // Temporary hack until llvm libc++ finally implement this
+		float rightFloat = std::stof(str);
+#else
 		const auto& begin = str.data();
 		const auto& end = begin + std::size(str);
 		float rightFloat;
 		std::from_chars(begin, end, rightFloat);
+#endif
 		var = rightFloat;
 	}
 	else if (str.find("true") != std::string::npos)

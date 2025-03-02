@@ -72,18 +72,66 @@ project "Editor"
         "msdf-gen",
         "msdf-atlas-gen",
         "Freetype",
-        "vma"
+        "vma",
+        "dxcompiler"
     }
+    libdirs { "../Nuake/Thirdparty/dxc/lib/x64" }
 
-    prebuildcommands {
-        '{ECHO} "Copying dxcompiler.dll to Working directory..."',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll" "%{cfg.debugdir}/"',
-        '{ECHO} Copying Coral to Working directory...',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
-        '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
-        '{COPYFILE} "%{wks.location}NuakeNet/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll" "%{cfg.debugdir}/"',
-        'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
-    }
+    filter "system:windows"
+        defines
+        {
+            "NK_WIN"
+        }
+        prebuildcommands {
+            '{ECHO} "Copying dxcompiler.dll to Working directory..."',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll" "%{cfg.debugdir}/"',
+            '{ECHO} Copying Coral to Working directory...',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
+            '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
+            '{COPYFILE} "%{wks.location}NuakeNet/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll" "%{cfg.debugdir}/"',
+            'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
+        }
+
+    filter "system:linux"
+        defines
+        {
+            "NK_LINUX"
+        }
+
+        links
+        {
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
+            "glib-2.0",
+            "gtk-3",
+            "gobject-2.0"
+        }
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 glib-2.0 gobject-2.0`" }
+
+    filter "system:bsd"
+        defines
+        {
+            "NK_LINUX",
+            "NK_BSD"
+        }
+
+        links
+        {
+            "GL",
+            "glfw",
+            "glad",
+            "X11",
+            "asound",
+            "glib-2.0",
+            "gtk-3",
+            "gobject-2.0",
+            "pthread",
+            "execinfo"
+        }
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0 gtk+-3.0 glib-2.0 gobject-2.0`" }
 
     filter { "system:windows", "action:vs*"}
     flags

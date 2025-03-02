@@ -1,4 +1,3 @@
-#pragma once
 #include "Scene.h"
 #include "Entities/Entity.h"
 
