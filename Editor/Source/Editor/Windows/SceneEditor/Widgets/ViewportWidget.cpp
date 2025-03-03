@@ -23,7 +23,7 @@ ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
 
 ViewportWidget::~ViewportWidget()
 {
-    Nuake::VkRenderer::Get().RemoveViewport(sceneViewport->GetID());
+    VkRenderer::Get().RemoveViewport(sceneViewport->GetID());
 }
 
 void ViewportWidget::Update(float ts)
