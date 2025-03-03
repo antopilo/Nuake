@@ -1,5 +1,5 @@
 project "Editor"
-    targetname ("Nuake Engine")
+    targetname "NuakeEngine"
 
     kind "ConsoleApp"
     language "C++"

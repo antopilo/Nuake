@@ -19,6 +19,11 @@ newaction {
     end
 }
 
+newoption {
+    trigger     = "disable-dotnet",
+    description = "Disables dotnet build for makefile builders",
+}
+
 -- ╔═══════════════════════════════════════╗
 -- ║               WORKSPACE               ║
 -- ╚═══════════════════════════════════════╝
@@ -53,8 +58,8 @@ workspace "Nuake"
         architecture "x64"
 
 outputdir = "Build/%{cfg.buildcfg}/"
-binaryOutputDir = outputdir .. "Binaries/"
-intBinaryOutputDir = outputdir .. "Binaries-Intermediate/"
+binaryOutputDir = "%{wks.location}/" .. outputdir .. "Binaries/"
+intBinaryOutputDir = "%{wks.location}/" .. outputdir .. "Binaries-Intermediate/"
 
 globalDefines = {
     "TRACY_ENABLE",
@@ -81,5 +86,7 @@ group ""
 include "Nuake/premake5.lua"
 include "Editor/premake5.lua"
 include "Runtime/premake5.lua"
-include "NuakeNet/premake5.lua"
-include "EditorNet/premake5.lua"
+if not _OPTIONS["disable-dotnet"] then
+    include "NuakeNet/premake5.lua"
+    include "EditorNet/premake5.lua"
+end
