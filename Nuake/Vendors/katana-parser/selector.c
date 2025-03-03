@@ -450,7 +450,7 @@ unsigned calc_specificity_for_one_selector(const KatanaSelector* selector)
             return 0x100;
             
         case KatanaSelectorMatchTag:
-            return !stricmp(selector->tag->local, "*") ? 0 : 1;
+            return !strcmp(selector->tag->local, "*") ? 0 : 1;
         case KatanaSelectorMatchUnknown:
         case KatanaSelectorMatchPagePseudoClass:
             return 0;
@@ -608,7 +608,7 @@ static KatanaPseudoType name_to_pseudo_type(const char* name, bool hasArguments)
     
     const KatanaNameToPseudoStruct* match = lower_bound(pseudoTypeMap, count, name);
     if ( match == (pseudoTypeMap + count)
-         || 0 != stricmp(match->string, name) )
+         || 0 != strcasecmp(match->string, name) )
         return KatanaPseudoUnknown;
     
     return match->type;

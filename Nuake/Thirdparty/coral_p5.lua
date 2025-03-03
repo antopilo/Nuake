@@ -1,4 +1,6 @@
 group "Thirdparty"
 include "Coral/Coral.Native"
-include "Coral/Coral.Managed"
+if not _OPTIONS["disable-dotnet"] then
+    include "Coral/Coral.Managed"
+end
 group ""

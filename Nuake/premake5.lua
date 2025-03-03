@@ -107,25 +107,48 @@ project "Nuake"
     }
 
     filter "system:linux"
-        defines 
+        defines
         {
             "GLFW_STATIC",
             "NK_LINUX"
         }
-        
-        links 
+
+        links
         {
             "glib-2.0"
         }
-        
+
         buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
-    	linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
-        
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
+
         includedirs
         {
         	"/usr/include/gtk-3.0/",
         	"/usr/lib/glib-2.0/include",
 		    "/usr/include/glib-2.0",
+        }
+
+    filter "system:bsd"
+        defines
+        {
+            "GLFW_STATIC",
+            "NK_LINUX",
+            "NK_BSD"
+        }
+
+        links
+        {
+            "glib-2.0"
+        }
+
+        buildoptions { "`pkg-config --cflags glib-2.0 pango gdk-pixbuf-2.0 atk`" }
+        linkoptions { "`pkg-config --libs glib-2.0 pango gdk-pixbuf-2.0`" }
+
+        includedirs
+        {
+                "/usr/local/include/gtk-3.0/",
+                "/usr/local/lib/glib-2.0/include",
+                "/usr/local/include/glib-2.0",
         }
 
     filter "system:windows"

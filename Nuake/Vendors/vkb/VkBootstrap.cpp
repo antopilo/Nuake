@@ -26,7 +26,8 @@
 #include <windows.h>
 #endif // _WIN32
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+#define UNIX 1
 #include <dlfcn.h>
 #endif
 
@@ -114,7 +115,7 @@ namespace vkb {
         private:
             std::mutex init_mutex;
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(UNIX)
             void* library = nullptr;
 #elif defined(_WIN32)
             HMODULE library = nullptr;
@@ -125,13 +126,13 @@ namespace vkb {
                 if (library) {
                     return true;
                 }
-#if defined(__linux__)
-                library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
-                if (!library) library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
                 library = dlopen("libvulkan.dylib", RTLD_NOW | RTLD_LOCAL);
                 if (!library) library = dlopen("libvulkan.1.dylib", RTLD_NOW | RTLD_LOCAL);
                 if (!library) library = dlopen("libMoltenVK.dylib", RTLD_NOW | RTLD_LOCAL);
+#elif defined(UNIX)
+                library = dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+                if (!library) library = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
 #elif defined(_WIN32)
                 library = LoadLibrary(TEXT("vulkan-1.dll"));
 #else
@@ -143,14 +144,14 @@ namespace vkb {
             }
 
             template <typename T> void load_func(T& func_dest, const char* func_name) {
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(UNIX)
                 func_dest = reinterpret_cast<T>(dlsym(library, func_name));
 #elif defined(_WIN32)
                 func_dest = reinterpret_cast<T>(GetProcAddress(library, func_name));
 #endif
             }
             void close() {
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(UNIX)
                 dlclose(library);
 #elif defined(_WIN32)
                 FreeLibrary(library);
@@ -663,13 +664,13 @@ namespace vkb {
             bool added_window_exts = check_add_window_ext("VK_KHR_android_surface");
 #elif defined(_DIRECT2DISPLAY)
             bool added_window_exts = check_add_window_ext("VK_KHR_display");
-#elif defined(__linux__)
+#elif defined(__APPLE__)
+            bool added_window_exts = check_add_window_ext("VK_EXT_metal_surface");
+#elif defined(UNIX)
             // make sure all three calls to check_add_window_ext, don't allow short circuiting
             bool added_window_exts = check_add_window_ext("VK_KHR_xcb_surface");
             added_window_exts = check_add_window_ext("VK_KHR_xlib_surface") || added_window_exts;
             added_window_exts = check_add_window_ext("VK_KHR_wayland_surface") || added_window_exts;
-#elif defined(__APPLE__)
-            bool added_window_exts = check_add_window_ext("VK_EXT_metal_surface");
 #endif
             if (!khr_surface_added || !added_window_exts)
                 return make_error_code(InstanceError::windowing_extensions_not_present);

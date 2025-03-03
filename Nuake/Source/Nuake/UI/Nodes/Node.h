@@ -11,7 +11,7 @@
 #include "Nuake/Resource/UUID.h"
 #include "Nuake/Scripting/ScriptingEngineNet.h"
 
-#include <yoga/yoga.h>
+#include <yoga/Yoga.h>
 
 #include <any>
 #include <map>
@@ -20,33 +20,33 @@
 
 
 #define SetLength(name) \
-if (ComputedStyle.##name.type == LengthType::Auto)  \
+if (ComputedStyle.name.type == LengthType::Auto)  \
 YGNodeStyleSet##name##Auto(mNode); \
-else if (ComputedStyle.##name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.##name.value); \
-else if (ComputedStyle.##name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.##name.value); \
+else if (ComputedStyle.name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.name.value); \
+else if (ComputedStyle.name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.name.value); \
 
 #define SetLengthBorder(name, border) \
-if (ComputedStyle.##name##border.type == LengthType::Auto)  \
+if (ComputedStyle.name##border.type == LengthType::Auto)  \
 YGNodeStyleSet##name##Auto(mNode, YGEdge##border); \
-else if (ComputedStyle.##name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.##name##border.value); \
-else if (ComputedStyle.##name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.##name##border.value); \
+else if (ComputedStyle.name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.name##border.value); \
+else if (ComputedStyle.name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.name##border.value); \
 
 #define SetLengthBorderNoAuto(name, border) \
-if (ComputedStyle.##name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.##name##border.value); \
-else if (ComputedStyle.##name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.##name##border.value); \
+if (ComputedStyle.name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.name##border.value); \
+else if (ComputedStyle.name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.name##border.value); \
 
 
 #define SetLengthNoAuto(name) \
-if (ComputedStyle.##name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.##name.value); \
-else if (ComputedStyle.##name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.##name.value); \
+if (ComputedStyle.name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.name.value); \
+else if (ComputedStyle.name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.name.value); \
 
-#define EnumProp(name) EnumPropEx(name, ##name##Type)
+#define EnumProp(name) EnumPropEx(name, name##Type)
 
 #define EnumPropEx(name, enums) \
 case StyleProperties::name: \
 { \
 auto type = value.value.Enum; \
-ComputedStyle.##name## = (##enums##)type; \
+ComputedStyle.name = (enums)type; \
 } \
 break;\
 

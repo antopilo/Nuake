@@ -51,6 +51,8 @@ namespace Nuake
 		if (status != Coral::CoralInitStatus::Success)
 		{
 			Logger::Log("Failed to initialize Coral: " + std::to_string((int)status));
+			delete hostInstance;
+			return;
 		}
 
 		// Initialize API modules
@@ -81,7 +83,9 @@ namespace Nuake
 
 	ScriptingEngineNet::~ScriptingEngineNet()
 	{
-		hostInstance->Shutdown();
+		if (isInitialized)
+			hostInstance->Shutdown();
+		delete hostInstance;
 	}
 
 	std::vector<CompilationError> ScriptingEngineNet::ExtractErrors(const std::string& output)
@@ -178,6 +182,9 @@ namespace Nuake
 
 	void ScriptingEngineNet::Initialize()
 	{
+		if (!isInitialized)
+			return;
+
 		loadContext = hostInstance->CreateAssemblyLoadContext(m_ContextName);
 
 		nuakeAssembly = ReloadEngineAPI(loadContext);

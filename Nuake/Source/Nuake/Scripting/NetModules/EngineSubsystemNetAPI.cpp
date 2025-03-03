@@ -31,7 +31,7 @@ namespace Nuake
 
     void EngineSubsystemNetAPI::RegisterMethods()
     {
-        RegisterMethod("EngineSubsystem.SetCanTickIcall", &SetCanTick);
-        RegisterMethod("EngineSubsystem.GetCanTickIcall", &GetCanTick);
+        RegisterMethod("EngineSubsystem.SetCanTickIcall", (void*)(&SetCanTick));
+        RegisterMethod("EngineSubsystem.GetCanTickIcall", (void*)(&GetCanTick));
     }
 }

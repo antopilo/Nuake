@@ -284,7 +284,11 @@ void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet
 					case KatanaValueUnit::KATANA_VALUE_PARSER_HEXCOLOR:
 					{
 						int r, g, b, a = 255;
+#ifdef _MSC_VER // sscanf_s is microsoft-only
 						int result = sscanf_s(value->string, "%02x%02x%02x%02x", &r, &g, &b, &a);
+#else
+						int result = sscanf(value->string, "%02x%02x%02x%02x", &r, &g, &b, &a);
+#endif
 						propValue.value.Color = Color(r, g, b, a);
 						propValue.type = PropValueType::Color;
 					}

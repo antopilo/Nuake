@@ -2260,7 +2260,7 @@ namespace Nuake {
     void OpenScene()
     {
         // Parse the project and load it.
-        std::string projectPath = FileDialog::OpenFile(".scene");
+        std::string projectPath = FileDialog::OpenFile("Scene file\0*.scene");
         if (projectPath.empty() || !FileSystem::FileExists(projectPath, true))
         {
             return;

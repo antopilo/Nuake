@@ -21,9 +21,9 @@ project 'msdf-gen'
 		'msdf-atlas-gen/msdfgen/*.h',
 		'msdf-atlas-gen/msdfgen/*.cpp',
 		'msdf-atlas-gen/msdfgen/*.hpp',
-		'msdf-atlas-gen/msdfgen/Core/*.h',
-		'msdf-atlas-gen/msdfgen/Core/*.hpp',
-		'msdf-atlas-gen/msdfgen/Core/*.cpp',
+		'msdf-atlas-gen/msdfgen/core/*.h',
+		'msdf-atlas-gen/msdfgen/core/*.hpp',
+		'msdf-atlas-gen/msdfgen/core/*.cpp',
 		'msdf-atlas-gen/msdfgen/lib/*.cpp',
 		'msdf-atlas-gen/msdfgen/ext/*.h',
 		'msdf-atlas-gen/msdfgen/ext/*.cpp'

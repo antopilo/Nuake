@@ -590,7 +590,7 @@ namespace Nuake
 						Vector3(hitPosition.GetX(), hitPosition.GetY(), hitPosition.GetZ()),
 						hitFraction,
 						Vector3(0, 0, 0),
-						layer,
+						static_cast<float>(layer),
 						userData
 					};
 

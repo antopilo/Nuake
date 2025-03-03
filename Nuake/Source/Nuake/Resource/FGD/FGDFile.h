@@ -40,7 +40,7 @@ namespace Nuake {
 			END_SERIALIZE();
 		}
 
-		bool Deserialize(const json& j)
+		bool Deserialize(const json& j) override
 		{
 			if (j.contains("BrushEntities"))
 			{

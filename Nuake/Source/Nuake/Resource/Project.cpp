@@ -116,6 +116,9 @@ Ref<Project> Project::Load(std::string& path)
 
 void Project::ExportEntitiesToTrenchbroom()
 {
+	if (TrenchbroomPath == "")
+		return;
+
 	Ref<FGDFile> file = EntityDefinitionsFile;
 
 	file->BrushEntities.clear();

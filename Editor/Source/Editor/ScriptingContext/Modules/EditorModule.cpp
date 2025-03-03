@@ -19,6 +19,6 @@ int GetSelectedEntity()
 
 void EditorNetAPI::RegisterMethods()
 {
-	RegisterMethod("Editor.SetSelectedEntityIcall", &SelectEntity);
-	RegisterMethod("Editor.GetSelectedEntityIcall", &GetSelectedEntity);
+	RegisterMethod("Editor.SetSelectedEntityIcall", (void*)(&SelectEntity));
+	RegisterMethod("Editor.GetSelectedEntityIcall", (void*)(&GetSelectedEntity));
 }

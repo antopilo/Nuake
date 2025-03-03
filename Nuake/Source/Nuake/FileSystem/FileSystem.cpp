@@ -7,16 +7,21 @@
 #include "Directory.h"
 #include "File.h"
 
+#ifndef NK_BSD
 #include "filewatch/FileWatch.hpp"
+#endif
 
 #include <filesystem>
+#include <fstream>
 
 using namespace Nuake;
 
 std::string FileSystem::Root = "";
 
 Ref<Directory> FileSystem::RootDirectory;
+#ifndef NK_BSD
 Ref<filewatch::FileWatch<std::string>> FileSystem::RootFileWatch;
+#endif
 
 void FileSystem::ForeachFile(OnFileFunc func)
 {
@@ -113,6 +118,7 @@ std::vector<Ref<File>> FileSystem::GetAllFiles(const FileType fileType)
 void FileSystem::SetRootDirectory(const std::string path)
 {
 	Root = path;
+#ifndef NK_BSD
 	RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
 		path, [&](const std::string& path, const filewatch::Event& event)
 			{
@@ -150,6 +156,7 @@ void FileSystem::SetRootDirectory(const std::string path)
 				}
 			}
 	);
+#endif
 	Scan();
 }
 

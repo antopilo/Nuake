@@ -2,6 +2,10 @@
 
 #include <imgui/imgui.h>
 
+#ifndef _MSC_VER
+#define strncpy_s strncpy
+#endif
+
 void ImGuiTextSTD(const std::string& label, std::string& value)
 {
 	char buffer[256];

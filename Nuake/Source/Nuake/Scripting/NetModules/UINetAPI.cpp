@@ -168,19 +168,19 @@ void SetTextNodeTextICall(const Coral::String& canvasUUID, const Coral::String& 
 
 void UINetAPI::RegisterMethods()
 {
-	RegisterMethod("Node.FindChildByIDICall", &FindChildByIDIcall);
-	RegisterMethod("Node.HasNativeInstanceICall", &HasNativeInstanceICall);
-	RegisterMethod("Node.GetNativeInstanceNodeICall", &GetNativeInstanceNodeICall);
+	RegisterMethod("Node.FindChildByIDICall", (void*)(&FindChildByIDIcall));
+	RegisterMethod("Node.HasNativeInstanceICall", (void*)(&HasNativeInstanceICall));
+	RegisterMethod("Node.GetNativeInstanceNodeICall", (void*)(&GetNativeInstanceNodeICall));
 
 	// Styling
-	RegisterMethod("Node.GetVisibilityICall", &GetVisibilityICall);
-	RegisterMethod("Node.SetVisibilityICall", &SetVisibilityICall);
+	RegisterMethod("Node.GetVisibilityICall", (void*)(&GetVisibilityICall));
+	RegisterMethod("Node.SetVisibilityICall", (void*)(&SetVisibilityICall));
 
-	//RegisterMethod("Node.GetWidthPercentageICall", &GetWidthPercentageICall);
-	RegisterMethod("Node.SetWidthPercentageICall", &SetWidthPercentageICall);
-	//	RegisterMethod("Node.GetHeightPercentageICall", &GetHeightPercentageICall);
-	RegisterMethod("Node.SetHeightPercentageICall", &SetHeightPercentageICall);
+	//RegisterMethod("Node.GetWidthPercentageICall", (void*)(&GetWidthPercentageICall));
+	RegisterMethod("Node.SetWidthPercentageICall", (void*)(&SetWidthPercentageICall));
+	//	RegisterMethod("Node.GetHeightPercentageICall", (void*)(&GetHeightPercentageICall));
+	RegisterMethod("Node.SetHeightPercentageICall", (void*)(&SetHeightPercentageICall));
 
-	RegisterMethod("TextNode.GetTextNodeTextICall", &GetTextNodeTextICall);
-	RegisterMethod("TextNode.SetTextNodeTextICall", &SetTextNodeTextICall);
+	RegisterMethod("TextNode.GetTextNodeTextICall", (void*)(&GetTextNodeTextICall));
+	RegisterMethod("TextNode.SetTextNodeTextICall", (void*)(&SetTextNodeTextICall));
 }

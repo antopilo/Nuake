@@ -9,7 +9,7 @@
 #include <Coral/ManagedObject.hpp>
 #include <Coral/Array.hpp>
 #include "Coral/Type.hpp"
-#include "..\..\Subsystems\EngineSubsystemScriptable.h"
+#include "../../Subsystems/EngineSubsystemScriptable.h"
 
 namespace Nuake {
 
@@ -141,21 +141,21 @@ namespace Nuake {
 
 	void EngineNetAPI::RegisterMethods()
 	{
-		RegisterMethod("Engine.LoadSceneIcall", &LoadScene);
+		RegisterMethod("Engine.LoadSceneIcall", (void*)(&LoadScene));
 		RegisterMethod("Engine.LoggerLogIcall", (void*)(&Log));
-		RegisterMethod("Engine.GetSubsystemByNameIcall", &GetEngineSubsystemByName);
+		RegisterMethod("Engine.GetSubsystemByNameIcall", (void*)(&GetEngineSubsystemByName));
 
 		// Debug renderer
-		RegisterMethod("Debug.DrawLineIcall", &DrawLine);
-		RegisterMethod("Debug.DrawShapeBoxIcall", &DrawShapeBox);
-		RegisterMethod("Debug.DrawShapeSphereIcall", &DrawShapeSphere);
-		RegisterMethod("Debug.DrawShapeCapsuleIcall", &DrawShapeCapsule);
-		RegisterMethod("Debug.DrawShapeCylinderIcall", &DrawShapeCylinder);
+		RegisterMethod("Debug.DrawLineIcall", (void*)(&DrawLine));
+		RegisterMethod("Debug.DrawShapeBoxIcall", (void*)(&DrawShapeBox));
+		RegisterMethod("Debug.DrawShapeSphereIcall", (void*)(&DrawShapeSphere));
+		RegisterMethod("Debug.DrawShapeCapsuleIcall", (void*)(&DrawShapeCapsule));
+		RegisterMethod("Debug.DrawShapeCylinderIcall", (void*)(&DrawShapeCylinder));
 
-		RegisterMethod("Physic.RayCastIcall", &Raycast);
-		RegisterMethod("Physic.ShapeCastSphereIcall", &ShapeCastSphere);
-		RegisterMethod("Physic.ShapeCastCapsuleIcall", &ShapeCastCapsule);
-		RegisterMethod("Physic.ShapeCastBoxIcall", &ShapeCastBox);
+		RegisterMethod("Physic.RayCastIcall", (void*)(&Raycast));
+		RegisterMethod("Physic.ShapeCastSphereIcall", (void*)(&ShapeCastSphere));
+		RegisterMethod("Physic.ShapeCastCapsuleIcall", (void*)(&ShapeCastCapsule));
+		RegisterMethod("Physic.ShapeCastBoxIcall", (void*)(&ShapeCastBox));
 	}
 
 }

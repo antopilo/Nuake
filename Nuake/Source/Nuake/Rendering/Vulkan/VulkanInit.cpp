@@ -1,5 +1,5 @@
 #include "VulkanInit.h"
-#include "VulkanImage\VulkanImage.h"
+#include "VulkanImage/VulkanImage.h"
 
 using namespace Nuake;
 

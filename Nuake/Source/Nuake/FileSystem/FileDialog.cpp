@@ -40,9 +40,7 @@ std::string FileDialog::OpenFile(const std::string_view& filter)
 		filePath = std::string(ofn.lpstrFile);
 	}
 
-#endif
-
-#ifdef NK_LINUX
+#elif defined(NK_LINUX)
 	GtkWidget *dialog;
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 	gint res;
@@ -58,10 +56,19 @@ std::string FileDialog::OpenFile(const std::string_view& filter)
 
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
-	if (filter) {
+	if (!filter.empty()) {
 		GtkFileFilter *file_filter = gtk_file_filter_new();
-		gtk_file_filter_set_name(file_filter, "Filter Name");
-		gtk_file_filter_add_pattern(file_filter, filter);
+		gtk_file_filter_set_name(file_filter, filter.data());
+
+		size_t pos = 0;
+		size_t end = 0;
+		std::string filterCopy(filter.data() + strlen(filter.data()) + 1);
+		while ((end = filterCopy.find('|', pos)) != std::string::npos) {
+			std::string token = filterCopy.substr(pos, end - pos);
+			gtk_file_filter_add_pattern(file_filter, token.c_str());
+			pos = end + 1;
+		}
+		gtk_file_filter_add_pattern(file_filter, filterCopy.substr(pos).c_str());
 		gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
 	}
 
@@ -102,8 +109,6 @@ std::string FileDialog::SaveFile(const std::string_view& filter)
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
 	gint res;
 
-	gtk_init(NULL, NULL);
-
 	dialog = gtk_file_chooser_dialog_new("Save File",
 										 NULL,
 										 action,
@@ -114,7 +119,7 @@ std::string FileDialog::SaveFile(const std::string_view& filter)
 										 NULL);
 
 	GtkFileFilter *file_filter = gtk_file_filter_new();
-	gtk_file_filter_set_name(file_filter, filter);
+	gtk_file_filter_set_name(file_filter, filter.data());
 	gtk_file_filter_add_pattern(file_filter, "*.*"); // You can customize this pattern
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), file_filter);
 
@@ -197,6 +202,30 @@ std::string FileDialog::OpenFolder()
 		// Uninitialize COM library
 		CoUninitialize();
 	}
+
+#elif defined(NK_LINUX)
+	GtkWidget *dialog;
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+	gint res;
+
+	dialog = gtk_file_chooser_dialog_new("Open Folder",
+		NULL,
+		action,
+		"_Cancel",
+		GTK_RESPONSE_CANCEL,
+		"_Open",
+		GTK_RESPONSE_ACCEPT,
+		NULL);
+
+	res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	if (res == GTK_RESPONSE_ACCEPT) {
+		char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		folderPath = filename;
+		g_free(filename);
+	}
+
+	gtk_widget_destroy(dialog);
 #endif
 	return folderPath;
 }
