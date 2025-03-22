@@ -2581,7 +2581,6 @@ namespace Nuake {
             else
             {
                 isLoadingProjectQueue = false;
-
             }
             
             return;

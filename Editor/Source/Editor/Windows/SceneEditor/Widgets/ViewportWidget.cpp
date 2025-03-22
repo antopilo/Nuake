@@ -14,10 +14,6 @@ using namespace Nuake;
 
 ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
 {
-	const Vector2& defaultSize = { 1280, 720 };
-	const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
-    auto& vkRenderer = Nuake::VkRenderer::Get();
-
     OnSceneChanged(context.GetScene());
 }
 
@@ -32,8 +28,8 @@ void ViewportWidget::Update(float ts)
 
     if (!Engine::IsPlayMode())
     {
-        Ref<EditorCamera> editorCam = editorContext.GetScene()->m_EditorCamera;
-        editorCam->Update(ts, isHoveringViewport);
+        EditorCamera& editorCam = reinterpret_cast<EditorCamera&>(*editorContext.GetScene()->GetCurrentCamera().get());
+        editorCam.Update(ts, isHoveringViewport);
     }
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
