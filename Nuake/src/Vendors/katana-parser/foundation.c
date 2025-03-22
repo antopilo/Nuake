@@ -84,7 +84,7 @@ bool katana_string_has_prefix(const char* str, const char* prefix)
 {
     size_t pre_len = strlen(prefix);
     size_t str_len = strlen(str);
-    return pre_len <= str_len && stricmp(prefix, str, pre_len);
+    return pre_len <= str_len && stricmp(prefix, str);
 }
 
 void katana_string_to_lowercase(struct KatanaInternalParser* parser,
