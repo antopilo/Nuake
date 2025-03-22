@@ -13,6 +13,8 @@
 
 using namespace Nuake;
 
+std::set<std::string> SceneEditorWindow::previouslyCreatedEditors = std::set<std::string>();
+
 SceneEditorWindow::SceneEditorWindow(Ref<Scene> inScene) :
 	editorContext(inScene, inScene->Path),
 	layoutInitialized(false)
@@ -22,6 +24,16 @@ SceneEditorWindow::SceneEditorWindow(Ref<Scene> inScene) :
 	RegisterWidget<LoggerWidget>();
 	RegisterWidget<ViewportWidget>();
 	RegisterWidget<FileBrowserWidget>();
+
+	imguiId = editorContext.GetScene()->Path.empty() ? "New Scene" : editorContext.GetScene()->Path;
+
+	// This is to prevent initializing the dockspace twice, because imgui keeps a cache of the dockspace 
+	if (previouslyCreatedEditors.find(imguiId) != previouslyCreatedEditors.end())
+	{
+		layoutInitialized = true;
+	}
+
+	previouslyCreatedEditors.insert(imguiId);
 }
 
 void SceneEditorWindow::Save()
@@ -39,13 +51,8 @@ void SceneEditorWindow::Update(float ts)
 
 void SceneEditorWindow::Draw()
 {
-	std::string sceneName = editorContext.GetScene()->Path.empty() ? "New Scene" : editorContext.GetScene()->Path;
-
 	ImGuiID editorDockspaceId = ImGui::GetID("SceneEditorDockSpace");
-	if (!layoutInitialized) 
-	{
-		
-	}
+
 	// This is to prevent other windows of other scene editors to dock 
 	ImGuiWindowClass windowClass;
 	windowClass.ClassId = ImHashStr("SceneEditor");
@@ -54,15 +61,15 @@ void SceneEditorWindow::Draw()
 	ImGui::SetNextWindowDockID(ImGui::GetID("SceneEditorDockSpace"));
 	ImGui::SetNextWindowSizeConstraints({1280, 720}, { FLT_MAX, FLT_MAX });
 	bool shouldStayOpen = true;
-	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("   ") + sceneName);
+	std::string windowName = std::string(ICON_FA_WINDOW_MAXIMIZE + std::string("   ") + imguiId);
 	
 	if (ImGui::Begin(windowName.c_str(), &shouldStayOpen))
 	{
 		this->isFocused = true;
 
 		ImGuiWindowClass localSceneEditorClass;
-		localSceneEditorClass.ClassId = ImHashStr(sceneName.c_str());
-		std::string dockspaceName = std::string("Dockspace##" + sceneName);
+		localSceneEditorClass.ClassId = ImHashStr(imguiId.c_str());
+		std::string dockspaceName = std::string("Dockspace##" + imguiId);
 
 		ImGuiID dockspaceId = ImGui::GetID(dockspaceName.c_str());
 		ImGui::DockSpace(dockspaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_None, &localSceneEditorClass);

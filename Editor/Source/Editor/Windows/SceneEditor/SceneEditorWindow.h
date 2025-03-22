@@ -5,6 +5,7 @@
 
 #include "Widgets/IEditorWidget.h"
 
+#include <set>
 #include <string>
 #include <vector>
 #include <concepts>
@@ -30,6 +31,10 @@ private:
 	ImGuiID dockId = 0;
 	bool isFocused;
 	std::vector<Scope<IEditorWidget>> widgets;
+
+	// This is because imgui keeps cache of previously created dockspace, so we can reuse it.
+	std::string imguiId;
+	static std::set<std::string> previouslyCreatedEditors;
 
 public:
 	SceneEditorWindow(Ref<Nuake::Scene> scene);
