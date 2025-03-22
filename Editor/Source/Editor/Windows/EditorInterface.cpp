@@ -2529,7 +2529,6 @@ namespace Nuake {
 
     void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
     {
-        Window::Get()->SetDecorated(true);
         VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
     }
 
@@ -2562,7 +2561,7 @@ namespace Nuake {
             auto project = Engine::GetProject();
             if (project)
             {
-                auto sceneToLoad = project->DefaultScene;
+                auto& sceneToLoad = project->DefaultScene;
                 if (!sceneToLoad)
                 {
                     sceneToLoad = CreateRef<Scene>();
@@ -2573,6 +2572,7 @@ namespace Nuake {
                 isLoadingProjectQueue = false;
 
                 auto window = Window::Get();
+                window->SetDecorated(true);
                 window->ShowTitleBar(false);
                 window->SetSize({ 1600, 900 });
                 window->Center();
@@ -2839,22 +2839,22 @@ namespace Nuake {
             sceneEditor->Draw();
         }
 
-        ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
-        if (node)
-        {
-            ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 32);
-            if (ImGui::DockNodeBeginAmendTabBar(node))
-            {
-                ImGui::SetNextItemWidth(48);
-                if (ImGui::BeginTabItem("##logoPadding", 0, ImGuiTabItemFlags_Leading))
-                {
-
-                    ImGui::EndTabItem();
-                }
-                ImGui::DockNodeEndAmendTabBar();
-            }
-        }
-
+        //ImGuiDockNode* node = (ImGuiDockNode*)GImGui->DockContext.Nodes.GetVoidPtr(ImGui::GetID("SceneEditorDockSpace"));
+        //if (node)
+        //{
+        //    ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 32);
+        //    if (ImGui::DockNodeBeginAmendTabBar(node))
+        //    {
+        //        ImGui::SetNextItemWidth(48);
+        //        if (ImGui::BeginTabItem("##logoPadding", 0, ImGuiTabItemFlags_Leading))
+        //        {
+        //
+        //            ImGui::EndTabItem();
+        //        }
+        //        ImGui::DockNodeEndAmendTabBar();
+        //    }
+        //}
+        //
         ImGui::End();
 
 
