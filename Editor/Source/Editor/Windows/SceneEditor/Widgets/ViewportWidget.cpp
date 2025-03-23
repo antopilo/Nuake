@@ -10,6 +10,9 @@
 #include "Nuake/Rendering/Vulkan/DebugCmd.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <Nuake/Scene/Components/AudioEmitterComponent.h>
+#include <Nuake/Scene/Components/ParticleEmitterComponent.h>
+#include <Nuake/Scene/Components/RigidbodyComponent.h>
 
 
 using namespace Nuake;
@@ -210,21 +213,96 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
 	sceneViewport->GetOnDebugDraw().AddRaw(this, &ViewportWidget::OnDebugDraw);
 }
 
+
+float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
+{
+    float distance = Distance(camPosition, position);
+
+    constexpr float ClosestDistance = 3.5f;
+    if (distance < ClosestDistance)
+    {
+        float fraction = distance / ClosestDistance;
+        return fraction;
+    }
+
+    return 1.0f;
+}
+
+
+template<typename T>
+void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon)
+{
+    auto scene = debugCmd.GetScene();
+    auto cam = scene->GetCurrentCamera();
+    auto view = cam->GetTransform();
+    auto proj = cam->GetPerspective();
+    const Vector3& cameraPosition = cam->GetTranslation();
+    const Vector3 gizmoSize = Vector3(Engine::GetProject()->Settings.GizmoSize);
+    auto camView = scene->m_Registry.view<TransformComponent, T>();
+    for (auto e : camView)
+    {
+        auto [transform, cam] = scene->m_Registry.get<TransformComponent, T>(e);
+
+        Matrix4 initialTransform = transform.GetGlobalTransform();
+        Matrix4 gizmoTransform = initialTransform;
+        gizmoTransform = glm::inverse(scene->GetCurrentCamera()->GetTransform());
+        gizmoTransform[3] = initialTransform[3];
+        gizmoTransform = glm::scale(gizmoTransform, gizmoSize * GetGizmoScale(cameraPosition, initialTransform[3]));
+        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon));
+    }
+}
+
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
 {
-    auto cam = debugCmd.GetScene()->GetCurrentCamera();
+    auto scene = debugCmd.GetScene();
+    auto cam = scene->GetCurrentCamera();
+    const Vector3& cameraPosition = cam->GetTranslation();
+    const Vector3 gizmoSize = Vector3(Engine::GetProject()->Settings.GizmoSize);
 
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
     Matrix4 model = glm::translate(Matrix4(1.0f), Vector3(0, 3, 0));
 	debugCmd.DrawQuad(proj * view * model);
 
-    auto scene = debugCmd.GetScene();
-
+    static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon)
+    {
+        Matrix4 initialTransform = transform.GetGlobalTransform();
+        Matrix4 gizmoTransform = initialTransform;
+        gizmoTransform = glm::inverse(scene->GetCurrentCamera()->GetTransform());
+        gizmoTransform[3] = initialTransform[3];
+        gizmoTransform = glm::scale(gizmoTransform, gizmoSize * GetGizmoScale(cameraPosition, initialTransform[3]));
+        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon));
+    };
+    
     auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
     for (auto e : lightView)
     {
         auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
-        debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), Vector3(transform.GetGlobalTransform()[3])));
+
+        std::string texturePath = "Resources/Gizmos/";
+        switch (light.Type)
+        {
+        case LightType::Point:
+            texturePath += "light.png";
+            break;
+        case LightType::Directional:
+            texturePath += "light_directional.png";
+            break;
+        case LightType::Spot:
+            texturePath += "light_spot.png";
+            break;
+        default:
+            texturePath += "light.png";
+        }
+
+        // Billboard + scaling logic
+        drawGizmoIcon(transform, texturePath);
     }
+
+    DrawIconGizmo<CameraComponent>(debugCmd, "Resources/Gizmos/Camera.png");
+    DrawIconGizmo<CharacterControllerComponent>(debugCmd, "Resources/Gizmos/player.png");
+    DrawIconGizmo<BoneComponent>(debugCmd, "Resources/Gizmos/bone.png");
+    DrawIconGizmo<AudioEmitterComponent>(debugCmd, "Resources/Gizmos/sound_emitter.png");
+    DrawIconGizmo<RigidBodyComponent>(debugCmd, "Resources/Gizmos/rigidbody.png");
+    DrawIconGizmo<ParticleEmitterComponent>(debugCmd, "Resources/Gizmos/particles.png");
 }
