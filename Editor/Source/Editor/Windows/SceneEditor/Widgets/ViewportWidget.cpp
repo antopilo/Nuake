@@ -217,6 +217,14 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
     Matrix4 model = glm::translate(Matrix4(1.0f), Vector3(0, 3, 0));
-
 	debugCmd.DrawQuad(proj * view * model);
+
+    auto scene = debugCmd.GetScene();
+
+    auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+    for (auto e : lightView)
+    {
+        auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+        debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), Vector3(transform.GetGlobalTransform()[3])));
+    }
 }
