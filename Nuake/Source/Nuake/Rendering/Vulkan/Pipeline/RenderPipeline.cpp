@@ -38,21 +38,25 @@ void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
 	// Clear all color attachments
-	for (int i = 0; i < std::size(Attachments); i++)
+	int attachmentIndex = 0;
+	for (int i = 0; i < std::size(inputs); i++)
 	{
-		auto& texture = inputs[i];
-		auto& spec = Attachments[i];
-
-		if (spec.ClearOnLoad)
+		Ref<VulkanImage> input = inputs[i];
+		if (input->GetUsage() == ImageUsage::Depth)
 		{
-			if (texture->GetUsage() != ImageUsage::Depth)
+			if (DepthAttachment.ClearOnLoad)
 			{
-				ctx.commandBuffer.ClearColorImage(texture, this->ClearColor);
+				ctx.commandBuffer.ClearDepthImage(input);
 			}
-			else
+		}
+		else if(input->GetUsage() != ImageUsage::Depth)
+		{
+			if (Attachments[attachmentIndex].ClearOnLoad)
 			{
-				ctx.commandBuffer.ClearDepthImage(texture);
+				ctx.commandBuffer.ClearColorImage(input, this->ClearColor);
 			}
+
+			attachmentIndex++;
 		}
 	}
 }

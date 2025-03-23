@@ -22,7 +22,7 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 
 	ShadowPipeline = RenderPipeline();
 	auto& shadowPass = ShadowPipeline.AddPass("Shadow");
-	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth);
+	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth, true);
 	shadowPass.SetShaders(shaderMgr.GetShader("shadow_vert"), shaderMgr.GetShader("shadow_frag"));
 	shadowPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
