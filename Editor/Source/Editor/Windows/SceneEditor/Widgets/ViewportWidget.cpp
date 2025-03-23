@@ -7,8 +7,10 @@
 
 #include "Nuake/Rendering/Vulkan/VulkanRenderer.h"
 #include "Nuake/Rendering/Vulkan/SceneViewport.h"
+#include "Nuake/Rendering/Vulkan/DebugCmd.h"
 
 #include <glm/gtc/type_ptr.hpp>
+
 
 using namespace Nuake;
 
@@ -204,4 +206,17 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
 
     sceneViewport = viewport;
+
+	sceneViewport->GetOnDebugDraw().AddRaw(this, &ViewportWidget::OnDebugDraw);
+}
+
+void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
+{
+    auto cam = debugCmd.GetScene()->GetCurrentCamera();
+
+    auto view = cam->GetTransform();
+    auto proj = cam->GetPerspective();
+    Matrix4 model = glm::translate(Matrix4(1.0f), Vector3(0, 3, 0));
+
+	debugCmd.DrawQuad(proj * view * model);
 }

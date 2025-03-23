@@ -80,13 +80,14 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct DebugConstant
+struct CopyPushConstant
 {
-    float4x4 Transform;
+    int SourceTextureID;
+    int Source2TextureID;
 };
 
 [[vk::push_constant]]
-DebugConstant pushConstants;
+CopyPushConstant pushConstants;
 
 // Outputs
 struct VSOutput {
@@ -101,7 +102,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 
     Vertex v = vertexBuffer[vertexIndex];
     output.UV = float2(v.uv_x, v.uv_y);
-    output.Position = mul(pushConstants.Transform, float4(v.position, 1.0f));
+    output.Position = float4(v.position, 1.0f);
     
     return output;
 }

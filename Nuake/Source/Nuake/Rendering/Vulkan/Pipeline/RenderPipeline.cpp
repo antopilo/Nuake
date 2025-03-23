@@ -225,6 +225,8 @@ void RenderPass::Build()
 
 	PipelineBuilder pipelineBuilder;
 	pipelineBuilder.PipelineLayout = PipelineLayout;
+
+	assert(VertShader != nullptr && FragShader != nullptr && "No shader set for renderpass!");
 	pipelineBuilder.SetShaders(VertShader->GetModule(), FragShader->GetModule());
 	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);

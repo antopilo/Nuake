@@ -2,6 +2,7 @@
 #include "Nuake/Core/Core.h"
 #include "Nuake/Resource/UUID.h"
 
+#include "Nuake/Rendering/Vulkan/Constant/DebugConstant.h"
 #include "Nuake/Rendering/Vulkan/Pipeline/RenderPipeline.h"
 #include "Nuake/Rendering/Vulkan/VkResources.h"
 
@@ -50,6 +51,12 @@ namespace Nuake
 		int SourceTextureID;
 	};
 
+	struct CopyConstant
+	{
+		int SourceTextureID;
+		int Source2TextureID;
+	};
+
 	struct OutlineConstant
 	{
 		Vector4 Color;
@@ -91,6 +98,7 @@ namespace Nuake
 		Ref<VulkanImage> ShadingOutput;
 
 		Ref<VulkanImage> GizmoOutput;
+		Ref<VulkanImage> GizmoCombineOutput;
 
 		Ref<VulkanImage> TonemappedOutput;
 
@@ -110,6 +118,8 @@ namespace Nuake
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
 		TonemapConstant tonemapConstant;
+		DebugConstant debugConstant;
+		CopyConstant copyConstant;
 		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
 
@@ -124,7 +134,7 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return TonemappedOutput; }
+		Ref<VulkanImage> GetOutput() { return GizmoCombineOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 

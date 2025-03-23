@@ -1,11 +1,28 @@
 #include "DebugCmd.h"
 
+#include "VulkanRenderer.h"
 
 using namespace Nuake;
 
-DebugCmd::DebugCmd(Cmd& inCmd) : 
-	cmd(inCmd) 
+Ref<Scene> DebugCmd::GetScene() const
 {
+	return ctx.scene;
+}
+
+DebugCmd::DebugCmd(Cmd& inCmd, PassRenderContext& inCtx) : 
+	cmd(inCmd), ctx(inCtx), debugConstant({})
+{
+}
+
+void DebugCmd::DrawQuad(const Matrix4& transform)
+{
+	debugConstant.Transform = transform;
+	cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(DebugConstant), &debugConstant);
+
+	auto& quadMesh = VkSceneRenderer::QuadMesh;
+	cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+	cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+	cmd.DrawIndexed(6);
 }
 
 void DebugCmd::DrawLine(const Vector3& start, const Vector3& end, const Color& color) const

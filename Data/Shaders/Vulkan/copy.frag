@@ -80,28 +80,35 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct DebugConstant
-{
-    float4x4 Transform;
-};
-
-[[vk::push_constant]]
-DebugConstant pushConstants;
-
-// Outputs
-struct VSOutput {
+struct PSInput {
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };
 
-// Main vertex shader
-VSOutput main(uint vertexIndex : SV_VertexID) 
-{
-    VSOutput output;
+struct PSOutput {
+    float4 oColor0 : SV_TARGET;
+};
 
-    Vertex v = vertexBuffer[vertexIndex];
-    output.UV = float2(v.uv_x, v.uv_y);
-    output.Position = mul(pushConstants.Transform, float4(v.position, 1.0f));
-    
+struct CopyPushConstant
+{
+    int SourceTextureID;
+    int Source2TextureID;
+};
+
+[[vk::push_constant]]
+CopyPushConstant pushConstants;
+
+PSOutput main(PSInput input)
+{
+    PSOutput output;
+
+    int sourceTextureID = pushConstants.SourceTextureID;
+    int source2TextureID = pushConstants.Source2TextureID;
+
+    float2 uv = input.UV;
+    float4 sampleValue = textures[sourceTextureID].Sample(mySampler, input.UV);
+    float4 sampleValue2 = textures[source2TextureID].Sample(mySampler, input.UV);
+
+    output.oColor0 = sampleValue + sampleValue2;
     return output;
 }

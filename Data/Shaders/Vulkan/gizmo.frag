@@ -89,73 +89,18 @@ struct PSOutput {
     float4 oColor0 : SV_TARGET;
 };
 
-struct OutlinePushConstant
+struct DebugConstant
 {
-    float4 Color;
-    float Thickness;
-    int SourceTextureID;
-    int EntityIDTextureID;
-    int DepthTextureID;
-    float SelectedEntity;
+    float4x4 Transform;
 };
 
 [[vk::push_constant]]
-OutlinePushConstant pushConstants;
+DebugConstant pushConstants;
 
 PSOutput main(PSInput input)
 {
     PSOutput output;
-
-    float4 outlineColor = pushConstants.Color;
-    float target = pushConstants.SelectedEntity;
-    float radius = pushConstants.Thickness;
-	float2 uv = input.UV;
-
-    int entityIDTextureID = pushConstants.EntityIDTextureID;
-    float hasHit = 0.0f;
-
-    float sampleValue = textures[entityIDTextureID].Sample(mySampler, uv).r;
-
-    if(abs(sampleValue - target) < 0.0001)
-    {
-        output.oColor0 = outlineColor;
-        output.oColor0.a = 1.0;
-        return output;
-    }
-
-    float4 fragColor = float4(0, 0, 0, 0);
-    const float TAU = 6.28318530;
-	const float steps = 32.0;
-    for(float i = 0.0f; i < TAU; i += TAU / steps)
-    {
-        float2 uvOffset = float2(sin(i), cos(i)) * radius;
-
-        float2 sampleUV = uv + uvOffset;
-        sampleUV.x = clamp(sampleUV.x, 0.0, 0.999);
-		sampleUV.y = clamp(sampleUV.y, 0.0, 0.999);
-        
-        int sampleValue = (int)textures[entityIDTextureID].Sample(mySampler, sampleUV).r;
-        if(sampleValue == target)
-        {
-            hasHit = 1.0f;
-        }
-
-        float alpha = smoothstep(0.5, 0.9, int(sampleValue != target) * hasHit * 10.0f);
-        float4 outputColor = float4(
-			lerp(fragColor.r, outlineColor.r, alpha),
-			lerp(fragColor.g, outlineColor.g, alpha),
-			lerp(fragColor.b, outlineColor.b, alpha),
-			lerp(fragColor.a, outlineColor.a, alpha)
-		);
-
-        fragColor = outputColor;
-    }
-
-    if(fragColor.a > 0.1)
-    {
-        fragColor.a = 1.0f;
-    }
-
-    output.oColor0 = fragColor;
+    
+    output.oColor0 = float4(input.UV.x, input.UV.y, 0, 1);
     return output;
 }

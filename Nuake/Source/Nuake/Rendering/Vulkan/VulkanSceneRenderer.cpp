@@ -25,7 +25,6 @@ using namespace Nuake;
 Ref<VkMesh> VkSceneRenderer::QuadMesh;
 
 void VkSceneRenderer::Init()
-	
 {
 	LoadShaders();
 
@@ -67,6 +66,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("outline_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/outline.vert"));
 	shaderMgr.AddShader("gizmo_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/gizmo.frag"));
 	shaderMgr.AddShader("gizmo_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/gizmo.vert"));
+	shaderMgr.AddShader("copy_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/copy.frag"));
+	shaderMgr.AddShader("copy_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/copy.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)

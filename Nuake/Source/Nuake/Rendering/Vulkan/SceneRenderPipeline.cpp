@@ -112,6 +112,9 @@ SceneRenderPipeline::SceneRenderPipeline()
 	GizmoOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	GizmoOutput->SetDebugName("GizmoOutput");
 
+	GizmoCombineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GizmoCombineOutput->SetDebugName("GizmoCombineOutput");
+
 	// Setup bloom targets
 	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	BloomThreshold = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
@@ -241,7 +244,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 
 	auto& tonemapPass = GBufferPipeline.AddPass("Tonemap");
 	tonemapPass.SetShaders(shaderMgr.GetShader("tonemap_vert"), shaderMgr.GetShader("tonemap_frag"));
-	tonemapPass.SetPushConstant<TonemapConstant>(tonemapConstant);
+	tonemapPass.SetPushConstant(tonemapConstant);
 	tonemapPass.AddAttachment("TonemapOutput", TonemappedOutput->GetFormat());
 	tonemapPass.SetDepthTest(false);
 	tonemapPass.AddInput("ShadingOutput");
@@ -279,6 +282,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
+	gizmoPass.SetPushConstant(debugConstant);
 	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
 	gizmoPass.AddInput("Depth");
 	gizmoPass.SetPreRender([&](PassRenderContext& ctx) {
@@ -297,8 +301,42 @@ SceneRenderPipeline::SceneRenderPipeline()
 	gizmoPass.SetRender([&](PassRenderContext& ctx) 
 	{
 		auto& cmd = ctx.commandBuffer;
-		DebugCmd debugCmd = DebugCmd(cmd);
+		DebugCmd debugCmd = DebugCmd(cmd, ctx);
 		OnDebugDraw().Broadcast(debugCmd);
+	});
+
+	auto& gizmoCombinePass = GBufferPipeline.AddPass("GizmoCombine");
+	gizmoCombinePass.SetPushConstant(copyConstant);
+	gizmoCombinePass.SetShaders(shaderMgr.GetShader("copy_vert"), shaderMgr.GetShader("copy_frag"));
+	gizmoCombinePass.AddAttachment("GizmoCombineOutput", GizmoCombineOutput->GetFormat());
+	gizmoCombinePass.AddInput("GizmoCombineOutput");
+	gizmoCombinePass.SetPreRender([&](PassRenderContext& ctx) 
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	gizmoCombinePass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+
+		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
+
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
 	});
 
 	auto& outlinePass = GBufferPipeline.AddPass("Outline");
@@ -360,6 +398,9 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	ShadingOutput = ResizeImage(ctx, ShadingOutput, ctx.resolution);
 	TonemappedOutput = ResizeImage(ctx, TonemappedOutput, ctx.resolution);
 
+	GizmoOutput = ResizeImage(ctx, GizmoOutput, ctx.resolution);
+	GizmoCombineOutput = ResizeImage(ctx, GizmoCombineOutput, ctx.resolution);
+
 	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
 
 	Color clearColor = ctx.scene->GetEnvironment()->AmbientColor;
@@ -370,15 +411,12 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial, GBufferEntityID },	// GBuffer
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
-		{ OutlineOutput },
+		{ GizmoOutput },
+		{ GizmoCombineOutput },
 		{ OutlineOutput }
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);
-
-	// Debug drawing
-	DebugCmd debugCmd = DebugCmd(ctx.commandBuffer);
-	OnDebugDraw().Broadcast(debugCmd);
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size)
