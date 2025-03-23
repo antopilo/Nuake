@@ -213,7 +213,6 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
 	sceneViewport->GetOnDebugDraw().AddRaw(this, &ViewportWidget::OnDebugDraw);
 }
 
-
 float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
 {
     float distance = Distance(camPosition, position);
@@ -227,7 +226,6 @@ float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
 
     return 1.0f;
 }
-
 
 template<typename T>
 void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon)

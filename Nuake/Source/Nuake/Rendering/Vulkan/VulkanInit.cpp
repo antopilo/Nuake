@@ -177,7 +177,7 @@ VkRenderingAttachmentInfo VulkanInit::DepthAttachmentInfo(VkImageView view, VkIm
 
 	depthAttachment.imageView = view;
 	depthAttachment.imageLayout = layout;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	depthAttachment.clearValue.depthStencil.depth = 0.f;
 

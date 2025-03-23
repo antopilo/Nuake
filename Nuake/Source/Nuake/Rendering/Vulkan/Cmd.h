@@ -26,6 +26,7 @@ namespace Nuake
 		void SetViewport(const Vector2& size) const;
 		void SetScissor(const Vector2& size) const;
 		void ClearColorImage(Ref<VulkanImage> img, Color color = Color(0, 0, 0, 1)) const;
+		void ClearDepthImage(Ref<VulkanImage> img) const;
 		void BindDescriptorSet(VkPipelineLayout pipeline, VkDescriptorSet descriptor, uint32_t set) const;
 		void BindIndexBuffer(VkBuffer buffer) const;
 		void DrawIndexed(uint32_t count) const;

@@ -52,6 +52,22 @@ void Cmd::ClearColorImage(Ref<VulkanImage> img, Color color) const
 	vkCmdClearColorImage(CmdBuffer, img->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 }
 
+void Cmd::ClearDepthImage(Ref<VulkanImage> img) const
+{
+	VkClearDepthStencilValue clearValue = {};
+	clearValue.depth = 0.0f;
+	clearValue.stencil = 0;
+
+	VkImageSubresourceRange clearRange = {};
+	clearRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+	clearRange.baseMipLevel = 0;
+	clearRange.levelCount = VK_REMAINING_MIP_LEVELS;
+	clearRange.baseArrayLayer = 0;
+	clearRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+	vkCmdClearDepthStencilImage(CmdBuffer, img->GetImage(), VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
+}
+
 void Cmd::BindDescriptorSet(VkPipelineLayout pipeline, VkDescriptorSet descriptor, uint32_t set) const
 {
 	vkCmdBindDescriptorSets(

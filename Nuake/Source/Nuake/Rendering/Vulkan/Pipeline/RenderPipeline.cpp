@@ -9,9 +9,10 @@
 
 using namespace Nuake;
 
-TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage) :
+TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage, bool clearOnLoad) :
 	Name(name),
-	Format(format)
+	Format(format),
+	ClearOnLoad(clearOnLoad)
 {
 	Image = std::make_shared<VulkanImage>(format, Vector2(1280, 720), usage);
 
@@ -37,11 +38,21 @@ void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
 	// Clear all color attachments
-	for (auto& attachment : inputs)
+	for (int i = 0; i < std::size(Attachments); i++)
 	{
-		if (attachment->GetUsage() != ImageUsage::Depth)
+		auto& texture = inputs[i];
+		auto& spec = Attachments[i];
+
+		if (spec.ClearOnLoad)
 		{
-			ctx.commandBuffer.ClearColorImage(attachment, this->ClearColor);
+			if (texture->GetUsage() != ImageUsage::Depth)
+			{
+				ctx.commandBuffer.ClearColorImage(texture, this->ClearColor);
+			}
+			else
+			{
+				ctx.commandBuffer.ClearDepthImage(texture);
+			}
 		}
 	}
 }
@@ -120,9 +131,9 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 	}
 }
 
-TextureAttachment& RenderPass::AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage)
+TextureAttachment& RenderPass::AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage, bool clearOnLoad)
 {
-	auto newAttachment = TextureAttachment(name, format, usage);
+	auto newAttachment = TextureAttachment(name, format, usage, clearOnLoad);
 	if (usage == ImageUsage::Depth)
 	{
 		DepthAttachment = newAttachment;

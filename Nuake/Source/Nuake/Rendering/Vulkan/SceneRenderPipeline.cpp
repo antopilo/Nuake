@@ -157,6 +157,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx) {
 		Cmd& cmd = ctx.commandBuffer;
+
 		Ref<Scene> scene = ctx.scene;
 		auto& res = GPUResources::Get();
 
@@ -283,8 +284,10 @@ SceneRenderPipeline::SceneRenderPipeline()
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
 	gizmoPass.SetPushConstant(debugConstant);
-	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
 	gizmoPass.AddInput("Depth");
+	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
+	gizmoPass.AddAttachment("GizmoDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
+	gizmoPass.SetDepthTest(true);
 	gizmoPass.SetPreRender([&](PassRenderContext& ctx) {
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
@@ -411,7 +414,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial, GBufferEntityID },	// GBuffer
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
-		{ GizmoOutput },
+		{ GizmoOutput, GBufferDepth }, // Reusing depth from gBuffer
 		{ GizmoCombineOutput },
 		{ OutlineOutput }
 	};

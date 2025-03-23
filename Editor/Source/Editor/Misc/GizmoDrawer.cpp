@@ -617,7 +617,6 @@ void GizmoDrawer::DrawGizmos(Ref<Scene> scene, bool occluded)
 		renderList.Flush(gizmoShader, true);
 	}
 
-	
 	// Sound emitter
 	auto audioView = scene->m_Registry.view<TransformComponent, AudioEmitterComponent>();
 	for (auto e : audioView)

@@ -32,9 +32,10 @@ namespace Nuake
 		std::string Name;
 		ImageFormat Format;
 		Ref<VulkanImage> Image;
+		bool ClearOnLoad = true;
 
 	public:
-		TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
+		TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default, bool clearOnLoad = true);
 		TextureAttachment() = default;
 		~TextureAttachment() = default;
 	};
@@ -88,7 +89,7 @@ namespace Nuake
 	public:
 		void SetDepthTest(bool enabled) { HasDepthTest = enabled; }
 		std::string GetName() const { return Name; }
-		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default);
+		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default, bool clearOnLoad = true);
 		TextureAttachment& GetAttachment(const std::string& name);
 		std::vector<TextureAttachment> GetAttachments();
 
