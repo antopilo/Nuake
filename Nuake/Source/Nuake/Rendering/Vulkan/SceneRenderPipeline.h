@@ -90,6 +90,8 @@ namespace Nuake
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
 
+		Ref<VulkanImage> GizmoOutput;
+
 		Ref<VulkanImage> TonemappedOutput;
 
 		Ref<VulkanImage> OutlineOutput;

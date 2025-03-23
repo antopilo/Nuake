@@ -106,8 +106,11 @@ SceneRenderPipeline::SceneRenderPipeline()
 	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::R32F, defaultSize);
 	GBufferEntityID->SetDebugName("GBufferEntityID");
 
-	OutlineOutput =CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	OutlineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	OutlineOutput->SetDebugName("OutlineOutput");
+
+	GizmoOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GizmoOutput->SetDebugName("GizmoOutput");
 
 	// Setup bloom targets
 	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
@@ -274,6 +277,30 @@ SceneRenderPipeline::SceneRenderPipeline()
 		cmd.DrawIndexed(6);
 	});
 
+	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
+	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
+	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
+	gizmoPass.AddInput("Depth");
+	gizmoPass.SetPreRender([&](PassRenderContext& ctx) {
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	gizmoPass.SetRender([&](PassRenderContext& ctx) 
+	{
+		auto& cmd = ctx.commandBuffer;
+		DebugCmd debugCmd = DebugCmd(cmd);
+		OnDebugDraw().Broadcast(debugCmd);
+	});
+
 	auto& outlinePass = GBufferPipeline.AddPass("Outline");
 	outlinePass.SetShaders(shaderMgr.GetShader("outline_vert"), shaderMgr.GetShader("outline_frag"));
 	outlinePass.SetPushConstant<OutlineConstant>(outlineConstant);
@@ -343,6 +370,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial, GBufferEntityID },	// GBuffer
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
+		{ OutlineOutput },
 		{ OutlineOutput }
 	};
 

@@ -65,6 +65,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("tonemap_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/tonemap.vert"));
 	shaderMgr.AddShader("outline_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/outline.frag"));
 	shaderMgr.AddShader("outline_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/outline.vert"));
+	shaderMgr.AddShader("gizmo_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/gizmo.frag"));
+	shaderMgr.AddShader("gizmo_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/gizmo.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)

@@ -378,7 +378,6 @@ namespace Nuake
 		currentProject = project;
 
 		// TODO(antopilo) only generate manifest in editor context
-		
 		FileSystem::SetRootDirectory(FileSystem::GetParentPath(project->FullPath));
 		GenerateManifest();
 

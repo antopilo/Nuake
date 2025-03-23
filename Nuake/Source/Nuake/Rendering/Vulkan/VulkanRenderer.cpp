@@ -19,6 +19,7 @@
 #include "SceneViewport.h"
 #include "Nuake/Rendering/Vertex.h"
 #include "VulkanSceneRenderer.h"
+#include "SceneRenderPipeline.h"
 
 #include "DescriptorLayoutBuilder.h"
 
@@ -465,6 +466,9 @@ void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& view
 	// Each viewport has its own scene renderer
 	Ref<VkSceneRenderer> sceneRenderer = CreateRef<VkSceneRenderer>();
 	sceneRenderer->Init();
+
+	// Register the viewport to the onDebugDraw event for custom drawing
+	sceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(Viewports[viewportId].get(), &Viewport::OnDebugDraw);
 
 	SceneRenderers[viewportId] = std::move(sceneRenderer);
 }

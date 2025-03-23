@@ -339,6 +339,8 @@ void RenderPipeline::Execute(PassRenderContext& ctx, PipelineAttachments& inputs
 		return;
 	}
 
+	assert(std::size(RenderPasses) == std::size(inputs) && "Did you forget to an input?");
+
 	int passIndex = 0;
 	for (auto& pass : RenderPasses)
 	{

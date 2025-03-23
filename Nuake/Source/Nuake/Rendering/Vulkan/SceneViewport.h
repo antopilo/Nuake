@@ -1,12 +1,14 @@
 #pragma once
 #include "Nuake/Core/Core.h"
 #include "Nuake/Core/Maths.h"
+#include "Nuake/Core/MulticastDelegate.h"
 #include "Nuake/Resource/UUID.h"
 
 
 namespace Nuake
 {
 	class VulkanImage;
+	class DebugCmd;
 
 	class Viewport
 	{
@@ -17,6 +19,7 @@ namespace Nuake
 
 		UUID viewId;
 		Ref<VulkanImage> renderTarget;
+		MulticastDelegate<DebugCmd&> debugDrawDelegate;
 
 		int selectedEntityID;
 	public:
@@ -45,5 +48,15 @@ namespace Nuake
 
 		Ref<VulkanImage> GetRenderTarget() const { return renderTarget; }
 		bool Resize();
+
+		void OnDebugDraw(DebugCmd& debugCmd)
+		{
+			debugDrawDelegate.Broadcast(debugCmd);
+		}
+
+		MulticastDelegate<DebugCmd&>& GetOnDebugDraw() 
+		{
+			return debugDrawDelegate;
+		}
 	};
 }
