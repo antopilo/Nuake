@@ -261,8 +261,6 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
 
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
-    Matrix4 model = glm::translate(Matrix4(1.0f), Vector3(0, 3, 0));
-	debugCmd.DrawQuad(proj * view * model);
 
     static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon)
     {
