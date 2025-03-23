@@ -92,6 +92,7 @@ struct PSOutput {
 struct DebugConstant
 {
     float4x4 Transform;
+    int TextureID;
 };
 
 [[vk::push_constant]]
@@ -101,6 +102,23 @@ PSOutput main(PSInput input)
 {
     PSOutput output;
     
-    output.oColor0 = float4(input.UV.x, input.UV.y, 0, 1);
+    if(pushConstants.TextureID < 0)
+    {
+        output.oColor0 = float4(input.UV.x, input.UV.y, 0, 1);
+    }
+    else
+    {
+        float2 uv = input.UV;
+        float4 textureSample = textures[pushConstants.TextureID].Sample(mySampler, uv);
+
+        // Alpha scisorring
+        if(textureSample.a < 0.1)
+        {
+            discard;
+        }
+
+        output.oColor0 = textureSample;
+    }
+
     return output;
 }

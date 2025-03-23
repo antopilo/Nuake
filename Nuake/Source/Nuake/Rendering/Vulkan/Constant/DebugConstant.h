@@ -6,5 +6,6 @@ namespace Nuake
 	struct DebugConstant
 	{
 		Matrix4 Transform;
+		int TextureID;
 	};
 }

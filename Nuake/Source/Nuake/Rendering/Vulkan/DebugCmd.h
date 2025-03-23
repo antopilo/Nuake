@@ -25,6 +25,8 @@ namespace Nuake
 		Ref<Scene> GetScene() const;
 
 		void DrawQuad(const Matrix4& transform);
+		void DrawTexturedQuad(const Matrix4& transform, Ref<VulkanImage> texture);
+
 		void DrawLine(const Vector3& start, const Vector3& end, const Color& color) const;
 		void DrawSphere(const Vector2& position, float radius, const Color& color) const;
 		void DrawCube(const Vector3& position, const Vector3& size, const Color& color) const;

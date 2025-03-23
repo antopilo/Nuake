@@ -83,6 +83,7 @@ StructuredBuffer<CameraView> cameras;
 struct DebugConstant
 {
     float4x4 Transform;
+    int TextureID;
 };
 
 [[vk::push_constant]]
