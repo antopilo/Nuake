@@ -109,6 +109,6 @@ PSOutput main(PSInput input)
     float4 sampleValue = textures[sourceTextureID].Sample(mySampler, input.UV);
     float4 sampleValue2 = textures[source2TextureID].Sample(mySampler, input.UV);
 
-    output.oColor0 = sampleValue + sampleValue2;
+    output.oColor0 = lerp(sampleValue, sampleValue2, 1.0 - sampleValue.a);
     return output;
 }
