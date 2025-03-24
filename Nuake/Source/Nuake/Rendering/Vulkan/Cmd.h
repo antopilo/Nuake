@@ -35,7 +35,7 @@ namespace Nuake
 		void TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const;
 		void CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const;
 
-		void SetLineRasterizationMode(VkLineRasterizationModeEXT mode) const;
+		void SetLineRasterizationMode(VkLineRasterizationMode mode) const;
 		void SetLineWidth(float lineWidth) const;
 		void SetLineStippleEnabled(bool enabled) const;
 		void SetLineStipple(uint32_t factor, uint16_t pattern) const;

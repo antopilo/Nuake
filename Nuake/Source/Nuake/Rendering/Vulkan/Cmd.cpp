@@ -153,7 +153,7 @@ void Cmd::CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const
 	vkCmdBlitImage2(CmdBuffer, &blitInfo);
 }
 
-void Cmd::SetLineRasterizationMode(VkLineRasterizationModeEXT mode) const
+void Cmd::SetLineRasterizationMode(VkLineRasterizationMode mode) const
 {
 	vkCmdSetLineRasterizationModeEXT(CmdBuffer, mode);
 }

@@ -54,8 +54,9 @@ Ref<Scene> DebugLineCmd::GetScene() const
 void DebugLineCmd::DrawLine(const Matrix4& transform, const Color& inColor, float lineWidth)
 {
 	cmd.SetPolygonMode(VK_POLYGON_MODE_LINE);
+	cmd.SetLineRasterizationMode(VK_LINE_RASTERIZATION_MODE_RECTANGULAR_SMOOTH);
 	cmd.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
-	cmd.SetLineStipple(2, 0b1110110100000000);
+	cmd.SetLineStipple(2, 0b1111111100000000);
 	cmd.SetLineStippleEnabled(true);
 	lineConstant.LineColor = inColor;
 	lineConstant.Transform = transform;
