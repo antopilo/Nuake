@@ -153,4 +153,34 @@ void Cmd::CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const
 	vkCmdBlitImage2(CmdBuffer, &blitInfo);
 }
 
+void Cmd::SetLineRasterizationMode(VkLineRasterizationModeEXT mode) const
+{
+	vkCmdSetLineRasterizationModeEXT(CmdBuffer, mode);
+}
+
+void Cmd::SetLineWidth(float lineWidth) const
+{
+	vkCmdSetLineWidth(CmdBuffer, lineWidth);
+}
+
+void Cmd::SetLineStippleEnabled(bool enabled) const
+{
+	vkCmdSetLineStippleEnableEXT(CmdBuffer, static_cast<VkBool32>(enabled));
+}
+
+void Cmd::SetLineStipple(uint32_t factor, uint16_t pattern) const
+{
+	vkCmdSetLineStippleKHR(CmdBuffer, factor, pattern);
+}
+
+void Cmd::SetPrimitiveTopology(VkPrimitiveTopology topology) const
+{
+	vkCmdSetPrimitiveTopology(CmdBuffer, topology);
+}
+
+void Cmd::SetPolygonMode(VkPolygonMode mode) const
+{
+	vkCmdSetPolygonModeEXT(CmdBuffer, mode);
+}
+
 

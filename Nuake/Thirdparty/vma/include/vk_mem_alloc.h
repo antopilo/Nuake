@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017-2024 Advanced Micro Devices, Inc. All rights reserved.
+// Copyright (c) 2017-2025 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,9 @@
 
 /** \mainpage Vulkan Memory Allocator
 
-<b>Version 3.1.0</b>
+<b>Version 3.2.1</b>
 
-Copyright (c) 2017-2024 Advanced Micro Devices, Inc. All rights reserved. \n
+Copyright (c) 2017-2025 Advanced Micro Devices, Inc. All rights reserved. \n
 License: MIT \n
 See also: [product page on GPUOpen](https://gpuopen.com/gaming-product/vulkan-memory-allocator/),
 [repository on GitHub](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
@@ -133,7 +133,9 @@ extern "C" {
 #endif
 
 #if !defined(VMA_VULKAN_VERSION)
-    #if defined(VK_VERSION_1_3)
+    #if defined(VK_VERSION_1_4)
+        #define VMA_VULKAN_VERSION 1004000
+    #elif defined(VK_VERSION_1_3)
         #define VMA_VULKAN_VERSION 1003000
     #elif defined(VK_VERSION_1_2)
         #define VMA_VULKAN_VERSION 1002000
@@ -1121,7 +1123,7 @@ typedef struct VmaAllocatorCreateInfo
 
     It must be a value in the format as created by macro `VK_MAKE_VERSION` or a constant like: `VK_API_VERSION_1_1`, `VK_API_VERSION_1_0`.
     The patch version number specified is ignored. Only the major and minor versions are considered.
-    Only versions 1.0, 1.1, 1.2, 1.3 are supported by the current implementation.
+    Only versions 1.0...1.4 are supported by the current implementation.
     Leaving it initialized to zero is equivalent to `VK_API_VERSION_1_0`.
     It must match the Vulkan version used by the application and supported on the selected physical device,
     so it must be no higher than `VkApplicationInfo::apiVersion` passed to `vkCreateInstance`
@@ -9314,10 +9316,10 @@ void VmaBlockMetadata_TLSF::Alloc(
         RemoveFreeBlock(currentBlock);
 
     VkDeviceSize debugMargin = GetDebugMargin();
-    VkDeviceSize misssingAlignment = offset - currentBlock->offset;
+    VkDeviceSize missingAlignment = offset - currentBlock->offset;
 
     // Append missing alignment to prev block or create new one
-    if (misssingAlignment)
+    if (missingAlignment)
     {
         Block* prevBlock = currentBlock->prevPhysical;
         VMA_ASSERT(prevBlock != VMA_NULL && "There should be no missing alignment at offset 0!");
@@ -9325,17 +9327,17 @@ void VmaBlockMetadata_TLSF::Alloc(
         if (prevBlock->IsFree() && prevBlock->size != debugMargin)
         {
             uint32_t oldList = GetListIndex(prevBlock->size);
-            prevBlock->size += misssingAlignment;
+            prevBlock->size += missingAlignment;
             // Check if new size crosses list bucket
             if (oldList != GetListIndex(prevBlock->size))
             {
-                prevBlock->size -= misssingAlignment;
+                prevBlock->size -= missingAlignment;
                 RemoveFreeBlock(prevBlock);
-                prevBlock->size += misssingAlignment;
+                prevBlock->size += missingAlignment;
                 InsertFreeBlock(prevBlock);
             }
             else
-                m_BlocksFreeSize += misssingAlignment;
+                m_BlocksFreeSize += missingAlignment;
         }
         else
         {
@@ -9344,15 +9346,15 @@ void VmaBlockMetadata_TLSF::Alloc(
             prevBlock->nextPhysical = newBlock;
             newBlock->prevPhysical = prevBlock;
             newBlock->nextPhysical = currentBlock;
-            newBlock->size = misssingAlignment;
+            newBlock->size = missingAlignment;
             newBlock->offset = currentBlock->offset;
             newBlock->MarkTaken();
 
             InsertFreeBlock(newBlock);
         }
 
-        currentBlock->size -= misssingAlignment;
-        currentBlock->offset += misssingAlignment;
+        currentBlock->size -= missingAlignment;
+        currentBlock->offset += missingAlignment;
     }
 
     VkDeviceSize size = request.size + debugMargin;
@@ -12977,23 +12979,17 @@ VmaAllocator_T::VmaAllocator_T(const VmaAllocatorCreateInfo* pCreateInfo) :
         VMA_ASSERT(0 && "VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT is set but required extension or Vulkan 1.2 is not available in your Vulkan header or its support in VMA has been disabled by a preprocessor macro.");
     }
 #endif
+#if VMA_VULKAN_VERSION < 1004000
+    VMA_ASSERT(m_VulkanApiVersion < VK_MAKE_VERSION(1, 4, 0) && "vulkanApiVersion >= VK_API_VERSION_1_4 but required Vulkan version is disabled by preprocessor macros.");
+#endif
 #if VMA_VULKAN_VERSION < 1003000
-    if(m_VulkanApiVersion >= VK_MAKE_VERSION(1, 3, 0))
-    {
-        VMA_ASSERT(0 && "vulkanApiVersion >= VK_API_VERSION_1_3 but required Vulkan version is disabled by preprocessor macros.");
-    }
+    VMA_ASSERT(m_VulkanApiVersion < VK_MAKE_VERSION(1, 3, 0) && "vulkanApiVersion >= VK_API_VERSION_1_3 but required Vulkan version is disabled by preprocessor macros.");
 #endif
 #if VMA_VULKAN_VERSION < 1002000
-    if(m_VulkanApiVersion >= VK_MAKE_VERSION(1, 2, 0))
-    {
-        VMA_ASSERT(0 && "vulkanApiVersion >= VK_API_VERSION_1_2 but required Vulkan version is disabled by preprocessor macros.");
-    }
+    VMA_ASSERT(m_VulkanApiVersion < VK_MAKE_VERSION(1, 2, 0) && "vulkanApiVersion >= VK_API_VERSION_1_2 but required Vulkan version is disabled by preprocessor macros.");
 #endif
 #if VMA_VULKAN_VERSION < 1001000
-    if(m_VulkanApiVersion >= VK_MAKE_VERSION(1, 1, 0))
-    {
-        VMA_ASSERT(0 && "vulkanApiVersion >= VK_API_VERSION_1_1 but required Vulkan version is disabled by preprocessor macros.");
-    }
+    VMA_ASSERT(m_VulkanApiVersion < VK_MAKE_VERSION(1, 1, 0) && "vulkanApiVersion >= VK_API_VERSION_1_1 but required Vulkan version is disabled by preprocessor macros.");
 #endif
 #if !(VMA_MEMORY_PRIORITY)
     if(m_UseExtMemoryPriority)
@@ -13306,10 +13302,14 @@ void VmaAllocator_T::ImportVulkanFunctions_Dynamic()
     if(m_VulkanApiVersion >= VK_MAKE_VERSION(1, 1, 0))
     {
         VMA_FETCH_INSTANCE_FUNC(vkGetPhysicalDeviceMemoryProperties2KHR, PFN_vkGetPhysicalDeviceMemoryProperties2KHR, "vkGetPhysicalDeviceMemoryProperties2");
+        // Try to fetch the pointer from the other name, based on suspected driver bug - see issue #410.
+        VMA_FETCH_INSTANCE_FUNC(vkGetPhysicalDeviceMemoryProperties2KHR, PFN_vkGetPhysicalDeviceMemoryProperties2KHR, "vkGetPhysicalDeviceMemoryProperties2KHR");
     }
     else if(m_UseExtMemoryBudget)
     {
         VMA_FETCH_INSTANCE_FUNC(vkGetPhysicalDeviceMemoryProperties2KHR, PFN_vkGetPhysicalDeviceMemoryProperties2KHR, "vkGetPhysicalDeviceMemoryProperties2KHR");
+        // Try to fetch the pointer from the other name, based on suspected driver bug - see issue #410.
+        VMA_FETCH_INSTANCE_FUNC(vkGetPhysicalDeviceMemoryProperties2KHR, PFN_vkGetPhysicalDeviceMemoryProperties2KHR, "vkGetPhysicalDeviceMemoryProperties2");
     }
 #endif
 
@@ -15070,7 +15070,7 @@ VMA_CALL_PRE VkResult VMA_CALL_POST vmaCreateAllocator(
 {
     VMA_ASSERT(pCreateInfo && pAllocator);
     VMA_ASSERT(pCreateInfo->vulkanApiVersion == 0 ||
-        (VK_VERSION_MAJOR(pCreateInfo->vulkanApiVersion) == 1 && VK_VERSION_MINOR(pCreateInfo->vulkanApiVersion) <= 3));
+        (VK_VERSION_MAJOR(pCreateInfo->vulkanApiVersion) == 1 && VK_VERSION_MINOR(pCreateInfo->vulkanApiVersion) <= 4));
     VMA_DEBUG_LOG("vmaCreateAllocator");
     *pAllocator = vma_new(pCreateInfo->pAllocationCallbacks, VmaAllocator_T)(pCreateInfo);
     VkResult result = (*pAllocator)->Init(pCreateInfo);

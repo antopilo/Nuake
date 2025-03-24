@@ -211,6 +211,7 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     sceneViewport = viewport;
 
 	sceneViewport->GetOnDebugDraw().AddRaw(this, &ViewportWidget::OnDebugDraw);
+    sceneViewport->GetOnLineDraw().AddRaw(this, &ViewportWidget::OnLineDraw);
 }
 
 float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
@@ -250,6 +251,20 @@ void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon)
     }
 }
 
+void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
+{
+    auto scene = lineCmd.GetScene();
+    auto cam = scene->GetCurrentCamera();
+    const Vector3& cameraPosition = cam->GetTranslation();
+
+    auto view = cam->GetTransform();
+    auto proj = cam->GetPerspective();
+
+    Matrix4 transform = Matrix4(1.0f);
+    transform = glm::translate(transform, { 0, 2, 0 });
+    lineCmd.DrawLine(proj * view * transform, Color(1, 0, 0, 1), 4.0f);
+}
+
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
 {
     auto scene = debugCmd.GetScene();
@@ -270,6 +285,8 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
         debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon));
     };
     
+	debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), { 0, 4, 0 }));
+
     auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
     for (auto e : lightView)
     {

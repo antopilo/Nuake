@@ -23,12 +23,24 @@ TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format
 
 RenderPass::RenderPass(const std::string& name) :
 	Name(name),
-	PushConstantSize(0)
+	PushConstantSize(0),
+	IsLinePass(false),
+	Topology(PolygonTopology::TRIANGLE_LIST)
 {
+}
+
+void RenderPass::SetIsLinePass(bool enabled)
+{
+	IsLinePass = enabled;
 }
 
 void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 {
+	ctx.commandBuffer.SetPolygonMode(VK_POLYGON_MODE_FILL);
+	ctx.commandBuffer.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+	ctx.commandBuffer.SetLineRasterizationMode(VK_LINE_RASTERIZATION_MODE_DEFAULT);
+	ctx.commandBuffer.SetLineStippleEnabled(false);
+
 	ClearAttachments(ctx, inputs);
 	TransitionAttachments(ctx, inputs);
 	Render(ctx, inputs);
@@ -53,7 +65,7 @@ void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& input
 		{
 			if (Attachments[attachmentIndex].ClearOnLoad)
 			{
-				ctx.commandBuffer.ClearColorImage(input, this->ClearColor);
+				ctx.commandBuffer.ClearColorImage(input, ClearColor);
 			}
 
 			attachmentIndex++;
@@ -210,6 +222,11 @@ void RenderPass::SetClearColor(const Color& clearColor)
 	this->ClearColor = clearColor;
 }
 
+void RenderPass::SetTopology(PolygonTopology topology)
+{
+	this->Topology = topology;
+}
+
 void RenderPass::Build()
 {
 	// Push constant range
@@ -243,11 +260,16 @@ void RenderPass::Build()
 
 	assert(VertShader != nullptr && FragShader != nullptr && "No shader set for renderpass!");
 	pipelineBuilder.SetShaders(VertShader->GetModule(), FragShader->GetModule());
-	pipelineBuilder.SetInputTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+	pipelineBuilder.SetInputTopology(static_cast<VkPrimitiveTopology>(Topology));
 	pipelineBuilder.SetPolygonMode(VK_POLYGON_MODE_FILL);
 	pipelineBuilder.SetCullMode(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
 	pipelineBuilder.SetMultiSamplingNone();
 	pipelineBuilder.EnableBlendingAlphaBlend(attachmentCount);
+
+	if (IsLinePass)
+	{
+		pipelineBuilder.SetLineRendering(true);
+	}
 
 	// Set color attachments
 	std::vector<VkFormat> formats;

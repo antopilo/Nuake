@@ -186,6 +186,7 @@ void VkRenderer::GetInstance()
 	VkDebugMessenger = VkbInstance.debug_messenger;
 }
 
+
 void VkRenderer::SelectGPU()
 {
 	VkPhysicalDeviceVulkan13Features features{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
@@ -196,14 +197,26 @@ void VkRenderer::SelectGPU()
 	features12.bufferDeviceAddress = true;
 	features12.descriptorIndexing = true;
 	features12.runtimeDescriptorArray = true;
+	std::vector<const char*> requiredExtensions = 
+	{ 
+		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+		VK_KHR_LINE_RASTERIZATION_EXTENSION_NAME,
+		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
 
-	std::vector<const char*> requiredExtensions = { VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME };
+	};
+
+	auto systemInfoRet = vkb::SystemInfo::get_system_info();
+	auto& systemInfo = systemInfoRet.value();
 
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
 	vkb::PhysicalDevice physicalDevice = selector
 		.set_minimum_version(1, 3)
 		.set_required_features_13(features)
 		.set_required_features_12(features12)
+		.set_required_features(VkPhysicalDeviceFeatures{
+			.fillModeNonSolid = VK_TRUE,
+			
+		})
 		.set_surface(Surface)
 		.add_required_extensions(requiredExtensions)
 		.select()
@@ -211,7 +224,35 @@ void VkRenderer::SelectGPU()
 
 	vkb::DeviceBuilder deviceBuilder{ physicalDevice };
 
-	VkbDevice = deviceBuilder.build().value();
+	// Configure line extension
+	VkPhysicalDeviceLineRasterizationFeaturesKHR line_raster_features{};
+	line_raster_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_LINE_RASTERIZATION_FEATURES;
+	line_raster_features.rectangularLines = VK_TRUE;
+	line_raster_features.bresenhamLines = VK_TRUE;
+	line_raster_features.smoothLines = VK_TRUE;
+	line_raster_features.stippledBresenhamLines = VK_TRUE;
+
+	VkPhysicalDeviceExtendedDynamicState3FeaturesEXT extendedDynamicState3Features{};
+	extendedDynamicState3Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_3_FEATURES_EXT;
+	extendedDynamicState3Features.extendedDynamicState3PolygonMode = VK_TRUE;
+	extendedDynamicState3Features.extendedDynamicState3LineRasterizationMode = VK_TRUE;
+	extendedDynamicState3Features.extendedDynamicState3LineStippleEnable = VK_TRUE;
+
+	// Enable fillModeNonSolid to allow VK_POLYGON_MODE_LINE
+	VkPhysicalDeviceFeatures2 features2{};
+	features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+	VkPhysicalDeviceFeatures coreFeatures{};
+	coreFeatures.fillModeNonSolid = VK_TRUE; 
+
+	features2.features = coreFeatures;
+
+	// Chain pNext for Extended Dynamic State 3
+
+	VkbDevice = deviceBuilder
+		.add_pNext(&line_raster_features)
+		.add_pNext(&extendedDynamicState3Features)
+		.build().value();
 	Device = VkbDevice.device;
 	GPU = physicalDevice.physical_device;
 }
@@ -469,6 +510,7 @@ void VkRenderer::RegisterSceneViewport(const Ref<Scene>& scene, const UUID& view
 
 	// Register the viewport to the onDebugDraw event for custom drawing
 	sceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(Viewports[viewportId].get(), &Viewport::OnDebugDraw);
+	sceneRenderer->sceneRenderPipeline->OnLineDraw().AddRaw(Viewports[viewportId].get(), &Viewport::OnLineDraw);
 
 	SceneRenderers[viewportId] = std::move(sceneRenderer);
 }

@@ -5,14 +5,15 @@
 
 using namespace Nuake;
 
-Ref<Scene> DebugCmd::GetScene() const
-{
-	return ctx.scene;
-}
 
 DebugCmd::DebugCmd(Cmd& inCmd, PassRenderContext& inCtx) : 
 	cmd(inCmd), ctx(inCtx), debugConstant({})
 {
+}
+
+Ref<Scene> DebugCmd::GetScene() const
+{
+	return ctx.scene;
 }
 
 void DebugCmd::DrawQuad(const Matrix4& transform)
@@ -40,19 +41,30 @@ void DebugCmd::DrawTexturedQuad(const Matrix4& transform, Ref<VulkanImage> textu
 	cmd.DrawIndexed(6);
 }
 
-void DebugCmd::DrawLine(const Vector3& start, const Vector3& end, const Color& color) const
-{
-	
-}
-
-void DebugCmd::DrawSphere(const Vector2& position, float radius, const Color& color) const
+DebugLineCmd::DebugLineCmd(Cmd& inCmd, PassRenderContext& inCtx) :
+	cmd(inCmd), ctx(inCtx), lineConstant({})
 {
 }
 
-void DebugCmd::DrawCube(const Vector3& position, const Vector3& size, const Color& color) const
+Ref<Scene> DebugLineCmd::GetScene() const
 {
+	return ctx.scene;
 }
 
-void DebugCmd::DrawAABB(const Vector3& min, const Vector3& max, const Color& color) const
+void DebugLineCmd::DrawLine(const Matrix4& transform, const Color& inColor, float lineWidth)
 {
+	cmd.SetPolygonMode(VK_POLYGON_MODE_LINE);
+	cmd.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_LIST);
+	cmd.SetLineStipple(2, 0b1110110100000000);
+	cmd.SetLineStippleEnabled(true);
+	lineConstant.LineColor = inColor;
+	lineConstant.Transform = transform;
+	cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(LineConstant), &lineConstant);
+
+	cmd.SetLineWidth(lineWidth);
+
+	auto& quadMesh = VkSceneRenderer::QuadMesh;
+	cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+	cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+	cmd.DrawIndexed(6);
 }

@@ -34,5 +34,12 @@ namespace Nuake
 		void CopyBuffer(VkBuffer src, VkBuffer dst, size_t size) const;
 		void TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const;
 		void CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const;
+
+		void SetLineRasterizationMode(VkLineRasterizationModeEXT mode) const;
+		void SetLineWidth(float lineWidth) const;
+		void SetLineStippleEnabled(bool enabled) const;
+		void SetLineStipple(uint32_t factor, uint16_t pattern) const;
+		void SetPrimitiveTopology(VkPrimitiveTopology topology) const;
+		void SetPolygonMode(VkPolygonMode mode) const;
 	};
 }

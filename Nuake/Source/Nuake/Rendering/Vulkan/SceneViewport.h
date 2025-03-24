@@ -9,6 +9,7 @@ namespace Nuake
 {
 	class VulkanImage;
 	class DebugCmd;
+	class DebugLineCmd;
 
 	class Viewport
 	{
@@ -20,6 +21,7 @@ namespace Nuake
 		UUID viewId;
 		Ref<VulkanImage> renderTarget;
 		MulticastDelegate<DebugCmd&> debugDrawDelegate;
+		MulticastDelegate<DebugLineCmd&> debugLineDrawDelegate;
 
 		int selectedEntityID;
 	public:
@@ -54,9 +56,19 @@ namespace Nuake
 			debugDrawDelegate.Broadcast(debugCmd);
 		}
 
+		void OnLineDraw(DebugLineCmd& debugCmd)
+		{
+			debugLineDrawDelegate.Broadcast(debugCmd);
+		}
+
 		MulticastDelegate<DebugCmd&>& GetOnDebugDraw() 
 		{
 			return debugDrawDelegate;
+		}
+
+		MulticastDelegate<DebugLineCmd&>& GetOnLineDraw()
+		{
+			return debugLineDrawDelegate;
 		}
 	};
 }

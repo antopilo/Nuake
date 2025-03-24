@@ -68,6 +68,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("gizmo_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/gizmo.vert"));
 	shaderMgr.AddShader("copy_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/copy.frag"));
 	shaderMgr.AddShader("copy_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/copy.vert"));
+	shaderMgr.AddShader("line_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/line.frag"));
+	shaderMgr.AddShader("line_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/line.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)

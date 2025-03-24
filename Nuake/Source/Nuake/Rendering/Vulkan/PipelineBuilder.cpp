@@ -64,6 +64,7 @@ VkPipeline PipelineBuilder::BuildPipeline(VkDevice device)
     // to create the pipeline
     VkGraphicsPipelineCreateInfo pipelineInfo = { .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
     // connect the renderInfo to the pNext extension mechanism
+
     pipelineInfo.pNext = &RenderInfo;
 
     pipelineInfo.stageCount = (uint32_t)ShaderStages.size();
@@ -77,11 +78,24 @@ VkPipeline PipelineBuilder::BuildPipeline(VkDevice device)
     pipelineInfo.pDepthStencilState = &DepthStencil;
     pipelineInfo.layout = PipelineLayout;
 
-    VkDynamicState state[] = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-
-    VkPipelineDynamicStateCreateInfo dynamicInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
-    dynamicInfo.pDynamicStates = &state[0];
-    dynamicInfo.dynamicStateCount = 2;
+    // Dynamic states
+    VkDynamicState state[] = 
+    { 
+        VK_DYNAMIC_STATE_VIEWPORT, 
+        VK_DYNAMIC_STATE_SCISSOR,
+        VK_DYNAMIC_STATE_LINE_WIDTH,         // Dynamic line width
+        VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY,
+        VK_DYNAMIC_STATE_POLYGON_MODE_EXT,
+        VK_DYNAMIC_STATE_LINE_RASTERIZATION_MODE_EXT,
+        VK_DYNAMIC_STATE_LINE_STIPPLE_ENABLE_EXT,
+        VK_DYNAMIC_STATE_LINE_STIPPLE_EXT,    // Dynamic stippling
+    };
+    VkPipelineDynamicStateCreateInfo dynamicInfo = 
+    { 
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+		.dynamicStateCount = static_cast<uint32_t>(std::size(state)),
+        .pDynamicStates = &state[0],
+    };
 
     pipelineInfo.pDynamicState = &dynamicInfo;
 
@@ -162,6 +176,22 @@ void PipelineBuilder::SetColorAttachments(std::vector<VkFormat>& formats)
     // connect the format to the renderInfo  structure
     RenderInfo.colorAttachmentCount = std::size(formats);
     RenderInfo.pColorAttachmentFormats = ColorAttachmentformats.data();
+}
+
+void PipelineBuilder::SetLineRendering(bool enabled)
+{
+    if (enabled)
+    {
+        LineRasterization = {};
+        LineRasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_KHR;
+        LineRasterization.lineRasterizationMode = VK_LINE_RASTERIZATION_MODE_DEFAULT;
+        LineRasterization.stippledLineEnable = VK_FALSE;
+        //RenderInfo.pNext = &LineRasterization;
+    }
+    else
+    {
+		RenderInfo.pNext = nullptr;
+    }
 }
 
 void PipelineBuilder::SetDepthFormat(VkFormat depthFormat)

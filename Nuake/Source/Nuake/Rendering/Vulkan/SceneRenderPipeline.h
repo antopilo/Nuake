@@ -7,6 +7,7 @@
 #include "Nuake/Rendering/Vulkan/VkResources.h"
 
 #include "Nuake/Core/MulticastDelegate.h"
+#include "Constant/LineConstant.h"
 
 namespace Nuake
 {
@@ -80,6 +81,7 @@ namespace Nuake
 	};
 
 	class DebugCmd;
+	class DebugLineCmd;
 
 	// This class handles all the rendering of the scene
 	class SceneRenderPipeline
@@ -96,6 +98,9 @@ namespace Nuake
 
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
+
+		Ref<VulkanImage> LineOutput;
+		Ref<VulkanImage> LineCombineOutput;
 
 		Ref<VulkanImage> GizmoOutput;
 		Ref<VulkanImage> GizmoCombineOutput;
@@ -119,6 +124,7 @@ namespace Nuake
 		ShadingConstant shadingConstant;
 		TonemapConstant tonemapConstant;
 		DebugConstant debugConstant;
+		LineConstant lineConstant;
 		CopyConstant copyConstant;
 		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
@@ -127,6 +133,7 @@ namespace Nuake
 
 		// Delegates
 		MulticastDelegate<DebugCmd&> DebugDrawDelegate;
+		MulticastDelegate<DebugLineCmd&> DebugLineDrawDelegate;
 
 	public:
 		SceneRenderPipeline();
@@ -137,7 +144,7 @@ namespace Nuake
 		Ref<VulkanImage> GetOutput() { return GizmoCombineOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
-
+		MulticastDelegate<DebugLineCmd&>& OnLineDraw() { return DebugLineDrawDelegate; }
 	private:
 		Ref<VulkanImage> ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size);
 	};

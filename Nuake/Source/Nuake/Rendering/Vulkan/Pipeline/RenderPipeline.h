@@ -48,6 +48,20 @@ namespace Nuake
 
 	using PassAttachments = std::vector<Ref<VulkanImage>>;
 	
+	enum class PolygonTopology
+	{
+		POINT_LIST = 0,
+		LINE_LIST = 1,
+		LINE_STRIP = 2,
+		TRIANGLE_LIST = 3,
+		TRIANGLE_STRIP = 4,
+		TRIANGLE_FAN = 5,
+		LINE_LIST_WITH_ADJACENCY = 6,
+		LINE_STRIP_WITH_ADJACENCY = 7,
+		TRIANGLE_LIST_WITH_ADJACENCY = 8,
+		TRIANGLE_STRIP_WITH_ADJACENCY = 9,
+		PATCH_LIST = 10,
+	};
 
 	class RenderPass 
 	{
@@ -62,10 +76,13 @@ namespace Nuake
 		std::vector<std::string> InputNames;
 		std::map<std::string, TextureAttachment> Inputs;
 
+		PolygonTopology Topology;
 		std::any PushConstant;
 		size_t PushConstantSize;
 
 		Color ClearColor;
+
+		bool IsLinePass;
 
 		std::function<void(PassRenderContext& ctx)> PreRender;
 		std::function<void(PassRenderContext& ctx)> RenderCb;
@@ -101,6 +118,7 @@ namespace Nuake
 		void SetInput(const std::string& name, TextureAttachment attachment);
 		void SetShaders(Ref<VulkanShader> vertShader, Ref<VulkanShader> fragShader);
 
+		void SetTopology(PolygonTopology topology);
 		void SetClearColor(const Color& color);
 
 		template<typename T>
@@ -108,6 +126,8 @@ namespace Nuake
 		{
 			SetPushConstant(&pushConstant, sizeof(T));
 		}
+
+		void SetIsLinePass(bool enabled);
 
 		void Build();
 

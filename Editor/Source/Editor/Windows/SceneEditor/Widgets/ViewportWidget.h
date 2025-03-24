@@ -10,6 +10,7 @@ namespace Nuake
 {
 	class Viewport;
 	class DebugCmd;
+	class DebugLineCmd;
 }
 
 class ViewportWidget : public IEditorWidget
@@ -32,5 +33,6 @@ public:
 	void Draw() override;
 	void OnSceneChanged(Ref<Nuake::Scene> scene) override;
 
+	void OnLineDraw(Nuake::DebugLineCmd& lineCmd);
 	void OnDebugDraw(Nuake::DebugCmd& debugCmd);
 };

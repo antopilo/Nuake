@@ -17,6 +17,7 @@ namespace Nuake
         VkPipelineLayout PipelineLayout;
         VkPipelineDepthStencilStateCreateInfo DepthStencil;
         VkPipelineRenderingCreateInfo RenderInfo;
+		VkPipelineRasterizationLineStateCreateInfoEXT LineRasterization;
         std::vector<VkFormat> ColorAttachmentformats = std::vector<VkFormat>();
 
 	
@@ -28,6 +29,7 @@ namespace Nuake
         VkPipeline BuildPipeline(VkDevice device);
         void SetShaders(VkShaderModule vert, VkShaderModule frag);
 
+        void SetLineRendering(bool enabled);
         void SetInputTopology(VkPrimitiveTopology topology);
         void SetPolygonMode(VkPolygonMode polygonMode);
         void SetCullMode(VkCullModeFlags cullMode, VkFrontFace frontFace);
