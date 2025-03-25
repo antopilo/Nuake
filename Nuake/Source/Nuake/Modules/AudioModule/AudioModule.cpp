@@ -1,11 +1,11 @@
 #include "AudioModule.h"
 #include "AudioSceneSystem.h"
-
+#include "Nuake/Core/Maths.h"
 #include "Nuake/Scene/SceneSystems.h"
 #include "Nuake/Modules/ModuleDB.h"
 #include <Nuake/Core/Logger.h>
 
-void PlayAudio(int id, float volume)
+void PlayAudio(int id, Nuake::Matrix4 volume)
 {
 
 }

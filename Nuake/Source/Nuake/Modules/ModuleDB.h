@@ -5,20 +5,21 @@
 
 #include <entt/entt.hpp>
 
-#define NUAKEMODULE(name)										\
+#define NUAKEMODULE(moduleName)									\
 using TypeNameMap = std::map<entt::id_type, std::string>;		\
 																\
-struct name														\
+struct moduleName												\
 {																\
-    const std::string Name = #name;								\
+	entt::meta_any instance;									\
+    const std::string Name = #moduleName;						\
     std::string Description = "No Description";					\
-	entt::meta_factory<name> ModuleFactory = entt::meta<name>();						\
+	entt::meta_factory<moduleName> ModuleFactory = entt::meta<moduleName>();						\
 	TypeNameMap TypeNames;										\
 																\
 	std::map<entt::id_type, std::vector<std::string>> FuncArgNames; \
 \
 	template<auto T, typename... Args>										\
-	inline name& BindFunction(const std::string& name, Args... argNames)		\
+	inline moduleName& BindFunction(const std::string& name, Args... argNames)		\
 	{															\
 		entt::id_type typeId = entt::hashed_string(name.c_str()); \
 		TypeNames[typeId] = name; \
@@ -29,8 +30,23 @@ struct name														\
 																\
 	auto Resolve()												\
 	{															\
-		return entt::resolve<name>();							\
+		return entt::resolve<moduleName>();							\
 	}															\
+\
+	template<typename... Args> \
+	auto Invoke(const std::string& funcName, Args... args) \
+	{ \
+		auto reflection = Resolve();\
+		for (auto [id, func] : reflection.func())\
+		{\
+			const std::string_view returnType = func.ret().info().name();\
+			const std::string_view funcTypeName = GetTypeName(id);\
+			if (funcName == funcTypeName)\
+			{\
+				return func.invoke(instance, args...);\
+			}\
+		} \
+	} \
 \
 std::vector<std::string> GetFuncArgNames(entt::id_type id) \
 { \
@@ -56,7 +72,7 @@ std::vector<std::string> GetAllFuncNames() \
 		} \
 		return "Unknown"; \
 	}\
-}; 
+};
 
 namespace Nuake
 {

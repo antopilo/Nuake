@@ -43,11 +43,24 @@ void ExampleModule_Startup()
 	using namespace Nuake;
 
 	auto& module = ModuleDB::Get().RegisterModule<ExampleModule>();
+	module.instance = module.Resolve().construct();
+
 	module.Description = "This is an example module";
 
 	// This is to expose functions to the rest of the engine
 	module.BindFunction<ExampleFunction>("ExampleFunction");
 	module.BindFunction<ExampleModuleLog>("ExampleModuleLog", "hi");
+	module.Invoke("ExampleModuleLog", "Hello World");
+
+	entt::id_type typeId = entt::hashed_string("ExampleModuleLog"); 
+	entt::meta_type metaType = entt::resolve(typeId);
+	auto resolvedFunc = metaType.func(typeId);
+
+	if (resolvedFunc)
+	{
+		resolvedFunc.invoke(module.instance, std::string("Hello has been invoked!"));
+	}
+
 
 	Logger::Log("ExampleModule exposed API:", "Module", VERBOSE);
 
@@ -56,9 +69,12 @@ void ExampleModule_Startup()
 	{
 		const std::string_view returnType = func.ret().info().name();
 		const std::string_view funcName = module.GetTypeName(id);
-	
+		
+		if (funcName == "ExampleModuleLog")
+		{
+			func.invoke(module.instance, "Hi");
+		}
 		std::string msg = std::string(returnType) + " " + std::string(funcName) + "(";
-	
 		auto argNames = module.GetFuncArgNames(id);
 		std::vector<std::string_view> args;
 		for (int i = 0; i < func.arity(); i++)
