@@ -3,7 +3,78 @@
 #include <any>
 #include <vector>
 
+#include "Nuake/Core/Object/Object.h"
+
 #include <entt/entt.hpp>
+
+class Class
+{
+protected:
+	static void InitializeClass() {}
+
+	static void (*GetInitializeClass(void))()
+	{
+		return &Class::InitializeClass;
+	}
+
+public:
+	static std::string GetName(const entt::meta_type& componentMeta);
+};
+
+#define NUAKECLASS(klass)																				\
+public:																									\
+    static std::string ClassName()																		\
+    {																									\
+        static std::string className = #klass;															\
+        return className;																				\
+    }																									\
+																										\
+    static void (*GetInitializeClass())()														\
+    {																									\
+        return &klass::InitializeClass;														\
+    }																									\
+																										\
+	inline static auto ClassFactory = entt::meta<klass>();												\
+    static void InternalInitializeClass()																\
+    {																									\
+        static bool initialized = false;																\
+        if (initialized)																				\
+            return;																						\
+																										\
+		ClassFactory.type(entt::hashed_string(#klass));													\
+		ClassFactory.func<&klass::ClassName>(entt::hashed_string("ClassName"));							\
+		if (klass::GetInitializeClass() != Class::GetInitializeClass())			\
+        {																								\
+            GetInitializeClass()();															\
+        }																								\
+																										\
+		initialized = true;																				\
+	}																									\
+																										\
+	template<auto Data>																					\
+    static auto BindField(const char* varName, const char* displayName)									\
+    {																									\
+        return ClassFactory																			\
+            .data<Data>(entt::hashed_string(varName))													\
+            .prop(Nuake::HashedName::DisplayName, displayName);												\
+    }																									\
+																										\
+    template<auto Getter, auto Setter>																	\
+    static auto BindProperty(const char* varName, const char* displayName)								\
+    {																									\
+        return ClassFactory																			\
+            .data<Getter, Setter>(entt::hashed_string(varName))											\
+            .prop(Nuake::HashedName::DisplayName, displayName);												\
+    }																									\
+																										\
+	template<auto Func>																					\
+		static void BindAction(const char* funcName, const char* actionName)                            \
+	{																									\
+		ClassFactory																				\
+		.func<Func>(entt::hashed_string(funcName))														\
+		.prop(Nuake::HashedName::DisplayName, actionName);													\
+	}
+
 
 #define NUAKEMODULE(moduleName)									\
 using TypeNameMap = std::map<entt::id_type, std::string>;		\

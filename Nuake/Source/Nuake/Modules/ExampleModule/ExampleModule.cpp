@@ -32,6 +32,30 @@ namespace Nuake
 
 void ExampleFunction() { }
 
+class TestClass : public Class
+{
+	NUAKECLASS(TestClass)
+	static void InitializeClass()
+	{
+		BindField<&TestClass::Intensity>("Intensity", "Intensity");
+		BindProperty<&TestClass::SetIntensity, &TestClass::GetIntensity>("Intensity2", "Intensity2");
+	}
+
+public:
+	float Intensity = 1.0f;
+
+	void SetIntensity(float value)
+	{
+		Intensity = value;
+	}
+
+	float GetIntensity()
+	{
+		return Intensity;
+	}
+};
+
+
 void ExampleModuleLog(const std::string& hi)
 {
 	Nuake::Logger::Log(hi, "ExampleModule", Nuake::VERBOSE);
@@ -42,6 +66,9 @@ void ExampleModule_Startup()
 {
 	using namespace Nuake;
 
+	TestClass::InternalInitializeClass();
+
+
 	auto& module = ModuleDB::Get().RegisterModule<ExampleModule>();
 	module.instance = module.Resolve().construct();
 
@@ -50,7 +77,7 @@ void ExampleModule_Startup()
 	// This is to expose functions to the rest of the engine
 	module.BindFunction<ExampleFunction>("ExampleFunction");
 	module.BindFunction<ExampleModuleLog>("ExampleModuleLog", "hi");
-	module.Invoke("ExampleModuleLog", "Hello World");
+	//module.Invoke("ExampleModuleLog", "Hello World");
 
 	entt::id_type typeId = entt::hashed_string("ExampleModuleLog"); 
 	entt::meta_type metaType = entt::resolve(typeId);
