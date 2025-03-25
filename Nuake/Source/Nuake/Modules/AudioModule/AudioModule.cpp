@@ -2,12 +2,59 @@
 #include "AudioSceneSystem.h"
 
 #include "Nuake/Scene/SceneSystems.h"
+#include "Nuake/Modules/ModuleDB.h"
+#include <Nuake/Core/Logger.h>
 
+void PlayAudio(int id, float volume)
+{
+
+}
+
+void StopAudio()
+{
+
+}
+
+NUAKEMODULE(AudioModule)
 void AudioModule_Startup()
 {
 	using namespace Nuake;
 
-	SceneSystemDB::Get().RegisterSceneSystem<AudioModule::AudioSystem>();
+	auto& module = ModuleDB::Get().RegisterModule<AudioModule>();
+	module.Description = "Core audio module.";
+
+	module.BindFunction<PlayAudio>("PlayAudio", "id", "volume");
+	module.BindFunction<StopAudio>("StopAudio");
+
+	Logger::Log("AudioModule exposed API:", "Module", VERBOSE);
+
+	auto reflection = module.Resolve();
+	for (auto [id, func] : reflection.func())
+	{
+		const std::string_view returnType = func.ret().info().name();
+		const std::string_view funcName = module.GetTypeName(id);
+
+		std::string msg = std::string(returnType) + " " + std::string(funcName) + "(";
+		auto argNames = module.GetFuncArgNames(id);
+		std::vector<std::string_view> args;
+		for (int i = 0; i < func.arity(); i++)
+		{
+			const std::string argType = std::string(func.arg(i).info().name());
+			args.push_back(argType);
+
+			msg += argType + " " + argNames[i];
+
+			if (i < func.arity() - 1)
+			{
+				msg += ", ";
+			}
+		}
+		msg += ")";
+
+		Logger::Log(msg, "", VERBOSE);
+	}
+
+	SceneSystemDB::Get().RegisterSceneSystem<Audio::AudioSystem>();
 }
 
 void AudioModule_Shutdown()

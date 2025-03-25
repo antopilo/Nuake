@@ -1,7 +1,7 @@
 #pragma once
 #include "Nuake/Scene/Systems/System.h"
 
-namespace AudioModule
+namespace Audio
 {
 	using namespace Nuake;
 

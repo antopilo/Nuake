@@ -9,7 +9,7 @@
 
 #include <future>
 
-namespace AudioModule
+namespace Audio
 {
 	using namespace Nuake;
 
