@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <any>
+#include <map>
 #include <vector>
 
 #include "Nuake/Core/Object/Object.h"
@@ -42,7 +43,8 @@ public:																									\
             return;																						\
 																										\
 		ClassFactory.type(entt::hashed_string(#klass));													\
-		ClassFactory.func<&klass::ClassName>(entt::hashed_string("ClassName"));							\
+		ClassFactory.func<&klass::ClassName>(entt::hashed_string("ClassName"))							\
+		.prop(Nuake::HashedName::DisplayName, #klass); \
 		if (klass::GetInitializeClass() != Class::GetInitializeClass())			\
         {																								\
             GetInitializeClass()();															\
@@ -67,14 +69,15 @@ public:																									\
             .prop(Nuake::HashedName::DisplayName, displayName);												\
     }																									\
 																										\
-	template<auto Func>																					\
-		static void BindAction(const char* funcName, const char* actionName)                            \
+	template<auto F, typename... Args>																					\
+	static void BindFunc(const char* funcName, Args... args)                            \
 	{																									\
 		ClassFactory																				\
-		.func<Func>(entt::hashed_string(funcName))														\
-		.prop(Nuake::HashedName::DisplayName, actionName);													\
-	}
-
+		.func<F>(entt::hashed_string(funcName))												\
+		.prop(Nuake::HashedName::DisplayName, funcName)	 \
+		.prop(Nuake::HashedName::ArgsName, std::vector<std::string>({args...})); \
+	} \
+	\
 
 #define NUAKEMODULE(moduleName)									\
 using TypeNameMap = std::map<entt::id_type, std::string>;		\

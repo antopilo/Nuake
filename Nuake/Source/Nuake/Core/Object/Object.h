@@ -38,6 +38,7 @@ namespace Nuake
     struct HashedName
     {
         NK_HASHED_STATIC_STR(DisplayName)
+        NK_HASHED_STATIC_STR(ArgsName)
     };
 
     enum class ComponentTypeTrait : uint16_t

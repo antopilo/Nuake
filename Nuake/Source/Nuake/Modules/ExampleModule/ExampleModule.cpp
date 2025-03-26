@@ -39,6 +39,7 @@ class TestClass : public Class
 	{
 		BindField<&TestClass::Intensity>("Intensity", "Intensity");
 		BindProperty<&TestClass::SetIntensity, &TestClass::GetIntensity>("Intensity2", "Intensity2");
+		BindFunc<&TestClass::SetIntensity>("SetIntensity", "intensity");
 	}
 
 public:
@@ -68,7 +69,6 @@ void ExampleModule_Startup()
 
 	TestClass::InternalInitializeClass();
 
-
 	auto& module = ModuleDB::Get().RegisterModule<ExampleModule>();
 	module.instance = module.Resolve().construct();
 
@@ -79,43 +79,48 @@ void ExampleModule_Startup()
 	module.BindFunction<ExampleModuleLog>("ExampleModuleLog", "hi");
 	//module.Invoke("ExampleModuleLog", "Hello World");
 
-	entt::id_type typeId = entt::hashed_string("ExampleModuleLog"); 
+	entt::id_type typeId = entt::hashed_string(TestClass::ClassName().c_str());
 	entt::meta_type metaType = entt::resolve(typeId);
 	auto resolvedFunc = metaType.func(typeId);
 
-	if (resolvedFunc)
-	{
-		resolvedFunc.invoke(module.instance, std::string("Hello has been invoked!"));
-	}
-
-
 	Logger::Log("ExampleModule exposed API:", "Module", VERBOSE);
 
-	auto reflection = module.Resolve();
+	auto reflection = metaType;
 	for (auto [id, func] : reflection.func())
 	{
 		const std::string_view returnType = func.ret().info().name();
-		const std::string_view funcName = module.GetTypeName(id);
-		
-		if (funcName == "ExampleModuleLog")
+		auto propDisplayName = func.prop(HashedName::DisplayName);
+		std::string funcName = "UnknownFunc";
+		if (propDisplayName)
 		{
-			func.invoke(module.instance, "Hi");
+			funcName = std::string(*propDisplayName.value().try_cast<const char*>());
 		}
+		
 		std::string msg = std::string(returnType) + " " + std::string(funcName) + "(";
-		auto argNames = module.GetFuncArgNames(id);
 		std::vector<std::string_view> args;
-		for (int i = 0; i < func.arity(); i++)
-		{
-			const std::string argType = std::string(func.arg(i).info().name());
-			args.push_back(argType);
-	
-			msg += argType + " " + argNames[i];
 
-			if (i < func.arity() - 1)
+		if (func.arity() > 0)
+		{
+			auto propArgsName = func.prop(HashedName::ArgsName);
+			if (propArgsName)
 			{
-				msg += ", ";
+				std::vector<std::string> argsName = *propArgsName.value().try_cast<std::vector<std::string>>();
+				for (int i = 0; i < func.arity(); i++)
+				{
+					const std::string argType = std::string(func.arg(i).info().name());
+					args.push_back(argType);
+
+					msg += argType + " " + argsName[i];
+
+					if (i < func.arity() - 1)
+					{
+						msg += ", ";
+					}
+				}
 			}
 		}
+
+		
 		msg += ")";
 	
 		Logger::Log(msg, "", VERBOSE);
