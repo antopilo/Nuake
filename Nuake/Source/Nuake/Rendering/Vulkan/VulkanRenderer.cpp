@@ -23,6 +23,8 @@
 
 #include "DescriptorLayoutBuilder.h"
 
+#include "Nuake/Core/OS.h"
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -207,6 +209,17 @@ void VkRenderer::SelectGPU()
 
 	auto systemInfoRet = vkb::SystemInfo::get_system_info();
 	auto& systemInfo = systemInfoRet.value();
+
+	for (auto extension : requiredExtensions)
+	{
+		if (!systemInfo.is_extension_available(extension))
+		{
+			std::string errMessage = "No GPU found who supports the required Vulkan extension: " + std::string(extension);
+			errMessage += "\nConsider updating drivers.";
+			Logger::Log(errMessage, "vulkan", CRITICAL);
+			OS::ShowMessageBox("Vulkan Error", errMessage);
+		}
+	}
 
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
 	vkb::PhysicalDevice physicalDevice = selector

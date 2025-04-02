@@ -50,6 +50,13 @@ namespace Nuake {
 		return static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 	}
 
+	void OS::ShowMessageBox(const std::string& title, const std::string& message)
+	{
+#ifdef NK_WIN
+		::MessageBoxA(nullptr, message.c_str(), title.c_str(), MB_OK);
+#endif
+	}
+
 	void OS::OpenIn(const std::string& filePath)
 	{
 #ifdef NK_WIN
