@@ -14,7 +14,6 @@
 #include "Nuake/Scene/Systems/QuakeMapBuilder.h"
 #include "Nuake/Scene/Systems/ParticleSystem.h"
 #include "Nuake/Scene/Systems/AnimationSystem.h"
-#include "Nuake/Scene/Systems/AudioSystem.h"
 #include "Nuake/Scene/Systems/UISystem.h"
 
 #include "Nuake/Rendering/SceneRenderer.h"
@@ -74,7 +73,6 @@ namespace Nuake
 		m_Systems.push_back(CreateRef<AnimationSystem>(this));
 		m_Systems.push_back(CreateRef<TransformSystem>(this));
 		m_Systems.push_back(CreateRef<ParticleSystem>(this));
-		//m_Systems.push_back(CreateRef<AudioSystem>(this));
 
 		m_SceneRenderer = CreateRef<SceneRenderer>();
 		m_SceneRenderer->Init();
