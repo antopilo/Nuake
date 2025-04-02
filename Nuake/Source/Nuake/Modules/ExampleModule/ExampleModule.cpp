@@ -62,7 +62,7 @@ void ExampleModuleLog(const std::string& hi)
 	Nuake::Logger::Log(hi, "ExampleModule", Nuake::VERBOSE);
 }
 
-float mySetting = 1.0f;
+float mySetting = 8.0f;
 
 NUAKEMODULE(ExampleModule)
 void ExampleModule_Startup()
@@ -76,7 +76,7 @@ void ExampleModule_Startup()
 
 	module.Description = "This is an example module";
 
-	module.RegisterSetting<&mySetting>("Hello World!");
+	module.RegisterSetting<&mySetting>("mySetting");
 
 	// This is to expose functions to the rest of the engine
 	module.BindFunction<ExampleFunction>("ExampleFunction");

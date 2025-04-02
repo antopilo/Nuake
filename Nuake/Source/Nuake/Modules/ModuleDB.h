@@ -185,7 +185,9 @@ namespace Nuake
 		template<typename T>
 		T& RegisterModule()
 		{
-			Modules[typeid(T).name()] = (ModuleInstance*)(new T());
+			T* newInstance = new T();
+			newInstance->instance = entt::resolve<T>().construct();
+			Modules[typeid(T).name()] = (ModuleInstance*)newInstance;
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeid(T).name()]);
 		}
 
@@ -202,6 +204,18 @@ namespace Nuake
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeName]);
 		}
 
+		ModuleInstance& GetBaseImpl(const std::string& moduleName)
+		{
+			for (auto& [name, _] : Modules)
+			{
+				if (name == moduleName)
+				{
+					return *std::any_cast<ModuleInstance*>(Modules[name]);
+				}
+			}
+
+			assert(false && "Module not found.");
+		}
 
 		entt::meta_type GetModuleMeta(const std::string& moduleName)
 		{
