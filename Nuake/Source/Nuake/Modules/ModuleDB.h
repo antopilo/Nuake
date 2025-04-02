@@ -8,6 +8,22 @@
 
 #include <entt/entt.hpp>
 
+#include "Nuake/Core/Logger.h"
+class ModuleInstance
+{
+public:
+	entt::meta_any instance;
+	std::string Name;
+
+	entt::meta_type Resolve()
+	{ 
+		Nuake::Logger::Log("Resolved!" + Name, "ModuleReflection", Nuake::LOG_TYPE::VERBOSE); \
+		return entt::resolve(entt::hashed_string(Name.c_str()));
+	} 
+
+	
+};
+
 class Class
 {
 protected:
@@ -82,16 +98,16 @@ public:																									\
 #define NUAKEMODULE(moduleName)									\
 using TypeNameMap = std::map<entt::id_type, std::string>;		\
 																\
-struct moduleName												\
+class moduleName : public ModuleInstance			\
 {																\
-	entt::meta_any instance;									\
-    const std::string Name = #moduleName;						\
+public:															\
     std::string Description = "No Description";					\
 	entt::meta_factory<moduleName> ModuleFactory = entt::meta<moduleName>();						\
 	TypeNameMap TypeNames;										\
 																\
 	std::map<entt::id_type, std::vector<std::string>> FuncArgNames; \
 \
+	inline static auto ClassFactory = entt::meta<moduleName>();												\
 	template<auto T, typename... Args>										\
 	inline moduleName& BindFunction(const std::string& name, Args... argNames)		\
 	{															\
@@ -101,11 +117,14 @@ struct moduleName												\
 		ModuleFactory.func<T>(typeId);	\
 		return *this; \
 	}															\
-																\
-	auto Resolve()												\
+	template<auto Func>															\
+	static auto RegisterSetting(const char* settingName)															\
 	{															\
-		return entt::resolve<moduleName>();							\
-	}															\
+		return ClassFactory															\
+			.data<Func>(entt::hashed_string(settingName))															\
+			.prop(Nuake::HashedName::DisplayName, settingName);															\
+	}												\
+														\
 \
 	template<typename... Args> \
 	auto Invoke(const std::string& funcName, Args... args) \
@@ -166,8 +185,8 @@ namespace Nuake
 		template<typename T>
 		T& RegisterModule()
 		{
-			Modules[typeid(T).name()] = T();
-			return std::any_cast<T&>(Modules[typeid(T).name()]);
+			Modules[typeid(T).name()] = (ModuleInstance*)(new T());
+			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeid(T).name()]);
 		}
 
 		template<typename T>
@@ -180,7 +199,40 @@ namespace Nuake
 				return;
 			}
 
-			return std::any_cast<T>(Modules[typeName]);
+			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeName]);
+		}
+
+
+		entt::meta_type GetModuleMeta(const std::string& moduleName)
+		{
+			for (auto& [name, _] : Modules)
+			{
+				if (name == moduleName)
+				{
+					return std::any_cast<ModuleInstance*>(Modules[name])->Resolve();
+				}
+			}
+			//auto foundIt = std::find_if(Modules.begin(), Modules.end(), moduleName);
+			//if (foundIt != Modules.end())
+			//{
+			//	return std::any_cast<ModuleInstance*>(foundIt->second)->Resolve();
+			//}
+			
+			assert(false && "Module not found");
+			return entt::meta_type();
+		}
+
+		std::vector<std::string> GetModules()
+		{
+			std::vector<std::string> moduleNames;
+			moduleNames.reserve(Modules.size());
+
+			for(auto& [moduleName, _] : Modules)
+			{
+				moduleNames.push_back(moduleName);
+			}
+
+			return moduleNames;
 		}
 
 	private:

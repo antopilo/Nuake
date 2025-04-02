@@ -15,13 +15,29 @@ void StopAudio()
 
 }
 
+float Volume = 1.0f;
+void SetVolume(float volume)
+{
+	Volume = volume;
+}
+
+bool Muted = false;
+void SetMuted(bool muted)
+{
+	Muted = muted;
+}
+
 NUAKEMODULE(AudioModule)
 void AudioModule_Startup()
 {
 	using namespace Nuake;
 
 	auto& module = ModuleDB::Get().RegisterModule<AudioModule>();
+	module.Name = "AudioModule";
 	module.Description = "Core audio module.";
+
+	module.RegisterSetting<&Volume>("Volume");
+	module.RegisterSetting<&Muted>("Muted");
 
 	module.BindFunction<PlayAudio>("PlayAudio", "id", "volume");
 	module.BindFunction<StopAudio>("StopAudio");
@@ -29,6 +45,8 @@ void AudioModule_Startup()
 	Logger::Log("AudioModule exposed API:", "Module", VERBOSE);
 
 	auto reflection = module.Resolve();
+	auto metaTypeid = entt::hashed_string(module.Name.c_str());
+	auto s = reflection.func(metaTypeid);
 	for (auto [id, func] : reflection.func())
 	{
 		const std::string_view returnType = func.ret().info().name();

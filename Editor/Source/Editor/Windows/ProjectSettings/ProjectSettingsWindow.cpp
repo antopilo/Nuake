@@ -6,6 +6,7 @@
 #include "../EditorInterface.h"
 #include "../../Commands/Commands/Commands.h"
 #include <Nuake/Audio/AudioManager.h>
+#include <Nuake/Modules/ModuleDB.h>
 
 ProjectSettingsCategoryWindowGeneral::ProjectSettingsCategoryWindowGeneral(Ref<Nuake::Project> project) :
 	m_Project(project)
@@ -56,6 +57,11 @@ void ProjectSettingsWindow::Init(Ref<Nuake::Project> project)
     m_CategoryWindows.push_back(CreateRef<ProjectSettingsCategoryScripting>(project));
     m_CategoryWindows.push_back(CreateRef<ProjectSettingsCategoryPhysics>(project));
     m_CategoryWindows.push_back(CreateRef<ProjectSettingsCategoryAudio>(project));
+
+    for (auto& m : ModuleDB::Get().GetModules())
+    {
+        m_CategoryWindows.push_back(CreateRef<ProjectSettingsModuleWindow>(m));
+    }
 }
 
 void ProjectSettingsWindow::Draw()
@@ -195,6 +201,78 @@ ProjectSettingsCategoryAudio::ProjectSettingsCategoryAudio(Ref<Nuake::Project> p
     m_Project(project)
 {
     Name = "Audio";
+}
+
+ProjectSettingsModuleWindow::ProjectSettingsModuleWindow(const std::string& inModuleName) :
+    moduleName(inModuleName)
+{
+    Name = moduleName;
+}
+
+void ProjectSettingsModuleWindow::Draw()
+{
+    auto meta = entt::resolve(entt::hashed_string(Name.c_str()));
+    for (auto [id, data] : meta.data())
+    {
+        auto propDisplayName = data.prop(HashedName::DisplayName);
+        if (propDisplayName)
+        {
+            auto propVal = propDisplayName.value();
+            const char* settingName = *propVal.try_cast<const char*>();
+
+            ImGui::Text(settingName);
+        }
+    }
+
+	for (auto [id, func] : meta.func())
+	{
+		auto propDisplayName = func.prop(HashedName::DisplayName);
+        
+        if (propDisplayName)
+        {
+            auto propVal = propDisplayName.value();
+            const char* settingName = *propVal.try_cast<const char*>();
+
+            ImGui::Text(settingName);
+        }
+
+
+        // Setting
+		//std::string funcName = "UnknownFunc";
+		//if (propDisplayName)
+		//{
+		//	funcName = std::string(*propDisplayName.value().try_cast<const char*>());
+		//}
+		//
+		//std::string msg = std::string(returnType) + " " + std::string(funcName) + "(";
+		//std::vector<std::string_view> args;
+        //
+		//if (func.arity() > 0)
+		//{
+		//	auto propArgsName = func.prop(HashedName::ArgsName);
+		//	if (propArgsName)
+		//	{
+		//		std::vector<std::string> argsName = *propArgsName.value().try_cast<std::vector<std::string>>();
+		//		for (int i = 0; i < func.arity(); i++)
+		//		{
+		//			const std::string argType = std::string(func.arg(i).info().name());
+		//			args.push_back(argType);
+        //
+		//			msg += argType + " " + argsName[i];
+        //
+		//			if (i < func.arity() - 1)
+		//			{
+		//				msg += ", ";
+		//			}
+		//		}
+		//	}
+		//}
+        //
+		//
+		//msg += ")";
+	    //
+		//Logger::Log(msg, "", VERBOSE);
+	}
 }
 
 void ProjectSettingsCategoryAudio::Draw()

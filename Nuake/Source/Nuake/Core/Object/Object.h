@@ -24,6 +24,7 @@ namespace Nuake
         NK_HASHED_STATIC_STR(AddToEntity)
         NK_HASHED_STATIC_STR(RemoveFromEntity)
         NK_HASHED_STATIC_STR(ActionName)
+        NK_HASHED_STATIC_STR(ModuleSettingName)
     };
 
     struct HashedFieldPropName

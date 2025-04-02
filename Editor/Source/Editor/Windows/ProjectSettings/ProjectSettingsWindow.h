@@ -70,6 +70,17 @@ public:
 	void Draw() override;
 };
 
+class ProjectSettingsModuleWindow : public ProjectSettingsCategoryWindow
+{
+private:
+	std::string moduleName;
+
+public:
+	ProjectSettingsModuleWindow(const std::string& inModuleName);
+
+	void Draw() override;
+};
+
 class ProjectSettingsWindow
 {
 private:
