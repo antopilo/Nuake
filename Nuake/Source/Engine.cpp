@@ -5,7 +5,6 @@
 #include "Nuake/Physics/PhysicsManager.h"
 
 #include "Nuake/AI/NavManager.h"
-#include "Nuake/Audio/AudioManager.h"
 #include "Nuake/FileSystem/FileSystem.h"
 #include "Nuake/Core/Input.h"
 #include "Nuake/Rendering/Renderer.h"
@@ -54,7 +53,6 @@ namespace Nuake
 		
 		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		
-		AudioManager::Get().Initialize();
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
 
@@ -151,13 +149,17 @@ namespace Nuake
 			// Fixed update
 			while (fixedUpdateDifference >= fixedUpdateRate)
 			{
-				currentWindow->FixedUpdate(fixedUpdateRate * timeScale);
+				const float scaledFixedTimestep = fixedUpdateRate * timeScale;
+				currentWindow->FixedUpdate(scaledFixedTimestep);
+
+				Modules::FixedUpdate(scaledFixedTimestep);
 
 				fixedUpdateDifference -= fixedUpdateRate;
 			}
 
+			Modules::Update(scaledTimeStep);
+
 			Input::Update();
-			AudioManager::Get().AudioUpdate();
 		}
 	}
 

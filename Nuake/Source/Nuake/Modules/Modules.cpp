@@ -4,6 +4,7 @@
 #include "AssimpModule/AssimpModule.h"
 #include "AudioModule/AudioModule.h"
 #include "ExampleModule/ExampleModule.h"
+#include "ModuleDB.h"
 
 #include "Nuake/UI/WidgetDrawer.h"
 
@@ -54,6 +55,22 @@ void DrawFloatWidget(entt::meta_data& type, entt::meta_any& instance)
 void DrawBoolWidget(entt::meta_type& type, entt::meta_any& instance)
 {
 
+}
+
+void Nuake::Modules::FixedUpdate(float ts)
+{
+    for (auto& moduleName : ModuleDB::Get().GetModules())
+    {
+        ModuleDB::Get().GetBaseImpl(moduleName).OnFixedUpdate.Broadcast(ts);
+    }
+}
+
+void Nuake::Modules::Update(float ts)
+{
+    for (auto& moduleName : ModuleDB::Get().GetModules())
+    {
+        ModuleDB::Get().GetBaseImpl(moduleName).OnUpdate.Broadcast(ts);
+    }
 }
 
 void Nuake::Modules::StartupModules()
