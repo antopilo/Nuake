@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Nuake/Core/Core.h"
+#include "Nuake/Core/GameState.h"
 #include "Nuake/Core/Logger.h"
 #include "Nuake/Window.h"
 #include "Nuake/Core/MulticastDelegate.h"
@@ -12,14 +13,6 @@ namespace Nuake
 	class Scene;
 	class EngineSubsystem;
 	class EngineSubsystemScriptable;
-
-	enum GameState
-	{
-		Loading,
-		Playing,
-		Paused,
-		Stopped
-	};
 
 	class Engine 
 	{
