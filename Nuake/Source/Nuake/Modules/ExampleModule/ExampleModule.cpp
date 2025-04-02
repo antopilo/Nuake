@@ -71,17 +71,30 @@ void ExampleModule_Startup()
 
 	TestClass::InternalInitializeClass();
 
+	// Register the module & info
 	auto& module = ModuleDB::Get().RegisterModule<ExampleModule>();
 	module.instance = module.Resolve().construct();
-
 	module.Description = "This is an example module";
 
+	// This is to expose parameters in the modules settings
 	module.RegisterSetting<&mySetting>("mySetting");
 
 	// This is to expose functions to the rest of the engine
 	module.BindFunction<ExampleFunction>("ExampleFunction");
 	module.BindFunction<ExampleModuleLog>("ExampleModuleLog", "hi");
-	//module.Invoke("ExampleModuleLog", "Hello World");
+
+	// The module can hook to certain events
+	module.OnUpdate.AddStatic([](float ts)
+	{
+
+	});
+
+	module.OnFixedUpdate.AddStatic([](float ts) 
+	{
+		
+	});
+
+
 
 	entt::id_type typeId = entt::hashed_string(TestClass::ClassName().c_str());
 	entt::meta_type metaType = entt::resolve(typeId);
@@ -156,8 +169,6 @@ void ExampleModule_Startup()
 	//Logger::Log("Serialized reflected component: " + jsonData.dump(4), "ExampleModule", VERBOSE);
 	//Logger::Log("Serialized original component: " + jsonDataOG.dump(4), "ExampleModule", VERBOSE);
 }
-
-
 
 void ExampleModule_Shutdown()
 {

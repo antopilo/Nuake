@@ -4,11 +4,14 @@
 #include <map>
 #include <vector>
 
+#include "Nuake/Core/Logger.h"
+#include "Nuake/Core/GameState.h"
+#include "Nuake/Core/MulticastDelegate.h"
 #include "Nuake/Core/Object/Object.h"
 
+#include "Nuake/Scene/Scene.h"
 #include <entt/entt.hpp>
 
-#include "Nuake/Core/Logger.h"
 class ModuleInstance
 {
 public:
@@ -21,7 +24,10 @@ public:
 		return entt::resolve(entt::hashed_string(Name.c_str()));
 	} 
 
-	
+	MulticastDelegate<Ref<Nuake::Scene>> OnSceneLoad;
+	MulticastDelegate<float> OnUpdate;
+	MulticastDelegate<float> OnFixedUpdate;
+	MulticastDelegate<Nuake::GameState> OnGameStateChanged;
 };
 
 class Class
