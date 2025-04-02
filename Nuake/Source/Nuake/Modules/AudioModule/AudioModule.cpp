@@ -36,7 +36,7 @@ void AudioModule_Startup()
 
 	auto& module = ModuleDB::Get().RegisterModule<AudioModule>();
 	module.Name = "AudioModule";
-	module.Description = "Core audio module.";
+	module.Description = "Core audio module";
 
 	module.RegisterSetting<&Volume>("Volume");
 	module.RegisterSetting<&Muted>("Muted");
@@ -48,8 +48,12 @@ void AudioModule_Startup()
 
 	SceneSystemDB::Get().RegisterSceneSystem<Audio::AudioSystem>();
 
-	module.OnUpdate.AddStatic([](float ts) {
-		AudioManager::Get().AudioUpdate();
+	module.OnUpdate.AddStatic([](float ts) 
+	{
+		auto& audioMgr = AudioManager::Get();
+		audioMgr.SetGlobalVolume(Volume);
+
+		audioMgr.AudioUpdate();
 	});
 }
 
