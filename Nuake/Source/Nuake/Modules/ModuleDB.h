@@ -4,11 +4,14 @@
 #include <map>
 #include <vector>
 
+#include "Nuake/Core/Logger.h"
+#include "Nuake/Core/GameState.h"
+#include "Nuake/Core/MulticastDelegate.h"
 #include "Nuake/Core/Object/Object.h"
 
+#include "Nuake/Scene/Scene.h"
 #include <entt/entt.hpp>
 
-#include "Nuake/Core/Logger.h"
 class ModuleInstance
 {
 public:
@@ -21,7 +24,10 @@ public:
 		return entt::resolve(entt::hashed_string(Name.c_str()));
 	} 
 
-	
+	MulticastDelegate<Ref<Nuake::Scene>> OnSceneLoad;
+	MulticastDelegate<float> OnUpdate;
+	MulticastDelegate<float> OnFixedUpdate;
+	MulticastDelegate<Nuake::GameState> OnGameStateChanged;
 };
 
 class Class
@@ -185,7 +191,9 @@ namespace Nuake
 		template<typename T>
 		T& RegisterModule()
 		{
-			Modules[typeid(T).name()] = (ModuleInstance*)(new T());
+			T* newInstance = new T();
+			newInstance->instance = entt::resolve<T>().construct();
+			Modules[typeid(T).name()] = (ModuleInstance*)newInstance;
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeid(T).name()]);
 		}
 
@@ -202,6 +210,18 @@ namespace Nuake
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeName]);
 		}
 
+		ModuleInstance& GetBaseImpl(const std::string& moduleName)
+		{
+			for (auto& [name, _] : Modules)
+			{
+				if (name == moduleName)
+				{
+					return *std::any_cast<ModuleInstance*>(Modules[name]);
+				}
+			}
+
+			assert(false && "Module not found.");
+		}
 
 		entt::meta_type GetModuleMeta(const std::string& moduleName)
 		{

@@ -63,7 +63,7 @@ public:
     // Remove a callable using the token returned by Add()
     void Remove(DelegateHandle& handle)
     {
-        ASSERT(handle.IsValid());
+        //assert(handle.IsValid());
         
         if (handle.IsValid() && handle.id < delegates.size())
         {

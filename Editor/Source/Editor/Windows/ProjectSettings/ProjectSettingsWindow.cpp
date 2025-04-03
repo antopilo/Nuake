@@ -7,6 +7,7 @@
 #include "../../Commands/Commands/Commands.h"
 #include <Nuake/Audio/AudioManager.h>
 #include <Nuake/Modules/ModuleDB.h>
+#include "Nuake/UI/WidgetDrawer.h"
 
 ProjectSettingsCategoryWindowGeneral::ProjectSettingsCategoryWindowGeneral(Ref<Nuake::Project> project) :
 	m_Project(project)
@@ -212,6 +213,7 @@ ProjectSettingsModuleWindow::ProjectSettingsModuleWindow(const std::string& inMo
 void ProjectSettingsModuleWindow::Draw()
 {
     auto meta = entt::resolve(entt::hashed_string(Name.c_str()));
+    auto instance = ModuleDB::Get().GetBaseImpl(Name).instance;
     for (auto [id, data] : meta.data())
     {
         auto propDisplayName = data.prop(HashedName::DisplayName);
@@ -219,6 +221,9 @@ void ProjectSettingsModuleWindow::Draw()
         {
             auto propVal = propDisplayName.value();
             const char* settingName = *propVal.try_cast<const char*>();
+
+            auto& drawer = WidgetDrawer::Get();
+            drawer.DrawWidget(data, instance);
 
             ImGui::Text(settingName);
         }

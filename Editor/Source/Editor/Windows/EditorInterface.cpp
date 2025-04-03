@@ -42,7 +42,6 @@
 #include "Nuake/Rendering/SceneRenderer.h"
 #include <Nuake/Rendering/Buffers/Framebuffer.h>
 #include "UIDemoWindow.h"
-#include <Nuake/Audio/AudioManager.h>
 
 #include <Nuake/UI/ImUI.h>
 #include "Nuake/FileSystem/FileSystem.h"

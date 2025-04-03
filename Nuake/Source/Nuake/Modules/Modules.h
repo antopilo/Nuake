@@ -12,6 +12,8 @@ namespace Nuake
 
     public:
         static void StartupModules();
+        static void FixedUpdate(float ts);
+        static void Update(float ts);
         static void ShutdownModules();
     };
 }
