@@ -10,6 +10,8 @@
 #include "Nuake/Core/Object/Object.h"
 
 #include "Nuake/Scene/Scene.h"
+#include "Nuake/Scene/SceneSystems.h"
+
 #include <entt/entt.hpp>
 
 class ModuleInstance
@@ -104,7 +106,7 @@ public:																									\
 #define NUAKEMODULE(moduleName)									\
 using TypeNameMap = std::map<entt::id_type, std::string>;		\
 																\
-class moduleName : public ModuleInstance			\
+class moduleName : public ModuleInstance						\
 {																\
 public:															\
     std::string Description = "No Description";					\
@@ -116,35 +118,46 @@ public:															\
 	inline static auto ClassFactory = entt::meta<moduleName>();												\
 	template<auto T, typename... Args>										\
 	inline moduleName& BindFunction(const std::string& name, Args... argNames)		\
-	{															\
-		entt::id_type typeId = entt::hashed_string(name.c_str()); \
-		TypeNames[typeId] = name; \
-		FuncArgNames[typeId] = { argNames ... }; \
-		ModuleFactory.func<T>(typeId);	\
-		return *this; \
-	}															\
-	template<auto Func>															\
-	static auto RegisterSetting(const char* settingName)															\
-	{															\
-		return ClassFactory															\
-			.data<Func>(entt::hashed_string(settingName))															\
-			.prop(Nuake::HashedName::DisplayName, settingName);															\
-	}												\
-														\
+	{																		\
+		entt::id_type typeId = entt::hashed_string(name.c_str());			\
+		TypeNames[typeId] = name;											\
+		FuncArgNames[typeId] = { argNames ... };							\
+		ModuleFactory.func<T>(typeId);										\
+		return *this;														\
+	}																		\
+	template<auto Func>														\
+	static auto RegisterSetting(const char* settingName)					\
+	{																		\
+		return ClassFactory													\
+			.data<Func>(entt::hashed_string(settingName))					\
+			.prop(Nuake::HashedName::DisplayName, settingName);				\
+	}																		\
+																			\
+	template<typename T>													\
+	void RegisterComponent()												\
+	{																		\
+		/*Nuake::SceneSystemDB::Get().RegisterComponent<T>();*/						\
+	}																		\
 \
-	template<typename... Args> \
-	auto Invoke(const std::string& funcName, Args... args) \
+	template<typename T>													\
+	void RegisterComponentSystem() \
 	{ \
-		auto reflection = Resolve();\
-		for (auto [id, func] : reflection.func())\
-		{\
-			const std::string_view returnType = func.ret().info().name();\
-			const std::string_view funcTypeName = GetTypeName(id);\
-			if (funcName == funcTypeName)\
-			{\
-				return func.invoke(instance, args...);\
-			}\
-		} \
+		/*Nuake::SceneSystemDB::Get().RegisterSystem<T>();	*/					\
+	} \
+																			\
+	template<typename... Args>												\
+	auto Invoke(const std::string& funcName, Args... args)					\
+	{																		\
+		auto reflection = Resolve();										\
+		for (auto [id, func] : reflection.func())							\
+		{																	\
+			const std::string_view returnType = func.ret().info().name();	\
+			const std::string_view funcTypeName = GetTypeName(id);			\
+			if (funcName == funcTypeName)									\
+			{																\
+				return func.invoke(instance, args...);						\
+			}																\
+		}																	\
 	} \
 \
 std::vector<std::string> GetFuncArgNames(entt::id_type id) \

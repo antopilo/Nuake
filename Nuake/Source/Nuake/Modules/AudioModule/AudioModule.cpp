@@ -6,16 +6,9 @@
 #include <Nuake/Core/Logger.h>
 
 #include "Nuake/Audio/AudioManager.h"
+#include "Nuake/Scene/Components/AudioEmitterComponent.h"
 
-void PlayAudio(int id, Nuake::Matrix4 volume)
-{
-
-}
-
-void StopAudio()
-{
-
-}
+using namespace Nuake;
 
 float Volume = 1.0f;
 void SetVolume(float volume)
@@ -32,22 +25,24 @@ void SetMuted(bool muted)
 NUAKEMODULE(AudioModule)
 void AudioModule_Startup()
 {
-	using namespace Nuake;
-
+	// Register module info
 	auto& module = ModuleDB::Get().RegisterModule<AudioModule>();
 	module.Name = "AudioModule";
 	module.Description = "Core audio module";
 
+	// Exposed settings
 	module.RegisterSetting<&Volume>("Volume");
 	module.RegisterSetting<&Muted>("Muted");
 
-	module.BindFunction<PlayAudio>("PlayAudio", "id", "volume");
-	module.BindFunction<StopAudio>("StopAudio");
+	// Exposed functions(scripting API)
+	module.BindFunction<SetVolume>("SetVolume", "volume");
+	module.BindFunction<SetMuted>("SetMuted", "muted");
 
-	AudioManager::Get().Initialize();
+	// Register custom component & system
+	module.RegisterComponent<Audio::AudioEmitterComponent>();
+	module.RegisterComponentSystem<Audio::AudioSystem>();
 
-	SceneSystemDB::Get().RegisterSceneSystem<Audio::AudioSystem>();
-
+	// Register module hook on events
 	module.OnUpdate.AddStatic([](float ts) 
 	{
 		auto& audioMgr = AudioManager::Get();
@@ -55,9 +50,10 @@ void AudioModule_Startup()
 
 		audioMgr.AudioUpdate();
 	});
+
+	AudioManager::Get().Initialize();
 }
 
 void AudioModule_Shutdown()
 {
-
 }

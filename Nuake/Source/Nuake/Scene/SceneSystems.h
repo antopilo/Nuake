@@ -15,14 +15,19 @@ namespace Nuake
 
 	using SystemInitializerFunc = std::function<Ref<System>(Scene*)>;
 
+	using SystemInitializerFunc = std::function<Ref<System>(Scene*)>;
+
 	template<typename T>
 	concept InheritsFromSystem = std::derived_from<T, System>;
+
+	template<typename T>
+	concept InheritsFromComponent = std::derived_from<T, Component>;
 
 	class SceneSystemDB
 	{
 	private:
 		std::vector<SystemInitializerFunc> Systems;
-
+		
 	public:
 		static SceneSystemDB& Get()
 		{
@@ -38,6 +43,12 @@ namespace Nuake
 		void RegisterSceneSystem()
 		{
 			Systems.push_back(&System::Instantiate<T>);
+		}
+
+		template<InheritsFromComponent T>
+		void RegisterComponent()
+		{
+			T::InternalInitializeClass();
 		}
 
 		void InstantiateSystems(Scene* scene)

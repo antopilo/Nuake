@@ -1,6 +1,5 @@
 ﻿#include "RegisterCoreTypes.h"
 
-#include "Nuake/Scene/Components/AudioEmitterComponent.h"
 #include "Nuake/Scene/Components/BoneComponent.h"
 #include "Nuake/Scene/Components/BoxCollider.h"
 #include "Nuake/Scene/Components/CameraComponent.h"
@@ -44,7 +43,6 @@ namespace Nuake
         CameraComponent::InternalInitializeClass();
         BoxColliderComponent::InternalInitializeClass();
         BoneComponent::InternalInitializeClass();
-        AudioEmitterComponent::InternalInitializeClass();
         SkyComponent::InternalInitializeClass();
         EnvironmentComponent::InternalInitializeClass();
     }
