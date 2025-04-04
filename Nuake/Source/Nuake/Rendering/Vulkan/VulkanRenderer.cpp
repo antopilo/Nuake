@@ -217,7 +217,7 @@ void VkRenderer::SelectGPU()
 			std::string errMessage = "No GPU found who supports the required Vulkan extension: " + std::string(extension);
 			errMessage += "\nConsider updating drivers.";
 			Logger::Log(errMessage, "vulkan", CRITICAL);
-			OS::ShowMessageBox("Vulkan Error", errMessage);
+			//OS::ShowMessageBox("Vulkan Error", errMessage);
 		}
 	}
 

@@ -212,7 +212,7 @@ ProjectSettingsModuleWindow::ProjectSettingsModuleWindow(const std::string& inMo
 
 void ProjectSettingsModuleWindow::Draw()
 {
-    auto meta = entt::resolve(entt::hashed_string(Name.c_str()));
+    auto meta = entt::resolve(entt::hashed_string(("class " + Name).c_str()));
     auto instance = ModuleDB::Get().GetBaseImpl(Name).instance;
     for (auto [id, data] : meta.data())
     {

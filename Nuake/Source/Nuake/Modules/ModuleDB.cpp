@@ -12,7 +12,7 @@ json ModuleDB::GenerateModuleAPI()
 		json moduleData;
 		moduleData["Name"] = name;
 
-		auto meta = entt::resolve(entt::hashed_string(name.c_str()));
+		auto meta = entt::resolve(entt::hashed_string(("class " + name).c_str()));
 
 		int j = 0;
 		for (auto [id, func] : meta.func())

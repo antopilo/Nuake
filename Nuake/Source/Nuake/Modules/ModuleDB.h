@@ -8,6 +8,7 @@
 #include "Nuake/Core/GameState.h"
 #include "Nuake/Core/MulticastDelegate.h"
 #include "Nuake/Core/Object/Object.h"
+#include "Nuake/Core/String.h"
 
 #include "Nuake/Scene/Scene.h"
 #include "Nuake/Scene/SceneSystems.h"
@@ -110,7 +111,6 @@ class moduleName : public ModuleInstance										\
 {																				\
 public:																			\
     std::string Description = "No Description";									\
-	entt::meta_factory<moduleName> ModuleFactory = entt::meta<moduleName>();	\
 	TypeNameMap TypeNames;														\
 																				\
 	std::map<entt::id_type, std::vector<std::string>> FuncArgNames;				\
@@ -205,22 +205,24 @@ namespace Nuake
 		T& RegisterModule()
 		{
 			T* newInstance = new T();
+			std::string unmangledName = Nuake::String::Split(typeid(T).name(), ' ')[1];
 			newInstance->instance = entt::resolve<T>().construct();
-			Modules[typeid(T).name()] = (ModuleInstance*)newInstance;
-			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeid(T).name()]);
+			Modules[unmangledName] = (ModuleInstance*)newInstance;
+			return *(T*)std::any_cast<ModuleInstance*>(Modules[unmangledName]);
 		}
 
 		template<typename T>
 		T& GetModule()
 		{
 			const std::string_view typeName = typeid(T).name();
-			if (!Modules.contains(typeName))
+			std::string unmangledName = Nuake::String::Split(typeName)[1];
+			if (!Modules.contains(unmangledName))
 			{
 				assert(false && "Module not found.");
 				return;
 			}
 
-			return *(T*)std::any_cast<ModuleInstance*>(Modules[typeName]);
+			return *(T*)std::any_cast<ModuleInstance*>(Modules[unmangledName]);
 		}
 
 		ModuleInstance& GetBaseImpl(const std::string& moduleName)
