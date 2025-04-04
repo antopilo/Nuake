@@ -125,7 +125,9 @@ class Generator
     static void Main()
     {
         // Read file bindings.json
-        string json = File.ReadAllText("../../../../Editor/Build/Debug/Binaries/bindings.json");
+        string fullPath = Path.Combine(AppContext.BaseDirectory, "../../../../Editor/Build/Debug/Binaries/bindings.json");
+        Console.WriteLine(fullPath);
+        string json = File.ReadAllText(fullPath);
 
         // parse the json
         Bindings bindings = System.Text.Json.JsonSerializer.Deserialize<Bindings>(json);
@@ -159,7 +161,8 @@ class Generator
         // WriteFiles
         foreach (var module in filesToWrite)
         {
-            string filePath = Path.Combine("../../../../NuakeNet/Source/Generated", module.FileName);
+            string fullfilePath = Path.Combine(AppContext.BaseDirectory, "../../../../NuakeNet/Source/Generated");
+            string filePath = Path.Combine(fullfilePath, module.FileName);
             File.WriteAllText(filePath, module.Content);
             Console.WriteLine($"Wrote {module.FileName} to {filePath}");
         }
