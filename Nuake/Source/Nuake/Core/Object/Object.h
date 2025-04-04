@@ -42,6 +42,11 @@ namespace Nuake
         NK_HASHED_STATIC_STR(ArgsName)
     };
 
+    struct HashedUserValue
+    {
+        NK_HASHED_STATIC_STR(FuncPtr)
+    };
+
     enum class ComponentTypeTrait : uint16_t
     {
         None = 0,

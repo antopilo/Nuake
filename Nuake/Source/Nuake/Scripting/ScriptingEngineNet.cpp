@@ -12,7 +12,7 @@
 #include "NetModules/InputNetAPI.h"
 #include "NetModules/SceneNetAPI.h"
 #include "NetModules/UINetAPI.h"
-
+#include "NetModules/ModulesAPI.h"
 #include "Nuake/Scene/Components/BSPBrushComponent.h"
 
 #include <filesystem>
@@ -61,7 +61,8 @@ namespace Nuake
 			CreateRef<EngineSubsystemNetAPI>(),
 			CreateRef<InputNetAPI>(),
 			CreateRef<SceneNetAPI>(),
-			CreateRef<UINetAPI>()
+			CreateRef<UINetAPI>(),
+			CreateRef<ModulesAPI>(),
 		};
 
 		for (auto& m : modules)
@@ -166,8 +167,16 @@ namespace Nuake
 		{
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
-				auto namespaceClassSplit = String::Split(methodName, '.');
-				assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+				if(!netModule->isModule)
+				{
+					auto namespaceClassSplit = String::Split(methodName, '.');
+					assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+				}
+				else
+				{
+					auto namespaceClassSplit = String::Split(methodName, '.');
+					assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
+				}
 			}
 		}
 

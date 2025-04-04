@@ -52,7 +52,6 @@ namespace Nuake
 	{
 		//Window::Get()->OnWindowSetScene().AddStatic(&Engine::OnWindowSetScene);
 		
-		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
 		
 		PhysicsManager::Get().Init();
 		NavManager::Get().Initialize();
@@ -71,6 +70,9 @@ namespace Nuake
 		RegisterCoreTypes::RegisterCoreComponents();
 
 		Modules::StartupModules();
+
+		ScriptingEngineNet::Get().OnGameAssemblyLoaded().AddStatic(&Engine::OnScriptingEngineGameAssemblyLoaded);
+
 
 		// Writting bindings.json
 

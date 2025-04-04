@@ -1,20 +1,13 @@
 using System;
-namespace Nuake
+namespace Nuake.Net
 {
-    public static class AudioModule
+    public class AudioModule
     {
         public static void SetVolume(float volume)
         {
             unsafe
             {
-                 Internals.AudioModuleSetVolumeICall(volume);
-            }
-        }
-        public static void SetMuted(bool muted)
-        {
-            unsafe
-            {
-                 Internals.AudioModuleSetMutedICall(muted);
+                 Internals.SetVolumeICall(volume);
             }
         }
     }

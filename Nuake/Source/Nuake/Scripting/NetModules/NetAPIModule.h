@@ -8,6 +8,8 @@ namespace Nuake {
 	class NetAPIModule
 	{
 	public:
+		bool isModule = false;
+
 		using MethodMap = std::unordered_map<std::string, void*>;
 
 		virtual const std::string GetModuleName() const = 0;

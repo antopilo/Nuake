@@ -122,7 +122,8 @@ public:																			\
 		entt::id_type typeId = entt::hashed_string(name.c_str());				\
 		ClassFactory.func<T>(typeId)											\
 		.prop(Nuake::HashedName::DisplayName, name) 							\
-		.prop(Nuake::HashedName::ArgsName, std::vector<const char*>({argNames...}));										\
+		.prop(Nuake::HashedName::ArgsName, std::vector<const char*>({argNames...}))\
+		.prop(Nuake::HashedUserValue::FuncPtr, (void*)T); \
 	}																			\
 																				\
 	template<auto Func>															\
