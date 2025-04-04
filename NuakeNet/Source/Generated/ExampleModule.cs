@@ -10,11 +10,11 @@ namespace Nuake.Net
                  Internals.ExampleModuleExampleFunctionICall();
             }
         }
-        public static void ExampleModuleLog(string hi)
+        public static void ExampleModuleLog16(string hi2)
         {
             unsafe
             {
-                 Internals.ExampleModuleExampleModuleLogICall(hi);
+                 Internals.ExampleModuleExampleModuleLog16ICall(hi2);
             }
         }
     }

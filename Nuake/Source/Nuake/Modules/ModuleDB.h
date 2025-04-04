@@ -15,6 +15,10 @@
 
 #include <entt/entt.hpp>
 
+#include <Coral/String.hpp>
+
+using NativeString = Coral::String;
+
 class ModuleInstance
 {
 public:
@@ -104,9 +108,12 @@ public:																									\
 	} \
 	\
 
+
+
 #define NUAKEMODULE(moduleName)													\
 using TypeNameMap = std::map<entt::id_type, std::string>;						\
 																				\
+												\
 class moduleName : public ModuleInstance										\
 {																				\
 public:																			\
@@ -210,6 +217,24 @@ namespace Nuake
 			newInstance->instance = entt::resolve<T>().construct();
 			Modules[unmangledName] = (ModuleInstance*)newInstance;
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[unmangledName]);
+		}
+
+		void FixedUpdate(float ts)
+		{
+			for (auto& moduleName : GetModules())
+			{
+				auto& module = GetBaseImpl(moduleName);
+				module.OnFixedUpdate.Broadcast(ts);
+			}
+		}
+
+		void Update(float ts)
+		{
+			for (auto& moduleName : GetModules())
+			{
+				auto& module = GetBaseImpl(moduleName);
+				module.OnUpdate.Broadcast(ts);
+			}
 		}
 
 		template<typename T>

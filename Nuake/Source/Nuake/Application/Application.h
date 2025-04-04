@@ -18,6 +18,7 @@ namespace Nuake {
 		bool VSync = true;
 		std::string WorkingDirectory = "";
 		bool Headless = false;
+		bool GenerateBindings = false;
 	};
 
 	class Application

@@ -6,7 +6,6 @@
 #include "ExampleModule/ExampleModule.h"
 
 #include "Nuake/Core/Logger.h"
-#include "Nuake/Modules/ModuleDB.h"
 
 void Nuake::Modules::StartupModules()
 {
@@ -16,26 +15,6 @@ void Nuake::Modules::StartupModules()
     AudioModule_Startup();
     Logger::Log("Starting ExampleModule", "modules");
     ExampleModule_Startup();
-}
-
-void Nuake::Modules::FixedUpdate(float ts)
-{
-	auto& moduleDB = ModuleDB::Get();
-    for (auto& moduleName : moduleDB.GetModules())
-    {
-		auto& module = moduleDB.GetBaseImpl(moduleName);
-		module.OnFixedUpdate.Broadcast(ts);
-    }
-}
-
-void Nuake::Modules::Update(float ts)
-{
-    auto& moduleDB = ModuleDB::Get();
-    for (auto& moduleName : moduleDB.GetModules())
-    {
-        auto& module = moduleDB.GetBaseImpl(moduleName);
-        module.OnUpdate.Broadcast(ts);
-    }
 }
 
 void Nuake::Modules::ShutdownModules()

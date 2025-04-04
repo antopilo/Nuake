@@ -35,7 +35,7 @@ json ModuleDB::GenerateModuleAPI()
 					{
 						std::string argType = std::string(func.arg(k).info().name());
 
-						if (argType == "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >")
+						if (argType == "class Coral::String" || argType == "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >")
 						{
 							argType = "string";
 						}

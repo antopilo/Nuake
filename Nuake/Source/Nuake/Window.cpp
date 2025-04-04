@@ -46,6 +46,11 @@ GLFWwindow* Window::GetHandle()
     return this->window;
 }
 
+void Window::Close()
+{
+	glfwSetWindowShouldClose(this->window, true);
+}
+
 bool Window::ShouldClose()
 {
     return glfwWindowShouldClose(this->window);

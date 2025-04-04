@@ -57,7 +57,7 @@ public:
 };
 
 
-void ExampleModuleLog(const std::string& hi)
+void ExampleModuleLog(NativeString hi)
 {
 	Nuake::Logger::Log(hi, "ExampleModule", Nuake::VERBOSE);
 }
@@ -81,7 +81,7 @@ void ExampleModule_Startup()
 
 	// This is to expose functions to the rest of the engine
 	module.BindFunction<ExampleFunction>("ExampleFunction");
-	module.BindFunction<ExampleModuleLog>("ExampleModuleLog", "hi");
+	module.BindFunction<ExampleModuleLog>("ExampleModuleLog16", "hi2");
 
 	// The module can hook to certain events
 	module.OnUpdate.AddStatic([](float ts)

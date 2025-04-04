@@ -10,6 +10,11 @@
 
 using namespace Nuake;
 
+void HelloWorld()
+{
+	Logger::Log("Hello World");
+}
+
 float Volume = 1.0f;
 void SetVolume(float volume)
 {
@@ -20,6 +25,11 @@ bool Muted = false;
 void SetMuted(bool muted)
 {
 	Muted = muted;
+}
+
+void SetName(const std::string& name)
+{
+	Logger::Log("SetName: " + name);
 }
 
 NUAKEMODULE(AudioModule)
@@ -37,6 +47,8 @@ void AudioModule_Startup()
 	// Exposed functions(scripting API)
 	module.BindFunction<SetVolume>("SetVolume", "volume");
 	module.BindFunction<SetMuted>("SetMuted", "muted");
+	module.BindFunction<HelloWorld>("HelloWorld");
+	module.BindFunction<SetName>("SetName", "name");
 
 	// Register custom component & system
 	module.RegisterComponent<Audio::AudioEmitterComponent>();

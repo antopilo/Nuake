@@ -72,7 +72,6 @@ namespace Nuake
 
 		// Check if we have an .sln in the project.
 		const std::string absoluteAssemblyPath = FileSystem::Root + m_NetDirectory + "/" + m_EngineAssemblyName;
-
 		if (!FileSystem::FileExists(m_EngineAssemblyName, true))
 		{
 			isInitialized = false;

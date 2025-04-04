@@ -7,6 +7,7 @@
 
 #include "Nuake/UI/NuakeUI.h"
 #include "Nuake/UI/UIInputManager.h"
+#include "Nuake/Modules/ModuleDB.h"
 
 void EditorApplication::OnInit()
 {
@@ -14,7 +15,14 @@ void EditorApplication::OnInit()
     Engine::Init();
 	
 	// Register bakers, these can convert files into nuake resources
-	
+    if (m_LaunchSettings.generateBindings)
+    {
+        ModuleDB::Get().GenerateModuleAPI();
+
+        Logger::Log("Generated Bindings");
+        m_Window->Close();
+        return;
+    }
 	
     m_Window = Engine::GetCurrentWindow();
     m_Window->SetSize({ m_Specification.WindowWidth, m_Specification.WindowHeight });

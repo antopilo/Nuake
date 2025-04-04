@@ -91,6 +91,11 @@ LaunchSettings ParseLaunchSettings(const std::vector<std::string>& arguments)
                 launchSettings.monitor = stoi(arguments[i + 1]);
             }
         }
+        else if (arg == "--generate-bindings")
+        {
+            // Set editor window monitor
+            launchSettings.generateBindings = true;
+        }
         else if (argumentSize == 2 && Nuake::FileSystem::FileExists(arg))
         {
             if (Nuake::String::EndsWith(arg, ".project"))

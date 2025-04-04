@@ -27,6 +27,7 @@ namespace Nuake
 	public:
 		GLFWwindow* GetHandle();
 
+		void Close();
 		bool ShouldClose();
 
 		int Init();

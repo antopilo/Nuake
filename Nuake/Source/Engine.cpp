@@ -163,12 +163,12 @@ namespace Nuake
 				const float scaledFixedTimestep = fixedUpdateRate * timeScale;
 				currentWindow->FixedUpdate(scaledFixedTimestep);
 
-				Modules::FixedUpdate(scaledFixedTimestep);
+				ModuleDB::Get().FixedUpdate(scaledFixedTimestep);
 
 				fixedUpdateDifference -= fixedUpdateRate;
 			}
 
-			Modules::Update(scaledTimeStep);
+			ModuleDB::Get().Update(scaledTimeStep);
 
 			Input::Update();
 		}

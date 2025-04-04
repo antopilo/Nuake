@@ -17,5 +17,19 @@ namespace Nuake.Net
                  Internals.AudioModuleSetMutedICall(muted);
             }
         }
+        public static void HelloWorld()
+        {
+            unsafe
+            {
+                 Internals.AudioModuleHelloWorldICall();
+            }
+        }
+        public static void SetName(string name)
+        {
+            unsafe
+            {
+                 Internals.AudioModuleSetNameICall(name);
+            }
+        }
     }
 }
