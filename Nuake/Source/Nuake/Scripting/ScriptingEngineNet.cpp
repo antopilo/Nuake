@@ -167,16 +167,8 @@ namespace Nuake
 		{
 			for (const auto& [methodName, methodPtr] : netModule->GetMethods())
 			{
-				if(!netModule->isModule)
-				{
-					auto namespaceClassSplit = String::Split(methodName, '.');
-					assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
-				}
-				else
-				{
-					auto namespaceClassSplit = String::Split(methodName, '.');
-					assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
-				}
+				auto namespaceClassSplit = String::Split(methodName, '.');
+				assembly.AddInternalCall(m_Scope + '.' + namespaceClassSplit[0], namespaceClassSplit[1], methodPtr);
 			}
 		}
 

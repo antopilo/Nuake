@@ -48,6 +48,7 @@ class Generator
         string generatedInternals = string.Empty;
 
         generatedInternals += "using Coral.Managed.Interop;\n";
+        generatedInternals += "namespace Nuake.Net\r\n{\n";
         generatedInternals += "public class Internals\n";
         generatedInternals += "{\n";
 
@@ -56,7 +57,7 @@ class Generator
             generatedInternals += $"    // {module.Name}\n";
             foreach (var function in module.Functions)
             {
-                generatedInternals += $"    public static unsafe delegate*<";
+                generatedInternals += $"    internal static unsafe delegate*<";
 
                 if (function.NumArgs > 0)
                 {
@@ -70,7 +71,7 @@ class Generator
         }
 
         generatedInternals += "}\n";
-
+        generatedInternals += "}\n";
         return generatedInternals;
     }
 
@@ -78,9 +79,9 @@ class Generator
     {
         string moduleApi = string.Empty;
         moduleApi += "using System;\n";
-        moduleApi += "namespace Nuake\n";
+        moduleApi += "namespace Nuake.Net\n";
         moduleApi += "{\n";
-        moduleApi += "    public static class " + module.Name + "\n";
+        moduleApi += "    public class " + module.Name + "\n";
         moduleApi += "    {\n";
 
         foreach (Function func in module.Functions)

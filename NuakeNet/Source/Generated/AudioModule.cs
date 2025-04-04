@@ -7,7 +7,14 @@ namespace Nuake.Net
         {
             unsafe
             {
-                 Internals.SetVolumeICall(volume);
+                 Internals.AudioModuleSetVolumeICall(volume);
+            }
+        }
+        public static void SetMuted(bool muted)
+        {
+            unsafe
+            {
+                 Internals.AudioModuleSetMutedICall(muted);
             }
         }
     }
