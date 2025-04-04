@@ -103,88 +103,88 @@ public:																									\
 	} \
 	\
 
-#define NUAKEMODULE(moduleName)									\
-using TypeNameMap = std::map<entt::id_type, std::string>;		\
-																\
-class moduleName : public ModuleInstance						\
-{																\
-public:															\
-    std::string Description = "No Description";					\
-	entt::meta_factory<moduleName> ModuleFactory = entt::meta<moduleName>();						\
-	TypeNameMap TypeNames;										\
-																\
-	std::map<entt::id_type, std::vector<std::string>> FuncArgNames; \
-\
-	inline static auto ClassFactory = entt::meta<moduleName>();												\
-	template<auto T, typename... Args>										\
-	inline moduleName& BindFunction(const std::string& name, Args... argNames)		\
-	{																		\
-		entt::id_type typeId = entt::hashed_string(name.c_str());			\
-		TypeNames[typeId] = name;											\
-		FuncArgNames[typeId] = { argNames ... };							\
-		ModuleFactory.func<T>(typeId);										\
-		return *this;														\
-	}																		\
-	template<auto Func>														\
-	static auto RegisterSetting(const char* settingName)					\
-	{																		\
-		return ClassFactory													\
-			.data<Func>(entt::hashed_string(settingName))					\
-			.prop(Nuake::HashedName::DisplayName, settingName);				\
-	}																		\
-																			\
-	template<typename T>													\
-	void RegisterComponent()												\
-	{																		\
-		/*Nuake::SceneSystemDB::Get().RegisterComponent<T>();*/						\
-	}																		\
-\
-	template<typename T>													\
-	void RegisterComponentSystem() \
-	{ \
-		/*Nuake::SceneSystemDB::Get().RegisterSystem<T>();	*/					\
-	} \
-																			\
-	template<typename... Args>												\
-	auto Invoke(const std::string& funcName, Args... args)					\
-	{																		\
-		auto reflection = Resolve();										\
-		for (auto [id, func] : reflection.func())							\
-		{																	\
-			const std::string_view returnType = func.ret().info().name();	\
-			const std::string_view funcTypeName = GetTypeName(id);			\
-			if (funcName == funcTypeName)									\
-			{																\
-				return func.invoke(instance, args...);						\
-			}																\
-		}																	\
-	} \
-\
-std::vector<std::string> GetFuncArgNames(entt::id_type id) \
-{ \
-	return FuncArgNames[id]; \
-} \
-\
-std::vector<std::string> GetAllFuncNames() \
-{\
-	std::vector<std::string> names; \
-	names.reserve(TypeNames.size()); \
-	for (const auto& [_, name] : TypeNames) \
-	{ \
-		names.push_back(name);\
-	}\
-	return names;\
-}\
-\
-	std::string_view GetTypeName(entt::id_type id) \
-	{ \
-		if (TypeNames.contains(id)) \
-		{ \
-			return TypeNames[id]; \
-		} \
-		return "Unknown"; \
-	}\
-};
+#define NUAKEMODULE(moduleName)													\
+using TypeNameMap = std::map<entt::id_type, std::string>;						\
+																				\
+class moduleName : public ModuleInstance										\
+{																				\
+public:																			\
+    std::string Description = "No Description";									\
+	entt::meta_factory<moduleName> ModuleFactory = entt::meta<moduleName>();	\
+	TypeNameMap TypeNames;														\
+																				\
+	std::map<entt::id_type, std::vector<std::string>> FuncArgNames;				\
+																				\
+	inline static auto ClassFactory = entt::meta<moduleName>();					\
+	template<auto T, typename... Args>											\
+	static void BindFunction(const std::string& name, Args... argNames)			\
+	{																			\
+		entt::id_type typeId = entt::hashed_string(name.c_str());				\
+		ClassFactory.func<T>(typeId)											\
+		.prop(Nuake::HashedName::DisplayName, name) 							\
+		.prop(Nuake::HashedName::ArgsName, std::vector<const char*>({argNames...}));										\
+	}																			\
+																				\
+	template<auto Func>															\
+	static auto RegisterSetting(const char* settingName)						\
+	{																			\
+		return ClassFactory														\
+			.data<Func>(entt::hashed_string(settingName))						\
+			.prop(Nuake::HashedName::DisplayName, settingName);					\
+	}																			\
+																				\
+	template<typename T>														\
+	void RegisterComponent()													\
+	{																			\
+		Nuake::SceneSystemDB::Get().RegisterComponent<T>();						\
+	}																			\
+																				\
+	template<typename T>														\
+	void RegisterComponentSystem()												\
+	{																			\
+		Nuake::SceneSystemDB::Get().RegisterSceneSystem<T>();					\
+	}																			\
+																				\
+	template<typename... Args>													\
+	auto Invoke(const std::string& funcName, Args... args)						\
+	{																			\
+		auto reflection = Resolve();											\
+		for (auto [id, func] : reflection.func())								\
+		{																		\
+			const std::string_view returnType = func.ret().info().name();		\
+			const std::string_view funcTypeName = GetTypeName(id);				\
+			if (funcName == funcTypeName)										\
+			{																	\
+				return func.invoke(instance, args...);							\
+			}																	\
+		}																		\
+	}																			\
+																				\
+	std::vector<std::string> GetFuncArgNames(entt::id_type id)					\
+	{																			\
+		return FuncArgNames[id];												\
+	}																			\
+																				\
+	std::vector<std::string> GetAllFuncNames()									\
+	{																			\
+		std::vector<std::string> names;											\
+		names.reserve(TypeNames.size());										\
+		for (const auto& [_, name] : TypeNames)									\
+		{																		\
+			names.push_back(name);												\
+		}																		\
+		return names;															\
+	}																			\
+																				\
+		std::string_view GetTypeName(entt::id_type id)							\
+		{																		\
+			if (TypeNames.contains(id))											\
+			{																	\
+				return TypeNames[id];											\
+			}																	\
+			return "Unknown";													\
+		}																		\
+	};
 
 namespace Nuake
 {
@@ -245,11 +245,6 @@ namespace Nuake
 					return std::any_cast<ModuleInstance*>(Modules[name])->Resolve();
 				}
 			}
-			//auto foundIt = std::find_if(Modules.begin(), Modules.end(), moduleName);
-			//if (foundIt != Modules.end())
-			//{
-			//	return std::any_cast<ModuleInstance*>(foundIt->second)->Resolve();
-			//}
 			
 			assert(false && "Module not found");
 			return entt::meta_type();
@@ -267,6 +262,8 @@ namespace Nuake
 
 			return moduleNames;
 		}
+
+		json GenerateModuleAPI();
 
 	private:
 		std::map<std::string, std::any> Modules;
