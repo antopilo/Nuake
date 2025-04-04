@@ -13,6 +13,7 @@
 #include "Nuake/Threading/JobSystem.h"
 #include "Nuake/Core/RegisterCoreTypes.h"
 #include "Nuake/Modules/Modules.h"
+#include "Nuake/Modules/ModuleDB.h"
 #include "Nuake/Subsystems/EngineSubsystemScriptable.h"
 
 #include <GLFW/glfw3.h>
@@ -70,6 +71,14 @@ namespace Nuake
 		RegisterCoreTypes::RegisterCoreComponents();
 
 		Modules::StartupModules();
+
+		// Writting bindings.json
+
+		Logger::Log("Exporting bindings.json", "modules", VERBOSE);
+		auto api = ModuleDB::Get().GenerateModuleAPI();
+		FileSystem::BeginWriteFile("bindings.json", true);
+		FileSystem::WriteLine(api.dump(4));
+		FileSystem::EndWriteFile();
 
 		InitializeCoreSubsystems();
 
