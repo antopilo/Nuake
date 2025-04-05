@@ -219,6 +219,24 @@ namespace Nuake
 			return *(T*)std::any_cast<ModuleInstance*>(Modules[unmangledName]);
 		}
 
+		void OnGameStateChanged(GameState state)
+		{
+			for (auto& moduleName : GetModules())
+			{
+				auto& module = GetBaseImpl(moduleName);
+				module.OnGameStateChanged.Broadcast(state);
+			}
+		}
+
+		void OnSceneLoaded(Ref<Scene> scene)
+		{
+			for (auto& moduleName : GetModules())
+			{
+				auto& module = GetBaseImpl(moduleName);
+				module.OnSceneLoad.Broadcast(scene);
+			}
+		}
+
 		void FixedUpdate(float ts)
 		{
 			for (auto& moduleName : GetModules())

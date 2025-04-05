@@ -55,16 +55,20 @@ class Generator
         foreach (var module in bindings.Modules)
         {
             generatedInternals += $"    // {module.Name}\n";
-            foreach (var function in module.Functions)
+
+            if(module.Functions != null)
             {
-                generatedInternals += $"    internal static unsafe delegate*<";
-
-                if (function.NumArgs > 0)
+                foreach (var function in module.Functions)
                 {
-                    generatedInternals += $"{string.Join(", ", function.Args.Select(a => ConvertTypes(a.Type)))},";
-                }
+                    generatedInternals += $"    internal static unsafe delegate*<";
 
-                generatedInternals += $"{function.ReturnType}>{module.Name}{function.Name}ICall;\n";
+                    if (function.NumArgs > 0)
+                    {
+                        generatedInternals += $"{string.Join(", ", function.Args.Select(a => ConvertTypes(a.Type)))},";
+                    }
+
+                    generatedInternals += $"{function.ReturnType}>{module.Name}{function.Name}ICall;\n";
+                }
             }
 
             generatedInternals += "\n";
@@ -84,33 +88,37 @@ class Generator
         moduleApi += "    public class " + module.Name + "\n";
         moduleApi += "    {\n";
 
-        foreach (Function func in module.Functions)
+        if(module.Functions != null)
         {
-            moduleApi += "        public static " + func.ReturnType + " " + func.Name + "(";
-            if (func.NumArgs > 0)
+            foreach (Function func in module.Functions)
             {
-                moduleApi += string.Join(", ", func.Args.Select(a => a.Type + " " + a.Name));
-            }
-            moduleApi += ")\n";
-            moduleApi += "        {\n";
-            moduleApi += "            unsafe\n";
-            moduleApi += "            {\n";
-            if (func.ReturnType != "void")
-            {
-                moduleApi += $"            return ";
-            }
-            moduleApi += $"                 Internals.{module.Name}{func.Name}ICall(";
-            if (func.NumArgs > 0)
-            {
-                moduleApi += string.Join(", ", func.Args.Select(a => a.Name));
-            }
+                moduleApi += "        public static " + func.ReturnType + " " + func.Name + "(";
+                if (func.NumArgs > 0)
+                {
+                    moduleApi += string.Join(", ", func.Args.Select(a => a.Type + " " + a.Name));
+                }
+                moduleApi += ")\n";
+                moduleApi += "        {\n";
+                moduleApi += "            unsafe\n";
+                moduleApi += "            {\n";
+                if (func.ReturnType != "void")
+                {
+                    moduleApi += $"            return ";
+                }
+                moduleApi += $"                 Internals.{module.Name}{func.Name}ICall(";
+                if (func.NumArgs > 0)
+                {
+                    moduleApi += string.Join(", ", func.Args.Select(a => a.Name));
+                }
 
-            moduleApi += ");\n";
+                moduleApi += ");\n";
 
-            moduleApi += "            }\n";
-            moduleApi += "        }\n";
+                moduleApi += "            }\n";
+                moduleApi += "        }\n";
 
-        }
+            }
+        }   
+        
         moduleApi += "    }\n";
         moduleApi += "}\n";
         return moduleApi;

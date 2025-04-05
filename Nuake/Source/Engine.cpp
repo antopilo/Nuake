@@ -207,7 +207,7 @@ namespace Nuake
 		{
 			GetCurrentScene()->OnExit();
 			Input::ShowMouse();
-			gameState = GameState::Stopped;
+			SetGameState(GameState::Stopped);
 		}
 	}
 
@@ -244,6 +244,12 @@ namespace Nuake
 		Window::Get()->EndDraw();
 	}
 
+	void Engine::SetGameState(GameState state)
+	{
+		gameState = state;
+		ModuleDB::Get().OnGameStateChanged(state);
+	}
+
 	void Engine::Close()
 	{
 		glfwTerminate();
@@ -265,6 +271,8 @@ namespace Nuake
 		if (result)
 		{
 			OnSceneLoaded.Broadcast(scene);
+
+			ModuleDB::Get().OnSceneLoaded(scene);
 		}
 
 		return result;

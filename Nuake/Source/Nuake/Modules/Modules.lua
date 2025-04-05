@@ -25,6 +25,21 @@ function loadModules(modulesDir)
     return modules
 end
 
+function getModuleLibCopy(modules, outDir)
+    local libsCopyCommands = {}
+    for _, module in ipairs(modules) do
+        if module.libs then
+            for _, lib in ipairs(module.libs) do
+                print("Found module libs \"".. lib)
+                table.insert(libsCopyCommands, '{COPYFILE} "%{wks.location}Nuake/Source/Nuake/Modules/' .. module._name .. '/' .. lib ..'" "' .. outDir .. '/' .. '"')
+            end
+        end
+       
+    end
+
+    return libsCopyCommands
+end
+
 -- Function to generate the final C++ file with startup and shutdown functions
 function generateModulesFile(modules, outputFilePath, sourceDir)
     local outputFile = io.open(outputFilePath, "w")

@@ -1,3 +1,5 @@
+include "Nuake/Source/Nuake/Modules/Modules.lua"
+
 project "Editor"
     targetname ("Nuake Engine")
 
@@ -75,6 +77,30 @@ project "Editor"
         "vma"
     }
 
+    libdirs 
+    {
+        "%{cfg.debugdir}/",
+    }
+
+    local libCopyCmds = {}
+
+    local modules = {}
+    if _ACTION then
+        modules = loadModules("../Nuake/Source/Nuake/Modules")
+        print(#modules)
+        for _, m in ipairs(modules) do
+             print("m")
+        end
+        local libTargetDir = "%{cfg.debugdir}/"
+        local commands = getModuleLibCopy(modules, libTargetDir)
+        for _, command in ipairs(commands) do
+            table.insert(libCopyCmds, command)
+            print(command)
+        end
+        
+    end
+
+   
     prebuildcommands {
         '{ECHO} "Copying dxcompiler.dll to Working directory..."',
         '{COPYFILE} "%{wks.location}Nuake/Thirdparty/dxc/bin/x64/dxcompiler.dll" "%{cfg.debugdir}/"',
@@ -82,7 +108,8 @@ project "Editor"
         '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.dll" "%{cfg.debugdir}/"',
         '{COPYFILE} "%{wks.location}Nuake/Thirdparty/Coral/Coral.Managed/bin/%{cfg.buildcfg}/Coral.Managed.runtimeconfig.json" "%{cfg.debugdir}/"',
         '{COPYFILE} "%{wks.location}NuakeNet/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll" "%{cfg.debugdir}/"',
-        'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"'
+        'xcopy /E /I /Y "%{wks.location}Data" "%{cfg.debugdir}\\Resources"',
+        table.unpack(libCopyCmds)
     }
 
     filter { "system:windows", "action:vs*"}
