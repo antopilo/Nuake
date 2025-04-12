@@ -169,7 +169,15 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 {
 	size_t data_size = inSize.x * inSize.y;
 
-	if (inFormat != ImageFormat::A8)
+	if (inFormat == ImageFormat::RGB16F)
+	{
+		data_size *= 6;
+	}
+	else if (inFormat == ImageFormat::RG16F)
+	{
+		data_size *= 4;
+	}
+	else if (inFormat != ImageFormat::A8)
 	{
 		data_size *= 4;
 	}

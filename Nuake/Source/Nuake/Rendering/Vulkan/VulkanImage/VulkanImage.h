@@ -17,6 +17,8 @@ namespace Nuake
 		A8 = 9,
 		RGBA8 = 37,
 		RGBA16F = 97,
+		RGB16F = 90,
+		RG16F = 83,
 		RGBA32F = 109,
 		D32F = 126,
 		R32UINT = 98,

@@ -36,7 +36,7 @@
 #include <array>
 #include <algorithm>
 
-bool NKUseValidationLayer = false;
+bool NKUseValidationLayer = true;
 
 using namespace Nuake;
 
@@ -504,6 +504,14 @@ void VkRenderer::RemoveViewport(const UUID& viewportId)
 			SceneViewports.erase(scene);
 			return;
 		}
+	}
+}
+
+void VkRenderer::RecreatePipelines()
+{
+	for (auto& [viewportId, sceneRenderer] : SceneRenderers)
+	{
+		sceneRenderer->RecreatePipelines();
 	}
 }
 

@@ -220,6 +220,8 @@ namespace Nuake
 		void RemoveViewport(const UUID& viewportId);
 		void RegisterSceneViewport(const Ref<Scene>& scene, const UUID& viewportId);
 
+		void RecreatePipelines();
+
 	public:
 		void PrepareSceneData(RenderContext ctx);
 		void DrawScenes();

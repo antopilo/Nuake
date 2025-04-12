@@ -33,6 +33,19 @@ namespace Nuake
 		void Render(PassRenderContext& ctx, Ref<VulkanImage> output);
 	};
 
+	struct SSAOConstant
+	{
+		int noiseTextureID;
+		int normalTextureID;
+		int depthTextureID;
+		int camViewID; 
+		float radius;
+		float bias;
+		Vector2 noiseScale;
+		float power;
+
+	};
+
 	struct ShadingConstant
 	{
 		int AlbedoTextureID;
@@ -43,6 +56,7 @@ namespace Nuake
 		int CameraID;
 		float CascadeSplits[4];
 		float AmbientTerm;
+		int SSAOTextureID;
 	};
 
 	struct TonemapConstant
@@ -89,6 +103,9 @@ namespace Nuake
 	private:
 		UUID CurrentCameraID;
 
+		static std::vector<Vector3> ssaoKernelSamples;
+		static Ref<VulkanImage> ssaoNoiseTexture;
+
 		// Attachments GBuffer
 		Ref<VulkanImage> GBufferAlbedo;
 		Ref<VulkanImage> GBufferDepth;
@@ -98,6 +115,7 @@ namespace Nuake
 
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
+		Ref<VulkanImage> SSAOOutput;
 
 		Ref<VulkanImage> LineOutput;
 		Ref<VulkanImage> LineCombineOutput;
@@ -122,6 +140,7 @@ namespace Nuake
 		// Push constant
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
+		SSAOConstant ssaoConstant;
 		TonemapConstant tonemapConstant;
 		DebugConstant debugConstant;
 		LineConstant lineConstant;
@@ -140,12 +159,15 @@ namespace Nuake
 		~SceneRenderPipeline() = default;
 
 		void SetCamera(UUID camera);
-		void Render(PassRenderContext& ctx);
-		Ref<VulkanImage> GetOutput() { return GizmoCombineOutput; }
+		void Render(PassRenderContext& ctx); 
+		Ref<VulkanImage> GetOutput() { return GizmoCombineOutput; }       
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 		MulticastDelegate<DebugLineCmd&>& OnLineDraw() { return DebugLineDrawDelegate; }
+
+		void RecreatePipeline();
 	private:
 		Ref<VulkanImage> ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size);
 	};
 }
+ 

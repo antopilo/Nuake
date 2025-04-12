@@ -18,5 +18,7 @@ namespace Nuake
 
 		void AddShader(const std::string& shaderName, Ref<VulkanShader> shader);
 		Ref<VulkanShader> GetShader(const std::string& shaderName);
+
+		void RecompileShaders();
 	};
 }

@@ -40,6 +40,8 @@ namespace Nuake
 		void PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext);
 		void DrawSceneView(RenderContext inContext);
 
+		void RecreatePipelines();
+
 	private:
 		void LoadShaders();
 	};

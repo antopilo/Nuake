@@ -1,4 +1,7 @@
 #include "VkShaderManager.h"
+#include "ShaderCompiler.h"
+
+#include "SceneRenderPipeline.h"
 
 using namespace Nuake;
 
@@ -15,4 +18,17 @@ Ref<VulkanShader> VkShaderManager::GetShader(const std::string& shaderName)
 	}
 
 	assert(false && "Shader not found by name");
+}
+
+void VkShaderManager::RecompileShaders()
+{
+	ShaderCompiler compiler;
+
+	for (auto& shader : Shaders)
+	{
+		const auto& filePath = shader.second->GetSourcePath();
+		shader.second = compiler.CompileShader(filePath);
+	}
+
+	VkRenderer::Get().RecreatePipelines();
 }

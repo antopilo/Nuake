@@ -112,6 +112,8 @@ namespace Nuake
 		VkDescriptorSetLayout LightsDescriptorLayout;
 		VkDescriptorSetLayout CamerasDescriptorLayout;
 
+		VkDescriptorSetLayout SSAOKernelDescriptorLayout;
+
 		std::map<UUID, uint32_t> BindlessTextureMapping;
 		std::map<UUID, uint32_t> CameraMapping;
 
@@ -140,6 +142,7 @@ namespace Nuake
 		VkDescriptorSet TriangleBufferDescriptor;
 		VkDescriptorSet SamplerDescriptor;
 		VkDescriptorSet MaterialDescriptor;
+		VkDescriptorSet SSAOKernelDescriptor;
 		VkDescriptorSet TexturesDescriptor;
 		VkDescriptorSet LightsDescriptor;
 		VkDescriptorSet CamerasDescriptor;
@@ -157,6 +160,7 @@ namespace Nuake
 		void Init();
 
 		Ref<AllocatedBuffer> CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name = "");
+		void CopyIntoBuffer(Ref<AllocatedBuffer> buffer, void* data, size_t size, VkDescriptorSet descSet);
 		bool AddBuffer(const Ref<AllocatedBuffer>& buffer);
 		Ref<AllocatedBuffer> GetBuffer(const UUID& id);
 		std::vector<Ref<AllocatedBuffer>> GetAllBuffers();

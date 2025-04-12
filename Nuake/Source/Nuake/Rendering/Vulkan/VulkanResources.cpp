@@ -32,6 +32,41 @@ Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, 
 	return buffer;
 }
 
+void GPUResources::CopyIntoBuffer(Ref<AllocatedBuffer> buffer, void* data, size_t size, VkDescriptorSet descSet)
+{
+	void* mappedData;
+	vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (buffer->GetAllocation()), &mappedData);
+	memcpy(mappedData, &data, size);
+
+	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
+	{
+		VkBufferCopy copy{ 0 };
+		copy.dstOffset = 0;
+		copy.srcOffset = 0;
+		copy.size = size;
+	
+		vkCmdCopyBuffer(cmd, buffer->GetBuffer(), buffer->GetBuffer(), 1, &copy);
+	});
+
+	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), buffer->GetAllocation());
+
+	// Update descriptor set for camera
+	VkDescriptorBufferInfo transformBufferInfo{};
+	transformBufferInfo.buffer = buffer->GetBuffer();
+	transformBufferInfo.offset = 0;
+	transformBufferInfo.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet bufferWriteModel = {};
+	bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	bufferWriteModel.pNext = nullptr;
+	bufferWriteModel.dstBinding = 0;
+	bufferWriteModel.dstSet = descSet;
+	bufferWriteModel.descriptorCount = 1;
+	bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	bufferWriteModel.pBufferInfo = &transformBufferInfo;
+	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
+}
+
 bool GPUResources::AddBuffer(const Ref<AllocatedBuffer>& buffer)
 {
 	const UUID id = buffer->GetID();
@@ -189,6 +224,13 @@ void GPUResources::CreateBindlessLayout()
 		TriangleBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
+	// SSAO kernel
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		SSAOKernelDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+	}
+
 	// Samplers
 	{
 		DescriptorLayoutBuilder builder;
@@ -232,7 +274,7 @@ void GPUResources::CreateBindlessLayout()
 	ModelDescriptor = allocator.Allocate(device, ModelDescriptorLayout);
 	LightsDescriptor = allocator.Allocate(device, LightsDescriptorLayout);
 	MaterialDescriptor = allocator.Allocate(device, MaterialDescriptorLayout);
-	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
+	SSAOKernelDescriptor = allocator.Allocate(device, SSAOKernelDescriptorLayout);
 
 	// Samplers
 	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
@@ -452,7 +494,8 @@ std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()
 		MaterialDescriptorLayout,
 		TexturesDescriptorLayout,
 		LightsDescriptorLayout,
-		CamerasDescriptorLayout
+		CamerasDescriptorLayout,
+		SSAOKernelDescriptorLayout
 	};
 	return layouts;
 }

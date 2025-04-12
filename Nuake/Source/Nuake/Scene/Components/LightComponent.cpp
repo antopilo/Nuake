@@ -28,14 +28,11 @@ namespace Nuake
         CastShadows = toggle;
         if (CastShadows)
         {
-            if (Type == LightType::Directional || Type == LightType::Spot)
-            {
-				for (int i = 0; i < CSM_AMOUNT; i++)
-				{
-                    m_ShadowMaps[i] = CreateRef<VulkanImage>(ImageFormat::D32F, Vector2{ 4096, 4096 }, ImageUsage::Depth);
-					GPUResources::Get().AddTexture(m_ShadowMaps[i]);
-				}
-            }
+			for (int i = 0; i < CSM_AMOUNT; i++)
+			{
+                m_ShadowMaps[i] = CreateRef<VulkanImage>(ImageFormat::D32F, Vector2{ 4096, 4096 }, ImageUsage::Depth);
+				GPUResources::Get().AddTexture(m_ShadowMaps[i]);
+			}
         }
         else 
         {

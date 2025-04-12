@@ -61,6 +61,7 @@
 
 #include "Nuake/Rendering/Vulkan/SceneRenderPipeline.h"
 #include <Nuake/Rendering/Vulkan/DebugCmd.h>
+#include "Nuake/Rendering/Vulkan/VkShaderManager.h"
 
 #include "../Events/EditorRequests.h"
 
@@ -2434,6 +2435,12 @@ namespace Nuake {
                     m_ShowGpuResources = !m_ShowGpuResources;
 
                 }
+
+                if (ImGui::MenuItem("Reload Shaders"))
+                {
+                    VkShaderManager::Get().RecompileShaders();
+                }
+
 #endif // NK_DEBUG
 
                 ImGui::EndMenu();

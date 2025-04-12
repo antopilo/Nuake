@@ -80,28 +80,28 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct ShadingPushConstant
+[[vk::binding(0, 7)]]
+StructuredBuffer<float3> ssaoKernels;
+
+struct SSAOConstant
 {
-    int AlbedoInputTextureId;
-    int DepthInputTextureId;
-    int NormalInputTextureId;
-    int MaterialInputTextureId;
-    int LightCount;
-    int CameraID;
-    float cascadeDepth[4];
-    float AmbientTerm;
-    int SSAOTextureId;
+    int noiseTextureID;
+    int normalTextureID;
+    int depthTextureID;
+    float radius;
+    float bias;
+    float2 noiseScale;
+    float power;
 };
 
 [[vk::push_constant]]
-ShadingPushConstant pushConstants;
+SSAOConstant pushConstants;
 
 // Outputs
 struct VSOutput {
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };
-
 
 // Main vertex shader
 VSOutput main(uint vertexIndex : SV_VertexID) 

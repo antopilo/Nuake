@@ -99,6 +99,7 @@ struct ShadingPushConstant
     int CameraID;
     float cascadeDepth[4];
     float AmbientTerm;
+    int SSAOTextureId;
 };
 
 [[vk::push_constant]]
@@ -240,7 +241,8 @@ PSOutput main(PSInput input)
     float metallic = materialSample.r;
     float ao = materialSample.g;
     float roughness = materialSample.b;
-    
+    float ssao = textures[pushConstants.SSAOTextureId].Sample(mySampler, input.UV);
+
     float3 N = normal;
     float3 V = normalize(camView.Position - worldPos);
     float3 R = reflect(-V, N);
@@ -345,7 +347,7 @@ PSOutput main(PSInput input)
     float3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    float3 ambient = (albedo) * ao  * pushConstants.AmbientTerm;
+    float3 ambient = (albedo) * ao * ssao  * pushConstants.AmbientTerm;
     float3 color = (ambient) + Lo;
 
     output.oColor0 = float4(color, 1);

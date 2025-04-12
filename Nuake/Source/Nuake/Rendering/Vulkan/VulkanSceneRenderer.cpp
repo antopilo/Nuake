@@ -70,6 +70,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("copy_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/copy.vert"));
 	shaderMgr.AddShader("line_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/line.frag"));
 	shaderMgr.AddShader("line_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/line.vert"));
+	shaderMgr.AddShader("ssao_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/ssao.frag"));
+	shaderMgr.AddShader("ssao_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/ssao.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)
@@ -248,7 +250,11 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 					for (int i = 0; i < CSM_AMOUNT; i++)
 					{
 						light.TransformId[i] = gpu.GetBindlessCameraID(lightComp.m_LightViews[i].CameraID);
-						light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.m_ShadowMaps[i]->GetID());
+
+						if (lightComp.m_ShadowMaps[i])
+						{
+							light.ShadowMapTextureId[i] = gpu.GetBindlessTextureID(lightComp.m_ShadowMaps[i]->GetID());
+						}
 					}
 				}
 
@@ -333,4 +339,9 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_GENERAL);
 	inContext.CommandBuffer.TransitionImageLayout(sceneRenderPipeline->GetOutput(), VK_IMAGE_LAYOUT_GENERAL);
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+}
+
+void VkSceneRenderer::RecreatePipelines()
+{
+	sceneRenderPipeline->RecreatePipeline();
 }

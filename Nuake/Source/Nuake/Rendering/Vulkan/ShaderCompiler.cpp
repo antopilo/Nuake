@@ -114,33 +114,36 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
     // Output error if compilation failed
     if (FAILED(hres) && (result)) 
     {
-        CComPtr<IDxcBlobEncoding> errorBlob;
-        hres = result->GetErrorBuffer(&errorBlob);
+        CComPtr<IDxcBlobEncoding> errorBlob;     
+        hres = result->GetErrorBuffer(&errorBlob);            
         if (SUCCEEDED(hres) && errorBlob) 
         {
             CComPtr<IDxcBlobEncoding> errorBlobUtf8;
-
-            library->GetBlobAsUtf8(errorBlob, &errorBlobUtf8);
-
+             
+            library->GetBlobAsUtf8(errorBlob, &errorBlobUtf8); 
+             
             const char* errorMsg = reinterpret_cast<const char*>(errorBlobUtf8->GetBufferPointer());
             std::string errorMsgStr(errorMsg, errorBlobUtf8->GetBufferSize());
-
-            Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);
-
+              
+            Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);               
+              
             throw std::runtime_error("Shader compilation failed: " + errorMsgStr);
-        }
+        }     
         else
-        {
-            throw std::runtime_error("Shader compilation failed, but no error message was retrieved.");
+        { 
+            throw std::runtime_error("Shader compilation failed, but no error message was retrieved.");  
         }
-    }
-
+    } 
+     
     // Get compilation result
-    CComPtr<IDxcBlob> code;
+    CComPtr<IDxcBlob> code;  
     result->GetResult(&code);
 	
-	Ref<VulkanShader> shader = CreateRef<VulkanShader>(
-        static_cast<uint32_t*>(code->GetBufferPointer()), 
-        static_cast<uint32_t>(code->GetBufferSize()), shaderType);
-    return shader;
-}
+	Ref<VulkanShader> shader = CreateRef<VulkanShader>(        
+        static_cast<uint32_t*>(code->GetBufferPointer()),     
+        static_cast<uint32_t>(code->GetBufferSize()), shaderType);    
+
+    shader->SetSourcePath(path);
+    return shader;    
+} 
+  
