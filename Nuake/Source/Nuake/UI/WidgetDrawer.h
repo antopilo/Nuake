@@ -29,13 +29,12 @@ namespace Nuake
 
 		void RegisterDefaulWidgets()
 		{
-			auto& drawer = Get();
-			drawer.RegisterTypeDrawer<float, &WidgetDrawer::DrawFloat>(&drawer);
-			drawer.RegisterTypeDrawer<bool, &WidgetDrawer::DrawBool>(&drawer);
-			drawer.RegisterTypeDrawer<std::string, &WidgetDrawer::DrawString>(&drawer);
-			drawer.RegisterTypeDrawer<Vector2, &WidgetDrawer::DrawVector2>(&drawer);
-			drawer.RegisterTypeDrawer<Vector3, &WidgetDrawer::DrawVector3>(&drawer);
-			drawer.RegisterTypeDrawer<DynamicItemList, &WidgetDrawer::DrawDynamicItemList>(&drawer);
+			RegisterTypeDrawer<float, &WidgetDrawer::DrawFloat>(this);
+			RegisterTypeDrawer<bool, &WidgetDrawer::DrawBool>(this);
+			RegisterTypeDrawer<std::string, &WidgetDrawer::DrawString>(this);
+			RegisterTypeDrawer<Vector2, &WidgetDrawer::DrawVector2>(this);
+			RegisterTypeDrawer<Vector3, &WidgetDrawer::DrawVector3>(this);
+			RegisterTypeDrawer<DynamicItemList, &WidgetDrawer::DrawDynamicItemList>(this);
 		}
 
 		void DrawFloat(entt::meta_data& type, entt::meta_any& instance)
