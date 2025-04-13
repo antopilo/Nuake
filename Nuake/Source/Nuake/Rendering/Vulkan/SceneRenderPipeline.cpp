@@ -299,7 +299,8 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
 		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
-	gBufferPass.SetRender([&](PassRenderContext& ctx) {
+	gBufferPass.SetRender([&](PassRenderContext& ctx) 
+	{
 		Cmd& cmd = ctx.commandBuffer;
 
 		Ref<Scene> scene = ctx.scene;
@@ -334,7 +335,7 @@ void SceneRenderPipeline::RecreatePipeline()
 				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
 			}
 		}
-		});
+	});
 
 	auto& ssaoPass = GBufferPipeline.AddPass("SSAOPass");
 	ssaoPass.SetShaders(shaderMgr.GetShader("ssao_vert"), shaderMgr.GetShader("ssao_frag"));
@@ -343,41 +344,41 @@ void SceneRenderPipeline::RecreatePipeline()
 	ssaoPass.AddInput("Depth");
 	ssaoPass.AddInput("Normal");
 	ssaoPass.SetPreRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& res = GPUResources::Get();
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 
-			// Bind noise kernel
-			cmd.BindDescriptorSet(layout, res.SSAOKernelDescriptor, 7);
+		// Bind noise kernel
+		cmd.BindDescriptorSet(layout, res.SSAOKernelDescriptor, 7);
 
-			// Use noise texture 
-			ssaoConstant.noiseTextureID = res.GetBindlessTextureID(ssaoNoiseTexture->GetID());
-			ssaoConstant.normalTextureID = res.GetBindlessTextureID(GBufferNormal->GetID());
-			ssaoConstant.depthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
-			ssaoConstant.camViewID = ctx.cameraID;
-			ssaoConstant.radius = ctx.scene->GetEnvironment()->mSSAO->Radius;
-			ssaoConstant.bias = ctx.scene->GetEnvironment()->mSSAO->Bias;
-			ssaoConstant.noiseScale = ctx.resolution / 4.0f;
-			ssaoConstant.power = ctx.scene->GetEnvironment()->mSSAO->Strength;
+		// Use noise texture 
+		ssaoConstant.noiseTextureID = res.GetBindlessTextureID(ssaoNoiseTexture->GetID());
+		ssaoConstant.normalTextureID = res.GetBindlessTextureID(GBufferNormal->GetID());
+		ssaoConstant.depthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
+		ssaoConstant.camViewID = ctx.cameraID;
+		ssaoConstant.radius = ctx.scene->GetEnvironment()->mSSAO->Radius;
+		ssaoConstant.bias = ctx.scene->GetEnvironment()->mSSAO->Bias;
+		ssaoConstant.noiseScale = ctx.resolution / 4.0f;
+		ssaoConstant.power = ctx.scene->GetEnvironment()->mSSAO->Strength;
 
-			cmd.PushConstants(layout, sizeof(SSAOConstant), &ssaoConstant);
-		});
+		cmd.PushConstants(layout, sizeof(SSAOConstant), &ssaoConstant);
+	});
 	ssaoPass.SetRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& quadMesh = VkSceneRenderer::QuadMesh;
-			cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-			cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-			cmd.DrawIndexed(6);
-		});
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	auto& ssaoBlurPass = GBufferPipeline.AddPass("SSAOBlurPass");
 	ssaoBlurPass.SetShaders(shaderMgr.GetShader("blur_vert"), shaderMgr.GetShader("blur_frag"));
@@ -420,7 +421,8 @@ void SceneRenderPipeline::RecreatePipeline()
 	shadingPass.AddInput("Normal");
 	shadingPass.AddInput("Depth");
 	shadingPass.AddInput("Material");
-	shadingPass.SetPreRender([&](PassRenderContext& ctx) {
+	shadingPass.SetPreRender([&](PassRenderContext& ctx) 
+	{
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
@@ -451,7 +453,8 @@ void SceneRenderPipeline::RecreatePipeline()
 			shadingConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
 		}
 	});
-	shadingPass.SetRender([&](PassRenderContext& ctx) {
+	shadingPass.SetRender([&](PassRenderContext& ctx) 
+	{
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingConstant), &shadingConstant);
 
@@ -470,7 +473,8 @@ void SceneRenderPipeline::RecreatePipeline()
 	tonemapPass.AddAttachment("TonemapOutput", TonemappedOutput->GetFormat());
 	tonemapPass.SetDepthTest(false);
 	tonemapPass.AddInput("ShadingOutput");
-	tonemapPass.SetPreRender([&](PassRenderContext& ctx) {
+	tonemapPass.SetPreRender([&](PassRenderContext& ctx) 
+	{
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
