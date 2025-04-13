@@ -23,6 +23,11 @@
 using namespace Nuake;
 
 Ref<VkMesh> VkSceneRenderer::QuadMesh;
+Ref<VkMesh> VkSceneRenderer::BoxMesh;
+Ref<VkMesh> VkSceneRenderer::CapsuleMesh;
+Ref<VkMesh> VkSceneRenderer::SphereMesh;
+Ref<VkMesh> VkSceneRenderer::CylinderMesh;
+Ref<VkMesh> VkSceneRenderer::ArrowMesh;
 
 void VkSceneRenderer::Init()
 {
@@ -47,6 +52,295 @@ void VkSceneRenderer::Init()
     };
 
 	QuadMesh = CreateRef<VkMesh>(quadVertices, quadIndices);
+
+	const std::vector<Vertex> boxVertices
+	{
+		// Front face
+		{ Vector3(-1.0f, -1.0f,  1.0f), 0.0f, Vector3(0, 0, 1), 0.0f },
+		{ Vector3(1.0f, -1.0f,  1.0f), 1.0f, Vector3(0, 0, 1), 0.0f },
+		{ Vector3(1.0f,  1.0f,  1.0f), 1.0f, Vector3(0, 0, 1), 1.0f },
+		{ Vector3(-1.0f,  1.0f,  1.0f), 0.0f, Vector3(0, 0, 1), 1.0f },
+
+		// Back face
+		{ Vector3(1.0f, -1.0f, -1.0f), 0.0f, Vector3(0, 0, -1), 0.0f },
+		{ Vector3(-1.0f, -1.0f, -1.0f), 1.0f, Vector3(0, 0, -1), 0.0f },
+		{ Vector3(-1.0f,  1.0f, -1.0f), 1.0f, Vector3(0, 0, -1), 1.0f },
+		{ Vector3(1.0f,  1.0f, -1.0f), 0.0f, Vector3(0, 0, -1), 1.0f },
+
+		// Left face
+		{ Vector3(-1.0f, -1.0f, -1.0f), 0.0f, Vector3(-1, 0, 0), 0.0f },
+		{ Vector3(-1.0f, -1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 0.0f },
+		{ Vector3(-1.0f,  1.0f,  1.0f), 1.0f, Vector3(-1, 0, 0), 1.0f },
+		{ Vector3(-1.0f,  1.0f, -1.0f), 0.0f, Vector3(-1, 0, 0), 1.0f },
+
+		// Right face
+		{ Vector3(1.0f, -1.0f,  1.0f), 0.0f, Vector3(1, 0, 0), 0.0f },
+		{ Vector3(1.0f, -1.0f, -1.0f), 1.0f, Vector3(1, 0, 0), 0.0f },
+		{ Vector3(1.0f,  1.0f, -1.0f), 1.0f, Vector3(1, 0, 0), 1.0f },
+		{ Vector3(1.0f,  1.0f,  1.0f), 0.0f, Vector3(1, 0, 0), 1.0f },
+
+		// Top face
+		{ Vector3(-1.0f,  1.0f,  1.0f), 0.0f, Vector3(0, 1, 0), 0.0f },
+		{ Vector3(1.0f,  1.0f,  1.0f), 1.0f, Vector3(0, 1, 0), 0.0f },
+		{ Vector3(1.0f,  1.0f, -1.0f), 1.0f, Vector3(0, 1, 0), 1.0f },
+		{ Vector3(-1.0f,  1.0f, -1.0f), 0.0f, Vector3(0, 1, 0), 1.0f },
+
+		// Bottom face
+		{ Vector3(-1.0f, -1.0f, -1.0f), 0.0f, Vector3(0, -1, 0), 0.0f },
+		{ Vector3(1.0f, -1.0f, -1.0f), 1.0f, Vector3(0, -1, 0), 0.0f },
+		{ Vector3(1.0f, -1.0f,  1.0f), 1.0f, Vector3(0, -1, 0), 1.0f },
+		{ Vector3(-1.0f, -1.0f,  1.0f), 0.0f, Vector3(0, -1, 0), 1.0f },
+	};
+
+	const std::vector<uint32_t> boxIndices
+	{
+		// Front face
+	   0, 1, 1, 2, 2, 3, 3, 0,
+
+	   // Back face
+	   4, 5, 5, 6, 6, 7, 7, 4,
+
+	   // Side edges
+	   0, 5, 1, 4, 2, 7, 3, 6
+	};
+
+	BoxMesh = CreateRef<VkMesh>(boxVertices, boxIndices);
+
+	{
+		std::vector<Vertex> arrowVertices;
+		std::vector<uint32_t> arrowIndices;
+
+		Vector3 base = Vector3(0.0f, 0.0f, 0.0f);     // Start of arrow
+		Vector3 tip = Vector3(0.0f, 1.0f, 0.0f);      // Tip of arrow
+		float headSize = 0.2f;
+		float shaftLength = 0.8f;
+		Vector3 shaftEnd = Vector3(0.0f, shaftLength, 0.0f);
+
+		// Shaft line
+		arrowVertices.push_back({ base, 0.0f, Vector3(), 0.0f });       // 0
+		arrowVertices.push_back({ shaftEnd, 0.0f, Vector3(), 0.0f });   // 1
+		arrowIndices.push_back(0);
+		arrowIndices.push_back(1);
+
+		// Arrowhead lines (simple triangle)
+		Vector3 left = shaftEnd + Vector3(-headSize, headSize, 0.0f);  // 2
+		Vector3 right = shaftEnd + Vector3(headSize, headSize, 0.0f);   // 3
+		Vector3 back = shaftEnd + Vector3(0.0f, headSize, headSize);   // 4
+
+		arrowVertices.push_back({ left,  0.0f, Vector3(), 0.0f });
+		arrowVertices.push_back({ right, 0.0f, Vector3(), 0.0f });
+		arrowVertices.push_back({ back,  0.0f, Vector3(), 0.0f });
+
+		// Arrowhead edges
+		arrowIndices.push_back(1); arrowIndices.push_back(2);  // shaftEnd -> left
+		arrowIndices.push_back(1); arrowIndices.push_back(3);  // shaftEnd -> right
+		arrowIndices.push_back(1); arrowIndices.push_back(4);  // shaftEnd -> back
+
+		ArrowMesh = CreateRef<VkMesh>(arrowVertices, arrowIndices);
+	}
+
+	{
+		std::vector<Vertex> capsuleVertices;
+		std::vector<uint32_t> capsuleIndices;
+
+		const int segments = 16;
+		const int hemisphereSegments = 8;
+		const float radius = 1.0f;
+		const float cylinderHeight = 2.0f;
+		const float halfHeight = cylinderHeight * 0.5f;
+
+		// =====
+		// Circle rings (top and bottom of cylinder)
+		for (int i = 0; i < segments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / segments;
+			float x = cos(angle) * radius;
+			float z = sin(angle) * radius;
+
+			// Top ring
+			capsuleVertices.push_back({ Vector3(x, +halfHeight, z), 0.0f, Vector3(), 0.0f });
+
+			// Bottom ring
+			capsuleVertices.push_back({ Vector3(x, -halfHeight, z), 0.0f, Vector3(), 0.0f });
+		}
+
+		// Top/bottom circle outline
+		for (int i = 0; i < segments; ++i)
+		{
+			uint32_t top = i * 2;
+			uint32_t topNext = ((i + 1) % segments) * 2;
+			uint32_t bot = i * 2 + 1;
+			uint32_t botNext = ((i + 1) % segments) * 2 + 1;
+
+			capsuleIndices.push_back(top);
+			capsuleIndices.push_back(topNext);
+
+			capsuleIndices.push_back(bot);
+			capsuleIndices.push_back(botNext);
+		}
+
+		// =====
+		// 4 vertical lines at 0°, 90°, 180°, 270°
+		for (int i : { 0, segments / 4, segments / 2, (3 * segments) / 4 })
+		{
+			uint32_t top = i * 2;
+			uint32_t bot = i * 2 + 1;
+
+			capsuleIndices.push_back(top);
+			capsuleIndices.push_back(bot);
+		}
+
+		// =====
+		// Hemisphere arcs (vertical arcs at 4 directions)
+		for (int i : { 0, segments / 4, segments / 2, (3 * segments) / 4 })
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / segments;
+			float x = cos(angle);
+			float z = sin(angle);
+
+			// Top hemisphere arc
+			uint32_t last = capsuleVertices.size();
+			for (int j = 0; j <= hemisphereSegments; ++j)
+			{
+				float theta = (0.5f * glm::pi<float>() * j) / hemisphereSegments; // from 0 to pi/2
+				float y = sin(theta) * radius + halfHeight;
+				float r = cos(theta) * radius;
+
+				capsuleVertices.push_back({ Vector3(x * r, y, z * r), 0.0f, Vector3(), 0.0f });
+
+				if (j > 0)
+				{
+					capsuleIndices.push_back(last + j - 1);
+					capsuleIndices.push_back(last + j);
+				}
+			}
+
+			// Bottom hemisphere arc
+			last = capsuleVertices.size();
+			for (int j = 0; j <= hemisphereSegments; ++j)
+			{
+				float theta = (0.5f * glm::pi<float>() * j) / hemisphereSegments; // from 0 to pi/2
+				float y = -sin(theta) * radius - halfHeight;
+				float r = cos(theta) * radius;
+
+				capsuleVertices.push_back({ Vector3(x * r, y, z * r), 0.0f, Vector3(), 0.0f });
+
+				if (j > 0)
+				{
+					capsuleIndices.push_back(last + j - 1);
+					capsuleIndices.push_back(last + j);
+				}
+			}
+		}
+		CapsuleMesh = CreateRef<VkMesh>(capsuleVertices, capsuleIndices);
+	}
+	{
+		std::vector<Vertex> sphereVertices;
+		std::vector<uint32_t> sphereIndices;
+
+		const int ringSegments = 32;
+		const float sphereRadius = 1.0f;
+
+		// XY Ring
+		for (int i = 0; i < ringSegments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / ringSegments;
+			float x = cos(angle) * sphereRadius;
+			float y = sin(angle) * sphereRadius;
+			sphereVertices.push_back({ Vector3(x, y, 0.0f), 0.0f, Vector3(), 0.0f });
+
+			uint32_t curr = i;
+			uint32_t next = (i + 1) % ringSegments;
+			sphereIndices.push_back(curr);
+			sphereIndices.push_back(next);
+		}
+
+		// XZ Ring
+		uint32_t baseXZ = sphereVertices.size();
+		for (int i = 0; i < ringSegments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / ringSegments;
+			float x = cos(angle) * sphereRadius;
+			float z = sin(angle) * sphereRadius;
+			sphereVertices.push_back({ Vector3(x, 0.0f, z), 0.0f, Vector3(), 0.0f });
+
+			uint32_t curr = baseXZ + i;
+			uint32_t next = baseXZ + ((i + 1) % ringSegments);
+			sphereIndices.push_back(curr);
+			sphereIndices.push_back(next);
+		}
+
+		// YZ Ring
+		uint32_t baseYZ = sphereVertices.size();
+		for (int i = 0; i < ringSegments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / ringSegments;
+			float y = cos(angle) * sphereRadius;
+			float z = sin(angle) * sphereRadius;
+			sphereVertices.push_back({ Vector3(0.0f, y, z), 0.0f, Vector3(), 0.0f });
+
+			uint32_t curr = baseYZ + i;
+			uint32_t next = baseYZ + ((i + 1) % ringSegments);
+			sphereIndices.push_back(curr);
+			sphereIndices.push_back(next);
+		}
+
+		SphereMesh = CreateRef<VkMesh>(sphereVertices, sphereIndices);
+	}
+
+	{
+		std::vector<Vertex> cylinderVertices;
+		std::vector<uint32_t> cylinderIndices;
+
+		const int segments = 16;
+		const float radius = 1.0f;
+		const float halfHeight = 2.0f;
+
+		// Vertex pairs: top and bottom
+		for (int i = 0; i < segments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / segments;
+			float x = cos(angle) * radius;
+			float z = sin(angle) * radius;
+
+			// Top ring
+			cylinderVertices.push_back({ Vector3(x, +halfHeight, z), 0.0f, Vector3(), 0.0f });
+
+			// Bottom ring
+			cylinderVertices.push_back({ Vector3(x, -halfHeight, z), 0.0f, Vector3(), 0.0f });
+		}
+
+		// Circle edges (top and bottom)
+		for (int i = 0; i < segments; ++i)
+		{
+			uint32_t topIdx = i * 2;
+			uint32_t nextTopIdx = ((i + 1) % segments) * 2;
+			uint32_t botIdx = i * 2 + 1;
+			uint32_t nextBotIdx = ((i + 1) % segments) * 2 + 1;
+
+			// Top circle
+			cylinderIndices.push_back(topIdx);
+			cylinderIndices.push_back(nextTopIdx);
+
+			// Bottom circle
+			cylinderIndices.push_back(botIdx);
+			cylinderIndices.push_back(nextBotIdx);
+		}
+
+		// 4 vertical edges at 0, 90, 180, 270 degrees
+		for (int i : { 0, segments / 4, segments / 2, (3 * segments) / 4 })
+		{
+			uint32_t topIdx = i * 2;
+			uint32_t botIdx = i * 2 + 1;
+
+			cylinderIndices.push_back(topIdx);
+			cylinderIndices.push_back(botIdx);
+		}
+
+		// Final creation of the cylinder outline mesh
+		CylinderMesh = CreateRef<VkMesh>(cylinderVertices, cylinderIndices);
+	}
+	
 }
 
 void VkSceneRenderer::LoadShaders()
@@ -72,6 +366,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("line_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/line.vert"));
 	shaderMgr.AddShader("ssao_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/ssao.frag"));
 	shaderMgr.AddShader("ssao_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/ssao.vert"));
+	shaderMgr.AddShader("blur_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/blur.frag"));
+	shaderMgr.AddShader("blur_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/blur.vert"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)

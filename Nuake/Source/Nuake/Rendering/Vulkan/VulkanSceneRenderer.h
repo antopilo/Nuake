@@ -25,6 +25,11 @@ namespace Nuake
 	{
 	public:
 		static Ref<VkMesh> QuadMesh;
+		static Ref<VkMesh> BoxMesh;
+		static Ref<VkMesh> CapsuleMesh;
+		static Ref<VkMesh> SphereMesh;
+		static Ref<VkMesh> CylinderMesh;
+		static Ref<VkMesh> ArrowMesh;
 
 	public:
 		//RenderContext Context;

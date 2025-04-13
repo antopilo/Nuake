@@ -43,7 +43,12 @@ namespace Nuake
 		float bias;
 		Vector2 noiseScale;
 		float power;
+	};
 
+	struct BlurConstant
+	{
+		int sourceTextureID;
+		Vector2 sourceSize;
 	};
 
 	struct ShadingConstant
@@ -116,6 +121,7 @@ namespace Nuake
 		// Attachments Shading
 		Ref<VulkanImage> ShadingOutput;
 		Ref<VulkanImage> SSAOOutput;
+		Ref<VulkanImage> SSAOBlurOutput;
 
 		Ref<VulkanImage> LineOutput;
 		Ref<VulkanImage> LineCombineOutput;
@@ -141,6 +147,7 @@ namespace Nuake
 		GBufferConstant gbufferConstant;
 		ShadingConstant shadingConstant;
 		SSAOConstant ssaoConstant;
+		BlurConstant blurConstant;
 		TonemapConstant tonemapConstant;
 		DebugConstant debugConstant;
 		LineConstant lineConstant;

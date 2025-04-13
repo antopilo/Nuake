@@ -262,7 +262,24 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
 
     Matrix4 transform = Matrix4(1.0f);
     transform = glm::translate(transform, { 0, 2, 0 });
-    lineCmd.DrawLine(proj * view * transform, Color(1, 0, 0, 1), 4.0f);
+    //lineCmd.DrawLine(proj * view * transform, Color(1, 0, 0, 1), 2.0f);
+
+    auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
+    for (auto e : camView)
+    {
+        auto [transform, camera] = scene->m_Registry.get<TransformComponent, CameraComponent>(e);
+        const Quat& globalRotation = glm::normalize(transform.GetGlobalRotation());
+        const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+        const float aspectRatio = camera.CameraInstance->AspectRatio;
+        const float fov = camera.CameraInstance->Fov;
+
+        Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
+        Matrix4 boxTransform = glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
+        lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
+    }
+
+    //lineCmd.DrawArrow({3, 3, 0}, {7, 3, 0}, proj, view, Color(1, 0, 0, 1), 3.0f);
 }
 
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)

@@ -33,6 +33,13 @@ namespace Nuake
 		void DrawAABB(const Vector3& min, const Vector3& max, const Color& color) const;
 	};
 
+	struct DrawLineRequest
+	{
+		Vector3 Start;
+		Vector3 End;
+		Color Color;
+	};
+
 	class DebugLineCmd
 	{
 	private:
@@ -47,5 +54,10 @@ namespace Nuake
 		Ref<Scene> GetScene() const;
 
 		void DrawLine(const Matrix4& transform, const Color& color, float lineWidth = 1.0f);
+		void DrawBox(const Matrix4& transform, const Color& color, float lineWidth = 1.0f, bool stippled = false);
+		void DrawCapsule(const Matrix4& transform, const Color& color, float lineWidth = 1.0f, bool stippled = false);
+		void DrawSphere(const Matrix4& transform, const Color& color, float lineWidth = 1.0f, bool stippled = false);
+		void DrawCylinder(const Matrix4& transform, const Color& color, float lineWidth = 1.0f, bool stippled = false);
+		void DrawArrow(const Vector3& from, const Vector3& to, const Matrix4& view, const Matrix4& proj, const Color& color, float lineWidth = 1.0f, bool stippled = false);
 	};
 }

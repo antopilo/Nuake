@@ -158,23 +158,17 @@ SceneRenderPipeline::SceneRenderPipeline()
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);    
 		   
 		// Generate noise texture
-		struct Vector2H
-		{
-			uint16_t x;
-			uint16_t y;
-		}; 
-
-		std::vector<Vector2H> noiseData;    
+		std::vector<Vector2> noiseData;    
 		for (unsigned int i = 0; i < 16; i++)   
 		{    
-			Vector2H noise(
-				glm::packHalf1x16(randomFloats(generator) * 2.0 - 1.0),
-				glm::packHalf1x16(randomFloats(generator) * 2.0 - 1.0 )      
+			Vector2 noise(
+				randomFloats(generator),
+				randomFloats(generator)      
 			);
 			noiseData.push_back(noise);       
 		}
 		 
-		ssaoNoiseTexture = CreateRef<VulkanImage>(noiseData.data(), ImageFormat::RG16F, Vector2{4, 4});
+		ssaoNoiseTexture = CreateRef<VulkanImage>(noiseData.data(), ImageFormat::RG32F, Vector2{4, 4});
 		resources.AddTexture(ssaoNoiseTexture);  
 
 		initKernels = true;
@@ -215,6 +209,9 @@ SceneRenderPipeline::SceneRenderPipeline()
 	SSAOOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	SSAOOutput->SetDebugName("SSAOOutput");
 
+	SSAOBlurOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	SSAOBlurOutput->SetDebugName("SSAOBlurOutput");
+
 	GizmoOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	GizmoOutput->SetDebugName("GizmoOutput");
 
@@ -252,6 +249,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	LineCombineOutput = ResizeImage(ctx, LineCombineOutput, ctx.resolution);
 
 	SSAOOutput = ResizeImage(ctx, SSAOOutput, ctx.resolution);
+	SSAOBlurOutput = ResizeImage(ctx, SSAOBlurOutput, ctx.resolution);
 
 	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
 
@@ -262,9 +260,10 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	{
 		{ GBufferAlbedo, GBufferDepth, GBufferNormal, GBufferMaterial, GBufferEntityID },	// GBuffer
 		{ SSAOOutput },
+		{ SSAOBlurOutput },
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
-		{ LineOutput },
+		{ LineOutput, GBufferDepth },
 		{ LineCombineOutput },
 		{ GizmoOutput, GBufferDepth }, // Reusing depth from gBuffer
 		{ GizmoCombineOutput },
@@ -287,7 +286,8 @@ void SceneRenderPipeline::RecreatePipeline()
 	gBufferPass.AddAttachment("EntityID", GBufferEntityID->GetFormat());
 	gBufferPass.AddAttachment("Depth", GBufferDepth->GetFormat(), ImageUsage::Depth);
 	gBufferPass.SetPushConstant<GBufferConstant>(gbufferConstant);
-	gBufferPass.SetPreRender([&](PassRenderContext& ctx) {
+	gBufferPass.SetPreRender([&](PassRenderContext& ctx) 
+	{
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
@@ -298,7 +298,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
 		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
 		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx) {
 		Cmd& cmd = ctx.commandBuffer;
 
@@ -379,6 +379,38 @@ void SceneRenderPipeline::RecreatePipeline()
 			cmd.DrawIndexed(6);
 		});
 
+	auto& ssaoBlurPass = GBufferPipeline.AddPass("SSAOBlurPass");
+	ssaoBlurPass.SetShaders(shaderMgr.GetShader("blur_vert"), shaderMgr.GetShader("blur_frag"));
+	ssaoBlurPass.SetPushConstant<BlurConstant>(blurConstant);
+	ssaoBlurPass.AddAttachment("SSAOBlurOutput", SSAOBlurOutput->GetFormat());
+	ssaoBlurPass.AddInput("Input");
+	ssaoBlurPass.SetPreRender([&](PassRenderContext& ctx) 
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	
+		blurConstant.sourceTextureID = res.GetBindlessTextureID(SSAOOutput->GetID());
+		blurConstant.sourceSize = SSAOOutput->GetSize();
+
+		cmd.PushConstants(layout, sizeof(BlurConstant), &blurConstant);
+	});
+	ssaoBlurPass.SetRender([&](PassRenderContext& ctx) 
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
 	shadingPass.SetPushConstant<ShadingConstant>(shadingConstant);
@@ -407,7 +439,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		shadingConstant.NormalTextureID = res.GetBindlessTextureID(GBufferNormal->GetID());
 		shadingConstant.MaterialTextureID = res.GetBindlessTextureID(GBufferMaterial->GetID());
 		shadingConstant.AmbientTerm = ctx.scene->GetEnvironment()->AmbientTerm;
-		shadingConstant.SSAOTextureID = res.GetBindlessTextureID(SSAOOutput->GetID());
+		shadingConstant.SSAOTextureID = res.GetBindlessTextureID(SSAOBlurOutput->GetID());
 
 		// Camera
 		shadingConstant.CameraID = ctx.cameraID;
@@ -418,7 +450,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		{
 			shadingConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];
 		}
-		});
+	});
 	shadingPass.SetRender([&](PassRenderContext& ctx) {
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(ShadingConstant), &shadingConstant);
@@ -430,7 +462,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
 		cmd.DrawIndexed(6);
-		});
+	});
 
 	auto& tonemapPass = GBufferPipeline.AddPass("Tonemap");
 	tonemapPass.SetShaders(shaderMgr.GetShader("tonemap_vert"), shaderMgr.GetShader("tonemap_frag"));
@@ -455,49 +487,50 @@ void SceneRenderPipeline::RecreatePipeline()
 		tonemapConstant.Exposure = ctx.scene->GetEnvironment()->Exposure;
 		tonemapConstant.SourceTextureID = res.GetBindlessTextureID(ShadingOutput->GetID());
 		tonemapConstant.Gamma = ctx.scene->GetEnvironment()->Gamma;
-		});
+	});
 	tonemapPass.SetRender([&](PassRenderContext& ctx)
-		{
-			auto& cmd = ctx.commandBuffer;
-			cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(TonemapConstant), &tonemapConstant);
+	{
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(TonemapConstant), &tonemapConstant);
 
-			ctx.renderPass->SetClearColor(ctx.scene->GetEnvironment()->AmbientColor);
+		ctx.renderPass->SetClearColor(ctx.scene->GetEnvironment()->AmbientColor);
 
-			// Draw full screen quad
-			auto& quadMesh = VkSceneRenderer::QuadMesh;
-			cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-			cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-			cmd.DrawIndexed(6);
-		});
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	RenderPass& linePass = GBufferPipeline.AddPass("Line");
 	linePass.SetIsLinePass(true);
 	linePass.SetTopology(PolygonTopology::LINE_LIST);
 	linePass.SetShaders(shaderMgr.GetShader("line_vert"), shaderMgr.GetShader("line_frag"));
 	linePass.AddAttachment("LineOutput", LineOutput->GetFormat());
+	linePass.AddAttachment("LineDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
 	linePass.SetPushConstant(lineConstant);
-	linePass.SetDepthTest(false);
+	linePass.SetDepthTest(true);
 	linePass.SetIsLinePass(true);
 	linePass.SetPreRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& res = GPUResources::Get();
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
 
-			// Bindless
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
 	linePass.SetRender([&](PassRenderContext& ctx)
-		{
-			auto& cmd = ctx.commandBuffer;
-			DebugLineCmd debugCmd = DebugLineCmd(cmd, ctx);
-			OnLineDraw().Broadcast(debugCmd);
-		});
+	{
+		auto& cmd = ctx.commandBuffer;
+		DebugLineCmd debugCmd = DebugLineCmd(cmd, ctx);
+		OnLineDraw().Broadcast(debugCmd);
+	});
 
 	auto& lineCombinePass = GBufferPipeline.AddPass("LineCombine");
 	lineCombinePass.SetPushConstant(copyConstant);
@@ -505,33 +538,33 @@ void SceneRenderPipeline::RecreatePipeline()
 	lineCombinePass.AddAttachment("LineCombineOutput", LineCombineOutput->GetFormat());
 	lineCombinePass.AddInput("lineCombinePassOutput");
 	lineCombinePass.SetPreRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& res = GPUResources::Get();
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
 
-			// Bindless
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
 	lineCombinePass.SetRender([&](PassRenderContext& ctx)
-		{
-			auto& cmd = ctx.commandBuffer;
+	{
+		auto& cmd = ctx.commandBuffer;
 
-			copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(LineOutput->GetID());
-			copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
-			cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
+		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(LineOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
-			// Draw full screen quad
-			auto& quadMesh = VkSceneRenderer::QuadMesh;
-			cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-			cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-			cmd.DrawIndexed(6);
-		});
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
@@ -541,25 +574,25 @@ void SceneRenderPipeline::RecreatePipeline()
 	gizmoPass.AddAttachment("GizmoDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
 	gizmoPass.SetDepthTest(true);
 	gizmoPass.SetPreRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& res = GPUResources::Get();
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
 
-			// Bindless
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
 	gizmoPass.SetRender([&](PassRenderContext& ctx)
-		{
-			auto& cmd = ctx.commandBuffer;
-			DebugCmd debugCmd = DebugCmd(cmd, ctx);
-			OnDebugDraw().Broadcast(debugCmd);
-		});
+	{
+		auto& cmd = ctx.commandBuffer;
+		DebugCmd debugCmd = DebugCmd(cmd, ctx);
+		OnDebugDraw().Broadcast(debugCmd);
+	});
 
 	auto& gizmoCombinePass = GBufferPipeline.AddPass("GizmoCombine");
 	gizmoCombinePass.SetPushConstant(copyConstant);
@@ -567,33 +600,33 @@ void SceneRenderPipeline::RecreatePipeline()
 	gizmoCombinePass.AddAttachment("GizmoCombineOutput", GizmoCombineOutput->GetFormat());
 	gizmoCombinePass.AddInput("GizmoCombineOutput");
 	gizmoCombinePass.SetPreRender([&](PassRenderContext& ctx)
-		{
-			Cmd& cmd = ctx.commandBuffer;
-			auto& layout = ctx.renderPass->PipelineLayout;
-			auto& res = GPUResources::Get();
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
 
-			// Bindless
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+		// Bindless
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
 	gizmoCombinePass.SetRender([&](PassRenderContext& ctx)
-		{
-			auto& cmd = ctx.commandBuffer;
+	{
+		auto& cmd = ctx.commandBuffer;
 
-			copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoOutput->GetID());
-			copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(LineCombineOutput->GetID());
-			cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
+		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(LineCombineOutput->GetID());
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
-			// Draw full screen quad
-			auto& quadMesh = VkSceneRenderer::QuadMesh;
-			cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-			cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-			cmd.DrawIndexed(6);
-		});
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	auto& outlinePass = GBufferPipeline.AddPass("Outline");
 	outlinePass.SetShaders(shaderMgr.GetShader("outline_vert"), shaderMgr.GetShader("outline_frag"));
