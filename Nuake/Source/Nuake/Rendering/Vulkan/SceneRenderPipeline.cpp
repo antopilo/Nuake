@@ -635,7 +635,8 @@ void SceneRenderPipeline::RecreatePipeline()
 	outlinePass.SetDepthTest(false);
 	outlinePass.AddInput("ShadingOutput");
 	outlinePass.AddInput("EntityID");
-	outlinePass.SetPreRender([&](PassRenderContext& ctx) {
+	outlinePass.SetPreRender([&](PassRenderContext& ctx) 
+	{
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
@@ -647,25 +648,25 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
 		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
 		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-		});
+	});
 	outlinePass.SetRender([&](PassRenderContext& ctx)
-		{
-			outlineConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(ShadingOutput->GetID());
-			outlineConstant.EntityIDTextureID = GPUResources::Get().GetBindlessTextureID(GBufferEntityID->GetID());
-			outlineConstant.DepthTextureID = GPUResources::Get().GetBindlessTextureID(GBufferDepth->GetID());
-			outlineConstant.SelectedEntityID = ctx.selectedEntity;
-			outlineConstant.Color = Vector4(1, 0, 0, 1);
-			outlineConstant.Thickness = 4.0f;
+	{
+		outlineConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(ShadingOutput->GetID());
+		outlineConstant.EntityIDTextureID = GPUResources::Get().GetBindlessTextureID(GBufferEntityID->GetID());
+		outlineConstant.DepthTextureID = GPUResources::Get().GetBindlessTextureID(GBufferDepth->GetID());
+		outlineConstant.SelectedEntityID = ctx.selectedEntity;
+		outlineConstant.Color = Vector4(1, 0, 0, 1);
+		outlineConstant.Thickness = 4.0f;
 
-			auto& cmd = ctx.commandBuffer;
-			cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(OutlineConstant), &outlineConstant);
+		auto& cmd = ctx.commandBuffer;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(OutlineConstant), &outlineConstant);
 
-			// Draw full screen quad
-			auto& quadMesh = VkSceneRenderer::QuadMesh;
-			cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-			cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-			cmd.DrawIndexed(6);
-		});
+		// Draw full screen quad
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
 
 	GBufferPipeline.Build();
 }
