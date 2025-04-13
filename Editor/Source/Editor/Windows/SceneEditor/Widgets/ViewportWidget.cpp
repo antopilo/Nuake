@@ -109,7 +109,7 @@ void ViewportWidget::Draw()
 
                 // Since imguizmo doesnt support reverse-Z, we need to create a new projection matrix
                 // With a normal near and far plane.
-                Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Near, editorCam->Far);
+                Matrix4 normalZProjection = glm::perspectiveFov(glm::radians(editorCam->Fov), 9.0f * editorCam->AspectRatio, 9.0f, editorCam->Far, editorCam->Near);
                 static Vector3 camPreviousPos = editorContext.GetScene()->m_EditorCamera->Translation;
                 static Vector3 camNewPos = Vector3(0, 0, 0);
                 Vector3 camDelta = camNewPos - camPreviousPos;
