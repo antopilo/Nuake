@@ -168,14 +168,16 @@ PSOutput main(PSInput input)
     }
 
     // Calculate TBN
-    float3x3 normalMatrix = transpose(Inverse3x3((float3x3)camera.View));
+    float3x3 normalMatrix = (float3x3)camera.View;
+    //normalMatrix[0] *= -1.0; // Flip the Z basis vector
     float3 normal = SampleTexture(pushConstants.normalTextureID, input.UV).xyz * 2.0 - 1.0;
     normal = mul(normalMatrix, normal);
 
-    float3 randomVec = SampleTexture(pushConstants.noiseTextureID, input.UV * pushConstants.noiseScale).xyz;
-
+    float2 randomVecSample = SampleTexture(pushConstants.noiseTextureID, input.UV * pushConstants.noiseScale).xy * 2.0 - 1.0;
+    float3 randomVec = float3(randomVecSample.x, -randomVecSample.y, 0);
+    //randomVec = float3(0, 1, 0);
     float3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
-    float3 bitangent = cross(tangent, normal);
+    float3 bitangent = cross(normal, tangent);
     float3x3 TBN = float3x3(tangent, bitangent, normal);
 
     float3 fragPos = ViewPosFromDepth(depth, input.UV, camera.InverseProjection);
@@ -183,18 +185,22 @@ PSOutput main(PSInput input)
     float4 fragWorldPos = mul(camera.InverseView, float4(fragPos, 1.0));
     fragWorldPos.xyz /= fragWorldPos.w;
 
+    PSOutput output;
+
     float occlusion = 0.0f;
     for(int i = 0; i < 64; i++)
     {
-        float3 samplePos = mul(TBN, ssaoKernels[i]);
-        samplePos = fragWorldPos + samplePos * pushConstants.radius;
+        float3 samplePos = mul(ssaoKernels[i], TBN);
 
+        samplePos = fragPos + samplePos * pushConstants.radius;
+        //samplePos = fragWorldPos + samplePos * pushConstants.radius;
+
+        //return output;
         // Fix from: https://github.com/JoeyDeVries/LearnOpenGL/issues/364
         float4 worldSamplePos = mul(camera.View, float4(samplePos, 1.0));
         worldSamplePos.xyz /= worldSamplePos.w;
 
-        samplePos = worldSamplePos.xyz;
-
+        //samplePos = worldSamplePos.xyz;
         float4 offset = float4(samplePos, 1.0f);
         offset = mul(camera.Projection, offset);
         offset.xyz /= offset.w;
@@ -208,7 +214,7 @@ PSOutput main(PSInput input)
     occlusion = 1.0 - (occlusion / 64.0);
     occlusion = pow(occlusion, pushConstants.power);
 
-    PSOutput output;
+   
     output.oColor0 = float4(occlusion, occlusion, occlusion, 1.0f);
     return output;
 }
