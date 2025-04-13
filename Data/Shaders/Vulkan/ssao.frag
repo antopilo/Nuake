@@ -206,6 +206,9 @@ PSOutput main(PSInput input)
         offset.xyz /= offset.w;
         offset.xyz = offset.xyz * 0.5 + 0.5;
 
+        offset.x = clamp(offset.x, 0.00001, 0.999);
+        offset.y = clamp(offset.y, 0.00001, 0.999);
+
         float sampleDepth = ViewPosFromDepth(SampleDepth(offset.xy), offset.xy, camera.InverseProjection).z;
         float rangeCheck = smoothstep(0.0, 1.0, pushConstants.radius / abs(sampleDepth - fragPos.z));
         occlusion += (sampleDepth - pushConstants.bias >= samplePos.z  ? 1.0 : 0.0) * rangeCheck;
