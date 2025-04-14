@@ -428,7 +428,7 @@ void ViewportWidget::DrawOverlay()
             ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
         }
 
-        if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !IsControllingCamera))
         {
             CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
         }
@@ -449,7 +449,7 @@ void ViewportWidget::DrawOverlay()
             ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
         }
 
-        if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_E, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_E, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !IsControllingCamera))
         {
             CurrentOperation = ImGuizmo::OPERATION::ROTATE;
         }
@@ -470,7 +470,7 @@ void ViewportWidget::DrawOverlay()
             ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
         }
 
-        if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !IsControllingCamera))
         {
             CurrentOperation = ImGuizmo::OPERATION::SCALE;
         }
