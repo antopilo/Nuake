@@ -109,6 +109,11 @@ float2 GetTexelSize(Texture2D tex)
     return 1.0 / float2(width, height);
 }
 
+float LinearizeDepth(float depth, float nearPlane, float farPlane)
+{
+    return (2.0 * nearPlane) / (farPlane + nearPlane - (1.0 - depth) * (farPlane - nearPlane));
+}
+
 PSOutput main(PSInput input)
 {
     PSOutput output;
@@ -126,10 +131,10 @@ PSOutput main(PSInput input)
 
     float4 fragColor = float4(0, 0, 0, 0);
     const float TAU = 6.28318530;
-	const float steps = 32.0;
+	const float steps = 64.0;
     for(float i = 0.0f; i < TAU; i += TAU / steps)
     {
-        float2 uvOffset = float2(sin(i), cos(i)) * (GetTexelSize(textures[entityIDTextureID])) * radius;
+        float2 uvOffset = float2(cos(i), sin(i)) * (GetTexelSize(textures[entityIDTextureID])) * radius;
 
         float2 sampleUV = uv + uvOffset;
         sampleUV.x = clamp(sampleUV.x, 0.0, 0.999);
@@ -137,12 +142,20 @@ PSOutput main(PSInput input)
         
         float sample = textures[entityIDTextureID].Sample(mySampler, sampleUV).r;
         float sampleDepth = textures[pushConstants.DepthTextureID].Sample(mySampler, sampleUV).r;
-        if(sample == target && sampleDepth != 1.0f && sampleDepth > depth)
+
+        //sampleDepth = LinearizeDepth(sampleDepth, 0.1f, 200.0f);
+        //depth = LinearizeDepth(depth, 0.1f, 200.0f);
+        bool passDepthTest = (sampleDepth > depth);
+        if(sample == target && passDepthTest)
         {
             hasHit = 1.0f;
+            if(passDepthTest && sampleValue == target)
+            {
+                //hasHit = 0.0f;
+            }
         }
 
-        float alpha = smoothstep(0.5, 0.9, hasHit);
+        float alpha = smoothstep(0.1, 0.9, hasHit);
         float4 outputColor = float4(
 			lerp(fragColor.r, outlineColor.r, alpha),
 			lerp(fragColor.g, outlineColor.g, alpha),
