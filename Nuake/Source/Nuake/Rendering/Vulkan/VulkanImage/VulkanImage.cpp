@@ -157,7 +157,7 @@ VulkanImage::VulkanImage(ImageFormat inFormat, Vector2 inSize, ImageUsage usage)
 
 		if (info.pName)
 		{
-			Logger::Log("Deleting " + std::string(info.pName), "Vulkan", VERBOSE);
+			//Logger::Log("Deleting " + std::string(info.pName), "Vulkan", VERBOSE);
 		}
 
 		vkDestroyImageView(VkRenderer::Get().GetDevice(), dataCopy.ImageView, nullptr);
@@ -325,7 +325,7 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 
 VulkanImage::~VulkanImage()
 {
-	Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
+	//Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
 	GPUResources::Get().QueueDeletion(GetGPUCleanUpStack());
 }
 

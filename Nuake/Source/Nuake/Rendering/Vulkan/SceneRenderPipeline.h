@@ -184,12 +184,14 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx); 
-		Ref<VulkanImage> GetOutput() { return GizmoCombineOutput; }       
+		Ref<VulkanImage> GetOutput() { return OutlineOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 		MulticastDelegate<DebugLineCmd&>& OnLineDraw() { return DebugLineDrawDelegate; }
 
 		void RecreatePipeline();
+
+		int MousePick(const Vector2& coord);
 	private:
 		Ref<VulkanImage> ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size);
 	};

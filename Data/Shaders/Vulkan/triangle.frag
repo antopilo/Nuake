@@ -163,7 +163,7 @@ PSOutput main(PSInput input)
     
     output.oMaterial = float4(materialOuput, 1.0f);
 
-    output.oEntityID = float4(pushConstants.entityID, pushConstants.entityID, pushConstants.entityID, pushConstants.entityID);
+    output.oEntityID = float4(pushConstants.entityID, 0.0f, 0.0f, 1.0f);
 
     return output;
 }

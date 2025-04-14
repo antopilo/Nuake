@@ -45,6 +45,8 @@ namespace Nuake
 			return queuedResize != viewportSize;
 		}
 
+		int MousePick(const Vector2& mouseCoord);
+
 		void SetSelectedEntityID(int id) { selectedEntityID = id; }
 		int GetSelectedEntityID() const { return selectedEntityID; }
 

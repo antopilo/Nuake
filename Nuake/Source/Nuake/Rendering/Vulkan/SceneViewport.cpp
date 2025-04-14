@@ -1,6 +1,9 @@
 #include "SceneViewport.h"
 
 #include "Nuake/Rendering/Vulkan/VulkanImage/VulkanImage.h"
+#include "VulkanRenderer.h"
+
+#include "SceneRenderPipeline.h"
 
 using namespace Nuake;
 
@@ -11,6 +14,15 @@ Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 	viewId(inViewId)
 {
 	renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
+}
+
+int Viewport::MousePick(const Vector2& mouseCoord)
+{
+	auto& sceneRenderer = VkRenderer::Get().SceneRenderers[id];
+	int result = sceneRenderer->sceneRenderPipeline->MousePick(mouseCoord);
+
+
+	return 0;
 }
 
 bool Viewport::Resize()

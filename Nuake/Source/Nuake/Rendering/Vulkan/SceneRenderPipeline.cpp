@@ -194,7 +194,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	TonemappedOutput->SetDebugName("TonemappedOutput");
 
-	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::R32F, defaultSize);
+	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	GBufferEntityID->SetDebugName("GBufferEntityID");
 
 	OutlineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
@@ -666,7 +666,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	auto& outlinePass = GBufferPipeline.AddPass("Outline");
 	outlinePass.SetShaders(shaderMgr.GetShader("outline_vert"), shaderMgr.GetShader("outline_frag"));
 	outlinePass.SetPushConstant<OutlineConstant>(outlineConstant);
-	outlinePass.AddAttachment("OutlineOutput", ImageFormat::RGBA8);
+	outlinePass.AddAttachment("GizmoCombineOutput", ImageFormat::RGBA8);
 	outlinePass.SetDepthTest(false);
 	outlinePass.AddInput("ShadingOutput");
 	outlinePass.AddInput("EntityID");
@@ -686,7 +686,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	});
 	outlinePass.SetRender([&](PassRenderContext& ctx)
 	{
-		outlineConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(ShadingOutput->GetID());
+		outlineConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoCombineOutput->GetID());
 		outlineConstant.EntityIDTextureID = GPUResources::Get().GetBindlessTextureID(GBufferEntityID->GetID());
 		outlineConstant.DepthTextureID = GPUResources::Get().GetBindlessTextureID(GBufferDepth->GetID());
 		outlineConstant.SelectedEntityID = ctx.selectedEntity;
@@ -704,6 +704,12 @@ void SceneRenderPipeline::RecreatePipeline()
 	});
 
 	GBufferPipeline.Build();
+}
+
+int SceneRenderPipeline::MousePick(const Vector2& coord)
+{
+	GBufferEntityID->GetImage();
+	return 0;
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size)
