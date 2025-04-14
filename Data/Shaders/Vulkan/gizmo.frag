@@ -91,6 +91,7 @@ struct PSOutput {
 
 struct DebugConstant
 {
+    float4 Color;
     float4x4 Transform;
     int TextureID;
 };
@@ -117,7 +118,7 @@ PSOutput main(PSInput input)
             discard;
         }
 
-        output.oColor0 = textureSample;
+        output.oColor0 = textureSample * pushConstants.Color;
     }
 
     return output;

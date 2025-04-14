@@ -30,6 +30,7 @@ namespace Nuake
 		static Ref<VkMesh> SphereMesh;
 		static Ref<VkMesh> CylinderMesh;
 		static Ref<VkMesh> ArrowMesh;
+		static Ref<VkMesh> ConeMesh;
 
 	public:
 		//RenderContext Context;

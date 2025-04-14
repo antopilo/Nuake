@@ -322,7 +322,7 @@ PSOutput main(PSInput input)
             float theta = dot(L, normalize(-light.direction));
             float epsilon = light.innerConeAngle - light.outerConeAngle;
             float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
-            radiance = light.color * intensity;
+            radiance = light.color * intensity * attenuation;
         }
 
         float3 H = normalize(V + L);

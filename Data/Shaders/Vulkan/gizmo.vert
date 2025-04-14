@@ -82,6 +82,7 @@ StructuredBuffer<CameraView> cameras;
 
 struct DebugConstant
 {
+    float4 Color;
     float4x4 Transform;
     int TextureID;
 };

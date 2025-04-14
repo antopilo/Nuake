@@ -28,6 +28,7 @@ Ref<VkMesh> VkSceneRenderer::CapsuleMesh;
 Ref<VkMesh> VkSceneRenderer::SphereMesh;
 Ref<VkMesh> VkSceneRenderer::CylinderMesh;
 Ref<VkMesh> VkSceneRenderer::ArrowMesh;
+Ref<VkMesh> VkSceneRenderer::ConeMesh;
 
 void VkSceneRenderer::Init()
 {
@@ -293,7 +294,7 @@ void VkSceneRenderer::Init()
 		std::vector<uint32_t> cylinderIndices;
 
 		const int segments = 16;
-		const float radius = 0.5f;
+		const float radius = 0.25f;
 		const float halfHeight = 1.0f;
 
 		// Vertex pairs: top and bottom
@@ -340,7 +341,53 @@ void VkSceneRenderer::Init()
 		// Final creation of the cylinder outline mesh
 		CylinderMesh = CreateRef<VkMesh>(cylinderVertices, cylinderIndices);
 	}
-	
+
+	{
+		std::vector<Vertex> coneVertices;
+		std::vector<uint32_t> coneIndices;
+
+		const int segments = 16;
+		const float radius = 0.5f;
+		const float height = 2.0f;
+		const float halfHeight = height * 0.5f;
+
+		// Tip vertex at the top center
+		Vector3 tipPosition = Vector3(0.0f, +halfHeight, 0.0f);
+		coneVertices.push_back({ tipPosition, 0.0f, Vector3(), 0.0f });
+		uint32_t tipIndex = 0;
+
+		// Base ring vertices 
+		for (int i = 0; i < segments; ++i)
+		{
+			float angle = (2.0f * glm::pi<float>() * i) / segments;
+			float x = cos(angle) * radius;
+			float z = sin(angle) * radius;
+
+			Vector3 pos = Vector3(x, -halfHeight, z);
+			coneVertices.push_back({ pos, 0.0f, Vector3(), 0.0f });
+		}
+
+		// Circle outline on base
+		for (int i = 0; i < segments; ++i)
+		{
+			uint32_t currIdx = tipIndex + 1 + i;
+			uint32_t nextIdx = tipIndex + 1 + ((i + 1) % segments);
+
+			coneIndices.push_back(currIdx);
+			coneIndices.push_back(nextIdx);
+		}
+
+		// Lines from base to tip
+		for (int i = 0; i < segments; ++i)
+		{
+			uint32_t baseIdx = tipIndex + 1 + i;
+			coneIndices.push_back(tipIndex);     // tip
+			coneIndices.push_back(baseIdx);      // base
+		}
+
+		// Final creation of the cone outline mesh
+		ConeMesh = CreateRef<VkMesh>(coneVertices, coneIndices);
+	}
 }
 
 void VkSceneRenderer::LoadShaders()

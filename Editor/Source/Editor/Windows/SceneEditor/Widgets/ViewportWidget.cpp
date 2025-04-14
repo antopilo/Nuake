@@ -234,7 +234,7 @@ float GetGizmoScale(const Vector3& camPosition, const Nuake::Vector3& position)
 }
 
 template<typename T>
-void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon)
+void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon, const EditorContext& context)
 {
     auto scene = debugCmd.GetScene();
     auto cam = scene->GetCurrentCamera();
@@ -247,12 +247,15 @@ void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon)
     {
         auto [transform, cam] = scene->m_Registry.get<TransformComponent, T>(e);
 
+        auto selection = context.GetSelection();
+        bool isSelected = selection.Type == EditorSelectionType::Entity && selection.Entity.GetHandle() == (int)e;
+
         Matrix4 initialTransform = transform.GetGlobalTransform();
         Matrix4 gizmoTransform = initialTransform;
         gizmoTransform = glm::inverse(scene->GetCurrentCamera()->GetTransform());
         gizmoTransform[3] = initialTransform[3];
         gizmoTransform = glm::scale(gizmoTransform, gizmoSize * GetGizmoScale(cameraPosition, initialTransform[3]));
-        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon));
+        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), isSelected ? Color(1, 1, 0, 1) : Color(1, 1, 1, 1));
     }
 }
 
@@ -282,6 +285,57 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
         Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
         Matrix4 boxTransform = glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
         lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
+    }
+
+    auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
+    for (auto e : lightView)
+    {
+        auto [transformComp, lightComp] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+
+        const int32_t type = lightComp.Type;
+        const Quat& rotationOffset = QuatFromEuler(-90.0f, 0, 0);
+        const Quat& globalRotation = glm::normalize(transformComp.GetGlobalRotation()) * rotationOffset;
+        const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+        Matrix4 transform = Matrix4(1.0f);
+        transform = glm::translate(view, Vector3(transformComp.GetGlobalTransform()[3]));
+        transform = transform * rotationMatrix;
+        transform = glm::translate(transform, { 0, -1.0, 0.0 });
+
+        if (type == LightType::Spot)
+        {
+            const Quat& rotationOffset = QuatFromEuler(90.0f, 0, 0);
+            const Quat& globalRotation = glm::normalize(transformComp.GetGlobalRotation()) * rotationOffset;
+            const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+            Matrix4 transform = Matrix4(1.0f);
+            transform = glm::translate(view, Vector3(transformComp.GetGlobalTransform()[3]));
+            transform = transform * rotationMatrix;
+
+            float length = 1.0f;
+            float scaleDistance = glm::sqrt(lightComp.Strength);
+            length *= scaleDistance;
+
+            transform = glm::translate(transform, { 0, -length, 0.0 });
+
+            float radiusScale = (length) * glm::tan(Rad(lightComp.OuterCutoff)) / 0.25f;
+            Vector3 coneScale = Vector3(radiusScale, length, radiusScale);
+            transform = glm::scale(transform, coneScale);
+
+            lineCmd.DrawCone(proj * transform, Color{ lightComp.Color, 1.0f }, 1.5f, false);
+        }
+        else if (type == LightType::Directional)
+        {
+            const Quat& rotationOffset = QuatFromEuler(-90.0f, 0, 0);
+            const Quat& globalRotation = glm::normalize(transformComp.GetGlobalRotation()) * rotationOffset;
+            const Matrix4& rotationMatrix = glm::mat4_cast(globalRotation);
+
+            Matrix4 transform = Matrix4(1.0f);
+            transform = glm::translate(view, Vector3(transformComp.GetGlobalTransform()[3]));
+            transform = transform * rotationMatrix;
+            transform = glm::translate(transform, { 0, -1.0, 0.0 });
+            lineCmd.DrawCylinder(proj * transform, Color { lightComp.Color, 1.0f }, 1.5f, false);
+        }
     }
 
     auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
@@ -344,14 +398,14 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
 
-    static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon)
+    static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon, const Color& color)
     {
         Matrix4 initialTransform = transform.GetGlobalTransform();
         Matrix4 gizmoTransform = initialTransform;
         gizmoTransform = glm::inverse(scene->GetCurrentCamera()->GetTransform());
         gizmoTransform[3] = initialTransform[3];
         gizmoTransform = glm::scale(gizmoTransform, gizmoSize * GetGizmoScale(cameraPosition, initialTransform[3]));
-        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon));
+        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), color);
     };
     
 	debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), { 0, 4, 0 }));
@@ -360,6 +414,9 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     for (auto e : lightView)
     {
         auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
+
+        auto selection = editorContext.GetSelection();
+        bool isSelected = selection.Type == EditorSelectionType::Entity && selection.Entity.GetHandle() == (int)e;
 
         std::string texturePath = "Resources/Gizmos/";
         switch (light.Type)
@@ -378,15 +435,15 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
         }
 
         // Billboard + scaling logic
-        drawGizmoIcon(transform, texturePath);
+        drawGizmoIcon(transform, texturePath, isSelected ? Color(1, 1, 0, 1) : Color(1, 1, 1, 1));
     }
 
-    DrawIconGizmo<CameraComponent>(debugCmd, "Resources/Gizmos/Camera.png");
-    DrawIconGizmo<CharacterControllerComponent>(debugCmd, "Resources/Gizmos/player.png");
-    DrawIconGizmo<BoneComponent>(debugCmd, "Resources/Gizmos/bone.png");
-    DrawIconGizmo<AudioEmitterComponent>(debugCmd, "Resources/Gizmos/sound_emitter.png");
-    DrawIconGizmo<RigidBodyComponent>(debugCmd, "Resources/Gizmos/rigidbody.png");
-    DrawIconGizmo<ParticleEmitterComponent>(debugCmd, "Resources/Gizmos/particles.png");
+    DrawIconGizmo<CameraComponent>(debugCmd, "Resources/Gizmos/Camera.png", editorContext);
+    DrawIconGizmo<CharacterControllerComponent>(debugCmd, "Resources/Gizmos/player.png", editorContext);
+    DrawIconGizmo<BoneComponent>(debugCmd, "Resources/Gizmos/bone.png", editorContext);
+    DrawIconGizmo<AudioEmitterComponent>(debugCmd, "Resources/Gizmos/sound_emitter.png", editorContext);
+    DrawIconGizmo<RigidBodyComponent>(debugCmd, "Resources/Gizmos/rigidbody.png", editorContext);
+    DrawIconGizmo<ParticleEmitterComponent>(debugCmd, "Resources/Gizmos/particles.png", editorContext);
 }
 
 

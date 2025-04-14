@@ -606,7 +606,7 @@ void SceneRenderPipeline::RecreatePipeline()
 
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
-	gizmoPass.SetPushConstant(debugConstant);
+	gizmoPass.SetPushConstant<DebugConstant>(debugConstant);
 	gizmoPass.AddInput("Depth");
 	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
 	gizmoPass.AddAttachment("GizmoDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);

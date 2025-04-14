@@ -15,7 +15,7 @@
 
 namespace Nuake
 {
-    enum LightType 
+    enum LightType : int32_t
     {
         Directional, Point, Spot
     };
