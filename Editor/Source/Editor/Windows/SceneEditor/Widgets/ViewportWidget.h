@@ -16,14 +16,27 @@ namespace Nuake
 class ViewportWidget : public IEditorWidget
 {
 private:
+	enum class GizmoDrawingModes : char16_t
+	{
+		EditorOnly,
+		Always,
+		None
+	};
+
+private:
 	Ref<Nuake::Viewport> sceneViewport;
+
+	// Gizmo
+	GizmoDrawingModes gizmoDrawingMode;
 
 	ImGuizmo::OPERATION CurrentOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
 	bool UseSnapping = true;
 	Nuake::Vector3 CurrentSnapping = { 0.05f, 0.05f, 0.05f };
+
 	bool IsControllingCamera = false;
 	bool isHoveringViewport;
+
 public:
 	ViewportWidget(EditorContext& context);
 	~ViewportWidget();
