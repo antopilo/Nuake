@@ -135,6 +135,7 @@ PSOutput main(PSInput input)
             else
             {
                 output.oEntityID = float4(0, 0, 0, 0); // Or leave it unassigned if default is zero
+                discard;
             }
         }
     }
