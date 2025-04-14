@@ -434,14 +434,14 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
 
-    static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon, const Color& color)
+    static auto drawGizmoIcon = [&](TransformComponent& transform, const std::string& icon, const Color& color, int32_t entityId)
     {
         Matrix4 initialTransform = transform.GetGlobalTransform();
         Matrix4 gizmoTransform = initialTransform;
         gizmoTransform = glm::inverse(scene->GetCurrentCamera()->GetTransform());
         gizmoTransform[3] = initialTransform[3];
         gizmoTransform = glm::scale(gizmoTransform, gizmoSize * GetGizmoScale(cameraPosition, initialTransform[3]));
-        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), color);
+        debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), color, entityId);
     };
     
 	debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), { 0, 4, 0 }));
@@ -471,7 +471,7 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
         }
 
         // Billboard + scaling logic
-        drawGizmoIcon(transform, texturePath, isSelected ? Color(1, 1, 0, 1) : Color(1, 1, 1, 1));
+        drawGizmoIcon(transform, texturePath, isSelected ? Color(1, 1, 0, 1) : Color(1, 1, 1, 1), (int32_t)e);
     }
 
     DrawIconGizmo<CameraComponent>(debugCmd, "Resources/Gizmos/Camera.png", editorContext);

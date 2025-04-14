@@ -28,11 +28,12 @@ void DebugCmd::DrawQuad(const Matrix4& transform)
 	cmd.DrawIndexed(6);
 }
 
-void DebugCmd::DrawTexturedQuad(const Matrix4& transform, Ref<VulkanImage> texture, const Color& color)
+void DebugCmd::DrawTexturedQuad(const Matrix4& transform, Ref<VulkanImage> texture, const Color& color, int32_t entityId)
 {
 	debugConstant.Transform = transform;
 	debugConstant.TextureID = GPUResources::Get().GetBindlessTextureID(texture->GetID());
 	debugConstant.Color = color;
+	debugConstant.EntityID = entityId; 
 
 	cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(DebugConstant), &debugConstant);
 

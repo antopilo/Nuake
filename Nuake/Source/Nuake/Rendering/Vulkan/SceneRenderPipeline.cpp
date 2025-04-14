@@ -265,11 +265,11 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ SSAOBlurOutput },
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
-		{ LineOutput, GBufferDepth },
-		{ LineCombineOutput },
-		{ GizmoOutput, GBufferDepth }, // Reusing depth from gBuffer
+		{ GizmoOutput, GBufferEntityID, GBufferDepth }, // Reusing depth from gBuffer
 		{ GizmoCombineOutput },
-		{ OutlineOutput }
+		{ OutlineOutput },
+		{ LineCombineOutput },
+		{ LineOutput, GBufferDepth },
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);
@@ -545,72 +545,12 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.DrawIndexed(6);
 	});
 
-	RenderPass& linePass = GBufferPipeline.AddPass("Line");
-	linePass.SetIsLinePass(true);
-	linePass.SetTopology(PolygonTopology::LINE_LIST);
-	linePass.SetShaders(shaderMgr.GetShader("line_vert"), shaderMgr.GetShader("line_frag"));
-	linePass.AddAttachment("LineOutput", LineOutput->GetFormat());
-	linePass.AddAttachment("LineDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
-	linePass.SetPushConstant(lineConstant);
-	linePass.SetDepthTest(true);
-	linePass.SetIsLinePass(true);
-	linePass.SetPreRender([&](PassRenderContext& ctx)
-	{
-		Cmd& cmd = ctx.commandBuffer;
-		auto& layout = ctx.renderPass->PipelineLayout;
-		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-	});
-	linePass.SetRender([&](PassRenderContext& ctx)
-	{
-		auto& cmd = ctx.commandBuffer;
-		DebugLineCmd debugCmd = DebugLineCmd(cmd, ctx);
-		OnLineDraw().Broadcast(debugCmd);
-	});
-
-	auto& lineCombinePass = GBufferPipeline.AddPass("LineCombine");
-	lineCombinePass.SetPushConstant(copyConstant);
-	lineCombinePass.SetShaders(shaderMgr.GetShader("copy_vert"), shaderMgr.GetShader("copy_frag"));
-	lineCombinePass.AddAttachment("LineCombineOutput", LineCombineOutput->GetFormat());
-	lineCombinePass.AddInput("lineCombinePassOutput");
-	lineCombinePass.SetPreRender([&](PassRenderContext& ctx)
-	{
-		Cmd& cmd = ctx.commandBuffer;
-		auto& layout = ctx.renderPass->PipelineLayout;
-		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
-		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
-		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
-	});
-	lineCombinePass.SetRender([&](PassRenderContext& ctx)
-	{
-		auto& cmd = ctx.commandBuffer;
-
-		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(LineOutput->GetID());
-		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
-		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
-
-		auto& quadMesh = VkSceneRenderer::QuadMesh;
-		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
-		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
-		cmd.DrawIndexed(6);
-	});
-
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
 	gizmoPass.SetPushConstant<DebugConstant>(debugConstant);
 	gizmoPass.AddInput("Depth");
 	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
+	gizmoPass.AddAttachment("GizmoEntityID", GBufferEntityID->GetFormat(), ImageUsage::ColorAttachment, false);
 	gizmoPass.AddAttachment("GizmoDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
 	gizmoPass.SetDepthTest(true);
 	gizmoPass.SetPreRender([&](PassRenderContext& ctx)
@@ -656,7 +596,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& cmd = ctx.commandBuffer;
 
 		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoOutput->GetID());
-		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(LineCombineOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
@@ -704,6 +644,67 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
 		cmd.DrawIndexed(6);
 	});
+
+	RenderPass& linePass = GBufferPipeline.AddPass("Line");
+	linePass.SetIsLinePass(true);
+	linePass.SetTopology(PolygonTopology::LINE_LIST);
+	linePass.SetShaders(shaderMgr.GetShader("line_vert"), shaderMgr.GetShader("line_frag"));
+	linePass.AddAttachment("LineOutput", LineOutput->GetFormat());
+	linePass.AddAttachment("LineDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
+	linePass.SetPushConstant(lineConstant);
+	linePass.SetDepthTest(true);
+	linePass.SetPreRender([&](PassRenderContext& ctx)
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	linePass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+		DebugLineCmd debugCmd = DebugLineCmd(cmd, ctx);
+		OnLineDraw().Broadcast(debugCmd);
+	});
+
+	auto& lineCombinePass = GBufferPipeline.AddPass("LineCombine");
+	lineCombinePass.SetPushConstant(copyConstant);
+	lineCombinePass.SetShaders(shaderMgr.GetShader("copy_vert"), shaderMgr.GetShader("copy_frag"));
+	lineCombinePass.AddAttachment("LineCombineOutput", LineCombineOutput->GetFormat());
+	lineCombinePass.AddInput("lineCombinePassOutput");
+	lineCombinePass.SetPreRender([&](PassRenderContext& ctx)
+		{
+			Cmd& cmd = ctx.commandBuffer;
+			auto& layout = ctx.renderPass->PipelineLayout;
+			auto& res = GPUResources::Get();
+
+			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+		});
+	lineCombinePass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+
+		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(LineOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(OutlineOutput->GetID());
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
+
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
 
 	GBufferPipeline.Build();
 }

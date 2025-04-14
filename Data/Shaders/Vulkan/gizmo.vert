@@ -85,6 +85,7 @@ struct DebugConstant
     float4 Color;
     float4x4 Transform;
     int TextureID;
+    float EntityID;
 };
 
 [[vk::push_constant]]

@@ -122,6 +122,7 @@ PSOutput main(PSInput input)
     float hasHit = 0.0f;
 
     float sampleValue = textures[entityIDTextureID].Sample(mySampler, uv).r;
+    float depth = textures[pushConstants.DepthTextureID].Sample(mySampler, uv).r;
 
     float4 fragColor = float4(0, 0, 0, 0);
     const float TAU = 6.28318530;
@@ -135,7 +136,8 @@ PSOutput main(PSInput input)
 		sampleUV.y = clamp(sampleUV.y, 0.0, 0.999);
         
         float sample = textures[entityIDTextureID].Sample(mySampler, sampleUV).r;
-        if(sample == target)
+        float sampleDepth = textures[pushConstants.DepthTextureID].Sample(mySampler, sampleUV).r;
+        if(sample == target && sampleDepth != 1.0f && sampleDepth > depth)
         {
             hasHit = 1.0f;
         }
