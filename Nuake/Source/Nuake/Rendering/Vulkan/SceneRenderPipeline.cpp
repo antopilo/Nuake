@@ -9,6 +9,8 @@
 #include "Nuake/Scene/Components/TransformComponent.h"
 #include "Nuake/Scene/Components/ModelComponent.h"
 
+#include "Engine.h"
+#include "Nuake/Resource/Project.h"
 
 #include "VulkanAllocator.h"
 
@@ -194,7 +196,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	TonemappedOutput->SetDebugName("TonemappedOutput");
 
-	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	GBufferEntityID->SetDebugName("GBufferEntityID");
 
 	OutlineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
@@ -690,8 +692,8 @@ void SceneRenderPipeline::RecreatePipeline()
 		outlineConstant.EntityIDTextureID = GPUResources::Get().GetBindlessTextureID(GBufferEntityID->GetID());
 		outlineConstant.DepthTextureID = GPUResources::Get().GetBindlessTextureID(GBufferDepth->GetID());
 		outlineConstant.SelectedEntityID = ctx.selectedEntity;
-		outlineConstant.Color = Vector4(1, 0, 0, 1);
-		outlineConstant.Thickness = 4.0f;
+		outlineConstant.Color = Engine::GetProject()->Settings.PrimaryColor;
+		outlineConstant.Thickness = Engine::GetProject()->Settings.OutlineRadius;
 
 		auto& cmd = ctx.commandBuffer;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(OutlineConstant), &outlineConstant);
