@@ -68,6 +68,7 @@ void ViewportWidget::Draw()
 		Vector2 viewportPanelSize = glm::vec2(regionAvail.x, regionAvail.y);
 
         bool needsResize = sceneViewport->QueueResize(viewportPanelSize);
+        editorContext.GetScene()->GetCurrentCamera()->OnWindowResize(regionAvail.x, regionAvail.y);
 
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
@@ -208,7 +209,7 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     }
 
     // Create new viewport with same reoslution
-    const UUID viewId = editorContext.GetScene()->m_EditorCamera->ID;
+    const UUID viewId = editorContext.GetScene()->GetCurrentCamera()->ID;
     auto viewport = vkRenderer.CreateViewport(viewId, currentResolution);
     vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
 

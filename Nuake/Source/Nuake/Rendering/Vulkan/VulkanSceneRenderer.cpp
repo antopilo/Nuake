@@ -238,8 +238,8 @@ void VkSceneRenderer::Init()
 		std::vector<Vertex> sphereVertices;
 		std::vector<uint32_t> sphereIndices;
 
-		const int ringSegments = 32;
-		const float sphereRadius = 1.0f;
+		const int ringSegments = 16;
+		const float sphereRadius = 0.5f;
 
 		// XY Ring
 		for (int i = 0; i < ringSegments; ++i)
@@ -293,8 +293,8 @@ void VkSceneRenderer::Init()
 		std::vector<uint32_t> cylinderIndices;
 
 		const int segments = 16;
-		const float radius = 1.0f;
-		const float halfHeight = 2.0f;
+		const float radius = 0.5f;
+		const float halfHeight = 1.0f;
 
 		// Vertex pairs: top and bottom
 		for (int i = 0; i < segments; ++i)
