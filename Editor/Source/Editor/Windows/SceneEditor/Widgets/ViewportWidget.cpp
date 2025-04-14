@@ -19,7 +19,9 @@
 
 using namespace Nuake;
 
-ViewportWidget::ViewportWidget(EditorContext& context) : IEditorWidget(context)
+ViewportWidget::ViewportWidget(EditorContext& context) : 
+IEditorWidget(context),
+gizmoDrawingMode(GizmoDrawingModes::EditorOnly)
 {
     OnSceneChanged(context.GetScene());
 }
@@ -261,6 +263,23 @@ void DrawIconGizmo(DebugCmd& debugCmd, const std::string& icon, const EditorCont
 
 void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
 {
+    GameState gamestate = Engine::GetGameState();
+    switch (gizmoDrawingMode)
+    {
+        case GizmoDrawingModes::EditorOnly:
+        {
+            if (gamestate == GameState::Playing)
+            {
+                return;
+            }
+            break;
+        }
+        case GizmoDrawingModes::None:
+        {
+            return;
+        }
+    }
+
     auto scene = lineCmd.GetScene();
     auto cam = scene->GetCurrentCamera();
     const Vector3& cameraPosition = cam->GetTranslation();
@@ -283,7 +302,7 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
         const float fov = camera.CameraInstance->Fov;
 
         Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
-        Matrix4 boxTransform = glm::translate(scene->m_EditorCamera->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
+        Matrix4 boxTransform = glm::translate(scene->GetCurrentCamera()->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
         lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
     }
 
@@ -390,6 +409,23 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
 
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
 {
+    GameState gamestate = Engine::GetGameState();
+    switch (gizmoDrawingMode)
+    {
+        case GizmoDrawingModes::EditorOnly:
+        {
+            if (gamestate == GameState::Playing)
+            {
+                return;
+            }
+            break;
+        }
+        case GizmoDrawingModes::None:
+        {
+            return;
+        }
+    }
+
     auto scene = debugCmd.GetScene();
     auto cam = scene->GetCurrentCamera();
     const Vector3& cameraPosition = cam->GetTranslation();
