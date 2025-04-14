@@ -412,6 +412,44 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.DrawIndexed(6);
 	});
 
+	//auto& skyPass = GBufferPipeline.AddPass("SkyPass");
+	//skyPass.SetShaders(shaderMgr.GetShader("sky_vert"), shaderMgr.GetShader("sky_frag"));
+	//skyPass.SetPushConstant<SkyConstant>(skyConstant);
+	//skyPass.AddAttachment("SkyOutput", ShadingOutput->GetFormat());
+	//skyPass.SetDepthTest(false);
+	//skyPass.SetPreRender([&](PassRenderContext& ctx)
+	//{
+	//	Cmd& cmd = ctx.commandBuffer;
+	//	auto& layout = ctx.renderPass->PipelineLayout;
+	//	auto& res = GPUResources::Get();
+	//	cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+	//	cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+	//	cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+	//	cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+	//	cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+	//	cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	//
+	//	skyConstant.cameraID = ctx.cameraID;
+	//	auto camera = res.GetCamera(ctx.cameraID);
+	//	
+	//
+	//
+	//	skyConstant.ambientColor = ctx.scene->GetEnvironment()->AmbientColor;
+	//	skyConstant.ambientTerm = ctx.scene->GetEnvironment()->AmbientTerm;
+	//
+	//	cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(SkyConstant), &skyConstant);
+	//});
+	//skyPass.SetRender([&](PassRenderContext& ctx)
+	//	{
+	//		Cmd& cmd = ctx.commandBuffer;
+	//		auto& layout = ctx.renderPass->PipelineLayout;
+	//		auto& quadMesh = VkSceneRenderer::QuadMesh;
+	//		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+	//		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+	//		cmd.DrawIndexed(6);
+	//	});
+	// skyPass.SetShaders("shaderMgr")
+
 	auto& shadingPass = GBufferPipeline.AddPass("Shading");
 	shadingPass.SetShaders(shaderMgr.GetShader("shading_vert"), shaderMgr.GetShader("shading_frag"));
 	shadingPass.SetPushConstant<ShadingConstant>(shadingConstant);
@@ -499,7 +537,6 @@ void SceneRenderPipeline::RecreatePipeline()
 
 		ctx.renderPass->SetClearColor(ctx.scene->GetEnvironment()->AmbientColor);
 
-		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
@@ -521,7 +558,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		// Bindless
 		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
 		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
@@ -547,7 +583,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		// Bindless
 		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
 		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
@@ -563,7 +598,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
-		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
@@ -583,7 +617,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		// Bindless
 		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
 		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
@@ -609,7 +642,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		// Bindless
 		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
 		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
@@ -625,7 +657,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(LineCombineOutput->GetID());
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
-		// Draw full screen quad
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
 		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());

@@ -45,6 +45,22 @@ namespace Nuake
 		float power;
 	};
 
+	struct SkyConstant
+	{
+		int cameraID;
+		float surfaceRadius;
+		float atmosphereRadius;
+		Vector3 RayleighScattering;
+		Vector3 MieScattering;
+		float SunIntensity;
+		Vector3 CenterPoint;
+		Vector3 SunDirection;
+		Vector3 CamDirection;
+		Vector3 CamUp;
+		Vector3 CamRight;
+		float Exposure;
+	};
+
 	struct BlurConstant
 	{
 		int sourceTextureID;
@@ -148,6 +164,7 @@ namespace Nuake
 		ShadingConstant shadingConstant;
 		SSAOConstant ssaoConstant;
 		BlurConstant blurConstant;
+		SkyConstant skyConstant;
 		TonemapConstant tonemapConstant;
 		DebugConstant debugConstant;
 		LineConstant lineConstant;

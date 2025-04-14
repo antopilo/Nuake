@@ -14,6 +14,8 @@
 #include <Nuake/Scene/Components/ParticleEmitterComponent.h>
 #include <Nuake/Scene/Components/RigidbodyComponent.h>
 
+#include <Nuake/Scene/Components/BoxCollider.h>
+#include <Nuake/Scene/Components/SphereCollider.h>
 
 using namespace Nuake;
 
@@ -34,7 +36,7 @@ void ViewportWidget::Update(float ts)
     if (!Engine::IsPlayMode())
     {
         EditorCamera& editorCam = reinterpret_cast<EditorCamera&>(*editorContext.GetScene()->GetCurrentCamera().get());
-        editorCam.Update(ts, isHoveringViewport);
+        IsControllingCamera = editorCam.Update(ts, isHoveringViewport);
     }
 
     const Vector2 viewportSize = sceneViewport->GetViewportSize();
@@ -56,6 +58,8 @@ void ViewportWidget::Draw()
 	if (BeginWidgetWindow(ICON_FA_GAMEPAD + std::string("Viewport")))
 	{
 		ImGui::PopStyleVar();
+
+        DrawOverlay();
 
 		ImGuizmo::BeginFrame();
 		ImGuizmo::SetOrthographic(false);
@@ -279,6 +283,53 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
         lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
     }
 
+    auto boxColliderView = scene->m_Registry.view<TransformComponent, BoxColliderComponent>();
+    for (auto e : boxColliderView)
+    {
+        auto [transform, boxCollider] = scene->m_Registry.get<TransformComponent, BoxColliderComponent>(e);
+
+        Vector3 boxSize = boxCollider.GetSize();
+        Matrix4 boxTransform = Matrix4(1.0f); 
+		boxTransform = glm::translate(boxTransform, Vector3(transform.GetGlobalTransform()[3]));
+		boxTransform = glm::scale(boxTransform, boxSize);
+        lineCmd.DrawBox(proj * view * boxTransform, Color(0, 1, 0, 1.0f), 1.5f, boxCollider.IsTrigger);
+    }
+
+    auto sphereColliderView = scene->m_Registry.view<TransformComponent, SphereColliderComponent>();
+    for (auto e : sphereColliderView)
+    {
+        auto [transformComponent, sphereCollider] = scene->m_Registry.get<TransformComponent, SphereColliderComponent>(e);
+
+        float radius = sphereCollider.GetRadius();
+        Matrix4 transform = Matrix4(1.0f);
+        transform = glm::translate(transform, Vector3(transformComponent.GetGlobalTransform()[3]));
+        transform = glm::scale(transform, Vector3(sphereCollider.GetRadius()));
+        lineCmd.DrawSphere(proj * view * transform, Color(1, 0, 0, 1.0f), 1.5f, true);
+    }
+
+    auto capsuleColliderView = scene->m_Registry.view<TransformComponent, CapsuleColliderComponent>();
+    for (auto e : capsuleColliderView)
+    {
+        auto [transformComponent, capsuleCollider] = scene->m_Registry.get<TransformComponent, CapsuleColliderComponent>(e);
+
+        Matrix4 transform = Matrix4(1.0f);
+        transform = glm::translate(transform, Vector3(transformComponent.GetGlobalTransform()[3]));
+        transform = glm::scale(transform, Vector3(capsuleCollider.Radius, capsuleCollider.Height, capsuleCollider.Radius));
+        lineCmd.DrawCapsule(proj * view * transform, Color(1, 0, 0, 1.0f), 1.5f, true);
+    }
+
+    auto cylinderColliderView = scene->m_Registry.view<TransformComponent, CylinderColliderComponent>();
+    for (auto e : cylinderColliderView)
+    {
+        auto [transformComponent, cylinderCollider] = scene->m_Registry.get<TransformComponent, CylinderColliderComponent>(e);
+
+        Matrix4 transform = Matrix4(1.0f);
+        transform = glm::translate(transform, Vector3(transformComponent.GetGlobalTransform()[3]));
+        transform = glm::scale(transform, Vector3(cylinderCollider.Radius, cylinderCollider.Height, cylinderCollider.Radius));
+        lineCmd.DrawCylinder(proj * view * transform, Color(1, 0, 0, 1.0f), 1.5f, true);
+    }
+
+    lineCmd.DrawBox(proj * view * transform, { 0, 1, 0, 1 }, 1.5f, true);
     //lineCmd.DrawArrow({3, 3, 0}, {7, 3, 0}, proj, view, Color(1, 0, 0, 1), 3.0f);
 }
 
@@ -335,4 +386,204 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     DrawIconGizmo<AudioEmitterComponent>(debugCmd, "Resources/Gizmos/sound_emitter.png");
     DrawIconGizmo<RigidBodyComponent>(debugCmd, "Resources/Gizmos/rigidbody.png");
     DrawIconGizmo<ParticleEmitterComponent>(debugCmd, "Resources/Gizmos/particles.png");
+}
+
+
+void ViewportWidget::DrawOverlay()
+{
+    if (Engine::GetGameState() == GameState::Playing)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    const float DISTANCE = 10.0f;
+    int corner = 0;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav;
+
+    window_flags |= ImGuiWindowFlags_NoMove;
+    ImGuiViewport* viewport = ImGui::GetWindowViewport();
+    float title_bar_height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
+    ImVec2 work_area_pos = ImGui::GetCurrentWindow()->Pos + ImVec2(0, title_bar_height);   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+    ImVec2 work_area_size = ImGui::GetCurrentWindow()->Size;
+    ImVec2 window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+    ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+
+    bool showOverlay = true;
+    if (ImGui::Begin("ActionBar", &showOverlay, window_flags))
+    {
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+
+        bool selectedMode = CurrentOperation == ImGuizmo::OPERATION::TRANSLATE;
+        if (selectedMode)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+        }
+
+        if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        {
+            CurrentOperation = ImGuizmo::OPERATION::TRANSLATE;
+        }
+
+
+        UI::Tooltip("Translate");
+        if (selectedMode)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::SameLine();
+
+        selectedMode = CurrentOperation == ImGuizmo::OPERATION::ROTATE;
+        if (selectedMode)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+        }
+
+        if (ImGui::Button(ICON_FA_SYNC_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_E, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        {
+            CurrentOperation = ImGuizmo::OPERATION::ROTATE;
+        }
+
+        UI::Tooltip("Rotate");
+
+        if (selectedMode)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::SameLine();
+
+        selectedMode = CurrentOperation == ImGuizmo::OPERATION::SCALE;
+        if (selectedMode)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+        }
+
+        if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive()))
+        {
+            CurrentOperation = ImGuizmo::OPERATION::SCALE;
+        }
+
+        UI::Tooltip("Scale");
+
+        if (selectedMode)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::SameLine();
+
+        selectedMode = CurrentMode == ImGuizmo::MODE::WORLD;
+        if (selectedMode)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+        }
+
+        if (ImGui::Button(ICON_FA_GLOBE, ImVec2(30, 28)))
+        {
+            CurrentMode = ImGuizmo::MODE::WORLD;
+        }
+
+        UI::Tooltip("Global Transformation");
+
+        if (selectedMode)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::SameLine();
+
+        selectedMode = CurrentMode == ImGuizmo::MODE::LOCAL;
+        if (selectedMode)
+        {
+            Color color = Engine::GetProject()->Settings.PrimaryColor;
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+        }
+
+        if (ImGui::Button(ICON_FA_CUBE, ImVec2(30, 28)))
+        {
+            CurrentMode = ImGuizmo::MODE::LOCAL;
+        }
+
+        UI::Tooltip("Local Transformation");
+
+        if (selectedMode)
+        {
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::SameLine();
+
+        ImGui::SameLine();
+        ImGui::PushItemWidth(75);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
+        ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
+        CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.x };
+        ImGui::PopStyleVar();
+
+        ImGui::PopItemWidth();
+        UI::Tooltip("Snapping");
+
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
+        ImGui::PopStyleColor();
+    }
+
+    ImGui::PopStyleVar();
+    ImGui::End();
+
+    corner = 1;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    viewport = ImGui::GetWindowViewport();
+    work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+    work_area_size = ImGui::GetCurrentWindow()->Size;
+    window_pos = ImVec2((corner & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+    window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    int corner2 = 1;
+    work_area_pos = ImGui::GetCurrentWindow()->Pos;   // Instead of using viewport->Pos we use GetWorkPos() to avoid menu bars, if any!
+    work_area_size = ImGui::GetCurrentWindow()->Size;
+    window_pos = ImVec2((corner2 & 1) ? (work_area_pos.x + work_area_size.x - DISTANCE) : (work_area_pos.x + DISTANCE), (corner2 & 2) ? (work_area_pos.y + work_area_size.y - DISTANCE) : (work_area_pos.y + DISTANCE));
+    window_pos_pivot = ImVec2((corner2 & 1) ? 1.0f : 0.0f, (corner2 & 2) ? 1.0f : 0.0f);
+    ImGui::SetNextWindowPos(window_pos + ImVec2(0, 40), ImGuiCond_Always, window_pos_pivot);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
+    ImGui::SetNextWindowSize(ImVec2(16, ImGui::GetContentRegionAvail().y - DISTANCE * 2.0 - 40.0));
+    if (IsControllingCamera)
+    {
+        if (ImGui::Begin("Controls", &showOverlay, window_flags))
+        {
+            const auto& editorCam = Engine::GetCurrentScene()->m_EditorCamera;
+            const float camSpeed = editorCam->Speed;
+
+            const float maxSpeed = 50.0f;
+            const float minSpeed = 0.05f;
+            const float normalizedSpeed = glm::clamp((camSpeed / maxSpeed), 0.0f, 1.0f);
+
+            ImVec2 start = ImGui::GetWindowPos() - ImVec2(0.0, 4.0);
+            ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
+            ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
+
+            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
+            ImGui::PopStyleVar();
+        }
+        ImGui::End();
+    }
+    ImGui::PopStyleVar();
 }

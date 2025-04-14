@@ -21,9 +21,9 @@ SceneEditorWindow::SceneEditorWindow(Ref<Scene> inScene) :
 {
 	RegisterWidget<SceneHierarchyWidget>();
 	RegisterWidget<SelectionPropertyWidget>();
-	RegisterWidget<LoggerWidget>();
-	RegisterWidget<ViewportWidget>();
 	RegisterWidget<FileBrowserWidget>();
+	RegisterWidget<ViewportWidget>();
+	RegisterWidget<LoggerWidget>();
 
 	imguiId = editorContext.GetScene()->Path.empty() ? "New Scene" : editorContext.GetScene()->Path;
 

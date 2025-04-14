@@ -33,7 +33,7 @@ namespace Nuake
 			ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ButtonPadding);
 
-			//UIFont boldFont(Bold);
+			UIFont boldFont(Bold);
 			const bool buttonPressed = ImGui::Button(name.c_str(), ImVec2(size.x, size.y));
 
 			ImGui::PopStyleColor(3);

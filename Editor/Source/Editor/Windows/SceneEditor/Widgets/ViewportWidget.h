@@ -22,7 +22,7 @@ private:
 	ImGuizmo::MODE CurrentMode = ImGuizmo::WORLD;
 	bool UseSnapping = true;
 	Nuake::Vector3 CurrentSnapping = { 0.05f, 0.05f, 0.05f };
-
+	bool IsControllingCamera = false;
 	bool isHoveringViewport;
 public:
 	ViewportWidget(EditorContext& context);
@@ -35,4 +35,7 @@ public:
 
 	void OnLineDraw(Nuake::DebugLineCmd& lineCmd);
 	void OnDebugDraw(Nuake::DebugCmd& debugCmd);
+
+private:
+	void DrawOverlay();
 };
