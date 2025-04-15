@@ -16,7 +16,7 @@ cbuffer ubo : register(b0, space0) { UBO ubo; }
 struct VSOutput
 {
 	float4 Pos : SV_POSITION;
-[[vk::location(0)]] float3 Color : COLOR0;
+	[[vk::location(0)]] float3 Color : COLOR0;
 };
 
 VSOutput main(VSInput input, uint VertexIndex : SV_VertexID)

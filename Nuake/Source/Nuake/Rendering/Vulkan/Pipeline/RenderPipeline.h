@@ -67,7 +67,7 @@ namespace Nuake
 	{
 	private:
 		std::string Name;
-		bool HasDepthTest = true;
+		bool HasDepthTest = false;
 		Ref<VulkanShader> VertShader;
 		Ref<VulkanShader> FragShader;
 

@@ -80,7 +80,8 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct PSInput {
+struct PSInput 
+{
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };

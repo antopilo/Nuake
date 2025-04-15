@@ -92,12 +92,13 @@ struct ModelPushConstant
 ModelPushConstant pushConstants;
 
 // Outputs
-struct VSOutput {
+struct VSOutput 
+{
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
     float3 Normal : TEXCOORD2;
-    float3x3 TBN : TEXCOORD3;
+    //float3x3 TBN : TEXCOORD3;
 };
 
 // Main vertex shader
@@ -117,9 +118,9 @@ VSOutput main(uint vertexIndex : SV_VertexID)
     output.UV = float2(v.uv_x, v.uv_y);
     output.Normal = normalize(v.normal);
 
-    float3 T = normalize(mul((float3x3)modelData.model, normalize(v.tangent.xyz)));
-    float3 B = normalize(mul((float3x3)modelData.model, normalize(v.bitangent.xyz)));
-    float3 N = normalize(mul((float3x3)modelData.model, normalize(v.normal)).xyz);
-    output.TBN = transpose(float3x3(T, B, N));
+    //float3 T = normalize(mul((float3x3)modelData.model, normalize(v.tangent.xyz)));
+    //float3 B = normalize(mul((float3x3)modelData.model, normalize(v.bitangent.xyz)));
+    //float3 N = normalize(mul((float3x3)modelData.model, normalize(v.normal)).xyz);
+    //output.TBN = transpose(float3x3(T, B, N));
     return output;
 }

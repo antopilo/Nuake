@@ -29,6 +29,7 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 	ShadowPipeline = RenderPipeline();
 	auto& shadowPass = ShadowPipeline.AddPass("Shadow");
 	shadowPass.AddAttachment("Depth", ImageFormat::D32F, ImageUsage::Depth, true);
+	shadowPass.SetDepthTest(true);
 	shadowPass.SetShaders(shaderMgr.GetShader("shadow_vert"), shaderMgr.GetShader("shadow_frag"));
 	shadowPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
@@ -295,7 +296,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 
 			void* mappedData;
 			vmaMapMemory(VulkanAllocator::Get().GetAllocator(), stagingBuffer->GetAllocation(), &mappedData);
-			Vector4 entityID = *reinterpret_cast<Vector4*>(mappedData);
+			Vector4 entityID = *reinterpret_cast<Vector4*>(mappedData); 
 			vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), stagingBuffer->GetAllocation());
 
 			request.callback(static_cast<int>(entityID.r));
@@ -312,6 +313,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	GBufferPipeline = RenderPipeline();
 	auto& gBufferPass = GBufferPipeline.AddPass("GBuffer");
 	gBufferPass.SetShaders(shaderMgr.GetShader("basic_vert"), shaderMgr.GetShader("basic_frag"));
+	gBufferPass.SetDepthTest(true);
 	gBufferPass.AddAttachment("Albedo", GBufferAlbedo->GetFormat());
 	gBufferPass.AddAttachment("Normal", GBufferNormal->GetFormat());
 	gBufferPass.AddAttachment("Material", GBufferMaterial->GetFormat());
@@ -580,7 +582,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	gizmoPass.SetPushConstant<DebugConstant>(debugConstant);
 	gizmoPass.AddInput("Depth");
 	gizmoPass.AddAttachment("GizmoOutput", GizmoOutput->GetFormat());
-	gizmoPass.AddAttachment("GizmoEntityID", GBufferEntityID->GetFormat(), ImageUsage::ColorAttachment, false);
+	gizmoPass.AddAttachment("GizmoEntityID", GBufferEntityID->GetFormat(), ImageUsage::Default, false);
 	gizmoPass.AddAttachment("GizmoDepth", GBufferDepth->GetFormat(), ImageUsage::Depth, false);
 	gizmoPass.SetDepthTest(true);
 	gizmoPass.SetPreRender([&](PassRenderContext& ctx)

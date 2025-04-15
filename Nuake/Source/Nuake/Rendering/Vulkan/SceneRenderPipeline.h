@@ -190,6 +190,7 @@ namespace Nuake
 		MulticastDelegate<DebugCmd&> DebugDrawDelegate;
 		MulticastDelegate<DebugLineCmd&> DebugLineDrawDelegate;
 
+
 	public:
 		SceneRenderPipeline();
 		~SceneRenderPipeline() = default;

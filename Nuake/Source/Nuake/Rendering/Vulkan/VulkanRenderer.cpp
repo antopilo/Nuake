@@ -126,13 +126,9 @@ void VkRenderer::Initialize()
 	camData.View = Matrix4(1.0f);
 	camData.Projection = Matrix4(1.0f);
 
-	// init camera buffer
 	InitDescriptors();
 
 	InitImgui();
-
-	SceneRenderer = CreateRef<VkSceneRenderer>();
-	SceneRenderer->Init();
 
 	IsInitialized = true;
 }
@@ -203,8 +199,7 @@ void VkRenderer::SelectGPU()
 	{ 
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 		VK_KHR_LINE_RASTERIZATION_EXTENSION_NAME,
-		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
-
+		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME
 	};
 
 	auto systemInfoRet = vkb::SystemInfo::get_system_info();
@@ -228,7 +223,7 @@ void VkRenderer::SelectGPU()
 		.set_required_features_12(features12)
 		.set_required_features(VkPhysicalDeviceFeatures{
 			.fillModeNonSolid = VK_TRUE,
-			
+			.wideLines = VK_TRUE
 		})
 		.set_surface(Surface)
 		.add_required_extensions(requiredExtensions)
@@ -401,8 +396,12 @@ void VkRenderer::PrepareSceneData(RenderContext ctx)
 	{
 		scenes.push_back(scene);
 	}
-
-	SceneRenderer->PrepareScenes(scenes, ctx);
+	
+	// Maybe this shouldnt be in a scene renderer
+	if (!SceneRenderers.empty())
+	{
+		SceneRenderers.begin()->second->PrepareScenes(scenes, ctx);
+	}
 }
 
 void VkRenderer::DrawScenes()

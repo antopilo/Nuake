@@ -80,12 +80,9 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct PSInput {
+struct PSInput 
+{
     float4 Position : SV_Position;
-};
-
-struct PSOutput {
-    float4 oColor0 : SV_TARGET;
 };
 
 struct ModelPushConstant
@@ -98,8 +95,6 @@ struct ModelPushConstant
 [[vk::push_constant]]
 ModelPushConstant pushConstants;
 
-PSOutput main(PSInput input)
+void main(PSInput input)
 {
-    PSOutput output;
-    return output;
 }

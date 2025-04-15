@@ -91,7 +91,8 @@ struct ModelPushConstant
 ModelPushConstant pushConstants;
 
 // Outputs
-struct VSOutput {
+struct VSOutput 
+{
     float4 Position : SV_Position;
 };
 
