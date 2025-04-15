@@ -2535,7 +2535,7 @@ namespace Nuake {
 
     void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
     {
-        VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
+        //VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
     }
 
     void EditorInterface::OnDebugDraw(DebugCmd& cmd)
