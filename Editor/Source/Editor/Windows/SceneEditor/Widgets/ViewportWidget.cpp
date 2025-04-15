@@ -9,6 +9,8 @@
 #include "Nuake/Rendering/Vulkan/SceneViewport.h"
 #include "Nuake/Rendering/Vulkan/DebugCmd.h"
 
+#include "Nuake/Rendering/Vulkan/SceneRenderPipeline.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <Nuake/Scene/Components/AudioEmitterComponent.h>
 #include <Nuake/Scene/Components/ParticleEmitterComponent.h>
@@ -85,7 +87,9 @@ void ViewportWidget::Draw()
 		ImGui::Image(textureDesc, regionAvail, { 0, 1 }, { 1, 0 });
 		ImGui::PopStyleVar();
 
-		const Vector2& mousePos = Input::GetMousePosition();
+        float title_bar_height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
+		Vector2 mousePos = Input::GetMousePosition();
+        mousePos.y -= title_bar_height;
 
 		const ImVec2& windowPos = ImGui::GetWindowPos();
 		const auto windowPosNuake = Vector2(windowPos.x, windowPos.y);
@@ -93,6 +97,8 @@ void ViewportWidget::Draw()
 		const bool isInsideWidth = mousePos.x > windowPos.x && mousePos.x < windowPos.x + windowSize.x;
 		const bool isInsideHeight = mousePos.y > windowPos.y && mousePos.y < windowPos.y + windowSize.y;
 		this->isHoveringViewport = isInsideWidth && isInsideHeight;
+        auto pixelPos = (mousePos - windowPosNuake) * Engine::GetProject()->Settings.ResolutionScale;
+       
 
 		// TODO(antopilo) drag n drop
 		ImGuizmo::SetDrawlist();
@@ -187,6 +193,28 @@ void ViewportWidget::Draw()
             }
         }
 
+        if (!Engine::IsPlayMode() && !ImGuizmo::IsUsing() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::GetIO().WantCaptureMouse && isHoveringViewport)
+        {
+            auto& sceneRenderer = VkRenderer::Get().SceneRenderers[sceneViewport->GetID()];
+            sceneRenderer->sceneRenderPipeline->MousePick(pixelPos, [&](uint32_t picked)
+            {
+                Logger::Log("Mouse Picked: " + std::to_string(picked));
+
+                constexpr uint32_t INVALID_PICK_ID = 4187593120;
+                if (picked != INVALID_PICK_ID)
+                {
+                    Nuake::Entity entity = Nuake::Entity((entt::entity)picked, editorContext.GetScene().get());
+                    if (entity.IsValid())
+                    {
+                        editorContext.SetSelection(entity);
+                    }
+                }
+                else
+                {
+                    editorContext.SetSelection(EditorSelection());
+                }
+            });
+        }
 	}
 	else
 	{

@@ -196,7 +196,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	TonemappedOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
 	TonemappedOutput->SetDebugName("TonemappedOutput");
 
-	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
+	GBufferEntityID = CreateRef<VulkanImage>(ImageFormat::RGBA32F, defaultSize);
 	GBufferEntityID->SetDebugName("GBufferEntityID");
 
 	OutlineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
@@ -268,11 +268,41 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ GizmoOutput, GBufferEntityID, GBufferDepth }, // Reusing depth from gBuffer
 		{ GizmoCombineOutput },
 		{ OutlineOutput },
-		{ LineCombineOutput },
 		{ LineOutput, GBufferDepth },
+		{ LineCombineOutput },
 	};
 
 	GBufferPipeline.Execute(ctx, pipelineInputs);
+
+	// Mouse Picking requests
+	if (!mousePickingRequests.empty())
+	{
+		for (auto& request : mousePickingRequests)
+		{
+			size_t bufferSize = sizeof(Vector4);
+			Ref<AllocatedBuffer> stagingBuffer = CreateRef<AllocatedBuffer>(bufferSize, BufferUsage::TRANSFER_DST, MemoryUsage::GPU_TO_CPU);
+
+			assert(request.mousePosition.x < GBufferEntityID->GetSize().x && request.mousePosition.y < GBufferEntityID->GetSize().y && "Mouse coord out of bounds");
+			request.mousePosition.y = GBufferEntityID->GetSize().y - request.mousePosition.y;
+
+			VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
+			{
+				Cmd command(cmd);
+				command.TransitionImageLayout(GBufferEntityID, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+				command.CopyImageToBuffer(GBufferEntityID, stagingBuffer, request.mousePosition);
+				command.TransitionImageLayout(GBufferEntityID, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL);
+			});
+
+			void* mappedData;
+			vmaMapMemory(VulkanAllocator::Get().GetAllocator(), stagingBuffer->GetAllocation(), &mappedData);
+			Vector4 entityID = *reinterpret_cast<Vector4*>(mappedData);
+			vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), stagingBuffer->GetAllocation());
+
+			request.callback(static_cast<int>(entityID.r));
+		}
+
+		mousePickingRequests.clear();
+	}
 }
 
 void SceneRenderPipeline::RecreatePipeline()
@@ -709,10 +739,11 @@ void SceneRenderPipeline::RecreatePipeline()
 	GBufferPipeline.Build();
 }
 
-int SceneRenderPipeline::MousePick(const Vector2& coord)
+void SceneRenderPipeline::MousePick(const Vector2& coord, MousePickingCb mousePickingCb)
 {
-	GBufferEntityID->GetImage();
-	return 0;
+	assert(coord.x > 0 && coord.y > 0 && "Mouse coords out of bounds");
+
+	mousePickingRequests.push_back({ coord, std::move(mousePickingCb) });
 }
 
 Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size)

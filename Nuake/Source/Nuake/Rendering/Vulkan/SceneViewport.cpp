@@ -18,8 +18,6 @@ Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 
 int Viewport::MousePick(const Vector2& mouseCoord)
 {
-	auto& sceneRenderer = VkRenderer::Get().SceneRenderers[id];
-	int result = sceneRenderer->sceneRenderPipeline->MousePick(mouseCoord);
 
 
 	return 0;

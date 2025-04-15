@@ -6,6 +6,8 @@
 
 namespace Nuake
 {
+	class AllocatedBuffer;
+
 	class Cmd
 	{
 	private:
@@ -32,6 +34,7 @@ namespace Nuake
 		void DrawIndexed(uint32_t count) const;
 		void PushConstants(VkPipelineLayout pipeline, size_t size, void* data ) const;
 		void CopyBuffer(VkBuffer src, VkBuffer dst, size_t size) const;
+		void CopyImageToBuffer(Ref<VulkanImage> src, Ref<AllocatedBuffer> dst, const Vector2& offset, const Vector3& extent = {1, 1, 1}) const;
 		void TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const;
 		void CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const;
 

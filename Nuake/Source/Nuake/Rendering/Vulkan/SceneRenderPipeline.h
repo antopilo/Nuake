@@ -9,6 +9,8 @@
 #include "Nuake/Core/MulticastDelegate.h"
 #include "Constant/LineConstant.h"
 
+#include <functional>
+
 namespace Nuake
 {
 	struct GBufferConstant
@@ -118,6 +120,14 @@ namespace Nuake
 	class DebugCmd;
 	class DebugLineCmd;
 
+	using MousePickingCb = std::function<void(int result)>;
+
+	struct MousePickingRequest
+	{
+		Vector2 mousePosition;
+		MousePickingCb callback;
+	};
+
 	// This class handles all the rendering of the scene
 	class SceneRenderPipeline
 	{
@@ -126,6 +136,8 @@ namespace Nuake
 
 		static std::vector<Vector3> ssaoKernelSamples;
 		static Ref<VulkanImage> ssaoNoiseTexture;
+
+		std::vector<MousePickingRequest> mousePickingRequests;
 
 		// Attachments GBuffer
 		Ref<VulkanImage> GBufferAlbedo;
@@ -184,14 +196,14 @@ namespace Nuake
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx); 
-		Ref<VulkanImage> GetOutput() { return OutlineOutput; }
+		Ref<VulkanImage> GetOutput() { return LineCombineOutput; }
 
 		MulticastDelegate<DebugCmd&>& OnDebugDraw() { return DebugDrawDelegate; }
 		MulticastDelegate<DebugLineCmd&>& OnLineDraw() { return DebugLineDrawDelegate; }
 
 		void RecreatePipeline();
 
-		int MousePick(const Vector2& coord);
+		void MousePick(const Vector2& coord, MousePickingCb mousePickingCb);
 	private:
 		Ref<VulkanImage> ResizeImage(PassRenderContext& ctx, Ref<VulkanImage> image, const Vector2& size);
 	};

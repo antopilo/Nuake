@@ -1,4 +1,5 @@
 #include "Cmd.h"
+#include "VulkanAllocatedBuffer.h"
 
 using namespace Nuake;
 
@@ -151,6 +152,31 @@ void Cmd::CopyImageToImage(Ref<VulkanImage> src, Ref<VulkanImage> dst) const
 	blitInfo.pRegions = &blitRegion;
 
 	vkCmdBlitImage2(CmdBuffer, &blitInfo);
+}
+
+void Cmd::CopyImageToBuffer(Ref<VulkanImage> src, Ref<AllocatedBuffer> dst, const Vector2& offset, const Vector3& extent) const
+{
+	VkBufferImageCopy copyRegion{};
+	copyRegion.bufferOffset = 0;
+	copyRegion.bufferRowLength = 0;      // tightly packed
+	copyRegion.bufferImageHeight = 0;
+
+	copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	copyRegion.imageSubresource.mipLevel = 0;
+	copyRegion.imageSubresource.baseArrayLayer = 0;
+	copyRegion.imageSubresource.layerCount = 1;
+
+	copyRegion.imageOffset = { (int)offset.x, (int)offset.y, 0 };				// pixel offset (e.g. { mouseX, mouseY, 0 })
+	copyRegion.imageExtent = { (uint32_t)extent.x, (uint32_t)extent.y, 1 };     // pixel size (e.g. { 1, 1, 1 } for one pixel)
+
+	vkCmdCopyImageToBuffer(
+		CmdBuffer,
+		src->GetImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		dst->GetBuffer(),
+		1,
+		&copyRegion
+	);
 }
 
 void Cmd::SetLineRasterizationMode(VkLineRasterizationMode mode) const
