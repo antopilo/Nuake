@@ -40,20 +40,25 @@ namespace Nuake
 			0
 		};
 
+		std::string color;
 		switch (type)
 		{
 		case WARNING:
+			color = "\033[1;33m";
 			// TODO: Add color
 			break;
+		case COMPILATION:
+			color = "\033[1;34m";
+			break;
 		case CRITICAL:
-
+			color = "\033[1;31m";
 			break;
 		case VERBOSE:
-
+			color = "\033[0m";
 			break;
 		}
-
-		std::string msg = "[" + std::string(buff) + "] " + logger + " - " + log;
+		
+		std::string msg = color + std::string(buff) + " [" + logger + "] \033[38;5;245m" + log;
 		std::cout << msg << std::endl;
 
 		if (m_Logs.size() >= MAX_LOG)
