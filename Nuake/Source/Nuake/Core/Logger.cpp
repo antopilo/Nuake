@@ -67,7 +67,7 @@ namespace Nuake
 		m_Logs.push_back(newLog);
 	}
 
-	std::vector<LogEntry> Logger::GetLogs()
+	std::vector<LogEntry>& Logger::GetLogs()
 	{
 		return m_Logs;
 	}

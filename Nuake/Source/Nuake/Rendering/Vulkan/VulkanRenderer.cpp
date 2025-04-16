@@ -36,7 +36,7 @@
 #include <array>
 #include <algorithm>
 
-bool NKUseValidationLayer = true;
+bool NKUseValidationLayer = false;
 
 using namespace Nuake;
 

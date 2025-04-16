@@ -241,8 +241,8 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 	);
 
 	AddGPUCleanUpFunc([=]() {
-		//vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
-		//vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
+		vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
+		vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
 	});
 }
 
@@ -318,14 +318,14 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 	});
 
 	AddGPUCleanUpFunc([=]() {
-		//vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
-		//vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
+		vkDestroyImageView(VkRenderer::Get().GetDevice(), ImageView, nullptr);
+		vmaDestroyImage(VulkanAllocator::Get().GetAllocator(), Image, Allocation);
 	});
 }
 
 VulkanImage::~VulkanImage()
 {
-	//Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
+	Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
 	GPUResources::Get().QueueDeletion(GetGPUCleanUpStack());
 }
 
