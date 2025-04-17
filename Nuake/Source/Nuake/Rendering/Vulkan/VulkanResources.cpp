@@ -139,7 +139,7 @@ bool GPUResources::AddTexture(Ref<VulkanImage> image)
 		Images[id] = image;
 		return true;
 	}
-
+	
 	Logger::Log("Buffer with ID already exists", "vulkan", CRITICAL);
 	return false;
 }
@@ -151,7 +151,6 @@ void GPUResources::RemoveTexture(Ref<VulkanImage> image)
 	{
 		return;
 	}
-
 	Images.erase(id);
 }
 
@@ -576,7 +575,6 @@ void GPUResources::CleanUp(uint32_t frame)
 	{
 		deletionQueue.top()();
 		deletionQueue.pop();
-		Logger::Log("Deleted GPU resource", "vulkan", VERBOSE);
 	}
 }
 

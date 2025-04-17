@@ -193,7 +193,7 @@ namespace Nuake
 
 	public:
 		SceneRenderPipeline();
-		~SceneRenderPipeline() = default;
+		~SceneRenderPipeline();
 
 		void SetCamera(UUID camera);
 		void Render(PassRenderContext& ctx); 

@@ -21,12 +21,33 @@ TextureAttachment::TextureAttachment(const std::string& name, ImageFormat format
 	gpuResources.AddTexture(Image);
 }
 
+TextureAttachment::~TextureAttachment()
+{
+	if (Image)
+	{
+		auto& gpuResources = GPUResources::Get();
+		gpuResources.RemoveTexture(Image);
+	}
+}
+
 RenderPass::RenderPass(const std::string& name) :
 	Name(name),
 	PushConstantSize(0),
 	IsLinePass(false),
-	Topology(PolygonTopology::TRIANGLE_LIST)
+	Topology(PolygonTopology::TRIANGLE_LIST),
+	IsBuilt(false)
 {
+}
+
+RenderPass::~RenderPass()
+{
+	if (!IsBuilt)
+	{
+		return;
+	}
+
+	vkDestroyPipeline(VkRenderer::Get().GetDevice(), Pipeline, nullptr);
+	vkDestroyPipelineLayout(VkRenderer::Get().GetDevice(), PipelineLayout, nullptr);
 }
 
 void RenderPass::SetIsLinePass(bool enabled)
@@ -288,6 +309,8 @@ void RenderPass::Build()
 	}
 
 	Pipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
+
+	IsBuilt = true;
 }
 
 void RenderPass::SetPushConstant(std::any data, size_t size)
@@ -300,10 +323,17 @@ RenderPipeline::RenderPipeline() :
 	Built(false)
 { }
 
+RenderPipeline::~RenderPipeline()
+{
+	if (Built)
+	{
+		
+	}
+}
+
 RenderPass& RenderPipeline::AddPass(const std::string& name)
 {
-	auto newPass = RenderPass(name);
-	return RenderPasses.emplace_back(std::move(newPass));
+	return RenderPasses.emplace_back(name);
 }
 
 RenderPass& RenderPipeline::GetRenderPass(const std::string& name)

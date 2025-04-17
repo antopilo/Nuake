@@ -228,6 +228,26 @@ SceneRenderPipeline::SceneRenderPipeline()
 	RecreatePipeline();
 }
 
+SceneRenderPipeline::~SceneRenderPipeline()
+{
+	auto& res = GPUResources::Get();
+	res.RemoveTexture(GBufferAlbedo);
+	res.RemoveTexture(GBufferNormal);
+	res.RemoveTexture(GBufferMaterial);
+	res.RemoveTexture(GBufferDepth);
+	res.RemoveTexture(TonemappedOutput);
+	res.RemoveTexture(GBufferEntityID);
+	res.RemoveTexture(OutlineOutput);
+	res.RemoveTexture(LineOutput);
+	res.RemoveTexture(LineCombineOutput);
+	res.RemoveTexture(SSAOOutput);
+	res.RemoveTexture(SSAOBlurOutput);
+	res.RemoveTexture(GizmoOutput);
+	res.RemoveTexture(GizmoCombineOutput);
+	res.RemoveTexture(BloomOutput);
+	res.RemoveTexture(BloomThreshold);
+}
+
 void SceneRenderPipeline::SetCamera(UUID camera)
 {
 	CurrentCameraID = camera;

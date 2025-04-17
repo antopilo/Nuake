@@ -37,7 +37,7 @@ namespace Nuake
 	public:
 		TextureAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default, bool clearOnLoad = true);
 		TextureAttachment() = default;
-		~TextureAttachment() = default;
+		~TextureAttachment();
 	};
 
 	struct RenderPassSpec
@@ -87,13 +87,16 @@ namespace Nuake
 		std::function<void(PassRenderContext& ctx)> PreRender;
 		std::function<void(PassRenderContext& ctx)> RenderCb;
 		std::function<void(PassRenderContext& ctx)> PostRender;
+
+		bool IsBuilt;
+
 	public:
-		VkPipeline Pipeline;
+		VkPipeline Pipeline; 
 		VkPipelineLayout PipelineLayout;
 
 	public:
 		RenderPass(const std::string& name);
-		~RenderPass() = default;
+		~RenderPass();
 
 		void Execute(PassRenderContext& ctx, PassAttachments& inputs);
 
@@ -150,7 +153,7 @@ namespace Nuake
 		std::vector<RenderPass> RenderPasses;
 	public:
 		RenderPipeline();
-		~RenderPipeline() = default;
+		~RenderPipeline();
 
 	public:
 		RenderPass& AddPass(const std::string& name);
