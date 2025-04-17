@@ -2684,6 +2684,17 @@ namespace Nuake {
                 GPUResources& gpu = GPUResources::Get();
                 auto buffers = gpu.GetAllBuffers();
 
+                ImGui::Text("General Info");
+
+                const size_t textureCount = gpu.GetAllTextures().size();
+                ImGui::Text(("Image Count: " + std::to_string(textureCount)).c_str());
+
+                const size_t viewCount = gpu.GetAllCameras().size();
+                ImGui::Text(("View Count: " + std::to_string(viewCount)).c_str());
+
+                const size_t bufferCount = gpu.GetAllBuffers().size();
+                ImGui::Text(("Buffer Count: " + std::to_string(bufferCount)).c_str());
+
                 ImGui::BeginTable("Buffers", 2);
                 ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
                 ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
