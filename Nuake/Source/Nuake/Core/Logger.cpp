@@ -1,4 +1,4 @@
-#include "Logger.h"
+﻿#include "Logger.h"
 
 #include <iostream>
 #include <chrono>
@@ -58,13 +58,32 @@ namespace Nuake
 			break;
 		}
 		
-		std::string msg = color + std::string(buff) + " [" + logger + "] \033[38;5;245m" + log;
+		// Icons
+		std::string transformedLogger = logger;
+		if (logger == "window")
+		{
+			transformedLogger += reinterpret_cast<const char*>(u8"🪟");
+		}
+
+		std::string msg = color + buff;
+
+		if (!logger.empty())
+		{
+			msg += " [" + transformedLogger + "]";
+		}
+
+		msg += " \033[38;5;245m" + log;
+
 		std::cout << msg << std::endl;
 
+		// Simulating m_Logs push logic
+		// Assuming m_Logs is a std::vector<std::string>
+		static std::vector<std::string> m_Logs;
+		constexpr size_t MAX_LOG = 1000;
 		if (m_Logs.size() >= MAX_LOG)
 			m_Logs.erase(m_Logs.begin());
 
-		m_Logs.push_back(newLog);
+		m_Logs.push_back(msg); // Use msg or whatever your final log content is
 	}
 
 	std::vector<LogEntry>& Logger::GetLogs()
