@@ -303,8 +303,10 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 			size_t bufferSize = sizeof(Vector4);
 			Ref<AllocatedBuffer> stagingBuffer = CreateRef<AllocatedBuffer>(bufferSize, BufferUsage::TRANSFER_DST, MemoryUsage::GPU_TO_CPU);
 
-			assert(request.mousePosition.x < GBufferEntityID->GetSize().x && request.mousePosition.y < GBufferEntityID->GetSize().y && "Mouse coord out of bounds");
+			// Flip Y
 			request.mousePosition.y = GBufferEntityID->GetSize().y - request.mousePosition.y;
+
+			request.mousePosition = glm::clamp(request.mousePosition, { 0, 0 }, GBufferEntityID->GetSize() - Vector2{1, 1});
 
 			VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
 			{

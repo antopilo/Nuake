@@ -200,7 +200,7 @@ void ViewportWidget::Draw()
             {
                 Logger::Log("Mouse Picked: " + std::to_string(picked));
 
-                constexpr uint32_t INVALID_PICK_ID = 4187593120;
+                constexpr uint32_t INVALID_PICK_ID = 3863365216;
                 if (picked != INVALID_PICK_ID)
                 {
                     Nuake::Entity entity = Nuake::Entity((entt::entity)picked, editorContext.GetScene().get());
