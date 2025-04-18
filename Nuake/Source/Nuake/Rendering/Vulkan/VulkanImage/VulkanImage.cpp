@@ -325,7 +325,6 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 
 VulkanImage::~VulkanImage()
 {
-	Logger::Log("Deleting VulkanImage", "vulkan", VERBOSE);
 	GPUResources::Get().QueueDeletion(GetGPUCleanUpStack());
 }
 

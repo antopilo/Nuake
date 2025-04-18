@@ -315,10 +315,6 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
 
-    Matrix4 transform = Matrix4(1.0f);
-    transform = glm::translate(transform, { 0, 2, 0 });
-    //lineCmd.DrawLine(proj * view * transform, Color(1, 0, 0, 1), 2.0f);
-
     auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
     for (auto e : camView)
     {
@@ -430,9 +426,6 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
         transform = glm::scale(transform, Vector3(cylinderCollider.Radius, cylinderCollider.Height, cylinderCollider.Radius));
         lineCmd.DrawCylinder(proj * view * transform, Color(1, 0, 0, 1.0f), 1.5f, true);
     }
-
-    lineCmd.DrawBox(proj * view * transform, { 0, 1, 0, 1 }, 1.5f, true);
-    //lineCmd.DrawArrow({3, 3, 0}, {7, 3, 0}, proj, view, Color(1, 0, 0, 1), 3.0f);
 }
 
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
@@ -472,8 +465,6 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
         debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), color, entityId);
     };
     
-	debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), { 0, 4, 0 }));
-
     auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
     for (auto e : lightView)
     {
