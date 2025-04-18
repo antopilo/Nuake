@@ -77,14 +77,18 @@ void ViewportWidget::Draw()
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
 
-		VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
-
 		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
         ImVec2 viewportMin = ImGui::GetCursorScreenPos();
 		// Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		//m_ViewportPos = { imagePos.x, imagePos.y };
-		ImGui::Image(textureDesc, regionAvail, { 0, 1 }, { 1, 0 });
+
+        VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
+        if (!needsResize)
+        {
+		    ImGui::Image(textureDesc, regionAvail, { 0, 1 }, { 1, 0 });
+        }
+
 		ImGui::PopStyleVar();
 
         float title_bar_height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
@@ -470,7 +474,7 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
     {
         auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
 
-        auto selection = editorContext.GetSelection();
+        const auto& selection = editorContext.GetSelection();
         bool isSelected = selection.Type == EditorSelectionType::Entity && selection.Entity.GetHandle() == (int)e;
 
         std::string texturePath = "Resources/Gizmos/";

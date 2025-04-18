@@ -722,6 +722,7 @@ bool VkRenderer::Draw()
 	{
 		//viewport->Resize();
 	}
+	ResizeViewports();
 
 	FrameSkipped = false;
 
@@ -768,6 +769,7 @@ bool VkRenderer::Draw()
 
 void VkRenderer::EndDraw()
 {
+
 	if (FrameSkipped)
 	{
 		return;
@@ -822,9 +824,9 @@ void VkRenderer::EndDraw()
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
-	ResizeViewports();
 
 	VK_CALL(vkQueuePresentKHR(GPUQueue, &presentInfo));
+
 
 	auto& io = ImGui::GetIO();
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
