@@ -16,6 +16,15 @@ GPUResources::GPUResources()
 	}
 }
 
+GPUResources::~GPUResources()
+{
+	Images.clear();
+	Buffers.clear();
+	Meshes.clear();
+	Light.clear();
+	Cameras.clear();
+}
+
 void GPUResources::Init()
 {
 	CreateBindlessLayout();

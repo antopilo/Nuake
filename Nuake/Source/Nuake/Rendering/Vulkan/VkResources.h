@@ -154,7 +154,7 @@ namespace Nuake
 		};
 
 		GPUResources();
-		~GPUResources() = default;
+		~GPUResources();
 
 	public:
 		void Init();
