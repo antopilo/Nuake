@@ -83,7 +83,7 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 			material = CreateRef<Material>();
 			if (!materialData.albedo.empty())
 			{
-				material->SetAlbedo(absolutePath + "/../" + materialData.albedo);
+				material->SetAlbedo(FileSystem::AbsoluteToRelative(absolutePath + "/../" + materialData.albedo));
 			}
 
 			if (!materialData.normal.empty())
@@ -117,7 +117,7 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 			materialCache[materialPath] = material;
 		}
 
-		mesh->MaterialResource = RID(material->ID);
+		mesh->SetMaterial(material);
 		model->AddMesh(std::move(mesh));
 	}
 	

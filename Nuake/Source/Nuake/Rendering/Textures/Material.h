@@ -100,7 +100,21 @@ namespace Nuake
 		inline bool GetUnlit() { return data.u_Unlit == 1; }
 
 		bool HasAlbedo() { return (m_Albedo != nullptr || AlbedoImage != UUID(0)); }
-		void SetAlbedo(const std::string path) { m_Albedo = CreateRef<Texture>(path); }
+		void SetAlbedo(const std::string path) 
+		{ 
+			if (FileSystem::FileExists(path))
+			{
+				GPUResources& resources = GPUResources::Get();
+				Ref<VulkanImage> image = CreateRef<VulkanImage>(FileSystem::RelativeToAbsolute(path));
+				if (resources.AddTexture(image))
+				{
+					AlbedoImage = image->GetID();
+				}
+
+				Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(path);
+				SetAlbedo(albedoTexture);
+			}
+		}
 		void SetAlbedo(Ref<Texture> texture) { m_Albedo = texture; }
 
 		bool HasAO() { return m_AO != nullptr; }
