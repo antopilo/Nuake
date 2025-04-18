@@ -2593,7 +2593,7 @@ namespace Nuake {
         if (_WelcomeWindow->IsProjectQueued() && frameCount > 0)
         {
             // draw splash
-            LoadingSplash::Get().Draw();
+            LoadingSplash::Get().Draw(_WelcomeWindow->queuedProjectPath);
 
             frameCount--;
             if (frameCount == 0)
