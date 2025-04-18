@@ -64,6 +64,7 @@
 #include "Nuake/Rendering/Vulkan/VkShaderManager.h"
 
 #include "../Events/EditorRequests.h"
+#include "../../../../Nuake/Thirdparty/glfw/include/GLFW/glfw3.h"
 
 namespace Nuake {
     
@@ -243,7 +244,7 @@ namespace Nuake {
 
             if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight)))
             {
-                //glfwIconifyWindow(Window::Get()->GetHandle());
+                glfwIconifyWindow(Window::Get()->GetHandle());
             }
 
             auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -264,11 +265,11 @@ namespace Nuake {
                 const auto window = Window::Get()->GetHandle();
                 if (isMaximized)
                 {
-                    //glfwRestoreWindow(window);
+                    glfwRestoreWindow(window);
                 }
                 else
                 {
-                    //glfwMaximizeWindow(window);
+                    glfwMaximizeWindow(window);
                 }
             }
             auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -282,7 +283,7 @@ namespace Nuake {
             int iconHeight = std::max(CloseIconTexture->GetHeight(), 24);
             if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
             {
-                //glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
+                glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
             }
 
             UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
@@ -2577,11 +2578,7 @@ namespace Nuake {
 
                 isLoadingProjectQueue = false;
 
-                auto window = Window::Get();
-                window->SetDecorated(true);
-                window->ShowTitleBar(false);
-                window->SetSize({ 1600, 900 });
-                window->Center();
+                
                 frameCount = 0;
             }
             else
@@ -2615,6 +2612,17 @@ namespace Nuake {
         else
         {
             m_ProjectSettingsWindow->Init(Engine::GetProject());
+        }
+
+        static bool isDone = false;
+        if (frameCount == 0 && !isDone)
+        {
+            auto window = Window::Get();
+            window->SetDecorated(true);
+            window->ShowTitleBar(false);
+            window->SetSize({ 1600, 900 });
+            window->Center();
+            isDone = true;
         }
 
         // Shortcuts
