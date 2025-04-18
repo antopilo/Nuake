@@ -111,7 +111,7 @@ namespace Nuake
 					AlbedoImage = image->GetID();
 				}
 
-				Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(path);
+				Ref<Texture> albedoTexture = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(path));
 				SetAlbedo(albedoTexture);
 			}
 		}
