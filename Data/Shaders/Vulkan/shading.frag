@@ -193,6 +193,28 @@ int GetCSMSplit(float depth)
     return 0;
 }
 
+float SampleShadowMap(int textureId, float2 coords, float compare)
+{
+    return compare > textures[textureId].Sample(mySampler, coords.xy).r;
+}
+
+float SampleShadowMapLinear(int textureId, float2 coords, float compare, float2 texelSize)
+{
+    float2 pixelPos = coords / texelSize + float2(0.5f, 0.5f);
+    float2 fracPart = frac(pixelPos);
+    float2 startTexel = (pixelPos - fracPart) * texelSize;
+
+    float blTexel = SampleShadowMap(textureId, startTexel, compare);
+    float brTexel = SampleShadowMap(textureId, startTexel + float2(texelSize.x, 0.0), compare);
+    float tlTexel = SampleShadowMap(textureId, startTexel + float2(0.0, texelSize.y), compare);
+    float trTexel = SampleShadowMap(textureId, startTexel + texelSize, compare);
+
+    float mixA = lerp(blTexel, tlTexel, fracPart.y);
+    float mixB = lerp(brTexel, trTexel, fracPart.y);
+
+    return lerp(mixA, mixB, fracPart.x);
+}
+
 float ShadowCalculation(Light light, float3 fragPos, float3 normal)
 {
     // Find correct CSM splits from depth
@@ -214,6 +236,27 @@ float ShadowCalculation(Light light, float3 fragPos, float3 normal)
     //projCoords.y = 1.0 - projCoords.y;
     float currentDepth = projCoords.z;
     float bias = max(0.005 * (1.0 - dot(normal, light.direction)), 0.0005);
+
+    if(splitIndex < 2)
+    {
+        const float NUM_SAMPLES = 4.0f;
+        const float SAMPLES_START = (NUM_SAMPLES - 1.0f) / 2.0f;
+        const float NUM_SAMPLES_SQUARED = NUM_SAMPLES * NUM_SAMPLES;
+
+        float2 texelSize = 1.0f / float2(4096, 4096);
+        float result = 0.0f;
+        for(float y = -SAMPLES_START; y <= SAMPLES_START; y += 1.0f)
+        {
+            for (float x = -SAMPLES_START; x <= SAMPLES_START; x += 1.0f)
+            {
+                float2 coordsOffset = float2(x, y) * texelSize;
+                result += SampleShadowMapLinear(light.shadowMapTextureId[splitIndex], projCoords.xy + coordsOffset, currentDepth, texelSize);
+            }
+        }
+
+        return result /= NUM_SAMPLES_SQUARED;
+    }
+
     float shadowMapDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler, projCoords.xy).r;
 
     return (currentDepth > shadowMapDepth);//> 0.0 ? 1.0 : 0.0;
