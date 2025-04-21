@@ -47,7 +47,6 @@ void LoadingSplash::Draw(const std::string& project)
 		}
 		ImGui::SetCursorPosX(8.0f);
 		ImGui::TextColored({ 1.0, 1.0, 1.0, 0.5 }, project.c_str());
-		//ImGui::Text(project.c_str());
 	}
 
 	ImGui::End();
