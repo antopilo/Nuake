@@ -79,10 +79,10 @@ FileType File::GetFileType() const
 		return FileType::Mesh;
 	}
 	
-	if (ext == ".glb" || ext == ".gltf" || ext == ".fbx")
-	{
-		return FileType::MeshAsset;
-	}
+	//if (ext == ".glb" || ext == ".gltf" || ext == ".fbx")
+	//{
+	//	return FileType::MeshAsset;
+	//}
 
 	if (ext == ".html")
 	{

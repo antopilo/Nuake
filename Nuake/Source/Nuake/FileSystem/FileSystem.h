@@ -3,6 +3,7 @@
 #include "FileTypes.h"
 
 #include <functional>
+#include <queue>
 
 namespace filewatch
 {
@@ -17,8 +18,15 @@ namespace Nuake
 
 	using OnFileFunc = std::function<void(Ref<File>)>;
 
+	struct FileProcessRequest
+	{
+		Ref<File> FileToProcess;
+	};
+
 	class FileSystem
 	{
+	private:
+
 	public:
 		static std::string Root;
 		static Ref<Directory> RootDirectory;

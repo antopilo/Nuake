@@ -25,6 +25,11 @@ namespace Nuake
 		static ResourceManifest Manifest;
 		static Ref<Resource> GetResource(const UUID& uuid);
 
+		static void RemapResource(const UUID& oldUUID, const UUID& newUUID)
+		{
+			m_Resources[oldUUID] = m_Resources[newUUID];
+		}
+
 		static void RegisterResource(Ref<Resource> resource)
 		{
 			m_Resources[resource->ID] = resource;
@@ -33,6 +38,13 @@ namespace Nuake
 		static bool IsResourceLoaded(const UUID& uuid)
 		{
 			return m_Resources.find(uuid) != m_Resources.end();
+		}
+
+		static bool ReloadResource(const UUID& uuid)
+		{
+			m_Resources.erase(uuid);
+
+			return true;
 		}
 
 		static Ref<Resource> RegisterUnregisteredRessource(Ref<File> file)

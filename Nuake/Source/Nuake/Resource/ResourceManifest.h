@@ -5,6 +5,7 @@
 #include "Nuake/FileSystem/FileSystem.h"
 
 #include <map>
+#include <mutex>
 #include <string>
 
 namespace Nuake
@@ -16,10 +17,11 @@ namespace Nuake
 	private:
 		std::map<std::string, UUID> PathToMap;
 		std::map<UUID, std::string> MapToPath;
-
+		std::mutex Mutex;
 	public:
 		void RegisterResource(UUID uuid, const std::string& path)
 		{
+			std::lock_guard<std::mutex> lock(Mutex);
 			// New resource is overwritting so we need to clear UUID -> Path map
 			if (PathToMap.find(path) != PathToMap.end())
 			{
@@ -32,6 +34,7 @@ namespace Nuake
 
 		std::string GetResourcePath(UUID uuid)
 		{
+			std::lock_guard<std::mutex> lock(Mutex);
 			if (MapToPath.find(uuid) != MapToPath.end())
 			{
 				return MapToPath[uuid];
@@ -40,8 +43,14 @@ namespace Nuake
 			return "";
 		}
 
+		void RemapResource(UUID oldUUID, UUID newUUID)
+		{
+
+		}
+
 		UUID GetResourceUUID(const std::string& path)
 		{
+			std::lock_guard<std::mutex> lock(Mutex);
 			if (PathToMap.find(path) != PathToMap.end())
 			{
 				return PathToMap[path];
@@ -52,6 +61,7 @@ namespace Nuake
 
 		void Serialize(const std::string& path)
 		{
+			std::lock_guard<std::mutex> lock(Mutex);
 			json j;
 			for (auto& [path, uuid] : PathToMap)
 			{
@@ -65,6 +75,7 @@ namespace Nuake
 
 		void Deserialize(const std::string& path)
 		{
+			std::lock_guard<std::mutex> lock(Mutex);
 			auto content = FileSystem::ReadFile(path);
 			json j = json::parse(content);
 			for (auto& [path, uuid] : j.items())

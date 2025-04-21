@@ -73,6 +73,8 @@ void EditorLayer::OnUpdate()
 
     Nuake::Engine::EndDraw();
     Nuake::Input::Update();
+
+    RID::ExecuteRemaps();
 }
 
 void EditorLayer::OnDetach()

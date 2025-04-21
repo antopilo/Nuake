@@ -34,6 +34,7 @@
 #include "vk_mem_alloc.h"
 
 #include <array>
+#include <mutex>
 #include <algorithm>
 
 bool NKUseValidationLayer = false;
@@ -767,9 +768,11 @@ bool VkRenderer::Draw()
 	return true;
 }
 
+std::mutex queueMutex;
 void VkRenderer::EndDraw()
 {
 
+	std::lock_guard<std::mutex> lock(queueMutex);
 	if (FrameSkipped)
 	{
 		return;
@@ -856,8 +859,10 @@ void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
 	vkCmdEndRendering(cmd);
 }
 
+
 void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function)
 {
+	std::lock_guard<std::mutex> lock(queueMutex);
 	VK_CALL(vkResetFences(Device, 1, &ImguiFence));
 	VK_CALL(vkResetCommandBuffer(ImguiCommandBuffer, 0));
 
