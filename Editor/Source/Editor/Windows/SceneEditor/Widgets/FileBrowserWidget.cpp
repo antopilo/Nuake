@@ -15,7 +15,12 @@ using namespace Nuake;
 
 FileBrowserWidget::FileBrowserWidget(EditorContext& inCtx) : IEditorWidget(inCtx)
 {
-    currentDirectory = FileSystem::RootDirectory;
+    SetCurrentDirectory(FileSystem::RootDirectory);
+}
+
+void FileBrowserWidget::SetCurrentDirectory(Ref<Nuake::Directory> dir)
+{
+    queueDirectory = dir;
 }
 
 void FileBrowserWidget::Update(float ts)
@@ -27,6 +32,12 @@ void FileBrowserWidget::Draw()
 {
 	if (BeginWidgetWindow("File Browser"))
 	{
+        if (queueDirectory != currentDirectory)
+        {
+            opacity.SetValue(0.0f);
+            opacity = 1.0f;
+            currentDirectory = queueDirectory;
+        }
 		Ref<Nuake::Directory> rootDirectory = FileSystem::GetFileTree();
 
 		auto availableSpace = ImGui::GetContentRegionAvail();
@@ -35,7 +46,8 @@ void FileBrowserWidget::Draw()
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 8);
-
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		if (ImGui::BeginChild("Tree", ImVec2(splitterSizeLeft, availableSpace.y), true))
 		{
 			ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | 
@@ -54,7 +66,7 @@ void FileBrowserWidget::Draw()
 				bool open = ImGui::TreeNodeEx("PROJECT", base_flags);
 				if (ImGui::IsItemClicked())
 				{
-					this->currentDirectory = FileSystem::RootDirectory;
+                    SetCurrentDirectory(FileSystem::RootDirectory);
 				}
 			}
 			
@@ -67,6 +79,8 @@ void FileBrowserWidget::Draw()
 			ImGui::TreePop();
 		}
 		ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
 		ImGui::EndChild();
 
@@ -113,7 +127,7 @@ void FileBrowserWidget::Draw()
 					{
 						if (currentDirectory != FileSystem::RootDirectory)
 						{
-							currentDirectory = currentDirectory->Parent;
+                            SetCurrentDirectory(currentDirectory->Parent);
 						}
 					}
 				}
@@ -127,7 +141,7 @@ void FileBrowserWidget::Draw()
 				{
 					if (editorContext.GetSelection().Type == EditorSelectionType::Directory)
 					{
-						currentDirectory = editorContext.GetSelection().Directory;
+                        SetCurrentDirectory(editorContext.GetSelection().Directory);
 					}
 				}
 
@@ -160,7 +174,7 @@ void FileBrowserWidget::Draw()
 
 						if (ImGui::Button(pathLabel.c_str()))
 						{
-							currentDirectory = paths[i];
+                            SetCurrentDirectory(paths[i]);
 						}
 
 						ImGui::SameLine();
@@ -217,6 +231,7 @@ void FileBrowserWidget::Draw()
 				int i = 1; // current amount of item per row.
 				if (ImGui::BeginTable("ssss", amount))
 				{
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity);
 					// Button to go up a level.
 					//if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
 					//{
@@ -274,10 +289,12 @@ void FileBrowserWidget::Draw()
 						}
 					}
 
+                    ImGui::PopStyleVar();
 					//DrawContextMenu();
 
 					//m_HasClickedOnFile = false;
 
+                    ImageLoaded = 0;
 					ImGui::EndTable();
 				}
 			}
@@ -308,7 +325,7 @@ void FileBrowserWidget::DrawFiletree(Ref<Nuake::Directory> dir)
 
 	if (ImGui::IsItemClicked())
 	{
-		currentDirectory = dir;
+        SetCurrentDirectory(dir);
 	}
 
 	if (open)
@@ -351,7 +368,7 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 	{
 		if (ImGui::IsMouseDoubleClicked(0))
 		{
-			currentDirectory = directory;
+            SetCurrentDirectory(directory);
 		}
 	}
 
@@ -386,7 +403,7 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 	{
 		if (ImGui::MenuItem("Open"))
 		{
-			currentDirectory = directory;
+            SetCurrentDirectory(directory);
 		}
 
 		ImGui::Separator();
@@ -594,7 +611,25 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
     else if (fileType == FileType::Image)
     {
         const std::string path = file->GetAbsolutePath();
-        textureImage = textureMgr->GetTexture2(path);
+
+        int32_t imageNumberToLoadMax = maxImageLoaded;
+        if (ImGui::IsItemVisible())
+        {
+            imageNumberToLoadMax = 1;
+        }
+
+        if (ImageLoaded < maxImageLoaded || textureMgr->IsTextureLoaded2(path))
+        {
+            if(!textureMgr->IsTextureLoaded2(path))
+                ImageLoaded++;
+
+            textureImage = textureMgr->GetTexture2(path);
+        }
+        else
+        {
+
+            textureImage = textureMgr->GetTexture2("Resources/Images/env_file_icon.png");
+        }
     }
     else if (fileType == FileType::Project)
     {
@@ -653,7 +688,7 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
 
     ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
     ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
-    ImU32 rectColor = IM_COL32(255, 255, 255, 16);
+    ImU32 rectColor = IM_COL32(255, 255, 255, 16 * opacity);
     ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 80) - startOffset, prevScreenPos + totalSize + offsetEnd, rectColor, 1.0f);
 
     ImU32 rectColor2 = UI::PrimaryCol;
@@ -882,36 +917,38 @@ Color FileBrowserWidget::GetColorByFileType(Nuake::FileType fileType)
         case Nuake::FileType::Mesh:
             break;
         case Nuake::FileType::Script:
-            return { 1.0, 0.0, 0.0, 1.0 };
+            return { 1.0, 0.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::NetScript:
-            return { 1.0, 0.0, 0.0, 1.0 };
+            return { 1.0, 0.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Project:
-            return Engine::GetProject()->Settings.PrimaryColor;
+            auto color = Engine::GetProject()->Settings.PrimaryColor ;
+            color.a *= opacity;
+            return color;
             break;
         case Nuake::FileType::Prefab:
             break;
         case Nuake::FileType::Scene:
-            return { 0, 1.0f, 1.0, 1.0 };
+            return { 0, 1.0f, 1.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Wad:
             break;
         case Nuake::FileType::Map:
-            return { 0.0, 1.0, 0.0, 1.0 };
+            return { 0.0, 1.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Assembly:
             break;
         case Nuake::FileType::Solution:
             break;
         case Nuake::FileType::Audio:
-            return { 0.0, 0.0, 1.0, 1.0 };
+            return { 0.0, 0.0, 1.0, 1.0 * opacity };
             break;
         case Nuake::FileType::UI:
-            return { 1.0, 1.0, 0.0, 1.0 };
+            return { 1.0, 1.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::CSS:
-            return { 1.0, 0.0, 1.0, 1.0 };
+            return { 1.0, 0.0, 1.0, 1.0 * opacity };
             break;
         default:
             break;

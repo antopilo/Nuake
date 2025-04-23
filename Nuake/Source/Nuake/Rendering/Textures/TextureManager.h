@@ -15,7 +15,6 @@ namespace Nuake
 		static std::map<std::string, Ref<Texture>> m_Registry;
 		static std::map<std::string, Ref<VulkanImage>> m_Registry2;
 		bool IsTextureLoaded(const std::string path);
-		bool IsTextureLoaded2(const std::string path);
 
 		void LoadStaticTextures();
 
@@ -23,6 +22,7 @@ namespace Nuake
 		static TextureManager* Get();
 
 		TextureManager();
+		bool IsTextureLoaded2(const std::string path);
 
 		Ref<Texture> GetTexture(const std::string path);
 		Ref<VulkanImage> GetTexture2(const std::string path);

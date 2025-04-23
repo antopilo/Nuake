@@ -2,6 +2,8 @@
 #include "IEditorWidget.h"
 #include "../../EditorSelectionPanel.h"
 
+#include "../../../../../AnimatedValue.h"
+
 class EditorContext;
 
 using DrawComponentTypeFn = std::function<void(Nuake::Entity& entity, entt::meta_any& componentInstance)>;
@@ -15,6 +17,8 @@ private:
 	SkinnedMeshPanel skinnedMeshPanel;
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
+	AnimatedValue<float> opacity;
+
 public:
 	SelectionPropertyWidget(EditorContext& inCtx);
 	~SelectionPropertyWidget() = default;

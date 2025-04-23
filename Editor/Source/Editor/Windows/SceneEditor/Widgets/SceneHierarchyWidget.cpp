@@ -418,9 +418,34 @@ void SceneHierarchyWidget::DrawEntity(Nuake::Entity entity, bool drawChildrens)
 		editorContext.SetSelection(EditorSelection(entity));
 	}
 
-	if (!isDragging && (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) || Input::IsKeyPressed(Key::F2))
+	if (!isDragging && (ImGui::IsItemHovered() && ImGui::IsMouseTripleClicked(0)) || Input::IsKeyPressed(Key::F2))
 	{
 		isRenaming = true;
+	}
+
+	if (!isDragging && (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) || Input::IsKeyPressed(Key::F2))
+	{
+		Ref<EditorCamera> editorCam = editorContext.GetScene()->m_EditorCamera;
+
+		// Get target object's world position
+		glm::vec3 targetPos = glm::vec3(entity.GetComponent<TransformComponent>().GetGlobalTransform()[3]);
+
+		// Choose a direction and distance to place the camera away from the object
+		glm::vec3 offset = glm::vec3(2.0f, 2.0f, 2.0f); // above and behind
+
+		// Place camera at offset from the target
+		glm::vec3 camPos = targetPos + offset;
+
+		editorCam->Translation = camPos;
+
+		Vector3 direction = glm::normalize(targetPos - Vector3(camPos));
+		float yaw = glm::degrees(atan2(direction.z, direction.x));
+		float pitch = glm::degrees(asin(direction.y));
+
+		editorCam->TargetYaw = yaw;
+		editorCam->TargetPitch = pitch;
+		// Set the camera's transform as the inverse of the view matrix
+		//editorCam->SetTransform(glm::inverse(view));
 	}
 
 	if (!isRenaming && selection.Type == EditorSelectionType::Entity && Input::IsKeyPressed(Key::DELETE_KEY))

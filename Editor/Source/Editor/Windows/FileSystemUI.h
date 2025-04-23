@@ -8,6 +8,8 @@ namespace Nuake {
 	{
 	private:
 		EditorInterface* Editor;
+		const int maxTextureLoadedPerFrame = 4;
+		int textureLoadedThisFrame = 0;
 
 	public:
 		static Ref<Directory> m_CurrentDirectory;

@@ -136,11 +136,20 @@ void SelectionPropertyWidget::DrawNone()
 	ImGui::Text(text.c_str());
 }
 
+Nuake::Entity lastEntity;
 void SelectionPropertyWidget::DrawEntity(Nuake::Entity entity)
 {
     if (!entity.IsValid())
     {
         return;
+    }
+
+
+    if (lastEntity != entity)
+    {
+        opacity.SetValue(0.0f);
+        opacity = 1.0f;
+        lastEntity = entity;
     }
 
     DrawAddComponentMenu(entity);
@@ -1487,6 +1496,8 @@ void SelectionPropertyWidget::DrawFile(Ref<Nuake::File> file)
     }
 }
 
+
+
 void SelectionPropertyWidget::DrawResource(Nuake::Resource resource)
 {
 
@@ -1758,13 +1769,13 @@ void SelectionPropertyWidget::DrawNetScriptPanel(Ref<Nuake::File> file)
 void SelectionPropertyWidget::DrawComponent(Nuake::Entity& entity, entt::meta_any& component)
 {
     // Call into custom component drawer if one is available for this component
-
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity);
     const auto componentIdHash = component.type().info().hash();
     if (ComponentTypeDrawers.contains(componentIdHash))
     {
         const auto drawerFn = ComponentTypeDrawers[componentIdHash];
         drawerFn(entity, component);
-
+        ImGui::PopStyleVar();
         return;
     }
 
@@ -1818,7 +1829,7 @@ void SelectionPropertyWidget::DrawComponent(Nuake::Entity& entity, entt::meta_an
         ImGui::PopStyleVar();
         delete boldFont;
     }
-    ImGui::PopStyleVar();
+    ImGui::PopStyleVar(2);
 }
 
 void SelectionPropertyWidget::DrawComponentContent(entt::meta_any& component)

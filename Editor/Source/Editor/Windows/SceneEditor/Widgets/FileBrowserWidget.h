@@ -6,6 +6,8 @@
 
 #include "IEditorWidget.h"
 
+#include "../../../../../AnimatedValue.h"
+
 namespace Nuake
 {
 	class Directory;
@@ -15,10 +17,13 @@ namespace Nuake
 class FileBrowserWidget : public IEditorWidget
 {
 private:
+	AnimatedValue<float> opacity;
 	float splitterSizeLeft = 300.0f;
 	float splitterSizeRight = 300.0f;
-
+	int maxImageLoaded = 2;
+	int ImageLoaded = 0;
 	Ref<Nuake::Directory> currentDirectory;
+	Ref<Nuake::Directory> queueDirectory;
 
 	std::string searchQuery;
 
@@ -27,6 +32,7 @@ public:
 	~FileBrowserWidget() = default;
 
 public:
+	void SetCurrentDirectory(Ref<Nuake::Directory> dir);
 	void Update(float ts) override;
 	void Draw() override;
 

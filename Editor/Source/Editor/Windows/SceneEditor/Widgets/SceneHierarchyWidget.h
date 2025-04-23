@@ -18,6 +18,7 @@ public:
 private:
 	std::string searchQuery;
 	bool isRenaming;
+	
 	Nuake::Entity deletionQueue;
 
 	void DrawSearchBar();

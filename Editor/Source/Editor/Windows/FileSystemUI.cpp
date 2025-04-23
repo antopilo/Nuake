@@ -339,7 +339,6 @@ namespace Nuake
             ImGui::EndDragDropSource();
         }
 
-
         Ref<VulkanImage> textureImage = TextureManager::Get()->GetTexture2("Resources/Images/file_icon.png");
 
         const auto textureMgr = TextureManager::Get();
@@ -355,7 +354,11 @@ namespace Nuake
         else if (fileType == FileType::Image)
         {
             const std::string path = file->GetAbsolutePath();
-            textureImage = textureMgr->GetTexture2(path);
+            if (!textureMgr->IsTextureLoaded2(path) && textureLoadedThisFrame < maxTextureLoadedPerFrame)
+            {
+                textureImage = textureMgr->GetTexture2(path);
+                textureLoadedThisFrame++;
+            }
         }
         else if (fileType == FileType::Project)
         {
@@ -1037,6 +1040,8 @@ namespace Nuake
                                     i++;
                                 }
                             }
+
+                            
                         }
 
                         DrawContextMenu();
@@ -1049,7 +1054,7 @@ namespace Nuake
             }
 
             ThumbnailManager::Get().OnEndFrame();
-
+            textureLoadedThisFrame = 0;
             ImGui::EndChild();
         }
         ImGui::End();
