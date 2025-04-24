@@ -6,6 +6,6 @@ return {
     sources = {
         "QuakeModule.cpp",
         "QuakBaker.h",
-        "QuakBaker.cpp",
+        "QuakeBaker.cpp",
     }
 }
