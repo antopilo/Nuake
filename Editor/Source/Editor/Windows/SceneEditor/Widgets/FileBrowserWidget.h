@@ -6,7 +6,7 @@
 
 #include "IEditorWidget.h"
 
-#include "../../../../../AnimatedValue.h"
+#include "../../../misc/AnimatedValue.h"
 
 namespace Nuake
 {

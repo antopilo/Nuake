@@ -5,7 +5,7 @@ return {
     -- Place all your sources here
     sources = {
         "QuakeModule.cpp",
-        "QuakBaker.h",
+        "QuakeBaker.h",
         "QuakeBaker.cpp",
     }
 }
