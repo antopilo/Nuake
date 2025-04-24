@@ -144,7 +144,12 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 		}
 	}
 
-	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(ctx.resolution, renderAttachmentInfos, !hasDepthAttachment ? nullptr : &depthAttachmentInfo);
+	Vector2 resolution = ctx.resolution * RenderScale;
+	resolution.x = static_cast<float>(static_cast<int>(resolution.x));
+	resolution.y = static_cast<float>(static_cast<int>(resolution.y));
+	resolution = glm::clamp(resolution, Vector2(1, 1), ctx.resolution);
+
+	VkRenderingInfo renderInfo = VulkanInit::RenderingInfo(resolution, renderAttachmentInfos, !hasDepthAttachment ? nullptr : &depthAttachmentInfo);
 	renderInfo.colorAttachmentCount = std::size(renderAttachmentInfos);
 	renderInfo.pColorAttachments = renderAttachmentInfos.data();
 
@@ -152,8 +157,8 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 	cmd.BeginRendering(renderInfo);
 	{
 		cmd.BindPipeline(Pipeline);
-		cmd.SetViewport(ctx.resolution);
-		cmd.SetScissor(ctx.resolution);
+		cmd.SetViewport(resolution);
+		cmd.SetScissor(resolution);
 
 		if (RenderCb)
 		{

@@ -89,6 +89,10 @@ struct VolumetricConstant
     int CamViewID;
     int LightCount;
     float Ambient;
+    float Time;
+    float NoiseSpeed;
+    float NoiseScale;
+    float NoiseStrength;
 };
 
 [[vk::push_constant]]

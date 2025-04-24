@@ -37,7 +37,7 @@
 #include <mutex>
 #include <algorithm>
 
-bool NKUseValidationLayer = false;
+bool NKUseValidationLayer = true;
 
 using namespace Nuake;
 

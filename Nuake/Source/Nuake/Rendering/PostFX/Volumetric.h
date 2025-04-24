@@ -17,10 +17,15 @@ namespace Nuake {
 		Texture* mDepth;
 		float mBaseAmbient = 0.1f;
 
+
+
 		Scope<FrameBuffer> mVolumetricFramebuffer;
 		Scope<FrameBuffer> mFinalFramebuffer;
 
 	public:
+		float mNoiseScale = 1.0f;
+		float mNoiseStrength = 1.0f;
+		float mNoiseSpeed = 0.1f;
 		Volumetric();
 
 		void SetDepth(Texture* depth);

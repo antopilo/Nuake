@@ -98,6 +98,10 @@ namespace Nuake
 		int CamViewID;
 		int LightCount;
 		float Ambient;
+		float Time;
+		float NoiseSpeed;
+		float NoiseScale;
+		float NoiseStrength;
 	};
 
 	struct CopyConstant

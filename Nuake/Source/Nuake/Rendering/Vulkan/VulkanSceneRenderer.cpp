@@ -673,7 +673,10 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 	passCtx.commandBuffer = inContext.CommandBuffer;
 	passCtx.scene = inContext.CurrentScene;
 	passCtx.selectedEntity = static_cast<float>(inContext.SelectedEntityID);
-	sceneRenderPipeline->Render(passCtx);
+	if (passCtx.resolution != Vector2{ 1, 1 })
+	{
+		sceneRenderPipeline->Render(passCtx);
+	}
 
 	// in case we just resized
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_GENERAL);

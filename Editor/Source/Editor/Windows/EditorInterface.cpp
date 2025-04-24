@@ -2956,7 +2956,6 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
-        Logger::Log("Opacity: " + std::to_string(ts), "UPDATE");
         if (!Engine::GetCurrentScene() || Engine::IsPlayMode())
         {
             return;

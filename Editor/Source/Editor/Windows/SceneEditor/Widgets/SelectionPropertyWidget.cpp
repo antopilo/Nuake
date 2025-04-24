@@ -946,6 +946,54 @@ void SelectionPropertyWidget::DrawFile(Ref<Nuake::File> file)
                     ImGui::PopStyleColor();
                 }
 
+                ImGui::TableNextColumn();
+                {
+                    // Title
+                    ImGui::Text("Noise Strength");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##Noise Strength", &env->mVolumetric->mNoiseStrength, .001f, 0.f, 1.0f);
+                    ImGui::TableNextColumn();
+
+                    // Reset button
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBase");
+                    if (ImGui::Button(resetBloomThreshold.c_str())) env->mVolumetric->mNoiseStrength = 1.0f;
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TableNextColumn();
+                {
+                    // Title
+                    ImGui::Text("Noise Scale");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##Noise Scale", &env->mVolumetric->mNoiseScale, .001f, 0.f, 10.0f);
+                    ImGui::TableNextColumn();
+
+                    // Reset button
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBase");
+                    if (ImGui::Button(resetBloomThreshold.c_str())) env->mVolumetric->mNoiseScale = 1.0f;
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TableNextColumn();
+                {
+                    // Title
+                    ImGui::Text("Noise Speed");
+                    ImGui::TableNextColumn();
+
+                    ImGui::DragFloat("##Noise Speed", &env->mVolumetric->mNoiseSpeed, .001f, 0.f, 10.0f);
+                    ImGui::TableNextColumn();
+
+                    // Reset button
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBase");
+                    if (ImGui::Button(resetBloomThreshold.c_str())) env->mVolumetric->mNoiseSpeed = 0.1f;
+                    ImGui::PopStyleColor();
+                }
+
                 ImGui::EndTable();
             }
         END_COLLAPSE_HEADER()

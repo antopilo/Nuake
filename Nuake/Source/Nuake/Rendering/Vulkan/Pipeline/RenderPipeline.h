@@ -70,7 +70,7 @@ namespace Nuake
 		bool HasDepthTest = false;
 		Ref<VulkanShader> VertShader;
 		Ref<VulkanShader> FragShader;
-
+		float RenderScale = 1.0f;
 		std::vector<TextureAttachment> Attachments;
 		TextureAttachment DepthAttachment;
 		std::vector<std::string> InputNames;
@@ -112,6 +112,7 @@ namespace Nuake
 		TextureAttachment& AddAttachment(const std::string& name, ImageFormat format, ImageUsage usage = ImageUsage::Default, bool clearOnLoad = true);
 		TextureAttachment& GetAttachment(const std::string& name);
 		std::vector<TextureAttachment> GetAttachments();
+		void SetRenderScale(float scale) { RenderScale = scale; }
 
 		void AddInput(const std::string& name);
 		std::vector<std::string> GetInputs();

@@ -178,7 +178,7 @@ SceneRenderPipeline::SceneRenderPipeline()
 	}
 
 	// Initialize render targets     
-	const Vector2 defaultSize = { 1, 1 };
+	const Vector2 defaultSize = { 4, 4 };
 	GBufferAlbedo = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	GBufferAlbedo->SetDebugName("GBufferAlbedo");
 
@@ -279,7 +279,8 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	SSAOOutput = ResizeImage(ctx, SSAOOutput, ctx.resolution);
 	SSAOBlurOutput = ResizeImage(ctx, SSAOBlurOutput, ctx.resolution);
 
-	VolumetricOutput = ResizeImage(ctx, VolumetricOutput, ctx.resolution);
+	Vector2 resolution = { static_cast<int>(ctx.resolution.x * 0.25f), static_cast<int>(ctx.resolution.y * 0.25f) };
+	VolumetricOutput = ResizeImage(ctx, VolumetricOutput, glm::clamp(resolution, {1, 1}, ctx.resolution));
 	VolumetricCombineOutput = ResizeImage(ctx, VolumetricCombineOutput, ctx.resolution);
 
 	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
@@ -613,6 +614,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	volumetricPass.SetShaders(shaderMgr.GetShader("volumetric_vert"), shaderMgr.GetShader("volumetric_frag"));
 	volumetricPass.SetPushConstant(volumetricConstant);
 	volumetricPass.AddInput("Depth");
+	volumetricPass.SetRenderScale(0.25f);
 	volumetricPass.AddAttachment("VolumetricOutput", VolumetricOutput->GetFormat());
 	volumetricPass.SetDepthTest(false);
 	volumetricPass.SetPreRender([&](PassRenderContext& ctx)
@@ -642,6 +644,10 @@ void SceneRenderPipeline::RecreatePipeline()
 		volumetricConstant.DepthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
 		volumetricConstant.CamViewID = ctx.cameraID;
 		volumetricConstant.LightCount = res.LightCount;
+		volumetricConstant.NoiseScale = env->mVolumetric->mNoiseScale;
+		volumetricConstant.NoiseSpeed = env->mVolumetric->mNoiseSpeed;
+		volumetricConstant.NoiseStrength = env->mVolumetric->mNoiseStrength;
+		volumetricConstant.Time = Engine::GetTime();
 
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(VolumetricConstant), &volumetricConstant);
 
@@ -870,7 +876,16 @@ Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<Vu
 	// Register to resource manager
 	GPUResources& gpuResources = GPUResources::Get();
 	gpuResources.AddTexture(newAttachment);
-	gpuResources.RemoveTexture(image);
+
+	using CleanUpFunc = std::function<void()>;
+	using CleanUpStack = std::stack<CleanUpFunc>;
+
+	CleanUpStack stack;
+	stack.push([image]() {
+		GPUResources& gpuResources = GPUResources::Get();
+		//gpuResources.RemoveTexture(image);
+	}); 
+	//gpuResources.QueueDeletion(std::move(stack));
 
 	// We might need to do this?
 	ctx.commandBuffer.TransitionImageLayout(newAttachment, VK_IMAGE_LAYOUT_GENERAL);

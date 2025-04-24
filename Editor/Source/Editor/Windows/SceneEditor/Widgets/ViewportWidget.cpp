@@ -81,7 +81,6 @@ void ViewportWidget::Draw()
 
         {
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, overlayOpacity.Value);
-            Logger::Log("Opacity: " + std::to_string(overlayOpacity.Value), "Animated");
             DrawOverlay();
             ImGui::PopStyleVar();
         }
