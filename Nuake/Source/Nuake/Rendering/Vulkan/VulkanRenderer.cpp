@@ -177,13 +177,19 @@ void VkRenderer::GetInstance()
 	vkb::InstanceBuilder builder;
 
 	//make the vulkan instance, with basic debug features
-	auto inst_ret = builder.set_app_name("Nuake Engine")
+	auto instRet = builder.set_app_name("Nuake Engine")
 		.request_validation_layers(NKUseValidationLayer)
 		.use_default_debug_messenger()
 		.require_api_version(1, 3, 0)
 		.build();
 
-	VkbInstance = inst_ret.value();
+	if (!instRet)
+	{
+		std::string errMsg = "Failed to create Vulkan instance. Error: " + instRet.error().message();
+		OS::ShowMessageBox("Vulkan Error", errMsg);
+	}
+
+	VkbInstance = instRet.value();
 	Instance = VkbInstance.instance;
 	VkDebugMessenger = VkbInstance.debug_messenger;
 }
@@ -222,18 +228,25 @@ void VkRenderer::SelectGPU()
 	}
 
 	vkb::PhysicalDeviceSelector selector{ VkbInstance };
-	vkb::PhysicalDevice physicalDevice = selector
+	auto physRet = selector
 		.set_minimum_version(1, 3)
 		.set_required_features_13(features)
 		.set_required_features_12(features12)
 		.set_required_features(VkPhysicalDeviceFeatures{
 			.fillModeNonSolid = VK_TRUE,
-			
-		})
-		.set_surface(Surface)
+
+			})
+			.set_surface(Surface)
 		.add_required_extensions(requiredExtensions)
-		.select()
-		.value();
+		.select();
+
+	if (!physRet)
+	{
+		auto message = physRet.error().message();
+		OS::ShowMessageBox("Vulkan Error", "No Physical Device supported found. \n" + message);
+	}
+
+	vkb::PhysicalDevice physicalDevice = physRet.value();
 
 	vkb::DeviceBuilder deviceBuilder{ physicalDevice };
 
@@ -262,10 +275,18 @@ void VkRenderer::SelectGPU()
 
 	// Chain pNext for Extended Dynamic State 3
 
-	VkbDevice = deviceBuilder
+	auto devRet = deviceBuilder
 		.add_pNext(&line_raster_features)
 		.add_pNext(&extendedDynamicState3Features)
-		.build().value();
+		.build();
+
+	if (!devRet)
+	{
+		auto message = devRet.error().message();
+		OS::ShowMessageBox("Vulkan Error", "No Device supported found.\n" + message);
+	}
+
+	VkbDevice = devRet.value();
 	Device = VkbDevice.device;
 	GPU = physicalDevice.physical_device;
 }
