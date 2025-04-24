@@ -3,6 +3,7 @@
 #include "IEditorWidget.h"
 
 #include <imgui/ImGuizmo.h>
+#include "../../../../../AnimatedValue.h"
 
 class EditorContext;
 
@@ -25,6 +26,9 @@ private:
 
 private:
 	Ref<Nuake::Viewport> sceneViewport;
+
+	AnimatedValue<float> outlineSize;
+	AnimatedValue<float> overlayOpacity;
 
 	// Gizmo
 	GizmoDrawingModes gizmoDrawingMode;

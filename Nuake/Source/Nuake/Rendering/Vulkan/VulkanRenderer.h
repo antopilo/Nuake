@@ -175,7 +175,6 @@ namespace Nuake
 		VkCommandPool ImguiCommandPool;
 
 		std::map<UUID, Ref<VkSceneRenderer>> SceneRenderers;
-		Ref<VkSceneRenderer> SceneRenderer;
 
 	public:
 		static VkRenderer& Get()

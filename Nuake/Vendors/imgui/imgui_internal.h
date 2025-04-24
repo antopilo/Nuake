@@ -3485,6 +3485,7 @@ namespace ImGui
     IMGUI_API bool              IsMouseClicked(ImGuiMouseButton button, ImGuiID owner_id, ImGuiInputFlags flags = 0);
     IMGUI_API bool              IsMouseReleased(ImGuiMouseButton button, ImGuiID owner_id);
     IMGUI_API bool              IsMouseDoubleClicked(ImGuiMouseButton button, ImGuiID owner_id);
+    IMGUI_API bool              IsMouseTripleClicked(ImGuiMouseButton button);
 
     // [EXPERIMENTAL] Shortcut Routing
     // - ImGuiKeyChord = a ImGuiKey optionally OR-red with ImGuiMod_Alt/ImGuiMod_Ctrl/ImGuiMod_Shift/ImGuiMod_Super.

@@ -180,7 +180,7 @@ void PipelineBuilder::SetColorAttachments(std::vector<VkFormat>& formats)
 
 void PipelineBuilder::SetLineRendering(bool enabled)
 {
-    if (enabled)
+    if (enabled) 
     {
         LineRasterization = {};
         LineRasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_LINE_STATE_CREATE_INFO_KHR;
@@ -190,7 +190,7 @@ void PipelineBuilder::SetLineRendering(bool enabled)
     }
     else
     {
-		RenderInfo.pNext = nullptr;
+		RenderInfo.pNext = nullptr; 
     }
 }
 
@@ -204,7 +204,7 @@ void PipelineBuilder::DisableDepthTest()
     DepthStencil.depthTestEnable = VK_FALSE;
     DepthStencil.depthWriteEnable = VK_FALSE;
     DepthStencil.depthCompareOp = VK_COMPARE_OP_NEVER;
-    DepthStencil.depthBoundsTestEnable = VK_FALSE;
+    DepthStencil.depthBoundsTestEnable = VK_FALSE; 
     DepthStencil.stencilTestEnable = VK_FALSE;
     DepthStencil.front = {};
     DepthStencil.back = {};

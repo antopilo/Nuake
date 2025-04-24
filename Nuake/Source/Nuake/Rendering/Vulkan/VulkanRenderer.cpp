@@ -34,9 +34,10 @@
 #include "vk_mem_alloc.h"
 
 #include <array>
+#include <mutex>
 #include <algorithm>
 
-bool NKUseValidationLayer = true;
+bool NKUseValidationLayer = false;
 
 using namespace Nuake;
 
@@ -126,13 +127,9 @@ void VkRenderer::Initialize()
 	camData.View = Matrix4(1.0f);
 	camData.Projection = Matrix4(1.0f);
 
-	// init camera buffer
 	InitDescriptors();
 
 	InitImgui();
-
-	SceneRenderer = CreateRef<VkSceneRenderer>();
-	SceneRenderer->Init();
 
 	IsInitialized = true;
 }
@@ -209,8 +206,7 @@ void VkRenderer::SelectGPU()
 	{ 
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 		VK_KHR_LINE_RASTERIZATION_EXTENSION_NAME,
-		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
-
+		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME
 	};
 
 	auto systemInfoRet = vkb::SystemInfo::get_system_info();
@@ -234,9 +230,9 @@ void VkRenderer::SelectGPU()
 		.set_required_features_12(features12)
 		.set_required_features(VkPhysicalDeviceFeatures{
 			.fillModeNonSolid = VK_TRUE,
-
-			})
-			.set_surface(Surface)
+			.wideLines = VK_TRUE
+		})
+		.set_surface(Surface)
 		.add_required_extensions(requiredExtensions)
 		.select();
 
@@ -422,8 +418,12 @@ void VkRenderer::PrepareSceneData(RenderContext ctx)
 	{
 		scenes.push_back(scene);
 	}
-
-	SceneRenderer->PrepareScenes(scenes, ctx);
+	
+	// Maybe this shouldnt be in a scene renderer
+	if (!SceneRenderers.empty())
+	{
+		SceneRenderers.begin()->second->PrepareScenes(scenes, ctx);
+	}
 }
 
 void VkRenderer::DrawScenes()
@@ -744,6 +744,7 @@ bool VkRenderer::Draw()
 	{
 		//viewport->Resize();
 	}
+	ResizeViewports();
 
 	FrameSkipped = false;
 
@@ -788,8 +789,11 @@ bool VkRenderer::Draw()
 	return true;
 }
 
+std::mutex queueMutex;
 void VkRenderer::EndDraw()
 {
+
+	std::lock_guard<std::mutex> lock(queueMutex);
 	if (FrameSkipped)
 	{
 		return;
@@ -844,9 +848,9 @@ void VkRenderer::EndDraw()
 
 	presentInfo.pImageIndices = &swapchainImageIndex;
 
-	ResizeViewports();
 
 	VK_CALL(vkQueuePresentKHR(GPUQueue, &presentInfo));
+
 
 	auto& io = ImGui::GetIO();
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -876,8 +880,10 @@ void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)
 	vkCmdEndRendering(cmd);
 }
 
+
 void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& function)
 {
+	std::lock_guard<std::mutex> lock(queueMutex);
 	VK_CALL(vkResetFences(Device, 1, &ImguiFence));
 	VK_CALL(vkResetCommandBuffer(ImguiCommandBuffer, 0));
 

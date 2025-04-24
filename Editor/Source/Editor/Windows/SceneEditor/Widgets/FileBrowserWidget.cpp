@@ -15,7 +15,12 @@ using namespace Nuake;
 
 FileBrowserWidget::FileBrowserWidget(EditorContext& inCtx) : IEditorWidget(inCtx)
 {
-    currentDirectory = FileSystem::RootDirectory;
+    SetCurrentDirectory(FileSystem::RootDirectory);
+}
+
+void FileBrowserWidget::SetCurrentDirectory(Ref<Nuake::Directory> dir)
+{
+    queueDirectory = dir;
 }
 
 void FileBrowserWidget::Update(float ts)
@@ -27,6 +32,12 @@ void FileBrowserWidget::Draw()
 {
 	if (BeginWidgetWindow("File Browser"))
 	{
+        if (queueDirectory != currentDirectory)
+        {
+            opacity.SetValue(0.0f);
+            opacity = 1.0f;
+            currentDirectory = queueDirectory;
+        }
 		Ref<Nuake::Directory> rootDirectory = FileSystem::GetFileTree();
 
 		auto availableSpace = ImGui::GetContentRegionAvail();
@@ -35,7 +46,8 @@ void FileBrowserWidget::Draw()
 		ImVec4* colors = ImGui::GetStyle().Colors;
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, colors[ImGuiCol_TitleBgCollapsed]);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 8);
-
+        ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 0, 0 });
 		if (ImGui::BeginChild("Tree", ImVec2(splitterSizeLeft, availableSpace.y), true))
 		{
 			ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_SpanAvailWidth | 
@@ -54,7 +66,7 @@ void FileBrowserWidget::Draw()
 				bool open = ImGui::TreeNodeEx("PROJECT", base_flags);
 				if (ImGui::IsItemClicked())
 				{
-					this->currentDirectory = FileSystem::RootDirectory;
+                    SetCurrentDirectory(FileSystem::RootDirectory);
 				}
 			}
 			
@@ -67,6 +79,8 @@ void FileBrowserWidget::Draw()
 			ImGui::TreePop();
 		}
 		ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
+        ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
 		ImGui::EndChild();
 
@@ -113,7 +127,7 @@ void FileBrowserWidget::Draw()
 					{
 						if (currentDirectory != FileSystem::RootDirectory)
 						{
-							currentDirectory = currentDirectory->Parent;
+                            SetCurrentDirectory(currentDirectory->Parent);
 						}
 					}
 				}
@@ -127,7 +141,7 @@ void FileBrowserWidget::Draw()
 				{
 					if (editorContext.GetSelection().Type == EditorSelectionType::Directory)
 					{
-						currentDirectory = editorContext.GetSelection().Directory;
+                        SetCurrentDirectory(editorContext.GetSelection().Directory);
 					}
 				}
 
@@ -160,7 +174,7 @@ void FileBrowserWidget::Draw()
 
 						if (ImGui::Button(pathLabel.c_str()))
 						{
-							currentDirectory = paths[i];
+                            SetCurrentDirectory(paths[i]);
 						}
 
 						ImGui::SameLine();
@@ -210,13 +224,14 @@ void FileBrowserWidget::Draw()
 			if (child)
 			{
 				int width = availableSpace.x;
-				ImVec2 buttonSize = ImVec2(80, 80);
+				ImVec2 buttonSize = ImVec2(60, 60);
 				int amount = (int)(width / 110);
 				if (amount <= 0) amount = 1;
 
 				int i = 1; // current amount of item per row.
 				if (ImGui::BeginTable("ssss", amount))
 				{
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, opacity);
 					// Button to go up a level.
 					//if (m_CurrentDirectory && m_CurrentDirectory != FileSystem::RootDirectory && m_CurrentDirectory->Parent)
 					//{
@@ -254,7 +269,7 @@ void FileBrowserWidget::Draw()
 						{
 							if (searchQuery.empty() || f->GetName().find(String::Sanitize(searchQuery)) != std::string::npos)
 							{
-								if (f->GetFileType() == FileType::Unknown || f->GetFileType() == FileType::Assembly)
+                                if (f->GetFileType() == FileType::Unknown || f->GetFileType() == FileType::Assembly)
 								{
 									continue;
 								}
@@ -274,10 +289,12 @@ void FileBrowserWidget::Draw()
 						}
 					}
 
+                    ImGui::PopStyleVar();
 					//DrawContextMenu();
 
 					//m_HasClickedOnFile = false;
 
+                    ImageLoaded = 0;
 					ImGui::EndTable();
 				}
 			}
@@ -308,7 +325,7 @@ void FileBrowserWidget::DrawFiletree(Ref<Nuake::Directory> dir)
 
 	if (ImGui::IsItemClicked())
 	{
-		currentDirectory = dir;
+        SetCurrentDirectory(dir);
 	}
 
 	if (open)
@@ -328,10 +345,12 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
 	const char* icon = ICON_FA_FOLDER;
 	const std::string id = std::string("##") + directory->Name;
-
+    const ImVec2 size = { 80, 80 };
+    const ImVec2 headerSize = { size.x, 50 };
+    const ImVec2 totalSize = { size.x, size.y + headerSize.y };
 	ImVec2 prevCursor = ImGui::GetCursorPos();
 	ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
-	const bool selected = ImGui::Selectable(id.c_str(), editorContext.GetSelection().Directory == directory, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
+	const bool selected = ImGui::Selectable(id.c_str(), editorContext.GetSelection().Directory == directory, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, totalSize);
 	const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
 	if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
 	{
@@ -349,25 +368,22 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 	{
 		if (ImGui::IsMouseDoubleClicked(0))
 		{
-			currentDirectory = directory;
+            SetCurrentDirectory(directory);
 		}
-
-		//Editor->Selection = EditorSelection(directory);
 	}
 
 	if (ImGui::IsItemHovered())
 		ImGui::SetTooltip(directory->Name.c_str());
 
-
 	ImGui::SetCursorPos(prevCursor);
-	ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture2("Resources/Images/folder_icon.png")->GetImGuiDescriptorSet(), ImVec2(100, 100), {0, 1}, {1, 0});
+	ImGui::Image((ImTextureID)TextureManager::Get()->GetTexture2("Resources/Images/folder_icon.png")->GetImGuiDescriptorSet(), size, {0, 1}, {1, 0});
 
 	auto imguiStyle = ImGui::GetStyle();
 
 	ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
 	ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
 	ImU32 rectColor = IM_COL32(255, 255, 255, 16);
-	ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+	ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, size.x) - startOffset, prevScreenPos + totalSize + offsetEnd, rectColor, 1.0f);
 	std::string visibleName = directory->Name;
 	const uint32_t MAX_CHAR_NAME = 34;
 	if (directory->Name.size() > MAX_CHAR_NAME)
@@ -377,7 +393,7 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 
 	ImGui::TextWrapped(visibleName.c_str());
 
-	ImGui::SetCursorPosY(prevCursor.y + 150 - ImGui::GetTextLineHeight());
+	ImGui::SetCursorPosY(prevCursor.y + totalSize.y - ImGui::GetTextLineHeight());
 	ImGui::TextColored({ 1, 1, 1, 0.5f }, "Folder");
 
 	ImGui::PopStyleVar();
@@ -387,7 +403,7 @@ void FileBrowserWidget::DrawDirectory(Ref<Nuake::Directory> directory, uint32_t 
 	{
 		if (ImGui::MenuItem("Open"))
 		{
-			currentDirectory = directory;
+            SetCurrentDirectory(directory);
 		}
 
 		ImGui::Separator();
@@ -471,10 +487,14 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
     ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 0.f, 0.f });
     std::string fileExtension = file->GetExtension();
 
+    const ImVec2 size = { 80, 80 };
+    const ImVec2 headerSize = { size.x, 50 };
+    const ImVec2 totalSize = { size.x, size.y + headerSize.y };
+
     ImVec2 prevCursor = ImGui::GetCursorPos();
     ImVec2 prevScreenPos = ImGui::GetCursorScreenPos();
     std::string id = std::string("##") + file->GetAbsolutePath();
-    const bool selected = ImGui::Selectable(id.c_str(), editorContext.GetSelection().File == file, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 150));
+    const bool selected = ImGui::Selectable(id.c_str(), editorContext.GetSelection().File == file, ImGuiSelectableFlags_AllowOverlap | ImGuiSelectableFlags_AllowDoubleClick, totalSize);
 
     const std::string hoverMenuId = std::string("item_hover_menu") + std::to_string(drawId);
     if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(1))
@@ -591,7 +611,25 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
     else if (fileType == FileType::Image)
     {
         const std::string path = file->GetAbsolutePath();
-        textureImage = textureMgr->GetTexture2(path);
+
+        int32_t imageNumberToLoadMax = maxImageLoaded;
+        if (ImGui::IsItemVisible())
+        {
+            imageNumberToLoadMax = 1;
+        }
+
+        if (ImageLoaded < maxImageLoaded || textureMgr->IsTextureLoaded2(path))
+        {
+            if(!textureMgr->IsTextureLoaded2(path))
+                ImageLoaded++;
+
+            textureImage = textureMgr->GetTexture2(path);
+        }
+        else
+        {
+
+            textureImage = textureMgr->GetTexture2("Resources/Images/env_file_icon.png");
+        }
     }
     else if (fileType == FileType::Project)
     {
@@ -643,19 +681,19 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
     }
 
     ImGui::SetCursorPos(prevCursor);
-    ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetImGuiDescriptorSet()), ImVec2(100, 100), { 0, 1 }, { 1, 0 });
+    ImGui::Image(reinterpret_cast<ImTextureID>(textureImage->GetImGuiDescriptorSet()), size, { 0, 1 }, { 1, 0 });
     ImGui::PopStyleVar();
 
     auto& imguiStyle = ImGui::GetStyle();
 
     ImVec2 startOffset = ImVec2(imguiStyle.CellPadding.x / 2.0f, 0);
     ImVec2 offsetEnd = ImVec2(startOffset.x, imguiStyle.CellPadding.y / 2.0f);
-    ImU32 rectColor = IM_COL32(255, 255, 255, 16);
-    ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 150) + offsetEnd, rectColor, 1.0f);
+    ImU32 rectColor = IM_COL32(255, 255, 255, 16 * opacity);
+    ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 80) - startOffset, prevScreenPos + totalSize + offsetEnd, rectColor, 1.0f);
 
     ImU32 rectColor2 = UI::PrimaryCol;
     Color fileTypeColor = GetColorByFileType(file->GetFileType());
-    ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 100) - startOffset, prevScreenPos + ImVec2(100, 101) + offsetEnd, IM_COL32(fileTypeColor.r * 255.f, fileTypeColor.g * 255.f, fileTypeColor.b * 255.f, fileTypeColor.a * 255.f), 0.0f);
+    ImGui::GetWindowDrawList()->AddRectFilled(prevScreenPos + ImVec2(0, 80) - startOffset, prevScreenPos + ImVec2(80, 101) + offsetEnd, IM_COL32(fileTypeColor.r * 255.f, fileTypeColor.g * 255.f, fileTypeColor.b * 255.f, fileTypeColor.a * 255.f), 0.0f);
 
     std::string visibleName = file->GetName();
     const uint32_t MAX_CHAR_NAME = 32;
@@ -666,7 +704,7 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
 
     ImGui::TextWrapped(visibleName.c_str());
 
-    ImGui::SetCursorPosY(prevCursor.y + 150 - ImGui::GetTextLineHeight());
+    ImGui::SetCursorPosY(prevCursor.y + totalSize.y - ImGui::GetTextLineHeight());
     ImGui::TextColored({ 1, 1, 1, 0.5f }, file->GetFileTypeAsString().c_str());
 
     //if (fileExtension == ".png" || fileExtension == ".jpg")
@@ -879,36 +917,38 @@ Color FileBrowserWidget::GetColorByFileType(Nuake::FileType fileType)
         case Nuake::FileType::Mesh:
             break;
         case Nuake::FileType::Script:
-            return { 1.0, 0.0, 0.0, 1.0 };
+            return { 1.0, 0.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::NetScript:
-            return { 1.0, 0.0, 0.0, 1.0 };
+            return { 1.0, 0.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Project:
-            return Engine::GetProject()->Settings.PrimaryColor;
+            auto color = Engine::GetProject()->Settings.PrimaryColor ;
+            color.a *= opacity;
+            return color;
             break;
         case Nuake::FileType::Prefab:
             break;
         case Nuake::FileType::Scene:
-            return { 0, 1.0f, 1.0, 1.0 };
+            return { 0, 1.0f, 1.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Wad:
             break;
         case Nuake::FileType::Map:
-            return { 0.0, 1.0, 0.0, 1.0 };
+            return { 0.0, 1.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::Assembly:
             break;
         case Nuake::FileType::Solution:
             break;
         case Nuake::FileType::Audio:
-            return { 0.0, 0.0, 1.0, 1.0 };
+            return { 0.0, 0.0, 1.0, 1.0 * opacity };
             break;
         case Nuake::FileType::UI:
-            return { 1.0, 1.0, 0.0, 1.0 };
+            return { 1.0, 1.0, 0.0, 1.0 * opacity };
             break;
         case Nuake::FileType::CSS:
-            return { 1.0, 0.0, 1.0, 1.0 };
+            return { 1.0, 0.0, 1.0, 1.0 * opacity };
             break;
         default:
             break;

@@ -16,6 +16,15 @@ GPUResources::GPUResources()
 	}
 }
 
+GPUResources::~GPUResources()
+{
+	Images.clear();
+	Buffers.clear();
+	Meshes.clear();
+	Light.clear();
+	Cameras.clear();
+}
+
 void GPUResources::Init()
 {
 	CreateBindlessLayout();
@@ -139,7 +148,7 @@ bool GPUResources::AddTexture(Ref<VulkanImage> image)
 		Images[id] = image;
 		return true;
 	}
-
+	
 	Logger::Log("Buffer with ID already exists", "vulkan", CRITICAL);
 	return false;
 }
@@ -151,7 +160,6 @@ void GPUResources::RemoveTexture(Ref<VulkanImage> image)
 	{
 		return;
 	}
-
 	Images.erase(id);
 }
 
@@ -304,16 +312,19 @@ void GPUResources::CreateBindlessLayout()
 void GPUResources::RecreateBindlessTextures()
 {
 	// Ideally wed have update bit enabled ondescriptors
-	vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
+	//vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
+
 	if (!TexturesDescriptor)
 	{
 		CreateBindlessLayout();
 	}
 
 	BindlessTextureMapping.clear();
+
 	std::vector<VkDescriptorImageInfo> imageInfos(Images.size());
 	auto allTextures = GetAllTextures();
-	for (size_t i = 0; i < Images.size(); i++) {
+	for (size_t i = 0; i < Images.size(); i++) 
+	{
 		imageInfos[i].imageView = allTextures[i]->GetImageView();
 		imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		BindlessTextureMapping[allTextures[i]->GetID()] = i;
@@ -576,7 +587,6 @@ void GPUResources::CleanUp(uint32_t frame)
 	{
 		deletionQueue.top()();
 		deletionQueue.pop();
-		Logger::Log("Deleted GPU resource", "vulkan", VERBOSE);
 	}
 }
 

@@ -431,8 +431,6 @@ namespace Nuake
 				return; // We don't care about this file type, we dont support it.
 			}
 
-			Logger::Log("Adding " + file->GetName() + " to manifest", "manifest", VERBOSE);
-
 			// Register the resource in the manifest
 			const std::string& path = file->GetRelativePath();
 			const UUID uuid = resolverManager.ResolveUUID(file);

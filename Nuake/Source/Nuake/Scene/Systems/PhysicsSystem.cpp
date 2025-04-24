@@ -203,20 +203,19 @@ namespace Nuake
 			auto& meshColliderComponent = meshColliderView.get<MeshColliderComponent>(e);
 			if (!meshColliderComponent.Shape)
 			{
-				const auto& modelComponent = entity.GetComponent<ModelComponent>();
-
-				//if (modelComponent.ModelResource.Get<Model>())
-				//{
-				//	uint32_t subMeshId = meshColliderComponent.SubMesh;
-				//	const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
-				//	if (subMeshId >= submeshes.size())
-				//	{
-				//		Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
-				//	}
-				//
-				//	Ref<Mesh> mesh = submeshes[subMeshId];
-				//	meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
-				//}
+				auto& modelComponent = entity.GetComponent<ModelComponent>();
+				if (modelComponent.ModelResource.Get<Model>())
+				{
+					uint32_t subMeshId = meshColliderComponent.SubMesh;
+					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
+					if (subMeshId >= submeshes.size())
+					{
+						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
+					}
+				
+					Ref<Mesh> mesh = submeshes[subMeshId];
+					meshColliderComponent.Shape = CreateRef<Physics::MeshShape>(mesh);
+				}
 			}
 		}
 	}
@@ -276,24 +275,23 @@ namespace Nuake
 					Logger::Log("Cannot use mesh collider without model component", "physics", WARNING);
 				}
 
-				const auto& modelComponent = ent.GetComponent<ModelComponent>();
-				const auto& component = ent.GetComponent<MeshColliderComponent>();
+				auto& modelComponent = ent.GetComponent<ModelComponent>();
+				auto& component = ent.GetComponent<MeshColliderComponent>();
 
 				isTrigger = component.IsTrigger;
 
-				//modelComponent.ModelResource.Data()
-				//if (modelComponent.ModelResource.Get<Model>())
-				//{
-				//	uint32_t subMeshId = component.SubMesh;
-				//	const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
-				//	if (subMeshId >= submeshes.size())
-				//	{
-				//		Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
-				//	}
-				//
-				//	Ref<Mesh> mesh = submeshes[subMeshId];
-				//	shape = CreateRef<Physics::MeshShape>(mesh);
-				//}
+				if (modelComponent.ModelResource.Get<Model>())
+				{
+					uint32_t subMeshId = component.SubMesh;
+					const std::vector<Ref<Mesh>>& submeshes = modelComponent.ModelResource.Get<Model>()->GetMeshes();
+					if (subMeshId >= submeshes.size())
+					{
+						Logger::Log("Cannot create mesh collider, invalid submesh ID", "physics", WARNING);
+					}
+				
+					Ref<Mesh> mesh = submeshes[subMeshId];
+					shape = CreateRef<Physics::MeshShape>(mesh);
+				}
 			}
 
 			if (!shape)

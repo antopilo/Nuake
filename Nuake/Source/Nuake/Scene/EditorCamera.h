@@ -33,6 +33,10 @@ namespace Nuake
 		void SetPitch(float pitch);
 
 		bool IsFlying() const { return m_IsFlying; }
+
+
+		float TargetYaw = 0.f;
+		float TargetPitch = 0.0f;
 	private:
 		bool controlled = false;
 		bool firstMouse = false;
@@ -42,8 +46,6 @@ namespace Nuake
 
 		float Yaw = 0.0f;
 		float Pitch = 0.0f;
-		float TargetYaw = 0.f;
-		float TargetPitch = 0.0f;
 		void UpdateDirection();
 	};
 }

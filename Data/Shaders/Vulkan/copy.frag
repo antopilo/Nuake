@@ -80,7 +80,8 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct PSInput {
+struct PSInput 
+{
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };
@@ -93,6 +94,7 @@ struct CopyPushConstant
 {
     int SourceTextureID;
     int Source2TextureID;
+    int Mode;
 };
 
 [[vk::push_constant]]
@@ -109,6 +111,14 @@ PSOutput main(PSInput input)
     float4 sampleValue = textures[sourceTextureID].Sample(mySampler, input.UV);
     float4 sampleValue2 = textures[source2TextureID].Sample(mySampler, input.UV);
 
-    output.oColor0 = lerp(sampleValue, sampleValue2, 1.0 - sampleValue.a);
+    if(pushConstants.Mode == 0)
+    {
+        output.oColor0 = lerp(sampleValue, sampleValue2, 1.0 - sampleValue.a);
+    }
+    else if(pushConstants.Mode == 1)
+    {
+        output.oColor0 = sampleValue;
+        output.oColor0 = sampleValue + sampleValue2;
+    }
     return output;
 }

@@ -47,6 +47,11 @@ void SceneEditorWindow::Update(float ts)
 	{
 		widget->Update(ts);
 	}
+
+	if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+	{
+		editorContext.SetSelection(EditorSelection());
+	}
 }
 
 void SceneEditorWindow::Draw()

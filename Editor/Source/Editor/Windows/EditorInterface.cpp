@@ -64,6 +64,8 @@
 #include "Nuake/Rendering/Vulkan/VkShaderManager.h"
 
 #include "../Events/EditorRequests.h"
+#include "../../../../Nuake/Thirdparty/glfw/include/GLFW/glfw3.h"
+#include "../../../AnimatedValue.h"
 
 namespace Nuake {
     
@@ -243,7 +245,7 @@ namespace Nuake {
 
             if (ImGui::InvisibleButton("Minimize", ImVec2(buttonWidth, buttonHeight)))
             {
-                //glfwIconifyWindow(Window::Get()->GetHandle());
+                glfwIconifyWindow(Window::Get()->GetHandle());
             }
 
             auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -264,11 +266,11 @@ namespace Nuake {
                 const auto window = Window::Get()->GetHandle();
                 if (isMaximized)
                 {
-                    //glfwRestoreWindow(window);
+                    glfwRestoreWindow(window);
                 }
                 else
                 {
-                    //glfwMaximizeWindow(window);
+                    glfwMaximizeWindow(window);
                 }
             }
             auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -282,7 +284,7 @@ namespace Nuake {
             int iconHeight = std::max(CloseIconTexture->GetHeight(), 24);
             if (ImGui::InvisibleButton("Close", ImVec2(buttonWidth, buttonHeight)))
             {
-                //glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
+                glfwSetWindowShouldClose(Window::Get()->GetHandle(), true);
             }
 
             UI::DrawButtonImage(CloseIconTexture, UI::TextCol, UI::TextCol, buttonColP);
@@ -2535,7 +2537,7 @@ namespace Nuake {
 
     void EditorInterface::OnSceneLoaded(Ref<Scene> scene)
     {
-        VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
+        //VkRenderer::Get().SceneRenderer->sceneRenderPipeline->OnDebugDraw().AddRaw(this, &EditorInterface::OnDebugDraw);
     }
 
     void EditorInterface::OnDebugDraw(DebugCmd& cmd)
@@ -2577,11 +2579,7 @@ namespace Nuake {
 
                 isLoadingProjectQueue = false;
 
-                auto window = Window::Get();
-                window->SetDecorated(true);
-                window->ShowTitleBar(false);
-                window->SetSize({ 1600, 900 });
-                window->Center();
+                
                 frameCount = 0;
             }
             else
@@ -2596,7 +2594,7 @@ namespace Nuake {
         if (_WelcomeWindow->IsProjectQueued() && frameCount > 0)
         {
             // draw splash
-            LoadingSplash::Get().Draw();
+            LoadingSplash::Get().Draw(_WelcomeWindow->queuedProjectPath);
 
             frameCount--;
             if (frameCount == 0)
@@ -2615,6 +2613,17 @@ namespace Nuake {
         else
         {
             m_ProjectSettingsWindow->Init(Engine::GetProject());
+        }
+
+        static bool isDone = false;
+        if (frameCount == 0 && !isDone)
+        {
+            auto window = Window::Get();
+            window->SetDecorated(true);
+            window->ShowTitleBar(false);
+            window->SetSize({ 1600, 900 });
+            window->Center();
+            isDone = true;
         }
 
         // Shortcuts
@@ -2683,6 +2692,17 @@ namespace Nuake {
             {
                 GPUResources& gpu = GPUResources::Get();
                 auto buffers = gpu.GetAllBuffers();
+
+                ImGui::Text("General Info");
+
+                const size_t textureCount = gpu.GetAllTextures().size();
+                ImGui::Text(("Image Count: " + std::to_string(textureCount)).c_str());
+
+                const size_t viewCount = gpu.GetAllCameras().size();
+                ImGui::Text(("View Count: " + std::to_string(viewCount)).c_str());
+
+                const size_t bufferCount = gpu.GetAllBuffers().size();
+                ImGui::Text(("Buffer Count: " + std::to_string(bufferCount)).c_str());
 
                 ImGui::BeginTable("Buffers", 2);
                 ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
@@ -2936,6 +2956,7 @@ namespace Nuake {
 
     void EditorInterface::Update(float ts)
     {
+        Logger::Log("Opacity: " + std::to_string(ts), "UPDATE");
         if (!Engine::GetCurrentScene() || Engine::IsPlayMode())
         {
             return;

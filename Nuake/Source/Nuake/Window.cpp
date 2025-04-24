@@ -417,7 +417,7 @@ void Window::SetTitlebarHitTestCallback(std::function<void(Window&, int x, int y
 
 void Window::OnWindowFocused(Window& window, bool focused)
 {
-    if (onWindowFocusedCallback)
+    if (onWindowFocusedCallback && !window.ShouldClose())
     {
         onWindowFocusedCallback(window, focused);
     }

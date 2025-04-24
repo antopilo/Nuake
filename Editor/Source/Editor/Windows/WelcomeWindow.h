@@ -42,10 +42,10 @@ namespace Nuake
 		
 		int32_t SelectedProject = -1;
 		std::vector<ProjectPreview> _Projects;
-		std::string queuedProjectPath;
 		std::string queuedRemovalPath;
 
 	public:
+		std::string queuedProjectPath;
 		WelcomeWindow(Nuake::EditorInterface* editor);
 		~WelcomeWindow() = default;
 

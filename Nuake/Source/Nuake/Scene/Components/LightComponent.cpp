@@ -23,6 +23,17 @@ namespace Nuake
 		}
     }
 
+    LightComponent::~LightComponent()
+    {
+        for (int i = 0; i < CSM_AMOUNT; i++)
+        {
+            if (m_ShadowMaps[i])
+            {
+                GPUResources::Get().RemoveTexture(m_ShadowMaps[i]);
+            }
+        }
+    }
+
     void LightComponent::SetCastShadows(bool toggle)
     {
         CastShadows = toggle;

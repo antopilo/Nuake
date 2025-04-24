@@ -26,13 +26,16 @@ IEditorWidget(context),
 gizmoDrawingMode(GizmoDrawingModes::EditorOnly)
 {
     OnSceneChanged(context.GetScene());
+
+    overlayOpacity.Speed = 10.0f;
+    overlayOpacity = 1.0f;
+    outlineSize = Engine::GetProject()->Settings.OutlineRadius;
 }
 
 ViewportWidget::~ViewportWidget()
 {
     VkRenderer::Get().RemoveViewport(sceneViewport->GetID());
 }
-
 void ViewportWidget::Update(float ts)
 {
 	editorContext.GetScene()->Update(ts);
@@ -58,12 +61,30 @@ void ViewportWidget::Update(float ts)
 
 void ViewportWidget::Draw()
 {
+    auto oldTarget = overlayOpacity.TargetValue;
+    overlayOpacity.TargetValue = Engine::GetGameState() == GameState::Playing ? 0.0f : 1.0f;
+
+    if (overlayOpacity.TargetValue == oldTarget)
+    {
+        IAnimatedValue::UpdateAll(glm::clamp((float)Engine::GetTimestep(), 0.0f, Engine::GetFixedTimeStep()));
+    }
+    else
+    {
+        overlayOpacity.Value = (Engine::GetGameState() != GameState::Playing);
+        overlayOpacity.TargetValue = 1.0f - overlayOpacity.Value;
+    }
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 	if (BeginWidgetWindow(ICON_FA_GAMEPAD + std::string("Viewport")))
 	{
 		ImGui::PopStyleVar();
 
-        DrawOverlay();
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, overlayOpacity.Value);
+            Logger::Log("Opacity: " + std::to_string(overlayOpacity.Value), "Animated");
+            DrawOverlay();
+            ImGui::PopStyleVar();
+        }
 
 		ImGuizmo::BeginFrame();
 		ImGuizmo::SetOrthographic(false);
@@ -77,14 +98,18 @@ void ViewportWidget::Draw()
 		// This is important for make UI mouse coord relative to viewport
 		// Nuake::Input::SetViewportDimensions(m_ViewportPos, viewportPanelSize);
 
-		VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
-
 		ImVec2 imagePos = ImGui::GetWindowPos() + ImGui::GetCursorPos();
         ImVec2 viewportMin = ImGui::GetCursorScreenPos();
 		// Input::SetEditorViewportSize(m_ViewportPos, viewportPanelSize);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		//m_ViewportPos = { imagePos.x, imagePos.y };
-		ImGui::Image(textureDesc, regionAvail, { 0, 1 }, { 1, 0 });
+
+        VkDescriptorSet textureDesc = sceneViewport->GetRenderTarget()->GetImGuiDescriptorSet();
+        if (!needsResize)
+        {
+		    ImGui::Image(textureDesc, regionAvail, { 0, 1 }, { 1, 0 });
+        }
+
 		ImGui::PopStyleVar();
 
         float title_bar_height = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2;
@@ -104,6 +129,8 @@ void ViewportWidget::Draw()
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::AllowAxisFlip(true);
 		ImGuizmo::SetRect(viewportMin.x, viewportMin.y, regionAvail.x, regionAvail.y);
+
+        Engine::GetProject()->Settings.OutlineRadius = outlineSize;
 
 		// TODO(grid)
         auto selection = editorContext.GetSelection();
@@ -200,17 +227,20 @@ void ViewportWidget::Draw()
             {
                 Logger::Log("Mouse Picked: " + std::to_string(picked));
 
-                constexpr uint32_t INVALID_PICK_ID = 4187593120;
+                constexpr uint32_t INVALID_PICK_ID = 3863365216;
                 if (picked != INVALID_PICK_ID)
                 {
                     Nuake::Entity entity = Nuake::Entity((entt::entity)picked, editorContext.GetScene().get());
                     if (entity.IsValid())
                     {
+                        outlineSize.SetValue(0.0f);
+                        outlineSize = 7.0f;
                         editorContext.SetSelection(entity);
                     }
                 }
                 else
                 {
+                    outlineSize.SetValue(0.0f);
                     editorContext.SetSelection(EditorSelection());
                 }
             });
@@ -314,10 +344,6 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
 
     auto view = cam->GetTransform();
     auto proj = cam->GetPerspective();
-
-    Matrix4 transform = Matrix4(1.0f);
-    transform = glm::translate(transform, { 0, 2, 0 });
-    //lineCmd.DrawLine(proj * view * transform, Color(1, 0, 0, 1), 2.0f);
 
     auto camView = scene->m_Registry.view<TransformComponent, CameraComponent>();
     for (auto e : camView)
@@ -430,9 +456,6 @@ void ViewportWidget::OnLineDraw(DebugLineCmd& lineCmd)
         transform = glm::scale(transform, Vector3(cylinderCollider.Radius, cylinderCollider.Height, cylinderCollider.Radius));
         lineCmd.DrawCylinder(proj * view * transform, Color(1, 0, 0, 1.0f), 1.5f, true);
     }
-
-    lineCmd.DrawBox(proj * view * transform, { 0, 1, 0, 1 }, 1.5f, true);
-    //lineCmd.DrawArrow({3, 3, 0}, {7, 3, 0}, proj, view, Color(1, 0, 0, 1), 3.0f);
 }
 
 void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
@@ -472,14 +495,12 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
         debugCmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2(icon), color, entityId);
     };
     
-	debugCmd.DrawQuad(proj * view * glm::translate(Matrix4(1.0f), { 0, 4, 0 }));
-
     auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
     for (auto e : lightView)
     {
         auto [transform, light] = scene->m_Registry.get<TransformComponent, LightComponent>(e);
 
-        auto selection = editorContext.GetSelection();
+        const auto& selection = editorContext.GetSelection();
         bool isSelected = selection.Type == EditorSelectionType::Entity && selection.Entity.GetHandle() == (int)e;
 
         std::string texturePath = "Resources/Gizmos/";
@@ -513,11 +534,6 @@ void ViewportWidget::OnDebugDraw(DebugCmd& debugCmd)
 
 void ViewportWidget::DrawOverlay()
 {
-    if (Engine::GetGameState() == GameState::Playing)
-    {
-        return;
-    }
-
     ImGuiIO& io = ImGui::GetIO();
     const float DISTANCE = 10.0f;
     int corner = 0;
@@ -533,7 +549,7 @@ void ViewportWidget::DrawOverlay()
     ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
     ImGui::SetNextWindowViewport(viewport->ID);
 
-    ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+    ImGui::SetNextWindowBgAlpha(0.35f * overlayOpacity); // Transparent background
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 32.0f);
 
     bool showOverlay = true;
@@ -547,7 +563,7 @@ void ViewportWidget::DrawOverlay()
         if (selectedMode)
         {
             Color color = Engine::GetProject()->Settings.PrimaryColor;
-            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0 });
         }
 
         if (ImGui::Button(ICON_FA_ARROWS_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_W, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !IsControllingCamera))
@@ -589,7 +605,7 @@ void ViewportWidget::DrawOverlay()
         if (selectedMode)
         {
             Color color = Engine::GetProject()->Settings.PrimaryColor;
-            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1 });
         }
 
         if (ImGui::Button(ICON_FA_EXPAND_ALT, ImVec2(30, 28)) || (ImGui::Shortcut(ImGuiKey_R, 0, ImGuiInputFlags_RouteGlobalLow) && !ImGui::IsAnyItemActive() && !IsControllingCamera))
@@ -610,7 +626,7 @@ void ViewportWidget::DrawOverlay()
         if (selectedMode)
         {
             Color color = Engine::GetProject()->Settings.PrimaryColor;
-            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1 });
         }
 
         if (ImGui::Button(ICON_FA_GLOBE, ImVec2(30, 28)))
@@ -631,7 +647,7 @@ void ViewportWidget::DrawOverlay()
         if (selectedMode)
         {
             Color color = Engine::GetProject()->Settings.PrimaryColor;
-            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1.0f });
+            ImGui::PushStyleColor(ImGuiCol_Button, { color.r, color.g, color.b, 1 });
         }
 
         if (ImGui::Button(ICON_FA_CUBE, ImVec2(30, 28)))
@@ -651,6 +667,7 @@ void ViewportWidget::DrawOverlay()
         ImGui::SameLine();
         ImGui::PushItemWidth(75);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6, 6 });
+        
         ImGui::DragFloat("##snapping", &CurrentSnapping.x, 0.01f, 0.0f, 100.0f);
         CurrentSnapping = { CurrentSnapping.x, CurrentSnapping.x, CurrentSnapping.x };
         ImGui::PopStyleVar();
@@ -701,7 +718,7 @@ void ViewportWidget::DrawOverlay()
             ImVec2 end = start + ImGui::GetWindowSize() - ImVec2(0, 16.0);
             ImVec2 startOffset = ImVec2(start.x, end.y - (normalizedSpeed * (ImGui::GetWindowHeight() - 20.0)));
 
-            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180), 8.0f, ImDrawFlags_RoundCornersAll);
+            ImGui::GetWindowDrawList()->AddRectFilled(startOffset + ImVec2(0, 10.0), end + ImVec2(0.0, 20.0), IM_COL32(255, 255, 255, 180 * overlayOpacity), 8.0f, ImDrawFlags_RoundCornersAll);
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 100);
             ImGui::PopStyleVar();
         }

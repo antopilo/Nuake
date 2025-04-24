@@ -84,13 +84,15 @@ struct CopyPushConstant
 {
     int SourceTextureID;
     int Source2TextureID;
+    int Mode;
 };
 
 [[vk::push_constant]]
 CopyPushConstant pushConstants;
 
 // Outputs
-struct VSOutput {
+struct VSOutput 
+{
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };

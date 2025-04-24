@@ -92,7 +92,8 @@ struct DebugConstant
 DebugConstant pushConstants;
 
 // Outputs
-struct VSOutput {
+struct VSOutput 
+{
     float4 Position : SV_Position;
     float2 UV : TEXCOORD0;
 };

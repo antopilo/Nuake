@@ -125,9 +125,9 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
             const char* errorMsg = reinterpret_cast<const char*>(errorBlobUtf8->GetBufferPointer());
             std::string errorMsgStr(errorMsg, errorBlobUtf8->GetBufferSize());
               
-            Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);               
+            Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);         
               
-            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);
+            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);   
         }     
         else
         { 
@@ -141,7 +141,7 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
 	
 	Ref<VulkanShader> shader = CreateRef<VulkanShader>(        
         static_cast<uint32_t*>(code->GetBufferPointer()),     
-        static_cast<uint32_t>(code->GetBufferSize()), shaderType);    
+        static_cast<uint32_t>(code->GetBufferSize()), shaderType);     
 
     shader->SetSourcePath(path);
     return shader;    

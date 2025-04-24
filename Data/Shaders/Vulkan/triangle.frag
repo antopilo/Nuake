@@ -80,12 +80,13 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct PSInput {
+struct PSInput 
+{
     float4 Position : SV_Position;
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
     float3 Normal : TEXCOORD2;
-    float3x3 TBN : TEXCOORD3;
+    //float3x3 TBN : TEXCOORD3;
 };
 
 struct PSOutput {
@@ -118,7 +119,7 @@ PSOutput main(PSInput input)
     {
         // Sample from texture.
     }
-    normal = mul(input.TBN, normal);
+    //normal = mul(input.TBN, normal);
     normal = input.Normal / 2.0f + 0.5f;
     output.oNormal = float4(normal, 1.0f);
 

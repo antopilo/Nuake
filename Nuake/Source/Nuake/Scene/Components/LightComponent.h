@@ -46,6 +46,7 @@ namespace Nuake
             BindComponentField<&LightComponent::CastShadows>("CastShadows", "CastShadows");
         }
 
+
     public:
         // All lights
         int32_t Type = Point;
@@ -72,7 +73,7 @@ namespace Nuake
     public:
 
         LightComponent();
-        ~LightComponent() = default;
+        ~LightComponent();
 
         std::vector<UUID> LightMapIDs = std::vector<UUID>();
         void SetCastShadows(bool toggle);

@@ -1,4 +1,4 @@
-#include "Logger.h"
+﻿#include "Logger.h"
 
 #include <iostream>
 #include <chrono>
@@ -40,29 +40,53 @@ namespace Nuake
 			0
 		};
 
+		std::string color;
 		switch (type)
 		{
 		case WARNING:
+			color = "\033[1;33m";
 			// TODO: Add color
 			break;
+		case COMPILATION:
+			color = "\033[1;34m";
+			break;
 		case CRITICAL:
-
+			color = "\033[1;31m";
 			break;
 		case VERBOSE:
-
+			color = "\033[0m";
 			break;
 		}
+		
+		// Icons
+		std::string transformedLogger = logger;
+		if (logger == "window")
+		{
+			transformedLogger += reinterpret_cast<const char*>(u8"🪟");
+		}
 
-		std::string msg = "[" + std::string(buff) + "] " + logger + " - " + log;
+		std::string msg = color + buff;
+
+		if (!logger.empty())
+		{
+			msg += " [" + transformedLogger + "]";
+		}
+
+		msg += " \033[38;5;245m" + log;
+
 		std::cout << msg << std::endl;
 
+		// Simulating m_Logs push logic
+		// Assuming m_Logs is a std::vector<std::string>
+		static std::vector<std::string> m_Logs;
+		constexpr size_t MAX_LOG = 1000;
 		if (m_Logs.size() >= MAX_LOG)
 			m_Logs.erase(m_Logs.begin());
 
-		m_Logs.push_back(newLog);
+		m_Logs.push_back(msg); // Use msg or whatever your final log content is
 	}
 
-	std::vector<LogEntry> Logger::GetLogs()
+	std::vector<LogEntry>& Logger::GetLogs()
 	{
 		return m_Logs;
 	}

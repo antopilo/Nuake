@@ -28,66 +28,6 @@
 
 GizmoDrawer::GizmoDrawer(EditorInterface* editor)
 {
-	m_LineShader = Nuake::ShaderManager::GetShader("Resources/Shaders/line.shader");
-
-	m_AxisLineBuffer = CreateRef<Nuake::VertexArray>();
-	m_AxisLineBuffer->Bind();
-
-	m_AxisLineVertexBuffer = CreateRef<VertexBuffer>(m_Vertices.data(), m_Vertices.size() * sizeof(Nuake::LineVertex));
-	auto vblayout = CreateRef<VertexBufferLayout>();
-	vblayout->Push<float>(3);
-	vblayout->Push<float>(4);
-
-	m_AxisLineBuffer->AddBuffer(*m_AxisLineVertexBuffer, *vblayout);
-
-	GenerateSphereGizmo();
-
-	// Box
-	const Color cubeColor = Color(1, 0, 0, 0.5f);
-	std::vector<LineVertex> mBoxVertices = 
-	{
-		LineVertex{Vector3(-1.f, -1.f, -1.f), cubeColor},
-		LineVertex{Vector3(1.0f, -1.f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.f, -1.f, 1.f), cubeColor},
-		LineVertex{Vector3(1.0f, -1.f, 1.f), cubeColor},
-		LineVertex{Vector3(-1.f, 1.f, -1.f), cubeColor},
-		LineVertex{Vector3(1.0f, 1.f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.f, 1.f, 1.f), cubeColor},
-		LineVertex{Vector3(1.0f, 1.f, 1.f), cubeColor},
-
-		LineVertex{Vector3(-1.f, -1.f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.0f, -1.f, 1.f), cubeColor},
-		LineVertex{Vector3(1.f, -1.f, -1.f), cubeColor},
-		LineVertex{Vector3(1.0f, -1.f, 1.f), cubeColor},
-		LineVertex{Vector3(-1.f, 1.f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.0f, 1.f, 1.f), cubeColor},
-		LineVertex{Vector3(1.f, 1.f, -1.f), cubeColor},
-		LineVertex{Vector3(1.0f, 1.f, 1.f), cubeColor},
-
-		LineVertex{Vector3(-1.0f, -1.0f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.f, 1.0f, -1.f), cubeColor},
-		LineVertex{Vector3(1.0f, -1.0f, -1.f), cubeColor},
-		LineVertex{Vector3(1.f, 1.0f, -1.f), cubeColor},
-		LineVertex{Vector3(-1.0f, -1.0f, 1.f), cubeColor},
-		LineVertex{Vector3(-1.f, 1.0f, 1.f), cubeColor},
-		LineVertex{Vector3(1.0f, -1.0f, 1.f), cubeColor},
-		LineVertex{Vector3(1.0f, 1.0f, 1.f), cubeColor}
-	};
-
-	m_BoxBuffer = CreateRef<Nuake::VertexArray>();
-	m_BoxBuffer->Bind();
-
-	m_BoxVertexBuffer = CreateRef<VertexBuffer>(mBoxVertices.data(), mBoxVertices.size() * sizeof(Nuake::LineVertex));
-
-	m_BoxBuffer->AddBuffer(*m_BoxVertexBuffer, *vblayout);
-
-	// Load gizmos
-	ModelLoader loader;
-	m_Gizmos = std::map<std::string, Ref<Model>>();
-	//_gizmos["cam"] = loader.LoadModel("Resources/Models/Camera.gltf");
-	//_gizmos["light"] = loader.LoadModel("Resources/Models/Light.gltf");
-	//_gizmos["player"] = loader.LoadModel("Resources/Models/Camera.gltf");
-
 	m_Editor = editor;
 }
 

@@ -15,6 +15,7 @@ namespace Nuake {
 		float mFogExponant = 1.0f;
 		Vector2 mSize;
 		Texture* mDepth;
+		float mBaseAmbient = 0.1f;
 
 		Scope<FrameBuffer> mVolumetricFramebuffer;
 		Scope<FrameBuffer> mFinalFramebuffer;
@@ -31,6 +32,8 @@ namespace Nuake {
 
 		inline void SetStepCount(unsigned int amount) { mStepCount = amount; }
 
+		void SetBaseAmbient(float value) { mBaseAmbient = value; }
+		float GetBaseAmbient() const { return mBaseAmbient; }
 		void SetFogExponant(float expo) { mFogExponant = expo; }
 		float GetFogExponant() const { return mFogExponant; }
 

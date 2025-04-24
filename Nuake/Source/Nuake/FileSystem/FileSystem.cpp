@@ -7,9 +7,16 @@
 #include "Directory.h"
 #include "File.h"
 
+#include "Nuake/Resource/Bakers/AssetBakerManager.h"
+#include "Nuake/Resource/Resolvers/ResolverManager.h"
+
 #include "filewatch/FileWatch.hpp"
 
 #include <filesystem>
+#include <Nuake/Resource/ResourceManifest.h>
+#include <Nuake/Resource/ResourceManager.h>
+#include "Nuake/Resource/RID.h"
+
 
 using namespace Nuake;
 
@@ -113,8 +120,11 @@ std::vector<Ref<File>> FileSystem::GetAllFiles(const FileType fileType)
 void FileSystem::SetRootDirectory(const std::string path)
 {
 	Root = path;
-	RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
-		path, [&](const std::string& path, const filewatch::Event& event)
+
+	if (!RootFileWatch)
+	{
+		RootFileWatch = CreateRef<filewatch::FileWatch<std::string>>(
+			path, [&](const std::string& path, const filewatch::Event& event)
 			{
 				std::string normalizedPath = String::ReplaceSlash(path);
 
@@ -133,23 +143,59 @@ void FileSystem::SetRootDirectory(const std::string path)
 					std::string extension = filePath.extension().string();
 					Ref<File> newImportedFile = CreateRef<File>(parentDirectory, FileSystem::RelativeToAbsolute(normalizedPath), name, extension);
 					parentDirectory->Files.push_back(newImportedFile);
+
+					AssetBakerManager::Get().OnNewAssetDetected(newImportedFile);
 				}
 
-				if(Ref<File> file = GetFile(normalizedPath); file)
+				if (Ref<File> file = GetFile(normalizedPath); file)
 				{
-					if (file->GetFileType() == FileType::Unknown)
-					{
-						return;
-					}
-
 					if (event == filewatch::Event::modified)
 					{
 						file->SetHasBeenModified(true);
+
+						AssetBakerManager::Get().OnNewAssetDetected(file);
+
+						if (file->GetExtension() != ".nkmesh")
+						{
+							return;
+						}
+
+						ResourceManifest& manifest = Nuake::ResourceManager::Manifest;
+						UUID oldUUID = manifest.GetResourceUUID(file->GetRelativePath());
+						
+						if(oldUUID == 0)
+						{
+							return;
+						}
+
+						Logger::Log("Old UUID" + std::to_string(oldUUID), "UUID", VERBOSE);
+						
+						//Ref<File> newFile = AssetBakerManager::Get().Bake(file);
+						auto& resolver = ResourceResolverManager::Get();
+						if (resolver.IsFileTypeResolvable(file->GetExtension()))
+						{
+							// Read uuid from file
+							const UUID& uuid = resolver.ResolveUUID(file);
+							Logger::Log("new UUID" + std::to_string(uuid), "UUID", VERBOSE);
+							manifest.RegisterResource(uuid, file->GetRelativePath());
+							RID::QueueRemap(oldUUID, uuid);
+						}
+
+						//	manifest.RegisterResource(uuid, file->GetRelativePath());
+						//
+						//	ResourceManager::RemapResource(oldUUID, uuid);
+						//
+						//	if (ResourceManager::IsResourceLoaded(uuid))
+						//	{
+						//		ResourceManager::ReloadResource(uuid);
+						//	}
+						//}
 					}
-					
 				}
 			}
-	);
+		);
+	}
+	
 	Scan();
 }
 

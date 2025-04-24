@@ -4,6 +4,7 @@
 #include "AssimpModule/AssimpModule.h"
 #include "AudioModule/AudioModule.h"
 #include "ExampleModule/ExampleModule.h"
+#include "QuakeModule/QuakeModule.h"
 
 #include "Nuake/Core/Logger.h"
 
@@ -15,6 +16,8 @@ void Nuake::Modules::StartupModules()
     AudioModule_Startup();
     Logger::Log("Starting ExampleModule", "modules");
     ExampleModule_Startup();
+    Logger::Log("Starting QuakeModule", "modules");
+    QuakeModule_Startup();
 }
 
 void Nuake::Modules::ShutdownModules()
@@ -25,4 +28,6 @@ void Nuake::Modules::ShutdownModules()
     AudioModule_Shutdown();
     Logger::Log("Shutting down ExampleModule", "modules");
     ExampleModule_Shutdown();
+    Logger::Log("Shutting down QuakeModule", "modules");
+    QuakeModule_Shutdown();
 }
