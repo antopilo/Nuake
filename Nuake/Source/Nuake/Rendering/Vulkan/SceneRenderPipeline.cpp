@@ -225,12 +225,15 @@ SceneRenderPipeline::SceneRenderPipeline()
 	BloomOutput = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 	BloomThreshold = CreateRef<VulkanImage>(ImageFormat::RGBA16F, defaultSize);
 
+	VolumetricOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+	VolumetricCombineOutput = CreateRef<VulkanImage>(ImageFormat::RGBA8, defaultSize);
+
 	RecreatePipeline();
 }
 
 SceneRenderPipeline::~SceneRenderPipeline()
 {
-	auto& res = GPUResources::Get();
+	auto& res = GPUResources::Get(); 
 	res.RemoveTexture(GBufferAlbedo);
 	res.RemoveTexture(GBufferNormal);
 	res.RemoveTexture(GBufferMaterial);
@@ -246,6 +249,8 @@ SceneRenderPipeline::~SceneRenderPipeline()
 	res.RemoveTexture(GizmoCombineOutput);
 	res.RemoveTexture(BloomOutput);
 	res.RemoveTexture(BloomThreshold);
+	res.RemoveTexture(VolumetricOutput);
+	res.RemoveTexture(VolumetricCombineOutput);
 }
 
 void SceneRenderPipeline::SetCamera(UUID camera)
@@ -274,6 +279,9 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 	SSAOOutput = ResizeImage(ctx, SSAOOutput, ctx.resolution);
 	SSAOBlurOutput = ResizeImage(ctx, SSAOBlurOutput, ctx.resolution);
 
+	VolumetricOutput = ResizeImage(ctx, VolumetricOutput, ctx.resolution);
+	VolumetricCombineOutput = ResizeImage(ctx, VolumetricCombineOutput, ctx.resolution);
+
 	OutlineOutput = ResizeImage(ctx, OutlineOutput, ctx.resolution);
 
 	Color clearColor = ctx.scene->GetEnvironment()->AmbientColor;
@@ -286,6 +294,8 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ SSAOBlurOutput },
 		{ ShadingOutput },													// Shading
 		{ TonemappedOutput },												// Tonemap
+		{ VolumetricOutput },
+		{ VolumetricCombineOutput },
 		{ GizmoOutput, GBufferEntityID, GBufferDepth }, // Reusing depth from gBuffer
 		{ GizmoCombineOutput },
 		{ OutlineOutput },
@@ -599,6 +609,81 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.DrawIndexed(6);
 	});
 
+	auto& volumetricPass = GBufferPipeline.AddPass("Volumetric");
+	volumetricPass.SetShaders(shaderMgr.GetShader("volumetric_vert"), shaderMgr.GetShader("volumetric_frag"));
+	volumetricPass.SetPushConstant(volumetricConstant);
+	volumetricPass.AddInput("Depth");
+	volumetricPass.AddAttachment("VolumetricOutput", VolumetricOutput->GetFormat());
+	volumetricPass.SetDepthTest(false);
+	volumetricPass.SetPreRender([&](PassRenderContext& ctx)
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		//ctx.renderPass->SetClearColor({0, 0, 0, 0});
+
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	volumetricPass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+		auto env = ctx.scene->GetEnvironment();
+		volumetricConstant.FogAmount = env->mVolumetric->GetFogAmount();
+		volumetricConstant.StepCount = env->mVolumetric->GetStepCount();
+		volumetricConstant.Exponant = env->mVolumetric->GetFogExponant();
+		volumetricConstant.Ambient = env->mVolumetric->GetBaseAmbient();
+		auto& res = GPUResources::Get();
+		volumetricConstant.DepthTextureID = res.GetBindlessTextureID(GBufferDepth->GetID());
+		volumetricConstant.CamViewID = ctx.cameraID;
+		volumetricConstant.LightCount = res.LightCount;
+
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(VolumetricConstant), &volumetricConstant);
+
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
+	auto& volumetricCombinePass = GBufferPipeline.AddPass("VolumetricCombine");
+	volumetricCombinePass.SetPushConstant(copyConstant);
+	volumetricCombinePass.SetShaders(shaderMgr.GetShader("copy_vert"), shaderMgr.GetShader("copy_frag"));
+	volumetricCombinePass.AddAttachment("VolumetricCombineOutput", VolumetricCombineOutput->GetFormat());
+	volumetricCombinePass.SetDepthTest(false);
+	volumetricCombinePass.SetPreRender([&](PassRenderContext& ctx)
+	{
+		Cmd& cmd = ctx.commandBuffer;
+		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& res = GPUResources::Get();
+
+		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
+		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
+		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
+	});
+	volumetricCombinePass.SetRender([&](PassRenderContext& ctx)
+	{
+		auto& cmd = ctx.commandBuffer;
+
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(VolumetricOutput->GetID());
+		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
+		copyConstant.Mode = 1;
+		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant); 
+
+		auto& quadMesh = VkSceneRenderer::QuadMesh;
+		cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, quadMesh->GetDescriptorSet(), 1);
+		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
+		cmd.DrawIndexed(6);
+	});
+
 	auto& gizmoPass = GBufferPipeline.AddPass("Gizmo");
 	gizmoPass.SetShaders(shaderMgr.GetShader("gizmo_vert"), shaderMgr.GetShader("gizmo_frag"));
 	gizmoPass.SetPushConstant<DebugConstant>(debugConstant);
@@ -640,7 +725,7 @@ void SceneRenderPipeline::RecreatePipeline()
 
 		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
+		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3); 
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
 		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
 		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
@@ -650,7 +735,8 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& cmd = ctx.commandBuffer;
 
 		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(GizmoOutput->GetID());
-		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(TonemappedOutput->GetID());
+		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(VolumetricCombineOutput->GetID());
+		copyConstant.Mode = 0;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
 		auto& quadMesh = VkSceneRenderer::QuadMesh;
@@ -662,7 +748,7 @@ void SceneRenderPipeline::RecreatePipeline()
 	auto& outlinePass = GBufferPipeline.AddPass("Outline");
 	outlinePass.SetShaders(shaderMgr.GetShader("outline_vert"), shaderMgr.GetShader("outline_frag"));
 	outlinePass.SetPushConstant<OutlineConstant>(outlineConstant);
-	outlinePass.AddAttachment("GizmoCombineOutput", ImageFormat::RGBA8);
+	outlinePass.AddAttachment("GizmoCombineOutput", GizmoCombineOutput->GetFormat());
 	outlinePass.SetDepthTest(false);
 	outlinePass.AddInput("ShadingOutput");
 	outlinePass.AddInput("EntityID");
@@ -751,6 +837,7 @@ void SceneRenderPipeline::RecreatePipeline()
 
 		copyConstant.SourceTextureID = GPUResources::Get().GetBindlessTextureID(LineOutput->GetID());
 		copyConstant.Source2TextureID = GPUResources::Get().GetBindlessTextureID(OutlineOutput->GetID());
+		copyConstant.Mode = 0;
 		cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(copyConstant), &copyConstant);
 
 		auto& quadMesh = VkSceneRenderer::QuadMesh;

@@ -89,10 +89,22 @@ namespace Nuake
 		int SourceTextureID;
 	};
 
+	struct VolumetricConstant
+	{
+		int DepthTextureID;
+		int StepCount;
+		float FogAmount;
+		float Exponant;
+		int CamViewID;
+		int LightCount;
+		float Ambient;
+	};
+
 	struct CopyConstant
 	{
 		int SourceTextureID;
 		int Source2TextureID;
+		int Mode;
 	};
 
 	struct OutlineConstant
@@ -158,6 +170,8 @@ namespace Nuake
 		Ref<VulkanImage> GizmoCombineOutput;
 
 		Ref<VulkanImage> TonemappedOutput;
+		Ref<VulkanImage> VolumetricOutput;
+		Ref<VulkanImage> VolumetricCombineOutput;
 
 		Ref<VulkanImage> OutlineOutput;
 
@@ -183,6 +197,7 @@ namespace Nuake
 		CopyConstant copyConstant;
 		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
+		VolumetricConstant volumetricConstant;
 
 		RenderPipeline GBufferPipeline;
 

@@ -894,6 +894,24 @@ void SelectionPropertyWidget::DrawFile(Ref<Nuake::File> file)
                 ImGui::TableNextColumn();
                 {
                     // Title
+                    ImGui::Text("Base Ambient");
+                    ImGui::TableNextColumn();
+
+                    float fogAmount = env->mVolumetric->GetBaseAmbient();
+                    ImGui::DragFloat("##Base Ambient", &fogAmount, .001f, 0.f, 1.0f);
+                    env->mVolumetric->SetBaseAmbient(fogAmount);
+                    ImGui::TableNextColumn();
+
+                    // Reset button
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1, 1, 1, 0));
+                    std::string resetBloomThreshold = ICON_FA_UNDO + std::string("##resetBase");
+                    if (ImGui::Button(resetBloomThreshold.c_str())) env->mVolumetric->SetBaseAmbient(0.1f);
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TableNextColumn();
+                {
+                    // Title
                     ImGui::Text("Strength");
                     ImGui::TableNextColumn();
 
