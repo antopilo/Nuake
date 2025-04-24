@@ -3,7 +3,7 @@
 #include "IEditorWidget.h"
 
 #include <imgui/ImGuizmo.h>
-#include "../../../../../AnimatedValue.h"
+#include "../../../misc/AnimatedValue.h"
 
 class EditorContext;
 

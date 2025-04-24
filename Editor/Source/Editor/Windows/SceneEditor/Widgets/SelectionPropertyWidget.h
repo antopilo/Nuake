@@ -2,7 +2,7 @@
 #include "IEditorWidget.h"
 #include "../../EditorSelectionPanel.h"
 
-#include "../../../../../AnimatedValue.h"
+#include "../../../misc/AnimatedValue.h"
 
 class EditorContext;
 

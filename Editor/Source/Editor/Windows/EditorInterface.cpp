@@ -65,7 +65,7 @@
 
 #include "../Events/EditorRequests.h"
 #include "../../../../Nuake/Thirdparty/glfw/include/GLFW/glfw3.h"
-#include "../../../AnimatedValue.h"
+#include "../misc/AnimatedValue.h"
 
 namespace Nuake {
     
