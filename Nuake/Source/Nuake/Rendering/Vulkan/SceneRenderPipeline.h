@@ -102,6 +102,7 @@ namespace Nuake
 		float NoiseSpeed;
 		float NoiseScale;
 		float NoiseStrength;
+		float CSMSplits[4];
 	};
 
 	struct CopyConstant
@@ -175,6 +176,7 @@ namespace Nuake
 
 		Ref<VulkanImage> TonemappedOutput;
 		Ref<VulkanImage> VolumetricOutput;
+		Ref<VulkanImage> VolumetricBlurOutput;
 		Ref<VulkanImage> VolumetricCombineOutput;
 
 		Ref<VulkanImage> OutlineOutput;
@@ -202,6 +204,7 @@ namespace Nuake
 		OutlineConstant outlineConstant;
 		BloomConstant bloomConstant;
 		VolumetricConstant volumetricConstant;
+
 
 		RenderPipeline GBufferPipeline;
 

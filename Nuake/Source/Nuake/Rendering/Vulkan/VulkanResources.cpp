@@ -295,7 +295,7 @@ void GPUResources::CreateBindlessLayout()
 	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
 
 	VkDescriptorImageInfo textureInfo = {};
-	textureInfo.sampler = SamplerNearest;  // Your VkSampler object
+	textureInfo.sampler = SamplerLinear;  // Your VkSampler object
 	textureInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 	VkWriteDescriptorSet samplerWrite = {};

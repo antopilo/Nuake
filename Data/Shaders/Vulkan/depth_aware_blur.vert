@@ -80,24 +80,14 @@ struct CameraView {
 [[vk::binding(0, 6)]]
 StructuredBuffer<CameraView> cameras;
 
-struct VolumetricConstant
+struct DepthAwareBlurConstant
 {
     int DepthTextureID;
-    int StepCount;
-    float FogAmount;
-    float Exponant;
-    int CamViewID;
-    int LightCount;
-    float Ambient;
-    float Time;
-    float NoiseSpeed;
-    float NoiseScale;
-    float NoiseStrength;
-    float CSMSplits[4];    
+    int VolumetricTextureID;
 };
 
 [[vk::push_constant]]
-VolumetricConstant pushConstants;
+DepthAwareBlurConstant pushConstants;
 
 // Outputs
 struct VSOutput 

@@ -103,6 +103,7 @@ struct VolumetricConstant
     float NoiseSpeed;
     float NoiseScale;
     float NoiseStrength;
+    float CSMSplits[4];
 };
 
 [[vk::push_constant]]
@@ -214,8 +215,28 @@ float snoise(float3 v)
     return 42.0 * dot(m*m, float4(dot(g0,x0), dot(g1,x1), dot(g2,x2), dot(g3,x3)));
 }
 
+int GetCSMSplit(float depth)
+{
+    for(int i = 0; i < 4; i++)
+    {
+        float csmSplitDepth = pushConstants.CSMSplits[i];
+
+        if(depth < csmSplitDepth + 0.000001)
+        {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
 PSOutput main(PSInput input)
 {
+    float ditherPattern[4][4] = { { 0.0f, 0.5f, 0.125f, 0.625f},
+    { 0.75f, 0.22f, 0.875f, 0.375f},
+    { 0.1875f, 0.6875f, 0.0625f, 0.5625},
+    { 0.9375f, 0.4375f, 0.8125f, 0.3125} };
+
     CameraView camView = cameras[pushConstants.CamViewID];
     float3 startPosition = camView.Position;
 
@@ -246,30 +267,65 @@ PSOutput main(PSInput input)
         for(int l = 0; l < pushConstants.LightCount; l++)
         {
             Light light = lights[l];
-            if(light.type != 0) 
+            if(light.type == 0) 
             {
-                continue;
+                float lightDepth = length(worldPos - camView.Position);
+                int splitIndex = GetCSMSplit(lightDepth);
+
+                CameraView lightView = cameras[light.transformId[splitIndex]];
+                float4 fragPosLightSpace = mul(lightView.Projection, mul(lightView.View, float4(currentPosition, 1.0)));
+                float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+                projCoords.xy = projCoords.xy * 0.5 + 0.5;
+
+                float currentDepth = projCoords.z;
+                float closestDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler, projCoords.xy).r;
+
+                float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
+                float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;
+                if(closestDepth < currentDepth)
+                {
+                    accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color.xyz) * pushConstants.Exponant * ((snoise(noiseSamplePos.xyz) + 1.0) / 2.0);
+                }
+                else
+                {
+                    accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color.xyz) * pushConstants.Ambient * ((snoise(noiseSamplePos.xyz) + 1.0) / 2.0);
+                }
             }
-
-            CameraView lightView = cameras[light.transformId[0]];
-            float4 fragPosLightSpace = mul(lightView.Projection, mul(lightView.View, float4(currentPosition, 1.0)));
-            float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-            projCoords.xy = projCoords.xy * 0.5 + 0.5;
-
-            float currentDepth = projCoords.z;
-            float closestDepth = textures[light.shadowMapTextureId[0]].Sample(mySampler, projCoords.xy).r;
-
-            float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
-            float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;
-            if(closestDepth < currentDepth)
+            else if(light.type == 1)
             {
-                accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color) * pushConstants.Exponant * ((snoise(noiseSamplePos.xyz) + 1.0) / 2.0);
+                float3 lightToFrag = currentPosition - light.position;
+                float distance = length(lightToFrag);
+                float3 lightDir = normalize(-lightToFrag);
+                float attenuation = 1.0 / (distance * distance);
+                attenuation = 1.0 - smoothstep(0.0, 3.0f, distance);
+                float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
+                float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;
+                float lightScatter = (snoise(noiseSamplePos.xyz) + 1.0) * 0.5;
+
+                float3 scatterTerm = ComputeScattering(dot(rayDirection, lightDir)).rrr * light.color.xyz;
+
+                accumFog += scatterTerm * lightScatter * pushConstants.Exponant * attenuation;
             }
-            else
+            else if(light.type == 2)
             {
-                accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color) * pushConstants.Ambient * ((snoise(noiseSamplePos.xyz) + 1.0) / 2.0);
+                float3 lightToFrag = currentPosition - light.position;
+                float distance = length(lightToFrag);
+                float3 lightDir = normalize(-lightToFrag);
+                float attenuation = 1.0 / (distance * distance);
+                attenuation = 1.0 - smoothstep(0.0, 6.0f, distance);
+                float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
+                float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;
+                float lightScatter = (snoise(noiseSamplePos.xyz) + 1.0) * 0.5;
+
+                float theta = dot(lightDir, normalize(-light.direction));
+                float epsilon = light.innerConeAngle - light.outerConeAngle;
+                float intensity = clamp((theta - light.outerConeAngle) / epsilon, 0.0, 1.0);
+                float3 scatterTerm = ComputeScattering(dot(rayDirection, lightDir)).rrr * light.color.xyz;
+                accumFog += scatterTerm * lightScatter * pushConstants.Exponant * attenuation * intensity;
             }
         }
+
+
 
         currentPosition += step ;
         

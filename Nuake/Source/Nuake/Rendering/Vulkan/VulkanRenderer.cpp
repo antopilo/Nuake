@@ -37,8 +37,11 @@
 #include <mutex>
 #include <algorithm>
 
-bool NKUseValidationLayer = true;
-
+#ifdef NK_DEBUG
+bool NKUseValidationLayer = true; 
+#else
+bool NKUseValidationLayer = false;
+#endif
 using namespace Nuake;
 
 VkRenderer::~VkRenderer()

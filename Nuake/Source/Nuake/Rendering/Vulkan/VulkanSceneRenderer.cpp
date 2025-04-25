@@ -417,6 +417,8 @@ void VkSceneRenderer::LoadShaders()
 	shaderMgr.AddShader("blur_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/blur.vert"));
 	shaderMgr.AddShader("volumetric_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/volumetric.frag"));
 	shaderMgr.AddShader("volumetric_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/volumetric.vert"));
+	shaderMgr.AddShader("depth_aware_blur_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/depth_aware_blur.vert"));
+	shaderMgr.AddShader("depth_aware_blur_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/depth_aware_blur.frag"));
 }
 
 void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, RenderContext inContext)
