@@ -10,6 +10,7 @@
 
 #include <Nuake/UI/ImUI.h>
 #include "../../../Misc/InterfaceFonts.h"
+#include <Nuake/Resource/Bakers/AssetBakerManager.h>
 
 using namespace Nuake;
 
@@ -269,7 +270,7 @@ void FileBrowserWidget::Draw()
 						{
 							if (searchQuery.empty() || f->GetName().find(String::Sanitize(searchQuery)) != std::string::npos)
 							{
-                                if (f->GetFileType() == FileType::Unknown || f->GetFileType() == FileType::Assembly)
+                                if ((f->GetFileType() == FileType::Unknown && !AssetBakerManager::Get().IsBakable(f)) || f->GetFileType() == FileType::Assembly)
 								{
 									continue;
 								}
@@ -779,6 +780,14 @@ void FileBrowserWidget::DrawFile(Ref<Nuake::File> file, uint32_t drawId)
             if (ImGui::MenuItem("Load Scene"))
             {
                 shouldOpenScene = true;
+            }
+        }
+        
+        if (AssetBakerManager::Get().IsBakable(file))
+        {
+            if (ImGui::MenuItem("Rebake"))
+            {
+                AssetBakerManager::Get().OnNewAssetDetected(file);
             }
         }
 

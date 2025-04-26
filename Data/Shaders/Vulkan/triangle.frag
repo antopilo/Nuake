@@ -13,8 +13,8 @@ struct Vertex
     float uv_x;
     float3 normal;
     float uv_y;
-    float3 tangent;
-    float3 bitangent;
+    float4 tangent;
+    float4 bitangent;
 };
 
 [[vk::binding(0, 1)]] 
@@ -86,7 +86,8 @@ struct PSInput
     float3 Color : TEXCOORD0;
     float2 UV : TEXCOORD1;
     float3 Normal : TEXCOORD2;
-    //float3x3 TBN : TEXCOORD3;
+    float3 Tangent : TEXCOORD3;
+    float3 Bitangent : TEXCOORD4;
 };
 
 struct PSOutput {
@@ -107,6 +108,8 @@ struct ModelPushConstant
 [[vk::push_constant]]
 ModelPushConstant pushConstants;
 
+
+
 PSOutput main(PSInput input)
 {
     PSOutput output;
@@ -114,13 +117,26 @@ PSOutput main(PSInput input)
     Material inMaterial = material[pushConstants.materialIndex];
     // NORMAL
     // TODO use TBN matrix
-    float3 normal = float3(0.5, 0.5, 1.0);
+    float3 T = input.Tangent.xyz;
+    float3 B = input.Bitangent.xyz;
+    float3 N = input.Normal.xyz;
+    float3x3 TBN = float3x3(T, B, N);
+
+    float3 normal = float3(0.0, 0.0, 1.0);
     if(inMaterial.hasNormal == 1)
     {
-        // Sample from texture.
+        normal = textures[inMaterial.normalTextureId].Sample(mySampler, input.UV).rgb;
+        normal.xyz = normal.zxy;
+        normal = normal * 2.0f - 1.0f;
     }
-    //normal = mul(input.TBN, normal);
-    normal = input.Normal / 2.0f + 0.5f;
+    else
+    {
+        normal = normal;
+    }
+
+    //normal = input.Normal;
+    normal = mul(transpose(TBN), normal);
+    normal = normal / 2.0f + 0.5f;
     output.oNormal = float4(normal, 1.0f);
 
     // MATERIAL

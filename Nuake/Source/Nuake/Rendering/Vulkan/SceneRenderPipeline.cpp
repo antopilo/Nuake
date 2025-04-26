@@ -17,6 +17,7 @@
 #include <Tracy.hpp>
 #include "DebugCmd.h"
 #include <random>
+#include <Nuake/Scene/Components/ParticleEmitterComponent.h>
 
 using namespace Nuake;
 
@@ -403,6 +404,31 @@ void SceneRenderPipeline::RecreatePipeline()
 				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(GBufferConstant), &gbufferConstant);
 				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
 				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
+			}
+		}
+
+		auto particleView = scene->m_Registry.view<TransformComponent, ParticleEmitterComponent, VisibilityComponent>();
+		for (auto e : particleView)
+		{
+			auto [transform, particle, visibility] = particleView.get<TransformComponent, ParticleEmitterComponent, VisibilityComponent>(e);
+
+			if (!visibility.Visible)
+				continue;
+
+			if (particle.resFile.dirty)
+			{
+				particle.resFile.dirty = false;
+
+				if (particle.resFile.Exist())
+				{
+					Ref<Nuake::Material> material = Nuake::ResourceLoader::LoadMaterial(particle.resFile.GetRelativePath());
+					particle.ParticleMaterial = material;
+				}
+			}
+
+			if (particle.ParticleMaterial == nullptr)
+			{
+				continue;
 			}
 		}
 	});
@@ -927,16 +953,7 @@ Ref<VulkanImage> SceneRenderPipeline::ResizeImage(PassRenderContext& ctx, Ref<Vu
 	// Register to resource manager
 	GPUResources& gpuResources = GPUResources::Get();
 	gpuResources.AddTexture(newAttachment);
-
-	using CleanUpFunc = std::function<void()>;
-	using CleanUpStack = std::stack<CleanUpFunc>;
-
-	CleanUpStack stack;
-	stack.push([image]() {
-		GPUResources& gpuResources = GPUResources::Get();
-		//gpuResources.RemoveTexture(image);
-	}); 
-	//gpuResources.QueueDeletion(std::move(stack));
+	gpuResources.RemoveTexture(image);
 
 	// We might need to do this?
 	ctx.commandBuffer.TransitionImageLayout(newAttachment, VK_IMAGE_LAYOUT_GENERAL);

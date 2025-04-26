@@ -35,10 +35,7 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 	
 	const std::string absolutePath = file->GetAbsolutePath();
 	auto importFlags = 
-		aiProcess_Triangulate | 
-		aiProcess_GenSmoothNormals |
-		aiProcess_FixInfacingNormals | 
-		aiProcess_CalcTangentSpace;
+		aiProcessPreset_TargetRealtime_Fast;
 	const aiScene* scene = importer.ReadFile(absolutePath, importFlags);
 	
 	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // Assimp failed
@@ -88,22 +85,22 @@ Ref<File> GLTFBaker::Bake(const Ref<File>& file)
 
 			if (!materialData.normal.empty())
 			{
-				material->SetNormal(absolutePath + "/../" + materialData.normal);
+				material->SetNormal(FileSystem::AbsoluteToRelative(absolutePath + "/../" + materialData.normal));
 			}
 
 			if (!materialData.ao.empty())
 			{
-				material->SetAO(absolutePath + "/../" + materialData.ao);
+				material->SetAO(FileSystem::AbsoluteToRelative(absolutePath + "/../" + materialData.ao));
 			}
 
 			if (!materialData.metallic.empty())
 			{
-				material->SetMetalness(absolutePath + "/../" + materialData.metallic);
+				material->SetMetalness(FileSystem::AbsoluteToRelative(absolutePath + "/../" + materialData.metallic));
 			}
 
 			if (!materialData.roughness.empty())
 			{
-				material->SetRoughness(absolutePath + "/../" + materialData.roughness);
+				material->SetRoughness(FileSystem::AbsoluteToRelative(absolutePath + "/../" + materialData.roughness));
 			}
 
 			ResourceManager::RegisterResource(material);

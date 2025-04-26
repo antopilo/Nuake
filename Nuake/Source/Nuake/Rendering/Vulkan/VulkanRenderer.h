@@ -236,6 +236,11 @@ namespace Nuake
 			return Device;
 		}
 
+		VkPhysicalDevice GetPhysicalDevice() const
+		{
+			return GPU;
+		}
+
 		FrameData& GetCurrentFrame() 
 		{ 
 			return Frames[FrameNumber % FRAME_OVERLAP]; 

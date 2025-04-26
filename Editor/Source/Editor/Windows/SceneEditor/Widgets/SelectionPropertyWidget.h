@@ -3,6 +3,7 @@
 #include "../../EditorSelectionPanel.h"
 
 #include "../../../misc/AnimatedValue.h"
+#include "../../../ComponentsPanel/MaterialEditor.h"
 
 class EditorContext;
 
@@ -12,6 +13,7 @@ using DrawFieldTypeFn = std::function<void(entt::meta_data& fieldMeta, entt::met
 class SelectionPropertyWidget : public IEditorWidget
 {
 private:
+	MaterialEditor matEditor;
 	TransformPanel transformPanel;
 	MeshPanel meshPanel;
 	SkinnedMeshPanel skinnedMeshPanel;

@@ -161,22 +161,72 @@ namespace Nuake
 
 	void Material::SetAO(const std::string ao)
 	{
+		if (FileSystem::FileExists(ao))
+		{
+			GPUResources& resources = GPUResources::Get();
+			Ref<VulkanImage> image = CreateRef<VulkanImage>(FileSystem::RelativeToAbsolute(ao));
+			if (resources.AddTexture(image))
+			{
+				AOImage = image->GetID();
+			}
+
+			Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(ao));
+			SetAO(aoTexture);
+		}
+
 		m_AO = CreateRef<Texture>(ao);
 	}
 
 	void Material::SetMetalness(const std::string metalness)
 	{
+		if (FileSystem::FileExists(metalness))
+		{
+			GPUResources& resources = GPUResources::Get();
+			Ref<VulkanImage> image = CreateRef<VulkanImage>(FileSystem::RelativeToAbsolute(metalness));
+			if (resources.AddTexture(image))
+			{
+				MetalnessImage = image->GetID();
+			}
+
+			Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(metalness));
+			SetMetalness(aoTexture);
+		}
+
 		m_Metalness = CreateRef<Texture>(metalness);
 	}
 
 	void Material::SetRoughness(const std::string roughness)
 	{
+		if (FileSystem::FileExists(roughness))
+		{
+			GPUResources& resources = GPUResources::Get();
+			Ref<VulkanImage> image = CreateRef<VulkanImage>(FileSystem::RelativeToAbsolute(roughness));
+			if (resources.AddTexture(image))
+			{
+				RoughnessImage = image->GetID();
+			}
+
+			Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(roughness));
+			SetRoughness(aoTexture);
+		}
+
 		m_Roughness = CreateRef<Texture>(roughness);
 	}
 
 	void Material::SetNormal(const std::string normal)
 	{
-		m_Normal = CreateRef<Texture>(normal);
+		if (FileSystem::FileExists(normal))
+		{
+			GPUResources& resources = GPUResources::Get();
+			Ref<VulkanImage> image = CreateRef<VulkanImage>(FileSystem::RelativeToAbsolute(normal));
+			if (resources.AddTexture(image))
+			{
+				NormalImage = image->GetID();
+			}
+
+			Ref<Texture> aoTexture = TextureManager::Get()->GetTexture(FileSystem::RelativeToAbsolute(normal));
+			SetNormal(aoTexture);
+		}
 	}
 
 	void Material::SetDisplacement(const std::string displacement)

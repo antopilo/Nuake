@@ -5,6 +5,7 @@
 ModelResourceInspector::ModelResourceInspector(Ref<Nuake::Model> model)
 {
 	_model = model;
+
 }
 
 void ModelResourceInspector::Draw()
@@ -19,7 +20,7 @@ void ModelResourceInspector::Draw()
 				std::string childId = "materialEditor" + std::to_string(i);
 				ImGui::BeginChild(childId.c_str(), ImVec2(0, 0), false);
 				{
-					MaterialEditor editor;
+					static MaterialEditor editor;
 					editor.Draw(_model->GetMeshes().at(i)->GetMaterial());
 				}
 				ImGui::EndChild();

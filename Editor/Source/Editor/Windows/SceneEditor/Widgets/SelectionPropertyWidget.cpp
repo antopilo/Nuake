@@ -3,7 +3,6 @@
 #include "Nuake/Scene/Components.h"
 
 #include "Nuake/UI/ImUI.h"
-#include "../../../ComponentsPanel/MaterialEditor.h"
 
 #include <Nuake/Resource/SkyResource.h>
 #include <Nuake/FileSystem/FileDialog.h>
@@ -238,7 +237,6 @@ void SelectionPropertyWidget::DrawFile(Ref<Nuake::File> file)
     {
     case FileType::Material:
     {
-        MaterialEditor matEditor;
         matEditor.Draw(std::static_pointer_cast<Material>(selectedResource));
         break;
     }
@@ -1665,14 +1663,14 @@ void SelectionPropertyWidget::DrawMaterialPanel(Ref<Nuake::Material> material)
         ImGui::EndChild();
     }
 
-    if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen)) 
     {
         ImGui::BeginChild("##normal", TexturePanelSize, true);
         {
             uint32_t textureID = 0;
             if (material->HasNormal())
             {
-                textureID = material->m_Normal->GetID();
+                textureID = material->m_Normal->GetID(); 
             }
 
             if (ImGui::ImageButtonEx(ImGui::GetCurrentWindow()->GetID("#image3"), (void*)textureID, ImVec2(80, 80), ImVec2(0, 1), ImVec2(1, 0), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1)))

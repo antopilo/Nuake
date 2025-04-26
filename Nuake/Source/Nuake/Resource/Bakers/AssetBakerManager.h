@@ -34,6 +34,11 @@ namespace Nuake
 			}
 		}
 		
+		bool IsBakable(const Ref<File>& file)
+		{
+			return Bakers.find(file->GetExtension()) != Bakers.end();
+		}
+
 		void OnAssetReimport(const Ref<File>& file)
 		{
 			const std::string extension = file->GetExtension();

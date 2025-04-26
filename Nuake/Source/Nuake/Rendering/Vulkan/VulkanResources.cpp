@@ -170,7 +170,7 @@ Ref<VulkanImage> GPUResources::GetTexture(const UUID& id)
 		return Images[id];
 	}
 
-	Logger::Log("Mesh with ID does not exist", "vulkan", CRITICAL);
+	Logger::Log("Texture with ID does not exist", "vulkan", CRITICAL);
 	return TextureManager::Get()->GetTexture2("missing_texture");
 }
 
@@ -285,13 +285,20 @@ void GPUResources::CreateBindlessLayout()
 	SSAOKernelDescriptor = allocator.Allocate(device, SSAOKernelDescriptorLayout);
 
 	// Samplers
+	VkPhysicalDeviceProperties properties{};
+	vkGetPhysicalDeviceProperties(VkRenderer::Get().GetPhysicalDevice(), &properties);
+
 	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
 	sampler.magFilter = VK_FILTER_NEAREST;
 	sampler.minFilter = VK_FILTER_NEAREST;
+	sampler.anisotropyEnable = VK_TRUE;
+	sampler.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 	vkCreateSampler(device, &sampler, nullptr, &SamplerNearest);
 
 	sampler.magFilter = VK_FILTER_LINEAR;
 	sampler.minFilter = VK_FILTER_LINEAR;
+	sampler.anisotropyEnable = VK_TRUE;
+	sampler.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
 
 	VkDescriptorImageInfo textureInfo = {};

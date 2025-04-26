@@ -127,7 +127,7 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
               
             Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);         
               
-            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);    
+            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);     
         }     
         else
         { 

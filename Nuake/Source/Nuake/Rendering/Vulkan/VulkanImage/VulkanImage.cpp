@@ -388,6 +388,7 @@ VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
 		sampler_info.minLod = -1000;
 		sampler_info.maxLod = 1000;
 		sampler_info.maxAnisotropy = 1.0f;
+		
 		VK_CALL(vkCreateSampler(VkRenderer::Get().GetDevice(), &sampler_info, nullptr, &Sampler));
 
 		// Create Descriptor Set using ImGUI's implementation
