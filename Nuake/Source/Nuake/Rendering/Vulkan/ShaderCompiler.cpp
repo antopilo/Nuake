@@ -14,6 +14,42 @@
 
 using namespace Nuake;
 
+class MyIncludeHandler : public IDxcIncludeHandler
+{
+public:
+    MyIncludeHandler(IDxcUtils* utils) : m_Utils(utils) {}
+
+    HRESULT STDMETHODCALLTYPE LoadSource(LPCWSTR pFilename, IDxcBlob** ppIncludeSource) override
+    {
+        // 1. Find the include file (pFilename) yourself (filesystem, memory, etc).
+        // 2. Create a blob and return it.
+
+        std::wstring fullPath = L"Resources/Shaders/Vulkan/" + std::wstring(pFilename);  
+
+        uint32_t codePage = DXC_CP_ACP;
+        CComPtr<IDxcBlobEncoding> sourceBlob;
+        return m_Utils->LoadFile(fullPath.c_str(), &codePage, &sourceBlob);
+    }
+
+    // IUnknown methods
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject) override
+    {
+        if (riid == __uuidof(IDxcIncludeHandler) || riid == __uuidof(IUnknown)) {
+            *ppvObject = static_cast<IDxcIncludeHandler*>(this);
+            AddRef();
+            return S_OK;
+        }
+        *ppvObject = nullptr;
+        return E_NOINTERFACE;
+    }
+
+    ULONG STDMETHODCALLTYPE AddRef(void) override { return 1; }
+    ULONG STDMETHODCALLTYPE Release(void) override { return 1; }
+
+private:
+    IDxcUtils* m_Utils;
+};
+
 Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
 {
     HRESULT hres;
@@ -97,12 +133,14 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
     buffer.Ptr = sourceBlob->GetBufferPointer();
     buffer.Size = sourceBlob->GetBufferSize();
 
+    CComPtr<IDxcIncludeHandler> includeHandler;
+    utils->CreateDefaultIncludeHandler(&includeHandler);
     CComPtr<IDxcResult> result{ nullptr };
     hres = compiler->Compile(
         &buffer,
         arguments.data(),
         (uint32_t)arguments.size(),
-        nullptr,
+        includeHandler,
         IID_PPV_ARGS(&result)
     );
 
@@ -127,7 +165,7 @@ Ref<VulkanShader> ShaderCompiler::CompileShader(const std::string& path)
               
             Logger::Log("Shader compilation failed: " + errorMsgStr, "DXC", CRITICAL);         
               
-            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);
+            throw std::runtime_error("Shader compilation failed: " + errorMsgStr);  
         }     
         else
         { 

@@ -394,7 +394,7 @@ void VkSceneRenderer::LoadShaders()
 {
 	// TODO: load embedded shaders in the future
 	VkShaderManager& shaderMgr = VkShaderManager::Get();
-	ShaderCompiler& shaderCompiler = ShaderCompiler::Get();
+	ShaderCompiler& shaderCompiler = ShaderCompiler::Get(); 
 	shaderMgr.AddShader("basic_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/triangle.frag"));
 	shaderMgr.AddShader("basic_vert", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/triangle.vert"));
 	shaderMgr.AddShader("shading_frag", shaderCompiler.CompileShader("Resources/Shaders/Vulkan/shading.frag"));
