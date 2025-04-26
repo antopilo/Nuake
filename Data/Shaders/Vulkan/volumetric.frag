@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,6 +41,7 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -241,7 +242,7 @@ PSOutput main(PSInput input)
     float3 startPosition = camView.Position;
 
     int depthTexture = pushConstants.DepthTextureID;
-    float depth = textures[depthTexture].Sample(mySampler, input.UV).r;
+    float depth = textures[depthTexture].Sample(mySampler[1], input.UV).r;
 
     float3 worldPos = WorldPosFromDepth(depth, input.UV, camView.InverseProjection, camView.InverseView);
 
@@ -284,7 +285,7 @@ PSOutput main(PSInput input)
                     projCoords.xy = projCoords.xy * 0.5 + 0.5;
 
                     float currentDepth = projCoords.z;
-                    float closestDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler, projCoords.xy).r;
+                    float closestDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler[1], projCoords.xy).r;
 
                     float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
                     float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;

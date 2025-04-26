@@ -233,6 +233,17 @@ void SelectionPropertyWidget::DrawAddComponentMenu(Nuake::Entity entity)
 void SelectionPropertyWidget::DrawFile(Ref<Nuake::File> file)
 {
     using namespace Nuake;
+    auto fileType = file->GetFileType();
+
+    if (fileType != FileType::Material)
+    {
+        matEditor.Disable();
+    }
+    else
+    {
+        matEditor.Enable();
+    }
+
     switch (file->GetFileType())
     {
     case FileType::Material:

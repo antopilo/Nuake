@@ -13,5 +13,7 @@ public:
 	MaterialEditor();
 	~MaterialEditor() = default;
 
+	void Disable();
+	void Enable();
 	void Draw(Ref<Nuake::Material> material);
 };

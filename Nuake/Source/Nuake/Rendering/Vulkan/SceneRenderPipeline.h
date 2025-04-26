@@ -75,10 +75,11 @@ namespace Nuake
 		int DepthTextureID;
 		int NormalTextureID;
 		int MaterialTextureID;
+		int LightOffset;
 		int LightCount;
 		int CameraID;
-		float CascadeSplits[4];
 		float AmbientTerm;
+		float CascadeSplits[4];
 		int SSAOTextureID;
 	};
 

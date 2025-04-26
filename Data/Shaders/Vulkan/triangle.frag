@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,6 +41,7 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -114,7 +115,9 @@ PSOutput main(PSInput input)
 {
     PSOutput output;
 
-    Material inMaterial = material[pushConstants.materialIndex];
+    Material inMaterial = material[pushConstants.materialIndex]; 
+
+    SamplerState samplerr = mySampler[inMaterial.samplingType];
     // NORMAL
     // TODO use TBN matrix
     float3 T = input.Tangent.xyz;
@@ -125,7 +128,7 @@ PSOutput main(PSInput input)
     float3 normal = float3(0.0, 0.0, 1.0);
     if(inMaterial.hasNormal == 1)
     {
-        normal = textures[inMaterial.normalTextureId].Sample(mySampler, input.UV).rgb;
+        normal = textures[inMaterial.normalTextureId].Sample(samplerr, input.UV).rgb;
         normal.xyz = normal.zxy;
         normal = normal * 2.0f - 1.0f;
     }
@@ -145,7 +148,7 @@ PSOutput main(PSInput input)
     float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
     if(inMaterial.hasAlbedo == 1)
     {
-        float4 albedoSample = textures[inMaterial.albedoTextureId].Sample(mySampler, input.UV);
+        float4 albedoSample = textures[inMaterial.albedoTextureId].Sample(samplerr, input.UV);
 
         // Alpha cutout?
         if(albedoSample.a < 0.001f)
@@ -170,7 +173,7 @@ PSOutput main(PSInput input)
         // TODO: Sample from AO texture
     }
 
-    float roughnessValue = inMaterial.roughnessValue;
+    float roughnessValue = inMaterial.roughnessValue; 
     if(inMaterial.hasRoughness == 1)
     {
         // TODO: Sample from roughness texture

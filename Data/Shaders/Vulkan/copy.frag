@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,6 +41,7 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -108,8 +109,8 @@ PSOutput main(PSInput input)
     int source2TextureID = pushConstants.Source2TextureID;
 
     float2 uv = input.UV;
-    float4 sampleValue = textures[sourceTextureID].Sample(mySampler, input.UV);
-    float4 sampleValue2 = textures[source2TextureID].Sample(mySampler, input.UV);
+    float4 sampleValue = textures[sourceTextureID].Sample(mySampler[1], input.UV);
+    float4 sampleValue2 = textures[source2TextureID].Sample(mySampler[1], input.UV);
 
     if(pushConstants.Mode == 0)
     {

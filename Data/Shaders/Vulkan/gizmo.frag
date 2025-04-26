@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,6 +41,7 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -114,7 +115,7 @@ PSOutput main(PSInput input)
     else
     {
         float2 uv = input.UV;
-        float4 textureSample = textures[pushConstants.TextureID].Sample(mySampler, uv);
+        float4 textureSample = textures[pushConstants.TextureID].Sample(mySampler[1], uv);
 
         // Alpha scisorring
         if(textureSample.a < 0.1)

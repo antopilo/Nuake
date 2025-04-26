@@ -26,6 +26,16 @@ enum class Shapes
 
 Shapes currentShape = Shapes::Sphere;
 
+void MaterialEditor::Enable()
+{
+	SceneViewport->SetActive(true);
+}
+
+void MaterialEditor::Disable()
+{
+	SceneViewport->SetActive(false);
+}
+
 MaterialEditor::MaterialEditor()
 {
 	using namespace Nuake;
@@ -37,12 +47,13 @@ MaterialEditor::MaterialEditor()
 	camera.GetComponent<Nuake::TransformComponent>().Translation = Nuake::Vector3(-2, 0, -2);
 	auto& camComponent = camera.AddComponent<Nuake::CameraComponent>();
 	camComponent.CameraInstance->Fov = 44.0f;
-	//auto light = PreviewScene->CreateEntity("Light");
-	//auto& lightC = light.AddComponent<LightComponent>();
-	//lightC.CastShadows = false;
-	//lightC.Type = LightType::Directional;
+	auto light = PreviewScene->CreateEntity("Light");
+	auto& lightC = light.AddComponent<LightComponent>();
+	auto& lightT = light.AddComponent<TransformComponent>();
+	lightC.CastShadows = false;
+	lightC.Type = LightType::Directional;
 
-	glm::vec3 forward = glm::normalize(Vector3(0, 1, 0));
+	glm::vec3 forward = glm::normalize(Vector3(.33, -.33, -.33));
 	glm::vec3 up = glm::vec3(0, 1, 0);
 
 	// Prevent up being colinear with forward
@@ -55,7 +66,7 @@ MaterialEditor::MaterialEditor()
 	glm::mat3 rotationMatrix(right, up, forward);
 
 	//auto& lightT = light.GetComponent<TransformComponent>();
-	//lightT.GlobalRotation = glm::quat_cast(rotationMatrix);
+	lightT.GlobalRotation = glm::quat_cast(rotationMatrix);
 
 	auto sphere = PreviewScene->CreateEntity("Sphere");
 	auto& modelComponent = sphere.AddComponent<Nuake::ModelComponent>();
@@ -272,7 +283,6 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 	{
 		UIFont boldfont = UIFont(Fonts::SubTitle);
 		ImGui::Text(material->Path.c_str());
-
 	}
 	ImGui::SameLine();
 	{
@@ -435,16 +445,43 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 
 			ImGui::TableNextColumn();
 
-			ImGui::Text("Unlit");
-			ImGui::TableNextColumn();
+			{
+				ImGui::Text("Culling");
+				ImGui::TableNextColumn();
 
-			bool unlit = material->data.u_Unlit == 1;
-			ImGui::Checkbox("Unlit", &unlit);
-			material->data.u_Unlit = (int)unlit;
-			ImGui::TableNextColumn();
+				static const char* cullingType[]{ "Back", "Front", "None"};
+				int selectedCulling = static_cast<int>(material->m_CullingType);
+				ImGui::Combo("##Culling", &selectedCulling, cullingType, IM_ARRAYSIZE(cullingType));
+				material->m_CullingType = static_cast<CullingType>(selectedCulling);
 
-			ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			}
 
+			{
+				ImGui::Text("Sampling");
+				ImGui::TableNextColumn();
+
+				static const char* samplingType[]{ "Nearest", "Linear" };
+				int selectedSampling = static_cast<int>(material->m_SamplingType);
+				ImGui::Combo("##Sampling", &selectedSampling, samplingType, IM_ARRAYSIZE(samplingType));
+				material->m_SamplingType = static_cast<SamplingType>(selectedSampling);
+
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			}
+
+			{
+				ImGui::Text("Unlit");
+				ImGui::TableNextColumn();
+
+				bool unlit = material->data.u_Unlit == 1;
+				ImGui::Checkbox("##Unlit", &unlit);
+				material->data.u_Unlit = (int)unlit;
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			}
+			
 			ImGui::Text("Emissive");
 			ImGui::TableNextColumn();
 

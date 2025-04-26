@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material

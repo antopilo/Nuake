@@ -11,6 +11,7 @@
 #include "Nuake/Resource/Serializable.h"
 #include "Nuake/Scene/Systems/System.h"
 #include "Nuake/Resource/UUID.h"
+#include "Nuake/Resource/Resource.h"
 
 namespace Nuake 
 {
@@ -25,7 +26,7 @@ namespace Nuake
 	class PhysicsSystem;
 	class ScriptingSystem;
 
-	class Scene : public ISerializable
+	class Scene : public ISerializable, public Resource, public std::enable_shared_from_this<Scene>
 	{
 		friend Entity;
 
@@ -105,6 +106,11 @@ namespace Nuake
 
 		Ref<PhysicsSystem> GetPhysicsSystem() const { return physicsSystem; }
 		Ref<ScriptingSystem> GetScriptingSystem() const { return scriptingSystem; }
+
+		Ref<Scene> Shared()
+		{
+			return shared_from_this();
+		}
 
 	protected:
 		PreInitializeDelegate preInitializeDelegate;

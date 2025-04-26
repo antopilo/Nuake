@@ -28,7 +28,7 @@ GPUResources::~GPUResources()
 void GPUResources::Init()
 {
 	CreateBindlessLayout();
-	CamerasBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CamerasBuffer");
+	CamerasBuffer = CreateBuffer(sizeof(CameraView) * MAX_CAMERAS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "CamerasBuffer");
 	ModelBuffer = CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
 	MaterialBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
 	LightBuffer = CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "LightBuffer");
@@ -187,6 +187,11 @@ std::vector<Ref<VulkanImage>> GPUResources::GetAllTextures()
 
 void GPUResources::AddCamera(const UUID& id, const CameraView& camera)
 {
+	if (CameraMapping.contains(id))
+	{
+		return;
+	}
+
 	Cameras.push_back(camera);
 	CameraMapping[id] = Cameras.size() - 1;
 }
@@ -242,7 +247,7 @@ void GPUResources::CreateBindlessLayout()
 	// Samplers
 	{
 		DescriptorLayoutBuilder builder;
-		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER);
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER, 2);
 		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 	}
 
@@ -288,30 +293,35 @@ void GPUResources::CreateBindlessLayout()
 	VkPhysicalDeviceProperties properties{};
 	vkGetPhysicalDeviceProperties(VkRenderer::Get().GetPhysicalDevice(), &properties);
 
-	VkSamplerCreateInfo sampler = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-	sampler.magFilter = VK_FILTER_NEAREST;
-	sampler.minFilter = VK_FILTER_NEAREST;
-	sampler.anisotropyEnable = VK_TRUE;
-	sampler.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-	vkCreateSampler(device, &sampler, nullptr, &SamplerNearest);
+	VkSamplerCreateInfo samplerCreateInfo = { .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+	samplerCreateInfo.magFilter = VK_FILTER_NEAREST;
+	samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
+	samplerCreateInfo.anisotropyEnable = VK_TRUE;
+	samplerCreateInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+	vkCreateSampler(device, &samplerCreateInfo, nullptr, &SamplerNearest);
 
-	sampler.magFilter = VK_FILTER_LINEAR;
-	sampler.minFilter = VK_FILTER_LINEAR;
-	sampler.anisotropyEnable = VK_TRUE;
-	sampler.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-	vkCreateSampler(device, &sampler, nullptr, &SamplerLinear);
+	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+	vkCreateSampler(device, &samplerCreateInfo, nullptr, &SamplerLinear);
 
-	VkDescriptorImageInfo textureInfo = {};
-	textureInfo.sampler = SamplerLinear;  // Your VkSampler object
-	textureInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	// Array of VkDescriptorImageInfo, one for each sampler
+	std::array<VkDescriptorImageInfo, 2> textureInfos = {};
+	textureInfos[0].sampler = SamplerNearest;
+	textureInfos[0].imageView = VK_NULL_HANDLE;  // Ignored for VK_DESCRIPTOR_TYPE_SAMPLER
+	textureInfos[0].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED; // Ignored for VK_DESCRIPTOR_TYPE_SAMPLER
 
+	textureInfos[1].sampler = SamplerLinear;
+	textureInfos[1].imageView = VK_NULL_HANDLE;
+	textureInfos[1].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	// Write descriptor
 	VkWriteDescriptorSet samplerWrite = {};
 	samplerWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	samplerWrite.dstBinding = 0;  // Binding for sampler (in shader)
-	samplerWrite.dstSet = SamplerDescriptor;  // The allocated descriptor set for the sampler
-	samplerWrite.descriptorCount = 1;
+	samplerWrite.dstBinding = 0;  // Binding for sampler (array in shader)
+	samplerWrite.dstSet = SamplerDescriptor;
+	samplerWrite.descriptorCount = static_cast<uint32_t>(textureInfos.size());
 	samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-	samplerWrite.pImageInfo = &textureInfo;  // Sampler info (same as texture)
+	samplerWrite.pImageInfo = textureInfos.data();  // <- pointer to the first element
 
 	vkUpdateDescriptorSets(device, 1, &samplerWrite, 0, nullptr);
 }

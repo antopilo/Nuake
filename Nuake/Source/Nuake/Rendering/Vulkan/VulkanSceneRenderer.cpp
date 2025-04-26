@@ -552,6 +552,7 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 						.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
 						.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
 						.AoTextureId = material->HasAO() ? gpu.GetBindlessTextureID(material->AOImage) : 0,
+						.SamplerType = static_cast<int>(material->m_SamplingType)
 					};
 
 					// Save bindless mapping index
@@ -566,6 +567,9 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 
 		// Lights
 		{
+			int lightIndexStart = lightCount;
+			
+			int count = 0;;
 			auto lightView = scene->m_Registry.view<TransformComponent, LightComponent>();
 			for (auto e : lightView)
 			{
@@ -608,7 +612,10 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 				allLights[lightCount] = std::move(light);
 
 				lightCount++;
+				count++;
 			}
+
+			gpu.SceneLightOffets[scene->ID] = { lightIndexStart, count };
 		}
 
 		// Update light CSM
@@ -682,7 +689,6 @@ void VkSceneRenderer::DrawSceneView(RenderContext inContext)
 
 	// in case we just resized
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_GENERAL);
-
 	inContext.CommandBuffer.TransitionImageLayout(sceneRenderPipeline->GetOutput(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	inContext.CommandBuffer.TransitionImageLayout(inContext.ViewportImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	inContext.CommandBuffer.CopyImageToImage(sceneRenderPipeline->GetOutput(), inContext.ViewportImage);

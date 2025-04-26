@@ -379,6 +379,9 @@ void SceneRenderPipeline::RecreatePipeline()
 
 		ZoneScopedN("Render Models");
 		gbufferConstant.CameraID = ctx.cameraID;
+
+		CullingType lastCulling = CullingType::Back;
+
 		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
 		for (auto e : view)
 		{
@@ -393,11 +396,35 @@ void SceneRenderPipeline::RecreatePipeline()
 			// Set entity ID
 			Entity entity = { (entt::entity)e, scene.get() };
 			gbufferConstant.EntityID = static_cast<float>(entity.GetHandle());
-
+			 
 			for (auto& m : mesh.ModelResource.Get<Model>()->GetMeshes())
 			{
 				Ref<VkMesh> vkMesh = m->GetVkMesh();
 
+				// toggle culling modes
+				if (auto mat = m->GetMaterial(); mat)
+				{
+					CullingType culling = m->GetMaterial()->m_CullingType;
+
+					if (culling != lastCulling)
+					{
+						switch (culling)
+						{
+						case CullingType::None:
+							vkCmdSetCullMode(ctx.commandBuffer.GetCmdBuffer(), VK_CULL_MODE_NONE);
+							break;
+						case CullingType::Front:
+							vkCmdSetCullMode(ctx.commandBuffer.GetCmdBuffer(), VK_CULL_MODE_FRONT_BIT);
+							break;
+						case CullingType::Back:
+							vkCmdSetCullMode(ctx.commandBuffer.GetCmdBuffer(), VK_CULL_MODE_BACK_BIT);
+							break;
+						}
+
+						lastCulling = culling;
+					}
+				}
+				
 				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, vkMesh->GetDescriptorSet(), 1);
 				gbufferConstant.MaterialIndex = res.MeshMaterialMapping[vkMesh->GetID()];
 
@@ -581,7 +608,10 @@ void SceneRenderPipeline::RecreatePipeline()
 		shadingConstant.CameraID = ctx.cameraID;
 
 		// Light
-		shadingConstant.LightCount = res.LightCount;
+		const auto& [offset, count] = res.SceneLightOffets[ctx.scene->ID];
+		shadingConstant.LightOffset = offset;
+		shadingConstant.LightCount = count; 
+
 		for (int i = 0; i < CSM_AMOUNT; i++)
 		{
 			shadingConstant.CascadeSplits[i] = LightComponent::mCascadeSplitDepth[i];

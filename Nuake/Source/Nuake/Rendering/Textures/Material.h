@@ -33,6 +33,19 @@ namespace Nuake
 		float u_Emissive;
 	};
 
+	enum class SamplingType
+	{
+		Nearest = 0,
+		Linear,
+	};
+
+	enum class CullingType
+	{
+		Back = 0,
+		Front,
+		None
+	};
+
 	class Material : ISerializable, public Resource
 	{
 	private:
@@ -66,6 +79,9 @@ namespace Nuake
 		UUID RoughnessImage = UUID(0);
 		UUID NormalImage = UUID(0);
 		
+		SamplingType m_SamplingType = SamplingType::Nearest;
+		CullingType m_CullingType = CullingType::Back;
+
 		Ref<Texture> m_Albedo; 
 		Ref<Texture> m_AO;
 		Ref<Texture> m_Metalness;

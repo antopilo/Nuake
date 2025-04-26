@@ -14,6 +14,7 @@ namespace Nuake
 	class Viewport
 	{
 	private:
+		bool Active;
 		UUID id;
 		Vector2 queuedResize;
 		Vector2 viewportSize;
@@ -29,6 +30,9 @@ namespace Nuake
 		~Viewport() = default;
 
 	public:
+		void SetActive(bool isActive) { Active = isActive; }
+		bool IsActive() const { return Active; }
+
 		UUID GetID() const { return id; }
 		UUID GetViewID() const { return viewId; }
 		void SetViewID(UUID inViewID) { this->viewId = inViewID; }

@@ -42,6 +42,8 @@ namespace Nuake
 		uint32_t MetalnessTextureId;
 		uint32_t RoughnessTextureId;
 		uint32_t AoTextureId;
+		int SamplerType;
+		int pad[3];
 	};
 
 	// This is the *whole* buffer
@@ -88,7 +90,7 @@ namespace Nuake
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
 	constexpr uint32_t MAX_MATERIAL = 3000;
 	constexpr uint32_t MAX_TEXTURES = 1000;
-	constexpr uint32_t MAX_CAMERAS = 100;
+	constexpr uint32_t MAX_CAMERAS = 1000;
 	constexpr uint32_t MAX_LIGHTS = 100;
 
 	class GPUResources
@@ -157,6 +159,7 @@ namespace Nuake
 		~GPUResources();
 
 	public:
+		std::map<UUID, std::pair<uint32_t, uint32_t>> SceneLightOffets;
 		void Init();
 
 		Ref<AllocatedBuffer> CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name = "");

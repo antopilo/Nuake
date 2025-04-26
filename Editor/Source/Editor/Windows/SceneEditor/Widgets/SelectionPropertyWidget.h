@@ -19,6 +19,7 @@ private:
 	SkinnedMeshPanel skinnedMeshPanel;
 	Ref<Nuake::File> currentFile;
 	Ref<Nuake::Resource> selectedResource;
+
 	AnimatedValue<float> opacity;
 
 public:

@@ -11,15 +11,14 @@ Viewport::Viewport(UUID inViewId, const Vector2& inViewportSize) :
 	id(UUID()),
 	viewportSize(inViewportSize),
 	queuedResize(inViewportSize),
-	viewId(inViewId)
+	viewId(inViewId),
+	Active(true)
 {
 	renderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
 }
 
 int Viewport::MousePick(const Vector2& mouseCoord)
 {
-
-
 	return 0;
 }
 

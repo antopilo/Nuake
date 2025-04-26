@@ -269,7 +269,7 @@ void VkRenderer::SelectGPU()
 
 	VkPhysicalDeviceFeatures coreFeatures{};
 	coreFeatures.fillModeNonSolid = VK_TRUE; 
-
+	coreFeatures.samplerAnisotropy = VK_TRUE;
 	features2.features = coreFeatures;
 
 	// Chain pNext for Extended Dynamic State 3
@@ -441,14 +441,17 @@ void VkRenderer::DrawScenes()
 		for (auto& view : views)
 		{
 			Ref<Viewport> viewport = Viewports[view];
+
 			assert(viewport && "Viewport is null");
+			if (viewport->IsActive())
+			{
+				ctx.CameraID = viewport->GetViewID();
+				ctx.Size = viewport->GetRenderTarget()->GetSize();
+				ctx.ViewportImage = viewport->GetRenderTarget();
+				ctx.SelectedEntityID = viewport->GetSelectedEntityID();
 
-			ctx.CameraID = viewport->GetViewID();
-			ctx.Size = viewport->GetRenderTarget()->GetSize();
-			ctx.ViewportImage = viewport->GetRenderTarget();
-			ctx.SelectedEntityID = viewport->GetSelectedEntityID();
-
-			SceneRenderers[view]->DrawSceneView(ctx);
+				SceneRenderers[view]->DrawSceneView(ctx);
+			}
 		}
 	}
 }

@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,7 +41,9 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
+
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
 
@@ -96,10 +98,11 @@ struct ShadingPushConstant
     int DepthInputTextureId;
     int NormalInputTextureId;
     int MaterialInputTextureId;
+    int LightOffset;
     int LightCount;
     int CameraID;
-    float cascadeDepth[4];
     float AmbientTerm;
+    float cascadeDepth[4];
     int SSAOTextureId;
 };
 
@@ -195,7 +198,7 @@ int GetCSMSplit(float depth)
 
 float SampleShadowMap(int textureId, float2 coords, float compare)
 {
-    return compare > textures[textureId].Sample(mySampler, coords.xy).r;
+    return compare > textures[textureId].Sample(mySampler[1], coords.xy).r;
 }
 
 float SampleShadowMapLinear(int textureId, float2 coords, float compare, float2 texelSize)
@@ -257,7 +260,7 @@ float ShadowCalculation(Light light, float3 fragPos, float3 normal)
         return result /= NUM_SAMPLES_SQUARED;
     }
 
-    float shadowMapDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler, projCoords.xy).r;
+    float shadowMapDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler[1], projCoords.xy).r;
 
     return (currentDepth > shadowMapDepth);//> 0.0 ? 1.0 : 0.0;
 }
@@ -267,7 +270,7 @@ PSOutput main(PSInput input)
     CameraView camView = cameras[pushConstants.CameraID];
 
     int depthTexture = pushConstants.DepthInputTextureId;
-    float depth = textures[depthTexture].Sample(mySampler, input.UV).r;
+    float depth = textures[depthTexture].Sample(mySampler[1], input.UV).r;
 
     if(depth == 0.0f)
     {
@@ -275,17 +278,16 @@ PSOutput main(PSInput input)
     }
 
     float3 worldPos = WorldPosFromDepth(depth, input.UV, camView.InverseProjection, camView.InverseView);
-   
     int albedoTextureId = pushConstants.AlbedoInputTextureId;
-    float3 albedo = textures[albedoTextureId].Sample(mySampler, input.UV).xyz;
-    float3 normal = textures[pushConstants.NormalInputTextureId].Sample(mySampler, input.UV).rgb;
+    float3 albedo = textures[albedoTextureId].Sample(mySampler[1], input.UV).xyz;
+    float3 normal = textures[pushConstants.NormalInputTextureId].Sample(mySampler[1], input.UV).rgb;
     normal = normal * 2.0f - 1.0f;
 
-    float4 materialSample = textures[pushConstants.MaterialInputTextureId].Sample(mySampler, input.UV);
+    float4 materialSample = textures[pushConstants.MaterialInputTextureId].Sample(mySampler[1], input.UV);
     float metallic = materialSample.r;
     float ao = materialSample.g;
     float roughness = materialSample.b;
-    float ssao = textures[pushConstants.SSAOTextureId].Sample(mySampler, input.UV);
+    float ssao = textures[pushConstants.SSAOTextureId].Sample(mySampler[1], input.UV);
 
     float3 N = normal;
     float3 V = normalize(camView.Position - worldPos);
@@ -295,7 +297,7 @@ PSOutput main(PSInput input)
 
     Light directionalLight;
     bool foundDirectional = false;
-    for(int i = 0; i < pushConstants.LightCount; i++)
+    for(int i = pushConstants.LightOffset; i < pushConstants.LightOffset + pushConstants.LightCount; i++)
     {
         Light light = lights[i];
         if(light.type == 0) 
@@ -349,7 +351,7 @@ PSOutput main(PSInput input)
     }
 
     // other lights
-    for(int i = 0; i < pushConstants.LightCount; i++)
+    for(int i = pushConstants.LightOffset; i < pushConstants.LightOffset + pushConstants.LightCount; i++)
     {
         Light light = lights[i];
         float3 L = normalize(light.position - worldPos);

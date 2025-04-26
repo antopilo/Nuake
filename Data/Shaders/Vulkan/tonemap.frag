@@ -22,7 +22,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t2);
 
 // Samplers
 [[vk::binding(0, 2)]]
-SamplerState mySampler : register(s0);
+SamplerState mySampler[2] : register(s0);
 
 // Materials
 struct Material
@@ -41,6 +41,7 @@ struct Material
     int metalnessTextureId;
     int roughnessTextureId;
     int aoTextureId;
+    int samplingType;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -122,7 +123,7 @@ float3 PBRNeutralToneMapping(float3 color)
 PSOutput main(PSInput input)
 {
     PSOutput output;
-    float3 color = textures[pushConstants.SourceTextureID].Sample(mySampler, input.UV).rgb;
+    float3 color = textures[pushConstants.SourceTextureID].Sample(mySampler[1], input.UV).rgb;
     float3 mapped = float3(1.0, 1.0, 1.0) - exp(-color * pushConstants.Exposure);
 
     color = pow(mapped, float3(pushConstants.Gamma, pushConstants.Gamma, pushConstants.Gamma));
