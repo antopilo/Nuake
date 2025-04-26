@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -116,8 +119,8 @@ float PixelToUV(float2 uv, Texture2D tex)
 PSOutput main(PSInput input)
 {
     int depthTexture = pushConstants.DepthTextureID;
-    float upSampledDepth = textures[depthTexture].Sample(mySampler[1], input.UV).r;
-    float3 upSampledColor = textures[pushConstants.VolumetricTextureID].Sample(mySampler[1], input.UV).rgb;
+    float upSampledDepth = textures[depthTexture].Sample(mySampler[0], input.UV).r;
+    float3 upSampledColor = textures[pushConstants.VolumetricTextureID].Sample(mySampler[0], input.UV).rgb;
     float3 color = 0.0f.xxx;
 	float totalWeight = 0.0f;
 	
@@ -134,8 +137,8 @@ PSOutput main(PSInput input)
 	{
         float2 uvOffset = float2(offsets[i].x * 4.0, offsets[i].y * 4.0) ;
         uvOffset = PixelToUV(uvOffset, textures[pushConstants.DepthTextureID]);
-        float3 downscaledColor = textures[pushConstants.VolumetricTextureID].Sample(mySampler[1], input.UV + uvOffset).rgb;
-		float downscaledDepth = textures[pushConstants.DepthTextureID].Sample(mySampler[1], input.UV + uvOffset).r;
+        float3 downscaledColor = textures[pushConstants.VolumetricTextureID].Sample(mySampler[0], input.UV + uvOffset).rgb;
+		float downscaledDepth = textures[pushConstants.DepthTextureID].Sample(mySampler[0], input.UV + uvOffset).r;
 		
 		float currentWeight = 1.0f;
 

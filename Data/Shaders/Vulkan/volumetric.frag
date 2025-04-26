@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -228,7 +231,7 @@ int GetCSMSplit(float depth)
         }
     }
 
-    return -1;
+    return 0;
 }
 
 PSOutput main(PSInput input)
@@ -242,7 +245,7 @@ PSOutput main(PSInput input)
     float3 startPosition = camView.Position;
 
     int depthTexture = pushConstants.DepthTextureID;
-    float depth = textures[depthTexture].Sample(mySampler[1], input.UV).r;
+    float depth = textures[depthTexture].Sample(mySampler[0], input.UV).r;
 
     float3 worldPos = WorldPosFromDepth(depth, input.UV, camView.InverseProjection, camView.InverseView);
 
@@ -275,7 +278,7 @@ PSOutput main(PSInput input)
 
                 if(splitIndex == -1)
                 {
-                    accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color.xyz) * pushConstants.Exponant;
+                    //accumFog += (ComputeScattering(dot(rayDirection, light.direction)).rrr * light.color.xyz) * pushConstants.Exponant;
                 }
                 else
                 {
@@ -285,7 +288,7 @@ PSOutput main(PSInput input)
                     projCoords.xy = projCoords.xy * 0.5 + 0.5;
 
                     float currentDepth = projCoords.z;
-                    float closestDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler[1], projCoords.xy).r;
+                    float closestDepth = textures[light.shadowMapTextureId[splitIndex]].Sample(mySampler[0], projCoords.xy).r;
 
                     float3 noiseOffset = float3(pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time, pushConstants.NoiseSpeed * pushConstants.Time);
                     float3 noiseSamplePos = (currentPosition + noiseOffset) * pushConstants.NoiseScale;

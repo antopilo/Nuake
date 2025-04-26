@@ -66,6 +66,14 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 				Ref<VkMesh> vkMesh = m->GetVkMesh();
 				cmd.BindDescriptorSet(ctx.renderPass->PipelineLayout, vkMesh->GetDescriptorSet(), 1);
 
+				if (auto material = m->GetMaterial(); material)
+				{
+					if (!material->m_CastShadows)
+					{
+						continue;
+					}
+				}
+
 				gbufferConstant.Index = GPUResources::Get().GetBindlessTransformID(entityId);
 				gbufferConstant.CameraID = ctx.cameraID;
 
@@ -603,6 +611,7 @@ void SceneRenderPipeline::RecreatePipeline()
 		shadingConstant.MaterialTextureID = res.GetBindlessTextureID(GBufferMaterial->GetID());
 		shadingConstant.AmbientTerm = ctx.scene->GetEnvironment()->AmbientTerm;
 		shadingConstant.SSAOTextureID = res.GetBindlessTextureID(SSAOBlurOutput->GetID());
+		shadingConstant.EntityTextureID = res.GetBindlessTextureID(GBufferEntityID->GetID());
 
 		// Camera
 		shadingConstant.CameraID = ctx.cameraID;

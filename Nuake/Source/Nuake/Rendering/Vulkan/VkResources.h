@@ -43,7 +43,9 @@ namespace Nuake
 		uint32_t RoughnessTextureId;
 		uint32_t AoTextureId;
 		int SamplerType;
-		int pad[3];
+		int ReceiveShadow;
+		int CastShadow;
+		int Unlit;
 	};
 
 	// This is the *whole* buffer

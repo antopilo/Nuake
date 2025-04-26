@@ -298,7 +298,7 @@ void GPUResources::CreateBindlessLayout()
 	samplerCreateInfo.minFilter = VK_FILTER_NEAREST;
 	samplerCreateInfo.anisotropyEnable = VK_TRUE;
 	samplerCreateInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-	vkCreateSampler(device, &samplerCreateInfo, nullptr, &SamplerNearest);
+	vkCreateSampler(device, &samplerCreateInfo, nullptr, &SamplerNearest); 
 
 	samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
 	samplerCreateInfo.minFilter = VK_FILTER_LINEAR;

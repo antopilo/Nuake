@@ -472,12 +472,31 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 			}
 
 			{
-				ImGui::Text("Unlit");
+				ImGui::Text("Receive Shadows");
+				ImGui::TableNextColumn();
+				
+				ImGui::Checkbox("##ReceiveShadows", &material->m_ReceiveShadows);
+
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			}
+
+			{
+				ImGui::Text("Cast Shadows");
 				ImGui::TableNextColumn();
 
-				bool unlit = material->data.u_Unlit == 1;
-				ImGui::Checkbox("##Unlit", &unlit);
-				material->data.u_Unlit = (int)unlit;
+				ImGui::Checkbox("##CastShadows", &material->m_CastShadows);
+
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			}
+
+			{
+				ImGui::Text("Unlit");
+				ImGui::TableNextColumn();
+				bool val = static_cast<bool>(material->data.u_Unlit);
+				ImGui::Checkbox("##Unlit", &val);
+				material->data.u_Unlit = static_cast<int>(val);
 				ImGui::TableNextColumn();
 				ImGui::TableNextColumn();
 			}

@@ -81,6 +81,7 @@ namespace Nuake
 		float AmbientTerm;
 		float CascadeSplits[4];
 		int SSAOTextureID;
+		int EntityTextureID;
 	};
 
 	struct TonemapConstant

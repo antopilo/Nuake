@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;

@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -132,12 +135,12 @@ float3 WorldPosFromDepth(float depth, float2 uv, CameraView camera)
 
 float3 SampleTexture(int textureId, float2 uv)
 {
-    return textures[textureId].Sample(mySampler[1], uv).rgb;
+    return textures[textureId].Sample(mySampler[0], uv).rgb;
 }
 
 float SampleDepth(float2 uv)
 {
-    return textures[pushConstants.depthTextureID].Sample(mySampler[1], uv).r;
+    return textures[pushConstants.depthTextureID].Sample(mySampler[0], uv).r;
 }
 
 float3x3 Inverse3x3(float3x3 m)

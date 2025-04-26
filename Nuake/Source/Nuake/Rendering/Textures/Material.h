@@ -81,6 +81,8 @@ namespace Nuake
 		
 		SamplingType m_SamplingType = SamplingType::Nearest;
 		CullingType m_CullingType = CullingType::Back;
+		bool m_ReceiveShadows = true;
+		bool m_CastShadows = true;
 
 		Ref<Texture> m_Albedo; 
 		Ref<Texture> m_AO;

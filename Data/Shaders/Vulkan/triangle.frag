@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -183,7 +186,7 @@ PSOutput main(PSInput input)
     
     output.oMaterial = float4(materialOuput, 1.0f);
 
-    output.oEntityID = float4(pushConstants.entityID, 0.0f, 0.0f, 1.0f);
+    output.oEntityID = float4(pushConstants.entityID, pushConstants.materialIndex, 0.0f, 1.0f);
 
     return output;
 }

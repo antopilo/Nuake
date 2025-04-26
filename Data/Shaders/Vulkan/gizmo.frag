@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -115,7 +118,7 @@ PSOutput main(PSInput input)
     else
     {
         float2 uv = input.UV;
-        float4 textureSample = textures[pushConstants.TextureID].Sample(mySampler[1], uv);
+        float4 textureSample = textures[pushConstants.TextureID].Sample(mySampler[0], uv);
 
         // Alpha scisorring
         if(textureSample.a < 0.1)

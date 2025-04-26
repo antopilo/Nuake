@@ -552,7 +552,10 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 						.MetalnessTextureId = material->HasMetalness() ? gpu.GetBindlessTextureID(material->MetalnessImage) : 0,
 						.RoughnessTextureId = material->HasRoughness() ? gpu.GetBindlessTextureID(material->RoughnessImage) : 0,
 						.AoTextureId = material->HasAO() ? gpu.GetBindlessTextureID(material->AOImage) : 0,
-						.SamplerType = static_cast<int>(material->m_SamplingType)
+						.SamplerType = static_cast<int>(material->m_SamplingType),
+						.ReceiveShadow = material->m_ReceiveShadows,
+						.CastShadow = material->m_CastShadows,
+						.Unlit = material->data.u_Unlit
 					};
 
 					// Save bindless mapping index

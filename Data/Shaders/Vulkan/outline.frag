@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -128,8 +131,8 @@ PSOutput main(PSInput input)
     int entityIDTextureID = pushConstants.EntityIDTextureID;
     float hasHit = 0.0f;
 
-    float sampleValue = textures[entityIDTextureID].Sample(mySampler[1], uv).r;
-    float depth = textures[pushConstants.DepthTextureID].Sample(mySampler[1], uv).r;
+    float sampleValue = textures[entityIDTextureID].Sample(mySampler[0], uv).r;
+    float depth = textures[pushConstants.DepthTextureID].Sample(mySampler[0], uv).r;
 
     float4 fragColor = float4(0, 0, 0, 0);
     const float TAU = 6.28318530;
@@ -142,8 +145,8 @@ PSOutput main(PSInput input)
         sampleUV.x = clamp(sampleUV.x, 0.0, 0.999);
 		sampleUV.y = clamp(sampleUV.y, 0.0, 0.999);
         
-        float sample = textures[entityIDTextureID].Sample(mySampler[1], sampleUV).r;
-        float sampleDepth = textures[pushConstants.DepthTextureID].Sample(mySampler[1], sampleUV).r;
+        float sample = textures[entityIDTextureID].Sample(mySampler[0], sampleUV).r;
+        float sampleDepth = textures[pushConstants.DepthTextureID].Sample(mySampler[0], sampleUV).r;
 
         //sampleDepth = LinearizeDepth(sampleDepth, 0.1f, 200.0f);
         //depth = LinearizeDepth(depth, 0.1f, 200.0f);
@@ -173,7 +176,7 @@ PSOutput main(PSInput input)
         fragColor.a = 1.0f;
     }
 
-    float3 sourceTexture = textures[pushConstants.SourceTextureID].Sample(mySampler[1], uv).rgb;
+    float3 sourceTexture = textures[pushConstants.SourceTextureID].Sample(mySampler[0], uv).rgb;
     float ratio = float(sampleValue != target && hasHit > 0.0f);
     float4 finalColor = float4(
         lerp(sourceTexture.r, fragColor.r, ratio),

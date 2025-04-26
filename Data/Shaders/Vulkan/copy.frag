@@ -42,6 +42,9 @@ struct Material
     int roughnessTextureId;
     int aoTextureId;
     int samplingType;
+    int receiveShadow;
+    int castShadow;
+    int unlit;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;
@@ -109,8 +112,8 @@ PSOutput main(PSInput input)
     int source2TextureID = pushConstants.Source2TextureID;
 
     float2 uv = input.UV;
-    float4 sampleValue = textures[sourceTextureID].Sample(mySampler[1], input.UV);
-    float4 sampleValue2 = textures[source2TextureID].Sample(mySampler[1], input.UV);
+    float4 sampleValue = textures[sourceTextureID].Sample(mySampler[0], input.UV);
+    float4 sampleValue2 = textures[source2TextureID].Sample(mySampler[0], input.UV);
 
     if(pushConstants.Mode == 0)
     {
