@@ -37,6 +37,23 @@ PSOutput main(PSInput input)
     Material inMaterial = material[pushConstants.materialIndex]; 
 
     SamplerState samplerr = mySampler[inMaterial.samplingType];
+
+    // ALBEDO COLOR
+    float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
+    if(inMaterial.hasAlbedo == 1)
+    {
+        float4 albedoSample = textures[inMaterial.albedoTextureId].Sample(samplerr, input.UV);
+
+        // Alpha cutout?
+        if(inMaterial.alphaScissor == 1 && albedoSample.a < 0.001f)
+        {
+            discard;
+        }
+
+        albedoColor.xyz = albedoSample.xyz * albedoColor.xyz;
+    }
+    output.oColor0 = albedoColor;
+
     // NORMAL
     // TODO use TBN matrix
     float3 T = input.Tangent.xyz;
@@ -63,21 +80,7 @@ PSOutput main(PSInput input)
 
     // MATERIAL
 
-    // ALBEDO COLOR
-    float4 albedoColor = float4(inMaterial.albedo.xyz, 1.0f);
-    if(inMaterial.hasAlbedo == 1)
-    {
-        float4 albedoSample = textures[inMaterial.albedoTextureId].Sample(samplerr, input.UV);
 
-        // Alpha cutout?
-        if(albedoSample.a < 0.001f)
-        {
-            discard;
-        }
-
-        albedoColor.xyz = albedoSample.xyz;
-    }
-    output.oColor0 = albedoColor;
 
     // MATERIAL PROPERTIES
     float metalnessValue = inMaterial.metalnessValue;

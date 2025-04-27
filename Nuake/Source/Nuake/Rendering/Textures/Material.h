@@ -83,6 +83,7 @@ namespace Nuake
 		CullingType m_CullingType = CullingType::Back;
 		bool m_ReceiveShadows = true;
 		bool m_CastShadows = true;
+		bool m_AlphaScissor = false;
 
 		Ref<Texture> m_Albedo; 
 		Ref<Texture> m_AO;

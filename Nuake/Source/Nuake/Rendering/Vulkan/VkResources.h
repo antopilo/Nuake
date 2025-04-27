@@ -46,6 +46,8 @@ namespace Nuake
 		int ReceiveShadow;
 		int CastShadow;
 		int Unlit;
+		int AlphaScissor;
+		int pad[3];
 	};
 
 	// This is the *whole* buffer

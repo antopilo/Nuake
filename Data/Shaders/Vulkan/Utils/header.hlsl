@@ -45,6 +45,7 @@ struct Material
     int receiveShadow;
     int castShadow;
     int unlit;
+    int alphaScissor;
 };
 [[vk::binding(0, 3)]]
 StructuredBuffer<Material> material;

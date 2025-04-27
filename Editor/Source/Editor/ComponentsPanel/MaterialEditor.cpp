@@ -503,6 +503,16 @@ void MaterialEditor::Draw(Ref<Nuake::Material> material)
 			}
 
 			{
+				ImGui::Text("Alpha Scissoring");
+				ImGui::TableNextColumn();
+
+				ImGui::Checkbox("##AlphaScissor", &material->m_AlphaScissor);
+
+				ImGui::TableNextColumn();
+				ImGui::TableNextColumn();
+			} 
+
+			{
 				ImGui::Text("Unlit");
 				ImGui::TableNextColumn();
 				bool val = static_cast<bool>(material->data.u_Unlit);

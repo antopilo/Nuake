@@ -14,6 +14,7 @@ ModelPushConstant pushConstants;
 struct VSOutput 
 {
     float4 Position : SV_Position;
+    float2 UV : TEXCOORD0;
 };
 
 float LinearizeDepth(float depth, float nearPlane, float farPlane, bool reverseDepth)
@@ -43,6 +44,7 @@ VSOutput main(uint vertexIndex : SV_VertexID)
 
     // Output the position of each vertex
     output.Position = mul(camView.Projection, mul(camView.View,mul(modelData.model, float4(v.position, 1.0f))));
+    output.UV = float2(v.uv_x, v.uv_y);
 
     //output.Position.z = LinearizeDepth(output.Position.z, camView.Near, camView.Far, false);
     return output;

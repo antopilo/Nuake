@@ -555,7 +555,8 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 						.SamplerType = static_cast<int>(material->m_SamplingType),
 						.ReceiveShadow = material->m_ReceiveShadows,
 						.CastShadow = material->m_CastShadows,
-						.Unlit = material->data.u_Unlit
+						.Unlit = material->data.u_Unlit,
+						.AlphaScissor = static_cast<int>(material->m_AlphaScissor)
 					};
 
 					// Save bindless mapping index

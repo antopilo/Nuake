@@ -49,6 +49,7 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 		auto& cmd = ctx.commandBuffer;
 		auto& scene = ctx.scene;
 		auto& vk = VkRenderer::Get();
+		auto& res = GPUResources::Get();
 
 		ZoneScopedN("Render Models");
 		auto view = scene->m_Registry.view<TransformComponent, ModelComponent, VisibilityComponent>();
@@ -72,14 +73,16 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 					{
 						continue;
 					}
+
+					gbufferConstant.MaterialIndex = res.MeshMaterialMapping[vkMesh->GetID()];
 				}
 
 				gbufferConstant.Index = GPUResources::Get().GetBindlessTransformID(entityId);
 				gbufferConstant.CameraID = ctx.cameraID;
-
+				
 				cmd.PushConstants(ctx.renderPass->PipelineLayout, sizeof(GBufferConstant), &gbufferConstant);
 				cmd.BindIndexBuffer(vkMesh->GetIndexBuffer()->GetBuffer());
-				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t));
+				cmd.DrawIndexed(vkMesh->GetIndexBuffer()->GetSize() / sizeof(uint32_t)); 
 			}
 		}
 	});
