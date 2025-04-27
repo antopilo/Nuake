@@ -8,6 +8,7 @@ class IEditorWidget
 {
 protected:
 	EditorContext& editorContext;
+	bool visible;
 
 private:
 	std::string widgetName;
@@ -21,6 +22,14 @@ public:
 	virtual void Draw() = 0;
 
 	virtual void OnSceneChanged(Ref<Nuake::Scene> scene) {}
+
+	void SetVisible(bool isVisible)
+	{
+		visible = isVisible;
+	}
+
+	virtual void OnVisible() {}
+	virtual void OnHidden() {}
 
 	void DockTo(uint32_t dockId)
 	{

@@ -21,6 +21,8 @@ public:
             const UUID viewId = componentPtr->CameraInstance->ID;
 
             previewViewport = vkRenderer.CreateViewport(viewId, { 200, 200 });
+            previewViewport->SetDebugName("CameraPreviewViewport");
+
             vkRenderer.RegisterSceneViewport(scene->Shared(), previewViewport->GetID());
         }
         if (componentPtr == nullptr)

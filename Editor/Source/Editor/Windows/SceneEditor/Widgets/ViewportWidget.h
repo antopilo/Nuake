@@ -50,6 +50,9 @@ public:
 	void Draw() override;
 	void OnSceneChanged(Ref<Nuake::Scene> scene) override;
 
+	void OnVisible() override;
+	void OnHidden() override;
+
 	void OnLineDraw(Nuake::DebugLineCmd& lineCmd);
 	void OnDebugDraw(Nuake::DebugCmd& debugCmd);
 

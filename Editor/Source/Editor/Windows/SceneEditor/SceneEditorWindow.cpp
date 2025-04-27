@@ -80,6 +80,7 @@ void SceneEditorWindow::Draw()
 		ImGui::DockSpace(dockspaceId, ImGui::GetContentRegionAvail(), ImGuiDockNodeFlags_None, &localSceneEditorClass);
 		for (auto& widget : widgets)
 		{
+			widget->OnVisible();
 			widget->Draw();
 		}
 
@@ -100,6 +101,11 @@ void SceneEditorWindow::Draw()
 	else
 	{
 		this->isFocused = false;
+
+		for (auto& widget : widgets)
+		{
+			widget->OnHidden();
+		}
 	}
 	ImGui::End();
 	if (!layoutInitialized)

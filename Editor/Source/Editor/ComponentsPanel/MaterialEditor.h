@@ -4,11 +4,13 @@
 #include <Nuake/Scene/Scene.h>
 
 #include "Nuake/Rendering/Vulkan/SceneViewport.h"
+
 class MaterialEditor
 {
 private:
-	Ref<Nuake::Scene> PreviewScene;
-	Ref<Nuake::Viewport> SceneViewport;
+	static Ref<Nuake::Scene> PreviewScene;
+	static Ref<Nuake::Viewport> SceneViewport;
+
 public:
 	MaterialEditor();
 	~MaterialEditor() = default;

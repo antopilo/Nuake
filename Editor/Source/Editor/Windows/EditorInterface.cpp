@@ -2693,6 +2693,12 @@ namespace Nuake {
                 GPUResources& gpu = GPUResources::Get();
                 auto buffers = gpu.GetAllBuffers();
 
+                ImGui::Text("Render Info");
+
+                auto stats = VkRenderer::Get().Stats;
+                ImGui::Text(("View rendered: " + std::to_string(stats.ViewRenderers)).c_str());
+                ImGui::Text(("View skipped: " + std::to_string(stats.ViewRenderSkipped)).c_str());
+
                 ImGui::Text("General Info");
 
                 const size_t textureCount = gpu.GetAllTextures().size();

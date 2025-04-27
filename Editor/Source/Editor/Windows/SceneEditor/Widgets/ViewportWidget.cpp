@@ -59,6 +59,16 @@ void ViewportWidget::Update(float ts)
     }
 }
 
+void ViewportWidget::OnVisible()
+{
+    sceneViewport->SetActive(true);
+}
+
+void ViewportWidget::OnHidden()
+{
+    sceneViewport->SetActive(false);
+}
+
 void ViewportWidget::Draw()
 {
     auto oldTarget = overlayOpacity.TargetValue;
@@ -270,6 +280,7 @@ void ViewportWidget::OnSceneChanged(Ref<Nuake::Scene> scene)
     // Create new viewport with same reoslution
     const UUID viewId = editorContext.GetScene()->GetCurrentCamera()->ID;
     auto viewport = vkRenderer.CreateViewport(viewId, currentResolution);
+	viewport->SetDebugName("ViewportWidget(" + scene->GetName() + ")");
     vkRenderer.RegisterSceneViewport(scene, viewport->GetID());
 
     sceneViewport = viewport;

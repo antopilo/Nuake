@@ -26,6 +26,9 @@ enum class Shapes
 
 Shapes currentShape = Shapes::Sphere;
 
+Ref<Nuake::Viewport> MaterialEditor::SceneViewport = nullptr;
+Ref<Nuake::Scene> MaterialEditor::PreviewScene = nullptr;
+
 void MaterialEditor::Enable()
 {
 	SceneViewport->SetActive(true);
@@ -40,33 +43,61 @@ MaterialEditor::MaterialEditor()
 {
 	using namespace Nuake;
 
-	PreviewScene = CreateRef<Nuake::Scene>();
-	PreviewScene->GetEnvironment()->mVolumetric->SetFogAmount(1.0f);
+	if (!SceneViewport)
+	{
+		PreviewScene = CreateRef<Nuake::Scene>();
+		PreviewScene->GetEnvironment()->mVolumetric->SetFogAmount(1.0f);
+		
+		auto camera = PreviewScene->CreateEntity("Camera");
+		camera.GetComponent<Nuake::TransformComponent>().Translation = Nuake::Vector3(-2, 0, -2);
+		auto& camComponent = camera.AddComponent<Nuake::CameraComponent>();
+		camComponent.CameraInstance->Fov = 44.0f;
+		auto light = PreviewScene->CreateEntity("Light");
+		auto& lightC = light.AddComponent<LightComponent>();
+		auto& lightT = light.AddComponent<TransformComponent>();
+		lightC.CastShadows = false;
+		lightC.Type = LightType::Directional;
 
-	auto camera = PreviewScene->CreateEntity("Camera");
-	camera.GetComponent<Nuake::TransformComponent>().Translation = Nuake::Vector3(-2, 0, -2);
-	auto& camComponent = camera.AddComponent<Nuake::CameraComponent>();
-	camComponent.CameraInstance->Fov = 44.0f;
-	auto light = PreviewScene->CreateEntity("Light");
-	auto& lightC = light.AddComponent<LightComponent>();
-	auto& lightT = light.AddComponent<TransformComponent>();
-	lightC.CastShadows = false;
-	lightC.Type = LightType::Directional;
+		glm::vec3 forward = glm::normalize(Vector3(.33, -.33, -.33));
+		glm::vec3 up = glm::vec3(0, 1, 0);
 
-	glm::vec3 forward = glm::normalize(Vector3(.33, -.33, -.33));
-	glm::vec3 up = glm::vec3(0, 1, 0);
+		// Prevent up being colinear with forward
+		if (glm::abs(glm::dot(forward, up)) > 0.999f)
+			up = glm::vec3(1, 0, 0);
 
-	// Prevent up being colinear with forward
-	if (glm::abs(glm::dot(forward, up)) > 0.999f)
-		up = glm::vec3(1, 0, 0);
+		glm::vec3 right = glm::normalize(glm::cross(up, forward));
+		up = glm::cross(forward, right);
 
-	glm::vec3 right = glm::normalize(glm::cross(up, forward));
-	up = glm::cross(forward, right);
+		glm::mat3 rotationMatrix(right, up, forward);
 
-	glm::mat3 rotationMatrix(right, up, forward);
+		//auto& lightT = light.GetComponent<TransformComponent>();
+		lightT.GlobalRotation = glm::quat_cast(rotationMatrix);
 
-	//auto& lightT = light.GetComponent<TransformComponent>();
-	lightT.GlobalRotation = glm::quat_cast(rotationMatrix);
+		auto& vkRenderer = Nuake::VkRenderer::Get();
+		const UUID viewId = camComponent.CameraInstance->ID;
+
+		SceneViewport = vkRenderer.CreateViewport(viewId, { 200, 200 });
+		SceneViewport->SetActive(false);
+		SceneViewport->SetDebugName("MaterialPreview");
+		SceneViewport->GetOnDebugDraw().AddStatic([](DebugCmd& cmd) {
+			Matrix4 transform = Matrix4(1.0f);
+			//cmd.DrawQuad(transform);
+			});
+		SceneViewport->GetOnLineDraw().AddStatic([](DebugLineCmd& cmd) {
+			Matrix4 transform = Matrix4(1.0f);
+
+			auto cam = cmd.GetScene()->GetEntity("Camera");
+			auto& camc = cam.GetComponent<CameraComponent>();
+			auto& cami = camc.CameraInstance;
+			auto proj = cami->GetPerspective();
+			auto view = cami->GetTransform();
+			//cmd.DrawSphere(proj * view * transform, { 1, 0, 0, 1 }, 2.0f, false);
+			});
+
+		//PreviewScene->GetEnvironment()->AmbientColor = { 0, 0, 0, 0 };
+		vkRenderer.RegisterSceneViewport(PreviewScene, SceneViewport->GetID());
+	}
+	
 
 	auto sphere = PreviewScene->CreateEntity("Sphere");
 	auto& modelComponent = sphere.AddComponent<Nuake::ModelComponent>();
@@ -223,27 +254,7 @@ MaterialEditor::MaterialEditor()
 	ResourceManager::RegisterResource(cubeModel);
 	modelComponent.ModelResource = cubeModel->ID;
 
-	auto& vkRenderer = Nuake::VkRenderer::Get();
-	const UUID viewId = camComponent.CameraInstance->ID;
-
-	SceneViewport = vkRenderer.CreateViewport(viewId, {200, 200});
-	SceneViewport->GetOnDebugDraw().AddStatic([](DebugCmd& cmd) {
-		Matrix4 transform = Matrix4(1.0f);
-		//cmd.DrawQuad(transform);
-	});
-	SceneViewport->GetOnLineDraw().AddStatic([](DebugLineCmd& cmd) {
-		Matrix4 transform = Matrix4(1.0f);
-
-		auto cam = cmd.GetScene()->GetEntity("Camera");
-		auto& camc = cam.GetComponent<CameraComponent>();
-		auto& cami = camc.CameraInstance;
-		auto proj = cami->GetPerspective();
-		auto view = cami->GetTransform();
-		//cmd.DrawSphere(proj * view * transform, { 1, 0, 0, 1 }, 2.0f, false);
-	});
-
-	//PreviewScene->GetEnvironment()->AmbientColor = { 0, 0, 0, 0 };
-	vkRenderer.RegisterSceneViewport(PreviewScene, SceneViewport->GetID());
+	
 }
 
 void MaterialEditor::Draw(Ref<Nuake::Material> material)
