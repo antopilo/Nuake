@@ -140,7 +140,7 @@ namespace Nuake {
         
         Logger::Log("Loading imgui from mem", "window", VERBOSE);
         using namespace Nuake::StaticResources;
-        ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Data_default_layout_ini);
+        ImGui::LoadIniSettingsFromMemory((const char*)StaticResources::Data_default_layout_ini, StaticResources::Data_default_layout_ini_len);
         
         virtualCamera = CreateRef<FrameBuffer>(true, Vector2{ 640, 360 });
         //ScriptingContext::Get().Initialize();
