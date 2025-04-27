@@ -29,17 +29,17 @@ bool Viewport::Resize()
 		viewportSize = queuedResize;
 
 		auto newRenderTarget = CreateRef<VulkanImage>(ImageFormat::RGBA16F, viewportSize);
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
+		VkRenderer::Get().ImmediateSubmit([&, newRenderTarget](VkCommandBuffer cmd)
 		{
 			Cmd command(cmd);
+			command.DebugScope("Viewport Resize GPGPU copy");
 			command.TransitionImageLayout(renderTarget, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 			command.TransitionImageLayout(newRenderTarget, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 			command.CopyImageToImage(renderTarget, newRenderTarget);
 			command.TransitionImageLayout(renderTarget, VK_IMAGE_LAYOUT_GENERAL);
 			command.TransitionImageLayout(newRenderTarget, VK_IMAGE_LAYOUT_GENERAL);
+			renderTarget = newRenderTarget;
 		});
-
-		renderTarget = newRenderTarget;
 
 		return true;
 	}

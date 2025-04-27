@@ -3,6 +3,7 @@
 #include "VulkanAllocator.h"
 
 #include "GPUManaged.h"
+#include "VulkanInit.h"
 
 using namespace Nuake;
 
@@ -228,6 +229,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		ModelDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(ModelDescriptorLayout, "ModelDescriptorLayout");
 	}
 
 	// Triangles
@@ -235,6 +237,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		TriangleBufferDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(TriangleBufferDescriptorLayout, "TriangleBufferDescriptorLayout");
 	}
 
 	// SSAO kernel
@@ -242,6 +245,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		SSAOKernelDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(SSAOKernelDescriptorLayout, "SSAOKernelDescriptorLayout");
 	}
 
 	// Samplers
@@ -249,6 +253,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLER, 2);
 		SamplerDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(SamplerDescriptorLayout, "SamplerDescriptorLayout");
 	}
 
 	// Material
@@ -256,6 +261,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		MaterialDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(MaterialDescriptorLayout, "MaterialDescriptorLayout");
 	}
 
 	// Textures
@@ -263,6 +269,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_TEXTURES);
 		TexturesDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(TexturesDescriptorLayout, "TexturesDescriptorLayout");
 	}
 
 	// bindless lights
@@ -270,6 +277,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		LightsDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(LightsDescriptorLayout, "LightsDescriptorLayout");
 	}
 
 	// bindless cameras
@@ -277,6 +285,7 @@ void GPUResources::CreateBindlessLayout()
 		DescriptorLayoutBuilder builder;
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		CamerasDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(CamerasDescriptorLayout, "CamerasDescriptorLayout");
 	}
 
 	auto allocator = vk.GetDescriptorAllocator();
@@ -288,6 +297,14 @@ void GPUResources::CreateBindlessLayout()
 	LightsDescriptor = allocator.Allocate(device, LightsDescriptorLayout);
 	MaterialDescriptor = allocator.Allocate(device, MaterialDescriptorLayout);
 	SSAOKernelDescriptor = allocator.Allocate(device, SSAOKernelDescriptorLayout);
+
+	VulkanUtil::SetDebugName(TexturesDescriptor, "TextureDescriptor");
+	VulkanUtil::SetDebugName(CamerasDescriptor, "CamerasDescriptor");
+	VulkanUtil::SetDebugName(TriangleBufferDescriptor, "TriangleBufferDescriptor");
+	VulkanUtil::SetDebugName(ModelDescriptor, "ModelDescriptor");
+	VulkanUtil::SetDebugName(LightsDescriptor, "LightsDescriptor");
+	VulkanUtil::SetDebugName(MaterialDescriptor, "MaterialDescriptor");
+	VulkanUtil::SetDebugName(SSAOKernelDescriptor, "SSAOKernelDescriptor");
 
 	// Samplers
 	VkPhysicalDeviceProperties properties{};

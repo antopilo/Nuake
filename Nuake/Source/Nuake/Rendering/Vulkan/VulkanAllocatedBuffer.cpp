@@ -5,6 +5,7 @@
 #include "VulkanRenderer.h"
 
 #include "vk_mem_alloc.h"
+#include "VulkanInit.h"
 #include "VkResources.h"
 using namespace Nuake;
 
@@ -33,6 +34,8 @@ AllocatedBuffer::AllocatedBuffer(const std::string& name, size_t inSize, BufferU
 	AllocatedBuffer::AllocatedBuffer(inSize, inFlags, inUsage)
 {
 	Name = name.empty() ? std::to_string(ID) : name; // Default name is just ID
+
+	VulkanUtil::SetDebugName(Buffer, "Name");
 }
 
 AllocatedBuffer::~AllocatedBuffer()

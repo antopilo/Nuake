@@ -145,6 +145,8 @@ SceneRenderPipeline::SceneRenderPipeline()
 		memcpy(mappedData, ssaoKernelSamples.data(), buffer->GetSize());
 		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd)  
 		{
+			auto command = Cmd(cmd);
+			command.DebugScope("SSAO Kernel CopyBuffer");
 			VkBufferCopy copy{ 0 };
 			copy.dstOffset = 0;
 			copy.srcOffset = 0;
@@ -316,7 +318,10 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 		{ LineCombineOutput },
 	};
 
-	GBufferPipeline.Execute(ctx, pipelineInputs);
+	{
+		auto marker = ctx.commandBuffer.DebugScope("GBufferPipeline Execute");
+		GBufferPipeline.Execute(ctx, pipelineInputs);
+	}
 
 	// Mouse Picking requests
 	if (!mousePickingRequests.empty())
@@ -334,6 +339,7 @@ void SceneRenderPipeline::Render(PassRenderContext& ctx)
 			VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
 			{
 				Cmd command(cmd);
+				command.DebugScope("Mouse picking GPU to CPU copy");
 				command.TransitionImageLayout(GBufferEntityID, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 				command.CopyImageToBuffer(GBufferEntityID, stagingBuffer, request.mousePosition);
 				command.TransitionImageLayout(GBufferEntityID, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL);

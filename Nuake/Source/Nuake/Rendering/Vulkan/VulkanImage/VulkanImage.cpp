@@ -62,13 +62,19 @@ VulkanImage::VulkanImage(const std::string & path) :
 
 	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
 
+	VulkanUtil::SetDebugName(Image, path + "Image");
+
 	VkImageViewCreateInfo imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(Format), Image, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
 
+	VulkanUtil::SetDebugName(ImageView, path + "ImageView");
+
 	// Transition image and copy data to GPU
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd)
 	{
+		Cmd command(cmd);
+		command.DebugScope("Image CPU to GPU Copy");
 		TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		//VulkanUtil::TransitionImage(cmd, Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
@@ -225,6 +231,7 @@ VulkanImage::VulkanImage(void* inData, ImageFormat inFormat, Vector2 inSize) : V
 	Layout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) 
 	{
+
 		TransitionLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 		TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		VkBufferImageCopy copyRegion = {};
@@ -296,7 +303,6 @@ VulkanImage::VulkanImage(void* inData, size_t inSize) :
 
 	vmaCreateImage(VulkanAllocator::Get().GetAllocator(), &imgCreateInfo, &imgAllocInfo, &Image, &Allocation, nullptr);
 	
-
 	VkImageViewCreateInfo imageViewCreateInfo = VulkanInit::ImageviewCreateInfo(static_cast<VkFormat>(Format), Image, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	VK_CALL(vkCreateImageView(VkRenderer::Get().GetDevice(), &imageViewCreateInfo, nullptr, &ImageView));
@@ -336,7 +342,8 @@ VulkanImage::~VulkanImage()
 void VulkanImage::SetDebugName(const std::string& name)
 {
 	GPUManaged::SetDebugName(name);
-
+	VulkanUtil::SetDebugName(Image, name);
+	VulkanUtil::SetDebugName(ImageView, name);
 	vmaSetAllocationName(VulkanAllocator::Get().GetAllocator(), Allocation, GetDebugName().data());
 }
 
@@ -401,6 +408,7 @@ VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
 
 		ImGuiDescriptorSetGenerated = true;
 
+		
 		struct cleanUpData
 		{
 			VkDescriptorSet descriptorSet;
@@ -412,6 +420,8 @@ VkDescriptorSet& VulkanImage::GetImGuiDescriptorSet()
 			ImGuiDescriptorSet,
 			Sampler
 		};
+
+		
 
 		AddGPUCleanUpFunc([=]() {
 			cleanUpData data = dataToCleanUp;

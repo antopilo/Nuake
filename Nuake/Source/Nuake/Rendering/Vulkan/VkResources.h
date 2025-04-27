@@ -91,7 +91,7 @@ namespace Nuake
 
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
 	constexpr uint32_t MAX_MATERIAL = 3000;
-	constexpr uint32_t MAX_TEXTURES = 1000;
+	constexpr uint32_t MAX_TEXTURES = 3000;
 	constexpr uint32_t MAX_CAMERAS = 1000;
 	constexpr uint32_t MAX_LIGHTS = 100;
 

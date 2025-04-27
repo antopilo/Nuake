@@ -70,6 +70,8 @@ void RenderPass::Execute(PassRenderContext& ctx, PassAttachments& inputs)
 
 void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
+	auto marker = ctx.commandBuffer.DebugScope("Clear Attachments");
+
 	// Clear all color attachments
 	int attachmentIndex = 0;
 	for (int i = 0; i < std::size(inputs); i++)
@@ -96,6 +98,7 @@ void RenderPass::ClearAttachments(PassRenderContext& ctx, PassAttachments& input
 
 void RenderPass::TransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
+	auto marker = ctx.commandBuffer.DebugScope("Transition Attachments");
 	// Transition all color attachments
 	for (auto& attachment : inputs)
 	{
@@ -108,6 +111,8 @@ void RenderPass::TransitionAttachments(PassRenderContext& ctx, PassAttachments& 
 
 void RenderPass::UntransitionAttachments(PassRenderContext& ctx, PassAttachments& inputs)
 {
+	auto marker = ctx.commandBuffer.DebugScope("Detransition Attachments");
+
 	for (auto& attachment : inputs)
 	{
 		// Transform from color attachment to transfer src for next pass
@@ -122,6 +127,7 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 
 	if (PreRender)
 	{
+		auto marker = ctx.commandBuffer.DebugScope("Pre Render");
 		PreRender(ctx);
 	}
 	
@@ -162,6 +168,7 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 
 		if (RenderCb)
 		{
+			auto marker = ctx.commandBuffer.DebugScope("Render");
 			RenderCb(ctx);
 		}
 	}
@@ -169,6 +176,7 @@ void RenderPass::Render(PassRenderContext& ctx, PassAttachments& inputs)
 
 	if (PostRender)
 	{
+		auto marker = ctx.commandBuffer.DebugScope("Post Render");
 		PostRender(ctx);
 	}
 }
@@ -278,6 +286,7 @@ void RenderPass::Build()
 
 	VK_CALL(vkCreatePipelineLayout(VkRenderer::Get().GetDevice(), &pipeline_layout_info, nullptr, &PipelineLayout));
 
+	VulkanUtil::SetDebugName(PipelineLayout, Name + "PipelineLayout");
 	// Create pipeline 
 	const size_t attachmentCount = Attachments.size();
 
@@ -314,7 +323,7 @@ void RenderPass::Build()
 	}
 
 	Pipeline = pipelineBuilder.BuildPipeline(VkRenderer::Get().GetDevice());
-
+	VulkanUtil::SetDebugName(Pipeline, Name + "Pipeline");
 	IsBuilt = true;
 }
 
@@ -381,6 +390,7 @@ void RenderPipeline::Execute(PassRenderContext& ctx, PipelineAttachments& inputs
 	int passIndex = 0;
 	for (auto& pass : RenderPasses)
 	{
+		auto marker = ctx.commandBuffer.DebugScope(pass.GetName() + " Execute");
 		pass.Execute(ctx, inputs[passIndex]);
 
 		passIndex++;

@@ -179,6 +179,7 @@ void VkRenderer::GetInstance()
 	//make the vulkan instance, with basic debug features
 	auto instRet = builder.set_app_name("Nuake Engine")
 		.request_validation_layers(NKUseValidationLayer)
+		.enable_extension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 		.use_default_debug_messenger()
 		.require_api_version(1, 3, 0)
 		.build();
@@ -209,7 +210,7 @@ void VkRenderer::SelectGPU()
 	{ 
 		VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 		VK_KHR_LINE_RASTERIZATION_EXTENSION_NAME,
-		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME
+		VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
 	};
 
 	auto systemInfoRet = vkb::SystemInfo::get_system_info();
@@ -219,9 +220,9 @@ void VkRenderer::SelectGPU()
 	{
 		if (!systemInfo.is_extension_available(extension))
 		{
-			std::string errMessage = "No GPU found who supports the required Vulkan extension: " + std::string(extension);
-			errMessage += "\nConsider updating drivers.";
-			Logger::Log(errMessage, "vulkan", CRITICAL);
+			//std::string errMessage = "No GPU found who supports the required Vulkan extension: " + std::string(extension);
+			//errMessage += "\nConsider updating drivers.";
+			//Logger::Log(errMessage, "vulkan", CRITICAL);
 			//OS::ShowMessageBox("Vulkan Error", errMessage);
 		}
 	}
@@ -233,7 +234,7 @@ void VkRenderer::SelectGPU()
 		.set_required_features_12(features12)
 		.set_required_features(VkPhysicalDeviceFeatures{
 			.fillModeNonSolid = VK_TRUE,
-			.wideLines = VK_TRUE
+			.wideLines = VK_TRUE,
 		})
 		.set_surface(Surface)
 		.add_required_extensions(requiredExtensions)
@@ -451,6 +452,11 @@ void VkRenderer::DrawScenes()
 				ctx.SelectedEntityID = viewport->GetSelectedEntityID();
 
 				SceneRenderers[view]->DrawSceneView(ctx);
+				Stats.ViewRenderers++;
+			}
+			else
+			{
+				Stats.ViewRenderSkipped++;
 			}
 		}
 	}
@@ -737,6 +743,8 @@ void VkRenderer::BeginScene(const UUID& camera)
 
 bool VkRenderer::Draw()
 {
+	Stats = {};
+
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
 
 	if (SurfaceSize != Window::Get()->GetSize())
@@ -798,7 +806,6 @@ bool VkRenderer::Draw()
 std::mutex queueMutex;
 void VkRenderer::EndDraw()
 {
-
 	std::lock_guard<std::mutex> lock(queueMutex);
 	if (FrameSkipped)
 	{
@@ -894,7 +901,9 @@ void VkRenderer::ImmediateSubmit(std::function<void(VkCommandBuffer cmd)>&& func
 	VK_CALL(vkResetCommandBuffer(ImguiCommandBuffer, 0));
 
 	VkCommandBuffer cmd = ImguiCommandBuffer;
+	Cmd command(cmd);
 
+	command.DebugScope("Immediate Submit", Color(1, 1, 0, 1));
 	VkCommandBufferBeginInfo cmdBeginInfo = VulkanInit::CommandBufferBeginInfo(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	VK_CALL(vkBeginCommandBuffer(cmd, &cmdBeginInfo));
@@ -926,8 +935,6 @@ void DescriptorAllocator::InitPool(VkDevice device, uint32_t maxSets, std::span<
 			}
 		);
 	}
-
-	
 
 	VkDescriptorPoolCreateInfo pool_info = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
 	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;

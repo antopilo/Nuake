@@ -134,6 +134,13 @@ namespace Nuake
 	
 	class Viewport;
 
+	struct RendererStats
+	{
+		int ViewRenderers = 0;
+		int ViewRenderSkipped = 0;
+		int DrawCalls = 0;
+	};
+
 	class VkRenderer
 	{
 	private:
@@ -165,6 +172,7 @@ namespace Nuake
 		DescriptorAllocator GlobalDescriptorAllocator;
 
 	public:
+		RendererStats Stats;
 		uint32_t FrameNumber = 0;
 		VkDescriptorSet DrawImageDescriptors;
 		VkDescriptorSetLayout DrawImageDescriptorLayout;

@@ -3,6 +3,7 @@
 
 #include "VulkanRenderer.h"
 #include "VulkanAllocator.h"
+#include "VulkanInit.h"
 
 using namespace Nuake;
 
@@ -36,6 +37,8 @@ void VkMesh::UploadToGPU(const std::vector<Vertex>& vertices, const std::vector<
 	memcpy((char*)mappedData + VertexBuffer->GetSize(), indices.data(), IndexBuffer->GetSize());
 
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
+		auto command = Cmd(cmd);
+		command.DebugScope("VkMesh UploadToGPU");
 		VkBufferCopy vertexCopy{ 0 };
 		vertexCopy.dstOffset = 0;
 		vertexCopy.srcOffset = 0;
@@ -65,6 +68,9 @@ void VkMesh::CreateDescriptorSet()
 		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 		DescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
 		DescriptorSet = vk.GetDescriptorAllocator().Allocate(device, DescriptorLayout);
+
+		VulkanUtil::SetDebugName(DescriptorLayout, "VkMesh " + std::to_string(ID) + " DescriptorLayout");
+		VulkanUtil::SetDebugName(DescriptorSet, "VkMesh " + std::to_string(ID) + " DescriptorSet");
 	}
 
 	VkDescriptorBufferInfo bufferInfo{};
