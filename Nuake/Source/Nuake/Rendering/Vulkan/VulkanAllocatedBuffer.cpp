@@ -9,6 +9,10 @@
 #include "VkResources.h"
 using namespace Nuake;
 
+void AllocatedBuffer::Update()
+{
+	LastUpdatedFrame = VkRenderer::Get().FrameNumber;
+}
 
 AllocatedBuffer::AllocatedBuffer(size_t inSize, BufferUsage inFlags, MemoryUsage inUsage)
 	: ID(UUID()),
@@ -25,9 +29,13 @@ AllocatedBuffer::AllocatedBuffer(size_t inSize, BufferUsage inFlags, MemoryUsage
 	vmaallocInfo.usage = static_cast<VmaMemoryUsage>(inUsage);
 	vmaallocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
+	MemUsage = inUsage;
+
 	// allocate the buffer
 	VK_CALL(vmaCreateBuffer(VulkanAllocator::Get().GetAllocator(), &bufferInfo, &vmaallocInfo, &Buffer, &Allocation,
 		&Info));
+
+	LastUpdatedFrame = VkRenderer::Get().FrameNumber;
 }
 
 AllocatedBuffer::AllocatedBuffer(const std::string& name, size_t inSize, BufferUsage inFlags, MemoryUsage inUsage) :

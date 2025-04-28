@@ -36,6 +36,7 @@
 #include <array>
 #include <mutex>
 #include <algorithm>
+#include <implot-0.16/implot.h>
 
 #ifdef NK_DEBUG
 bool NKUseValidationLayer = true; 
@@ -606,6 +607,7 @@ void VkRenderer::InitImgui()
 
 	// 2: initialize imgui library
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	{
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.Fonts->AddFontFromMemoryTTF(StaticResources::Data_Fonts_Poppins_Regular_ttf, StaticResources::Data_Fonts_Poppins_Regular_ttf_len, 16.0);

@@ -43,6 +43,7 @@ namespace Nuake
 		VmaAllocation Allocation;
 		VmaAllocationInfo Info;
 		size_t Size;
+		int LastUpdatedFrame = 0;
 
 	public:
 		AllocatedBuffer(size_t size, BufferUsage flags, MemoryUsage usage);
@@ -50,11 +51,17 @@ namespace Nuake
 		AllocatedBuffer() = default;
 		~AllocatedBuffer();
 
+		MemoryUsage MemUsage;
+		BufferUsage BufUsage;
+
 		VkBuffer GetBuffer() const { return Buffer; }
 		VmaAllocation GetAllocation() const { return Allocation; }
 		UUID GetID() const { return ID; }
 		size_t GetSize() const { return Size; }
+		int GetLastUpdated() const { return LastUpdatedFrame; }
 		std::string GetName() const { return Name; }
+
+		void Update();
 	};
 
 	// push constants for our mesh object draws

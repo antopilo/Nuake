@@ -156,6 +156,8 @@ SceneRenderPipeline::SceneRenderPipeline()
 			copy.size = buffer->GetSize();
 
 			vkCmdCopyBuffer(cmd, staging.GetBuffer(), buffer->GetBuffer(), 1, &copy);
+
+			buffer->Update();
 		});
 		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), staging.GetAllocation());
 

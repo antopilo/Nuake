@@ -113,6 +113,8 @@ void Cmd::CopyBuffer(VkBuffer src, VkBuffer dst, size_t size) const
 	copy.size = size;
 
 	vkCmdCopyBuffer(CmdBuffer, src, dst, 1, &copy);
+
+
 }
 
 void Cmd::TransitionImageLayout(Ref<VulkanImage> img, VkImageLayout layout) const
@@ -177,6 +179,8 @@ void Cmd::CopyImageToBuffer(Ref<VulkanImage> src, Ref<AllocatedBuffer> dst, cons
 		1,
 		&copyRegion
 	);
+
+	dst->Update();
 }
 
 void Cmd::SetLineRasterizationMode(VkLineRasterizationMode mode) const

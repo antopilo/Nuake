@@ -53,7 +53,7 @@ namespace Nuake
 	// This is the *whole* buffer
 	struct MaterialData
 	{
-		std::array<MaterialBufferStruct, 3000> Data;
+		std::array<MaterialBufferStruct, 2000> Data;
 	};
 
 	struct LightData
@@ -92,14 +92,22 @@ namespace Nuake
 	};
 
 	constexpr uint32_t MAX_MODEL_MATRIX = 3000;
-	constexpr uint32_t MAX_MATERIAL = 3000;
+	constexpr uint32_t MAX_MATERIAL = 2000;
 	constexpr uint32_t MAX_TEXTURES = 3000;
 	constexpr uint32_t MAX_CAMERAS = 1000;
 	constexpr uint32_t MAX_LIGHTS = 100;
 
 	class GPUResources
 	{
+		Ref<AllocatedBuffer> AllBuffer;
+		struct FrameData
+		{
+			VkDescriptorSet TestDescriptorSet;
+		};
+
 	private:
+		FrameData frameData[FRAME_OVERLAP];
+
 		bool isDirty = false;
 		std::map<UUID, Ref<AllocatedBuffer>> Buffers;
 		std::map<UUID, Ref<VkMesh>> Meshes;

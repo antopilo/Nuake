@@ -4,6 +4,7 @@
 
 #include "GPUManaged.h"
 #include "VulkanInit.h"
+#include "BindlessDescriptor.h"
 
 using namespace Nuake;
 
@@ -33,6 +34,54 @@ void GPUResources::Init()
 	ModelBuffer = CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "TransformBuffer");
 	MaterialBuffer = CreateBuffer(sizeof(MaterialBufferStruct) * MAX_MATERIAL, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "MaterialBuffer");
 	LightBuffer = CreateBuffer(sizeof(LightData) * MAX_LIGHTS, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::GPU_ONLY, "LightBuffer");
+
+	auto& vk = VkRenderer::Get();
+	auto device = vk.GetDevice();
+
+	{
+		DescriptorLayoutBuilder builder;
+		builder.AddBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+		ModelDescriptorLayout = builder.Build(device, VK_SHADER_STAGE_ALL_GRAPHICS);
+		VulkanUtil::SetDebugName(ModelDescriptorLayout, "ModelDescriptorLayout");
+	}
+
+	VkDescriptorSet descriptorSets[FRAME_OVERLAP];
+	Ref<AllocatedBuffer> bigBuffer = CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX * FRAME_OVERLAP, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::CPU_TO_GPU, "BigBuffer");
+	for (int i = 0; i < FRAME_OVERLAP; i++)
+	{
+		auto& allocator = vk.GetDescriptorAllocator();
+		descriptorSets[i] = allocator.Allocate(device, ModelDescriptorLayout);
+	
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = bigBuffer->GetBuffer();
+		bufferInfo.offset = sizeof(Matrix4) * MAX_MODEL_MATRIX * i;
+		bufferInfo.range = sizeof(Matrix4) * MAX_MODEL_MATRIX;
+	
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = descriptorSets[i];
+		write.dstBinding = 0;
+		write.dstArrayElement = 0;
+		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		write.descriptorCount = 1;
+		write.pBufferInfo = &bufferInfo;
+	
+		vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+	}
+
+	//// Update the relevant part
+	//void* mappedData;
+	//vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (bigBuffer->GetAllocation()), &mappedData);
+
+	//void* mappedPointer = 0;
+	//int frameIndex = 1;
+	////uint8_t* frameData = static_cast<uint8_t*>(bigBuffer) + (frameIndex * sizeof(Matrix4) * MAX_MODEL_MATRIX);
+
+	//int data = 2;
+	//// Now copy into the correct frame
+	//memcpy(frameData, &data, sizeof(Matrix4) * MAX_MODEL_MATRIX);
+
+	//vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), bigBuffer->GetAllocation());
 }
 
 Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name)
@@ -56,6 +105,8 @@ void GPUResources::CopyIntoBuffer(Ref<AllocatedBuffer> buffer, void* data, size_
 		copy.size = size;
 	
 		vkCmdCopyBuffer(cmd, buffer->GetBuffer(), buffer->GetBuffer(), 1, &copy);
+
+		buffer->Update();
 	});
 
 	vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), buffer->GetAllocation());
@@ -288,6 +339,16 @@ void GPUResources::CreateBindlessLayout()
 		VulkanUtil::SetDebugName(CamerasDescriptorLayout, "CamerasDescriptorLayout");
 	}
 
+	ResourceDescriptorsLimits limits
+	{
+		.MaxView = 10,
+		.MaxMaterial = 1,
+		.MaxTexture = 20,
+		.MaxLight = 10,
+		.MaxSampler = 2,
+	};
+	ResourceDescriptors descriptors = ResourceDescriptors(limits);
+
 	auto allocator = vk.GetDescriptorAllocator();
 	TexturesDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
 	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
@@ -394,7 +455,7 @@ void GPUResources::RecreateBindlessCameras()
 	auto allocator = VulkanAllocator::Get().GetAllocator();
 	vmaMapMemory(allocator, (VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation()), &mappedData);
 	memcpy(mappedData, Cameras.data(), sizeof(CameraView) * Cameras.size());
-
+	VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->Update();
 	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
 		VkBufferCopy copy{ 0 };
 		copy.dstOffset = 0;
@@ -402,6 +463,7 @@ void GPUResources::RecreateBindlessCameras()
 		copy.size = sizeof(CameraView) * MAX_CAMERAS;
 
 		vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetBuffer(), CamerasBuffer->GetBuffer(), 1, &copy);
+		CamerasBuffer->Update();
 	});
 
 	vmaUnmapMemory(allocator, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation());
@@ -431,6 +493,7 @@ void GPUResources::UpdateBuffers()
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
 		memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
 
+		VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->Update();
 		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
 			VkBufferCopy copy{ 0 };
 			copy.dstOffset = 0;
@@ -438,6 +501,8 @@ void GPUResources::UpdateBuffers()
 			copy.size = sizeof(ModelData);
 
 			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
+
+			ModelBuffer->Update();
 		});
 
 		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
@@ -464,7 +529,7 @@ void GPUResources::UpdateBuffers()
 		void* mappedData;
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation()), &mappedData);
 		memcpy(mappedData, &MaterialDataContainer, sizeof(MaterialData));
-
+		VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->Update();
 		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
 			VkBufferCopy copy{ 0 };
 			copy.dstOffset = 0;
@@ -472,6 +537,8 @@ void GPUResources::UpdateBuffers()
 			copy.size = sizeof(MaterialData);
 
 			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetBuffer(), MaterialBuffer->GetBuffer(), 1, &copy);
+
+			MaterialBuffer->Update();
 		});
 
 		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation());
@@ -499,7 +566,7 @@ void GPUResources::UpdateBuffers()
 		void* mappedData;
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);
 		memcpy(mappedData, &LightDataContainerArray, sizeof(LightDataContainer));
-
+		VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->Update();
 		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
 			VkBufferCopy copy{ 0 };
 			copy.dstOffset = 0;
@@ -507,6 +574,7 @@ void GPUResources::UpdateBuffers()
 			copy.size = sizeof(LightDataContainer);
 
 			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetBuffer(), LightBuffer->GetBuffer(), 1, &copy);
+			LightBuffer->Update();
 		});
 
 		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation());
