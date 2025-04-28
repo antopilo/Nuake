@@ -66,6 +66,7 @@
 #include "../Events/EditorRequests.h"
 #include "../../../../Nuake/Thirdparty/glfw/include/GLFW/glfw3.h"
 #include "../misc/AnimatedValue.h"
+#include <implot-0.16/implot.h>
 
 namespace Nuake {
     
@@ -2688,11 +2689,13 @@ namespace Nuake {
 
         if (m_ShowGpuResources)
         {
+
             if (ImGui::Begin("GPU Resources"))
             {
+                static Ref<AllocatedBuffer> selectedBuffer;
+
                 GPUResources& gpu = GPUResources::Get();
                 auto buffers = gpu.GetAllBuffers();
-
                 ImGui::Text("Render Info");
 
                 auto stats = VkRenderer::Get().Stats;
@@ -2710,25 +2713,165 @@ namespace Nuake {
                 const size_t bufferCount = gpu.GetAllBuffers().size();
                 ImGui::Text(("Buffer Count: " + std::to_string(bufferCount)).c_str());
 
-                ImGui::BeginTable("Buffers", 2);
-                ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_IndentDisable | ImGuiTableColumnFlags_WidthFixed);
-
-                ImGui::TableHeadersRow();
-
-                ImGui::TableNextColumn();
-
-                for (auto& buffer : buffers)
+                if (selectedBuffer)
                 {
-                    ImGui::Text(buffer->GetName().c_str());
+                    ImGui::BeginChild("Buffer Info", {ImGui::GetContentRegionAvail().x, 100});
+                    {
+                        {
+                            UIFont boldFont(Bold);
+                            ImGui::Text("Buffer Info");
+                        }
+                        {
 
-                    ImGui::TableNextColumn();
-                     
-                    ImGui::Text(std::to_string(buffer->GetSize()).c_str());
-                    ImGui::TableNextColumn();
+                            ImGui::Text(("Name:" + selectedBuffer->GetName()).c_str());
+                        }
+
+                        {
+
+                            ImGui::Text(("Size:" + std::to_string(selectedBuffer->GetSize() / 1024) + " KB").c_str());
+                        }
+
+                        {
+                            auto type = selectedBuffer->MemUsage;
+
+                            auto typeString = std::string();
+                            switch (type)
+                            {
+                            case MemoryUsage::CPU_ONLY: typeString = "CPU Only"; break;
+                            case MemoryUsage::GPU_ONLY: typeString = "GPU Only"; break;
+                            case MemoryUsage::CPU_TO_GPU: typeString = "CPU -> GPU"; break;
+                            case MemoryUsage::GPU_TO_CPU: typeString = "GPU -> CPU"; break;
+                            }
+
+                            ImGui::Text(("Usage: " + typeString).c_str());
+                        }
+
+                        {
+                            auto currentFrame = VkRenderer::Get().FrameNumber;
+                            auto lastUpdated = selectedBuffer->GetLastUpdated();
+                            auto ago = currentFrame - lastUpdated;
+                            ImGui::Text(("Last Updated: " + std::to_string(ago) + " frames ago").c_str());
+                        }
+                        
+                    }
+                    ImGui::EndChild();
                 }
 
-                ImGui::EndTable();
+                int columnCount = std::sqrt(bufferCount);
+                std::vector<float> data; // Flattened data to be used in the heatmap
+                float minVal = FLT_MAX, maxVal = -FLT_MAX; // For normalizing values
+
+                ImPlot::PushColormap("Deep");  // You can choose other colormaps, such as ImPlotColormap_Cool
+                std::vector<Ref<AllocatedBuffer>> bufferInfo;
+
+                enum class SortType
+                {
+                    Size,
+                    Update
+                };
+                static SortType sortType = SortType::Size;
+
+                static const char* sortTypeLbl[]{ "Size", "Update" };
+                int selectSort = static_cast<int>(sortType);
+                ImGui::Combo("##SortType", &selectSort, sortTypeLbl, IM_ARRAYSIZE(sortTypeLbl));
+                sortType = static_cast<SortType>(selectSort);
+
+                auto& sortedBuffers = buffers;
+                auto sortBySize = [](const Ref<AllocatedBuffer>& a, const Ref<AllocatedBuffer>& b)
+                {
+                    return a->GetSize() > b->GetSize();
+                };
+
+                auto sortByUpdate = [](const Ref<AllocatedBuffer>& a, const Ref<AllocatedBuffer>& b)
+                {
+                    return a->GetLastUpdated() > b->GetLastUpdated();
+                };
+
+                using SortFunc = std::function<bool(const Ref<AllocatedBuffer>& a, const Ref<AllocatedBuffer>& b)>;
+                SortFunc sortFunc = sortBySize;
+
+                switch (sortType)
+                {
+                case SortType::Size: sortFunc = sortBySize; break;
+                case SortType::Update: sortFunc = sortByUpdate; break;
+                default:
+                    sortFunc = sortBySize;
+                    break;
+                };
+
+                std::sort(std::begin(sortedBuffers), std::end(sortedBuffers), sortFunc);
+
+                for (auto& buffer : sortedBuffers)
+                {
+                    float size = buffer->GetSize() / 1024.0f;
+                    data.push_back(size);
+                    bufferInfo.push_back(buffer);
+                    // Update the min/max values for normalization
+                    minVal = std::min(minVal, size);
+                    maxVal = std::max(maxVal, size);
+                }
+
+                // Assuming number of rows is based on the size of the data and column count
+                int rowCount = data.size() / columnCount;
+
+                if (ImPlot::BeginPlot("Buffer view", ImGui::GetContentRegionAvail()))
+                {
+                    ImPlot::PlotHeatmap("Buffers", data.data(), rowCount, columnCount, minVal, maxVal, "%.2f KB");
+                    
+                    auto mousePos = ImPlot::GetPlotMousePos();
+
+                    // Calculate the hovered square based on mouse position and the grid size
+                    int col = (int)((mousePos.x) * columnCount); // Column in the heatmap
+                    int row = (int)((1.0 - mousePos.y) * rowCount); // Row in the heatmap
+                    ImDrawList* drawList = ImPlot::GetPlotDrawList();
+
+                    for (int i = 0; i < rowCount * columnCount; i++)
+                    {
+                        int cellRow = i / columnCount;
+                        int cellCol = i % columnCount;
+
+                        ImPlotPoint pMin((float)cellCol / columnCount, 1.0f - (float)(cellRow + 1) / rowCount);
+                        ImPlotPoint pMax((float)(cellCol + 1) / columnCount, 1.0f - (float)(cellRow) / rowCount);
+
+                        ImVec2 plotPMin = ImPlot::PlotToPixels(pMin);
+                        ImVec2 plotPMax = ImPlot::PlotToPixels(pMax);
+
+                        auto& b = bufferInfo[i];
+                        if ((VkRenderer::Get().FrameNumber - b->GetLastUpdated()) <= 1)
+                        {
+                            drawList->AddRect(plotPMin, plotPMax, IM_COL32(255, 0, 0, 128), 0.0f, 0, 4.0f);
+                        }
+                        else if ((VkRenderer::Get().FrameNumber - b->GetLastUpdated()) <= 2)
+                        {
+                            drawList->AddRect(plotPMin, plotPMax, IM_COL32(255, 0, 255, 128), 0.0f, 0, 4.0f);
+                        }
+                    }
+
+                    // Check if the mouse is over a valid square in the heatmap
+                    if (col >= 0 && col < columnCount && row >= 0 && row < rowCount)
+                    {
+                        // Get the value of the hovered square
+                        size_t index = row * columnCount + col;
+                        float hoveredValue = data[index];
+
+                        ImPlotPoint pMin((float)col / columnCount, 1.0 - (float)(row + 1) / rowCount);
+                        ImPlotPoint pMax((float)(col + 1) / columnCount, 1.0 - (float)(row) / rowCount);
+
+                        ImVec2 plotPMin = ImPlot::PlotToPixels(pMin);
+                        ImVec2 plotPMax = ImPlot::PlotToPixels(pMax);
+
+                        drawList->AddRect(plotPMin, plotPMax, IM_COL32(255, 255, 0, 255), 0.0f, 0, 2.0f); // Yellow outline, thickness 2.0f
+
+                        // Show the value in a tooltip when hovering over a square
+                        ImGui::SetTooltip(bufferInfo[index]->GetName().c_str());
+                        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                        {
+                            selectedBuffer = bufferInfo[index];
+                        }
+                    }
+
+                    ImPlot::EndPlot();
+                }
             }
             ImGui::End();
         }

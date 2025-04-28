@@ -253,8 +253,6 @@ MaterialEditor::MaterialEditor()
 	cubeModel->AddMesh(meshBox);
 	ResourceManager::RegisterResource(cubeModel);
 	modelComponent.ModelResource = cubeModel->ID;
-
-	
 }
 
 void MaterialEditor::Draw(Ref<Nuake::Material> material)
