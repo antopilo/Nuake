@@ -5,6 +5,7 @@
 
 #include "Nuake/Core/Core.h"
 #include "Nuake/Rendering/Vulkan/SceneViewport.h"
+#include "Nuake/Rendering/Vulkan/DebugCmd.h"
 
 class CameraPanel 
 {
@@ -22,6 +23,56 @@ public:
 
             previewViewport = vkRenderer.CreateViewport(viewId, { 200, 200 });
             previewViewport->SetDebugName("CameraPreviewViewport");
+            previewViewport->GetOnDebugDraw().AddStatic([&, componentPtr](DebugCmd& cmd)
+            {
+                    Matrix4 transform = Matrix4(1.0f);
+
+                    auto& cam = cmd.GetScene()->m_EditorCamera;
+
+                    Matrix4 initialTransform = Matrix4(1.0f);
+                    initialTransform = glm::translate(initialTransform, cam->Translation);
+
+                    Matrix4 gizmoTransform = initialTransform;
+                    gizmoTransform = glm::inverse(componentPtr->CameraInstance->GetTransform());
+                    gizmoTransform[3] = initialTransform[3];
+
+                    auto view = componentPtr->CameraInstance->GetTransform();
+                    auto proj = componentPtr->CameraInstance->GetPerspective();
+
+                    static auto getGizmoScale = [](const Vector3& camPosition, const Nuake::Vector3& position) -> float
+                    {
+                        float distance = Distance(camPosition, position);
+
+                        constexpr float ClosestDistance = 3.5f;
+                        if (distance < ClosestDistance)
+                        {
+                            float fraction = distance / ClosestDistance;
+                            return fraction;
+                        }
+
+                        return 1.0f;
+                    };
+
+                    Vector3 cameraPosition = componentPtr->CameraInstance->Translation;
+
+                    const Vector3 gizmoSize = Vector3(Engine::GetProject()->Settings.GizmoSize);
+                    gizmoTransform = glm::scale(gizmoTransform, gizmoSize * getGizmoScale(cameraPosition, initialTransform[3]));
+
+                    cmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2("Resources/Gizmos/Camera.png"), Engine::GetProject()->Settings.PrimaryColor);
+            });
+            previewViewport->GetOnLineDraw().AddStatic([&, componentPtr](DebugCmd& cmd)
+                {
+                    auto& cam = cmd.GetScene()->m_EditorCamera;
+                    Matrix4 initialTransform = Matrix4(1.0f);
+                    initialTransform = glm::translate(initialTransform, cam->Translation);
+
+                    const float aspectRatio = cam->AspectRatio;
+                    const float fov = cam->Fov;
+
+                    Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
+                    Matrix4 boxTransform = glm::translate(scene->GetCurrentCamera()->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
+                    lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
+                });
 
             vkRenderer.RegisterSceneViewport(scene->Shared(), previewViewport->GetID());
         }
