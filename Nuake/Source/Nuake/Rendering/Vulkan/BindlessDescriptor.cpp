@@ -119,7 +119,7 @@ BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info)
 	{
 		const size_t offset = i * size;
 		uint8_t* partitionStart = static_cast<uint8_t*>(mappedData) + offset;
-		Descriptors.emplace_back(Descriptor(Buffer, DescriptorLayout, partitionStart, offset, size));
+		Descriptors.emplace_back(Buffer, DescriptorLayout, partitionStart, offset, size, info);
 	}
 }
 

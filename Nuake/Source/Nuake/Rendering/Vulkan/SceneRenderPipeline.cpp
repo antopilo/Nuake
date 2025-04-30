@@ -34,7 +34,7 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 	shadowPass.SetShaders(shaderMgr.GetShader("shadow_vert"), shaderMgr.GetShader("shadow_frag"));
 	shadowPass.SetPushConstant<GBufferConstant>(gbufferConstant);
 	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
-		auto& layout = ctx.renderPass->PipelineLayout;
+		auto& layout = ctx.renderPass->PipelineLayout;  
 		auto& res = GPUResources::Get();
 
 		Cmd& cmd = ctx.commandBuffer;

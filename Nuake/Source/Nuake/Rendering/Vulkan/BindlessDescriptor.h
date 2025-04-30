@@ -54,8 +54,7 @@ namespace Nuake
 		~Descriptor() = default;
 
 		int32_t LoadResource(const UUID& id);
-		int32_t GetResourceSlot(const UUID& id);
-
+		int32_t GetResourceSlot(const UUID& id) const;
 	};
 
 	// Contains buffer for N frames of a resource type
@@ -98,7 +97,7 @@ namespace Nuake
 		{
 			Info.ResourceElementSize[T] = sizeof(S);
 			Info.ResourceCount[T] = size;
-			Descriptors[T] = BindlessDescriptor(T, (size_t)sizeof(S) * size);
+			//Descriptors[T] = BindlessDescriptor(T, Info);
 		}
 	};
 }
