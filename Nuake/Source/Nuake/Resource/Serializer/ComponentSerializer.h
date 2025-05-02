@@ -85,6 +85,11 @@ namespace Nuake
 						cursor["file" + displayName] = value.file->GetRelativePath();
 					}
 				}
+				else if (dataType.type() == entt::resolve<std::string>())
+				{
+					std::string value = fieldVal.cast<std::string>();
+					cursor[displayName] = value;
+				}
 			}
 
 			return jsonSnippet;
