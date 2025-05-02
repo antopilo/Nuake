@@ -60,19 +60,19 @@ public:
 
                     cmd.DrawTexturedQuad(proj * view * gizmoTransform, TextureManager::Get()->GetTexture2("Resources/Gizmos/Camera.png"), Engine::GetProject()->Settings.PrimaryColor);
             });
-            previewViewport->GetOnLineDraw().AddStatic([&, componentPtr](DebugCmd& cmd)
-                {
-                    auto& cam = cmd.GetScene()->m_EditorCamera;
-                    Matrix4 initialTransform = Matrix4(1.0f);
-                    initialTransform = glm::translate(initialTransform, cam->Translation);
-
-                    const float aspectRatio = cam->AspectRatio;
-                    const float fov = cam->Fov;
-
-                    Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
-                    Matrix4 boxTransform = glm::translate(scene->GetCurrentCamera()->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
-                    lineCmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
-                });
+            previewViewport->GetOnLineDraw().AddStatic([&, componentPtr](DebugLineCmd& cmd)
+            {
+                //auto& cam = cmd.GetScene()->m_EditorCamera;
+                //Matrix4 initialTransform = Matrix4(1.0f);
+                //initialTransform = glm::translate(initialTransform, cam->Translation);
+                //
+                //const float aspectRatio = cam->AspectRatio;
+                //const float fov = cam->Fov;
+                //
+                //Matrix4 clampedProj = glm::perspectiveFov(glm::radians(fov), 9.0f * aspectRatio, 9.0f, 0.05f, 3.0f);
+                //Matrix4 boxTransform = glm::translate(scene->GetCurrentCamera()->GetTransform(), Vector3(transform.GetGlobalTransform()[3])) * rotationMatrix * glm::inverse(clampedProj);
+                //cmd.DrawBox(proj * boxTransform, Color(1, 0, 0, 1.0f), 1.5f, false);
+            });
 
             vkRenderer.RegisterSceneViewport(scene->Shared(), previewViewport->GetID());
         }

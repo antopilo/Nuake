@@ -4,7 +4,6 @@
 
 #include "GPUManaged.h"
 #include "VulkanInit.h"
-#include "BindlessDescriptor.h"
 
 using namespace Nuake;
 
@@ -45,43 +44,38 @@ void GPUResources::Init()
 		VulkanUtil::SetDebugName(ModelDescriptorLayout, "ModelDescriptorLayout");
 	}
 
-	VkDescriptorSet descriptorSets[FRAME_OVERLAP];
-	Ref<AllocatedBuffer> bigBuffer = CreateBuffer(sizeof(Matrix4) * MAX_MODEL_MATRIX * FRAME_OVERLAP, BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST, MemoryUsage::CPU_TO_GPU, "BigBuffer");
-	for (int i = 0; i < FRAME_OVERLAP; i++)
+	ResourceDescriptorsLimits limits
 	{
-		auto& allocator = vk.GetDescriptorAllocator();
-		descriptorSets[i] = allocator.Allocate(device, ModelDescriptorLayout);
-	
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = bigBuffer->GetBuffer();
-		bufferInfo.offset = sizeof(Matrix4) * MAX_MODEL_MATRIX * i;
-		bufferInfo.range = sizeof(Matrix4) * MAX_MODEL_MATRIX;
-	
-		VkWriteDescriptorSet write{};
-		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write.dstSet = descriptorSets[i];
-		write.dstBinding = 0;
-		write.dstArrayElement = 0;
-		write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		write.descriptorCount = 1;
-		write.pBufferInfo = &bufferInfo;
-	
-		vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+		.MaxView = 1000,
+		.MaxMaterial = 1000,
+		.MaxTexture = 1000,
+		.MaxLight = 1000,
+		.MaxSampler = 1000,
+	};
+	resourceDescriptors = CreateScope<ResourceDescriptors>(limits);
+
+	View testData
+	{
+		.myView = 1,
+		.dat2 = 2
+	};
+
+	std::vector<View> testDataVector;
+	testDataVector.reserve(limits.MaxView);
+	for (int i = 0; i < limits.MaxView; i++)
+	{
+		testDataVector.push_back(testData);
 	}
 
-	//// Update the relevant part
-	//void* mappedData;
-	//vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (bigBuffer->GetAllocation()), &mappedData);
+	resourceDescriptors->UpdateBuffer<ResourceType::View>(0, testDataVector.data(), testDataVector.size());
 
-	//void* mappedPointer = 0;
-	//int frameIndex = 1;
-	////uint8_t* frameData = static_cast<uint8_t*>(bigBuffer) + (frameIndex * sizeof(Matrix4) * MAX_MODEL_MATRIX);
+	testDataVector[0].myView = 1337;
+	resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
 
-	//int data = 2;
-	//// Now copy into the correct frame
-	//memcpy(frameData, &data, sizeof(Matrix4) * MAX_MODEL_MATRIX);
-
-	//vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), bigBuffer->GetAllocation());
+	resourceDescriptors->Swap(1);
+	resourceDescriptors->Swap(0);
+	resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
+	resourceDescriptors->Swap(0);
 }
 
 Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name)
@@ -690,6 +684,11 @@ void GPUResources::CleanUp(uint32_t frame)
 		deletionQueue.top()();
 		deletionQueue.pop();
 	}
+}
+
+void GPUResources::Swap(uint32_t frame)
+{
+	resourceDescriptors->Swap(frame);
 }
 
 CleanUpStack& GPUResources::GetFrameCleanUpStack(uint32_t frame)

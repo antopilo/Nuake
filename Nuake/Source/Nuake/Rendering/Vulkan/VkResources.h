@@ -12,6 +12,8 @@
 #include "Nuake/Rendering/Vulkan/VulkanImage/VulkanImage.h"
 #include "Nuake/Rendering/Vulkan/VulkanRenderer.h"
 
+#include "Nuake/Rendering/Vulkan/BindlessDescriptor.h"
+
 #include <volk/volk.h>
 
 #include <stack>
@@ -106,6 +108,8 @@ namespace Nuake
 		};
 
 	private:
+		Scope<ResourceDescriptors> resourceDescriptors;
+
 		FrameData frameData[FRAME_OVERLAP];
 
 		bool isDirty = false;
@@ -207,6 +211,8 @@ namespace Nuake
 
 		void QueueDeletion(CleanUpStack func);
 		void CleanUp(uint32_t frame);
+
+		void Swap(uint32_t frame);
 	private:
 		void CreateBindlessLayout();
 		CleanUpStack& GetFrameCleanUpStack(uint32_t frame);

@@ -1,9 +1,12 @@
 #include "BindlessDescriptor.h"
 
+#include "Nuake/Core/Logger.h"
+
 #include "VulkanAllocator.h"
 #include "VulkanRenderer.h"
 #include "VulkanInit.h"
 #include "DescriptorLayoutBuilder.h"
+
 
 using namespace Nuake;
 
@@ -80,12 +83,12 @@ Descriptor::Descriptor(Ref<AllocatedBuffer> buffer, VkDescriptorSetLayout layout
 	vkUpdateDescriptorSets(vk.GetDevice(), 1, &write, 0, nullptr);
 }
 
-
-BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info)
+BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info) :
+	Info(info), 
+	Type(type)
 {
 	// Create a buffer that holds for N frame in flights of data
 	const std::string& resourceName = GetResourceTypeName(type);
-
 	// Build descriptor layout
 	DescriptorLayoutBuilder builder;
 	switch (type)
@@ -123,16 +126,42 @@ BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info)
 	}
 }
 
+void BindlessDescriptor::WriteToBuffer(int32_t frameIndex, void* data, size_t size)
+{
+	int currentFrame = frameIndex % FRAME_OVERLAP;
+	auto& desc = Descriptors[currentFrame];
+	
+	const size_t offsetSize = Info.ResourceCount[Type] * Info.ResourceElementSize[Type];
+	size_t offset = currentFrame * offsetSize;
+	
+	memcpy(desc.DataPtr, data, size);
+}
+
+void BindlessDescriptor::Swap(int32_t frameIndex)
+{
+	int currentFrame = frameIndex % FRAME_OVERLAP;
+	int nextFrame = (frameIndex + 1) % FRAME_OVERLAP;
+	auto& desc = Descriptors[currentFrame];
+	auto& nextDesc = Descriptors[nextFrame];
+
+	// memcpy from currentFrame to next frame
+	memcpy(desc.DataPtr, nextDesc.DataPtr, desc.Size);
+}
+
 ResourceDescriptors::ResourceDescriptors(const ResourceDescriptorsLimits& limits)
 {
-	struct View
-	{
-		int myView;
-		int dat2;
-	};
 	AddResourceDescriptors<ResourceType::View, View>(limits.MaxView);
 	//AddResourceDescriptors<ResourceType::Material>(limits.MaxMaterial);
 	//AddResourceDescriptors<ResourceType::Texture>(limits.MaxTexture);
 	//AddResourceDescriptors<ResourceType::Light>(limits.MaxLight);
 	//AddResourceDescriptors<ResourceType::Sampler>(limits.MaxSampler);
+}
+
+void ResourceDescriptors::Swap(int32_t frameIndex)
+{
+	for (auto& [type, desc] : Descriptors)
+	{
+		desc.Swap(frameIndex);
+		Logger::Log("Swapped: " + GetResourceTypeName(type));
+	}
 }
