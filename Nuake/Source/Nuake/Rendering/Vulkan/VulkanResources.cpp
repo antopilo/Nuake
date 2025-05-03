@@ -54,28 +54,17 @@ void GPUResources::Init()
 	};
 	resourceDescriptors = CreateScope<ResourceDescriptors>(limits);
 
-	View testData
-	{
-		.myView = 1,
-		.dat2 = 2
-	};
+	
 
-	std::vector<View> testDataVector;
-	testDataVector.reserve(limits.MaxView);
-	for (int i = 0; i < limits.MaxView; i++)
-	{
-		testDataVector.push_back(testData);
-	}
-
-	resourceDescriptors->UpdateBuffer<ResourceType::View>(0, testDataVector.data(), testDataVector.size());
-
-	testDataVector[0].myView = 1337;
-	resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
-
-	resourceDescriptors->Swap(1);
-	resourceDescriptors->Swap(0);
-	resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
-	resourceDescriptors->Swap(0);
+	//resourceDescriptors->UpdateBuffer<ResourceType::View>(0, testDataVector.data(), testDataVector.size());
+	//
+	//testDataVector[0].myView = 1337;
+	//resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
+	//
+	//resourceDescriptors->Swap(1);
+	//resourceDescriptors->Swap(0);
+	//resourceDescriptors->UpdateBuffer<ResourceType::View>(1, testDataVector.data(), testDataVector.size());
+	//resourceDescriptors->Swap(0);
 }
 
 Ref<AllocatedBuffer> GPUResources::CreateBuffer(size_t size, BufferUsage flags, MemoryUsage usage, const std::string& name)

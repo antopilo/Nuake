@@ -7,6 +7,7 @@
 #include "VulkanInit.h"
 #include "DescriptorLayoutBuilder.h"
 
+#include "GPUData/GPUData.h"
 
 using namespace Nuake;
 
@@ -150,11 +151,11 @@ void BindlessDescriptor::Swap(int32_t frameIndex)
 
 ResourceDescriptors::ResourceDescriptors(const ResourceDescriptorsLimits& limits)
 {
-	AddResourceDescriptors<ResourceType::View, View>(limits.MaxView);
-	//AddResourceDescriptors<ResourceType::Material>(limits.MaxMaterial);
-	//AddResourceDescriptors<ResourceType::Texture>(limits.MaxTexture);
-	//AddResourceDescriptors<ResourceType::Light>(limits.MaxLight);
-	//AddResourceDescriptors<ResourceType::Sampler>(limits.MaxSampler);
+	AddResourceDescriptors<ResourceType::View, CameraView>(limits.MaxView);
+	AddResourceDescriptors<ResourceType::Material, MaterialBufferStruct>(limits.MaxMaterial);
+	AddResourceDescriptors<ResourceType::Texture, VkDescriptorImageInfo>(limits.MaxTexture);
+	AddResourceDescriptors<ResourceType::Light, LightData>(limits.MaxLight);
+	AddResourceDescriptors<ResourceType::Sampler, VkDescriptorImageInfo>(limits.MaxSampler);
 }
 
 void ResourceDescriptors::Swap(int32_t frameIndex)
@@ -162,6 +163,5 @@ void ResourceDescriptors::Swap(int32_t frameIndex)
 	for (auto& [type, desc] : Descriptors)
 	{
 		desc.Swap(frameIndex);
-		Logger::Log("Swapped: " + GetResourceTypeName(type));
 	}
 }
