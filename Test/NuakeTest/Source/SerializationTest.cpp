@@ -8,6 +8,14 @@ namespace Serialization
 {
 	using namespace Nuake;
 
+	enum class TestEnum : int32_t
+	{
+		One,
+		Two,
+		Three,
+		Four
+	};
+
 	class TestData : public Component
 	{
 		NUAKECOMPONENT(TestData, "TestData");
@@ -19,6 +27,7 @@ namespace Serialization
 		Vector2 myVec2;
 		Vector3 myVec3;
 		Vector4 myVec4;
+		TestEnum myEnum;
 
 		static void InitializeComponentClass()
 		{
@@ -28,6 +37,7 @@ namespace Serialization
 			BindComponentField<&TestData::myVec2>("myVec2", "myVec2");
 			BindComponentField<&TestData::myVec3>("myVec3", "myVec3");
 			BindComponentField<&TestData::myVec4>("myVec4", "myVec4");
+			BindComponentField<&TestData::myEnum>("myEnum", "myEnum");
 		}
 	};
 
@@ -42,7 +52,8 @@ namespace Serialization
 			.myString = "Hello World",
 			.myVec2 = Vector2(1, 2),
 			.myVec3 = Vector3(3, 4, 5),
-			.myVec4 = Vector4(6, 7, 8, 9)
+			.myVec4 = Vector4(6, 7, 8, 9),
+			.myEnum = TestEnum::Two
 		};
 
 		// Serialize into json
@@ -75,5 +86,36 @@ namespace Serialization
 		REQUIRE(result["TestData"]["myVec4"]["y"] == testData.myVec4.y);
 		REQUIRE(result["TestData"]["myVec4"]["z"] == testData.myVec4.z);
 		REQUIRE(result["TestData"]["myVec4"]["w"] == testData.myVec4.w);
+	}
+
+	TEST_CASE("Deserialize Struct", "[Serialization]")
+	{
+		// Initialize component
+		TestData::InternalInitializeClass();
+		TestData testData =
+		{
+			.myInt = 1337,
+			.myBool = true,
+			.myString = "Hello World",
+			.myVec2 = Vector2(1, 2),
+			.myVec3 = Vector3(3, 4, 5),
+			.myVec4 = Vector4(6, 7, 8, 9)
+		};
+
+		// Serialize into json
+		ComponentSerializer serializer;
+		json result = serializer.Serialize(testData);
+
+		// Deserialize
+		TestData inTestData = TestData{ };
+		serializer.Deserialize(result, inTestData);
+
+		// Test JSON result
+		REQUIRE(inTestData.myInt == testData.myInt);
+		REQUIRE(inTestData.myBool == testData.myBool);
+		REQUIRE(inTestData.myString == testData.myString);
+		REQUIRE(inTestData.myVec2 == testData.myVec2);
+		REQUIRE(inTestData.myVec3 == testData.myVec3);
+		REQUIRE(inTestData.myVec4 == testData.myVec4);
 	}
 }
