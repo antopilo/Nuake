@@ -881,7 +881,7 @@ void VkRenderer::EndDraw()
 	// Increase the number of frames drawn
 	FrameNumber++;
 
-	GPUResources::Get().Swap(FrameNumber);
+	//GPUResources::Get().Swap(FrameNumber);
 }
 
 void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)

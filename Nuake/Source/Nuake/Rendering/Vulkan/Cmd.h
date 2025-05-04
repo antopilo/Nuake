@@ -57,6 +57,7 @@ namespace Nuake
 
 		void DebugMarker(const std::string& name, Color color = Color(1, 0, 0, 1));
 		void BindPipeline(VkPipeline pipeline) const;
+		void BindSceneData(VkPipelineLayout pipelineLayout);
 		void SetViewport(const Vector2& size) const;
 		void SetScissor(const Vector2& size) const;
 		void ClearColorImage(Ref<VulkanImage> img, Color color = Color(0, 0, 0, 1)) const;

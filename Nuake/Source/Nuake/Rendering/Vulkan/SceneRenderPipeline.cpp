@@ -36,9 +36,10 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 	shadowPass.SetPreRender([&](PassRenderContext& ctx) {
 		auto& layout = ctx.renderPass->PipelineLayout;  
 		auto& res = GPUResources::Get();
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 
 		Cmd& cmd = ctx.commandBuffer;
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		//cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
 		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);

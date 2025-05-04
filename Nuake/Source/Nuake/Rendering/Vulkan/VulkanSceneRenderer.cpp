@@ -640,7 +640,7 @@ void VkSceneRenderer::PrepareScenes(const std::vector<Ref<Scene>>& scenes, Rende
 		gpu.RecreateBindlessCameras();
 	}
 
-	gpu.ModelTransforms = ModelData{ allTransforms };
+	gpu.ModelTransforms = TransformData{ allTransforms };
 	gpu.MaterialDataContainer = MaterialData{ allMaterials };
 	gpu.LightDataContainerArray = LightDataContainer{ allLights };
 	gpu.LightCount = lightCount;

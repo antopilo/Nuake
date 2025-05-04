@@ -48,8 +48,8 @@ namespace Nuake
 			VkDescriptorSet TestDescriptorSet;
 		};
 
-	private:
 		Scope<ResourceDescriptors> resourceDescriptors;
+	private:
 
 		FrameData frameData[FRAME_OVERLAP];
 
@@ -154,6 +154,8 @@ namespace Nuake
 		void CleanUp(uint32_t frame);
 
 		void Swap(uint32_t frame);
+
+		void BindSceneData(VkCommandBuffer cmd, VkPipelineLayout pipeline);
 	private:
 		void CreateBindlessLayout();
 		CleanUpStack& GetFrameCleanUpStack(uint32_t frame);

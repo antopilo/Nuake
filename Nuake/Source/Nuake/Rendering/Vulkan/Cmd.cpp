@@ -1,5 +1,6 @@
 #include "Cmd.h"
 #include "VulkanAllocatedBuffer.h"
+#include "VkResources.h"
 
 using namespace Nuake;
 
@@ -16,6 +17,12 @@ void Cmd::EndRendering()
 void Cmd::BindPipeline(VkPipeline pipeline) const
 {
 	vkCmdBindPipeline(CmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+}
+
+void Cmd::BindSceneData(VkPipelineLayout pipelineLayout)
+{
+	auto& res = GPUResources::Get();
+	res.BindSceneData(CmdBuffer, pipelineLayout);
 }
 
 void Cmd::SetViewport(const Vector2 & size) const

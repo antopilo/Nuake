@@ -46,15 +46,14 @@ void GPUResources::Init()
 
 	ResourceDescriptorsLimits limits
 	{
-		.MaxView = 1000,
-		.MaxMaterial = 1000,
-		.MaxTexture = 1000,
-		.MaxLight = 1000,
-		.MaxSampler = 1000,
+		.MaxTransform = 100,
+		.MaxView = 100,
+		.MaxMaterial = 100,
+		.MaxTexture = 100,
+		.MaxLight = 100,
+		.MaxSampler = 100,
 	};
 	resourceDescriptors = CreateScope<ResourceDescriptors>(limits);
-
-	
 
 	//resourceDescriptors->UpdateBuffer<ResourceType::View>(0, testDataVector.data(), testDataVector.size());
 	//
@@ -322,16 +321,6 @@ void GPUResources::CreateBindlessLayout()
 		VulkanUtil::SetDebugName(CamerasDescriptorLayout, "CamerasDescriptorLayout");
 	}
 
-	ResourceDescriptorsLimits limits
-	{
-		.MaxView = 10,
-		.MaxMaterial = 1,
-		.MaxTexture = 20,
-		.MaxLight = 10,
-		.MaxSampler = 2,
-	};
-	ResourceDescriptors descriptors = ResourceDescriptors(limits);
-
 	auto allocator = vk.GetDescriptorAllocator();
 	TexturesDescriptor = allocator.Allocate(device, TexturesDescriptorLayout);
 	CamerasDescriptor = allocator.Allocate(device, CamerasDescriptorLayout);
@@ -390,7 +379,7 @@ void GPUResources::CreateBindlessLayout()
 void GPUResources::RecreateBindlessTextures()
 {
 	// Ideally wed have update bit enabled ondescriptors
-	//vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
+	vkQueueWaitIdle(VkRenderer::Get().GPUQueue);
 
 	if (!TexturesDescriptor)
 	{
@@ -470,32 +459,34 @@ void GPUResources::RecreateBindlessCameras()
 
 void GPUResources::UpdateBuffers()
 {
+	//resourceDescriptors->UpdateBuffer<ResourceType::Tranform>(VkRenderer::Get().FrameNumber, ModelTransforms.Data.data(), ModelTransforms.Data.size() * sizeof(Matrix4));
+
 	// Tranforms
 	{
 		void* mappedData;
 		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &ModelTransforms, sizeof(ModelData));
-
+		memcpy(mappedData, &ModelTransforms, sizeof(TransformData));
+	
 		VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->Update();
 		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
 			VkBufferCopy copy{ 0 };
 			copy.dstOffset = 0;
 			copy.srcOffset = 0;
-			copy.size = sizeof(ModelData);
-
+			copy.size = sizeof(TransformData);
+	
 			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
-
+	
 			ModelBuffer->Update();
 		});
-
+	
 		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
-
+	
 		// Update descriptor set for camera
 		VkDescriptorBufferInfo transformBufferInfo{};
 		transformBufferInfo.buffer = ModelBuffer->GetBuffer();
 		transformBufferInfo.offset = 0;
 		transformBufferInfo.range = VK_WHOLE_SIZE;
-
+	
 		VkWriteDescriptorSet bufferWriteModel = {};
 		bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		bufferWriteModel.pNext = nullptr;
@@ -506,6 +497,8 @@ void GPUResources::UpdateBuffers()
 		bufferWriteModel.pBufferInfo = &transformBufferInfo;
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
 	}
+
+	//resourceDescriptors->UpdateBuffer<ResourceType::Material>(0, MaterialDataContainer.Data.data(), MaterialDataContainer.Data.size());
 
 	// Update material buffer
 	{
@@ -543,6 +536,8 @@ void GPUResources::UpdateBuffers()
 		bufferWrite.pImageInfo = VK_NULL_HANDLE;
 		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
 	}
+
+	//resourceDescriptors->UpdateBuffer<ResourceType::Light>(0, LightDataContainerArray.Data.data(), LightDataContainerArray.Data.size());
 
 	// Lights
 	{
@@ -678,6 +673,11 @@ void GPUResources::CleanUp(uint32_t frame)
 void GPUResources::Swap(uint32_t frame)
 {
 	resourceDescriptors->Swap(frame);
+}
+
+void GPUResources::BindSceneData(VkCommandBuffer cmd, VkPipelineLayout pipeline)
+{
+	resourceDescriptors->Bind(cmd, VkRenderer::Get().FrameNumber, pipeline);
 }
 
 CleanUpStack& GPUResources::GetFrameCleanUpStack(uint32_t frame)
