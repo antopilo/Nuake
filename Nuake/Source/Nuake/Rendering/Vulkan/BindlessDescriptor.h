@@ -72,6 +72,7 @@ namespace Nuake
 		VkDescriptorSetLayout DescriptorLayout;
 		BindlessInfo Info;
 		ResourceType Type;
+		size_t LastWriteSize = 0;
 
 	public:
 		// Delete copy
@@ -89,6 +90,12 @@ namespace Nuake
 		void WriteToBuffer(int32_t frameIndex, void* data, size_t size);
 		void Swap(int32_t frameIndex);
 		void Bind(VkCommandBuffer cmd, int32_t frameIndex, VkPipelineLayout layout);
+	};
+
+	struct ResourceDescriptorDef
+	{
+		size_t Size;
+		uint32_t Slot;
 	};
 
 	struct ResourceDescriptorsLimits

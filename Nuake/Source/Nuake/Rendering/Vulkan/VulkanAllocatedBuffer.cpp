@@ -27,7 +27,7 @@ AllocatedBuffer::AllocatedBuffer(size_t inSize, BufferUsage inFlags, MemoryUsage
 
 	VmaAllocationCreateInfo vmaallocInfo = {};
 	vmaallocInfo.usage = static_cast<VmaMemoryUsage>(inUsage);
-	vmaallocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+	vmaallocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 
 	MemUsage = inUsage;
 

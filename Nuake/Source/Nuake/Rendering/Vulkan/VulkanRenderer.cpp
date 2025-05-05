@@ -749,6 +749,7 @@ bool VkRenderer::Draw()
 
 	VK_CALL(vkWaitForFences(Device, 1, &GetCurrentFrame().RenderFence, true, 1000000000));
 
+
 	if (SurfaceSize != Window::Get()->GetSize())
 	{
 		RecreateSwapchain();
@@ -770,6 +771,8 @@ bool VkRenderer::Draw()
 	VkResult result = vkAcquireNextImageKHR(Device, Swapchain, 1000000000, GetCurrentFrame().SwapchainSemaphore, nullptr, &swapchainImageIndex);
 	
 	VK_CALL(vkResetFences(Device, 1, &GetCurrentFrame().RenderFence));
+
+	GPUResources::Get().Swap(FrameNumber);
 
 	// Note: this will be the meat of the engine that should be here.
 	VkCommandBuffer cmd = GetCurrentFrame().CommandBuffer;
@@ -881,7 +884,6 @@ void VkRenderer::EndDraw()
 	// Increase the number of frames drawn
 	FrameNumber++;
 
-	//GPUResources::Get().Swap(FrameNumber);
 }
 
 void VkRenderer::DrawImgui(VkCommandBuffer cmd, VkImageView targetImageView)

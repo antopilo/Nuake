@@ -46,12 +46,12 @@ void GPUResources::Init()
 
 	ResourceDescriptorsLimits limits
 	{
-		.MaxTransform = 100,
-		.MaxView = 100,
-		.MaxMaterial = 100,
-		.MaxTexture = 100,
-		.MaxLight = 100,
-		.MaxSampler = 100,
+		.MaxTransform = 3000,
+		.MaxView = 1000,
+		.MaxMaterial = 1000,
+		.MaxTexture = 3000,
+		.MaxLight = 1000,
+		.MaxSampler = 2,
 	};
 	resourceDescriptors = CreateScope<ResourceDescriptors>(limits);
 
@@ -423,157 +423,16 @@ void GPUResources::RecreateBindlessCameras()
 		i++;
 	}
 
-	void* mappedData;
-	auto allocator = VulkanAllocator::Get().GetAllocator();
-	vmaMapMemory(allocator, (VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation()), &mappedData);
-	memcpy(mappedData, Cameras.data(), sizeof(CameraView) * Cameras.size());
-	VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->Update();
-	VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-		VkBufferCopy copy{ 0 };
-		copy.dstOffset = 0;
-		copy.srcOffset = 0;
-		copy.size = sizeof(CameraView) * MAX_CAMERAS;
-
-		vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetBuffer(), CamerasBuffer->GetBuffer(), 1, &copy);
-		CamerasBuffer->Update();
-	});
-
-	vmaUnmapMemory(allocator, VkRenderer::Get().GetCurrentFrame().CamerasStagingBuffer->GetAllocation());
-
-	// Update descriptor set for camera
-	VkDescriptorBufferInfo transformBufferInfo{};
-	transformBufferInfo.buffer = CamerasBuffer->GetBuffer();
-	transformBufferInfo.offset = 0;
-	transformBufferInfo.range = VK_WHOLE_SIZE;
-
-	VkWriteDescriptorSet bufferWriteModel = {};
-	bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	bufferWriteModel.pNext = nullptr;
-	bufferWriteModel.dstBinding = 0;
-	bufferWriteModel.dstSet = CamerasDescriptor;
-	bufferWriteModel.descriptorCount = 1;
-	bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	bufferWriteModel.pBufferInfo = &transformBufferInfo;
-	vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
+	const auto frameIndex = VkRenderer::Get().FrameNumber;
+	resourceDescriptors->UpdateBuffer<ResourceType::View>(frameIndex, Cameras.data(), Cameras.size() * sizeof(CameraView));
 }
 
 void GPUResources::UpdateBuffers()
 {
-	//resourceDescriptors->UpdateBuffer<ResourceType::Tranform>(VkRenderer::Get().FrameNumber, ModelTransforms.Data.data(), ModelTransforms.Data.size() * sizeof(Matrix4));
-
-	// Tranforms
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &ModelTransforms, sizeof(TransformData));
-	
-		VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->Update();
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(TransformData);
-	
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetBuffer(), ModelBuffer->GetBuffer(), 1, &copy);
-	
-			ModelBuffer->Update();
-		});
-	
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().ModelStagingBuffer->GetAllocation());
-	
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo transformBufferInfo{};
-		transformBufferInfo.buffer = ModelBuffer->GetBuffer();
-		transformBufferInfo.offset = 0;
-		transformBufferInfo.range = VK_WHOLE_SIZE;
-	
-		VkWriteDescriptorSet bufferWriteModel = {};
-		bufferWriteModel.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWriteModel.pNext = nullptr;
-		bufferWriteModel.dstBinding = 0;
-		bufferWriteModel.dstSet = ModelDescriptor;
-		bufferWriteModel.descriptorCount = 1;
-		bufferWriteModel.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWriteModel.pBufferInfo = &transformBufferInfo;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWriteModel, 0, nullptr);
-	}
-
-	//resourceDescriptors->UpdateBuffer<ResourceType::Material>(0, MaterialDataContainer.Data.data(), MaterialDataContainer.Data.size());
-
-	// Update material buffer
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &MaterialDataContainer, sizeof(MaterialData));
-		VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->Update();
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(MaterialData);
-
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetBuffer(), MaterialBuffer->GetBuffer(), 1, &copy);
-
-			MaterialBuffer->Update();
-		});
-
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().MaterialStagingBuffer->GetAllocation());
-
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = MaterialBuffer->GetBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet bufferWrite = {};
-		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWrite.pNext = nullptr;
-		bufferWrite.dstBinding = 0;
-		bufferWrite.dstSet = MaterialDescriptor;
-		bufferWrite.descriptorCount = 1;
-		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWrite.pBufferInfo = &bufferInfo;
-		bufferWrite.pImageInfo = VK_NULL_HANDLE;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
-	}
-
-	//resourceDescriptors->UpdateBuffer<ResourceType::Light>(0, LightDataContainerArray.Data.data(), LightDataContainerArray.Data.size());
-
-	// Lights
-	{
-		void* mappedData;
-		vmaMapMemory(VulkanAllocator::Get().GetAllocator(), (VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation()), &mappedData);
-		memcpy(mappedData, &LightDataContainerArray, sizeof(LightDataContainer));
-		VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->Update();
-		VkRenderer::Get().ImmediateSubmit([&](VkCommandBuffer cmd) {
-			VkBufferCopy copy{ 0 };
-			copy.dstOffset = 0;
-			copy.srcOffset = 0;
-			copy.size = sizeof(LightDataContainer);
-
-			vkCmdCopyBuffer(cmd, VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetBuffer(), LightBuffer->GetBuffer(), 1, &copy);
-			LightBuffer->Update();
-		});
-
-		vmaUnmapMemory(VulkanAllocator::Get().GetAllocator(), VkRenderer::Get().GetCurrentFrame().LightStagingBuffer->GetAllocation());
-
-		// Update descriptor set for camera
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = LightBuffer->GetBuffer();
-		bufferInfo.offset = 0;
-		bufferInfo.range = VK_WHOLE_SIZE;
-
-		VkWriteDescriptorSet bufferWrite = {};
-		bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		bufferWrite.pNext = nullptr;
-		bufferWrite.dstBinding = 0;
-		bufferWrite.dstSet = LightsDescriptor;
-		bufferWrite.descriptorCount = 1;
-		bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		bufferWrite.pBufferInfo = &bufferInfo;
-		bufferWrite.pImageInfo = VK_NULL_HANDLE;
-		vkUpdateDescriptorSets(VkRenderer::Get().GetDevice(), 1, &bufferWrite, 0, nullptr);
-	}
+	auto frameIndex = VkRenderer::Get().FrameNumber;
+	resourceDescriptors->UpdateBuffer<ResourceType::Transform>(frameIndex, ModelTransforms.Data.data(), ModelTransforms.Data.size() * sizeof(Matrix4));
+	resourceDescriptors->UpdateBuffer<ResourceType::Material>(frameIndex, MaterialDataContainer.Data.data(), MaterialDataContainer.Data.size() * sizeof(MaterialBufferStruct));
+	resourceDescriptors->UpdateBuffer<ResourceType::Light>(frameIndex, LightDataContainerArray.Data.data(), LightDataContainerArray.Data.size() * sizeof(LightData));
 }
 
 std::vector<VkDescriptorSetLayout> GPUResources::GetBindlessLayout()

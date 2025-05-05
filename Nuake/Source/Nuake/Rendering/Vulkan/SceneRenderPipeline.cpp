@@ -39,12 +39,8 @@ ShadowRenderPipeline::ShadowRenderPipeline()
 		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 
 		Cmd& cmd = ctx.commandBuffer;
-		//cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	shadowPass.SetRender([&](PassRenderContext& ctx) {
 		auto& cmd = ctx.commandBuffer;
@@ -381,14 +377,11 @@ void SceneRenderPipeline::RecreatePipeline()
 	{
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 
 		Cmd& cmd = ctx.commandBuffer;
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	gBufferPass.SetRender([&](PassRenderContext& ctx) 
 	{
@@ -491,12 +484,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 
 		// Bind noise kernel
 		cmd.BindDescriptorSet(layout, res.SSAOKernelDescriptor, 7);
@@ -533,12 +523,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	
 		blurConstant.sourceTextureID = res.GetBindlessTextureID(SSAOOutput->GetID());
 		blurConstant.sourceSize = SSAOOutput->GetSize();
@@ -609,12 +596,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& res = GPUResources::Get();
 
 		// Bindless
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 
 		// Inputs
 		shadingConstant.AlbedoTextureID = res.GetBindlessTextureID(GBufferAlbedo->GetID());
@@ -665,12 +649,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& res = GPUResources::Get();
 
 		// Bindless
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 
 		// Inputs
 		tonemapConstant.Exposure = ctx.scene->GetEnvironment()->Exposure;
@@ -703,14 +684,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		//ctx.renderPass->SetClearColor({0, 0, 0, 0});
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	volumetricPass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -760,13 +736,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	volumetricBlurPass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -793,13 +765,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	volumetricCombinePass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -831,13 +799,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	gizmoPass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -856,13 +820,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		Cmd& cmd = ctx.commandBuffer;
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
-
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3); 
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	gizmoCombinePass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -892,13 +852,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		// Bindless
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	outlinePass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -933,12 +889,9 @@ void SceneRenderPipeline::RecreatePipeline()
 		auto& layout = ctx.renderPass->PipelineLayout;
 		auto& res = GPUResources::Get();
 
-		cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+		res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 		cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-		cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 		cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-		cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-		cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 	});
 	linePass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -958,12 +911,9 @@ void SceneRenderPipeline::RecreatePipeline()
 			auto& layout = ctx.renderPass->PipelineLayout;
 			auto& res = GPUResources::Get();
 
-			cmd.BindDescriptorSet(layout, res.ModelDescriptor, 0);
+			res.BindSceneData(ctx.commandBuffer.GetCmdBuffer(), layout);
 			cmd.BindDescriptorSet(layout, res.SamplerDescriptor, 2);
-			cmd.BindDescriptorSet(layout, res.MaterialDescriptor, 3);
 			cmd.BindDescriptorSet(layout, res.TexturesDescriptor, 4);
-			cmd.BindDescriptorSet(layout, res.LightsDescriptor, 5);
-			cmd.BindDescriptorSet(layout, res.CamerasDescriptor, 6);
 		});
 	lineCombinePass.SetRender([&](PassRenderContext& ctx)
 	{
@@ -979,7 +929,6 @@ void SceneRenderPipeline::RecreatePipeline()
 		cmd.BindIndexBuffer(quadMesh->GetIndexBuffer()->GetBuffer());
 		cmd.DrawIndexed(6);
 	});
-
 
 	GBufferPipeline.Build();
 }

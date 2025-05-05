@@ -92,7 +92,7 @@ void Descriptor::Bind(VkCommandBuffer cmd, VkPipelineLayout layout)
 }
 
 BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info) :
-	Info(info), 
+	Info(info),
 	Type(type)
 {
 	// Create a buffer that holds for N frame in flights of data
@@ -119,7 +119,7 @@ BindlessDescriptor::BindlessDescriptor(ResourceType type, BindlessInfo& info) :
 	// Create buffer and map, CPU -> GPU since we will writing to it directly
 	// Size of buffer is: size_of(ResourceType) * FRAME_OVERLAP since 1 buffer will hold N Frames in flight
 	// TODO(antopilo): move mapped pointer inside buffer directly
-	const BufferUsage usage = BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST;
+	const BufferUsage usage = BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST | BufferUsage::TRANSFER_SRC;
 	const MemoryUsage memoryUsage = MemoryUsage::CPU_TO_GPU;
 	const size_t size = info.ResourceElementSize[type] * info.ResourceCount[type];
 	const size_t totalSize = size * FRAME_OVERLAP;
@@ -145,6 +145,7 @@ void BindlessDescriptor::WriteToBuffer(int32_t frameIndex, void* data, size_t si
 	const size_t offsetSize = Info.ResourceCount[Type] * Info.ResourceElementSize[Type];
 	size_t offset = currentFrame * offsetSize;
 	
+	LastWriteSize = size;
 	memcpy(desc.DataPtr, data, size);
 }
 
@@ -156,7 +157,7 @@ void BindlessDescriptor::Swap(int32_t frameIndex)
 	auto& nextDesc = Descriptors[nextFrame];
 
 	// memcpy from currentFrame to next frame
-	memcpy(desc.DataPtr, nextDesc.DataPtr, desc.Size);
+	//memcpy(nextDesc.DataPtr, desc.DataPtr, LastWriteSize);
 }
 
 void BindlessDescriptor::Bind(VkCommandBuffer cmd, int32_t frameIndex, VkPipelineLayout layout)
@@ -173,7 +174,7 @@ ResourceDescriptors::ResourceDescriptors(const ResourceDescriptorsLimits& limits
 	AddResourceDescriptors<ResourceType::Sampler, VkDescriptorImageInfo>(limits.MaxSampler, 2);
 	AddResourceDescriptors<ResourceType::Material, MaterialBufferStruct>(limits.MaxMaterial, 3);
 	AddResourceDescriptors<ResourceType::Texture, VkDescriptorImageInfo>(limits.MaxTexture, 4);
-	AddResourceDescriptors<ResourceType::Light, LightData>(limits.MaxLight, 4);
+	AddResourceDescriptors<ResourceType::Light, LightData>(limits.MaxLight, 5);
 	AddResourceDescriptors<ResourceType::View, CameraView>(limits.MaxView, 6);
 }
 
@@ -195,4 +196,7 @@ void ResourceDescriptors::Bind(VkCommandBuffer cmd, int32_t frame, VkPipelineLay
 	*/
 
 	Descriptors[ResourceType::Transform].Bind(cmd, frame, layout);
+	Descriptors[ResourceType::Material].Bind(cmd, frame, layout);
+	Descriptors[ResourceType::Light].Bind(cmd, frame, layout);
+	Descriptors[ResourceType::View].Bind(cmd, frame, layout);
 }
