@@ -4,16 +4,22 @@ project "NuakeNet"
     kind "SharedLib"
 	    clr "Unsafe"
 	
+    targetdir (binaryOutputDir)
+    objdir (intBinaryOutputDir)
+    debugdir (binaryOutputDir)
+
     -- Don't specify architecture here. (see https://github.com/premake/premake-core/issues/1758)
 
-    propertytags {
-        { "AppendTargetFrameworkToOutputPath", "false" },
-        { "Nullable", "enable" },
+    vsprops {
+       AppendTargetFrameworkToOutputPath =  "false",
+       Nullable = "enable",
+       CopyLocalLockFileAssemblies = "true",
+       EnableDynamicLoading = "true"
     }
 
     files 
     {
-        "src/**.cs"
+        "Source/**.cs"
     }
     
 	links 
@@ -21,7 +27,11 @@ project "NuakeNet"
         "Coral.Managed"
     }
 
-    postbuildcommands {
-        '{ECHO} Copying "%{wks.location}/NuakeNet/bin/$(Configuration)/NuakeNet.dll" to "%{wks.location}/Editor"',
-	'{COPYFILE} "%{wks.location}/NuakeNet/bin/$(Configuration)/NuakeNet.dll" "%{wks.location}/Editor"'
+    prebuildcommands {
+        'dotnet dotnet run --project %{wks.location}NuakeNetGenerator/NuakeNetGenerator.csproj'
     }
+
+    postbuildcommands {
+        '{COPYFILE} "%{wks.location}NuakeNet/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll" "%{wks.location}Editor/Build/%{cfg.buildcfg}/Binaries/NuakeNet.dll"'
+    }
+

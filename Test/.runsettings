@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <Catch2Adapter>
+    <CombinedTimeout>30000</CombinedTimeout><!-- 30s in Milliseconds -->
+    <FilenameFilter>.*</FilenameFilter>
+    <DllRunnerCommandline>${catch2} ${dll}</DllRunnerCommandline>
+  </Catch2Adapter>
+
+</RunSettings>

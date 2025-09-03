@@ -1,0 +1,71 @@
+{
+    "Modules": [
+        {
+            "Functions": [
+                {
+                    "Args": [
+                        {
+                            "Name": "volume",
+                            "Type": "float"
+                        }
+                    ],
+                    "Name": "SetVolume",
+                    "NumArgs": 1,
+                    "ReturnType": "void"
+                },
+                {
+                    "Args": [
+                        {
+                            "Name": "muted",
+                            "Type": "bool"
+                        }
+                    ],
+                    "Name": "SetMuted",
+                    "NumArgs": 1,
+                    "ReturnType": "void"
+                },
+                {
+                    "Name": "HelloWorld",
+                    "NumArgs": 0,
+                    "ReturnType": "void"
+                },
+                {
+                    "Args": [
+                        {
+                            "Name": "name",
+                            "Type": "string"
+                        }
+                    ],
+                    "Name": "SetName",
+                    "NumArgs": 1,
+                    "ReturnType": "void"
+                }
+            ],
+            "Name": "AudioModule"
+        },
+        {
+            "Functions": [
+                {
+                    "Name": "ExampleFunction",
+                    "NumArgs": 0,
+                    "ReturnType": "void"
+                },
+                {
+                    "Args": [
+                        {
+                            "Name": "hi2",
+                            "Type": "string"
+                        }
+                    ],
+                    "Name": "ExampleModuleLog16",
+                    "NumArgs": 1,
+                    "ReturnType": "void"
+                }
+            ],
+            "Name": "ExampleModule"
+        },
+        {
+            "Name": "FidelityFXModule"
+        }
+    ]
+}
